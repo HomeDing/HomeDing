@@ -1,0 +1,47 @@
+#######################################
+# Syntax Coloring Map for HomeDing
+#######################################
+
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+CreateElementFn KEYWORD1
+MicroJsonCallbackFn KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+pushState	KEYWORD2
+start	KEYWORD2
+loop  KEYWORD2
+term	KEYWORD2
+get	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+Element KEYWORD2
+NTPElement	KEYWORD2
+BoardServer KEYWORD2
+ButtonElement KEYWORD2
+DeviceElement KEYWORD2
+DHTElement  KEYWORD2
+DigitalOutElement KEYWORD2
+Element KEYWORD2
+ElementRegistry KEYWORD2
+Logger  KEYWORD2
+MicroJsonParser KEYWORD2
+NTPTimeElement  KEYWORD2
+RemoteElement KEYWORD2
+SSDPElement KEYWORD2
+TimerElement  KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+MAX_LENGTH	LITERAL1

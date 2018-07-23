@@ -1,0 +1,174 @@
+// -----
+// Element.cpp - Base class for all kind of Elements.
+//
+// Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+//
+// This work is licensed under a BSD style license.
+// See https://www.mathertel.de/License.aspx.
+// More information on https://www.mathertel.de/Arduino
+// -----
+// Changelog: see Element.h
+// -----
+
+// https://stackoverflow.com/questions/18806141/move-object-creation-to-setup-function-of-arduino
+
+#include "Element.h"
+#include "ElementRegistry.h"
+
+#define LOGGER_MODULE "element"
+#include "Logger.h"
+
+
+/**
+ * @brief initialize the common functionality of all element objects.
+ */
+void Element::init(Board *board)
+{
+  LOGGER_TRACE("init()");
+  _board = board;
+} // init()
+
+
+/**
+ * @brief Set a parameter or property to a new value or start an action.
+ * @param name Name of property.
+ * @param value Value of property.
+ * @return true when property could be changed and the corresponding action
+ * could be executed.
+ */
+bool Element::set(const char *name, const char *value)
+{
+  LOGGER_TRACE("set(%s, %s)", name, value);
+  bool ret = false;
+
+  if (_stricmp(name, "start") == 0) {
+    start();
+    ret = active;
+
+  } else if (_stricmp(name, "stop") == 0) {
+    term();
+    ret = true;
+
+  } else {
+    LOGGER_ERR("cannot set unknown property %s", name);
+    ret = false;
+
+  } // if
+  return (ret);
+} // set()
+
+
+/**
+ * @brief Activate the Element.
+ */
+void Element::start()
+{
+  LOGGER_TRACE("start()");
+  active = true;
+} // start()
+
+
+/**
+ * @brief Give some processing time to the element to do something on it's own
+ */
+void Element::loop() {} // loop()
+
+
+/**
+ * @brief push the current value of all properties to the callback.
+ */
+void Element::pushState(
+    std::function<void(const char *pName, const char *eValue)> callback)
+{
+  callback("active", active ? "true" : "false");
+} // pushState()
+
+
+/**
+ * @brief Get a property value.
+ */
+const char *Element::get(const char *propName)
+{
+  LOGGER_INFO("get(%s)", propName);
+  String ret;
+
+  pushState(
+      [this, propName, &ret](const char *name, const char *value) {
+        // LOGGER_TRACE("-%s:%s", name, value);
+        if (_stricmp(name, propName) == 0) {
+          ret = value;
+        }
+      });
+
+  return (ret.c_str());
+};
+
+
+/**
+ * @brief stop all activities and go inactive.
+ */
+void Element::term()
+{
+  LOGGER_TRACE("term()");
+  active = false;
+} // term()
+
+
+/* Return a boolean value from a string. */
+bool Element::_atob(const char *value)
+{
+  bool ret = false;
+
+  if ((!value) || (strlen(value) > 5)) {
+    // ret = false;
+  } else if (_stricmp(value, "1") == 0) {
+    ret = true;
+  } else {
+    char v[8];
+    strcpy(v, value);
+    if (_stricmp(value, "true") == 0) {
+      ret = true;
+    } else if (_stricmp(value, "high") == 0) {
+      ret = true;
+    }
+  } // if
+  return (ret);
+} // _atob()
+
+
+/* Return a time value from a string. */
+unsigned long Element::_atotime(const char *value)
+{
+  unsigned long ret = 0;
+  unsigned long f = 1;
+
+  ret = atol(value);
+
+  if (strchr(value, 'm') != NULL) {
+    ret *= 60;
+  } else if (strchr(value, 'h') != NULL) {
+    ret *= 60 * 60;
+  } else if (strchr(value, 'd') != NULL) {
+    ret *= 24 * 60 * 60;
+  } // if
+  return (ret);
+} // _atotime()
+
+
+int Element::_stricmp(const char *str1, const char *str2)
+{
+  char c1, c2;
+
+  do {
+    c1 = *str1++;
+    c2 = *str2++;
+
+    if ((c1 >= 'A') && (c1 <= 'Z'))
+      c1 += 'a' - 'A';
+    if ((c2 >= 'A') && (c2 <= 'Z'))
+      c2 += 'a' - 'A';
+  } while ((c1) && (c1 == c2));
+  return (int)(c1 - c2);
+} // _stricmp
+
+// End

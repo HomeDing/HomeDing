@@ -148,7 +148,7 @@ protected:
 
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Timer
-
+#define HOMEDING_INCLUDE_DigitalOut
 
 #endif
 

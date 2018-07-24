@@ -1,0 +1,40 @@
+{
+  "device": {
+    "main": {
+      "name": "BlinkDing",
+      "reboottime": "24h",
+      "description": "Blinking forever"
+    }
+  },
+
+  "ota": {
+    "main": {
+      "description": "Allow Over the Air Updates"
+    }
+  },
+
+  "ssdp": {
+    "0": {
+      "description": "Make the device apear on the network"
+    }
+  },
+
+  "timer": {
+    "blink": {
+      "type": "LOOP",
+      "waittime": "1s",
+      "pulsetime": "1s",
+      "onon": "digitalout/led?on,device/main?log=*on*",
+      "onoff": "digitalout/led?off,device/main?log=*off*",
+      "description": "Water Timer"
+    }
+  },
+
+  "digitalout": {
+    "led": {
+      "pin": 16,
+      "invers": "true",
+      "description": "Builtin LED is on Port GPIO16"
+    }
+  }
+}

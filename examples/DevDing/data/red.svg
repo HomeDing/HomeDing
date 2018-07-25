@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48">
+    <defs>
+        <linearGradient id="a">
+            <stop offset="0" stop-color="#F00"/>
+            <stop offset="1" stop-color="#F00" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient xlink:href="#a" id="b" x1="8.722" y1="294.645" x2="1.522" y2="284.503" gradientUnits="userSpaceOnUse" gradientTransform="translate(.51 -1051.185) scale(3.69925)"/>
+    </defs>
+    <circle style="isolation:auto;mix-blend-mode:normal" cx="24" cy="24" overflow="visible" r="23.49" color="#000" opacity=".96" fill="url(#b)" stroke="#F00" stroke-width="1.02" stroke-linejoin="round"/>
+</svg>

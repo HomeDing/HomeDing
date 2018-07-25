@@ -37,6 +37,8 @@
 #include <memory>
 #include <time.h>
 
+#include <DisplayAdapter.h>
+
 // id can be multi-level when using the slash as a separator.
 // like "device/name"
 #define ELEM_ID_SEPARATOR '/'
@@ -51,8 +53,7 @@
 
 // forward class declarations
 class Element;
-class Display;
-//
+
 
 /**
  * @brief The Board is the platform / functionality that manage all elements
@@ -73,7 +74,7 @@ public:
    * @param d DisplayAdapter for an existing display
    * @param s WebServer
    */
-  void init(Display *d = NULL, ESP8266WebServer *s = NULL);
+  void init(DisplayAdapter *d = NULL, ESP8266WebServer *s = NULL);
 
   // ElementRegistry
   // allow registration of Element Types to avoid hard references.
@@ -137,7 +138,7 @@ public:
 
 
   // Display
-  Display *display = NULL;
+  DisplayAdapter *display = NULL;
 
   // WebServer
   ESP8266WebServer *server;

@@ -28,7 +28,7 @@
 /**
  * @brief initialize the board.
  */
-void Board::init(Display *d, ESP8266WebServer *s)
+void Board::init(DisplayAdapter *d, ESP8266WebServer *s)
 {
   LOGGER_TRACE("init()");
   display = d;

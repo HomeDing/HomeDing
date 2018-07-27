@@ -125,7 +125,7 @@ void TimerElement::start()
 
 
 /**
- * @brief Give some processing time to the timer to check for next actions.
+ * @brief Give some processing time to the Element to check for next actions.
  */
 void TimerElement::loop()
 {

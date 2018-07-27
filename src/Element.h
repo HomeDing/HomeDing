@@ -21,9 +21,6 @@
 
 #define ACTION_SEPARATOR ','
 
-// forward class declarations
-class Board;
-
 /**
  * @brief This is the base class for all Elements that can be managed by the
  * Board.
@@ -146,10 +143,17 @@ protected:
 // easy include of all libraries that do not require a separate library
 #ifdef HOMEDING_INCLUDE_CORE
 
+#define HOMEDING_INCLUDE_OTA
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_DigitalOut
 
+#endif
+
+#ifdef HOMEDING_INCLUDE_OTA
+#include <OTAElement.h>
+bool OTAElement::registered =
+    ElementRegistry::registerElement("ota", OTAElement::create);
 #endif
 
 #ifdef HOMEDING_INCLUDE_Button

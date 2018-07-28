@@ -1,15 +1,18 @@
-// -----
-// DigitalOutElement.h - Library to output an digital signals based on actions.
-//
-// Copyright (c) by Matthias Hertel, https://www.mathertel.de.
-//
-// This work is licensed under a BSD style license.
-// See https://www.mathertel.de/License.aspx.
-// More information on https://www.mathertel.de/Arduino
-// -----
-// 29.04.2018 created by Matthias Hertel
-// -----
-
+/**
+ * @file DigitalOutElement.h
+ * @brief Output Element of the HomeDing Library to output an digital signals based on actions.
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license,
+ * https://www.mathertel.de/License.aspx.
+ *
+ * More information on https://www.mathertel.de/Arduino.
+ *
+ * Changelog:
+ * * 29.04.2018 created by Matthias Hertel
+ */
 
 #ifndef DIGITALOUT_H
 #define DIGITALOUT_H

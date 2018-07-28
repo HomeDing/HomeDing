@@ -1,7 +1,9 @@
-// -----
-// Element.h - Base class for actions, timer, ...
-//
-// Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+/**
+ * @file Element.h
+ * @brief Base Element class of the HomeDing Library implementing the default
+ * functionality. All Elements must derive from this class.
+ * @author Matthias Hertel, https://www.mathertel.de
+ */
 //
 // This work is licensed under a BSD style license.
 // See https://www.mathertel.de/License.aspx.

@@ -1,7 +1,7 @@
 /**
  * @file DHTElement.h
- * @brief Input Element for the IoT Board Library typicaly used with momentary
- * buttons or switches.
+ * @brief Input Element of the HomeDong Board Library to read DHT11 and DHT22
+ * sensors and create actions.
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -72,8 +72,8 @@ public:
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
-  virtual void
-  pushState(std::function<void(const char *pName, const char *eValue)> callback);
+  virtual void pushState(
+      std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
   DHTesp::DHT_MODEL_t _type;

@@ -1,16 +1,20 @@
-// -----
-// TimerElement.h - Element for creating timer actions.
-//
-// Copyright (c) by Matthias Hertel, https://www.mathertel.de.
-//
-// This work is licensed under a BSD style license.
-// See https://www.mathertel.de/License.aspx.
-// More information on https://www.mathertel.de/Arduino
-// -----
-// 14.04.2018 created by Matthias Hertel
-// 27.04.2018 Based on Element class.
-// 15.05.2018 set = properties and actions interface.
-// -----
+/**
+ * @file TimerElement.h
+ * @brief Element for creating timer based actions.
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license.
+ * https://www.mathertel.de/License.aspx.
+ * 
+ * More information on https://www.mathertel.de/Arduino
+ * 
+ * Changelog:
+ * * 14.04.2018 created by Matthias Hertel
+ * * 27.04.2018 Based on Element class.
+ * * 15.05.2018 set = properties and actions interface.
+ */
 
 #ifndef TIMERELEMENT_H
 #define TIMERELEMENT_H

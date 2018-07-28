@@ -41,7 +41,6 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-#include <ArduinoOTA.h>
 #include <WiFiUdp.h>
 
 #include <FS.h>
@@ -53,6 +52,8 @@
 #include <Board.h>
 #include <BoardServer.h>
 #include <FileServer.h>
+
+#define LOGGER_MODULE "main"
 #include <Logger.h>
 
 // Use the Core Elements of the HomeDing Library
@@ -80,9 +81,6 @@ extern "C" {
 ESP8266WebServer server(80);
 
 DisplayAdapterSSD1306 *display = NULL; // created later, when available
-
-// Setup a OLED Display with a SSD1306 controller on D1 and D2
-// SSD1306 display(0x3c, 5, 4, GEOMETRY_128_64);   // GPIO 5 = D1, GPIO 4 = D2
 
 // ===== application state variables =====
 
@@ -128,18 +126,19 @@ void setup(void)
   Serial.begin(115200);
   Serial.setDebugOutput(false);
 
+  LOGGER_INFO("Board Server is starting...");
+
   DEBUG_LOG("Board Server is starting...\n");
   DEBUG_LOG("Build " __DATE__ "\n");
 
   DEBUG_LOG("Boot mode %d\n", ESP.getBootMode());
 
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
-
   // ----- setup File System -----
   SPIFFS.begin();
 
   // ----- setup Display -----
-  display = new DisplayAdapterSSD1306();
+  display = new DisplayAdapterSSD1306(0x3c, 5, 4, 64);
+
   if (!display->init()) {
     DEBUG_LOG("no attached display found.\n");
     delete display;
@@ -160,9 +159,8 @@ void setup(void)
     DEBUG_LOG(" devicename: %s.\n", devicename);
     DEBUG_LOG(" description: %s.\n", deviceElement->get("description"));
   } else {
-    strncpy(devicename, "iotdevice", sizeof(devicename));
+    strncpy(devicename, "homeding", sizeof(devicename));
   }
-
 
   // ----- setup Server -----
 
@@ -192,40 +190,6 @@ void setup(void)
     display->drawText(0, 0, 10, devicename);
     display->drawText(0, 10, 10, ipstr);
   }
-
-  // Setup ArduinoOTA
-  ArduinoOTA.setHostname(devicename);
-  // ArduinoOTA.setPort(8266);   // defaults = 8266
-  // ArduinoOTA.setPassword((const char *)"iot");
-
-  ArduinoOTA.onStart([]() { Serial.println("OTA Start"); });
-  ArduinoOTA.onEnd([]() { Serial.println("OTA End\n"); });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    static int lastpc = 0;
-    int pc = (progress / (total / 100));
-    if (pc != lastpc) {
-      Serial.print('.');
-      if (pc % 50 == 0)
-        Serial.printf(" %d %%\n", pc);
-      lastpc = pc;
-    }
-  });
-
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR)
-      Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR)
-      Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR)
-      Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR)
-      Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR)
-      Serial.println("End Failed");
-  });
-  ArduinoOTA.begin();
 
   // WiFi.printDiag(Serial);
 
@@ -283,10 +247,10 @@ void setup(void)
   DEBUG_LOG("Server started.\n\n");
 } // setup
 
+
 // handle all give time to all Elements and active components.
 void loop(void)
 {
-  ArduinoOTA.handle();
   server.handleClient();
   mainBoard.loop();
 } // loop()

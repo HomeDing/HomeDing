@@ -1,6 +1,6 @@
 /**
- * @file DisplayTextElement.h
- * @brief Output Element for controlling a text output on a display.
+ * @file DisplayDotElement.h
+ * @brief Output Element for controlling a binary output on a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -17,8 +17,8 @@
  */
 
 
-#ifndef DisplayTextElement_H
-#define DisplayTextElement_H
+#ifndef DISPLAYDOTELEMENT_H
+#define DISPLAYDOTELEMENT_H
 
 #include <Arduino.h>
 #include "Board.h"
@@ -27,12 +27,12 @@
 #include "DisplayAdapter.h"
 
 /**
- * @brief The DisplayTextElement is an Element that allows to create information
+ * @brief The DisplayDotElement is an Element that allows to create information
  * on the display based on actions.
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayTextElement : public Element
+class DisplayDotElement : public Element
 {
 public:
   /**
@@ -57,7 +57,7 @@ public:
   virtual bool set(const char *name, const char *value);
 
   /**
-   * @brief Activate the DisplayTextElement.
+   * @brief Activate the DisplayDotElement.
    * @return true when activation was good.
    * @return false when activation failed.
    */
@@ -73,16 +73,6 @@ public:
 
 private:
   /**
-   * @brief When using the TEXT type this text is shown before the value text.
-   */
-  char _prefix[MAX_ID_LENGTH]; // static text before the value
-
-  /**
-   * @brief When using the TEXT type this text is shown after the value text.
-   */
-  char _postfix[MAX_ID_LENGTH]; //  after the value
-
-  /**
    * @brief displayed value
    */
   String _value;
@@ -97,16 +87,16 @@ private:
    */
   int _y = 0;
 
-  int _w = 100;
-  int _h = 10; // also used as _fontsize
+  int _w = 11;
+  int _h = 11;
 
   DisplayAdapter *_display = NULL;
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplayTextElement onto the ElementRegistry.
-bool DisplayTextElement::registered =
-    ElementRegistry::registerElement("displaytext", DisplayTextElement::create);
+// Register the DisplayDotElement onto the ElementRegistry.
+bool DisplayDotElement::registered =
+    ElementRegistry::registerElement("displaydot", DisplayDotElement::create);
 #endif
 
-#endif // DisplayTextElement_H
+#endif // DISPLAYDOTELEMENT_H

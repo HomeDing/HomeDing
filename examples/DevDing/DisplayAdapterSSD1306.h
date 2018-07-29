@@ -72,7 +72,7 @@ public:
       display->setTextAlignment(TEXT_ALIGN_LEFT);
       display->setFont(ArialMT_Plain_10);
 
-      display->drawString(0, 0, "IoT...");
+      display->drawString(0, 0, "HomeDing...");
       display->display();
     } // if
     return (true);

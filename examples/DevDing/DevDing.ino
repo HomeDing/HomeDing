@@ -1,6 +1,6 @@
 /**
  * @file DevDing.ino
- * @brief Sketch that uses the IoT Board System to implement Things attached the
+ * @brief Sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -23,7 +23,7 @@
  * * 17.07.2016 config data services added.
  * * 20.08.2016 config of a device name added.
  * * 21.08.2016 reboot using Sleep deep
- * * 23.04.2018 reused to build the IoT Board System
+ * * 23.04.2018 reused to build the HomeDing Library
  * * 27.04.2018 parameter pushing & loading added.
  * * 20.06.2018 SSDP converted to an element
  * * 25.06.2018 ArduinoJson replace by MicroJsonParser. in use only in board.
@@ -63,7 +63,7 @@
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_DS18B20
 
-#include <Element.h>
+#include <HomeDing.h>
 
 extern "C" {
 #include "user_interface.h"
@@ -127,11 +127,8 @@ void setup(void)
   Serial.setDebugOutput(false);
 
   LOGGER_INFO("Board Server is starting...");
-
-  DEBUG_LOG("Board Server is starting...\n");
-  DEBUG_LOG("Build " __DATE__ "\n");
-
-  DEBUG_LOG("Boot mode %d\n", ESP.getBootMode());
+  LOGGER_INFO("Build " __DATE__);
+  LOGGER_INFO("Boot mode %d", ESP.getBootMode());
 
   // ----- setup File System -----
   SPIFFS.begin();
@@ -160,7 +157,7 @@ void setup(void)
     DEBUG_LOG(" description: %s.\n", deviceElement->get("description"));
   } else {
     strncpy(devicename, "homeding", sizeof(devicename));
-  }
+  } // if 
 
   // ----- setup Server -----
 

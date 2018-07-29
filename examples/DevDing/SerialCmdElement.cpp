@@ -1,7 +1,8 @@
 /**
  * @file SerialCmdElement.cpp
- * @brief Input Element for the IoT Board Library typicaly used with momentary
- * buttons or switches.
+ * 
+ * @brief Local Element for the HomeDing Library that listens to input on the serial interface.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -32,13 +33,6 @@ Element *SerialCmdElement::create()
 } // create()
 
 
-SerialCmdElement::SerialCmdElement()
-{
-  // set some defaults
-  _cmdLine.reserve(40);
-} // SerialCmdElement()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -65,18 +59,27 @@ void SerialCmdElement::loop()
 {
   while (Serial.available()) {
     char ch = Serial.read();
-    LOGGER_INFO(">>%c", ch);
-    if ((ch == '\n') || (ch == '\r') || (ch == ',')) {
+    // LOGGER_INFO(">>%c", ch);
 
-      if (_cmdLine.length() == 1) {
+    if ((ch == '\n') || (ch == '\r') || (ch == ',')) {
+      if (_cmdLine == "+") {
+        // increase loggging Level
+        LOGGER_INFO("Trace Level Logging enabled.");
+        Logger::logger_level = LOGGER_LEVEL_TRACE;
+
+      } else if (_cmdLine == "-") {
+        // standard loggging Level
+        LOGGER_INFO("Error Level Logging enabled.");
+        Logger::logger_level = LOGGER_LEVEL_ERR;
+
+      } else if (_cmdLine.length() == 1) {
         // substitude preset values
         if (_cmdLine.charAt(0) == '0')
           _cmdLine = _preset0;
         else if (_cmdLine.charAt(0) == '1')
           _cmdLine = _preset1;
-      }
 
-      if (_cmdLine.length() > 1) {
+      } else {
         LOGGER_INFO("dispatch %s", _cmdLine.c_str());
         _board->dispatch(_cmdLine);
         _cmdLine = "";

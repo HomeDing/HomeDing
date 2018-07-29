@@ -72,9 +72,9 @@
 #include <DisplayTextElement.h>
 #endif
 
-// #define HOMEDING_INCLUDE_DisplayDot
-// #include <DisplayDotElement.h>
-// #endif
+#ifdef HOMEDING_INCLUDE_DisplayDot
+#include <DisplayDotElement.h>
+#endif
 
 // ===== OPTIONAL ELEMENTS =====
 

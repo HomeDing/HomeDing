@@ -13,6 +13,17 @@
  *
  * Changelog:
  * * 24.06.2018 created by Matthias Hertel
+ * 
+ * 
+
+ "serialcmd": {
+    "0": {
+      "preset0": "",
+      "preset1": "",
+      "description": "Listen for commands on the Serial in line"
+    }
+  },
+
  */
 
 #ifndef SERIALCMDELEMENT_H
@@ -36,12 +47,12 @@ public:
    */
   static Element *create();
 
+
   /**
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
 
-  SerialCmdElement();
 
   /**
    * @brief Set a parameter or property to a new value or start an action.

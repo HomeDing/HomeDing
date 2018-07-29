@@ -1,16 +1,19 @@
-// -----
-// DeviceElement.cpp - Library for creating a digital outgoing signal.
-//
-// Copyright (c) by Matthias Hertel, https://www.mathertel.de.
-//
-// This work is licensed under a BSD style license.
-// See https://www.mathertel.de/License.aspx.
-// More information on https://www.mathertel.de/Arduino
-// -----
-// Changelog: see DeviceElement.h
-// -----
-
-// https://stackoverflow.com/questions/18806141/move-object-creation-to-setup-function-of-arduino
+/**
+ * @file DeviceElement.cpp
+ * 
+ * @brief System Element for the HomeDing Library to manage device level settings.
+ * 
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license,
+ * https://www.mathertel.de/License.aspx.
+ *
+ * More information on https://www.mathertel.de/Arduino.
+ *
+ * Changelog: see DeviceElement.h
+ */ 
 
 #include "DeviceElement.h"
 #include "ElementRegistry.h"

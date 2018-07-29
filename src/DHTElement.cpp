@@ -1,7 +1,9 @@
 /**
  * @file DHTElement.cpp
- * @brief Input Element for the IoT Board Library typicaly used with momentary
- * buttons or switches.
+ *
+ * @brief Optional Input Element for the HomeDing Library to read DHT11 and
+ * DHT22 sensors and create actions.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -183,11 +185,5 @@ void DHTElement::_dispatch(String &evt, int value)
   _board->dispatch(evt, tmp);
 } // _dispatch()
 
-
-// ===== Register =====
-
-// Register the DHTElement onto the ElementRegistry.
-// bool DHTElement::registered =
-//     ElementRegistry::registerElement("dht", DHTElement::create);
 
 // End

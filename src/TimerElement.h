@@ -165,4 +165,11 @@ private:
   void _stopTimer();
 };
 
+
+#ifdef HOMEDING_REGISTER
+// Register the TimerElement onto the ElementRegistry.
+bool TimerElement::registered =
+    ElementRegistry::registerElement("timer", TimerElement::create);
+#endif
+
 #endif

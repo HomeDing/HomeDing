@@ -1,6 +1,9 @@
 /**
  * @file RemoteElement.h
- * @brief Element starting a remote action on another IoT Board based device.
+ * 
+ * @brief System Element for the HomeDing Library to send actions to remote devices.
+ * This allows starting a remote action on another HomeDing Library based device.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.

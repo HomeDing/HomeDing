@@ -1,7 +1,9 @@
 /**
  * @file DHTElement.h
- * @brief Input Element of the HomeDong Board Library to read DHT11 and DHT22
- * sensors and create actions.
+ * 
+ * @brief Optional Input Element for the HomeDing Library to read DHT11 and
+ * DHT22 sensors and create actions.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -128,5 +130,13 @@ private:
 
   void _dispatch(String &evt, int value);
 };
+
+
+#ifdef HOMEDING_REGISTER
+// Register the DHTElement in the ElementRegistry.
+bool DHTElement::registered =
+    ElementRegistry::registerElement("dht", DHTElement::create);
+#endif
+
 
 #endif // DHTELEMENT_H

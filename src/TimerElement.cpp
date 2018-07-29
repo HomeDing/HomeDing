@@ -205,8 +205,4 @@ void TimerElement::_stopTimer()
   _state = 3;
 }
 
-// Register the TimerElement onto the ElementRegistry.
-// bool TimerElement::registered =
-//     ElementRegistry::registerElement("timer", TimerElement::create);
-
 // End

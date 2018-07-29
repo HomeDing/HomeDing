@@ -126,9 +126,4 @@ void ButtonElement::pushState(
   callback("level", String(_lastOutLevel).c_str());
 } // pushState()
 
-
-// Register the ButtonElement onto the ElementRegistry.
-// bool ButtonElement::registered =
-//     ElementRegistry::registerElement("button", ButtonElement::create);
-
 // End

@@ -71,4 +71,12 @@ private:
   void _setLevel(bool logicalHigh); // set the physical level based on _inverse
 };
 
+
+#ifdef HOMEDING_REGISTER
+// Register the DigitalOutElement onto the ElementRegistry.
+bool DigitalOutElement::registered =
+    ElementRegistry::registerElement("digitalout", DigitalOutElement::create);
+#endif
+
+
 #endif // DIGITALOUT_H

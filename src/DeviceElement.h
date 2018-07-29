@@ -1,6 +1,8 @@
 /**
  * @file DeviceElement.h
- * @brief Element for the HomeDing Library to manage device level settings.
+ * 
+ * @brief System Element for the HomeDing Library to manage device level settings.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.

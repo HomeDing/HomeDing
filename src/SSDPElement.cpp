@@ -1,6 +1,6 @@
 // -----
-// SSDPElement.cpp - Element for specifying Element discovery using SSDP.
-// Enable the SSDP Protocol to find the device in the network
+// SSDPElement.cpp - System Element for specifying Element discovery using SSDP.
+// Enable the SSDP Protocol to find the device in the network.
 //
 // Copyright (c) by Matthias Hertel, https://www.mathertel.de.
 //
@@ -94,7 +94,7 @@ void SSDPElement::term()
 } // term()
 
 
-// Register the SSDPElement onto the ElementRegistry.
+// Always register the SSDPElement in the ElementRegistry.
 bool SSDPElement::registered =
     ElementRegistry::registerElement("ssdp", SSDPElement::create);
 

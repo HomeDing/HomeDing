@@ -1,7 +1,8 @@
 /**
  * @file NTPTimeElement.cpp
- * @brief Input Element for the IoT Board Library typicaly used with momentary
- * buttons or switches.
+ * 
+ * @brief Core Element for the HomeDing Library to get the actual time using the NTP protocol.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.

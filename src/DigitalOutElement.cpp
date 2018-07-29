@@ -91,8 +91,4 @@ void DigitalOutElement::_setLevel(bool logicalHigh)
   digitalWrite(_pin, physLevel);
 } // _setLevel
 
-// Register the DigitalOutElement onto the ElementRegistry.
-// bool DigitalOutElement::registered =
-//     ElementRegistry::registerElement("digitalout", DigitalOutElement::create);
-
 // End

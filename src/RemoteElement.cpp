@@ -1,7 +1,9 @@
 /**
  * @file RemoteElement.cpp
- * @brief Input Element for the IoT Board Library typicaly used with momentary
- * buttons or switches.
+ * 
+ * @brief System Element for the HomeDing Library to send actions to remote devices.
+ * This allows starting a remote action on another HomeDing Library based device.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.

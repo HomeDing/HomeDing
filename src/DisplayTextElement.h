@@ -1,9 +1,7 @@
 /**
- * @file ButtonElement.h
+ * @file DisplayTextElement.h
+ * @brief Output Element for controlling a text output on a display.
  *
- * @brief Core Input Element for the HomeDing Library typicaly used with
- * momentary buttons or switches.
- * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -15,25 +13,29 @@
  *
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
+ * * 24.06.2018 no problems when no display is available.
  */
 
-#ifndef BUTTON_H
-#define BUTTON_H
+
+#ifndef DisplayTextElement_H
+#define DisplayTextElement_H
 
 #include <Arduino.h>
-
 #include "Board.h"
 #include "Element.h"
 
-#define BUTTON_TYPE_TOGGLE 0x01
+#include "DisplayAdapter.h"
 
-// class OneButton;
+#define DISPLAY_TYPE_TEXT 0x01
+#define DISPLAY_TYPE_DOT 0x02
 
 /**
- * @brief The ButtonElement is an special Element that creates actions based on
- * a digital IO signal.
+ * @brief The DisplayTextElement is an Element that allows to create information
+ * on the display based on actions.
+ *
+ * The parameters specify how the information from the action will be displayed.
  */
-class ButtonElement : public Element
+class DisplayTextElement : public Element
 {
 public:
   /**
@@ -47,6 +49,7 @@ public:
    */
   static bool registered;
 
+
   /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
@@ -57,16 +60,11 @@ public:
   virtual bool set(const char *name, const char *value);
 
   /**
-   * @brief Activate the ButtonElement.
+   * @brief Activate the DisplayTextElement.
    * @return true when activation was good.
    * @return false when activation failed.
    */
   virtual void start();
-
-  /**
-   * @brief check the state of the input signal and evenuallt emit actions.
-   */
-  virtual void loop();
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -75,34 +73,43 @@ public:
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
 
+
 private:
-  int _type;
-  int _pin = -1;
-  bool _invers = false;
-
-  //  OneButton *_button = NULL;
-  int _lastInLevel;
-  int _lastOutLevel;
+  /**
+   * @brief When using the TEXT type this text is shown before the value text.
+   */
+  char _prefix[MAX_ID_LENGTH]; // static text before the value
 
   /**
-   * @brief The _onAction is emitted when the logical input level is going from
-   * LOW to HIGH. With type == TOGGLE this action will be emitted every second
-   * time when the input level is going from HIGH to LOW (Button is released).
+   * @brief When using the TEXT type this text is shown after the value text.
    */
-  String _onAction;
+  char _postfix[MAX_ID_LENGTH]; //  after the value
 
   /**
-   * @brief The _offAction is emitted when the logical input level is going from
-   * HIGH to LOW. With type == TOGGLE this action will be emitted every second
-   * time when the input level is going from HIGH to LOW (Button is released).
+   * @brief displayed value
    */
-  String _offAction;
+  String _value;
+
+  /**
+   * @brief This variable corresponds to the x parameter.
+   */
+  int _x = 0;
+
+  /**
+   * @brief This variable corresponds to the y parameter.
+   */
+  int _y = 0;
+
+  int _w = 100;
+  int _h = 10; // also used as _fontsize
+
+  DisplayAdapter *_display = NULL;
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the ButtonElement onto the ElementRegistry.
-bool ButtonElement::registered =
-    ElementRegistry::registerElement("button", ButtonElement::create);
+// Register the DisplayTextElement onto the ElementRegistry.
+bool DisplayTextElement::registered =
+    ElementRegistry::registerElement("displaytext", DisplayTextElement::create);
 #endif
 
-#endif // BUTTON_H
+#endif // DisplayTextElement_H

@@ -10,8 +10,6 @@
 // Changelog: see Element.h
 // -----
 
-// https://stackoverflow.com/questions/18806141/move-object-creation-to-setup-function-of-arduino
-
 #include "Element.h"
 #include "ElementRegistry.h"
 

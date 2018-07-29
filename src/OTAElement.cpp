@@ -1,5 +1,5 @@
 // -----
-// OTAElement.cpp - Library for creating actions based on a timer.
+// OTAElement.cpp - System Element for handling OTA Updates.
 //
 // Copyright (c) by Matthias Hertel, https://www.mathertel.de.
 //
@@ -109,10 +109,8 @@ void OTAElement::pushState(
   Element::pushState(callback);
 } // pushState()
 
-/*
 // Register the OTAElement onto the ElementRegistry.
 bool OTAElement::registered =
     ElementRegistry::registerElement("ota", OTAElement::create);
-*/
 
 // End

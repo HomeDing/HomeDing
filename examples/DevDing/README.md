@@ -1,10 +1,10 @@
-# IoT Board System
+# HomeDing Library
 
-The IoT Board System enables building IoT Devices using ESP8266 boards.
+The HomeDing Library enables building IoT Devices using ESP8266 boards.
 
 **This is WORK in PROGRESS - no first version yet.**
 
-The IoT Board System enables building IoT Devices (here called Things in short) using ESP8266 based boards. It is a complete ecosystem of the required internal functionality of a Thing (called the Elements) together with a Web Server implementation that runs a small IDE (Integrated Development Environment) that allows changing and redefining the function of a thing by using a web browser only.
+The HomeDing Library enables building IoT Devices (here called Things in short) using ESP8266 based boards. It is a complete ecosystem of the required internal functionality of a Thing (called the Elements) together with a Web Server implementation that runs a small IDE (Integrated Development Environment) that allows changing and redefining the function of a thing by using a web browser only.
 
 Especially it is running completely on it’s own and doesn’t require any cloud system and is only exchanging data defined by the configuration- (it optionally can interact with some of the Cloud systems)
 

@@ -1,5 +1,5 @@
 // -----
-// OTAElement.h - Element for handling OTA Updates.
+// OTAElement.h - System Element for handling OTA Updates.
 //
 // Copyright (c) by Matthias Hertel, https://www.mathertel.de.
 //

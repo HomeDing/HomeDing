@@ -1,6 +1,8 @@
 /**
  * @file board.cpp
- * @brief Implementation of the Board class for the IoT Board System
+ * 
+ * @brief Implementation of the Board class for the HomeDing Library
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.

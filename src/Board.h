@@ -1,6 +1,8 @@
 /**
  * @file Board.h
- * @brief Inferface of the Board class for the IoT Board System
+ * 
+ * @brief Inferface of the Board class for the HomeDing Library.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -19,7 +21,6 @@
 
 // The Board.h file also works as the base import file that contains some
 // general definitions.
-
 
 #ifndef BOARD_H
 #define BOARD_H

@@ -1,7 +1,9 @@
 /**
  * @file DisplayAdapter.h
- * @brief Abstract class, defining the functionlaity MomeDing requires to be
- * implemented for a local Display.
+ * 
+ * @brief Abstract class, defining the functionlaity the HomeDing requires to be
+ * implemented for a local attached display.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.

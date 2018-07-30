@@ -1,6 +1,6 @@
 /**
  * @file TimerElement.h
- * @brief Element for creating timer based actions.
+ * @brief Input Element for creating timer based actions.
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.

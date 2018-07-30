@@ -1,5 +1,5 @@
 // -----
-// TimerElement.cpp - Library for creating actions based on a timer.
+// TimerElement.cpp - Input Element for creating actions based on a timer.
 //
 // Copyright (c) by Matthias Hertel, https://www.mathertel.de.
 //

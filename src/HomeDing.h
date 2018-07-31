@@ -43,6 +43,7 @@
 
 #ifdef HOMEDING_INCLUDE_CORE
 
+#define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_DigitalOut
@@ -55,6 +56,10 @@
 // Register the Elements by inculing the definition wiht defined HOMEDING_REGISTER
 
 #define HOMEDING_REGISTER 1
+
+#ifdef HOMEDING_INCLUDE_Value
+#include <ValueElement.h>
+#endif
 
 #ifdef HOMEDING_INCLUDE_Button
 #include <ButtonElement.h>

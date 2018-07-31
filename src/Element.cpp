@@ -165,7 +165,7 @@ int Element::_atopin(const char *value)
   } else {
     pin = atoi(value);
   }
-  return GPIO[8];
+  return(pin);
 } // _atopin()
 
 

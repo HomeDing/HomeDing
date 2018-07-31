@@ -57,7 +57,7 @@ public:
   virtual bool set(const char *name, const char *value);
 
   /**
-   * @brief Activate the ButtonElement.
+   * @brief Activate the Element.
    * @return true when activation was good.
    * @return false when activation failed.
    */

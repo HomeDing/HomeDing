@@ -34,7 +34,7 @@ bool DigitalOutElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "pin") == 0) {
-    _pin = atoi(value);
+    _pin = _atopin(value);
 
   } else if (_stricmp(name, "invers") == 0) {
     _invers = _atob(value);

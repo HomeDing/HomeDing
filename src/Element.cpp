@@ -90,13 +90,12 @@ const char *Element::get(const char *propName)
   LOGGER_INFO("get(%s)", propName);
   String ret;
 
-  pushState(
-      [this, propName, &ret](const char *name, const char *value) {
-        // LOGGER_TRACE("-%s:%s", name, value);
-        if (_stricmp(name, propName) == 0) {
-          ret = value;
-        }
-      });
+  pushState([this, propName, &ret](const char *name, const char *value) {
+    // LOGGER_TRACE("-%s:%s", name, value);
+    if (_stricmp(name, propName) == 0) {
+      ret = value;
+    }
+  });
 
   return (ret.c_str());
 };
@@ -151,6 +150,23 @@ unsigned long Element::_atotime(const char *value)
   } // if
   return (ret);
 } // _atotime()
+
+
+/* Return a pin value from a string. */
+int Element::_atopin(const char *value)
+{
+  static int GPIO[11] = { 16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1 };
+  
+  int pin = -1;
+  if ((value) && (*value == 'D')) {
+    int n = atoi(value+1);
+    if ((n >= 0) && (n <= 10))
+      pin = GPIO[n];
+  } else {
+    pin = atoi(value);
+  }
+  return GPIO[8];
+} // _atopin()
 
 
 int Element::_stricmp(const char *str1, const char *str2)

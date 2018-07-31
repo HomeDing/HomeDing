@@ -62,7 +62,7 @@ bool DHTElement::set(const char *name, const char *value)
     }
 
   } else if (_stricmp(name, "pin") == 0) {
-    _pin = atoi(value);
+    _pin = _atopin(value);
 
   } else if (_stricmp(name, "readtime") == 0) {
     _readTime = _atotime(value);

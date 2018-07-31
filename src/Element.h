@@ -122,6 +122,28 @@ protected:
   unsigned long _atotime(const char *value);
 
   /**
+   * @brief Return a pin value from a string.
+   * @details pin values can be entered using the "D0" or "A0" syntax or by specifying a GPIO number.
+   * Mappings are taken from NodeMCU.
+   *
+   * * D0  = GPIO 16
+   * * D1  = GPIO 5
+   * * D2  = GPIO 4
+   * * D3  = GPIO 0
+   * * D4  = GPIO 2
+   * * D5  = GPIO 14
+   * * D6  = GPIO 12
+   * * D7  = GPIO 13
+   * * D8  = GPIO 15
+   * * D9  = GPIO 3
+   * * D10 = GPIO 1
+   *
+   * @param value Given value as string.
+   * @return GPIO Number.
+   */
+  int _atopin(const char *value);
+
+  /**
    * @brief replacement of the CPP stricmp function not available on Arduino.
    */
   int _stricmp(const char *str1, const char *str2);

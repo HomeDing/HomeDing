@@ -1,7 +1,9 @@
 /**
  * @file BlinkDing.ino
- * @brief Sketch that uses the IoT Board System to implement Things attached the
+ *
+ * @brief Sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -12,21 +14,7 @@
  * More information on https://www.mathertel.de/Arduino.
  *
  * Changelog:
- * * 02.06.2016 created using the FSWebServer sample.
- * * 03.06.2016 ArduinoJson library added.
- * * 05.06.2016 using server.serveStatic.
- * * 05.06.2016 server.sendHeader("Cache-control" , "NO-CACHE"); added in
- *              various places.
- * * 07.06.2016 Timer added
- * * 25.06.2016 handling /all and /list removed.
- * * 02.07.2016 read main_settings from JSON file main_settings.txt
- * * 17.07.2016 config data services added.
- * * 20.08.2016 config of a device name added.
- * * 21.08.2016 reboot using Sleep deep
- * * 23.04.2018 reused to build the IoT Board System
- * * 27.04.2018 parameter pushing & loading added.
- * * 20.06.2018 SSDP converted to an element
- * * 25.06.2018 ArduinoJson replace by MicroJsonParser. in use only in board.
+ * * 23.04.2018 created to build a Blink Example
  */
 
 #ifdef DEBUG_ESP_PORT
@@ -41,18 +29,19 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-#include <ArduinoOTA.h>
 #include <WiFiUdp.h>
 
 #include <FS.h>
 
-#include <SSD1306Wire.h>
+// need for a Display
 
 // =====
 
 #include <Board.h>
 #include <BoardServer.h>
 #include <FileServer.h>
+
+#define LOGGER_MODULE "main"
 #include <Logger.h>
 
 // Use the Core Elements of the HomeDing Library
@@ -62,7 +51,7 @@
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_DS18B20
 
-#include "Element.h"
+#include <HomeDing.h>
 
 extern "C" {
 #include "user_interface.h"
@@ -79,10 +68,7 @@ ESP8266WebServer server(80);
 
 // need no Display
 
-SSD1306Wire *display = NULL; // created later, when available
-
-// Setup a OLED Display with a SSD1306 controller on D1 and D2
-// SSD1306 display(0x3c, 5, 4, GEOMETRY_128_64);   // GPIO 5 = D1, GPIO 4 = D2
+DisplayAdapter *display = NULL;
 
 // ===== application state variables =====
 
@@ -129,44 +115,18 @@ void setup(void)
   Serial.begin(115200);
   Serial.setDebugOutput(false);
 
-  DEBUG_LOG("Board Server is starting...\n");
-  DEBUG_LOG("Build " __DATE__ "\n");
-
-  DEBUG_LOG("Boot mode %d\n", ESP.getBootMode());
+  LOGGER_INFO("Board Server is starting...");
+  LOGGER_INFO("Build " __DATE__);
+  LOGGER_INFO("Boot mode %d", ESP.getBootMode());
 
   Logger::logger_level = LOGGER_LEVEL_TRACE;
   
   // ----- setup File System -----
   SPIFFS.begin();
 
-  // ----- setup Display -----
-
-  // test if a display device is attached
-  Wire.begin(5, 4);
-  Wire.beginTransmission(0x3c);
-  int error = Wire.endTransmission();
-
-  if (error != 0) {
-    DEBUG_LOG("display error %d\n", error);
-
-  } else {
-    DEBUG_LOG("setupDisplay...\n");
-    display = new SSD1306Wire(0x3c, 5, 4, GEOMETRY_128_64);
-
-    display->init();
-    display->connect();
-
-    display->flipScreenVertically();
-    display->setTextAlignment(TEXT_ALIGN_LEFT);
-    display->setFont(ArialMT_Plain_10);
-
-    display->drawString(0, 0, "IoT...");
-    display->display();
-  } // if
-
   // ----- setup Board and Elements-----
 
-  mainBoard.init((Display *)display, &server);
+  mainBoard.init((DisplayAdapter *)display, &server);
   mainBoard.addElements();
   mainBoard.start();
   DEBUG_LOG("Board started.\n\n");
@@ -178,8 +138,8 @@ void setup(void)
     DEBUG_LOG(" devicename: %s.\n", devicename);
     DEBUG_LOG(" description: %s.\n", deviceElement->get("description"));
   } else {
-    strncpy(devicename, "iotdevice", sizeof(devicename));
-  }
+    strncpy(devicename, "homeding", sizeof(devicename));
+  } // if
 
 
   // ----- setup Server -----
@@ -204,47 +164,6 @@ void setup(void)
   DEBUG_LOG("\nConnected to: %s\n", WiFi.SSID().c_str());
   DEBUG_LOG("  as: %s\n", devicename);
   DEBUG_LOG("  IP: %s\n", ipstr);
-
-  if (display) {
-    display->clear();
-    display->drawString(0, 0, devicename);
-    display->drawString(0, 10, ipstr);
-    display->display();
-  }
-
-  // Setup ArduinoOTA
-  ArduinoOTA.setHostname(devicename);
-  // ArduinoOTA.setPort(8266);   // defaults = 8266
-  // ArduinoOTA.setPassword((const char *)"iot");
-
-  ArduinoOTA.onStart([]() { Serial.println("OTA Start"); });
-  ArduinoOTA.onEnd([]() { Serial.println("OTA End\n"); });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    static int lastpc = 0;
-    int pc = (progress / (total / 100));
-    if (pc != lastpc) {
-      Serial.print('.');
-      if (pc % 50 == 0)
-        Serial.printf(" %d %%\n", pc);
-      lastpc = pc;
-    }
-  });
-
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR)
-      Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR)
-      Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR)
-      Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR)
-      Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR)
-      Serial.println("End Failed");
-  });
-  ArduinoOTA.begin();
 
   // WiFi.printDiag(Serial);
 
@@ -302,10 +221,10 @@ void setup(void)
   DEBUG_LOG("Server started.\n\n");
 } // setup
 
+
 // handle all give time to all Elements and active components.
 void loop(void)
 {
-  ArduinoOTA.handle();
   server.handleClient();
   mainBoard.loop();
 } // loop()

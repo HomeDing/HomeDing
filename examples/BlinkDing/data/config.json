@@ -1,6 +1,6 @@
 {
   "device": {
-    "main": {
+    "0": {
       "name": "BlinkDing",
       "reboottime": "24h",
       "description": "Blinking forever"
@@ -8,13 +8,14 @@
   },
 
   "ota": {
-    "main": {
+    "0": {
       "description": "Allow Over the Air Updates"
     }
   },
 
   "ssdp": {
     "0": {
+      "ModelUrl": "https://www.mathertel.de/Arduino",
       "description": "Make the device apear on the network"
     }
   },
@@ -22,11 +23,11 @@
   "timer": {
     "blink": {
       "type": "LOOP",
-      "waittime": "1s",
-      "pulsetime": "1s",
+      "waittime": "3s",
+      "pulsetime": "3s",
       "onon": "digitalout/led?on,device/main?log=*on*",
       "onoff": "digitalout/led?off,device/main?log=*off*",
-      "description": "Water Timer"
+      "description": "Blink slowly"
     }
   },
 

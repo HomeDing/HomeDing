@@ -17,7 +17,6 @@
 #include "DisplayAdapter.h"
 #include <Arduino.h>
 
-// #include "DisplayAdapterSSD1306.h"
 #include <SSD1306Wire.h>
 
 class DisplayAdapterSSD1306 : DisplayAdapter

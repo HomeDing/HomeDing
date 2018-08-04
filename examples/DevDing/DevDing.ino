@@ -41,7 +41,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-#include <WiFiUdp.h>
+// #include <WiFiUdp.h>
 
 #include <FS.h>
 
@@ -69,12 +69,12 @@ extern "C" {
 #include "user_interface.h"
 }
 
-// WiFiClient;
-
 // ===== WLAN credentials =====
 
 // const char *ssid = "NetworkName";
 // const char *password = "NetworkPass";
+const char *ssid = "KH";
+const char *password = "hk-021FD2829";
 
 // need a WebServer
 
@@ -118,13 +118,15 @@ void handleFileList()
 
 /**
  * Setup all components and Serial debugging helpers
-*/
+ */
 void setup(void)
 {
   unsigned long now = millis();
 
   Serial.begin(115200);
   Serial.setDebugOutput(false);
+
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("Board Server is starting...");
   LOGGER_INFO("Build " __DATE__);
@@ -134,7 +136,19 @@ void setup(void)
   SPIFFS.begin();
 
   // ----- setup Display -----
-  display = new DisplayAdapterSSD1306(0x3c, 5, 4, 64);
+
+  // for Esp-Wroom-02 Modul ESP8266 with OLED and 18650
+  // display = new DisplayAdapterSSD1306(0x3c, 5, 4, 64);
+
+#define RST_OLED 16
+  pinMode(RST_OLED, OUTPUT);
+  digitalWrite(RST_OLED, LOW); // turn D2 low to reset OLED
+  delay(50);
+  digitalWrite(RST_OLED, HIGH); // while OLED is running, must set D2 in high
+
+  // for Wifi-Kit 8
+  display = new DisplayAdapterSSD1306(0x3c, 4, 5, 32);
+
 
   if (!display->init()) {
     DEBUG_LOG("no attached display found.\n");
@@ -157,12 +171,13 @@ void setup(void)
     DEBUG_LOG(" description: %s.\n", deviceElement->get("description"));
   } else {
     strncpy(devicename, "homeding", sizeof(devicename));
-  } // if 
+  } // if
+
 
   // ----- setup Server -----
 
   WiFi.mode(WIFI_STA);
-  // WiFi.begin(ssid, password);
+  WiFi.begin(ssid, password);
 
   wifi_station_set_auto_connect(true);
   wifi_station_set_hostname(devicename);
@@ -186,6 +201,8 @@ void setup(void)
     display->clear();
     display->drawText(0, 0, 10, devicename);
     display->drawText(0, 10, 10, ipstr);
+    delay(4 * 1000);
+    display->clear();
   }
 
   // WiFi.printDiag(Serial);

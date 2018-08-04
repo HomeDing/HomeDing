@@ -1,15 +1,15 @@
-// -----
-// DisplayAdapterSSD1306.h
-//
-// Copyright (c) by Matthias Hertel, https://www.mathertel.de.
-//
-// This work is licensed under a BSD style license.
-// See https://www.mathertel.de/License.aspx.
-// More information on https://www.mathertel.de/Arduino
-// -----
-// 25.07.2018 created by Matthias Hertel
-// -----
-
+/**
+ * @file DisplayAdapterSSD1306.h
+ *
+ * @brief DisplayAdapter implementation for the HomeDing library
+ * adapting OLED displays using the SSD1306 chip.
+ *
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ * -----
+ * * 25.07.2018 created by Matthias Hertel
+ */
 
 #ifndef DisplayAdapterSSD1306_H
 #define DisplayAdapterSSD1306_H
@@ -162,9 +162,9 @@ private:
    */
   int _scl;
 
-/**
+  /**
    * @brief GPIO pin for the I2C SDA Line.
- */
+   */
   int _sda;
 
   /**

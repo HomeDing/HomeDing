@@ -1,0 +1,123 @@
+{
+  "device": {
+    "0": {
+      "name": "devdevice",
+      "reboottime": "30m",
+      "description": "IoT Dev-Device"
+    }
+  },
+
+  "ota": {
+    "0": {
+      "port": 8266,
+      "passwd": "123",
+      "description": "Listen for 'over the air' OTA Updates"
+    }
+  },
+
+  "ssdp": {
+    "0": {
+      "ModelUrl": "https://www.mathertel.de/Arduino"
+    }
+  },
+
+  "serialcmd": {
+    "0": {
+      "description": "Listen for commands on the Serial in line"
+    }
+  },
+
+  "remote": {
+    "display-t": {
+      "host": "weatherdisplay",
+      "remoteid": "display/t",
+      "description": "Display temperature on remode thing."
+    },
+    "display-h": {
+      "host": "weatherdisplay",
+      "remoteid": "display/h",
+      "description": "Display humidity on remode thing."
+    }
+
+  },
+
+  "displaytext": {
+    "temp": {
+      "x": 40,
+      "y": 10,
+      "prefix": "Temp:",
+      "postfix": "°C",
+      "description": "Display temperature on local display"
+    },
+    "hum": {
+      "x": 40,
+      "y": 20,
+      "prefix": "Hum.:",
+      "postfix": "%",
+      "description": "Display humidity on local display"
+    }
+  },
+
+  "displaydot": {
+    "b": {
+      "x": 10,
+      "y": 35,
+      "description": "Display a bink"
+    }
+  },
+
+  "dht": {
+    "on": {
+      "pin": 0,
+      "type": "DHT22",
+      "readtime": "30s",
+      "resendtime": "2m",
+      "onTemperature": "device/0?log=temp:$v,displaytext/temp?show=$v,remote/display-t?show=$v",
+      "onHumidity": "device/0?log=hum:$v%,displaytext/hum?show=$v,remote/display-h?show=$v",
+      "description": "Local DHT sensor"
+    }
+  },
+
+  "ntptime": {
+    "on": {
+      "readtime": "2m",
+      "zone": 2,
+      "onminute": "device/0?log=time:$v"
+    }
+  },
+
+  "timer": {
+    "blink": {
+      "type": "LOOP",
+      "waittime": "0",
+      "pulsetime": "1",
+      "cycletime": "3",
+      "onon": "displaydot/b?show=1",
+      "onoff": "displaydot/b?show=0",
+      "description": "Water Timer for testing"
+    }
+  },
+
+  "button": {
+    "up": {
+      "pin": 12,
+      "inverse": "true",
+      "onoff": "pwmout/led?value=255"
+    },
+    "down": {
+      "pin": 13,
+      "inverse": "true",
+      "onoff": "pwmout/led?value=15"
+    }
+  },
+
+  "pwmout": {
+    "led": {
+      "pin": 16,
+      "range": 256,
+      "value": 10,
+      "invers": "true",
+      "description": "Build-in LED"
+    }
+  }
+}

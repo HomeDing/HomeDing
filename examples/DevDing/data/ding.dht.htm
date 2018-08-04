@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon-precomposed" href="/favicon-256.png">
+  <link rel="xx-manifest" href="/watermanifest.json">
+  <title>Ding Control</title>
+  <link Content-Type="text/css" href="iotstyle.css" rel="stylesheet" />
+  <script src="micro.js"></script>
+  <style>
+    .header {
+      margin-top: 0.2rem;
+      background-color: lightgoldenrodyellow
+    }
+    
+    .panel {
+      background-color: lightsteelblue
+    }
+    
+    img.light {
+      width: 1rem;
+      height: 1rem;
+      display: inline-block;
+      background-image: url(red.svg);
+      background-size: 100%;
+    }
+    
+    img.light.active {
+      background-image: url(green.svg);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row header">
+      <div class="col stretch">
+        <img class="icon" src="generic/icon.svg" style="float:left" />
+        <h1>Control the Ding</h1>
+      </div>
+    </div>
+
+    <div microID="/dht/on" microBehavior='generic'>
+      <div class="row panel">
+        <div class="col-1">
+          <label>Active:</label>
+        </div>
+        <div class="col stretch">
+          <img class="light" property='active'></img>
+          <span property='description'></span>
+        </div>
+      </div>
+      <div class="row panel">
+        <div class="col-1">
+          <label>Temp:</label>
+        </div>
+        <div class="col stretch">
+          <!-- <input property='temperature' value="..." /> -->
+          <span property='temperature'></span> °C
+        </div>
+      </div>
+      <div class="row panel">
+        <div class="col-1">
+          <label>Property:</label>
+        </div>
+        <div class="col stretch">
+          <span property='humidity'>value in here.</span> %
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    GenericElementBehavior = {
+      microID: "",
+
+      init: function() {
+        hub.subscribe(this.microid + "?*", this.newData.bind(this));
+      }, // init
+
+      newData: function(path, key, value) {
+        forAllNodeList(this.querySelectorAll("img[property='" + key + "']"), function(e) {
+          if (value)
+            e.classList.add('active');
+          else
+            e.classList.remove('active')
+            // e.textContent = value;
+          e.title = value;
+        });
+
+        forAllNodeList(this.querySelectorAll("span[property='" + key + "']"), function(e) {
+          e.textContent = value;
+          e.title = value;
+        });
+
+        forAllNodeList(this.querySelectorAll("input[property='" + key + "']"), function(e) {
+          e.value = value;
+        });
+      }, // newData()
+
+      onchange: function(e) {
+        var src = e.srcElement;
+        dispatch(this.microid, src.getAttribute('property'), e.srcElement.value);
+        // debugger;
+      }
+    }; // GenericElementBehavior
+
+    jcl.registerBehaviour("generic", GenericElementBehavior);
+
+    jcl.attachAll(document.body);
+
+    function updateState() {
+      loadAsync("state.json", "application/json", function(txt) {
+        var obj = JSON.parse(txt);
+        hub.publishObj(obj);
+      });
+    } // updateState()
+
+    updateState();
+    // window.setInterval(updateState, 8000);
+  </script>
+
+</body>

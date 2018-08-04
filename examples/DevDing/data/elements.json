@@ -1,0 +1,49 @@
+{
+  "button": {
+    "id": "attribute",
+    "type": "attribute",
+    "pin": "attribute",
+    "invers": "attribute",
+    "onon": "event",
+    "onoff": "event",
+    "onlevel": "event",
+    "level": "state"
+  },
+
+  "display": {
+    "id": "attribute",
+    "type": "attribute",
+    "x": "attribute",
+    "y": "attribute",
+    "prefix": "attribute",
+    "postfix": "attribute",
+    "show": "action",
+    "clear": "action",
+    "value": "state"
+  },
+
+  "timer": {
+    "id": "attribute",
+    "type": "attribute",
+    "waittime": "attribute",
+    "pulsetime": "attribute",
+    "cycletime": "attribute",
+    "onon": "event",
+    "onoff": "event",
+    "onlevel": "event",
+    "start": "action",
+    "stop": "action",
+    "next": "action",
+    "level": "state",
+    "remain": "state"
+  },
+
+  "digitalout": {
+    "id": "attribute",
+    "type": "attribute",
+    "invers": "attribute",
+    "on": "action",
+    "off": "action",
+    "level": "action, state"
+  }
+}

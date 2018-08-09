@@ -23,7 +23,7 @@
 #include <Arduino.h>
 
 /**
- * @brief Timer Element that produces actions based on timing conditions.
+ * @brief MyElement implements...
  * @details
 @verbatim
 

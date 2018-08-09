@@ -1,8 +1,9 @@
 /**
  * @file NTPTimeElement.cpp
- * 
- * @brief Core Element for the HomeDing Library to get the actual time using the NTP protocol.
- * 
+ *
+ * @brief Core Element for the HomeDing Library to get the actual time using the
+ * NTP protocol.
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -23,9 +24,9 @@
  * https://github.com/nodemcu/nodemcu-firmware/blob/master/app/include/rtc/rtctime_internal.h
  * system_rtc_mem_read
  * https://github.com/Makuna/Task
- * 
- * 
- * 
+ *
+ *
+ *
  * Changelog: see NTPTimeElement.h
  */
 
@@ -35,8 +36,8 @@
 #define LOGGER_MODULE "NTPTime"
 #include "Logger.h"
 
-#include "time.h"
 #include "sntp.h"
+#include "time.h"
 
 #include "user_interface.h"
 
@@ -74,7 +75,7 @@ NTPTimeElement::NTPTimeElement()
   _zone = 1; // Central Europe
   _nextRead = 0;
 
-  uint32	rtc_time = system_get_rtc_time();
+  uint32 rtc_time = system_get_rtc_time();
   LOGGER_INFO("rtc_time=%d", rtc_time);
 } // NTPTimeElement()
 
@@ -228,10 +229,9 @@ void NTPTimeElement::pushState(
  */
 void NTPTimeElement::_sendAction(String &action, const char *fmt, time_t tStamp)
 {
-  LOGGER_TRACE("_send(%s)", action.c_str());
-  char b[32];
-
-  if (action.length() > 0) {
+  if (action.length()) {
+    LOGGER_TRACE("_send(%s)", action.c_str());
+    char b[32];
     struct tm *tmp = localtime(&tStamp);
     strftime(b, sizeof(b), fmt, tmp);
     _board->dispatch(action, b);

@@ -13,6 +13,7 @@
  * 
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
+ * * 11.08.2018 using TabRF library
  */
 
 #ifndef RFSendElement_H
@@ -82,7 +83,6 @@ private:
   String _codeOn;
   String _codeOff;
   bool _lastValue;
-
 };
 
 #endif

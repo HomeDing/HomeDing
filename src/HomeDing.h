@@ -87,4 +87,8 @@
 #include <DHTElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_RFSend
+#include <RFSendElement.h>
+#endif
+
 #endif

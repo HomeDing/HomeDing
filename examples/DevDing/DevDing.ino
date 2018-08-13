@@ -41,11 +41,14 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-// #include <WiFiUdp.h>
-
 #include <FS.h>
 
-#include "DisplayAdapterSSD1306.h"
+// include the hardware supporting libraries
+#include <DisplayAdapterSSD1306.h>
+
+// Library TabRF is used for sending RF 433 MHz Signals
+#include <TabRF.h>
+#include <intertechno2.h> // use the intertechno2 code defintions
 
 // =====
 
@@ -62,6 +65,7 @@
 // Use some more Elements that need additional libraries
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_DS18B20
+#define HOMEDING_INCLUDE_RFSend
 
 #include <HomeDing.h>
 
@@ -126,7 +130,7 @@ void setup(void)
   Serial.begin(115200);
   Serial.setDebugOutput(false);
 
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
+  //   Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("Board Server is starting...");
   LOGGER_INFO("Build " __DATE__);
@@ -137,18 +141,29 @@ void setup(void)
 
   // ----- setup Display -----
 
-  // for Esp-Wroom-02 Modul ESP8266 with OLED and 18650
-  // display = new DisplayAdapterSSD1306(0x3c, 5, 4, 64);
+  // for Esp-Wroom-02 Modul ESP8266 with OLED and 18650 
+#if 1
+  display = new DisplayAdapterSSD1306(0x3c, 5, 4, 64);
+#endif
 
-#define RST_OLED 16
-  pinMode(RST_OLED, OUTPUT);
-  digitalWrite(RST_OLED, LOW); // turn D2 low to reset OLED
+  // for Wifi Kit 8 Modul ESP8266 with OLED
+#if 0
+  // the propper reset of the OLED is required using pin 16 = D0
+  pinMode(D0, OUTPUT);
+  digitalWrite(D0, LOW); // turn D2 low to reset OLED
   delay(50);
-  digitalWrite(RST_OLED, HIGH); // while OLED is running, must set D2 in high
+  digitalWrite(D0, HIGH); // while OLED is running, must set D2 in high
 
   // for Wifi-Kit 8
   display = new DisplayAdapterSSD1306(0x3c, 4, 5, 32);
+#endif
 
+  // ----- setup RF 433 MHz Library -----
+#if 0
+  // initialize the tabRF library
+  tabRF.init(NO_PIN, D4); // input at D1 = pin #2 , output at D4, pin # 9
+  tabRF.setupDefition(&Intertechno2_Sequence);
+#endif
 
   if (!display->init()) {
     DEBUG_LOG("no attached display found.\n");

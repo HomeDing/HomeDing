@@ -18,9 +18,6 @@
 #include "ElementRegistry.h"
 #include "RFSendElement.h"
 
-// use the intertechno2 code defintions
-#include <intertechno2.h>
-
 #define LOGGER_MODULE "RFSend"
 #include "Logger.h"
 
@@ -94,12 +91,6 @@ void RFSendElement::start()
   Element::start();
   // } // if
 
-  // initialize the tabRF library
-  tabRF.init(NO_PIN, D4); // input at D1 = pin #2 , output at D4, pin # 9
-  tabRF.setupDefition(&Intertechno2_Sequence);
-  // tabRF.attachCallback(receiveCode);
-
-
 } // start()
 
 
@@ -136,10 +127,10 @@ void RFSendElement::pushState(
 // available Elements. See <HomeDing.h> the move these lines to
 // RFSendElement.h
 
-// #ifdef HOMEDING_REGISTER
+#ifdef HOMEDING_REGISTER
 // Register the RFSendElement onto the ElementRegistry.
 bool RFSendElement::registered =
     ElementRegistry::registerElement("rfsend", RFSendElement::create);
-// #endif
+#endif
 
 // End

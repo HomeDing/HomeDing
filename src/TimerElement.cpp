@@ -82,14 +82,14 @@ bool TimerElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "start") == 0) {
     // turn off and do a fresh start
-    if (_state == 2) {
+    if (_state == 1) {
       _board->dispatch(_offAction);
     }
     _startTimer();
 
   } else if (_stricmp(name, "stop") == 0) {
     // turn off and do a fresh start
-    if (_state == 2) {
+    if (_state == 1) {
       _board->dispatch(_offAction);
     }
     _stopTimer();
@@ -170,7 +170,10 @@ void TimerElement::pushState(
 
   Element::pushState(callback);
   callback("state", String(_state).c_str());
-  callback("time", String(now - _startTime).c_str());
+  if (_state == 3)
+    callback("time", "0");
+  else 
+    callback("time", String(now - _startTime).c_str());
   callback("level", (_state == 1) ? "1" : "0");
 } // pushState()
 

@@ -74,17 +74,17 @@ void OTAElement::start()
   });
 
   ArduinoOTA.onError([](ota_error_t error) {
-    LOGGER_INFO("Error[%u]: ", error);
+    LOGGER_ERR("Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR)
-      LOGGER_INFO("Auth Failed");
+      LOGGER_ERR("Auth Failed");
     else if (error == OTA_BEGIN_ERROR)
-      LOGGER_INFO("Begin Failed");
+      LOGGER_ERR("Begin Failed");
     else if (error == OTA_CONNECT_ERROR)
-      LOGGER_INFO("Connect Failed");
+      LOGGER_ERR("Connect Failed");
     else if (error == OTA_RECEIVE_ERROR)
-      LOGGER_INFO("Receive Failed");
+      LOGGER_ERR("Receive Failed");
     else if (error == OTA_END_ERROR)
-      LOGGER_INFO("End Failed");
+      LOGGER_ERR("End Failed");
   });
   ArduinoOTA.begin();
   Element::start();

@@ -87,7 +87,7 @@ void Element::pushState(
  */
 const char *Element::get(const char *propName)
 {
-  LOGGER_INFO("get(%s)", propName);
+  LOGGER_TRACE("get(%s)", propName);
   String ret;
 
   pushState([this, propName, &ret](const char *name, const char *value) {

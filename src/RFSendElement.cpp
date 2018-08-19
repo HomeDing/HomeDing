@@ -35,7 +35,7 @@
  */
 Element *RFSendElement::create()
 {
-  LOGGER_INFO("create()");
+  LOGGER_TRACE("create()");
   return (new RFSendElement());
 } // create()
 
@@ -51,7 +51,7 @@ Element *RFSendElement::create()
  */
 bool RFSendElement::set(const char *name, const char *value)
 {
-  LOGGER_INFO("set(%s, %s)", name, value);
+  LOGGER_TRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
@@ -83,7 +83,7 @@ bool RFSendElement::set(const char *name, const char *value)
  */
 void RFSendElement::start()
 {
-  LOGGER_INFO("start()");
+  LOGGER_TRACE("start()");
 
   // Verify parameters
 

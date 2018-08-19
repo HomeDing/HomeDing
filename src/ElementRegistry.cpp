@@ -45,18 +45,19 @@ Element *ElementRegistry::createElement(const char *elementTypeName)
 {
   static bool done_once = false;
   LOGGER_TRACE("createElement(%s)", elementTypeName);
-  int n = 0;
+  int n;
   Element *e = NULL;
 
   if (!done_once) {
-    LOGGER_INFO("Registered Libraries:");
-    n = 0;
-    while (n < _count) {
-      LOGGER_INFO(" %d:%s", n, _names[n]);
-      n++;
-    }
+    // report registered libraries
+    String s;
+    for (n = 0; n < _count; n++) {
+      s.concat(" ");
+      s.concat(_names[n]);
+    } // for
+    LOGGER_INFO("Registered Libraries:%s\n", s.c_str());
     done_once = true;
-  }
+  } // if
 
   // search for the the typeName
   n = 0;
@@ -66,7 +67,6 @@ Element *ElementRegistry::createElement(const char *elementTypeName)
   } // while
 
   if (n < _count) {
-    // LOGGER_LOG(".found.");
     e = _func[n]();
   } // if
   return (e);

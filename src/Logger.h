@@ -67,11 +67,13 @@ public:
       // Logger prefix "><module>:<loglevel>: ....."
       char *levString;
       if (level == LOGGER_LEVEL_ERR) {
-        levString = "err";
+        levString = "e";
       } else if (level == LOGGER_LEVEL_LOG) {
-        levString = "log";
+        levString = "l";
       } else if (level == LOGGER_LEVEL_TRACE) {
-        levString = "trc";
+        levString = "t";
+      } else if (level == LOGGER_LEVEL_INFO) {
+        levString = "i";
       } else {
         levString = "---";
       }

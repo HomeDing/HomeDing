@@ -18,10 +18,8 @@
 #include "DeviceElement.h"
 #include "ElementRegistry.h"
 
-#define LOGGER_MODULE "Device"
+#define LOGGER_MODULE "device"
 #include "Logger.h"
-
-#include <SSD1306Wire.h>
 
 /**
  * @brief static factory function to create a new DeviceElement.

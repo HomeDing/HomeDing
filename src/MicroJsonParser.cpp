@@ -26,7 +26,9 @@
 #define MJ_STATE_ASSIGN (0x11 + MJ_IGNOREBLANCS)
 #define MJ_STATE_PRE_VALUE (0x21 + MJ_IGNOREBLANCS)
 #define MJ_STATE_Q_VALUE (0x22)
-#define MJ_STATE_VALUE (0x23)
+#define MJ_STATE_Q_VALUE_ESC (0x23)
+#define MJ_STATE_Q_VALUE_ESCU (0x24)
+#define MJ_STATE_VALUE (0x25)
 #define MJ_STATE_PRE_DONE (0x31 + MJ_IGNOREBLANCS)
 #define MJ_STATE_DONE (0x32 + MJ_IGNOREBLANCS)
 #define MJ_STATE_ERROR (0x50 + MJ_IGNOREBLANCS)
@@ -52,6 +54,7 @@ MicroJson::MicroJson(MicroJsonCallbackFn callback)
   _path[0] = NUL;
   _name[0] = NUL;
   _value[0] = NUL;
+  _esc[0] = NUL;
 };
 
 
@@ -181,7 +184,11 @@ void MicroJson::parse(char ch)
     }
 
   } else if (_state == MJ_STATE_Q_VALUE) {
-    if (ch != '"') {
+    if (ch == '\\') {
+      _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE_ESC);
+      _esc[0] = NUL;
+
+    } else if (ch != '"') {
       strncat(_value, ch, sizeof(_value));
 
     } else {
@@ -191,6 +198,41 @@ void MicroJson::parse(char ch)
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
     }
 
+  } else if (_state == MJ_STATE_Q_VALUE_ESC) {
+    // single char escape sequences
+    if (ch == 'b') {
+      ch = '\b';
+    } else if (ch == 'f') {
+      ch = '\f';
+    } else if (ch == 'n') {
+      ch = '\n';
+    } else if (ch == 'r') {
+      ch = '\r';
+    } else if (ch == 't') {
+      ch = '\t';
+    } else if (ch == 'u') {
+      // read 4 hex digits  \u0034
+      _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE_ESCU);
+      _esc[0] = NUL;
+
+    } else {
+      // like \" , \\, \/ and all other normal chars.
+    } // if
+
+    if (_state != MJ_STATE_Q_VALUE_ESCU) {
+      strncat(_value, ch, sizeof(_value));
+      _state = MJ_STATE_Q_VALUE;
+    } // if
+    
+  } else if (_state == MJ_STATE_Q_VALUE_ESCU) {
+    strncat(_esc, ch, sizeof(_esc));
+    if (strlen(_esc) == 4) {
+      long l = strtol(_esc, NULL, 16);
+      ch = (char)(l % 0x00FF);
+      strncat(_value, ch, sizeof(_value));
+      _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE);
+    } // if
+    
   } else if (_state == MJ_STATE_PRE_DONE) {
     if (ch == ',') {
       _name[0] = _value[0] = NUL;

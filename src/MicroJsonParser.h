@@ -50,6 +50,7 @@ protected:
   char _path[64];
   char _name[16];
   char _value[200];
+  char _esc[8];
 
   MicroJsonCallbackFn _callbackFn;
 };

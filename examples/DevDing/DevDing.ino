@@ -45,6 +45,7 @@
 
 // include the hardware supporting libraries
 #include <DisplayAdapterSSD1306.h>
+#include "DisplayAdapterLCD.h"
 
 // Library TabRF is used for sending RF 433 MHz Signals
 #include <TabRF.h>
@@ -84,7 +85,8 @@ const char *password = "hk-021FD2829";
 
 ESP8266WebServer server(80);
 
-DisplayAdapterSSD1306 *display = NULL; // created later, when available
+// DisplayAdapterSSD1306 *display = NULL; // created later, when available
+DisplayAdapterLCD *display = NULL; // created later, when available
 
 // ===== application state variables =====
 
@@ -130,7 +132,7 @@ void setup(void)
   Serial.begin(115200);
   Serial.setDebugOutput(false);
 
-  //   Logger::logger_level = LOGGER_LEVEL_TRACE;
+    // Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("Board Server is starting...");
   LOGGER_INFO("Build " __DATE__);
@@ -142,8 +144,12 @@ void setup(void)
   // ----- setup Display -----
 
   // for Esp-Wroom-02 Modul ESP8266 with OLED and 18650 
-#if 1
+#if 0
   display = new DisplayAdapterSSD1306(0x3c, 5, 4, 64);
+#endif
+
+#if 1
+  display = new DisplayAdapterLCD(0x27, SDA, SCL);
 #endif
 
   // for Wifi Kit 8 Modul ESP8266 with OLED
@@ -165,7 +171,7 @@ void setup(void)
   tabRF.setupDefition(&Intertechno2_Sequence);
 #endif
 
-  if (!display->init()) {
+  if ((display) && (!display->init())) {
     DEBUG_LOG("no attached display found.\n");
     delete display;
     display = NULL;
@@ -175,8 +181,6 @@ void setup(void)
 
   mainBoard.init((DisplayAdapter *)display, &server);
   mainBoard.addElements();
-  mainBoard.start();
-  DEBUG_LOG("Board started.\n\n");
 
   Element *deviceElement = mainBoard.getElement("device");
 
@@ -188,14 +192,17 @@ void setup(void)
     strncpy(devicename, "homeding", sizeof(devicename));
   } // if
 
+   // set device hostname as soon as possible from the device name
+  wifi_station_set_hostname(devicename);
+  wifi_station_set_auto_connect(true);
+
+  mainBoard.start();
+  DEBUG_LOG("Board started.\n\n");
 
   // ----- setup Server -----
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-
-  wifi_station_set_auto_connect(true);
-  wifi_station_set_hostname(devicename);
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
@@ -216,8 +223,8 @@ void setup(void)
     display->clear();
     display->drawText(0, 0, 10, devicename);
     display->drawText(0, 10, 10, ipstr);
-    delay(4 * 1000);
-    display->clear();
+    delay(800);
+    // display->clear();
   }
 
   // WiFi.printDiag(Serial);

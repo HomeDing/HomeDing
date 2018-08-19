@@ -126,7 +126,7 @@ public:
   }; // drawText()
 
 
-  void drawText(int16_t x, int16_t y, int16_t h, char *text)
+  void drawText(int16_t x, int16_t y, int16_t h, const char *text)
   {
     String s_text(text);
     drawText(x, y, h, s_text);

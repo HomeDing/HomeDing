@@ -47,7 +47,7 @@ public:
 
   virtual void drawText(int16_t x, int16_t y, int16_t h, String &text);
 
-  virtual void drawText(int16_t x, int16_t y, int16_t h, char *text);
+  virtual void drawText(int16_t x, int16_t y, int16_t h, const char *text);
 
   virtual void drawDot(int16_t x, int16_t y, int16_t h, bool fill);
 };

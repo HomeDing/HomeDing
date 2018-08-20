@@ -15,8 +15,12 @@
  */
 
 
-#include "ElementRegistry.h"
 #include "RFSendElement.h"
+
+#include <TabRF.h>
+#include <intertechno2.h> // use the intertechno2 code defintions
+
+#include "ElementRegistry.h"
 
 #define LOGGER_MODULE "RFSend"
 #include "Logger.h"
@@ -25,6 +29,10 @@
 
 // like:
 // #define TIMER_UNIT 1000
+
+
+// Define static class variables here.
+int RFSendElement::_rfpin;
 
 
 /* ===== Static factory function ===== */
@@ -58,11 +66,17 @@ bool RFSendElement::set(const char *name, const char *value)
     _lastValue = atoi(value);
 
     if (active) {
-      if (_lastValue)
+      if (_lastValue) {
+        LOGGER_TRACE("send(%s)", _codeOn.c_str());
         tabRF.send(_codeOn.c_str());
-      else
+      } else {
+        LOGGER_TRACE("send(%s)", _codeOff.c_str());
         tabRF.send(_codeOff.c_str());
+      }
     } // if
+
+  } else if (_stricmp(name, "pin") == 0) {
+    _rfpin = _atopin(value);
 
   } else if (_stricmp(name, "codeOn") == 0) {
     _codeOn = value;
@@ -83,7 +97,17 @@ bool RFSendElement::set(const char *name, const char *value)
  */
 void RFSendElement::start()
 {
+  static bool initialized = false;
   LOGGER_TRACE("start()");
+
+  // initialize the tabrf library only once.
+  if (!initialized) {
+    LOGGER_TRACE("start on pin=%d", _rfpin);
+
+    tabRF.init(NO_PIN, _rfpin); // input at D1 = pin #2 , output at D4, pin # 9
+    tabRF.setupDefition(&Intertechno2_Sequence);
+    initialized = true;
+  }
 
   // Verify parameters
 
@@ -113,24 +137,5 @@ void RFSendElement::pushState(
   callback("value", (_lastValue == 1) ? "1" : "0");
 } // pushState()
 
-
-// maybe: overwrite the term() function,
-
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_RFSEND should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to
-// RFSendElement.h
-
-#ifdef HOMEDING_REGISTER
-// Register the RFSendElement onto the ElementRegistry.
-bool RFSendElement::registered =
-    ElementRegistry::registerElement("rfsend", RFSendElement::create);
-#endif
 
 // End

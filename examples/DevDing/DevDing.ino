@@ -44,12 +44,8 @@
 #include <FS.h>
 
 // include the hardware supporting libraries
-#include <DisplayAdapterSSD1306.h>
 #include "DisplayAdapterLCD.h"
-
-// Library TabRF is used for sending RF 433 MHz Signals
-#include <TabRF.h>
-#include <intertechno2.h> // use the intertechno2 code defintions
+#include <DisplayAdapterSSD1306.h>
 
 // =====
 
@@ -78,8 +74,11 @@ extern "C" {
 
 // const char *ssid = "NetworkName";
 // const char *password = "NetworkPass";
-const char *ssid = "KH";
-const char *password = "hk-021FD2829";
+// const char *ssid = "KH";
+// const char *password = "hk-021FD2829";
+
+const char *ssid = "";
+const char *password = "";
 
 // need a WebServer
 
@@ -132,7 +131,7 @@ void setup(void)
   Serial.begin(115200);
   Serial.setDebugOutput(false);
 
-    // Logger::logger_level = LOGGER_LEVEL_TRACE;
+  // Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("Board Server is starting...");
   LOGGER_INFO("Build " __DATE__);
@@ -143,7 +142,7 @@ void setup(void)
 
   // ----- setup Display -----
 
-  // for Esp-Wroom-02 Modul ESP8266 with OLED and 18650 
+  // for Esp-Wroom-02 Modul ESP8266 with OLED and 18650
 #if 0
   display = new DisplayAdapterSSD1306(0x3c, 5, 4, 64);
 #endif
@@ -165,16 +164,17 @@ void setup(void)
 #endif
 
   // ----- setup RF 433 MHz Library -----
-#if 0
-  // initialize the tabRF library
-  tabRF.init(NO_PIN, D4); // input at D1 = pin #2 , output at D4, pin # 9
-  tabRF.setupDefition(&Intertechno2_Sequence);
-#endif
+  if (display) {
 
-  if ((display) && (!display->init())) {
-    DEBUG_LOG("no attached display found.\n");
-    delete display;
-    display = NULL;
+    if (display->init()) {
+      display->drawText(0, 0, 0, "HomeDing...");
+      delay(100);
+
+    } else {
+      DEBUG_LOG("no attached display found.\n");
+      delete display;
+      display = NULL;
+    } // if
   } // if
 
   // ----- setup Board and Elements-----
@@ -187,12 +187,11 @@ void setup(void)
   if (deviceElement) {
     strncpy(devicename, deviceElement->get("name"), sizeof(devicename));
     DEBUG_LOG(" devicename: %s.\n", devicename);
-    DEBUG_LOG(" description: %s.\n", deviceElement->get("description"));
   } else {
     strncpy(devicename, "homeding", sizeof(devicename));
   } // if
 
-   // set device hostname as soon as possible from the device name
+  // set device hostname as soon as possible from the device name
   wifi_station_set_hostname(devicename);
   wifi_station_set_auto_connect(true);
 
@@ -202,7 +201,8 @@ void setup(void)
   // ----- setup Server -----
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  if ((*ssid) && (*password ))
+    WiFi.begin(ssid, password);
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
@@ -221,10 +221,12 @@ void setup(void)
 
   if (display) {
     display->clear();
-    display->drawText(0, 0, 10, devicename);
-    display->drawText(0, 10, 10, ipstr);
+    display->drawText(0, 0, 0, devicename);
     delay(800);
-    // display->clear();
+    display->clear();
+    display->drawText(0, 0, 0, ipstr);
+    delay(800);
+    display->clear();
   }
 
   // WiFi.printDiag(Serial);

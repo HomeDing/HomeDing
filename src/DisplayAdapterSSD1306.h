@@ -73,6 +73,7 @@ public:
 
       display->drawString(0, 0, "HomeDing...");
       display->display();
+      delay(100);
     } // if
     return (true);
   }; // init()
@@ -107,12 +108,12 @@ public:
    * @brief Draw a text at this position using the specific height.-
    * @param x x-position or offset of the text.
    * @param y y-position of the text.
-   * @param h height of the characters
+   * @param h height of the characters. Use 0 to use standard height;
    * @param text the text.
    */
   void drawText(int16_t x, int16_t y, int16_t h, String &text)
   {
-    if (h == 10) {
+    if ((h == 0) || (h == 10)) {
       display->setFont(ArialMT_Plain_10);
     } else if (h == 16) {
       display->setFont(ArialMT_Plain_16);

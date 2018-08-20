@@ -16,6 +16,7 @@
 
 #include "DisplayAdapter.h"
 #include <Arduino.h>
+#include <Wire.h>
 
 #include <LiquidCrystal_PCF8574.h>
 
@@ -59,12 +60,18 @@ public:
     } else {
       Serial.printf("setupDisplay...\n");
       display = new LiquidCrystal_PCF8574(_address);
-
       display->begin(16, 2);
+
+      byte dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
+                        0b10001, 0b01110, 0b00000, 0b00000};
+      byte dotOn[8]  = {0b00000, 0b01110, 0b11111, 0b11111,
+                        0b11111, 0b01110, 0b00000, 0b00000};
+
+      display->createChar(1, dotOff);
+      display->createChar(2, dotOn);
+
       display->clear();
-      display->setCursor(0, 0);
-      display->print("HomeDing...");
-      delay(800);
+      display->setBacklight(1);
     } // if
     return (true);
   }; // init()
@@ -94,8 +101,8 @@ public:
     } else {
       display->setCursor(x, y);
       // while (w > 0) {
-        display->write('#');
-        w--;
+      display->write('#');
+      w--;
       // }
     } // if
   }; // clear()
@@ -105,7 +112,7 @@ public:
    * @brief Draw a text at this position using the specific height.-
    * @param x x-position or offset of the text.
    * @param y y-position of the text.
-   * @param h height of the characters
+   * @param h height of the characters, ignored.
    * @param text the text.
    */
   void drawText(int16_t x, int16_t y, int16_t h, const char *text)
@@ -127,12 +134,7 @@ public:
 
   void drawDot(int16_t x, int16_t y, int16_t h, bool fill)
   {
-    x=14; y=1;
-    if (fill) {
-      drawText(x, y, 1, "+");
-    } else {
-      drawText(x, y, 1, "-");
-    }
+    drawText(x, y, 1, fill ? "\02" : "\01");
   }; // drawDot()
 
 private:

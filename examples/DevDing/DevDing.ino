@@ -27,6 +27,7 @@
  * * 27.04.2018 parameter pushing & loading added.
  * * 20.06.2018 SSDP converted to an element
  * * 25.06.2018 ArduinoJson replace by MicroJsonParser. in use only in board.
+ * * 22.08.2018 separate network and device confguration.
  */
 
 #ifdef DEBUG_ESP_PORT
@@ -74,8 +75,6 @@ extern "C" {
 
 // const char *ssid = "NetworkName";
 // const char *password = "NetworkPass";
-// const char *ssid = "KH";
-// const char *password = "hk-021FD2829";
 
 const char *ssid = "";
 const char *password = "";

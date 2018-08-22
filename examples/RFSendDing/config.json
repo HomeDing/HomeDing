@@ -1,0 +1,57 @@
+{
+  "device": {
+    "0": {
+      "name": "RFdevice",
+      "reboottime": "8h",
+      "description": "IoT Dev-Device for sending RF Signals"
+    }
+  },
+
+  "ota": {
+    "0": {
+      "port": 8266,
+      "passwd": "123",
+      "description": "Listen for 'over the air' OTA Updates"
+    }
+  },
+
+  "ssdp": {
+    "0": {
+      "ModelUrl": "https://www.mathertel.de/Arduino"
+    }
+  },
+
+  "button": {
+    "up": {
+      "pin": 12,
+      "inverse": "true",
+      "onoff": "rfsend/0?value=1"
+    },
+    "down": {
+      "pin": 13,
+      "inverse": "true",
+      "onoff": "rfsend/0?value=0"
+    }
+  },
+
+  "rfsend": {
+    "i1": {
+      "pin": "D4",
+      "codeOn": "s_##___#____#_#__###_____#__#____x",
+      "codeOff": "s_##___#____#_#__###_____#_______x",
+      "description": "Send out specifc RF signal"
+    },
+    "i2": {
+      "pin": "D4",
+      "codeOn": "s_##___#____#_#__###_____#__#___#x",
+      "codeOff": "s_##___#____#_#__###_____#______#x",
+      "description": "Send out specifc RF signal"
+    },
+    "i3": {
+      "pin": "D4",
+      "codeOn": "s_##___#____#_#__###_____#__#__#_x",
+      "codeOff": "s_##___#____#_#__###_____#_____#_x",
+      "description": "Send out specifc RF signal"
+    }
+  }
+}

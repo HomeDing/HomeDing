@@ -17,6 +17,7 @@
 #include "Element.h"
 #include <Arduino.h>
 
+#define REG_MAX_TYPES 32
 
 typedef Element *(*CreateElementFn)(void);
 
@@ -43,8 +44,8 @@ public:
 
 private:
   static int _count;
-  static const char *_names[20];
-  static CreateElementFn _func[20];
+  static const char *_names[REG_MAX_TYPES];
+  static CreateElementFn _func[REG_MAX_TYPES];
 };
 
 

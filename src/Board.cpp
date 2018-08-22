@@ -1,8 +1,8 @@
 /**
  * @file board.cpp
- * 
+ *
  * @brief Implementation of the Board class for the HomeDing Library
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -42,40 +42,47 @@ void Board::addElements()
 {
   LOGGER_TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
+  MicroJson *mj;
 
-  MicroJson *mj = new MicroJson(
-      [this, &_lastElem](int level, char *path, char *name, char *value) {
-        if (level == 3) {
-          if (name == NULL) {
-            LOGGER_TRACE(" new Element %s", path);
-            // path = <elem-type>/<elem-name>
+  mj = new MicroJson(
+    [this, &_lastElem](int level, char *path, char *name, char *value) {
+      if (level == 3) {
+        if (name == NULL) {
+          LOGGER_TRACE(" new Element %s", path);
+          // path = <elem-type>/<elem-name>
 
-            // create that element using the typename
-            char tmp[32];
-            strncpy(tmp, path, sizeof(tmp));
-            tmp[31] = '\0'; // force termination
-            char *p = strchr(tmp, MICROJSON_PATH_SEPARATOR);
-            if (p)
-              *p = '\0'; // cut at first path separator. The type remains in the
-                         // buffer.
+          // create that element using the typename
+          char tmp[32];
+          strncpy(tmp, path, sizeof(tmp));
+          tmp[31] = '\0'; // force termination
+          char *p = strchr(tmp, MICROJSON_PATH_SEPARATOR);
+          if (p)
+            *p = '\0'; // cut at first path separator. The type remains in the
+                        // buffer.
 
-            _lastElem = ElementRegistry::createElement(tmp);
-            if (_lastElem == NULL) {
-              LOGGER_ERR("Cannot create Element type %s", tmp);
+          _lastElem = ElementRegistry::createElement(tmp);
+          if (_lastElem == NULL) {
+            LOGGER_ERR("Cannot create Element type %s", tmp);
 
-            } else {
-              // add to the list of elements
-              _add(path, _lastElem);
-            } // if
-
-          } else if (_lastElem != NULL) {
-            // add a parameter to the last Element
-            LOGGER_TRACE(" add %s=%s", name, value);
-            _lastElem->set(name, value);
+          } else {
+            // add to the list of elements
+            _add(path, _lastElem);
           } // if
+
+        } else if (_lastElem != NULL) {
+          // add a parameter to the last Element
+          LOGGER_TRACE(" add %s=%s", name, value);
+          _lastElem->set(name, value);
         } // if
-      });
-  mj->parseFile(SET_FILENAME);
+      } // if
+    });
+
+  // config the thing to the local network
+  mj->parseFile(CONFNET_FILENAME);
+
+  // config the Elements of the thing
+  mj->parseFile(CONF_FILENAME);
+
 } // addElements()
 
 
@@ -110,7 +117,7 @@ void Board::loop()
         _actionList.remove(0, pos + 1);
       } else {
         _lastAction = _actionList;
-        _actionList = (const char *)0;
+        _actionList = (const char *)NULL;
       } // if
       _dispatchSingle(_lastAction);
     } // if
@@ -308,15 +315,12 @@ Element *Board::getElement(const char *elementTypeName)
 
   Element *l = _list2;
   while (l != NULL) {
-    // String lName = l->id;
-    // if (lName.substring(0, tnLength).equalsIgnoreCase(tn)) {
-
     if (String(l->id).substring(0, tnLength).equalsIgnoreCase(tn)) {
-
       break; // while
     } // if
     l = l->next;
   } // while
+  LOGGER_TRACE("found: %d", l);
   return (l);
 } // getElement
 

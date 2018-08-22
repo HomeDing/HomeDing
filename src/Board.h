@@ -46,7 +46,15 @@
 #define ELEM_PARAMETER '?'
 #define ELEM_VALUE '='
 
-#define SET_FILENAME "/config.json"
+/**
+ * @brief The confnet.json file contains all the settings for registering the device on the network. 
+  */
+#define CONFNET_FILENAME "/confnet.json"
+
+/**
+ * @brief The config.json file contains all the settings for the device elements. 
+ */
+#define CONF_FILENAME "/config.json"
 
 #define MAX_ID_LENGTH 32
 

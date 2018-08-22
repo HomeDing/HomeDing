@@ -33,7 +33,6 @@
 #define MJ_STATE_DONE (0x32 + MJ_IGNOREBLANCS)
 #define MJ_STATE_ERROR (0x50 + MJ_IGNOREBLANCS)
 
-
 #define NUL '\0'
 
 #if 0
@@ -60,6 +59,8 @@ MicroJson::MicroJson(MicroJsonCallbackFn callback)
 
 void MicroJson::parse(const char *s)
 {
+  _state = MJ_STATE_INIT;
+  _level = 0;
   while ((s != NULL) && (*s != '\0')) {
     parse(*s++);
   }
@@ -68,10 +69,15 @@ void MicroJson::parse(const char *s)
 
 void MicroJson::parseFile(const char *fName)
 {
+  char buffer[64];
+  char *p;
+  size_t len;
+
   if (SPIFFS.exists(fName)) {
-    char buffer[64];
-    char *p;
-    size_t len;
+    LOGGER_TRACE("parsing file %s", fName);
+
+    _state = MJ_STATE_INIT;
+    _level = 0;
 
     File file = SPIFFS.open(fName, "r");
     while (file.available()) {
@@ -223,7 +229,7 @@ void MicroJson::parse(char ch)
       strncat(_value, ch, sizeof(_value));
       _state = MJ_STATE_Q_VALUE;
     } // if
-    
+
   } else if (_state == MJ_STATE_Q_VALUE_ESCU) {
     strncat(_esc, ch, sizeof(_esc));
     if (strlen(_esc) == 4) {
@@ -232,7 +238,7 @@ void MicroJson::parse(char ch)
       strncat(_value, ch, sizeof(_value));
       _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE);
     } // if
-    
+
   } else if (_state == MJ_STATE_PRE_DONE) {
     if (ch == ',') {
       _name[0] = _value[0] = NUL;

@@ -19,8 +19,8 @@
 
 // allocate static variables
 int ElementRegistry::_count;
-const char *ElementRegistry::_names[20];
-CreateElementFn ElementRegistry::_func[20];
+const char *ElementRegistry::_names[REG_MAX_TYPES];
+CreateElementFn ElementRegistry::_func[REG_MAX_TYPES];
 
 
 /**
@@ -31,7 +31,7 @@ bool ElementRegistry::registerElement(const char *elementTypeName,
 {
   // This functio is called during static variable initialization. Serial
   // doesn't work so early: LOGGER_TRACE("register(%s)", elementTypeName);
-  if (_count < 19) {
+  if (_count < REG_MAX_TYPES-1) {
     _names[_count] = elementTypeName;
     _func[_count] = CreateElementFn;
     _count++;

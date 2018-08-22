@@ -125,18 +125,26 @@
 </head>
 
 <body style="height:100%;">
-  <div class="container-fluid" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
+  <div class="container" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
     <div id="progressPanel" class="fadeout">
       <div id="progressBar"></div>
       <div id="progressText">saving...</div>
     </div>
 
-    <div class="row" style="flex:0 0 auto;align-items: top">
-      <div class="col-1">
-        <h1 style="margin:0">IoT-IDE</h1>
+    <div class="row wrap header">
+      <div class="col-2">
+        <img class="icon menuicon" src="i/ide.svg" style="float:left" />
+        <h1>Ding IDE</h1>
       </div>
-      <div class="col stretch" style="align-self: flex-end"><a href="index.htm">[Home]</a> <a href="ding-ide.htm">[IDE]</a>
-        <a href="ding-info.htm">[Info]</a> <a href="/$sysinfo">[$sysinfo]</a></div>
+
+      <div class="col stretch">
+        <a href="/index.htm" title="Home"><img class="icon menuicon" src="i/home.svg" style="float:left" /></a>
+        <a href="/ding-ide.htm" title="IDE"><img class="icon menuicon" src="i/ide.svg" style="float:left" /></a>
+        <a><img class="icon menuicon" src="i/timer.svg" style="float:left" /></a>
+        <a href="ding.htm">[UI]</a>
+        <a href="ding-info.htm">[Info]</a>
+        <a href="/$sysinfo">[$sysinfo]</a>
+      </div>
     </div>
 
     <div class="row" style="flex:0 0 auto">
@@ -148,7 +156,7 @@
         <h2 style="display: inline-block;margin:0">File: <span id="activeFile"></span></h2>
         <button style="float: right;" onclick="handleSave()">save</button>
       </div>
-      <div class="col"><span id="checker" class="valid">inactive</span></div>
+      <div class="col-1"><span id="checker" class="valid">inactive</span></div>
       <div class="col-1" id="dropzone">Drop files here.</div>
     </div>
 

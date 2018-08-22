@@ -7,19 +7,35 @@
   <link rel="icon" href="/water.ico" type="image/x-icon" />
   <link rel="apple-touch-icon-precomposed" href="/img/water-256.png">
   <link rel="manifest" href="/watermanifest.json">
-  <title>HomeDing Device</title>
+  <title>IoT Board System</title>
   <link Content-Type="text/css" href="iotstyle.css" rel="stylesheet" />
+
+  <style>
+    .header>* {
+      background-color: beige
+    }
+  </style>
 </head>
 
 <body>
   <div class="container">
-    <h1>Ding System</h1>
+    <div class="row wrap header">
+      <div class="col-2">
+        <img class="icon menuicon" src="i/timer.svg" style="float:left" />
+        <h1>Ding System</h1>
+      </div>
+
+      <div class="col stretch">
+        <a href="/index.htm" title="Home"><img class="icon menuicon" src="i/home.svg" style="float:left" /></a>
+        <a href="/ding-ide.htm" title="IDE"><img class="icon menuicon" src="i/ide.svg" style="float:left" /></a>
+        <a><img class="icon menuicon" src="i/timer.svg" style="float:left" /></a>
+      </div>
+
+    </div>
 
     <p><a href="ding.htm">Device UI</a></p>
     <!-- <p><a href="config.htm">Water System Config UI</a></p> -->
-
-    <h3>Micro IDE</h3>
-    <p><a href="ding-ide.htm">[Start IDE]</a> &nbsp; <a href="ding-info.htm">[Show info off elements]</a></p>
+    <p><a href="ding-info.htm">[Show info off elements]</a></p>
 
     <hr />
 

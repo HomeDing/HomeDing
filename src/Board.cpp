@@ -78,7 +78,7 @@ void Board::addElements()
     });
 
   // config the thing to the local network
-  mj->parseFile(CONFNET_FILENAME);
+  mj->parseFile(ENV_FILENAME);
 
   // config the Elements of the thing
   mj->parseFile(CONF_FILENAME);

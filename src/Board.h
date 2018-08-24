@@ -47,9 +47,10 @@
 #define ELEM_VALUE '='
 
 /**
- * @brief The confnet.json file contains all the settings for registering the device on the network. 
+ * @brief The env.json file contains all the settings for registering the device in a local environment.
+ * This includes devicename and network settings.
   */
-#define CONFNET_FILENAME "/confnet.json"
+#define ENV_FILENAME "/env.json"
 
 /**
  * @brief The config.json file contains all the settings for the device elements. 

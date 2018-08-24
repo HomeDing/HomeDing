@@ -12,6 +12,7 @@
  *
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
+ * * 24.08.2018 make level parameter availabe during setup.
  */
 
 #ifndef DIGITALOUT_H
@@ -66,7 +67,7 @@ private:
   bool _invers = false;
 
   // The last logical level LOW or HIGH
-  int _lastLevel; //
+  int _lastLevel = LOW; //
 
   void _setLevel(bool logicalHigh); // set the physical level based on _inverse
 };

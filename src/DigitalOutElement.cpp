@@ -39,7 +39,7 @@ bool DigitalOutElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "invers") == 0) {
     _invers = _atob(value);
 
-  } else   if (_stricmp(name, "level") == 0) {
+  } else if (_stricmp(name, "level") == 0) {
     _setLevel(_atob(value));
 
   } else if (_stricmp(name, "on") == 0) {
@@ -64,10 +64,10 @@ void DigitalOutElement::start()
     LOGGER_ERR("no meaningful pin");
 
   } else {
+    Element::start();
     // enable output and stay off
     pinMode(_pin, OUTPUT);
-    _setLevel(false);
-    Element::start();
+    _setLevel(_lastLevel);
   } // if
 } // start()
 
@@ -86,9 +86,10 @@ void DigitalOutElement::pushState(
  */
 void DigitalOutElement::_setLevel(bool logicalHigh)
 {
-  _lastLevel = (logicalHigh  ? HIGH : LOW);
-  int physLevel = (_invers ? (! _lastLevel) : _lastLevel);
-  digitalWrite(_pin, physLevel);
+  _lastLevel = (logicalHigh ? HIGH : LOW);
+  int physLevel = (_invers ? (!_lastLevel) : _lastLevel);
+  if (active)
+    digitalWrite(_pin, physLevel);
 } // _setLevel
 
 // End

@@ -84,7 +84,7 @@ const char *password = "";
 ESP8266WebServer server(80);
 
 // DisplayAdapterSSD1306 *display = NULL; // created later, when available
-DisplayAdapterLCD *display = NULL; // created later, when available
+DisplayAdapter *display = NULL; // created later, when available
 
 // ===== application state variables =====
 
@@ -132,21 +132,27 @@ void setup(void)
 
   // Logger::logger_level = LOGGER_LEVEL_TRACE;
 
-  LOGGER_INFO("Board Server is starting...");
-  LOGGER_INFO("Build " __DATE__);
-  LOGGER_INFO("Boot mode %d", ESP.getBootMode());
+  LOGGER_INFO("HomDing Device is starting... (%s), %d", __DATE__,
+              ESP.getBootMode());
 
   // ----- setup File System -----
   SPIFFS.begin();
 
+  // ----- load configuration -----
+  // load all config files and create Elements
+  mainBoard.init(&server);
+  mainBoard.addElements();
+
   // ----- setup Display -----
 
+  // TODO: will be done by the configured Display Element.
+
   // for Esp-Wroom-02 Modul ESP8266 with OLED and 18650
-#if 0
-  display = new DisplayAdapterSSD1306(0x3c, 5, 4, 64);
+#if 1
+  display = (DisplayAdapter *)(new DisplayAdapterSSD1306(0x3c, 5, 4, 64));
 #endif
 
-#if 1
+#if 0
   display = new DisplayAdapterLCD(0x27, SDA, SCL);
 #endif
 
@@ -161,6 +167,8 @@ void setup(void)
   // for Wifi-Kit 8
   display = new DisplayAdapterSSD1306(0x3c, 4, 5, 32);
 #endif
+
+  mainBoard.setDisplay(display);
 
   // ----- setup RF 433 MHz Library -----
   if (display) {
@@ -178,9 +186,6 @@ void setup(void)
 
   // ----- setup Board and Elements-----
 
-  mainBoard.init((DisplayAdapter *)display, &server);
-  mainBoard.addElements();
-
   Element *deviceElement = mainBoard.getElement("device");
 
   if (deviceElement) {
@@ -194,13 +199,14 @@ void setup(void)
   wifi_station_set_hostname(devicename);
   wifi_station_set_auto_connect(true);
 
+  // ===== start Elements =====
   mainBoard.start();
-  DEBUG_LOG("Board started.\n\n");
+  DEBUG_LOG("Elements started.\n\n");
 
   // ----- setup Server -----
 
   WiFi.mode(WIFI_STA);
-  if ((*ssid) && (*password ))
+  if ((*ssid) && (*password))
     WiFi.begin(ssid, password);
 
   // Wait for connection
@@ -245,7 +251,8 @@ void setup(void)
     FSInfo fs_info;
 
     String json = "{";
-    json += " 'heap':" + String(ESP.getFreeHeap()) + ",\n";
+    json += " 'build': '" __DATE__ "'\n";
+    json += " 'free heap':" + String(ESP.getFreeHeap()) + ",\n";
 
     json += " 'flash-size':" + String(ESP.getFlashChipSize()) + ",\n";
     json += " 'flash-real-size':" + String(ESP.getFlashChipRealSize()) + ",\n";
@@ -253,6 +260,7 @@ void setup(void)
     SPIFFS.info(fs_info);
     json += " 'fs-totalBytes':" + String(fs_info.totalBytes) + ",\n";
     json += " 'fs-usedBytes':" + String(fs_info.usedBytes) + "\n";
+
 
     json += "}";
     json.replace('\'', '"');

@@ -1,8 +1,8 @@
 /**
  * @file Board.h
- * 
+ *
  * @brief Inferface of the Board class for the HomeDing Library.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -17,6 +17,8 @@
  * * 27.04.2018 parameter pushing & loading added.
  * * 31.05.2018 self registering factory implementation.
  * * 25.06.2018 ArduinoJson replace by MicroJsonParser.
+ * * 24.08.2018 Environment setting separated from Element configuration.
+ * * 26.08.2018 Later display initialization, enabling display configuration.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -47,13 +49,14 @@
 #define ELEM_VALUE '='
 
 /**
- * @brief The env.json file contains all the settings for registering the device in a local environment.
- * This includes devicename and network settings.
-  */
+ * @brief The env.json file contains all the settings for registering the device
+ * in a local environment. This includes devicename and network settings.
+ */
 #define ENV_FILENAME "/env.json"
 
 /**
- * @brief The config.json file contains all the settings for the device elements. 
+ * @brief The config.json file contains all the settings for the device
+ * elements.
  */
 #define CONF_FILENAME "/config.json"
 
@@ -80,16 +83,17 @@ class Board
 {
 public:
   /**
-   * @brief initialize a blank board.
-   * @param d DisplayAdapter for an existing display
-   * @param s WebServer
+   * @brief Initialize a blank board.
+   * @param s The WebServer is always required.
    */
-  void init(DisplayAdapter *d = NULL, ESP8266WebServer *s = NULL);
+  void init(ESP8266WebServer *s);
 
-  // ElementRegistry
-  // allow registration of Element Types to avoid hard references.
-  // static bool registerElement(const char *elementTypeName,
-  //                      std::unique_ptr<Element *()> factoryFunc);
+  /**
+   * @brief Add a display to the board.
+   * @param d DisplayAdapter for an existing display
+   */
+  void setDisplay(DisplayAdapter *d = NULL);
+
 
   /**
    * @brief Add and config the Elements defined in the config file

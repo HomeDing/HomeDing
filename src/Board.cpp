@@ -27,15 +27,25 @@
 
 #include "sntp.h"
 
+
 /**
- * @brief initialize the board.
+ * @brief Initialize a blank board.
  */
-void Board::init(DisplayAdapter *d, ESP8266WebServer *s)
+void Board::init(ESP8266WebServer *s)
 {
   LOGGER_TRACE("init()");
-  display = d;
   server = s;
 } // init()
+
+
+/**
+ * @brief Add a display to the board.
+ */
+void Board::setDisplay(DisplayAdapter *d)
+{
+  LOGGER_TRACE("setDisplay()");
+  display = d;
+} // setDisplay()
 
 
 void Board::addElements()
@@ -45,37 +55,37 @@ void Board::addElements()
   MicroJson *mj;
 
   mj = new MicroJson(
-    [this, &_lastElem](int level, char *path, char *name, char *value) {
-      if (level == 3) {
-        if (name == NULL) {
-          LOGGER_TRACE(" new Element %s", path);
-          // path = <elem-type>/<elem-name>
+      [this, &_lastElem](int level, char *path, char *name, char *value) {
+        if (level == 3) {
+          if (name == NULL) {
+            LOGGER_TRACE(" new Element %s", path);
+            // path = <elem-type>/<elem-name>
 
-          // create that element using the typename
-          char tmp[32];
-          strncpy(tmp, path, sizeof(tmp));
-          tmp[31] = '\0'; // force termination
-          char *p = strchr(tmp, MICROJSON_PATH_SEPARATOR);
-          if (p)
-            *p = '\0'; // cut at first path separator. The type remains in the
-                        // buffer.
+            // create that element using the typename
+            char tmp[32];
+            strncpy(tmp, path, sizeof(tmp));
+            tmp[31] = '\0'; // force termination
+            char *p = strchr(tmp, MICROJSON_PATH_SEPARATOR);
+            if (p)
+              *p = '\0'; // cut at first path separator. The type remains in the
+                         // buffer.
 
-          _lastElem = ElementRegistry::createElement(tmp);
-          if (_lastElem == NULL) {
-            LOGGER_ERR("Cannot create Element type %s", tmp);
+            _lastElem = ElementRegistry::createElement(tmp);
+            if (_lastElem == NULL) {
+              LOGGER_ERR("Cannot create Element type %s", tmp);
 
-          } else {
-            // add to the list of elements
-            _add(path, _lastElem);
+            } else {
+              // add to the list of elements
+              _add(path, _lastElem);
+            } // if
+
+          } else if (_lastElem != NULL) {
+            // add a parameter to the last Element
+            LOGGER_TRACE(" add %s=%s", name, value);
+            _lastElem->set(name, value);
           } // if
-
-        } else if (_lastElem != NULL) {
-          // add a parameter to the last Element
-          LOGGER_TRACE(" add %s=%s", name, value);
-          _lastElem->set(name, value);
         } // if
-      } // if
-    });
+      });
 
   // config the thing to the local network
   mj->parseFile(ENV_FILENAME);

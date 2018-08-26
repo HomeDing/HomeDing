@@ -1,273 +1,93 @@
-html,
-body {
-  padding: 0;
-  margin: 0;
-}
+html, body { padding: 0; margin: 0; }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-body {
-  font-family: Arial;
-  font-size: 1em;
-  color: black;
-}
+body { font-family: Arial; font-size: 1em; color: black; }
 
-img.icon,
-svg.icon {
-  width: 4em;
-  height: 4em;
-}
+img.icon, svg.icon { width: 4em; height: 4em; }
 
-svg.icon .object {
-  fill: #304878;
-  fill-opacity: 1;
-}
+img.icon .object, svg.icon .object { fill: #304878; fill-opacity: 1; }
 
-svg.icon .connect {
-  fill: green;
-  fill-opacity: 1;
-}
+img.icon .connect, svg.icon .connect { fill: green; fill-opacity: 1; }
 
-svg.button {
-  width: 2em;
-  height: 2em;
-}
+svg.button { width: 2em; height: 2em; }
 
-svg.button .object {
-  fill: #304878;
-  fill-opacity: 1;
-}
+svg.button .object { fill: #304878; fill-opacity: 1; }
 
-svg.button .connect {
-  fill: green;
-  fill-opacity: 1;
-}
+svg.button .connect { fill: green; fill-opacity: 1; }
 
-p,
-h1,
-h2,
-h3 {
-  margin: 0 0 0.5em 0;
-}
+p, h1, h2, h3 { margin: 0 0 0.5em 0; }
 
-h1,
-h2 {
-  font-family: Arial;
-  color: black;
-}
+h1, h2 { font-family: Arial; color: black; }
 
-h1 {
-  font-size: 3.4em;
-}
+h1 { font-size: 3.4em; }
 
-h2 {
-  font-size: 1.6em;
-}
+h2 { font-size: 1.6em; }
 
-h3 {
-  font-size: 1em;
-  font-weight: bold;
-}
-
+h3 { font-size: 1em; font-weight: bold; }
 
 /* Grid Design with grid of 6 */
+.container { margin-right: 2rem; margin-left: 2rem; }
 
-.container {
-  margin-right: 2rem;
-  margin-left: 2rem;
-}
-
-.container-fluid {
-  margin-right: 0;
-  margin-left: 0;
-}
-
+.container-fluid { margin-right: 0; margin-left: 0; }
 
 /* row with 0.5rem gutter */
+.row { display: flex; flex-direction: row; flex-wrap: nowrap; margin: -0.5rem 0.1rem 0.5rem -0.5rem; clear: both; padding: 0px; }
 
-.row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  margin: -0.5rem 0.1rem 0.5rem -0.5rem;
-  clear: both;
-  padding: 0px;
-}
+.row.wrap { flex-wrap: wrap; }
 
-.row.wrap {
-  flex-wrap: wrap;
-}
+.row.nogutter { margin: 0; }
 
-.row.nogutter {
-  margin: 0;
-}
+.col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6 { flex: 0 0 0; margin: 0.5rem 0 0 0.5rem; }
 
-.col,
-.col-1,
-.col-2,
-.col-3,
-.col-4,
-.col-5,
-.col-6 {
-  flex: 0 0 0;
-  margin: 0.5rem 0 0 0.5rem;
-}
+.row.nogutter > .col { margin: 0; }
 
-.row.nogutter>.col {
-  margin: 0;
-}
+.col.stretch { flex-grow: 1; }
 
-.col.stretch {
-  flex-grow: 1;
-}
+.col-1 { flex-basis: 16.66666667%; }
 
-.col-1 {
-  flex-basis: 16.66666667%;
-}
+.col-2 { flex-basis: 33.33333333%; }
 
-.col-2 {
-  flex-basis: 33.33333333%;
-}
+.col-3 { flex-basis: 50%; }
 
-.col-3 {
-  flex-basis: 50%;
-}
+.col-4 { flex-basis: 66.66666667%; }
 
-.col-4 {
-  flex-basis: 66.66666667%;
-}
+.col-5 { flex-basis: 83.33333334%; }
 
-.col-5 {
-  flex-basis: 83.33333334%;
-}
-
-.col-6 {
-  flex-basis: 100%;
-}
-
+.col-6 { flex-basis: 100%; }
 
 /* === Header */
+.row.header { margin-top: 0.2rem; }
 
-.row.header {
-  margin-top: 0.2rem;
-}
+.row.header h1 { margin: 0.2em 0 0 0; }
 
-.row.header h1 {
-  margin: 0.2em 0 0 0;
-}
+.menuicon { background-color: #cccccc; border-radius: 0.5em; margin-top: 0.5em; }
 
-.menuicon {
-  background-color: #cccccc;
-  border-radius: 0.5em;
-  margin-top: 0.5em;
-}
-
-a+a>img {
-  margin-left: 0.5em;
-}
-
+a + a > img { margin-left: 0.5em; }
 
 /* === Cards */
+.card { position: relative; display: flex; flex-direction: column; background-color: #d4dced; border: 1px solid rgba(0, 0, 0, 0.125); border-radius: .25rem; width: 400px; }
 
-.card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background-color: #d4dced;
-  border: 1px solid rgba(0, 0, 0, .125);
-  border-radius: .25rem;
-  width: 400px
-}
+.card > .block { flex: 1 1 auto; padding: 1em; }
 
-.card>.block {
-  flex: 1 1 auto;
-  padding: 1em;
-}
+.card > h3 { margin: 0; }
 
-.card>h3 {
-  margin: 0;
-}
+.card > hr { background-color: rgba(0, 0, 0, 0.125); border: 0; height: 1px; padding: 0; margin: 0; }
 
-.card>hr {
-  background-color: rgba(0, 0, 0, .125);
-  border: 0;
-  height: 1px;
-  padding: 0;
-  margin: 0;
-}
+a + a, a + button, a + label, label + a, label + button, label + label, button + a, button + button, button + label { margin-left: 1.25rem; }
 
-a+a,
-a+button,
-a+label,
-label+a,
-label+button,
-label+label,
-button+a,
-button+button,
-button+label {
-  margin-left: 1.25rem;
-}
+@media (max-width: 720px) { .container { margin-right: 0.6rem; margin-left: 0.6rem; } }
 
-@media (max-width: 720px) {
-  .container {
-    margin-right: 0.6rem;
-    margin-left: 0.6rem;
-  }
-}
+button { font-size: 1em; border: 0.1em solid gray; border-radius: 0.4em; padding-left: 0.4em; padding-right: 0.4em; min-width: 4em; }
 
-button {
-  font-size: 1em;
-  border: 0.1em solid gray;
-  border-radius: 0.4em;
-  padding-left: 0.4em;
-  padding-right: 0.4em;
-  min-width: 4em;
-}
+button.activ { background-color: #acc1e4 !important; border-color: #203050 !important; }
 
-button.activ {
-  background-color: #acc1e4 !important;
-  border-color: #203050 !important;
-}
+.u-switch { display: inline-block; width: 100%; }
 
-.u-switch {
-  display: block;
-  width: 100%;
-}
+.u-switch > label { display: inline-block; padding: .4rem 1rem; margin-bottom: 0.5rem; vertical-align: top; font-size: 1.4rem; cursor: pointer; }
 
-.u-switch label {
-  display: inline-block;
-  padding: .4rem 1rem;
-  margin-bottom: 0.5rem;
-  vertical-align: top;
-  font-size: 1.4rem;
-  cursor: pointer;
-}
+.u-switch > .box { position: relative; cursor: pointer; display: inline-block; width: 3rem; height: 1.6rem; border: 0.1rem solid #C0C0C0; border-radius: 1.3rem; background-color: #eeeeee; }
 
-.u-switch>.box {
-  position: relative;
-  cursor: pointer;
-  display: inline-block;
-  width: 5.4rem;
-  height: 2.6rem;
-  border: 0.1rem solid #C0C0C0;
-  border-radius: 2.6rem;
-  background-color: #eeeeee;
-}
+.u-switch > .box > .handle { position: absolute; display: inline-block; top: 0.1rem; left: 0.1rem; height: 1.2rem; width: 1.2rem; border-radius: 1.2rem; background-color: #203050; transition: left 0.2s cubic-bezier(0.25, 0.1, 0.25, 1); }
 
-.u-switch>.box>.handle {
-  position: absolute;
-  display: inline-block;
-  top: 0px;
-  left: 0px;
-  height: 2.4rem;
-  width: 2.4rem;
-  border-radius: 1.2rem;
-  background-color: #203050;
-  transition: left 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-
-.u-switch.active>.box>.handle {
-  left: 2.8rem;
-}
+.u-switch.active > .box > .handle { left: 1.5rem; }

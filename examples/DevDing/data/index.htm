@@ -3,10 +3,8 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <link rel="shortcut icon" href="/water.ico" type="image/x-icon" />
-  <link rel="icon" href="/water.ico" type="image/x-icon" />
-  <link rel="apple-touch-icon-precomposed" href="/img/water-256.png">
-  <link rel="manifest" href="/watermanifest.json">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <title>IoT Board System</title>
   <link Content-Type="text/css" href="iotstyle.css" rel="stylesheet" />
 
@@ -21,45 +19,86 @@
   <div class="container">
     <div class="row wrap header">
       <div class="col-2">
-        <img class="icon menuicon" src="i/timer.svg" style="float:left" />
+        <img class="icon menuicon" src="i/device.svg" style="float:left" />
         <h1>Ding System</h1>
       </div>
 
       <div class="col stretch">
         <a href="/index.htm" title="Home"><img class="icon menuicon" src="i/home.svg" style="float:left" /></a>
         <a href="/ding-ide.htm" title="IDE"><img class="icon menuicon" src="i/ide.svg" style="float:left" /></a>
-        <a><img class="icon menuicon" src="i/timer.svg" style="float:left" /></a>
+        <!-- <a><img class="icon menuicon" src="i/timer.svg" style="float:left" /></a> -->
       </div>
 
     </div>
 
-    <p><a href="ding.htm">Device UI</a></p>
-    <!-- <p><a href="config.htm">Water System Config UI</a></p> -->
-    <p><a href="ding-info.htm">[Show info off elements]</a></p>
+    <div class="row">
+      <div class="col">
+        <p><a href="ding.htm">Device UI</a></p>
+        <!-- <p><a href="config.htm">Water System Config UI</a></p> -->
+        <p><a href="ding-info.htm">[Show info off elements]</a></p>
 
-    <hr />
+        <hr />
 
-    <h3>Insights</h3>
-    <p><a href="/config.json">Config file</a></p>
-    <p><a href="/$board">State complete</a></p>
-    <p><a href="/$board/timer/water">State of /timer/water</a></p>
+        <h3>Insights</h3>
+        <p><a href="/config.json">Config file</a></p>
+        <p><a href="/$board">State complete</a></p>
 
-    <h3>SSDP...</h3>
-    <p><a href="/description.xml">/description.xml</a></p>
+        <h3>SSDP...</h3>
+        <p><a href="/description.xml">/description.xml</a></p>
 
-    <p><a href="/$sysinfo">sysinfo</a></p>
-    <p><a href="/$list">current files</a></p>
-    <p><a href="/$reboot">reboot</a></p>
-    <!-- <p><a href="monitor.htm">Monitor</a></p> -->
+        <p><a href="/$sysinfo">sysinfo</a></p>
+        <p><a href="/$list">current files</a></p>
+        <p><a href="/$reboot">reboot</a></p>
+        <!-- <p><a href="monitor.htm">Monitor</a></p> -->
 
-    <hr />
-    <p><a href="/$board/display/temp?show=00.00">display/info?show=Hello</a></p>
-    <p><a href="/$board/remote/display-t?show=88.88">remote/display?show=8888</a></p>
+        <hr />
+        <p><a href="/$board/display/temp?show=00.00">display/info?show=Hello</a></p>
+        <p><a href="/$board/remote/display-t?show=88.88">remote/display?show=8888</a></p>
 
-    <!-- <p><a href="/$check">$check()</a></p> -->
+        <!-- <p><a href="/$check">$check()</a></p> -->
 
+        <!-- <p><a href="/visualize.htm">/visualize.htm</a></p> -->
+      </div>
+    </div>
+    <div class="row">
+      <div id="us" class="u-switch">
+        <label value="0">left</label>
+        <div class="box">
+          <div class="handle"></div>
+        </div>
+        <label value="1">right</label>
+      </div>
 
-    <!-- <p><a href="/visualize.htm">/visualize.htm</a></p> -->
+      <script>
+        function toggle(evt) {
+          var hObj = evt.srcElement;
+          window.status = evt.target.nodeName;
+          var tObjV = evt.target.attributes['value'];
+
+          if ((tObjV) && (tObjV.value == 1)) {
+            this.value = 1;
+          } else if ((tObjV) && (tObjV.value == 0)) {
+            this.value = 0;
+          } else if (this.value == 1) {
+            this.value = 0;
+          } else if (this.value == 0) {
+            this.value = 1;
+          } // if
+
+          if (this.value == 1) {
+            this.classList.add("active");
+          } else {
+            this.classList.remove("active");
+          } // if
+        }
+
+        var usObj = document.getElementById('us');
+        usObj.addEventListener("click", toggle);
+        usObj.value = 0;
+      </script>
+
+    </div>
+
 
   </div>
 </body>

@@ -45,6 +45,13 @@ Element *MyElement::create()
 
 // maybe: overwrite the init() function.
 
+// void MyElement::init(Board *board)
+// {
+//   LOGGER_TRACE("init()");
+//   Element::init(board);
+//   // do something here like initialization
+// } // init()
+
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -57,7 +64,7 @@ bool MyElement::set(const char *name, const char *value)
   if (_stricmp(name, "value") == 0) {
     _value = atoi(value);
 
-  } else if (_stricmp(name, "actionX") == 0) {
+    // } else if (_stricmp(name, "doAction") == 0) {
     // make something
 
   } else {
@@ -104,7 +111,7 @@ void MyElement::pushState(
 } // pushState()
 
 
-// maybe: overwrite the term() function, 
+// maybe: overwrite the term() function,
 
 
 /* ===== Register the Element ===== */
@@ -112,10 +119,9 @@ void MyElement::pushState(
 // As long as the Element is project specific or is a element always used
 // the registration is placed here without using a register #define.
 
-// When transferred to the HomeDing library a #define like the HOMEDING_INCLUDE_My should be used
-// to allow the sketch to select the available Elements.
-// See <HomeDing.h>
-// the move these lines to MyElement.h
+// When transferred to the HomeDing library a #define like the
+// HOMEDING_INCLUDE_My should be used to allow the sketch to select the
+// available Elements. See <HomeDing.h> the move these lines to MyElement.h:
 
 // #ifdef HOMEDING_REGISTER
 // Register the MyElement onto the ElementRegistry.

@@ -1,7 +1,7 @@
 /**
  * @file Board.h
  *
- * @brief Inferface of the Board class for the HomeDing Library.
+ * @brief Interface of the Board class for the HomeDing Library.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

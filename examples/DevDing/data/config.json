@@ -1,26 +1,4 @@
 {
-  "device": {
-    "0": {
-      "name": "devdevice",
-      "reboottime": "30m",
-      "description": "IoT Dev-Device"
-    }
-  },
-
-  "ota": {
-    "0": {
-      "port": 8266,
-      "passwd": "123",
-      "description": "Listen for 'over the air' OTA Updates"
-    }
-  },
-
-  "ssdp": {
-    "0": {
-      "ModelUrl": "https://www.mathertel.de/Arduino"
-    }
-  },
-
   "serialcmd": {
     "0": {
       "description": "Listen for commands on the Serial in line"
@@ -43,15 +21,15 @@
 
   "displaytext": {
     "temp": {
-      "x": 40,
-      "y": 10,
+      "x": 0,
+      "y": 0,
       "prefix": "Temp:",
-      "postfix": "°C",
+      "postfix": "\u00dfC",
       "description": "Display temperature on local display"
     },
     "hum": {
-      "x": 40,
-      "y": 20,
+      "x": 0,
+      "y": 1,
       "prefix": "Hum.:",
       "postfix": "%",
       "description": "Display humidity on local display"
@@ -60,15 +38,15 @@
 
   "displaydot": {
     "b": {
-      "x": 10,
-      "y": 35,
+      "x": 15,
+      "y": 0,
       "description": "Display a bink"
     }
   },
 
   "dht": {
     "on": {
-      "pin": 0,
+      "pin": "D4",
       "type": "DHT22",
       "readtime": "30s",
       "resendtime": "2m",
@@ -90,8 +68,8 @@
     "blink": {
       "type": "LOOP",
       "waittime": "0",
-      "pulsetime": "1",
-      "cycletime": "3",
+      "pulsetime": "1m",
+      "cycletime": "3m",
       "onon": "displaydot/b?show=1",
       "onoff": "displaydot/b?show=0",
       "description": "Water Timer for testing"
@@ -102,19 +80,44 @@
     "up": {
       "pin": 12,
       "inverse": "true",
-      "onoff": "pwmout/led?value=255"
+      "onoff": "value/led?up=16"
+    },
+    "x": {
+      "pin": "D3",
+      "inverse": "true",
+      "onoff": "value/led?value=0"
     },
     "down": {
       "pin": 13,
       "inverse": "true",
-      "onoff": "pwmout/led?value=15"
+      "onoff": "value/led?down=16"
+    }
+  },
+
+
+  "value": {
+    "led": {
+      "value": 20,
+      "min": 0,
+      "max": 255,
+      "onchange": "pwmout/led?value=$v",
+      "description": "Build-in LED"
+    }
+  },
+
+  "digitalout": {
+    "led": {
+      "pin": "D4",
+      "invers": "false",
+      "level": "false",
+      "description": "Builtin LED is on Port GPIO16"
     }
   },
 
   "pwmout": {
     "led": {
       "pin": 16,
-      "range": 256,
+      "range": 255,
       "value": 10,
       "invers": "true",
       "description": "Build-in LED"

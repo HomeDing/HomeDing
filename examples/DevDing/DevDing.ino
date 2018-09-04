@@ -73,11 +73,10 @@ extern "C" {
 
 // ===== WLAN credentials =====
 
+#include "secrets.h"
+
 // const char *ssid = "NetworkName";
 // const char *password = "NetworkPass";
-
-const char *ssid = "";
-const char *password = "";
 
 // need a WebServer
 

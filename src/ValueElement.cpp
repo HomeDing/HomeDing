@@ -52,9 +52,6 @@ bool ValueElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onchange") == 0) {
     _changeAction = value;
 
-  } else if (_stricmp(name, "onchange") == 0) {
-    _changeAction = value;
-
   } else if (_stricmp(name, "up") == 0) {
     _setValue(_value += atoi(value));
 

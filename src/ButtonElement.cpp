@@ -43,7 +43,9 @@ bool ButtonElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "type") == 0) {
-    if (_stricmp(value, "TOGGLE") == 0) {
+    if (_stricmp(value, "level") == 0) {
+      _type = BUTTON_TYPE_LEVEL;
+    } else if (_stricmp(value, "toggle") == 0) {
       _type = BUTTON_TYPE_TOGGLE;
     } else {
       LOGGER_ERR("unknown type");
@@ -123,7 +125,7 @@ void ButtonElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("level", String(_lastOutLevel).c_str());
+  callback("value", String(_lastOutLevel).c_str());
 } // pushState()
 
 // End

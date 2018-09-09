@@ -66,8 +66,8 @@ private:
   // when _inverse == true: logical HIGH will produce a physical LOW level.
   bool _invers = false;
 
-  // The last logical level LOW or HIGH
-  int _lastLevel = LOW; //
+  // The last logical value LOW or HIGH
+  int _lastValue = LOW; //
 
   void _setLevel(bool logicalHigh); // set the physical level based on _inverse
 };

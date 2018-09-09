@@ -39,7 +39,7 @@ bool DigitalOutElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "invers") == 0) {
     _invers = _atob(value);
 
-  } else if (_stricmp(name, "level") == 0) {
+  } else if (_stricmp(name, "value") == 0) {
     _setLevel(_atob(value));
 
   } else if (_stricmp(name, "on") == 0) {
@@ -67,7 +67,7 @@ void DigitalOutElement::start()
     Element::start();
     // enable output and stay off
     pinMode(_pin, OUTPUT);
-    _setLevel(_lastLevel);
+    _setLevel(_lastValue);
   } // if
 } // start()
 
@@ -76,7 +76,7 @@ void DigitalOutElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("level", String(_lastLevel).c_str());
+  callback("value", String(_lastValue).c_str());
 } // pushState()
 
 
@@ -86,8 +86,8 @@ void DigitalOutElement::pushState(
  */
 void DigitalOutElement::_setLevel(bool logicalHigh)
 {
-  _lastLevel = (logicalHigh ? HIGH : LOW);
-  int physLevel = (_invers ? (!_lastLevel) : _lastLevel);
+  _lastValue = (logicalHigh ? HIGH : LOW);
+  int physLevel = (_invers ? (!_lastValue) : _lastValue);
   if (active)
     digitalWrite(_pin, physLevel);
 } // _setLevel

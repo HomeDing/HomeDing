@@ -174,7 +174,7 @@ void TimerElement::pushState(
     callback("time", "0");
   else 
     callback("time", String(now - _startTime).c_str());
-  callback("level", (_state == 1) ? "1" : "0");
+  callback("value", (_state == 1) ? "1" : "0");
 } // pushState()
 
 

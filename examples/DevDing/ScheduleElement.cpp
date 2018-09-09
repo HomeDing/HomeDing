@@ -70,17 +70,16 @@ bool ScheduleElement::set(const char *name, const char *value)
   LOGGER_TRACE("set(%s, %s)", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
-    _value = atoi(value);
-
-  } else if (_stricmp(name, "ontime") == 0) {
+  if (_stricmp(name, "ontime") == 0) {
     _onTime = _atotime(value);
-    _offTime = _onTime + 60 * 60;
+
+  } else if (_stricmp(name, "offtime") == 0) {
+    _offTime = _atotime(value);
 
   } else if (_stricmp(name, "onon") == 0) {
     _onAction = value;
 
-  } else if (_stricmp(name, "onOff") == 0) {
+  } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
   } else {
@@ -169,7 +168,7 @@ void ScheduleElement::pushState(
 // #ifdef HOMEDING_REGISTER
 // Register the ScheduleElement onto the ElementRegistry.
 bool ScheduleElement::registered =
-    ElementRegistry::registerElement("sched", ScheduleElement::create);
+    ElementRegistry::registerElement("schedule", ScheduleElement::create);
 // #endif
 
 // End

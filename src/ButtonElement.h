@@ -25,6 +25,7 @@
 #include "Board.h"
 #include "Element.h"
 
+#define BUTTON_TYPE_LEVEL  0x00
 #define BUTTON_TYPE_TOGGLE 0x01
 
 // class OneButton;
@@ -76,7 +77,7 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
-  int _type;
+  int _type = BUTTON_TYPE_LEVEL;
   int _pin = -1;
   bool _invers = false;
 

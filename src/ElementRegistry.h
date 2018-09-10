@@ -38,7 +38,8 @@ public:
    * @return false when registration failed.
    */
   static bool registerElement(const char *elementTypeName,
-                              Element *(*CreateElementFn)(void));
+                              Element *(*CreateElementFn)(void),
+                              bool isSingleton = false);
 
   static Element *createElement(const char *elementTypeName);
 
@@ -46,6 +47,8 @@ private:
   static int _count;
   static const char *_names[REG_MAX_TYPES];
   static CreateElementFn _func[REG_MAX_TYPES];
+  static bool _singleton[REG_MAX_TYPES];
+
 };
 
 

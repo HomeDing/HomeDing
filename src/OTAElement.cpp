@@ -111,6 +111,6 @@ void OTAElement::pushState(
 
 // Register the OTAElement onto the ElementRegistry.
 bool OTAElement::registered =
-    ElementRegistry::registerElement("ota", OTAElement::create, true);
+    ElementRegistry::registerElement("ota", OTAElement::create);
 
 // End

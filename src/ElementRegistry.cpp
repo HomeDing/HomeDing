@@ -21,22 +21,19 @@
 int ElementRegistry::_count;
 const char *ElementRegistry::_names[REG_MAX_TYPES];
 CreateElementFn ElementRegistry::_func[REG_MAX_TYPES];
-bool ElementRegistry::_singleton[REG_MAX_TYPES];
 
 
 /**
  * @brief Register a Factoryunction to create a Element of the specific type.
  */
 bool ElementRegistry::registerElement(const char *elementTypeName,
-                                      Element *(*CreateElementFn)(void),
-                                      bool isSingleton)
+                                      Element *(*CreateElementFn)(void))
 {
   // This functio is called during static variable initialization. Serial
   // doesn't work so early: LOGGER_TRACE("register(%s)", elementTypeName);
   if (_count < REG_MAX_TYPES - 1) {
     _names[_count] = elementTypeName;
     _func[_count] = CreateElementFn;
-    _singleton[_count] = isSingleton;
     _count++;
     return (true);
   }
@@ -74,5 +71,6 @@ Element *ElementRegistry::createElement(const char *elementTypeName)
   } // if
   return (e);
 } // createElement()
+
 
 // End

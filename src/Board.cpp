@@ -52,16 +52,13 @@ void Board::addElements()
 {
   LOGGER_TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
-  bool _isSingleton;
   MicroJson *mj;
 
   mj = new MicroJson(
       [this, &_lastElem](int level, char *path, char *name, char *value) {
         LOGGER_INFO("callback %d %s", level, path);
 
-        if (level == 2) {
-
-        } else if (level == 3) {
+        if (level == 3) {
           if (name == NULL) {
             LOGGER_TRACE(" new Element %s", path);
             // path = <elem-type>/<elem-name>

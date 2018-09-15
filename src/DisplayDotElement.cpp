@@ -17,7 +17,7 @@
 #include "DisplayDotElement.h"
 
 #define LOGGER_MODULE "DisplayDot"
-#include "Logger.h"
+#include "core/Logger.h"
 
 /**
  * @brief static factory function to create a new DisplayDotElement.

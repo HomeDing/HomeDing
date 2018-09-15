@@ -14,7 +14,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "Timer"
-#include "Logger.h"
+#include "core/Logger.h"
 
 /**
  * @brief All timing variables in this class are in seconds.

@@ -18,7 +18,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "Button"
-#include "Logger.h"
+#include "core/Logger.h"
 
 // #include <OneButton.h>
 
@@ -54,7 +54,7 @@ bool ButtonElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "pin") == 0) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, "invers") == 0) {
+  } else if (_stricmp(name, "inverse") == 0) {
     _invers = _atob(value);
 
   } else if (_stricmp(name, "onon") == 0) {

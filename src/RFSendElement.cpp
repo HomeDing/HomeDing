@@ -23,7 +23,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "RFSend"
-#include "Logger.h"
+#include "core/Logger.h"
 
 /* ===== Define local constants and often used strings ===== */
 

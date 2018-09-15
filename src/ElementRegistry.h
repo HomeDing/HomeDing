@@ -34,7 +34,7 @@ public:
    * @brief Register a Factoryunction to create a Element of the specific type.
    * @param elementTypeName Name of the registered Element type.
    * @param CreateElementFn  Factory Function to create a new Element.
-   * @return true when registration was sucessful.
+   * @return true when registration was successful.
    * @return false when registration failed.
    */
   static bool registerElement(const char *elementTypeName,
@@ -48,5 +48,11 @@ private:
   static CreateElementFn _func[REG_MAX_TYPES];
 };
 
+
+#ifdef HOMEDING_REGISTER
+// Register the RotaryElement onto the ElementRegistry.
+bool RotaryElement::registered =
+    ElementRegistry::registerElement("rotary", RotaryElement::create);
+#endif
 
 #endif

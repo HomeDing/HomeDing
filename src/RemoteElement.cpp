@@ -20,7 +20,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "remote"
-#include "Logger.h"
+#include "core/Logger.h"
 
 
 /**

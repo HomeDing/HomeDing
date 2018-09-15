@@ -14,7 +14,7 @@
 #include "Element.h"
 
 #define LOGGER_MODULE "Registry"
-#include "Logger.h"
+#include "core/Logger.h"
 
 
 // allocate static variables

@@ -17,7 +17,7 @@
 #include "DisplayTextElement.h"
 
 #define LOGGER_MODULE "DisplayText"
-#include "Logger.h"
+#include "core/Logger.h"
 
 /**
  * @brief static factory function to create a new DisplayTextElement.
@@ -74,7 +74,7 @@ bool DisplayTextElement::set(const char *name, const char *value)
     String msg(_prefix);
     msg.concat(value);
     msg.concat(_postfix);
-    _display->drawText(_x, _y, _h, msg);
+    _w = _display->drawText(_x, _y, _h, msg);
 
   } else {
     ret = Element::set(name, value);

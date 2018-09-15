@@ -6,7 +6,7 @@
 #include <FS.h>
 
 #define LOGGER_MODULE "mj"
-#include "Logger.h"
+#include "core/Logger.h"
 
 // Remarks:
 // * No Arrays

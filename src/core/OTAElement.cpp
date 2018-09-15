@@ -16,7 +16,7 @@
 #include <ArduinoOTA.h>
 
 #define LOGGER_MODULE "OTA"
-#include "Logger.h"
+#include "core/Logger.h"
 
 /**
  * @brief static factory function to create a new OTAElement

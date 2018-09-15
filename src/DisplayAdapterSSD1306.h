@@ -48,6 +48,13 @@ public:
   } // DisplayAdapterSSD1306()
 
 
+  // define the default line height
+  int lineHeight = 10;
+
+  // define the default character width
+  int charWidth = 8;
+
+
   bool init()
   {
     // test if a display device is attached
@@ -111,7 +118,7 @@ public:
    * @param h height of the characters. Use 0 to use standard height;
    * @param text the text.
    */
-  void drawText(int16_t x, int16_t y, int16_t h, String &text)
+  int drawText(int16_t x, int16_t y, int16_t h, String &text)
   {
     if ((h == 0) || (h == 10)) {
       display->setFont(ArialMT_Plain_10);
@@ -124,17 +131,18 @@ public:
     display->setColor(WHITE);
     display->drawString(x, y, text);
     display->display();
+    return (display->getStringWidth(text));
   }; // drawText()
 
 
-  void drawText(int16_t x, int16_t y, int16_t h, const char *text)
+  int drawText(int16_t x, int16_t y, int16_t h, const char *text)
   {
     String s_text(text);
-    drawText(x, y, h, s_text);
+    return(drawText(x, y, h, s_text));
   }
 
 
-  void drawDot(int16_t x, int16_t y, int16_t h, bool fill)
+  int drawDot(int16_t x, int16_t y, int16_t h, bool fill)
   {
     int r = h / 2;
 
@@ -145,6 +153,7 @@ public:
       display->drawCircle(x + r, y + r, r);
     }
     display->display();
+    return (h);
   }; // drawDot()
 
 private:

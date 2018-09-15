@@ -52,8 +52,10 @@
 
 #endif
 
+#include <core/logger.h>
 
-// Register the Elements by inculing the definition wiht defined HOMEDING_REGISTER
+
+// Register the Elements by including the definition with defined HOMEDING_REGISTER
 
 #define HOMEDING_REGISTER 1
 
@@ -89,6 +91,10 @@
 
 #ifdef HOMEDING_INCLUDE_RFSend
 #include <RFSendElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_ROTARY
+#include <RotaryElement.h>
 #endif
 
 #endif

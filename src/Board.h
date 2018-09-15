@@ -88,11 +88,11 @@ public:
    */
   void init(ESP8266WebServer *s);
 
-  /**
-   * @brief Add a display to the board.
-   * @param d DisplayAdapter for an existing display
-   */
-  void setDisplay(DisplayAdapter *d = NULL);
+  // /**
+  //  * @brief Add a display to the board.
+  //  * @param d DisplayAdapter for an existing display
+  //  */
+  // void setDisplay(DisplayAdapter *d = NULL);
 
 
   /**
@@ -159,8 +159,8 @@ public:
 
   /**
    * @brief Get a Element by typename. Returns the first found element.
-   * This method can be used to access the singletopn Elements like device,
-   * displa, ota, ...
+   * This method can be used to access the singleton Elements like device,
+   * display, ota, ...
    * @param elementTypeName type name of element.
    * @return Element* first element in list with this type.
    */

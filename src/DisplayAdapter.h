@@ -35,6 +35,11 @@ public:
  */
   virtual void clear();
 
+  // define the default line height
+  int lineHeight;
+
+  // define the default character width
+  int charWidth;
 
 /**
  * @brief Clear a position or region.
@@ -45,11 +50,11 @@ public:
  */
   virtual void clear(int16_t x, int16_t y, int16_t w, int16_t h);
 
-  virtual void drawText(int16_t x, int16_t y, int16_t h, String &text);
+  virtual int drawText(int16_t x, int16_t y, int16_t h, String &text);
 
-  virtual void drawText(int16_t x, int16_t y, int16_t h, const char *text);
+  virtual int drawText(int16_t x, int16_t y, int16_t h, const char *text);
 
-  virtual void drawDot(int16_t x, int16_t y, int16_t h, bool fill);
+  virtual int drawDot(int16_t x, int16_t y, int16_t h, bool fill);
 };
 
 #endif // DisplayAdapter_H

@@ -19,7 +19,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "value"
-#include "Logger.h"
+#include "core/Logger.h"
 
 /**
  * @brief static factory function to create a new ValueElement

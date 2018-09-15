@@ -23,7 +23,7 @@
 
 #define LOGGER_MODULE "board"
 #define LOGGER_LEVEL 0
-#include "Logger.h"
+#include "core/Logger.h"
 
 #include "sntp.h"
 
@@ -38,14 +38,14 @@ void Board::init(ESP8266WebServer *s)
 } // init()
 
 
-/**
- * @brief Add a display to the board.
- */
-void Board::setDisplay(DisplayAdapter *d)
-{
-  LOGGER_TRACE("setDisplay()");
-  display = d;
-} // setDisplay()
+// /**
+//  * @brief Add a display to the board.
+//  */
+// void Board::setDisplay(DisplayAdapter *d)
+// {
+//   LOGGER_TRACE("setDisplay()");
+//   display = d;
+// } // setDisplay()
 
 
 void Board::addElements()
@@ -56,7 +56,7 @@ void Board::addElements()
 
   mj = new MicroJson(
       [this, &_lastElem](int level, char *path, char *name, char *value) {
-        LOGGER_INFO("callback %d %s", level, path);
+        // LOGGER_INFO("callback %d %s", level, path);
 
         if (level == 3) {
           if (name == NULL) {
@@ -270,7 +270,7 @@ void Board::getState(String &out, String path)
   // close root object
   ret += "}";
 
-  // pretify somehow
+  // prettify somehow
   ret.replace("},", "},\n");
 
   out = ret;

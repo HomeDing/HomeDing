@@ -14,7 +14,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "element"
-#include "Logger.h"
+#include "core/Logger.h"
 
 
 /**

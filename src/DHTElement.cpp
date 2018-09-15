@@ -20,7 +20,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "DHT"
-#include "Logger.h"
+#include "core/Logger.h"
 
 
 /**

@@ -42,13 +42,22 @@ public:
   DisplayAdapterLCD(int address, int sda, int scl)
       : _address(address), _sda(sda), _scl(scl)
   {
+
   } // DisplayAdapterLCD()
 
+
+  // define the default line height
+  int lineHeight = 1;
+
+  // define the default character width
+  int charWidth = 1;
 
   bool init()
   {
     // test if a display device is attached
     Wire.begin(_sda, _scl);
+    Serial.printf("connect %d %d\n", _sda, _scl);
+
     Wire.beginTransmission(_address);
     int error = Wire.endTransmission();
 
@@ -64,8 +73,8 @@ public:
 
       byte dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
                         0b10001, 0b01110, 0b00000, 0b00000};
-      byte dotOn[8]  = {0b00000, 0b01110, 0b11111, 0b11111,
-                        0b11111, 0b01110, 0b00000, 0b00000};
+      byte dotOn[8] = {0b00000, 0b01110, 0b11111, 0b11111,
+                       0b11111, 0b01110, 0b00000, 0b00000};
 
       display->createChar(1, dotOff);
       display->createChar(2, dotOn);
@@ -95,15 +104,13 @@ public:
    */
   void clear(int16_t x, int16_t y, int16_t w, int16_t h)
   {
-    return;
-    if ((x > 20) || (y > 4)) {
-      Serial.printf("outside\n");
-    } else {
-      display->setCursor(x, y);
-      // while (w > 0) {
-      display->write('#');
-      w--;
-      // }
+    display->setCursor(x, y);
+    if (y < 4) {
+      while ((x < 20) && (w > 0)) {
+        display->write(' ');
+        w--;
+        x++;
+      } // while
     } // if
   }; // clear()
 
@@ -112,29 +119,33 @@ public:
    * @brief Draw a text at this position using the specific height.-
    * @param x x-position or offset of the text.
    * @param y y-position of the text.
-   * @param h height of the characters, ignored.
+   * @param h height of the characters, ignored for this display.
    * @param text the text.
    */
-  void drawText(int16_t x, int16_t y, int16_t h, const char *text)
+  int drawText(int16_t x, int16_t y, int16_t h, const char *text)
   {
+    int w = 0;
     if ((x > 20) || (y > 4)) {
       Serial.printf("outside\n");
     } else {
       display->setCursor(x, y);
       display->print(text);
+      w = strlen(text);
     }
-  }
+    return (w);
+  } // drawText
 
 
-  void drawText(int16_t x, int16_t y, int16_t h, String &text)
+  int drawText(int16_t x, int16_t y, int16_t h, String &text)
   {
-    drawText(x, y, 1, text.c_str());
+    return (drawText(x, y, 1, text.c_str()));
   }; // drawText()
 
 
-  void drawDot(int16_t x, int16_t y, int16_t h, bool fill)
+  int drawDot(int16_t x, int16_t y, int16_t h, bool fill)
   {
     drawText(x, y, 1, fill ? "\02" : "\01");
+    return (1);
   }; // drawDot()
 
 private:

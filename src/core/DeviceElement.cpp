@@ -1,8 +1,9 @@
 /**
  * @file DeviceElement.cpp
- * 
- * @brief System Element for the HomeDing Library to manage device level settings.
- * 
+ *
+ * @brief System Element for the HomeDing Library to manage device level
+ * settings.
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -13,13 +14,13 @@
  * More information on https://www.mathertel.de/Arduino.
  *
  * Changelog: see DeviceElement.h
- */ 
+ */
 
 #include "DeviceElement.h"
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "device"
-#include "Logger.h"
+#include "core/Logger.h"
 
 /**
  * @brief static factory function to create a new DeviceElement.
@@ -55,9 +56,8 @@ bool DeviceElement::set(const char *name, const char *value)
 
     // ALWAYS send to log
     // LOGGER_INFO(...
-    DEBUG_ESP_PORT.printf("%3u:%02u:%02u %s, %d\n", (now / 3600),
-                          (now / 60) % 60, now % 60, value ? value : "NULL",
-                          ESP.getFreeHeap());
+    DEBUG_ESP_PORT.printf("%3u:%02u:%02u %s\n", (now / 3600), (now / 60) % 60,
+                          now % 60, value ? value : "NULL");
 
   } else {
     ret = Element::set(name, value);

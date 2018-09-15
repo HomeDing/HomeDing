@@ -19,7 +19,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "my"
-#include "Logger.h"
+#include "core/Logger.h"
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -63,6 +63,10 @@ bool MyElement::set(const char *name, const char *value)
 
   if (_stricmp(name, "value") == 0) {
     _value = atoi(value);
+
+    // } else if (_stricmp(name, "onChange") == 0) {
+    // save the actions
+    // _changeAction = value;
 
     // } else if (_stricmp(name, "doAction") == 0) {
     // make something

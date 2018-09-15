@@ -14,7 +14,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "PWMout"
-#include "Logger.h"
+#include "core/Logger.h"
 
 
 /**
@@ -36,7 +36,7 @@ bool PWMOutElement::set(const char *name, const char *value)
   if (_stricmp(name, "pin") == 0) {
     _pin = atoi(value);
 
-  } else if (_stricmp(name, "invers") == 0) {
+  } else if (_stricmp(name, "inverse") == 0) {
     _invers = _atob(value);
 
   } else if (_stricmp(name, "range") == 0) {

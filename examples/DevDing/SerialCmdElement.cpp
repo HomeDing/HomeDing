@@ -19,7 +19,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "cmd"
-#include "Logger.h"
+#include "core/Logger.h"
 
 
 /**

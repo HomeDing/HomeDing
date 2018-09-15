@@ -36,7 +36,7 @@ http://devdevice/$board/pwmout/led?value=255
       "pin": 16,
       "range" : 255,
       "value": 10,
-      "invers": "true",
+      "inverse": "true",
       "description": "Build-in LED"
     }
   }

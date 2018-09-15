@@ -19,7 +19,7 @@
 #include "ElementRegistry.h"
 
 #define LOGGER_MODULE "sched"
-#include "Logger.h"
+#include "core/Logger.h"
 
 #define LOGGER_TRACE LOGGER_INFO
 

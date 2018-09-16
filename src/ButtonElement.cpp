@@ -57,6 +57,9 @@ bool ButtonElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "inverse") == 0) {
     _invers = _atob(value);
 
+  } else if (_stricmp(name, "pullup") == 0) {
+    _pullup = _atob(value);
+
   } else if (_stricmp(name, "onon") == 0) {
     _onAction = value;
 
@@ -79,8 +82,7 @@ void ButtonElement::start()
     LOGGER_ERR("no meaningful pin");
 
   } else {
-    // _button = new OneButton(_pin, _invers);
-    pinMode(_pin, INPUT_PULLUP);
+    pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
     _lastInLevel = digitalRead(_pin);
     Element::start();
   } // if

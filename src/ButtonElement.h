@@ -15,6 +15,7 @@
  *
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
+ * * 16.09.2018 pullup config added.
  */
 
 #ifndef BUTTON_H
@@ -80,6 +81,7 @@ private:
   int _type = BUTTON_TYPE_LEVEL;
   int _pin = -1;
   bool _invers = false;
+  bool _pullup = false;
 
   //  OneButton *_button = NULL;
   int _lastInLevel;

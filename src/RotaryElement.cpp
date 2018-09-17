@@ -92,8 +92,11 @@ void RotaryElement::start()
     LOGGER_ERR("pin values are required.");
 
   } else {
+    LOGGER_INFO("connect %d %d\n", _pin1, _pin2);
     __encoder = new RotaryEncoder(_pin1, _pin2);
+    pinMode(_pin1, INPUT_PULLUP);
     attachInterrupt(_pin1,  __checkPosition, CHANGE);
+    pinMode(_pin2, INPUT_PULLUP);
     attachInterrupt(_pin2,  __checkPosition, CHANGE);
     Element::start();
   } // if

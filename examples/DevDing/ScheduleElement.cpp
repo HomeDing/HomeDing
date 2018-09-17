@@ -54,11 +54,6 @@ void ScheduleElement::init(Board *board)
 
   _onTime = TIME_T_NOT;
   _offTime = TIME_T_NOT;
-
-  // testing:
-  _onTime = 16 * 60 * 60 + 20 * 60;
-  _offTime = _onTime + 20 * 60;
-
 } // init()
 
 
@@ -98,12 +93,13 @@ void ScheduleElement::start()
   LOGGER_TRACE("start()");
 
   // Verify parameters
-
   _init = false;
 
-  // if (parameters ok) {
-  Element::start();
-  // } // if
+  if ((_onTime == TIME_T_NOT) && (_offTime == TIME_T_NOT)) {
+    LOGGER_ERR("no time span set.");
+  } else {
+    Element::start();
+  } // if
 
 } // start()
 
@@ -150,10 +146,6 @@ void ScheduleElement::pushState(
   Element::pushState(callback);
   callback("value", String(_value).c_str());
 } // pushState()
-
-
-// maybe: overwrite the term() function,
-
 
 /* ===== Register the Element ===== */
 

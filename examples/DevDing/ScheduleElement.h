@@ -1,16 +1,16 @@
 /**
  * @file ScheduleElement.h
  * @brief Element Template class.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
  */
@@ -23,15 +23,9 @@
 #include <Arduino.h>
 
 /**
- * @brief ScheduleElement implements...
- * @details
-@verbatim
-
-The ScheduleElement can ...
-
-@endverbatim
+ * @brief The ScheduleElement can trigger a ON and OFF action per day based on
+ * real time.
  */
-
 class ScheduleElement : public Element
 {
 public:
@@ -86,13 +80,13 @@ private:
    */
   int _value;
 
-/**
- * @brief remember that a first time was processed already. 
- */
-bool _init;
+  /**
+   * @brief remember that a first time was processed already.
+   */
+  bool _init;
 
-time_t _onTime;
-time_t _offTime;
+  time_t _onTime;
+  time_t _offTime;
 
   /**
    * @brief The _xAction holds the actions that is submitted when ...

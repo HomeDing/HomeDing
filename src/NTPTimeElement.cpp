@@ -25,8 +25,6 @@
  * system_rtc_mem_read
  * https://github.com/Makuna/Task
  *
- *
- *
  * Changelog: see NTPTimeElement.h
  */
 

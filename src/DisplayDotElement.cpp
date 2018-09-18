@@ -53,14 +53,10 @@ bool DisplayDotElement::set(const char *name, const char *value)
     _display->clear();
 
   } else if ((_stricmp(name, "show") == 0) || (_stricmp(name, "value") == 0)) {
-      LOGGER_TRACE("display=0x%x", _display);
-    LOGGER_TRACE("1");
     _display->clear(_x, _y, _w, _h);
-    LOGGER_TRACE("2");
 
     _value = value;
     _display->drawDot(_x, _y, _h, _atob(value));
-    LOGGER_TRACE("3");
 
   } else {
     ret = Element::set(name, value);

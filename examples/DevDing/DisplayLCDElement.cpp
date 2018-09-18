@@ -64,18 +64,23 @@ bool DisplayLCDElement::set(const char *name, const char *value)
 
 
 /**
- * @brief Activate the DisplayLCDElement.
+ * @brief Activate the DisplayLCDElement and register a Display Adapter to LCD in the board.
  */
 void DisplayLCDElement::start()
 {
   DisplayAdapter *d;
   LOGGER_TRACE("start(0x%x,%d,%d)", _address, _sda, _scl);
   d = (DisplayAdapter *)(new DisplayAdapterLCD(_address, _sda, _scl));
-  _board->display = d;
-  d->init();
-  LOGGER_TRACE("display=0x%x", _board->display);
 
-  Element::start();
+  bool success = d->init();
+  if (success) {
+    _board->display = d;
+    Element::start();
+
+  } else {
+    DEBUG_LOG("no display found.\n");
+    delete d;
+  } // if
 } // start()
 
 
@@ -86,7 +91,8 @@ void DisplayLCDElement::start()
 
 // When transferred to the HomeDing library a #define like the
 // HOMEDING_INCLUDE_My should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to DisplayLCDElement.h:
+// available Elements. See <HomeDing.h> the move these lines to
+// DisplayLCDElement.h:
 
 // #ifdef HOMEDING_REGISTER
 // Register the DisplayLCDElement onto the ElementRegistry.

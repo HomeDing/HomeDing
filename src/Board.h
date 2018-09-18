@@ -88,15 +88,8 @@ public:
    */
   void init(ESP8266WebServer *s);
 
-  // /**
-  //  * @brief Add a display to the board.
-  //  * @param d DisplayAdapter for an existing display
-  //  */
-  // void setDisplay(DisplayAdapter *d = NULL);
-
-
   /**
-   * @brief Add and config the Elements defined in the config file
+   * @brief Add and config the Elements defined in the config files.
    */
   void addElements();
 

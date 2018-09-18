@@ -38,16 +38,10 @@ void Board::init(ESP8266WebServer *s)
 } // init()
 
 
-// /**
-//  * @brief Add a display to the board.
-//  */
-// void Board::setDisplay(DisplayAdapter *d)
-// {
-//   LOGGER_TRACE("setDisplay()");
-//   display = d;
-// } // setDisplay()
-
-
+/**
+ * @brief Add and config the Elements defined in the config files.
+ * 
+ */
 void Board::addElements()
 {
   LOGGER_TRACE("addElements()");

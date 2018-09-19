@@ -28,6 +28,7 @@
  * * 20.06.2018 SSDP converted to an element
  * * 25.06.2018 ArduinoJson replace by MicroJsonParser. in use only in board.
  * * 22.08.2018 separate network and device configuration.
+ * * 18.09.2018 display configuration now in env.json using elements
  */
 
 #ifdef DEBUG_ESP_PORT
@@ -43,10 +44,6 @@
 #include <WiFiClient.h>
 
 #include <FS.h>
-
-// include the hardware supporting libraries
-#include "DisplayAdapterLCD.h"
-#include <DisplayAdapterSSD1306.h>
 
 // =====
 
@@ -65,6 +62,10 @@
 #define HOMEDING_INCLUDE_RFSend
 #define HOMEDING_INCLUDE_ROTARY
 
+// Use some more Elements for Displays
+#define HOMEDING_INCLUDE_DISPLAYLCD
+#define HOMEDING_INCLUDE_DISPLAYSSD1306
+
 #include <HomeDing.h>
 
 extern "C" {
@@ -76,16 +77,11 @@ extern "C" {
 #include "secrets.h"
 
 // need a WebServer
-
 ESP8266WebServer server(80);
-
-// DisplayAdapterSSD1306 *display = NULL; // created later, when available
-DisplayAdapter *display = NULL; // created later, when available
 
 // ===== application state variables =====
 
 char devicename[32]; // name of this device on the network
-
 Board mainBoard;
 
 // ===== implement =====
@@ -122,13 +118,15 @@ void handleFileList()
 void setup(void)
 {
   unsigned long now = millis();
+  DisplayAdapter *display = NULL;
 
   Serial.begin(115200);
   Serial.setDebugOutput(false);
 
   WiFi.mode(WIFI_OFF);
 
-  // Logger::logger_level = LOGGER_LEVEL_TRACE;
+  // Enable nbext line to start detailed tracing
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("HomDing Device is starting... (%s), %d", __DATE__,
               ESP.getBootMode());
@@ -143,43 +141,16 @@ void setup(void)
   // load all config files and create Elements
   mainBoard.addElements();
 
+  // ===== start Elements =====
+  mainBoard.start();
+  DEBUG_LOG("Elements started.\n\n");
+
   // ----- setup Display -----
 
-  // TODO: will be done by the configured Display Element.
-
-  // for Esp-WRoom-02 Module ESP8266 with OLED and 18650
-#if 0
-  display = (DisplayAdapter *)(new DisplayAdapterSSD1306(0x3c, 5, 4, 64));
-#endif
-
-#if 1
-  display = (DisplayAdapter *)(new DisplayAdapterLCD(0x27, SDA, SCL));
-#endif
-
-  // for Wifi Kit 8 Module ESP8266 with OLED
-#if 0
-  // the propper reset of the OLED is required using pin 16 = D0
-  pinMode(D0, OUTPUT);
-  digitalWrite(D0, LOW); // turn D2 low to reset OLED
-  delay(50);
-  digitalWrite(D0, HIGH); // while OLED is running, must set D2 in high
-
-  // for Wifi-Kit 8
-  display = new DisplayAdapterSSD1306(0x3c, 4, 5, 32);
-#endif
-
-  mainBoard.display = display;
-
+  display = mainBoard.display;
   if (display) {
-    if (display->init()) {
-      display->drawText(0, 0, 0, "HomeDing...");
-      delay(100);
-
-    } else {
-      DEBUG_LOG("no attached display found.\n");
-      delete display;
-      display = NULL;
-    } // if
+    display->drawText(0, 0, 0, "HomeDing...");
+    delay(100);
   } // if
 
   // ----- setup Board and Elements-----
@@ -193,7 +164,7 @@ void setup(void)
     strncpy(devicename, "homeding", sizeof(devicename));
   } // if
 
-  // ----- setup Server -----
+  // ----- setup Web Server -----
 
   WiFi.mode(WIFI_STA);
   if ((*ssid) && (*password)) {
@@ -206,11 +177,6 @@ void setup(void)
   WiFi.hostname(devicename);
   WiFi.setAutoConnect(true);
 
-  // ===== start Elements =====
-  mainBoard.start();
-  DEBUG_LOG("Elements started.\n\n");
-
-
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -220,7 +186,8 @@ void setup(void)
 
   IPAddress ipAddress = WiFi.localIP();
   char ipstr[16];
-  sprintf(ipstr, "%u.%u.%u.%u", ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
+  sprintf(ipstr, "%u.%u.%u.%u", ipAddress[0], ipAddress[1], ipAddress[2],
+          ipAddress[3]);
 
   DEBUG_LOG("\nConnected to: %s\n", WiFi.SSID().c_str());
   DEBUG_LOG("  as: %s\n", devicename);

@@ -65,4 +65,11 @@ private:
   int _scl = SCL;
 };
 
+#ifdef HOMEDING_REGISTER
+// Register the DisplaySSD1306Element onto the ElementRegistry.
+bool DisplayLCDElement::registered =
+    ElementRegistry::registerElement("displayLCD", DisplayLCDElement::create);
+#endif
+
+
 #endif

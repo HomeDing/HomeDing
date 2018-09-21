@@ -125,7 +125,7 @@ void setup(void)
 
   WiFi.mode(WIFI_OFF);
 
-  // Enable nbext line to start detailed tracing
+  // Enable the next line to start detailed tracing
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("HomDing Device is starting... (%s), %d", __DATE__,

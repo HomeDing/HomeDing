@@ -67,15 +67,10 @@ private:
   int _resetpin = -1;
 };
 
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_My should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to
-// DisplaySSD1306Element.h:
-
-// #ifdef HOMEDING_REGISTER
+#ifdef HOMEDING_REGISTER
 // Register the DisplaySSD1306Element onto the ElementRegistry.
 bool DisplaySSD1306Element::registered =
     ElementRegistry::registerElement("displaySSD1306", DisplaySSD1306Element::create);
-// #endif
+#endif
 
 #endif

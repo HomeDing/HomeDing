@@ -40,7 +40,7 @@
 #include <memory>
 #include <time.h>
 
-#include <DisplayAdapter.h>
+#include <displays/DisplayAdapter.h>
 
 // id can be multi-level when using the slash as a separator.
 // like "device/name"

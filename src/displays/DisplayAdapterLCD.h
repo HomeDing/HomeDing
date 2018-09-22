@@ -14,10 +14,10 @@
 #ifndef DisplayAdapterLCD_H
 #define DisplayAdapterLCD_H
 
-#include "DisplayAdapter.h"
 #include <Arduino.h>
 #include <Wire.h>
 
+#include <displays/DisplayAdapter.h>
 #include <LiquidCrystal_PCF8574.h>
 
 class DisplayAdapterLCD : DisplayAdapter

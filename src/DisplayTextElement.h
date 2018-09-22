@@ -24,7 +24,7 @@
 #include "Board.h"
 #include "Element.h"
 
-#include "DisplayAdapter.h"
+#include <displays/DisplayAdapter.h>
 
 /**
  * @brief The DisplayTextElement is an Element that allows to create information

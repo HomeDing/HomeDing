@@ -20,7 +20,7 @@
 #define LOGGER_MODULE "SSD1306"
 #include "core/Logger.h"
 
-#include "DisplayAdapterSSD1306.h"
+#include <displays/DisplayAdapterSSD1306.h>
 
 /* ===== Static factory function ===== */
 

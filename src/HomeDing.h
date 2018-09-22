@@ -35,11 +35,10 @@
 // The Core Elements that are required in any case add themselves to the ElementRegistry.
 // There are no HOMEDING_INCLUDE_ defines for these Elements:
 // Device, SSDP, OTA
+// because they are required for every HomeDing device.
 
-
-// See SSDPElement.cpp or DeviceElement.cpp as examples.
-
-// easy include of all libraries that do not require a separate library
+// Easy include of all elements that do not require a separate library
+// by defining HOMEDING_INCLUDE_CORE
 
 #ifdef HOMEDING_INCLUDE_CORE
 
@@ -53,7 +52,6 @@
 #endif
 
 #include <core/logger.h>
-
 
 // Register the Elements by including the definition with defined HOMEDING_REGISTER
 
@@ -81,6 +79,16 @@
 
 #ifdef HOMEDING_INCLUDE_DisplayDot
 #include <DisplayDotElement.h>
+#endif
+
+// ===== OPTIONAL DISPLAY ELEMENTS =====
+
+#ifdef HOMEDING_INCLUDE_DISPLAYLCD
+#include <displays/DisplayLCDElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYSSD1306
+#include <displays/DisplaySSD1306Element.h>
 #endif
 
 // ===== OPTIONAL ELEMENTS =====

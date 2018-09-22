@@ -21,7 +21,7 @@
 #define LOGGER_MODULE "lcd"
 #include "core/Logger.h"
 
-#include "DisplayAdapterLCD.h"
+#include <displays/DisplayAdapterLCD.h>
 
 /* ===== Static factory function ===== */
 

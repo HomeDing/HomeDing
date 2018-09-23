@@ -14,6 +14,7 @@
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
  * * 24.06.2018 no problems when no display is available.
+ * * 23.09.2018 support DisplayAdapter->flush()
  */
 
 
@@ -64,6 +65,11 @@ public:
   virtual void start();
 
   /**
+   * @brief Give some processing time to the timer to check for next action.
+   */
+  virtual void loop();
+
+  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
@@ -73,9 +79,14 @@ public:
 
 private:
   /**
+   * @brief value to be displayed 
+   */
+  bool _value;
+
+  /**
    * @brief displayed value
    */
-  String _value;
+  bool _displayValue;
 
   /**
    * @brief This variable corresponds to the x parameter.

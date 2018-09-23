@@ -14,8 +14,8 @@
 #ifndef DisplayAdapterSSD1306_H
 #define DisplayAdapterSSD1306_H
 
-#include <displays/DisplayAdapter.h>
 #include <Arduino.h>
+#include <displays/DisplayAdapter.h>
 
 #include <SSD1306Wire.h>
 
@@ -81,6 +81,7 @@ public:
       display->drawString(0, 0, "HomeDing...");
       display->display();
       delay(100);
+
     } // if
     return (true);
   }; // init()
@@ -92,7 +93,7 @@ public:
   void clear()
   {
     display->clear();
-    display->display();
+    _dirty = true;
   }; // clear()
 
 
@@ -107,7 +108,7 @@ public:
   {
     display->setColor(BLACK);
     display->fillRect(x, y, w, h);
-    display->display();
+    _dirty = true;
   }; // clear()
 
 
@@ -130,7 +131,7 @@ public:
 
     display->setColor(WHITE);
     display->drawString(x, y, text);
-    display->display();
+    _dirty = true;
     return (display->getStringWidth(text));
   }; // drawText()
 
@@ -138,7 +139,7 @@ public:
   int drawText(int16_t x, int16_t y, int16_t h, const char *text)
   {
     String s_text(text);
-    return(drawText(x, y, h, s_text));
+    return (drawText(x, y, h, s_text));
   }
 
 
@@ -152,9 +153,17 @@ public:
     } else {
       display->drawCircle(x + r, y + r, r);
     }
-    display->display();
     return (h);
   }; // drawDot()
+
+
+  void flush()
+  {
+    if (_dirty) {
+      display->display();
+      _dirty = false;
+    }
+  }; // flush()
 
 private:
   /**
@@ -176,6 +185,9 @@ private:
    * @brief GPIO pin for the I2C SDA Line.
    */
   int _sda;
+
+
+  bool _dirty;
 
   /**
    * @brief Number of vertical pixels of the display.

@@ -126,7 +126,7 @@ void setup(void)
   WiFi.mode(WIFI_OFF);
 
   // Enable the next line to start detailed tracing
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
+  // Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("HomDing Device is starting... (%s), %d", __DATE__,
               ESP.getBootMode());
@@ -150,6 +150,7 @@ void setup(void)
   display = mainBoard.display;
   if (display) {
     display->drawText(0, 0, 0, "HomeDing...");
+    display->flush();
     delay(100);
   } // if
 
@@ -196,9 +197,8 @@ void setup(void)
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, devicename);
-    delay(800);
-    display->clear();
-    display->drawText(0, 0, 0, ipstr);
+    display->drawText(0, display->lineHeight, 0, ipstr);
+    display->flush();
     delay(800);
     display->clear();
   }

@@ -65,16 +65,17 @@ bool DisplayTextElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "clear") == 0) {
     _display->clear();
+    _display->flush();
 
   } else if ((_stricmp(name, "show") == 0) || (_stricmp(name, "value") == 0)) {
     _display->clear(_x, _y, _w, _h);
-
     _value = value;
 
     String msg(_prefix);
     msg.concat(value);
     msg.concat(_postfix);
     _w = _display->drawText(_x, _y, _h, msg);
+    _display->flush();
 
   } else {
     ret = Element::set(name, value);

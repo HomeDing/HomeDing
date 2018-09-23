@@ -148,6 +148,12 @@ public:
     return (1);
   }; // drawDot()
 
+
+  void flush()
+  {
+  }; // flush()
+
+
 private:
   /**
    * @brief Reference to the used library object

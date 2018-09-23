@@ -51,12 +51,10 @@ bool DisplayDotElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "clear") == 0) {
     _display->clear();
+    _display->flush();
 
   } else if ((_stricmp(name, "show") == 0) || (_stricmp(name, "value") == 0)) {
-    _display->clear(_x, _y, _w, _h);
-
-    _value = value;
-    _display->drawDot(_x, _y, _h, _atob(value));
+    _value = _atob(value);
 
   } else {
     ret = Element::set(name, value);
@@ -78,12 +76,24 @@ void DisplayDotElement::start()
 
   } else {
     _display = d;
+    _displayValue = !_value; // send to display next time
     Element::start();
-    if (active) {
-      set("show", ""); // display the default UI for some types
-    } // if
   } // if
 } // start()
+
+
+/**
+ * @brief check the state of the DHT values and eventually create actions.
+ */
+void DisplayDotElement::loop()
+{
+  if (_value != _displayValue) {
+    _display->clear(_x, _y, _w, _h);
+    _display->drawDot(_x, _y, _h, _value);
+    _display->flush();
+    _displayValue = _value;
+  } // if
+} // loop()
 
 
 /**
@@ -93,7 +103,7 @@ void DisplayDotElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", _value.c_str());
+  callback("value", _value ? "1" : "0");
 } // pushState()
 
 // End

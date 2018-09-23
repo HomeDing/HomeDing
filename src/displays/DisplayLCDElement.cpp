@@ -50,10 +50,10 @@ bool DisplayLCDElement::set(const char *name, const char *value)
     _address = atoi(value);
 
   } else if (_stricmp(name, "sda") == 0) {
-    _sda = atoi(value);
+    _sda = _atopin(value);
 
   } else if (_stricmp(name, "scl") == 0) {
-    _scl = atoi(value);
+    _scl = _atopin(value);
 
   } else {
     ret = Element::set(name, value);

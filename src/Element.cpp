@@ -138,15 +138,25 @@ unsigned long Element::_atotime(const char *value)
 {
   unsigned long ret = 0;
   unsigned long f = 1;
+  char *pEnd;
 
-  ret = atol(value);
+  if (strchr(value, ':') != NULL) {
+    // scan using format hh:mm[:ss]
+    ret += strtol(value, &pEnd, 10) * 60 * 60;
+    if (*pEnd == ':')
+      ret += strtol(pEnd + 1, &pEnd, 10) * 60;
+    if (*pEnd == ':')
+      ret += strtol(pEnd + 1, &pEnd, 10);
 
-  if (strchr(value, 'm') != NULL) {
-    ret *= 60;
   } else if (strchr(value, 'h') != NULL) {
-    ret *= 60 * 60;
+    ret = strtol(value, &pEnd, 10) * 60 * 60;
+
+  } else if (strchr(value, 'm') != NULL) {
+    ret = strtol(value, &pEnd, 10) * 60;
+
   } else if (strchr(value, 'd') != NULL) {
-    ret *= 24 * 60 * 60;
+    ret = strtol(value, &pEnd, 10) * 24 * 60 * 60;
+
   } // if
   return (ret);
 } // _atotime()
@@ -155,17 +165,17 @@ unsigned long Element::_atotime(const char *value)
 /* Return a pin value from a string. */
 int Element::_atopin(const char *value)
 {
-  static int GPIO[11] = { 16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1 };
-  
+  static int GPIO[11] = {16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1};
+
   int pin = -1;
   if ((value) && (*value == 'D')) {
-    int n = atoi(value+1);
+    int n = atoi(value + 1);
     if ((n >= 0) && (n <= 10))
       pin = GPIO[n];
   } else {
     pin = atoi(value);
   }
-  return(pin);
+  return (pin);
 } // _atopin()
 
 

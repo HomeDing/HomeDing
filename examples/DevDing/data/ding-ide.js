@@ -4,6 +4,7 @@ var filesObj = document.getElementById("files");
 var contentObj = document.getElementById("content");
 var progressPanelObj = document.getElementById("progressPanel");
 var progressBarObj = document.getElementById("progressBar");
+var progressTextObj = document.getElementById("progressText");
 var activeFileObj = document.getElementById("activeFile");
 var checkerObj = document.getElementById("checker");
 
@@ -128,6 +129,7 @@ function dragHelper(e) {
 // start uploading file content
 function startUpload(filename, contentType, content) {
   progressPanelObj.classList.remove("fadeout");
+  progressTextObj.innerText = "saving...";
 
   var objHTTP = new XMLHttpRequest(); // new ActiveXObject("MSXML2.XMLHTTP");
   objHTTP.open("PUT", filename, true);
@@ -142,6 +144,7 @@ function startUpload(filename, contentType, content) {
   objHTTP.addEventListener("readystatechange", function(p) {
     if ((objHTTP.readyState == 4) && (objHTTP.status >= 200) && (objHTTP.status < 300)) {
       window.setTimeout(handleReloadFS, 100);
+      progressTextObj.innerText = "done.";
       progressPanelObj.classList.add("fadeout");
       // fade progress
     } // if

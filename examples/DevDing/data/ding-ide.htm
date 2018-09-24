@@ -121,30 +121,39 @@
       border: 2px solid #00CC00;
       background-color: #ccFFcc
     }
+    
+    button:disabled.once {
+      background-image: url(/spinner.gif);
+      background-size: 2em;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: transparent;
+      border: 1px solid black;
+    }
   </style>
 </head>
 
 <body style="height:100%;">
-  <div class="container" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
+  <div class="container-fluid" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
     <div id="progressPanel" class="fadeout">
       <div id="progressBar"></div>
       <div id="progressText">saving...</div>
     </div>
 
-    <div class="row wrap header">
-      <div class="col-2">
-        <img class="icon menuicon" src="i/ide.svg" style="float:left" />
-        <h1>Ding IDE</h1>
-      </div>
+    <div class="u-header">
+      <a href="/"><img class="icon" src="/i/device.svg" /></a>
+      <h1>Device</h1>
+      <a href="/index.htm"><img class="icon" src="/i/home.svg" /></a>
+      <a href="/index.htm">Home</a>
+      <a href="/ding-ide.htm"><img class="icon" src="/i/ide.svg" /></a>
+      <a href="/ding-ide.htm">IDE</a>
 
-      <div class="col stretch">
-        <a href="/index.htm" title="Home"><img class="icon menuicon" src="i/home.svg" style="float:left" /></a>
-        <a href="/ding-ide.htm" title="IDE"><img class="icon menuicon" src="i/ide.svg" style="float:left" /></a>
-        <a><img class="icon menuicon" src="i/timer.svg" style="float:left" /></a>
-        <a href="ding.htm">[UI]</a>
-        <a href="ding-info.htm">[Info]</a>
-        <a href="/$sysinfo">[$sysinfo]</a>
-      </div>
+      <a href="/ding.htm">[UI]</a>
+      <a href="/ding-info.htm">[Info]</a>
+      <a href="/$sysinfo">[$sysinfo]</a>
+
+      <button class="once" id="resetbutton">reset</button>
+
     </div>
 
     <div class="row" style="flex:0 0 auto">
@@ -170,4 +179,25 @@
     </div>
   </div>
   <script src="ding-ide.js"></script>
+  <script>
+    // call this to start blocking the button while activity is running.
+    function runOnce() {
+      this.disabled = true;
+
+      loadAsync("/$reboot", runDone, runDone);
+
+      // start here
+      window.setTimeout(runDone.bind(this), 2000);
+    } // runOnce
+
+
+    // call this to stop blocking the button.
+    function runDone(evt) {
+      this.disabled = false;
+    } // runDone
+
+
+    var resetObj = document.getElementById("resetbutton");
+    resetObj.addEventListener("click", runOnce);
+  </script>
 </body>

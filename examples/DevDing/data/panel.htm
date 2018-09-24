@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Element Panel</title>
+  <link href="/iotstyle.css" rel="stylesheet" type="text/css">
+
+  <!-- https://necolas.github.io/normalize.css/ -->
+  <!-- https://milligram.io/#grids -->
+  <!-- https://www.sitepoint.com/how-to-translate-from-dom-to-svg-coordinates-and-back-again/ -->
+
+  <style>
+    #panel {
+      background-color: #eeeeee;
+    }
+    
+    #panel #templates {
+      display: none;
+    }
+    
+    #links>line {
+      stroke: green;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+    
+    .node rect {
+      fill: yellow;
+      stroke-width: 0;
+    }
+    
+    .node {
+      font-size: 8;
+      font-family: sans-serif;
+      fill: #000000;
+      fill-opacity: 1;
+      stroke: none;
+      font-style: normal;
+      font-weight: normal;
+    }
+    
+    .node circle {
+      fill: green;
+      stroke-width: 0;
+    }
+    
+    #Grid {
+      fill: #cccccc;
+      stroke: none
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="u-header">
+      <a href="/"><img class="icon" src="/i/device.svg" /></a>
+      <h1>Panel</h1>
+      <a href="/index.htm"><img class="icon" src="/i/home.svg" /></a>
+      <a href="/index.htm">Home</a>
+      <a href="/ding-ide.htm"><img class="icon" src="/i/ide.svg" /></a>
+      <a href="/ding-ide.htm">IDE</a>
+      <button id="moveButton">move</button>
+    </div>
+
+    <svg id="panel">
+        <defs>
+          <pattern id="Grid" height="64" width="64" patternUnits="userSpaceOnUse">
+            <path d="m0,0h8v1h-7v7h-1z" />
+          </pattern>
+        </defs>
+        <rect fill="url(#Grid)" height="100%" width="100%"></rect>
+  
+        <g id="templates">
+          <g dragabble="true" class="node">
+            <rect width="64" height="64" rx="8"></rect>
+            <image x="16" y="4" width="32" height="32" xlink:href="/i/default.svg" />
+            <text x="32" y="60" text-anchor="middle">subtitle</text>
+            <circle pin="m" cx="8" cy="24" r="6"></circle>
+            <circle pin="a" cx="56" cy="12" r="6"></circle>
+            <circle pin="b" cx="56" cy="36" r="6"></circle>
+          </g>
+        </g>
+        <g id="viewport">
+          <g id="nodes"></g>
+          <g id="links"></g>
+        </g>
+        <circle id="mark" cx="-10" cy="-10" r="5" style="fill:red"></circle>
+      </svg>
+
+    <script>
+      var PANEL_GRIDSIZE = 64; // px
+      var PANEL_WIDTH = 16;
+      var PANEL_HEIGHT = 12;
+
+      var panelObj = document.getElementById('panel');
+      var viewObj = document.getElementById('viewport');
+      var moveButtonObj = document.getElementById('moveButton');
+      var markObj = document.getElementById('mark');
+
+      panelObj.style.width = PANEL_GRIDSIZE * PANEL_WIDTH + "px";
+      panelObj.style.height = PANEL_GRIDSIZE * PANEL_HEIGHT + "px";
+
+      var DragObj = null;
+      var DragOffset = null;
+
+      var nodes = {
+        "timer/0": {
+          icon: "home",
+          x: 1,
+          y: 1
+        },
+        "digitalout/0": {
+          icon: "button",
+          x: 4,
+          y: 6
+        },
+        "timer/1": {
+          icon: "digitalout",
+          x: 4,
+          y: 4
+        },
+        "digitalout/1": {
+          icon: "door",
+          x: 8,
+          y: 8
+        },
+        "timer/2": {
+          x: 7,
+          y: 2
+        },
+        "digitalout/2": {
+          x: 7,
+          y: 5
+        }
+      };
+
+      var links = [{
+        src: "timer/0",
+        srcPin: "b",
+        tar: "digitalout/0",
+        tarPin: "m"
+      }, {
+        src: "timer/1",
+        srcPin: "a",
+        tar: "digitalout/1",
+        tarPin: "m"
+      }, {
+        src: "timer/2",
+        srcPin: "a",
+        tar: "digitalout/2",
+        tarPin: "m"
+      }];
+
+
+      // find the position of the pin of a node.
+      function _pinPos(node, pin) {
+        var panelPos = panelObj.getBoundingClientRect();
+        window.status = viewObj.currentScale;
+
+        var obj = node.obj.querySelector('[pin="' + pin + '"]');
+        if (!obj)
+          obj = node.obj;
+
+        var b2 = obj.getBoundingClientRect();
+
+        var pos = {
+          x: Math.round(b2.left + b2.width / 2 - panelPos.left),
+          y: Math.round(b2.top + b2.height / 2 - panelPos.top)
+        };
+        return (pos);
+      } // _pinPos()
+
+
+      // mode a svg group to a specific position using transform:translate
+      function moveSVGGroup(g, x, y) {
+        g.setAttribute('transform', 'translate(' + x + ',' + y + ')');
+      } // moveSVGGroup
+
+
+      // update all nodes
+      function updateNodes() {
+        for (var eName in nodes) {
+          var e = nodes[eName];
+          var obj = e.obj;
+          if (!obj) {
+            var nodesObj = document.getElementById('nodes');
+            var t = document.querySelector('#templates .node');
+            obj = e.obj = t.cloneNode(true);
+            nodesObj.appendChild(obj);
+          }
+          if (e.icon) {
+            var img = obj.querySelector('image');
+            img.setAttribute("xlink:href", "/i/" + e.icon + ".svg");
+            // debugger;
+          }
+
+          moveSVGGroup(obj, e.x * PANEL_GRIDSIZE, e.y * PANEL_GRIDSIZE);
+        } // for
+      } // updateNodes()
+
+
+      function updateLinks() {
+        var aPos;
+
+        for (var n = 0; n < links.length; n++) {
+          var f = links[n];
+
+          var obj = f.obj;
+          if (!obj) {
+            var linksObj = document.getElementById('links');
+            obj = f.obj = linksObj.ownerDocument.createElementNS("http://www.w3.org/2000/svg", 'line');
+            linksObj.appendChild(obj);
+          } // if
+          aPos = _pinPos(nodes[f.src], f.srcPin);
+          obj.setAttribute("x1", aPos.x);
+          obj.setAttribute("y1", aPos.y);
+
+          aPos = _pinPos(nodes[f.tar], f.tarPin);
+          obj.setAttribute("x2", aPos.x);
+          obj.setAttribute("y2", aPos.y);
+        } // for
+      } // updateLinks()
+
+      updateNodes();
+      updateLinks();
+
+      moveButtonObj.addEventListener("click", function() {
+        nodes['timer/1'].x++;
+        updateNodes();
+        updateLinks();
+      })
+
+      // http://www.petercollingridge.co.uk/tutorials/svg/interactive/dragging/
+
+      // calc the current event/mouse/touch position
+      function getSVGPos(evt) {
+        var newScale = panelObj.currentScale;
+        var translation = panelObj.currentTranslate;
+        var panelPos = panelObj.getBoundingClientRect();
+        var ret = {
+          x: Math.round((evt.clientX - translation.x) / newScale - panelPos.left),
+          y: Math.round((evt.clientY - translation.y) / newScale - panelPos.top)
+        };
+        return (ret);
+      } // getSVGPos()
+
+
+      panelObj.addEventListener("mousedown", function(evt) {
+        if (!DragObj) {
+          var o = evt.target;
+          // check for a draggable object.
+          while (o && o.attributes && (!o.attributes["dragabble"]))
+            o = o.parentNode;
+          if (o && o.attributes && (o.attributes["dragabble"]))
+            DragObj = o;
+        }
+
+        if (DragObj) {
+          // calculate Drag Offset = mouse position - drag object position
+          DragOffset = getSVGPos(evt);
+          var cc = DragObj.getCTM();
+          DragOffset.x -= cc.e;
+          DragOffset.y -= cc.f;
+        }
+      }); // mouseDown
+
+
+      panelObj.addEventListener("mousemove", function(evt) {
+        if (DragObj) {
+          var DragPos = getSVGPos(evt);
+          // markObj.setAttribute("cx", DragPos.x - DragOffset.x);
+          // markObj.setAttribute("cy", DragPos.y - DragOffset.y);
+          moveSVGGroup(DragObj, DragPos.x - DragOffset.x, DragPos.y - DragOffset.y);
+          updateLinks();
+        } // if
+      }); // mousemove
+
+
+      panelObj.addEventListener("mouseup", function(evt) {
+        if (DragObj) {
+          var DragPos = getSVGPos(evt);
+
+          for (var n in nodes) {
+            if (nodes[n].obj == DragObj) {
+              nodes[n].x = Math.floor(DragPos.x / PANEL_GRIDSIZE);
+              nodes[n].y = Math.floor(DragPos.y / PANEL_GRIDSIZE);
+              break;
+            }
+          } // for
+          updateNodes();
+          updateLinks();
+
+          DragObj = null;
+        } // if
+      }); // mouseup
+
+
+      var scrollSensitivity = 0.2
+
+      panelObj.addEventListener("mousewheel", function(e) {
+        debugger;
+        var cs = panelObj.currentScale;
+        panelObj.setAttribute("transform", "scale(" + (cs + 0.2) + ")");
+
+      });
+    </script>
+
+  </div>
+</body>
+
+</html>

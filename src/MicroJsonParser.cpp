@@ -115,7 +115,7 @@ void strncat(char *s, char ch, int len)
 void MicroJson::parse(char ch)
 {
   // LOGGER_INFO("parse(%c)", ch);
-  if ((_state && MJ_IGNOREBLANCS) && isblank(ch)) {
+  if ((_state & MJ_IGNOREBLANCS) && isblank(ch)) {
     // ignore white space here.
     // LOGGER_INFO(" ignored");
 

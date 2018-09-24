@@ -17,8 +17,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include <displays/DisplayAdapter.h>
 #include <LiquidCrystal_PCF8574.h>
+#include <displays/DisplayAdapter.h>
 
 class DisplayAdapterLCD : DisplayAdapter
 {
@@ -42,15 +42,10 @@ public:
   DisplayAdapterLCD(int address, int sda, int scl)
       : _address(address), _sda(sda), _scl(scl)
   {
-
+    lineHeight = 1;
+    charWidth = 1;
   } // DisplayAdapterLCD()
 
-
-  // define the default line height
-  int lineHeight = 1;
-
-  // define the default character width
-  int charWidth = 1;
 
   bool init()
   {
@@ -149,9 +144,7 @@ public:
   }; // drawDot()
 
 
-  void flush()
-  {
-  }; // flush()
+  void flush(){}; // flush()
 
 
 private:

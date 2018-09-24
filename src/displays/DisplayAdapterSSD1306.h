@@ -45,14 +45,9 @@ public:
       _resolution = GEOMETRY_128_32;
     else if (h == 64)
       _resolution = GEOMETRY_128_64;
+    lineHeight = 10;
+    charWidth = 8;
   } // DisplayAdapterSSD1306()
-
-
-  // define the default line height
-  int lineHeight = 10;
-
-  // define the default character width
-  int charWidth = 8;
 
 
   bool init()

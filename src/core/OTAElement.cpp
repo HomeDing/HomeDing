@@ -35,7 +35,17 @@ Element *OTAElement::create()
 bool OTAElement::set(const char *name, const char *value)
 {
   LOGGER_TRACE("set(%s, %s)", name, value);
-  bool ret = Element::set(name, value);
+  bool ret = true;
+
+  if (_stricmp(name, "port") == 0) {
+    _port = atoi(value);
+
+  } else if (_stricmp(name, "passwd") == 0) {
+    _passwd = value;
+
+  } else {
+    ret = Element::set(name, value);
+  } // if
 
   return (ret);
 } // set()
@@ -51,17 +61,21 @@ void OTAElement::start()
 
   // get device name from device Element.
   strncpy(devicename, "homeding", sizeof(devicename));
+
   Element *deviceElement = _board->getElement("device");
   if (deviceElement)
     strncpy(devicename, deviceElement->get("name"), sizeof(devicename));
   ArduinoOTA.setHostname(devicename);
 
-  // ArduinoOTA.setPort(8266);   // defaults = 8266
-  // ArduinoOTA.setPassword((const char *)"iot");
+  ArduinoOTA.setPort(_port); // defaults = 8266
+  if (_passwd.length() > 0)
+    ArduinoOTA.setPassword((const char *)_passwd.c_str());
 
   ArduinoOTA.onStart([]() { LOGGER_INFO("Starting"); });
   ArduinoOTA.onEnd([]() { LOGGER_INFO("End."); });
 
+  // The onProgress function is called very often. Only report progress on
+  // full percents.
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     static int lastpc = 0;
     int pc = (progress / (total / 100));

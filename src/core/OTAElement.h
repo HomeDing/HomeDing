@@ -10,6 +10,7 @@
 // 14.04.2018 created by Matthias Hertel
 // 27.04.2018 Based on Element class.
 // 15.05.2018 set = properties and actions interface.
+// 24.09.2018 port and passwd configuration added.
 // -----
 
 #ifndef OTAELEMENT_H
@@ -63,7 +64,7 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
-  uint16_t _port;
+  uint16_t _port = 8266;
   String _passwd;
 };
 

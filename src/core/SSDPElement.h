@@ -51,6 +51,12 @@ public:
   static bool registered;
 
   /**
+   * @brief initialize a new Element.
+   * @param board The board reference.
+   */
+  virtual void init(Board *board);
+
+  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.
@@ -75,6 +81,7 @@ public:
   virtual void term();
 
 private:
+
 };
 
 #endif

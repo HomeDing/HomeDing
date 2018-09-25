@@ -30,6 +30,27 @@ Element *SSDPElement::create()
 
 
 /**
+ * @brief initialize the common functionality of all element objects.
+ */
+void SSDPElement::init(Board *board)
+{
+  LOGGER_TRACE("init()");
+  Element::init(board);
+
+  // set default values
+  SSDP.setSchemaURL("description.xml");
+  SSDP.setHTTPPort(80);
+  SSDP.setSerialNumber(ESP.getChipId());
+  SSDP.setURL("/");
+  SSDP.setModelNumber(__DATE__);
+  SSDP.setModelURL("http://www.mathertel.de/Arduino/Board");
+  SSDP.setManufacturer("Matthias Hertel");
+  SSDP.setManufacturerURL("https://www.mathertel.de");
+  SSDP.setDeviceType("upnp:rootdevice");
+} // init()
+
+
+/**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool SSDPElement::set(const char *name, const char *value)
@@ -37,19 +58,22 @@ bool SSDPElement::set(const char *name, const char *value)
   LOGGER_TRACE("set(%s, %s)", name, value);
   bool ret = true;
 
-  /*
-    if (_stricmp(name, "type") == 0) {
-      _cycleTime = _atotime(value);
+  if (_stricmp(name, "Manufacturer") == 0) {
+    SSDP.setManufacturer(value);
 
-    } else if (_stricmp(name, "onon") == 0) {
-      _onAction = value;
+  } else if (_stricmp(name, "ManufacturerURL") == 0) {
+    SSDP.setManufacturerURL(value);
 
-    } else {
-      ret = Element::set(name, value);
-    } // if
-  */
+  } else if (_stricmp(name, "ModelURL") == 0) {
+    SSDP.setModelURL(value);
 
-  ret = Element::set(name, value);
+  } else if (_stricmp(name, "ModelNumber") == 0) {
+    SSDP.setModelNumber(value);
+
+  } else {
+    ret = Element::set(name, value);
+  } // if
+
   return (ret);
 } // set()
 
@@ -62,20 +86,9 @@ void SSDPElement::start()
   LOGGER_TRACE("start()");
 
   Element *deviceElement = _board->getElement("device");
-
   if ((deviceElement) && (_board->server)) {
-    // get devicename and description from the device Element
-    SSDP.setSchemaURL("description.xml");
-    SSDP.setHTTPPort(80);
     SSDP.setName(deviceElement->get("name"));
-    SSDP.setSerialNumber(ESP.getChipId());
-    SSDP.setURL("/");
     SSDP.setModelName(deviceElement->get("description"));
-    SSDP.setModelNumber("v0004");
-    SSDP.setModelURL("http://www.mathertel.de/Arduino/Board");
-    SSDP.setManufacturer("Matthias Hertel");
-    SSDP.setManufacturerURL("https://www.mathertel.de");
-    SSDP.setDeviceType("upnp:rootdevice");
     SSDP.begin();
     ESP8266WebServer *server = _board->server;
     server->on("/description.xml", HTTP_GET,

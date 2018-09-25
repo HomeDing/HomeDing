@@ -93,8 +93,4 @@ void PWMOutElement::_setValue(int newValue)
 } // _setValue
 
 
-// Register the PWMOutElement onto the ElementRegistry.
-bool PWMOutElement::registered =
-    ElementRegistry::registerElement("pwmout", PWMOutElement::create);
-
 // End

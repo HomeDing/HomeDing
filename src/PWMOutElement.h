@@ -23,30 +23,7 @@
 #include "Element.h"
 
 /**
- * @brief PWMOut Element that produces pwm output signal.
- * @details
-@verbatim
-
-http://devdevice/$board/pwmout/led?value=0
-http://devdevice/$board/pwmout/led?value=100
-http://devdevice/$board/pwmout/led?value=255
-
-  "pwmout": {
-    "led": {
-      "pin": 16,
-      "range" : 255,
-      "value": 10,
-      "inverse": "true",
-      "description": "Build-in LED"
-    }
-  }
-@endverbatim
- */
-
-
-/**
- * @brief The PWMOutElement is an Element that creates an digital output
- * signal based on actions.
+ * @brief The PWMOutElement is an Element that creates an pwm digital output signal based on actions.
  */
 class PWMOutElement : public Element
 {
@@ -97,6 +74,9 @@ private:
 
 
 #ifdef HOMEDING_REGISTER
+// Register the PWMOutElement onto the ElementRegistry.
+bool PWMOutElement::registered =
+    ElementRegistry::registerElement("pwmout", PWMOutElement::create);
 #endif
 
 

@@ -127,9 +127,9 @@ void ScheduleElement::loop()
     if ((val == _value) && (_init)) {
       // no need to send an action.
     } else if (val) {
-      LOGGER_INFO("switch on %d %d", ct, _onTime);
+      _board->dispatch(_onAction);
     } else {
-      LOGGER_INFO("switch off %d %d", ct, _offTime);
+      _board->dispatch(_offAction);
     }
     _value = val;
     _init = true;
@@ -156,11 +156,5 @@ void ScheduleElement::pushState(
 // HOMEDING_INCLUDE_My should be used to allow the sketch to select the
 // available Elements. See <HomeDing.h> the move these lines to
 // ScheduleElement.h
-
-// #ifdef HOMEDING_REGISTER
-// Register the ScheduleElement onto the ElementRegistry.
-bool ScheduleElement::registered =
-    ElementRegistry::registerElement("schedule", ScheduleElement::create);
-// #endif
 
 // End

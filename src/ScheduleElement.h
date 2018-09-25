@@ -95,4 +95,10 @@ private:
   String _offAction;
 };
 
+#ifdef HOMEDING_REGISTER
+// Register the ScheduleElement onto the ElementRegistry.
+bool ScheduleElement::registered =
+    ElementRegistry::registerElement("schedule", ScheduleElement::create);
+#endif
+
 #endif

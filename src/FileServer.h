@@ -40,14 +40,14 @@ public:
   FileServerHandler(FS &fs, const char *path, const char *cache_header)
       : _fs(fs), _path(path), _cache_header(cache_header)
   {
-    DEBUG_MSG("init: path=%s cache_header=%s\n", path, cache_header);
+    LOGGER_TRACE("init: path=%s cache_header=%s", path, cache_header);
     if (_path.endsWith("/"))
       _path.remove(_path.length() - 1);
 
     _404_response =
         "<html><head><title>Oops! File not found</title></head><body>Oops! "
         "File not found</body></html>";
-    DEBUG_MSG("init: _path=%s\n", _path.c_str());
+    LOGGER_TRACE("init: _path=%s", _path.c_str());
   }
 
   /**
@@ -72,8 +72,6 @@ public:
     String contentType = getContentType(path);
     unsigned long now = millis();
 
-    DEBUG_MSG("get: path=%s, ct=%s\n", path.c_str(), contentType.c_str());
-
     // look for gz file, only if the original specified path is not a gz.  So
     // part only works to send gzip via content encoding when a non compressed
     // is asked for if you point the the path to gzip you will serve the gzip as
@@ -86,7 +84,7 @@ public:
 
     File f = _fs.open(path, "r");
     if (!f) {
-      DEBUG_MSG("get: file not found.\n");
+      LOGGER_TRACE(" file not found.");
       server.send(404, "text/html", _404_response);
 
     } else {
@@ -95,7 +93,7 @@ public:
       // server.setContentLength(f.size());
       // server.send(200, contentType, "");
       server.streamFile(f, contentType);
-      DEBUG_MSG("  %lu ms.\n", (millis() - now));
+      LOGGER_TRACE(" %lu ms. %s", (millis() - now), contentType.c_str());
 
     } // if
   } // handleGet()
@@ -107,35 +105,25 @@ public:
   */
   void handlePut(ESP8266WebServer &server, String path)
   {
-    DEBUG_MSG("put: path=%s, size=%d\n", path.c_str(),
-              server.arg("plain").length());
+    LOGGER_TRACE(" size=%d", server.arg("plain").length());
 
     File fsUploadFile = _fs.open(path, "w");
     if (fsUploadFile) {
-      // DEBUG_MSG("UploadFile opened.\n");
-      // size_t written = fsUploadFile.print(server.arg("plain").c_str());
-      // DEBUG_MSG("Written=%d", written);
-
       size_t written;
 
-      DEBUG_MSG("put: UploadFile opened.\n");
+      LOGGER_TRACE(" UploadFile opened.");
       char *c = (char *)(server.arg("plain").c_str());
 
       written = 0;
       while (*c) {
         written += fsUploadFile.write((uint8_t)(*c));
-        // DEBUG_MSG("%d \n", written);
         c++;
         yield();
       }
-      DEBUG_MSG("put: written:%u\n", written);
-      DEBUG_MSG("put: done.\n");
-
-      //      size_t written = fsUploadFile.print(server.arg("plain").c_str());
-      //      DEBUG_MSG("Written=%d", written);
+      LOGGER_TRACE(" %d bytes written", written);
 
       fsUploadFile.close();
-    }
+    } // if
 
     server.send(200, "text/plain", "");
   }
@@ -147,20 +135,20 @@ public:
   */
   void handleDelete(ESP8266WebServer &server, String path)
   {
-    DEBUG_MSG("delete: path=%s\n", path.c_str());
+    LOGGER_TRACE("delete: path=%s", path.c_str());
 
     if (_fs.exists(path)) {
       _fs.remove(path);
       server.send(200, "text/plain", "");
     } else {
       server.send(404, "text/plain", "");
-    }
+    } // if
   } // handleDelete()
 
   bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
               String requestUri) override
   {
-    DEBUG_MSG("handle: request=%s\n", requestUri.c_str());
+    LOGGER_TRACE("handle(%s)", requestUri.c_str());
 
     String path(_path);
     path += requestUri;

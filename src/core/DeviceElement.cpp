@@ -47,6 +47,9 @@ bool DeviceElement::set(const char *name, const char *value)
   if (_stricmp(name, "name") == 0) {
     _deviceName = value;
 
+  } else if (_stricmp(name, "description") == 0) {
+    _description = value;
+
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
 
@@ -108,6 +111,7 @@ void DeviceElement::pushState(
 
   Element::pushState(callback);
   callback("name", _deviceName.c_str());
+  callback("description", _description.c_str());
   callback("nextboot", String(_nextBoot - now).c_str());
 } // pushState()
 

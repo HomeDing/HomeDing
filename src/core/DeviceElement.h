@@ -14,6 +14,7 @@
  *
  * Changelog:
  * * 04.05.2018 created by Matthias Hertel
+ * * 24.09.2018 description added.
  */
 
 #ifndef DEVICEELEMENT_H
@@ -80,6 +81,11 @@ private:
    * @brief network name of the device
    */
   String _deviceName;
+
+  /**
+   * @brief Short description of the device.
+   */
+  String _description;
 
   /**
    * @brief hours to wait until a fresh reboot will be started,

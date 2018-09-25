@@ -31,14 +31,6 @@
  * * 18.09.2018 display configuration now in env.json using elements
  */
 
-#ifdef DEBUG_ESP_PORT
-#define DEBUG_MSG(...) DEBUG_ESP_PORT.printf(">" __VA_ARGS__)
-#define DEBUG_LOG(...) DEBUG_ESP_PORT.printf(">Main:" __VA_ARGS__)
-#else
-#define DEBUG_MSG(...)
-#define DEBUG_LOG(...)
-#endif
-
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -89,7 +81,7 @@ Board mainBoard;
 // Send out a JSON object with all files in dir
 void handleFileList()
 {
-  DEBUG_LOG("handleFileList\n");
+  LOGGER_TRACE("handleFileList()");
 
   String json;
   json.reserve(512);
@@ -143,7 +135,7 @@ void setup(void)
 
   // ===== start Elements =====
   mainBoard.start();
-  DEBUG_LOG("Elements started.\n\n");
+  LOGGER_TRACE("Elements started.\n");
 
   // ----- setup Display -----
 
@@ -160,7 +152,7 @@ void setup(void)
 
   if (deviceElement) {
     strncpy(devicename, deviceElement->get("name"), sizeof(devicename));
-    DEBUG_LOG(" devicename: %s.\n", devicename);
+    LOGGER_TRACE(" devicename: %s.", devicename);
   } else {
     strncpy(devicename, "homeding", sizeof(devicename));
   } // if
@@ -190,18 +182,17 @@ void setup(void)
   sprintf(ipstr, "%u.%u.%u.%u", ipAddress[0], ipAddress[1], ipAddress[2],
           ipAddress[3]);
 
-  DEBUG_LOG("\nConnected to: %s\n", WiFi.SSID().c_str());
-  DEBUG_LOG("  as: %s\n", devicename);
-  DEBUG_LOG("  IP: %s\n", ipstr);
+  LOGGER_INFO("Connected to: %s", WiFi.SSID().c_str());
+  LOGGER_INFO("  as: %s", devicename);
+  LOGGER_INFO("  IP: %s", ipstr);
 
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, devicename);
     display->drawText(0, display->lineHeight, 0, ipstr);
     display->flush();
-    delay(800);
-    display->clear();
-  }
+    delay(1000);
+  } // if
 
   // WiFi.printDiag(Serial);
 
@@ -210,7 +201,7 @@ void setup(void)
   // redirect to index.htm of only domain name is given.
   server.on("/", HTTP_GET, []() {
     server.sendHeader("Location", "/index.htm", true);
-    DEBUG_LOG("Redirect...");
+    LOGGER_TRACE("Redirect...");
     server.send(301, "text/plain", "");
   });
 
@@ -230,6 +221,11 @@ void setup(void)
     json += " 'fs-totalBytes':" + String(fs_info.totalBytes) + ",\n";
     json += " 'fs-usedBytes':" + String(fs_info.usedBytes) + "\n";
 
+    // json += " 'wifi-opmode':" + String(wifi_get_opmode()) + "\n";
+    // json += " 'wifi-phymode':" + String(wifi_get_phy_mode()) + "\n";
+    // json += " 'wifi-channel':" + String(wifi_get_channel()) + "\n";
+    // json += " 'wifi-ap-id':" + String(wifi_station_get_current_ap_id()) + "\n";
+    // json += " 'wifi-status':" + String(wifi_station_get_connect_status()) + "\n";
 
     json += "}";
     json.replace('\'', '"');
@@ -249,7 +245,7 @@ void setup(void)
   server.addHandler(new BoardHandler("/$board", mainBoard));
 
   server.on("/$reboot", HTTP_GET, []() {
-    DEBUG_LOG("rebooting...\n");
+    LOGGER_INFO("rebooting...");
     server.send(200, "text/plain", "");
     delay(500);
     ESP.reset();
@@ -258,7 +254,13 @@ void setup(void)
   server.addHandler(new FileServerHandler(SPIFFS, "/", "NO-CACHE"));
   server.begin();
 
-  DEBUG_LOG("Server started.\n\n");
+  LOGGER_TRACE("Server started.\n");
+
+  if (display) {
+    display->clear();
+    display->flush();
+  } // if
+
 } // setup
 
 

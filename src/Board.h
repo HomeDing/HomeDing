@@ -27,20 +27,16 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-// Debug output using Serial
-
-#ifdef DEBUG_ESP_PORT
-#define DEBUG_MSG(...) DEBUG_ESP_PORT.printf(__VA_ARGS__)
-#else
-#define DEBUG_MSG(...)
-#endif
-
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
 #include <memory>
 #include <time.h>
 
 #include <displays/DisplayAdapter.h>
+
+#define LOGGER_MODULE "board"
+#include "core/Logger.h"
+
 
 // id can be multi-level when using the slash as a separator.
 // like "device/name"

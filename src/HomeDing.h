@@ -7,22 +7,10 @@
 
 #include <Arduino.h>
 
-// #define LOGGER_MODULE ""
-
-// #ifdef DEBUG_ESP_PORT
-// #define LOGGER_ENABLE_TRACE
-// #endif
-
-// This is the set of Elements of the HomeDing Library
-// that do not need any specific library to be installed.
-
-// #define HOMEDINGUSE_Button
-
-
 #include "Element.h"
 #include "ElementRegistry.h"
 
-// ===== CORE Elements =====
+// ===== SYS Elements =====
 
 // Elements that are required in any case add themselves to the ElementRegistry
 // See SSDPElement.cpp or DeviceElement.cpp as examples.
@@ -45,7 +33,9 @@
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Timer
+#define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_DigitalOut
+#define HOMEDING_INCLUDE_PWMOut
 #define HOMEDING_INCLUDE_DisplayText
 #define HOMEDING_INCLUDE_DisplayDot
 
@@ -69,8 +59,16 @@
 #include <TimerElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_Schedule
+#include <ScheduleElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DigitalOut
 #include <DigitalOutElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_PWMOut
+#include <PWMOutElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayText

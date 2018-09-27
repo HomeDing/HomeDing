@@ -148,14 +148,20 @@ unsigned long Element::_atotime(const char *value)
     if (*pEnd == ':')
       ret += strtol(pEnd + 1, &pEnd, 10);
 
+  } else if (strchr(value, 'd') != NULL) {
+    ret = strtol(value, &pEnd, 10) * 24 * 60 * 60;
+
   } else if (strchr(value, 'h') != NULL) {
     ret = strtol(value, &pEnd, 10) * 60 * 60;
 
   } else if (strchr(value, 'm') != NULL) {
     ret = strtol(value, &pEnd, 10) * 60;
 
-  } else if (strchr(value, 'd') != NULL) {
-    ret = strtol(value, &pEnd, 10) * 24 * 60 * 60;
+  } else if (strchr(value, 's') != NULL) {
+    ret = strtol(value, &pEnd, 10);
+
+  } else {
+    ret = strtol(value, &pEnd, 10);
 
   } // if
   return (ret);

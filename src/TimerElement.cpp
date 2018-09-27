@@ -67,7 +67,7 @@ bool TimerElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "onon") == 0) {
     _onAction = value;
-
+  
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 

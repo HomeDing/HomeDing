@@ -115,6 +115,7 @@ protected:
    * * "h" for hours
    * * "m" for minutes
    * * "s" for seconds
+   * The format hh:mm[:ss] can also be used.
    *
    * @param value Given value as string.
    * @return time or duration as seconds.

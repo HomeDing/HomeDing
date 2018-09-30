@@ -19,6 +19,7 @@
 
 #undef LOGGER_MODULE
 #define LOGGER_MODULE "Rotary"
+#define LOGGER_ENABLE_TRACE
 #include "core/Logger.h"
 
 /* ===== statics ===== */
@@ -55,6 +56,9 @@ bool RotaryElement::set(const char *name, const char *value)
 
   if (_stricmp(name, "value") == 0) {
     _value = atoi(value);
+
+  } else if (_stricmp(name, "step") == 0) {
+    _step = atoi(value);
 
   } else if (_stricmp(name, "pin1") == 0) {
     _pin1 = _atopin(value);
@@ -116,7 +120,7 @@ void RotaryElement::loop()
   long newPos = __encoder->getPosition();
   if (newPos != _value) {
     // send an action with the delta
-    itoa(newPos - _value, tmp, sizeof(tmp));
+    itoa(_step * (newPos - _value), tmp, sizeof(tmp));
     _board->dispatch(_changeAction, tmp);
   }
   _value = newPos;

@@ -1,16 +1,16 @@
 /**
  * @file RotaryElement.h
  * @brief Element Template class.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 15.09.2018 created by Matthias Hertel
  */
@@ -88,11 +88,24 @@ private:
    */
   long _value = 0;
 
+  /**
+   * @brief delta of a value change
+   */
+  int _step = 1;
+
+  /**
+   * @brief Pin #1 for rotary input
+   */
   int _pin1 = -1;
+
+  /**
+   * @brief Pin #2 for rotary input
+   */
   int _pin2 = -1;
 
   /**
-   * @brief The _changeAction holds the actions that are submitted when the rotary was changed.
+   * @brief The _changeAction holds the actions that are submitted when the
+   * rotary was changed.
    */
   String _changeAction;
 };

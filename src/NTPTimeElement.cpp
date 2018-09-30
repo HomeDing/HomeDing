@@ -31,6 +31,7 @@
 #include "NTPTimeElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "NTPTime"
 #include "core/Logger.h"
 

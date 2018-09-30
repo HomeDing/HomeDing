@@ -14,6 +14,7 @@
 #include "SSDPElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "SSDP"
 #include "core/Logger.h"
 

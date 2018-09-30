@@ -15,6 +15,7 @@
 
 #include <ArduinoOTA.h>
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "OTA"
 #include "core/Logger.h"
 

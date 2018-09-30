@@ -18,7 +18,8 @@
 #include "ValueElement.h"
 #include "ElementRegistry.h"
 
-#define LOGGER_MODULE "value"
+#undef LOGGER_MODULE
+#define LOGGER_MODULE "Value"
 #include "core/Logger.h"
 
 /**

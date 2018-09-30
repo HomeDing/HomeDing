@@ -34,6 +34,7 @@
 
 #include <displays/DisplayAdapter.h>
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "board"
 #include "core/Logger.h"
 

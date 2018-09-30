@@ -16,6 +16,7 @@
 
 #include "DisplayTextElement.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "DisplayText"
 #include "core/Logger.h"
 

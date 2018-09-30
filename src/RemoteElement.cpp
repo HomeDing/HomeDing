@@ -19,7 +19,8 @@
 #include "RemoteElement.h"
 #include "ElementRegistry.h"
 
-#define LOGGER_MODULE "remote"
+#undef LOGGER_MODULE
+#define LOGGER_MODULE "Remote"
 #include "core/Logger.h"
 
 

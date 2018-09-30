@@ -19,6 +19,7 @@
 #include "DHTElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "DHT"
 #include "core/Logger.h"
 

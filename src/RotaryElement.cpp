@@ -17,7 +17,8 @@
 #include "RotaryElement.h"
 #include "ElementRegistry.h"
 
-#define LOGGER_MODULE "rotary"
+#undef LOGGER_MODULE
+#define LOGGER_MODULE "Rotary"
 #include "core/Logger.h"
 
 /* ===== statics ===== */

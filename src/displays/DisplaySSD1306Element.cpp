@@ -17,6 +17,7 @@
 #include "DisplaySSD1306Element.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "SSD1306"
 #include "core/Logger.h"
 

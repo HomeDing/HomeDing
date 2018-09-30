@@ -13,6 +13,7 @@
 #include "TimerElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "Timer"
 #include "core/Logger.h"
 

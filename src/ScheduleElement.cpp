@@ -18,9 +18,11 @@
 #include "ScheduleElement.h"
 #include "ElementRegistry.h"
 
-#define LOGGER_MODULE "sched"
+#undef LOGGER_MODULE
+#define LOGGER_MODULE "Sched"
 #include "core/Logger.h"
 
+#undef LOGGER_TRACE
 #define LOGGER_TRACE LOGGER_INFO
 
 /* ===== Define local constants and often used strings ===== */

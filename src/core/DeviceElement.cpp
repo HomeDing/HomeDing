@@ -19,6 +19,7 @@
 #include "DeviceElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "device"
 #include "core/Logger.h"
 

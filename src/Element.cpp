@@ -13,7 +13,8 @@
 #include "Element.h"
 #include "ElementRegistry.h"
 
-#define LOGGER_MODULE "element"
+#undef LOGGER_MODULE
+#define LOGGER_MODULE "Element"
 #include "core/Logger.h"
 
 

@@ -18,6 +18,7 @@
 #include "DisplayLCDElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "lcd"
 #include "core/Logger.h"
 

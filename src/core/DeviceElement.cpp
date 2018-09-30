@@ -89,9 +89,9 @@ void DeviceElement::loop()
 {
   unsigned long now = millis() / 1000;
   if ((_rebootTime > 0) && (now > _nextBoot)) {
-    LOGGER_INFO("reboot");
+    LOGGER_INFO("restart");
     delay(100);
-    ESP.reset();
+    ESP.restart();
     delay(100);
 
     // ESP.deepSleep(8000);

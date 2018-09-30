@@ -13,7 +13,9 @@
 #include "PWMOutElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "PWMout"
+#define LOGGER_ENABLE_TRACE
 #include "core/Logger.h"
 
 
@@ -34,7 +36,7 @@ bool PWMOutElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "pin") == 0) {
-    _pin = atoi(value);
+    _pin = _atopin(value);
 
   } else if (_stricmp(name, "inverse") == 0) {
     _invers = _atob(value);
@@ -64,6 +66,10 @@ void PWMOutElement::start()
     // enable output and stay off
     Element::start();
     pinMode(_pin, OUTPUT);
+    LOGGER_INFO("pin = %d", _pin);
+    LOGGER_INFO("range = %d", _range);
+    LOGGER_INFO("value = %d", _value);
+
     analogWriteRange(_range);
     _setValue(_value);
   } // if
@@ -84,11 +90,12 @@ void PWMOutElement::pushState(
  */
 void PWMOutElement::_setValue(int newValue)
 {
-  LOGGER_TRACE("setValue(%d)", newValue);
+  LOGGER_INFO("setValue(%d)", newValue);
   _value = newValue;
 
   if (active) {
     analogWrite(_pin, (_invers) ? _range - _value : _value);
+    LOGGER_INFO("value = %d", (_invers) ? _range - _value : _value);
   } // if
 } // _setValue
 

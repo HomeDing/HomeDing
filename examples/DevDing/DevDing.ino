@@ -45,6 +45,8 @@
 #include <BoardServer.h>
 #include <FileServer.h>
 
+#define NET_DEBUG 0
+
 // Use the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
 
@@ -60,9 +62,9 @@
 
 #include <HomeDing.h>
 
-extern "C" {
-#include "user_interface.h"
-}
+// extern "C" {
+// #include "user_interface.h"
+// }
 
 // ===== WLAN credentials =====
 
@@ -103,6 +105,57 @@ void handleFileList()
   server.send(200, "text/json", json);
 } // handleFileList
 
+wl_status_t net_connect()
+{
+  // connect to a same network as before ?
+  wl_status_t wifi_status = WiFi.status();
+
+#if NET_DEBUG
+  LOGGER_TRACE("wifi status=(%d)", wifi_status);
+  if (WiFi.getAutoConnect()) {
+    Serial.printf("autoconnect mode enabled.");
+  }
+#endif
+
+  if (WiFi.getAutoConnect() && WiFi.SSID().equalsIgnoreCase(ssid) &&
+      WiFi.psk().equalsIgnoreCase(password)) {
+#if NET_DEBUG
+    LOGGER_TRACE("same network");
+#endif
+
+    if (wifi_status != WL_CONNECTED) {
+      LOGGER_TRACE("start reconnect");
+      WiFi.mode(WIFI_STA);
+      WiFi.begin();
+    } // if
+  } else {
+    LOGGER_TRACE("start new STA");
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+  } // if
+
+  // wait max. 30 seconds for connecting
+  unsigned long maxTime = millis() + (30 * 1000);
+
+  while (1) {
+    wifi_status = WiFi.status();
+#if NET_DEBUG
+    Serial.printf("(%d).", wifi_status);
+#else
+    Serial.printf(".");
+#endif
+
+    if ((wifi_status == WL_CONNECTED) || (wifi_status == WL_NO_SSID_AVAIL) ||
+        (wifi_status == WL_CONNECT_FAILED) || (millis() >= maxTime))
+      break; // exit this loop
+    delay(100);
+  } // while
+
+  Serial.printf(".\n");
+  LOGGER_TRACE("net_connect returns(%d)", wifi_status);
+  return (wifi_status);
+} // net_connect
+
 
 /**
  * Setup all components and Serial debugging helpers
@@ -113,32 +166,30 @@ void setup(void)
   DisplayAdapter *display = NULL;
 
   Serial.begin(115200);
+
+#if NET_DEBUG
+  Serial.setDebugOutput(true);
+#else
   Serial.setDebugOutput(false);
-
-  WiFi.mode(WIFI_OFF);
-
-  // Enable the next line to start detailed tracing
-  // Logger::logger_level = LOGGER_LEVEL_TRACE;
+#endif
 
   LOGGER_INFO("HomDing Device is starting... (%s), %d", __DATE__,
               ESP.getBootMode());
 
-  // ----- setup File System -----
+  // ----- setup the file system and load configuration -----
   SPIFFS.begin();
-
-  // ----- load configuration -----
-
   mainBoard.init(&server);
 
-  // load all config files and create Elements
+  // load all config files and create+start elements
   mainBoard.addElements();
-
-  // ===== start Elements =====
   mainBoard.start();
+
+  // Enable the next line to start detailed tracing
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
+
   LOGGER_TRACE("Elements started.\n");
 
   // ----- setup Display -----
-
   display = mainBoard.display;
   if (display) {
     display->drawText(0, 0, 0, "HomeDing...");
@@ -159,42 +210,41 @@ void setup(void)
 
   // ----- setup Web Server -----
 
-  WiFi.mode(WIFI_STA);
-  if ((*ssid) && (*password)) {
-    WiFi.begin(ssid, password);
-  } else {
-    WiFi.begin();
-  }
+  LOGGER_INFO("Starting network...");
 
   // set device hostname as soon as possible from the device name
+  // LOGGER_INFO("hostname=%s", WiFi.hostname().c_str());
+  // LOGGER_INFO("devicename=%s", devicename);
   WiFi.hostname(devicename);
-  WiFi.setAutoConnect(true);
 
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  wl_status_t wifi_status = net_connect();
+
+  if (wifi_status != WL_CONNECTED) {
+    delay(10000);
+    ESP.restart();
   }
-  Serial.print("\n");
 
-  IPAddress ipAddress = WiFi.localIP();
-  char ipstr[16];
-  sprintf(ipstr, "%u.%u.%u.%u", ipAddress[0], ipAddress[1], ipAddress[2],
-          ipAddress[3]);
+  WiFi.setAutoConnect(true);
+  WiFi.setAutoReconnect(true);
 
   LOGGER_INFO("Connected to: %s", WiFi.SSID().c_str());
-  LOGGER_INFO("  as: %s", devicename);
-  LOGGER_INFO("  IP: %s", ipstr);
+  LOGGER_INFO("  as: %s", WiFi.hostname().c_str());
+
+  String ipStr = WiFi.localIP().toString();
+  LOGGER_INFO("  IP: %s", ipStr.c_str());
+  LOGGER_INFO(" MAC: %s", WiFi.macAddress().c_str());
 
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, devicename);
-    display->drawText(0, display->lineHeight, 0, ipstr);
+    display->drawText(0, display->lineHeight, 0, ipStr.c_str());
     display->flush();
     delay(1000);
   } // if
 
-  // WiFi.printDiag(Serial);
+#if NET_DEBUG
+  WiFi.printDiag(Serial);
+#endif
 
   // ----- adding web server handlers -----
 
@@ -224,8 +274,9 @@ void setup(void)
     // json += " 'wifi-opmode':" + String(wifi_get_opmode()) + "\n";
     // json += " 'wifi-phymode':" + String(wifi_get_phy_mode()) + "\n";
     // json += " 'wifi-channel':" + String(wifi_get_channel()) + "\n";
-    // json += " 'wifi-ap-id':" + String(wifi_station_get_current_ap_id()) + "\n";
-    // json += " 'wifi-status':" + String(wifi_station_get_connect_status()) + "\n";
+    // json += " 'wifi-ap-id':" + String(wifi_station_get_current_ap_id()) +
+    // "\n"; json += " 'wifi-status':" +
+    // String(wifi_station_get_connect_status()) + "\n";
 
     json += "}";
     json.replace('\'', '"');

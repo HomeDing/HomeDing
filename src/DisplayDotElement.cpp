@@ -16,6 +16,7 @@
 
 #include "DisplayDotElement.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "DisplayDot"
 #include "core/Logger.h"
 

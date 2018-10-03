@@ -13,6 +13,7 @@
 #include "DigitalOutElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "DigitalOut"
 #include "core/Logger.h"
 

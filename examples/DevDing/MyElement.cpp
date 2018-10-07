@@ -18,6 +18,7 @@
 #include "MyElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "my"
 #include "core/Logger.h"
 

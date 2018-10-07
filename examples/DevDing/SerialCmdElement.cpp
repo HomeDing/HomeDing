@@ -18,6 +18,7 @@
 #include "SerialCmdElement.h"
 #include "ElementRegistry.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "cmd"
 #include "core/Logger.h"
 

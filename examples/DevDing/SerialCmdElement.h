@@ -75,4 +75,4 @@ private:
   String _preset1;
 };
 
-#endif SERIALCMDOTEELEMENT_H
+#endif // SERIALCMDOTEELEMENT_H

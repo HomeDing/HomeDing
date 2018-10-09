@@ -19,6 +19,7 @@
  * * 25.06.2018 ArduinoJson replace by MicroJsonParser.
  * * 24.08.2018 Environment setting separated from Element configuration.
  * * 26.08.2018 Later display initialization, enabling display configuration.
+ * * 09.10.2018 Get time in time_t format.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -136,6 +137,11 @@ public:
 
   // fill the time structure from a timestamp;
   void getTime(struct tm *time);
+
+
+  // return the seconds since 1.1.1970 00:00:00
+  time_t getTime();
+
 
   // return the seconds of today.
   time_t getTimeOfDay();

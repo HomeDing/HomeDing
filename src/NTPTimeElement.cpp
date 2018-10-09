@@ -39,7 +39,7 @@
 #include "sntp.h"
 #include "time.h"
 
-#include "user_interface.h"
+// #include "user_interface.h"
 
 // String constants, only once in Memory
 static const char *NTPE_ntpserver = "ntpserver";
@@ -108,11 +108,6 @@ void NTPTimeElement::start()
   Element::start();
 
   sntp_set_timezone(_zone);
-
-  // time_t tStamp = (time_t)sntp_get_current_timestamp();
-  // char b[32];
-  // strftime(b, sizeof(b), NTPE_timestampFmt, localtime(&tStamp));
-  // LOGGER_INFO("startup Time= %s", b);
 } // start()
 
 

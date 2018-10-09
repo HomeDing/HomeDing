@@ -22,6 +22,7 @@
 #include "MicroJsonParser.h"
 
 #define LOGGER_MODULE "board"
+#define LOGGER_ENABLE_TRACE
 #define LOGGER_LEVEL 0
 #include "core/Logger.h"
 
@@ -293,6 +294,17 @@ void Board::getTime(struct tm *time)
   } else {
     memset(time, 0, sizeof(struct tm));
   }
+} // getTime()
+
+
+// return the seconds since 1.1.1970 00:00:00
+time_t Board::getTime()
+{
+  uint32 current_stamp = sntp_get_current_timestamp();
+  if (current_stamp <= (24 * 60 * 60)) {
+    current_stamp = 0;
+  } // if
+  return((time_t)(current_stamp));
 } // getTime()
 
 

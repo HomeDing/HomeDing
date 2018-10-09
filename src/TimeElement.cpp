@@ -25,8 +25,6 @@
 
 #include "time.h"
 
-#include "user_interface.h"
-
 static const char *TIME_ontime = "ontime";
 static const char *TIME_onminute = "onminute";
 static const char *TIME_ondate = "ondate";
@@ -46,11 +44,6 @@ Element *TimeElement::create()
   LOGGER_TRACE("create()");
   return (new TimeElement());
 } // create()
-
-
-TimeElement::TimeElement()
-{
-} // TimeElement()
 
 
 /**
@@ -126,13 +119,6 @@ void TimeElement::loop()
     } // if
   } // if
 } // loop()
-
-
-void TimeElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  Element::pushState(callback);
-} // pushState()
 
 
 // ===== private functions =====

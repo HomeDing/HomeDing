@@ -51,11 +51,6 @@ public:
   static bool registered;
 
   /**
-   * @brief Construct a new TimeElement object.
-   */
-  TimeElement();
-
-  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.
@@ -76,17 +71,9 @@ public:
    */
   virtual void loop();
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void
-  pushState(std::function<void(const char *pName, const char *eValue)> callback);
-
 private:
   void _sendAction(String &action, const char *fmt, time_t tStamp);
 
-  unsigned long _nextRead;
   uint32 _lastTimestamp;
   uint32 _lastMinute;
   uint32 _lastDate;

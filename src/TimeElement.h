@@ -1,9 +1,8 @@
 /**
- * @file NTPTimeElement.h
- *
- * @brief Core Element for the HomeDing Library to get the actual time using the
- * NTP protocol.
- *
+ * @file TimeElement.h
+ * 
+ * @brief Core Element for the HomeDing Library to send actions based on the actual local time.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -14,15 +13,15 @@
  * More information on https://www.mathertel.de/Arduino.
  *
  * Changelog:
- * * 21.05.2018 created by Matthias Hertel
+ * * 09.10.2018 created by Matthias Hertel
  */
 
-#ifndef NTPTIMEELEMENT_H
-#define NTPTIMEELEMENT_H
+#ifndef TIMEELEMENT_H
+#define TIMEELEMENT_H
 
+#include <Arduino.h>
 #include "Board.h"
 #include "Element.h"
-#include <Arduino.h>
 
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
@@ -34,14 +33,14 @@
 
 
 /**
- * @brief The NTPTimeElement is an special Element that creates actions based on
+ * @brief The TimeElement is an special Element that creates actions based on
  * a digital IO signal.
  */
-class NTPTimeElement : public Element
+class TimeElement : public Element
 {
 public:
   /**
-   * @brief Factory function to create a NTPTimeElement.
+   * @brief Factory function to create a TimeElement.
    * @return Element*
    */
   static Element *create();
@@ -52,9 +51,9 @@ public:
   static bool registered;
 
   /**
-   * @brief Construct a new NTPTimeElement object.
+   * @brief Construct a new TimeElement object.
    */
-  NTPTimeElement();
+  TimeElement();
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -66,7 +65,7 @@ public:
   virtual bool set(const char *name, const char *value);
 
   /**
-   * @brief Activate the NTPTimeElement.
+   * @brief Activate the TimeElement.
    * @return true when activation was good.
    * @return false when activation failed.
    */
@@ -81,27 +80,28 @@ public:
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback);
+  virtual void
+  pushState(std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
-  // host name of ntp server
-  String _ntpServer;
+  void _sendAction(String &action, const char *fmt, time_t tStamp);
 
-  // Time Zone
-  int _zone;
-
-  // time between 2 time syncronizations
-  int _readTime;
-
-  // 0: no time: 1 receiving time, 2: time ok.
-  int _state;
-
-  // millis, when a packet was sent out. 0 means no packet was sent.
-  unsigned long _sendTime;
-
-  // when to request a new ntp time from the server
   unsigned long _nextRead;
+  uint32 _lastTimestamp;
+  uint32 _lastMinute;
+  uint32 _lastDate;
+
+  // action send everytime the time has changed, value = hh:mm:ss
+  String _timeAction;
+
+  // action send everytime the date has changed, value = YYYY-MM-DD hh:mm:ss
+  String _timestampAction;
+
+  // action send everytime the time has changed, value = hh:mm
+  String _minuteAction;
+
+  // action send everytime the date has changed, value = YYYY-MM-DD
+  String _dateAction;
 };
 
-#endif // NTPTIMEELEMENT_H
+#endif // TIMEELEMENT_H

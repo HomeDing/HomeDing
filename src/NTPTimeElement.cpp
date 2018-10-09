@@ -33,6 +33,7 @@
 
 #undef LOGGER_MODULE
 #define LOGGER_MODULE "NTPTime"
+#define LOGGER_ENABLE_TRACE
 #include "core/Logger.h"
 
 #include "sntp.h"
@@ -45,16 +46,6 @@ static const char *NTPE_ntpserver = "ntpserver";
 
 static const char *NTPE_zone = "zone";
 static const char *NTPE_readtime = "readtime";
-
-static const char *NTPE_ontime = "ontime";
-static const char *NTPE_onminute = "onminute";
-static const char *NTPE_ondate = "ondate";
-static const char *NTPE_ontimestamp = "ontimestamp";
-
-static const char *NTPE_timeFmt = "%H:%M:%S";
-static const char *NTPE_minuteFmt = "%H:%M";
-static const char *NTPE_dateFmt = "%Y-%m-%d";
-static const char *NTPE_timestampFmt = "%Y-%m-%d %H:%M:%S";
 
 /**
  * @brief static factory function to create a new NTPTimeElement
@@ -75,7 +66,7 @@ NTPTimeElement::NTPTimeElement()
   _nextRead = 0;
 
   uint32 rtc_time = system_get_rtc_time();
-  LOGGER_INFO("rtc_time=%d", rtc_time);
+  LOGGER_TRACE("rtc_time=%d", rtc_time);
 } // NTPTimeElement()
 
 
@@ -95,18 +86,6 @@ bool NTPTimeElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, NTPE_zone) == 0) {
     _zone = atoi(value);
-
-  } else if (_stricmp(name, NTPE_ontime) == 0) {
-    _timeAction = value;
-
-  } else if (_stricmp(name, NTPE_onminute) == 0) {
-    _minuteAction = value;
-
-  } else if (_stricmp(name, NTPE_ondate) == 0) {
-    _dateAction = value;
-
-  } else if (_stricmp(name, NTPE_ontimestamp) == 0) {
-    _timestampAction = value;
 
   } else {
     ret = Element::set(name, value);
@@ -138,18 +117,13 @@ void NTPTimeElement::start()
 
 
 /**
- * @brief check the state of the DHT values and eventually create actions.
+ * @brief check the state of the local time DHT and eventually request a new ntp time.
  */
 void NTPTimeElement::loop()
 {
   unsigned long now_m = millis();
   unsigned int now = now_m / 1000;
-  time_t cts;
   uint32 current_stamp = sntp_get_current_timestamp();
-  String out;
-  String tmpEvent;
-
-  time(&cts);
 
   if ((_state != 1) && (_nextRead < now)) {
     LOGGER_TRACE("request sntp sync");
@@ -168,7 +142,6 @@ void NTPTimeElement::loop()
       LOGGER_LOG("got time: %d", current_stamp);
       _state = 2;
       _nextRead = now + _readTime;
-      _lastTimestamp = 0;
       sntp_stop();
 
     } // if
@@ -181,27 +154,6 @@ void NTPTimeElement::loop()
     sntp_stop();
 
   } else if (_state == 2) {
-
-    // check for time actions...
-    if (_lastTimestamp != current_stamp) {
-      _sendAction(_timeAction, NTPE_timeFmt, (time_t)current_stamp);
-      _sendAction(_timestampAction, NTPE_timestampFmt, (time_t)current_stamp);
-      _lastTimestamp = current_stamp;
-    } // if
-
-    // ignore seconds
-    current_stamp -= (current_stamp % 60);
-    if (_lastMinute != current_stamp) {
-      _sendAction(_minuteAction, NTPE_minuteFmt, (time_t)current_stamp);
-      _lastMinute = current_stamp;
-    } // if
-
-    // ignore time
-    current_stamp -= (current_stamp % (24 * 60 * 60));
-    if (_lastDate != current_stamp) {
-      _sendAction(_dateAction, NTPE_dateFmt, (time_t)current_stamp);
-      _lastDate = current_stamp;
-    } // if
   } // if
 } // loop()
 
@@ -213,29 +165,9 @@ void NTPTimeElement::pushState(
   char tmp[32];
 
   Element::pushState(callback);
-  strftime(tmp, sizeof(tmp), NTPE_timestampFmt, localtime(&tStamp));
+  strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&tStamp));
   callback("now", tmp);
 } // pushState()
-
-
-// ===== private functions =====
-
-/**
- * @brief Send out the action after adding the formatted value.
- * @param action Action template.
- * @param fmt Format for the value.
- * @param tStamp the time
- */
-void NTPTimeElement::_sendAction(String &action, const char *fmt, time_t tStamp)
-{
-  if (action.length()) {
-    LOGGER_TRACE("_send(%s)", action.c_str());
-    char b[32];
-    struct tm *tmp = localtime(&tStamp);
-    strftime(b, sizeof(b), fmt, tmp);
-    _board->dispatch(action, b);
-  } // if
-} // _sendAction()
 
 
 // ===== Register =====

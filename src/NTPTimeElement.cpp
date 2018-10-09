@@ -1,8 +1,8 @@
 /**
  * @file NTPTimeElement.cpp
  *
- * @brief Core Element for the HomeDing Library to get the actual time using the
- * NTP protocol.
+ * @brief Core Element for the HomeDing Library to get the actual local time
+ * using the NTP protocol from a NTP server.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -112,7 +112,8 @@ void NTPTimeElement::start()
 
 
 /**
- * @brief check the state of the local time DHT and eventually request a new ntp time.
+ * @brief check the state of the local time DHT and eventually request a new ntp
+ * time.
  */
 void NTPTimeElement::loop()
 {

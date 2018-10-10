@@ -29,6 +29,8 @@
  * * 25.06.2018 ArduinoJson replace by MicroJsonParser. in use only in board.
  * * 22.08.2018 separate network and device configuration.
  * * 18.09.2018 display configuration now in env.json using elements
+ * * 10.10.2018 more robust startup.
+ * * 10.10.2018 extend sysinfo
  */
 
 #include <ESP8266WebServer.h>
@@ -269,7 +271,11 @@ void setup(void)
 
     SPIFFS.info(fs_info);
     json += " 'fs-totalBytes':" + String(fs_info.totalBytes) + ",\n";
-    json += " 'fs-usedBytes':" + String(fs_info.usedBytes) + "\n";
+    json += " 'fs-usedBytes':" + String(fs_info.usedBytes) + ",\n";
+
+    // WIFI info
+    json += " 'ssid':'" + WiFi.SSID() + "',\n";
+    json += " 'bssid':'" + WiFi.BSSIDstr() + "'\n";
 
     // json += " 'wifi-opmode':" + String(wifi_get_opmode()) + "\n";
     // json += " 'wifi-phymode':" + String(wifi_get_phy_mode()) + "\n";

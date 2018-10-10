@@ -1,5 +1,17 @@
 # The HomeDing Library
 
-The The HomeDing Library for Arduino enables building IoT Devices (here called Things in short) using ESP8266 based boards. It is a complete ecosystem of the required internal functionality of a Thing (called the Elements) together with a Web Server implementation that runs a small IDE (Integrated Development Environment) that allows changing and redefining the function of a thing by using a web browser only.
+The HomeDing library for Arduino enables building IoT devices using ESP8266 based boards.
+It is a complete ecosystem of the required internal functionality based on elements that can be activated and integrated by configuration.
+It is extensible by adding specific elements.
+
+The embedded Web Server enables controlling the device and linking devices together.
+
+It supports:
+
+* a device specific UI that can be accessed by browsers and mobile devices
+* web services using the REST format to control the device
+* web services using the REST format to get the status of the device
+* retrieving actions from other devices
+* a small IDE (Integrated Development Environment) that allows changing the configuration
 
 More documentation can be found in the  [HomeDing Wiki](https://github.com/HomeDing/HomeDing/wiki)

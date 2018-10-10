@@ -38,7 +38,7 @@ void Element::init(Board *board)
 bool Element::set(const char *name, const char *value)
 {
   LOGGER_TRACE("set(%s, %s)", name, value);
-  bool ret = false;
+  bool ret = true;
 
   if (_stricmp(name, "start") == 0) {
     start();
@@ -46,12 +46,14 @@ bool Element::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "stop") == 0) {
     term();
-    ret = true;
+
+  // do not report an error for the following properties, as they are used in the web ui.
+  } else if (_stricmp(name, "description") == 0) {
+  } else if (_stricmp(name, "room") == 0) {
 
   } else {
     LOGGER_ERR("cannot set unknown property %s", name);
     ret = false;
-
   } // if
   return (ret);
 } // set()

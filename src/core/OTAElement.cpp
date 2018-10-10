@@ -30,6 +30,11 @@ Element *OTAElement::create()
 } // create()
 
 
+OTAElement::OTAElement()
+{
+  startupMode = STARTUP_ON_NET;
+}
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -57,16 +62,9 @@ bool OTAElement::set(const char *name, const char *value)
  */
 void OTAElement::start()
 {
-  char devicename[32]; // name of this device on the network
   LOGGER_TRACE("start()");
 
-  // get device name from device Element.
-  strncpy(devicename, "homeding", sizeof(devicename));
-
-  Element *deviceElement = _board->getElement("device");
-  if (deviceElement)
-    strncpy(devicename, deviceElement->get("name"), sizeof(devicename));
-  ArduinoOTA.setHostname(devicename);
+  ArduinoOTA.setHostname(_board->deviceName.c_str());
 
   ArduinoOTA.setPort(_port); // defaults = 8266
   if (_passwd.length() > 0)
@@ -76,15 +74,15 @@ void OTAElement::start()
   ArduinoOTA.onEnd([]() { LOGGER_INFO("End."); });
 
   // The onProgress function is called very often. Only report progress on
-  // full percents.
+  // full percentages.
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    static int lastpc = 0;
+    static int lastPC = 0;
     int pc = (progress / (total / 100));
-    if (pc != lastpc) {
+    if (pc != lastPC) {
       Serial.print('.');
       if (pc % 50 == 0)
         Serial.printf(" %d %%\n", pc);
-      lastpc = pc;
+      lastPC = pc;
     }
   });
 

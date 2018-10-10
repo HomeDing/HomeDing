@@ -37,6 +37,7 @@ Element *DeviceElement::create()
 DeviceElement::DeviceElement()
 {
   _rebootTime = 0; // no automatic reboot
+  startupMode = STARTUP_ON_SYS;
 }
 
 
@@ -47,6 +48,7 @@ bool DeviceElement::set(const char *name, const char *value)
 
   if (_stricmp(name, "name") == 0) {
     _deviceName = value;
+    _board->deviceName = value;
 
   } else if (_stricmp(name, "description") == 0) {
     _description = value;
@@ -77,6 +79,9 @@ bool DeviceElement::set(const char *name, const char *value)
 void DeviceElement::start()
 {
   unsigned long now = millis() / 1000;
+
+  // _board->deviceName = _deviceName;
+
   if (_rebootTime > 0) {
     _nextBoot = now + _rebootTime;
   } // if

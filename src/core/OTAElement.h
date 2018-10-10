@@ -11,6 +11,7 @@
 // 27.04.2018 Based on Element class.
 // 15.05.2018 set = properties and actions interface.
 // 24.09.2018 port and passwd configuration added.
+// 10.10.2018 startup as NET element
 // -----
 
 #ifndef OTAELEMENT_H
@@ -34,6 +35,11 @@ public:
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
+
+  /**
+   * @brief Construct a new OTAElement
+   */
+  OTAElement();
 
   /**
    * @brief Set a parameter or property to a new value or start an action.

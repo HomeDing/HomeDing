@@ -23,6 +23,13 @@
 
 #define ACTION_SEPARATOR ','
 
+// definitions for the startup mode of elements
+
+#define STARTUP_ON_SYS  1 // The element is started immediately after loading the configurations.
+#define STARTUP_ON_NET  2 // The element is started after a network connectivity in AP Mode was established.
+#define STARTUP_ON_TIME 3 // The element is started after a valid local time was set.
+
+
 /**
  * @brief This is the base class for all Elements that can be managed by the
  * Board.
@@ -95,6 +102,7 @@ public:
    */
   bool active = false;
 
+  int startupMode = STARTUP_ON_NET;
 
 protected:
   /**
@@ -124,8 +132,8 @@ protected:
 
   /**
    * @brief Return a pin value from a string.
-   * @details pin values can be entered using the "D0" or "A0" syntax or by specifying a GPIO number.
-   * Mappings are taken from NodeMCU.
+   * @details pin values can be entered using the "D0" or "A0" syntax or by
+   * specifying a GPIO number. Mappings are taken from NodeMCU.
    *
    * * D0  = GPIO 16
    * * D1  = GPIO 5

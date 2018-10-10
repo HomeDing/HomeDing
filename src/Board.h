@@ -35,8 +35,8 @@
 
 #include <displays/DisplayAdapter.h>
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "board"
+// #undef LOGGER_MODULE
+// #define LOGGER_MODULE "board"
 #include "core/Logger.h"
 
 
@@ -61,6 +61,22 @@
 #define MAX_ID_LENGTH 32
 
 #define MAX_LIST_LENGTH 20
+
+/**
+ * State of Board
+ */
+typedef enum {
+  BOARDSTATE_NONE = 0, // unspecified
+  BOARDSTATE_CONFIG = 1, // read all configurations and create elements. Start SYS Elements
+  BOARDSTATE_LASTNET = 2, // try to reconnect to last known network. Wait for clicks.
+  BOARDSTATE_AP = 3, // AP Mode, create a AccessPoint to allow configuration
+  BOARDSTATE_WPS = 4, // WPS Mode, waiting for configuration
+
+  BOARDSTATE_START = 5 // start all NET Elements 
+// start TIME Elements
+// restart on network lost > 30 secs.
+} BoardState;
+
 
 // forward class declarations
 class Element;
@@ -94,7 +110,7 @@ public:
   /**
    * @brief activate all the Elements by using start().
    */
-  void start();
+  void start(int startupMode);
 
   /**
    * @brief Give some processing time to all the active elements on the board.
@@ -138,14 +154,11 @@ public:
   // fill the time structure from a timestamp;
   void getTime(struct tm *time);
 
-
   // return the seconds since 1.1.1970 00:00:00
   time_t getTime();
 
-
   // return the seconds of today.
   time_t getTimeOfDay();
-
 
   // Display
   DisplayAdapter *display = NULL;
@@ -161,6 +174,10 @@ public:
    * @return Element* first element in list with this type.
    */
   Element *getElement(const char *elementTypeName);
+
+  String deviceName;
+
+  BoardState boardState;
 
 private:
   /**
@@ -187,6 +204,7 @@ private:
   void _dispatchSingle(String evt);
 
   bool active = false;
+  bool validTime = false;
 
   Element *_list2;
   Element *_next2;

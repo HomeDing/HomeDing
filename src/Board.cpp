@@ -21,6 +21,7 @@
 
 #include "MicroJsonParser.h"
 
+#undef LOGGER_MODULE
 #define LOGGER_MODULE "board"
 #define LOGGER_ENABLE_TRACE
 #define LOGGER_LEVEL 0
@@ -28,6 +29,8 @@
 
 #include "sntp.h"
 
+// time_t less than this value is assumed as not initialized.
+#define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
 /**
  * @brief Initialize a blank board.
@@ -36,12 +39,15 @@ void Board::init(ESP8266WebServer *s)
 {
   LOGGER_TRACE("init()");
   server = s;
+  boardState = BOARDSTATE_NONE;
+  deviceName = WiFi.hostname();
+  LOGGER_INFO("devicename=%s", deviceName.c_str());
 } // init()
 
 
 /**
  * @brief Add and config the Elements defined in the config files.
- * 
+ *
  */
 void Board::addElements()
 {
@@ -93,27 +99,71 @@ void Board::addElements()
 } // addElements()
 
 
-void Board::start()
+void Board::start(int startupMode)
 {
   LOGGER_TRACE("start()");
 
-  // make elements active
+  // make elements active that match
   Element *l = _list2;
   while (l != NULL) {
-    LOGGER_TRACE("starting %s...", l->id);
-    l->start();
+
+    if ((!l->active) && (l->startupMode <= startupMode)) {
+      // start element when not already active
+      LOGGER_TRACE("starting %s...", l->id);
+      l->start();
+    } // if
+
     l = l->next;
   } // while
+
   active = true;
   _next2 = NULL;
 } // start()
 
 
 // loop next element, only one at a time!
+
+
 void Board::loop()
 {
-  if (active) {
+  if (boardState == BOARDSTATE_NONE) {
+    LOGGER_INFO("do BOARDSTATE_NONE");
+    boardState = BOARDSTATE_CONFIG;
 
+  } else if (boardState == BOARDSTATE_CONFIG) {
+    LOGGER_INFO("do BOARDSTATE_CONFIG");
+
+    // load all config files and create+start elements
+    addElements();
+    start(STARTUP_ON_SYS);
+    LOGGER_INFO("SYS Elements started.");
+
+    LOGGER_INFO("devicename=%s", deviceName.c_str());
+
+    if (display) {
+      display->drawText(0, 0, 0, "HomeDing...");
+      display->flush();
+      delay(100);
+    } // if
+    boardState = BOARDSTATE_LASTNET;
+
+  } else if (boardState == BOARDSTATE_LASTNET) {
+    LOGGER_INFO("do BOARDSTATE_LASTNET");
+    boardState = BOARDSTATE_START;
+
+  } else if (boardState == BOARDSTATE_START) {
+
+    if (!validTime) {
+      // check if time is valid now -> start all elements with STARTUP_ON_TIME
+      uint32 current_stamp = sntp_get_current_timestamp();
+      if (current_stamp > MIN_VALID_TIME) {
+        start(STARTUP_ON_TIME);
+        validTime = true;
+        return;
+      } // if
+    }
+
+    // dispatch next action if any
     if (_actionList.length() > 0) {
       String _lastAction;
 
@@ -127,10 +177,10 @@ void Board::loop()
         _actionList = (const char *)NULL;
       } // if
       _dispatchSingle(_lastAction);
+      return;
     } // if
 
-    yield();
-
+    // give some time to next active element
     if (_next2 == NULL) {
       _next2 = _list2;
     } // if
@@ -288,7 +338,7 @@ void Board::setState(String &path, String property, String value)
 void Board::getTime(struct tm *time)
 {
   uint32 current_stamp = sntp_get_current_timestamp();
-  if (current_stamp > (24 * 60 * 60)) {
+  if (current_stamp > MIN_VALID_TIME) {
     struct tm *tmp = localtime((time_t *)(&current_stamp));
     memcpy(time, tmp, sizeof(struct tm));
   } else {
@@ -301,10 +351,10 @@ void Board::getTime(struct tm *time)
 time_t Board::getTime()
 {
   uint32 current_stamp = sntp_get_current_timestamp();
-  if (current_stamp <= (24 * 60 * 60)) {
+  if (current_stamp <= MIN_VALID_TIME) {
     current_stamp = 0;
   } // if
-  return((time_t)(current_stamp));
+  return ((time_t)(current_stamp));
 } // getTime()
 
 
@@ -312,7 +362,7 @@ time_t Board::getTime()
 time_t Board::getTimeOfDay()
 {
   uint32 current_stamp = sntp_get_current_timestamp();
-  if (current_stamp > (24 * 60 * 60)) {
+  if (current_stamp > MIN_VALID_TIME) {
     current_stamp = current_stamp % (24 * 60 * 60);
   } else {
     current_stamp = 0;
@@ -361,7 +411,7 @@ void Board::_add(const char *id, Element *e)
     while (l->next != NULL)
       l = l->next;
     l->next = e;
-    e->init(this);
   } // if
+  e->init(this);
 } // _add()
 // End

@@ -42,12 +42,13 @@
 // =====
 
 #define LOGGER_MODULE "main"
+#define LOGGER_ENABLE_TRACE
 
 #include <Board.h>
 #include <BoardServer.h>
 #include <FileServer.h>
 
-#define NET_DEBUG 0
+#define NET_DEBUG 1
 
 // Use the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
@@ -106,6 +107,7 @@ void handleFileList()
 
   server.send(200, "text/json", json);
 } // handleFileList
+
 
 wl_status_t net_connect()
 {
@@ -178,26 +180,33 @@ void setup(void)
   LOGGER_INFO("HomDing Device is starting... (%s), %d", __DATE__,
               ESP.getBootMode());
 
+  // Enable the next line to start detailed tracing
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
+
   // ----- setup the file system and load configuration -----
   SPIFFS.begin();
   mainBoard.init(&server);
 
-  // load all config files and create+start elements
-  mainBoard.addElements();
-  mainBoard.start();
+  while ((mainBoard.boardState == BOARDSTATE_NONE) ||
+         (mainBoard.boardState == BOARDSTATE_CONFIG)) {
+    mainBoard.loop();
+    yield();
+  } // while
 
-  // Enable the next line to start detailed tracing
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
+  /*
+    // load all config files and create+start elements
+    mainBoard.addElements();
+    mainBoard.start(STARTUP_ON_SYS);
+    LOGGER_TRACE("Elements started.\n");
 
-  LOGGER_TRACE("Elements started.\n");
-
-  // ----- setup Display -----
-  display = mainBoard.display;
-  if (display) {
-    display->drawText(0, 0, 0, "HomeDing...");
-    display->flush();
-    delay(100);
-  } // if
+    // ----- setup Display -----
+    display = mainBoard.display;
+    if (display) {
+      display->drawText(0, 0, 0, "HomeDing...");
+      display->flush();
+      delay(100);
+    } // if
+  */
 
   // ----- setup Board and Elements-----
 
@@ -243,6 +252,8 @@ void setup(void)
     display->flush();
     delay(1000);
   } // if
+
+  mainBoard.start(STARTUP_ON_NET);
 
 #if NET_DEBUG
   WiFi.printDiag(Serial);

@@ -66,10 +66,6 @@ void PWMOutElement::start()
     // enable output and stay off
     Element::start();
     pinMode(_pin, OUTPUT);
-    LOGGER_INFO("pin = %d", _pin);
-    LOGGER_INFO("range = %d", _range);
-    LOGGER_INFO("value = %d", _value);
-
     analogWriteRange(_range);
     _setValue(_value);
   } // if
@@ -90,12 +86,11 @@ void PWMOutElement::pushState(
  */
 void PWMOutElement::_setValue(int newValue)
 {
-  LOGGER_INFO("setValue(%d)", newValue);
+  LOGGER_TRACE("setValue(%d)", newValue);
   _value = newValue;
 
   if (active) {
     analogWrite(_pin, (_invers) ? _range - _value : _value);
-    LOGGER_INFO("value = %d", (_invers) ? _range - _value : _value);
   } // if
 } // _setValue
 

@@ -28,18 +28,13 @@
  * Changelog: see NTPTimeElement.h
  */
 
+#define LOGGER_MODULE "ntptime"
+
 #include "NTPTimeElement.h"
 #include "ElementRegistry.h"
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "NTPTime"
-#define LOGGER_ENABLE_TRACE
-#include "core/Logger.h"
-
 #include "sntp.h"
 #include "time.h"
-
-// #include "user_interface.h"
 
 // String constants, only once in Memory
 static const char *NTPE_ntpserver = "ntpserver";

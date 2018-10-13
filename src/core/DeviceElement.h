@@ -34,6 +34,8 @@
 class DeviceElement : public Element
 {
 public:
+  /* ===== Static factory function ===== */
+
   /**
    * @brief Factory function to create a DeviceElement.
    * @return Element*
@@ -45,8 +47,10 @@ public:
    */
   static bool registered;
 
+  /* ===== Element functions ===== */
+
   /**
-   * @brief Construct a new Device Element object
+   * @brief Constructor of a new DeviceElement.
    */
   DeviceElement();
 

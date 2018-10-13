@@ -11,13 +11,13 @@
 // Changelog: see SSDPElement.h
 // -----
 
+#define LOGGER_MODULE "ssdp"
+
 #include "SSDPElement.h"
 #include "ElementRegistry.h"
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "SSDP"
-#include "core/Logger.h"
 
+/* ===== Static factory function ===== */
 
 /**
  * @brief static factory function to create a new SSDPElement
@@ -29,6 +29,8 @@ Element *SSDPElement::create()
   return (new SSDPElement());
 } // create()
 
+
+/* ===== Element functions ===== */
 
 /**
  * @brief initialize the common functionality of all element objects.

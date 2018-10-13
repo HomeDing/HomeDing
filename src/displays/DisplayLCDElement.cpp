@@ -14,13 +14,10 @@
  * Changelog:see DisplayLCDElement.h
  */
 
-
+#define LOGGER_MODULE "lcd"
+#
 #include "DisplayLCDElement.h"
 #include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "lcd"
-#include "core/Logger.h"
 
 #include <displays/DisplayAdapterLCD.h>
 
@@ -38,6 +35,11 @@ Element *DisplayLCDElement::create()
 
 
 /* ===== Element functions ===== */
+
+DisplayLCDElement::DisplayLCDElement()
+{
+  startupMode = STARTUP_ON_SYS;
+}
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -65,7 +67,8 @@ bool DisplayLCDElement::set(const char *name, const char *value)
 
 
 /**
- * @brief Activate the DisplayLCDElement and register a Display Adapter to LCD in the board.
+ * @brief Activate the DisplayLCDElement and register a Display Adapter to LCD
+ * in the board.
  */
 void DisplayLCDElement::start()
 {

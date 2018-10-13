@@ -25,6 +25,7 @@
 class OTAElement : public Element
 {
 public:
+
   /**
    * @brief Factory function to create a OTAElement.
    * @return Element*

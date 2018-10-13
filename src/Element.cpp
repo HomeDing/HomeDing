@@ -10,13 +10,13 @@
 // Changelog: see Element.h
 // -----
 
+#define LOGGER_MODULE "element"
+
 #include "Element.h"
 #include "ElementRegistry.h"
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Element"
-#include "core/Logger.h"
 
+/* ===== Element functions ===== */
 
 /**
  * @brief initialize the common functionality of all element objects.

@@ -21,6 +21,9 @@
 #include "DeviceElement.h"
 #include "ElementRegistry.h"
 
+
+/* ===== Static factory function ===== */
+
 /**
  * @brief static factory function to create a new DeviceElement.
  * @return DeviceElement* created element
@@ -31,6 +34,8 @@ Element *DeviceElement::create()
   return (new DeviceElement());
 } // create()
 
+
+/* ===== Element functions ===== */
 
 DeviceElement::DeviceElement()
 {

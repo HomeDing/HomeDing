@@ -44,6 +44,11 @@ public:
   static bool registered;
 
   /**
+   * @brief Constructor of a new DisplayLCDElement.
+   */
+  DisplayLCDElement();
+
+  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.

@@ -14,12 +14,11 @@
  * Changelog:see DisplaySSD1306Element.h
  */
 
+#define LOGGER_MODULE "SSD1306"
+
 #include "DisplaySSD1306Element.h"
 #include "ElementRegistry.h"
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "SSD1306"
-#include "core/Logger.h"
 
 #include <displays/DisplayAdapterSSD1306.h>
 
@@ -37,6 +36,15 @@ Element *DisplaySSD1306Element::create()
 
 
 /* ===== Element functions ===== */
+
+/**
+ * @brief Constructor of a new DisplaySSD1306Element.
+ */
+DisplaySSD1306Element::DisplaySSD1306Element()
+{
+  startupMode = STARTUP_ON_SYS;
+}
+
 
 /**
  * @brief Set a parameter or property to a new value or start an action.

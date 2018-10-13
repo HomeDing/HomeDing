@@ -32,6 +32,8 @@
 class DisplaySSD1306Element : public Element
 {
 public:
+  /* ===== Static factory function ===== */
+
   /**
    * @brief Factory function to create a DisplaySSD1306Element.
    * @return Element*
@@ -42,6 +44,13 @@ public:
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
+
+  /* ===== Element functions ===== */
+
+  /**
+   * @brief Constructor of a new DisplaySSD1306Element.
+   */
+  DisplaySSD1306Element();
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -69,8 +78,8 @@ private:
 
 #ifdef HOMEDING_REGISTER
 // Register the DisplaySSD1306Element onto the ElementRegistry.
-bool DisplaySSD1306Element::registered =
-    ElementRegistry::registerElement("displaySSD1306", DisplaySSD1306Element::create);
+bool DisplaySSD1306Element::registered = ElementRegistry::registerElement(
+    "displaySSD1306", DisplaySSD1306Element::create);
 #endif
 
 #endif

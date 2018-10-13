@@ -10,14 +10,15 @@
 // Changelog: see OTAElement.h
 // -----
 
+#define LOGGER_MODULE "ota"
+
 #include "OTAElement.h"
 #include "ElementRegistry.h"
 
 #include <ArduinoOTA.h>
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "OTA"
-#include "core/Logger.h"
+
+/* ===== Static factory function ===== */
 
 /**
  * @brief static factory function to create a new OTAElement
@@ -29,6 +30,8 @@ Element *OTAElement::create()
   return (new OTAElement());
 } // create()
 
+
+/* ===== Element functions ===== */
 
 OTAElement::OTAElement()
 {

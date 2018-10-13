@@ -30,10 +30,6 @@
 #define LOGGER_MODULE "sketch"
 #endif
 
-// static int logger_level = LOGGER_LEVEL;
-
-// char *LoggerFmt[3] = {""}
-
 #define LOGGER_INFO(...)                                                       \
   Logger::LoggerPrint(LOGGER_MODULE, LOGGER_LEVEL_INFO, __VA_ARGS__)
 
@@ -43,12 +39,8 @@
 #define LOGGER_LOG(...)                                                        \
   Logger::LoggerPrint(LOGGER_MODULE, LOGGER_LEVEL_LOG, __VA_ARGS__)
 
-#ifdef LOGGER_ENABLE_TRACE
 #define LOGGER_TRACE(...)                                                      \
   Logger::LoggerPrint(LOGGER_MODULE, LOGGER_LEVEL_TRACE, __VA_ARGS__)
-#else
-#define LOGGER_TRACE(...)
-#endif
 
 class Logger
 {

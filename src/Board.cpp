@@ -15,22 +15,27 @@
  * Changelog: see Board.h
  */
 
+#define LOGGER_MODULE "board"
+
 #include "Board.h"
 #include "Element.h"
 #include "ElementRegistry.h"
 
 #include "MicroJsonParser.h"
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "board"
-#define LOGGER_ENABLE_TRACE
-#define LOGGER_LEVEL 0
-#include "core/Logger.h"
-
 #include "sntp.h"
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
+
+extern const char *ssid;
+extern const char *password;
+
+#define NetMode_AUTO 3
+#define NetMode_PSK 2
+#define NetMode_PASS 1
+
+#define SYS_LED 2 // TODO: make configurable
 
 /**
  * @brief Initialize a blank board.
@@ -40,8 +45,7 @@ void Board::init(ESP8266WebServer *s)
   LOGGER_TRACE("init()");
   server = s;
   boardState = BOARDSTATE_NONE;
-  deviceName = WiFi.hostname();
-  LOGGER_INFO("devicename=%s", deviceName.c_str());
+  deviceName = WiFi.hostname(); // use mac based default device name
 } // init()
 
 
@@ -57,7 +61,7 @@ void Board::addElements()
 
   mj = new MicroJson(
       [this, &_lastElem](int level, char *path, char *name, char *value) {
-        // LOGGER_INFO("callback %d %s", level, path);
+        // LOGGER_TRACE("callback %d %s", level, path);
 
         if (level == 3) {
           if (name == NULL) {
@@ -121,35 +125,138 @@ void Board::start(int startupMode)
 } // start()
 
 
+// switch to a new state
+void Board::_newState(BoardState newState)
+{
+  LOGGER_TRACE("do BoardState %d", newState);
+  boardState = newState;
+}
+
+
 // loop next element, only one at a time!
-
-
 void Board::loop()
 {
+  unsigned long now = millis();
+
   if (boardState == BOARDSTATE_NONE) {
-    LOGGER_INFO("do BOARDSTATE_NONE");
-    boardState = BOARDSTATE_CONFIG;
+    _newState(BOARDSTATE_CONFIG);
 
   } else if (boardState == BOARDSTATE_CONFIG) {
-    LOGGER_INFO("do BOARDSTATE_CONFIG");
-
     // load all config files and create+start elements
     addElements();
     start(STARTUP_ON_SYS);
-    LOGGER_INFO("SYS Elements started.");
+    LOGGER_TRACE("SYS Elements started.");
 
-    LOGGER_INFO("devicename=%s", deviceName.c_str());
+    LOGGER_TRACE("devicename=%s", deviceName.c_str());
+    WiFi.hostname(deviceName);
 
     if (display) {
       display->drawText(0, 0, 0, "HomeDing...");
       display->flush();
-      delay(100);
     } // if
-    boardState = BOARDSTATE_LASTNET;
 
-  } else if (boardState == BOARDSTATE_LASTNET) {
-    LOGGER_INFO("do BOARDSTATE_LASTNET");
-    boardState = BOARDSTATE_START;
+    _newState(BOARDSTATE_CONNECT);
+    netMode = NetMode_AUTO;
+
+    // wait at least 6 seconds for offering config mode
+    configPhaseEnd = now + (4 * 1000); // TODO: make configurable
+
+  } else if (boardState == BOARDSTATE_CONNECT) {
+    bool autoCon = WiFi.getAutoConnect();
+    LOGGER_TRACE("autoconnect =(%d)", autoCon);
+
+    if ((!autoCon) && (netMode == NetMode_AUTO))
+      netMode = NetMode_PSK;
+
+    // connect to a same network as before ?
+    wl_status_t wifi_status = WiFi.status();
+    LOGGER_TRACE("wifi status=(%d)", wifi_status);
+
+    if (netMode == NetMode_AUTO) {
+      // give autoconnect the chance to do it.
+      LOGGER_TRACE("start NetMode_AUTO");
+
+    } else if (netMode == NetMode_PSK) {
+      LOGGER_TRACE("start NetMode_PSK");
+      WiFi.mode(WIFI_STA);
+      WiFi.begin();
+
+    } else if (netMode == NetMode_PASS) {
+      LOGGER_TRACE("start NetMode_PASS");
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(ssid, password);
+    } // if
+
+    _newState(BOARDSTATE_CONFWAIT);
+    pinMode(SYS_LED, OUTPUT);
+    digitalWrite(SYS_LED, HIGH);
+
+    // wait max 30 seconds for connecting to the network
+    connectPhaseEnd = now + (30 * 1000); // TODO: make configurable
+
+  } else if (boardState == BOARDSTATE_CONFWAIT) {
+
+    if (now < configPhaseEnd) {
+      // just continue waiting, Blink and wait for clicks...
+
+      // MAKE SYS LED blink
+      if (((configPhaseEnd - now) % 700) > 350) {
+        digitalWrite(SYS_LED, HIGH);
+      } else {
+        digitalWrite(SYS_LED, LOW);
+      }
+      delay(100);
+
+    } else {
+      // stop using system LED
+      digitalWrite(SYS_LED, HIGH);
+      pinMode(SYS_LED, INPUT);
+      _newState(BOARDSTATE_WAIT);
+    }
+
+  } else if (boardState == BOARDSTATE_WAIT) {
+    wl_status_t wifi_status = WiFi.status();
+
+    if (wifi_status == WL_CONNECTED) {
+      LOGGER_TRACE("connected.");
+      _newState(BOARDSTATE_GREET);
+
+    } else if ((wifi_status == WL_NO_SSID_AVAIL) ||
+               (wifi_status == WL_CONNECT_FAILED) || (now >= connectPhaseEnd)) {
+      netMode -= 1;
+      LOGGER_TRACE("next connect method = %d", netMode);
+      if (netMode) {
+        _newState(BOARDSTATE_CONNECT);
+      } else {
+        LOGGER_TRACE("restarting...");
+        delay(10000);
+        ESP.restart();
+      }
+    } else {
+      delay(100);
+    }
+
+  } else if (boardState == BOARDSTATE_GREET) {
+    LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
+    LOGGER_TRACE("  as: %s", WiFi.hostname().c_str());
+
+    String ipStr = WiFi.localIP().toString();
+    LOGGER_TRACE("  IP: %s", ipStr.c_str());
+    LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
+
+    if (display) {
+      display->clear();
+      display->drawText(0, 0, 0, deviceName);
+      display->drawText(0, display->lineHeight, 0, ipStr.c_str());
+      display->flush();
+      delay(1600);
+      display->clear();
+      display->flush();
+    } // if
+
+    server->begin();
+    start(STARTUP_ON_NET);
+    _newState(BOARDSTATE_START);
 
   } else if (boardState == BOARDSTATE_START) {
 
@@ -283,7 +390,7 @@ void Board::getState(String &out, String path)
 
   Element *l = _list2;
   while (l != NULL) {
-    LOGGER_TRACE("  ->%s\n", l->id);
+    LOGGER_TRACE("  ->%s", l->id);
     if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
       ret += "\"";
       ret += l->id;
@@ -393,7 +500,9 @@ Element *Board::getElement(const char *elementTypeName)
 } // getElement
 
 
-// add another single element to the board.
+/**
+ * @brief Add another element to the board into the list of created elements.
+ */
 void Board::_add(const char *id, Element *e)
 {
   LOGGER_TRACE("_add(%s)", id);

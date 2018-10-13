@@ -31,6 +31,7 @@
  * * 18.09.2018 display configuration now in env.json using elements
  * * 10.10.2018 more robust startup.
  * * 10.10.2018 extend sysinfo
+ * * 11.10.2018 move network initialization into board loop.
  */
 
 #include <ESP8266WebServer.h>
@@ -42,13 +43,12 @@
 // =====
 
 #define LOGGER_MODULE "main"
-#define LOGGER_ENABLE_TRACE
 
 #include <Board.h>
 #include <BoardServer.h>
 #include <FileServer.h>
 
-#define NET_DEBUG 1
+#define NET_DEBUG 0
 
 // Use the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
@@ -65,10 +65,6 @@
 
 #include <HomeDing.h>
 
-// extern "C" {
-// #include "user_interface.h"
-// }
-
 // ===== WLAN credentials =====
 
 #include "secrets.h"
@@ -78,7 +74,6 @@ ESP8266WebServer server(80);
 
 // ===== application state variables =====
 
-char devicename[32]; // name of this device on the network
 Board mainBoard;
 
 // ===== implement =====
@@ -109,58 +104,6 @@ void handleFileList()
 } // handleFileList
 
 
-wl_status_t net_connect()
-{
-  // connect to a same network as before ?
-  wl_status_t wifi_status = WiFi.status();
-
-#if NET_DEBUG
-  LOGGER_TRACE("wifi status=(%d)", wifi_status);
-  if (WiFi.getAutoConnect()) {
-    Serial.printf("autoconnect mode enabled.");
-  }
-#endif
-
-  if (WiFi.getAutoConnect() && WiFi.SSID().equalsIgnoreCase(ssid) &&
-      WiFi.psk().equalsIgnoreCase(password)) {
-#if NET_DEBUG
-    LOGGER_TRACE("same network");
-#endif
-
-    if (wifi_status != WL_CONNECTED) {
-      LOGGER_TRACE("start reconnect");
-      WiFi.mode(WIFI_STA);
-      WiFi.begin();
-    } // if
-  } else {
-    LOGGER_TRACE("start new STA");
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
-  } // if
-
-  // wait max. 30 seconds for connecting
-  unsigned long maxTime = millis() + (30 * 1000);
-
-  while (1) {
-    wifi_status = WiFi.status();
-#if NET_DEBUG
-    Serial.printf("(%d).", wifi_status);
-#else
-    Serial.printf(".");
-#endif
-
-    if ((wifi_status == WL_CONNECTED) || (wifi_status == WL_NO_SSID_AVAIL) ||
-        (wifi_status == WL_CONNECT_FAILED) || (millis() >= maxTime))
-      break; // exit this loop
-    delay(100);
-  } // while
-
-  Serial.printf(".\n");
-  LOGGER_TRACE("net_connect returns(%d)", wifi_status);
-  return (wifi_status);
-} // net_connect
-
-
 /**
  * Setup all components and Serial debugging helpers
  */
@@ -184,82 +127,13 @@ void setup(void)
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   // ----- setup the file system and load configuration -----
+
   SPIFFS.begin();
   mainBoard.init(&server);
 
-  while ((mainBoard.boardState == BOARDSTATE_NONE) ||
-         (mainBoard.boardState == BOARDSTATE_CONFIG)) {
-    mainBoard.loop();
-    yield();
-  } // while
-
-  /*
-    // load all config files and create+start elements
-    mainBoard.addElements();
-    mainBoard.start(STARTUP_ON_SYS);
-    LOGGER_TRACE("Elements started.\n");
-
-    // ----- setup Display -----
-    display = mainBoard.display;
-    if (display) {
-      display->drawText(0, 0, 0, "HomeDing...");
-      display->flush();
-      delay(100);
-    } // if
-  */
-
-  // ----- setup Board and Elements-----
-
-  Element *deviceElement = mainBoard.getElement("device");
-
-  if (deviceElement) {
-    strncpy(devicename, deviceElement->get("name"), sizeof(devicename));
-    LOGGER_TRACE(" devicename: %s.", devicename);
-  } else {
-    strncpy(devicename, "homeding", sizeof(devicename));
-  } // if
-
-  // ----- setup Web Server -----
-
-  LOGGER_INFO("Starting network...");
-
-  // set device hostname as soon as possible from the device name
-  // LOGGER_INFO("hostname=%s", WiFi.hostname().c_str());
-  // LOGGER_INFO("devicename=%s", devicename);
-  WiFi.hostname(devicename);
-
-  wl_status_t wifi_status = net_connect();
-
-  if (wifi_status != WL_CONNECTED) {
-    delay(10000);
-    ESP.restart();
-  }
-
-  WiFi.setAutoConnect(true);
-  WiFi.setAutoReconnect(true);
-
-  LOGGER_INFO("Connected to: %s", WiFi.SSID().c_str());
-  LOGGER_INFO("  as: %s", WiFi.hostname().c_str());
-
-  String ipStr = WiFi.localIP().toString();
-  LOGGER_INFO("  IP: %s", ipStr.c_str());
-  LOGGER_INFO(" MAC: %s", WiFi.macAddress().c_str());
-
-  if (display) {
-    display->clear();
-    display->drawText(0, 0, 0, devicename);
-    display->drawText(0, display->lineHeight, 0, ipStr.c_str());
-    display->flush();
-    delay(1000);
-  } // if
-
-  mainBoard.start(STARTUP_ON_NET);
-
-#if NET_DEBUG
-  WiFi.printDiag(Serial);
-#endif
-
   // ----- adding web server handlers -----
+
+  LOGGER_TRACE("register handlers.\n");
 
   // redirect to index.htm of only domain name is given.
   server.on("/", HTTP_GET, []() {
@@ -305,12 +179,7 @@ void setup(void)
   // list directory
   server.on("/$list", HTTP_GET, handleFileList);
 
-  // Data and Commands exchange
-  // https://gist.github.com/igrr/0da0c4adc7588d9bd911
-  // https://www.intertech.com/Blog/iot-with-an-esp8266-part-2-arduino-sketch/
-  // https://learn.adafruit.com/esp8266-temperature-slash-humidity-webserver/code
-
-  server.addHandler(new BoardHandler("/$board", mainBoard));
+  server.addHandler(new BoardHandler("/$board", &mainBoard));
 
   server.on("/$reboot", HTTP_GET, []() {
     LOGGER_INFO("rebooting...");
@@ -320,15 +189,8 @@ void setup(void)
   });
 
   server.addHandler(new FileServerHandler(SPIFFS, "/", "NO-CACHE"));
-  server.begin();
 
-  LOGGER_TRACE("Server started.\n");
-
-  if (display) {
-    display->clear();
-    display->flush();
-  } // if
-
+  LOGGER_TRACE("sketch setup done.\n");
 } // setup
 
 

@@ -20,6 +20,7 @@
  * * 24.08.2018 Environment setting separated from Element configuration.
  * * 26.08.2018 Later display initialization, enabling display configuration.
  * * 09.10.2018 Get time in time_t format.
+ * * 11.10.2018 move network initialization into board loop.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -35,10 +36,7 @@
 
 #include <displays/DisplayAdapter.h>
 
-// #undef LOGGER_MODULE
-// #define LOGGER_MODULE "board"
 #include "core/Logger.h"
-
 
 // id can be multi-level when using the slash as a separator.
 // like "device/name"
@@ -67,14 +65,19 @@
  */
 typedef enum {
   BOARDSTATE_NONE = 0, // unspecified
-  BOARDSTATE_CONFIG = 1, // read all configurations and create elements. Start SYS Elements
-  BOARDSTATE_LASTNET = 2, // try to reconnect to last known network. Wait for clicks.
-  BOARDSTATE_AP = 3, // AP Mode, create a AccessPoint to allow configuration
-  BOARDSTATE_WPS = 4, // WPS Mode, waiting for configuration
+  BOARDSTATE_CONFIG =
+      1, // read all configurations and create elements. Start SYS Elements
+  BOARDSTATE_CONNECT = 2, // try to reconnect to last known network.
+  BOARDSTATE_CONFWAIT = 3, // Wait for clicks.
+  BOARDSTATE_WAIT = 5, // Wait for network connectivity and clicks.
+  BOARDSTATE_AP = 7, // AP Mode, create a AccessPoint to allow configuration
+  BOARDSTATE_WPS = 9, // WPS Mode, waiting for configuration
 
-  BOARDSTATE_START = 5 // start all NET Elements 
-// start TIME Elements
-// restart on network lost > 30 secs.
+  BOARDSTATE_GREET = 10, // start all NET Elements
+
+  BOARDSTATE_START = 12 // start all NET Elements
+  // start TIME Elements
+  // restart on network lost > 30 secs.
 } BoardState;
 
 
@@ -163,6 +166,9 @@ public:
   // Display
   DisplayAdapter *display = NULL;
 
+  // System LED
+  int sysLED = -1;
+
   // WebServer
   ESP8266WebServer *server;
 
@@ -177,13 +183,11 @@ public:
 
   String deviceName;
 
-  BoardState boardState;
-
 private:
   /**
-   * @brief Add a new element
-   * @param id
-   * @param e
+   * @brief Add another element to the board into the list of created elements.
+   * @param id id of element.
+   * @param e reference to element.
    */
   void _add(const char *id, Element *e);
 
@@ -203,8 +207,17 @@ private:
 
   void _dispatchSingle(String evt);
 
+  // state and timing
+
+  BoardState boardState;
+  unsigned long configPhaseEnd; // for offering config mode
+  unsigned long connectPhaseEnd; // for waiting on net connection
+  void _newState(BoardState newState);
+
   bool active = false;
   bool validTime = false;
+
+  int netMode;
 
   Element *_list2;
   Element *_next2;

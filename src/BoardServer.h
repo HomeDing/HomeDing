@@ -44,8 +44,10 @@ public:
    * @param path The root path of the state ressources.
    * @param board reference to the board.
    */
-  BoardHandler(const char *path, Board &board) : _path(path), _board(board)
+  BoardHandler(const char *path, Board *board)
   {
+    _path = path;
+    _board = board;
     LOGGER_TRACE("BoardHandler:init: %s", _path.c_str());
   }
 
@@ -86,9 +88,11 @@ public:
     int args = server.args();
     // LOGGER_TRACE(" args=%d", args);
 
+  LOGGER_INFO("&_board=%X", _board);
+
     if ((args == 0) && (requestMethod == HTTP_GET)) {
       String output;
-      _board.getState(output, localPath);
+      _board->getState(output, localPath);
 
       server.sendHeader("Cache-control", "NO-CACHE");
       server.send(200, "text/json", output);
@@ -97,7 +101,7 @@ public:
     } else if ((args > 0) && (requestMethod == HTTP_GET)) {
       // like http://newdevice/$board/display/info?show=Hello
       // like http://logger/$board/display/f?show=27.30
-      _board.setState(localPath, server.argName(0), server.arg(0));
+      _board->setState(localPath, server.argName(0), server.arg(0));
       server.send(200, "text/plain", "");
     }
 
@@ -108,7 +112,7 @@ protected:
   /**
    * @brief reference to the board.
    */
-  Board _board;
+  Board *_board;
 
   /**
    * @brief root path where the state ressource can be accessed. e.g. /$board.

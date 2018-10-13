@@ -16,12 +16,10 @@
  * Changelog: see DeviceElement.h
  */
 
+#define LOGGER_MODULE "device"
+
 #include "DeviceElement.h"
 #include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "device"
-#include "core/Logger.h"
 
 /**
  * @brief static factory function to create a new DeviceElement.
@@ -47,8 +45,10 @@ bool DeviceElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "name") == 0) {
-    _deviceName = value;
     _board->deviceName = value;
+
+  } else if (_stricmp(name, "led") == 0) {
+    _board->sysLED = _atopin(value);
 
   } else if (_stricmp(name, "description") == 0) {
     _description = value;
@@ -79,8 +79,6 @@ bool DeviceElement::set(const char *name, const char *value)
 void DeviceElement::start()
 {
   unsigned long now = millis() / 1000;
-
-  // _board->deviceName = _deviceName;
 
   if (_rebootTime > 0) {
     _nextBoot = now + _rebootTime;
@@ -116,7 +114,7 @@ void DeviceElement::pushState(
   unsigned long now = millis() / 1000;
 
   Element::pushState(callback);
-  callback("name", _deviceName.c_str());
+  callback("name", _board->deviceName.c_str());
   callback("description", _description.c_str());
   callback("nextboot", String(_nextBoot - now).c_str());
 } // pushState()

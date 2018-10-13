@@ -80,11 +80,6 @@ public:
 
 private:
   /**
-   * @brief network name of the device
-   */
-  String _deviceName;
-
-  /**
    * @brief Short description of the device.
    */
   String _description;

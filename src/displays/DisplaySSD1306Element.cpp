@@ -42,7 +42,7 @@ Element *DisplaySSD1306Element::create()
  */
 DisplaySSD1306Element::DisplaySSD1306Element()
 {
-  startupMode = STARTUP_ON_SYS;
+  startupMode = Element_StartupMode::System;
 }
 
 

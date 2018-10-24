@@ -35,7 +35,7 @@ Element *OTAElement::create()
 
 OTAElement::OTAElement()
 {
-  startupMode = STARTUP_ON_NET;
+  startupMode = Element_StartupMode::Network;
 }
 
 /**

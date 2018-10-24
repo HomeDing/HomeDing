@@ -103,7 +103,7 @@ void Board::addElements()
 } // addElements()
 
 
-void Board::start(int startupMode)
+void Board::start(Element_StartupMode startupMode)
 {
   LOGGER_TRACE("start()");
 
@@ -144,7 +144,7 @@ void Board::loop()
   } else if (boardState == BOARDSTATE_CONFIG) {
     // load all config files and create+start elements
     addElements();
-    start(STARTUP_ON_SYS);
+    start(Element_StartupMode::System);
     LOGGER_TRACE("SYS Elements started.");
 
     LOGGER_TRACE("devicename=%s", deviceName.c_str());
@@ -255,16 +255,16 @@ void Board::loop()
     } // if
 
     server->begin();
-    start(STARTUP_ON_NET);
+    start(Element_StartupMode::Network);
     _newState(BOARDSTATE_START);
 
   } else if (boardState == BOARDSTATE_START) {
 
     if (!validTime) {
-      // check if time is valid now -> start all elements with STARTUP_ON_TIME
+      // check if time is valid now -> start all elements with Element_StartupMode::Time
       uint32 current_stamp = sntp_get_current_timestamp();
       if (current_stamp > MIN_VALID_TIME) {
-        start(STARTUP_ON_TIME);
+        start(Element_StartupMode::Time);
         validTime = true;
         return;
       } // if

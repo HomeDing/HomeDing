@@ -14,6 +14,7 @@
 #ifndef ELEMENTREGISTRY_H
 #define ELEMENTREGISTRY_H
 
+#include "Board.h"
 #include "Element.h"
 #include <Arduino.h>
 

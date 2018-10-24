@@ -38,7 +38,7 @@ Element *DisplayLCDElement::create()
 
 DisplayLCDElement::DisplayLCDElement()
 {
-  startupMode = STARTUP_ON_SYS;
+  startupMode = Element_StartupMode::System;
 }
 
 /**

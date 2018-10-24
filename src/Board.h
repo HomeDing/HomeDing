@@ -34,15 +34,10 @@
 #include <memory>
 #include <time.h>
 
+#include <Element.h>
 #include <displays/DisplayAdapter.h>
 
 #include "core/Logger.h"
-
-// id can be multi-level when using the slash as a separator.
-// like "device/name"
-#define ELEM_ID_SEPARATOR '/'
-#define ELEM_PARAMETER '?'
-#define ELEM_VALUE '='
 
 /**
  * @brief The env.json file contains all the settings for registering the device
@@ -55,8 +50,6 @@
  * elements.
  */
 #define CONF_FILENAME "/config.json"
-
-#define MAX_ID_LENGTH 32
 
 #define MAX_LIST_LENGTH 20
 
@@ -79,10 +72,6 @@ typedef enum {
   // start TIME Elements
   // restart on network lost > 30 secs.
 } BoardState;
-
-
-// forward class declarations
-class Element;
 
 
 /**
@@ -113,7 +102,7 @@ public:
   /**
    * @brief activate all the Elements by using start().
    */
-  void start(int startupMode);
+  void start(Element_StartupMode startupMode);
 
   /**
    * @brief Give some processing time to all the active elements on the board.

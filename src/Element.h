@@ -18,16 +18,30 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
 
-#include "Board.h"
 #include <Arduino.h>
+
+// forward class declarations
+class Board;
+
+/**
+ * @brief Startup Mode specifies when is the right moment to try
+ * starting/activating the element.
+ */
+enum Element_StartupMode {
+  System = 1, // right after loading the configurations.
+  Network = 2, // after a network connectivity in AP Mode was established.
+  Time = 3, // after a valid local time was set.
+  Manual = 9 // manually started.
+};
 
 #define ACTION_SEPARATOR ','
 
-// definitions for the startup mode of elements
-
-#define STARTUP_ON_SYS  1 // The element is started immediately after loading the configurations.
-#define STARTUP_ON_NET  2 // The element is started after a network connectivity in AP Mode was established.
-#define STARTUP_ON_TIME 3 // The element is started after a valid local time was set.
+// id can be multi-level when using the slash as a separator.
+// like "device/name"
+#define MAX_ID_LENGTH 32
+#define ELEM_ID_SEPARATOR '/'
+#define ELEM_PARAMETER '?'
+#define ELEM_VALUE '='
 
 
 /**
@@ -42,10 +56,25 @@ public:
    */
   char id[MAX_ID_LENGTH]; // TODO: convert to String
 
+
+  /**
+   * @brief The Element will be marked active after passing valid parameters and
+   * calling start().
+   */
+  bool active = false;
+
+
+  /**
+   * @brief when the element should be started.
+   */
+  Element_StartupMode startupMode = Element_StartupMode::Network;
+
+
   /**
    * @brief The pointer to the next Element in the list of all Elements.
    */
   Element *next = NULL;
+
 
   // ===== Livetime management =====
 
@@ -54,6 +83,7 @@ public:
    * @param board The board reference.
    */
   virtual void init(Board *board);
+
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -64,12 +94,14 @@ public:
    */
   virtual bool set(const char *name, const char *value);
 
+
   /**
    * @brief Get a property value.
    * @param name Name of property.
    * @return actual value of property.
    */
   virtual const char *get(const char *name);
+
 
   /**
    * @brief Activate the Element.
@@ -78,15 +110,18 @@ public:
    */
   virtual void start();
 
+
   /**
    * @brief Give some processing time to the element to do something on it's own
    */
   virtual void loop();
 
+
   /**
    * @brief stop all activities and go inactive.
    */
   virtual void term();
+
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -94,15 +129,6 @@ public:
    */
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
-
-
-  /**
-   * @brief The Element will be marked active after passing valid parameters and
-   * calling start().
-   */
-  bool active = false;
-
-  int startupMode = STARTUP_ON_NET;
 
 protected:
   /**

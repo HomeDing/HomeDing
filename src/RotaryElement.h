@@ -18,11 +18,8 @@
 #ifndef RotaryElement_H
 #define RotaryElement_H
 
-#include "Board.h"
-#include "Element.h"
 #include <Arduino.h>
-
-#include <RotaryEncoder.h>
+#include <Element.h>
 
 /**
  * @brief RotaryElement implements...

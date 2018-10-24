@@ -10,14 +10,9 @@
 // Changelog: see PWMOutElement.h
 // -----
 
-#include "PWMOutElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "PWMout"
-#define LOGGER_ENABLE_TRACE
-#include "core/Logger.h"
-
+#include <PWMOutElement.h>
+#include <Board.h>
+#include <ElementRegistry.h>
 
 /**
  * @brief static factory function to create a new PWMOutElement.
@@ -25,14 +20,13 @@
  */
 Element *PWMOutElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new PWMOutElement());
 } // create()
 
 
 bool PWMOutElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "pin") == 0) {
@@ -60,7 +54,7 @@ bool PWMOutElement::set(const char *name, const char *value)
 void PWMOutElement::start()
 {
   if (_pin < 0) {
-    LOGGER_ERR("no meaningful pin");
+    LOGGER_EERR("no meaningful pin");
 
   } else {
     // enable output and stay off
@@ -86,7 +80,7 @@ void PWMOutElement::pushState(
  */
 void PWMOutElement::_setValue(int newValue)
 {
-  LOGGER_TRACE("setValue(%d)", newValue);
+  LOGGER_ETRACE("setValue(%d)", newValue);
   _value = newValue;
 
   if (active) {

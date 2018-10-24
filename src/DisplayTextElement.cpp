@@ -14,11 +14,8 @@
  * Changelog, see DisplayTextElement.h.
  */
 
-#include "DisplayTextElement.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "DisplayText"
-#include "core/Logger.h"
+#include <DisplayTextElement.h>
+#include <Board.h>
 
 /**
  * @brief static factory function to create a new DisplayTextElement.
@@ -26,7 +23,6 @@
  */
 Element *DisplayTextElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new DisplayTextElement());
 } // create()
 
@@ -36,7 +32,7 @@ Element *DisplayTextElement::create()
  */
 bool DisplayTextElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "prefix") == 0) {
@@ -61,7 +57,7 @@ bool DisplayTextElement::set(const char *name, const char *value)
 
   } else if (! active) {
     // no actions.
-    LOGGER_TRACE(" not active: %d.", _display);
+    LOGGER_ETRACE(" not active: %d.", _display);
 
 
   } else if (_stricmp(name, "clear") == 0) {
@@ -94,7 +90,7 @@ void DisplayTextElement::start()
   DisplayAdapter *d = (DisplayAdapter *)(_board->display);
 
   if (d == NULL) {
-    LOGGER_ERR("no display defined");
+    LOGGER_EERR("no display defined");
 
   } else {
     _display = d;

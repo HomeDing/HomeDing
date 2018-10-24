@@ -14,13 +14,11 @@
  * Changelog:see RotaryElement.h
  */
 
-#include "RotaryElement.h"
+#include <RotaryElement.h>
+#include <Board.h>
 #include "ElementRegistry.h"
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Rotary"
-#define LOGGER_ENABLE_TRACE
-#include "core/Logger.h"
+#include <RotaryEncoder.h>
 
 /* ===== statics ===== */
 

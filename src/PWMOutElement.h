@@ -18,9 +18,7 @@
 #define PWMOut_H
 
 #include <Arduino.h>
-
-#include "Board.h"
-#include "Element.h"
+#include <Element.h>
 
 /**
  * @brief The PWMOutElement is an Element that creates an pwm digital output signal based on actions.

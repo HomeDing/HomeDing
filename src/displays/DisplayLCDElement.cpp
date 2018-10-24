@@ -14,10 +14,9 @@
  * Changelog:see DisplayLCDElement.h
  */
 
-#define LOGGER_MODULE "lcd"
-#
-#include "DisplayLCDElement.h"
-#include "ElementRegistry.h"
+#include <displays/DisplayLCDElement.h>
+#include <Board.h>
+#include <ElementRegistry.h>
 
 #include <displays/DisplayAdapterLCD.h>
 
@@ -29,7 +28,6 @@
  */
 Element *DisplayLCDElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new DisplayLCDElement());
 } // create()
 
@@ -46,7 +44,7 @@ DisplayLCDElement::DisplayLCDElement()
  */
 bool DisplayLCDElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "address") == 0) {
@@ -73,7 +71,7 @@ bool DisplayLCDElement::set(const char *name, const char *value)
 void DisplayLCDElement::start()
 {
   DisplayAdapter *d;
-  LOGGER_TRACE("start(0x%x,%d,%d)", _address, _sda, _scl);
+  LOGGER_ETRACE("start(0x%x,%d,%d)", _address, _sda, _scl);
   d = (DisplayAdapter *)(new DisplayAdapterLCD(_address, _sda, _scl));
 
   bool success = d->init();
@@ -82,7 +80,7 @@ void DisplayLCDElement::start()
     Element::start();
 
   } else {
-    LOGGER_ERR("no display found.\n");
+    LOGGER_EERR("no display found.\n");
     delete d;
   } // if
 } // start()

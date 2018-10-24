@@ -14,11 +14,9 @@
  * Changelog:see DisplaySSD1306Element.h
  */
 
-#define LOGGER_MODULE "SSD1306"
-
 #include "DisplaySSD1306Element.h"
-#include "ElementRegistry.h"
-
+#include <Board.h>
+#include <ElementRegistry.h>
 
 #include <displays/DisplayAdapterSSD1306.h>
 
@@ -30,7 +28,6 @@
  */
 Element *DisplaySSD1306Element::create()
 {
-  LOGGER_TRACE("create()");
   return (new DisplaySSD1306Element());
 } // create()
 
@@ -51,7 +48,7 @@ DisplaySSD1306Element::DisplaySSD1306Element()
  */
 bool DisplaySSD1306Element::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "address") == 0) {
@@ -84,7 +81,7 @@ bool DisplaySSD1306Element::set(const char *name, const char *value)
 void DisplaySSD1306Element::start()
 {
   DisplayAdapter *d;
-  LOGGER_TRACE("start(0x%x,%d,%d)", _address, _sda, _scl);
+  LOGGER_ETRACE("start(0x%x,%d,%d)", _address, _sda, _scl);
 
   // reset of the display is available on GPIO
   if (_resetpin >= 0) {
@@ -103,7 +100,7 @@ void DisplaySSD1306Element::start()
     Element::start();
 
   } else {
-    LOGGER_ERR("no display found.\n");
+    LOGGER_EERR("no display found.\n");
     delete d;
   } // if
 } // start()

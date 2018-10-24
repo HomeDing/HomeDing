@@ -18,9 +18,8 @@
 #ifndef DisplayLCDElement_H
 #define DisplayLCDElement_H
 
-#include "Board.h"
-#include "Element.h"
 #include <Arduino.h>
+#include <Element.h>
 
 /**
  * @brief DisplayLCDElement implements creating an Display Adapter for a LCD

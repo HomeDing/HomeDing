@@ -14,11 +14,8 @@
  * Changelog, see DisplayDotElement.h.
  */
 
-#include "DisplayDotElement.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "DisplayDot"
-#include "core/Logger.h"
+#include <DisplayDotElement.h>
+#include <Board.h>
 
 /**
  * @brief static factory function to create a new DisplayDotElement.
@@ -26,7 +23,6 @@
  */
 Element *DisplayDotElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new DisplayDotElement());
 } // create()
 
@@ -36,7 +32,7 @@ Element *DisplayDotElement::create()
  */
 bool DisplayDotElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "x") == 0) {
@@ -47,7 +43,7 @@ bool DisplayDotElement::set(const char *name, const char *value)
 
   } else if (!active) {
     // no actions.
-    LOGGER_TRACE("not active: %d.", _display);
+    LOGGER_ETRACE("not active: %d.", _display);
 
 
   } else if (_stricmp(name, "clear") == 0) {
@@ -73,7 +69,7 @@ void DisplayDotElement::start()
   DisplayAdapter *d = (DisplayAdapter *)(_board->display);
 
   if (d == NULL) {
-    LOGGER_ERR("no display defined");
+    LOGGER_EERR("no display defined");
 
   } else {
     _display = d;

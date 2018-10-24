@@ -18,9 +18,8 @@
 #ifndef DisplaySSD1306Element_H
 #define DisplaySSD1306Element_H
 
-#include "Board.h"
-#include "Element.h"
 #include <Arduino.h>
+#include <Element.h>
 
 /**
  * @brief DisplaySSD1306Element implements creating an Display Adapter for a LCD

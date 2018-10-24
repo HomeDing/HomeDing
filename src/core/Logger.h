@@ -42,6 +42,21 @@
 #define LOGGER_TRACE(...)                                                      \
   Logger::LoggerPrint(LOGGER_MODULE, LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
+// for Elements:
+
+#define LOGGER_EINFO(...)                                                       \
+  Logger::LoggerPrint(this->id, LOGGER_LEVEL_INFO, __VA_ARGS__)
+
+#define LOGGER_EERR(...)                                                        \
+  Logger::LoggerPrint(this->id, LOGGER_LEVEL_ERR, __VA_ARGS__)
+
+#define LOGGER_ELOG(...)                                                        \
+  Logger::LoggerPrint(this->id, LOGGER_LEVEL_LOG, __VA_ARGS__)
+
+#define LOGGER_ETRACE(...)                                                      \
+  Logger::LoggerPrint(this->id, LOGGER_LEVEL_TRACE, __VA_ARGS__)
+
+
 class Logger
 {
 public:
@@ -56,6 +71,7 @@ public:
    * @param ... arguments
    */
   static void LoggerPrint(const char *module, int level, const char *fmt, ...);
+
 };
 
 #endif

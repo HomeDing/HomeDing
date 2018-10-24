@@ -20,9 +20,8 @@
 #ifndef RFSendElement_H
 #define RFSendElement_H
 
-#include "Board.h"
-#include "Element.h"
 #include <Arduino.h>
+#include <Element.h>
 
 /**
  * @brief RFSend Element that produces actions based on timing conditions.

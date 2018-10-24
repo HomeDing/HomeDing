@@ -23,9 +23,7 @@
 #define DEVICEELEMENT_H
 
 #include <Arduino.h>
-
-#include "Board.h"
-#include "Element.h"
+#include <Element.h>
 
 /**
  * @brief The Device is an Element that offers some geeral and useful

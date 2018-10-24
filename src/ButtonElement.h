@@ -22,9 +22,7 @@
 #define BUTTON_H
 
 #include <Arduino.h>
-
-#include "Board.h"
-#include "Element.h"
+#include <Element.h>
 
 #define BUTTON_TYPE_LEVEL  0x00
 #define BUTTON_TYPE_TOGGLE 0x01

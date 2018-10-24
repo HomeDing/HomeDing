@@ -1,9 +1,10 @@
 /**
  * @file RemoteElement.cpp
- * 
- * @brief System Element for the HomeDing Library to send actions to remote devices.
- * This allows starting a remote action on another HomeDing Library based device.
- * 
+ *
+ * @brief System Element for the HomeDing Library to send actions to remote
+ * devices. This allows starting a remote action on another HomeDing Library
+ * based device.
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -16,13 +17,9 @@
  * Changelog: see RemoteElement.h
  */
 
-#include "RemoteElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Remote"
-#include "core/Logger.h"
-
+#include <Board.h>
+#include <ElementRegistry.h>
+#include <RemoteElement.h>
 
 /**
  * @brief static factory function to create a new RemoteElement.
@@ -30,7 +27,6 @@
  */
 Element *RemoteElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new RemoteElement());
 } // create()
 
@@ -40,7 +36,8 @@ Element *RemoteElement::create()
  */
 bool RemoteElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
+  bool ret = true;
 
   if (_stricmp(name, "host") == 0) {
     _host = value;
@@ -49,18 +46,19 @@ bool RemoteElement::set(const char *name, const char *value)
     _remoteId = value;
 
   } else if (!active) {
-    LOGGER_ERR(" inactive, cannot send");
+    ret = Element::set(name, value);
+    LOGGER_EERR("inactive");
 
   } else {
     // must be a remote action
     String url = _remoteId + '?' + name + '=' + value;
     if (_status != 0) {
-      LOGGER_ERR("Remote Element is busy. Action dropped.");
+      LOGGER_EERR("Remote Element is busy. Action dropped.");
     } else {
       _startRemote(url);
     }
   } // if
-  return (true);
+  return (ret);
 } // set()
 
 
@@ -71,12 +69,12 @@ void RemoteElement::start()
 {
   bool ret = true;
   if (_host.length() == 0) {
-    LOGGER_ERR("missing host configuration");
+    LOGGER_EERR("missing host configuration");
     ret = false;
   }
 
   if (_remoteId.length() == 0) {
-    LOGGER_ERR("missing remoteId configuration");
+    LOGGER_EERR("missing remoteId configuration");
     ret = false;
   }
 
@@ -95,7 +93,7 @@ void RemoteElement::loop()
   unsigned long now_ms = millis();
 
   if ((_status == 1) && (!_httpClient.connected())) {
-    LOGGER_ERR("no connection.");
+    LOGGER_EERR("no connection.");
     _httpClient.stop();
     _status = 0;
     return;
@@ -103,7 +101,7 @@ void RemoteElement::loop()
   } else if ((_status == 1) && (!_httpClient.available() == 0)) {
     // wait or drop.
     if ((_startTime + 12000) > now_ms) {
-      LOGGER_ERR("timed out.");
+      LOGGER_EERR("timed out.");
       _httpClient.stop();
       _status = 0;
       return;
@@ -118,14 +116,14 @@ void RemoteElement::loop()
     // Read the header lines of the reply from server
     while (_httpClient.connected() && (!headerDone)) {
       String line = _httpClient.readStringUntil('\n');
-      LOGGER_TRACE(" line:%s", line.c_str());
+      LOGGER_ETRACE(" line:%s", line.c_str());
       if (line.startsWith("Content-Length:")) {
-        contentLength = atoi(line.c_str()+15);
+        contentLength = atoi(line.c_str() + 15);
         // contentLength = atoi(line.substring(15).c_str());
-        LOGGER_TRACE(" contentLength=%d", contentLength);
+        LOGGER_ETRACE(" contentLength=%d", contentLength);
 
       } else if (line.equals("\r")) {
-        LOGGER_TRACE(" header end.");
+        LOGGER_ETRACE(" header end.");
         headerDone = true;
       } // if
     } // while
@@ -134,7 +132,7 @@ void RemoteElement::loop()
     String ret;
 
     if (_httpClient.connected() && (contentLength > 0)) {
-      // LOGGER_INFO(" received bytes:%d", contentLength);
+      // LOGGER_EINFO(" received bytes:%d", contentLength);
       char *buffer = (char *)malloc(contentLength + 1);
       memset(buffer, 0, contentLength + 1);
       contentLength -= _httpClient.readBytes(buffer, contentLength);
@@ -152,17 +150,17 @@ void RemoteElement::loop()
 
 void RemoteElement::_startRemote(String url)
 {
-  LOGGER_TRACE("_startRemote(%s)", url.c_str());
+  LOGGER_ETRACE("_startRemote(%s)", url.c_str());
   _startTime = millis();
 
   // 1. connect to server
   if (!_httpClient.connect(_host, 80)) {
-    LOGGER_ERR("no connection to host %s", _host.c_str());
+    LOGGER_EERR("no connection to host %s", _host.c_str());
     _httpClient.stop();
     _status = 0;
     return;
   } // if
-  // LOGGER_TRACE("connected to server");
+  // LOGGER_ETRACE("connected to server");
 
   // 2. send request
   String request =

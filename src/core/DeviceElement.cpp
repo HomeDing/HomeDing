@@ -16,11 +16,9 @@
  * Changelog: see DeviceElement.h
  */
 
-#define LOGGER_MODULE "device"
-
 #include "DeviceElement.h"
-#include "ElementRegistry.h"
-
+#include <ElementRegistry.h>
+#include <Board.h>
 
 /* ===== Static factory function ===== */
 
@@ -30,7 +28,6 @@
  */
 Element *DeviceElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new DeviceElement());
 } // create()
 
@@ -46,7 +43,7 @@ DeviceElement::DeviceElement()
 
 bool DeviceElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "name") == 0) {
@@ -66,7 +63,7 @@ bool DeviceElement::set(const char *name, const char *value)
     unsigned long now = millis() / 1000; // make seconds
 
     // ALWAYS send to log
-    // LOGGER_INFO(...
+    // LOGGER_EINFO(...
     DEBUG_ESP_PORT.printf("%3u:%02u:%02u %s\n", (now / 3600), (now / 60) % 60,
                           now % 60, value ? value : "NULL");
 
@@ -97,7 +94,7 @@ void DeviceElement::loop()
 {
   unsigned long now = millis() / 1000;
   if ((_rebootTime > 0) && (now > _nextBoot)) {
-    LOGGER_INFO("restart");
+    LOGGER_EINFO("device restart");
     delay(100);
     ESP.restart();
     delay(100);

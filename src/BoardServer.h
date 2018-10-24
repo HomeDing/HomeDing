@@ -48,7 +48,7 @@ public:
   {
     _path = path;
     _board = board;
-    LOGGER_TRACE("BoardHandler:init: %s", _path.c_str());
+    LOGGER_RAW("BoardHandler:init: %s", _path.c_str());
   }
 
   /**
@@ -61,7 +61,7 @@ public:
   {
     bool ret = ((requestMethod == HTTP_GET) || (requestMethod == HTTP_PUT)) &&
                (requestUri.startsWith(_path));
-    // LOGGER_TRACE("BoardHandler:canHandle(%s)=%u", requestUri.c_str(), ret);
+    // LOGGER_RAW("BoardHandler:canHandle(%s)=%u", requestUri.c_str(), ret);
     return (ret);
   }
 
@@ -76,7 +76,7 @@ public:
   bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
               String requestUri) override
   {
-    LOGGER_TRACE("BoardHandler:handle(%s)", requestUri.c_str());
+    LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
 
     // cut off the registered path from the url.
     String localPath(requestUri.substring(_path.length()));
@@ -86,7 +86,7 @@ public:
     }
 
     int args = server.args();
-    // LOGGER_TRACE(" args=%d", args);
+    // LOGGER_RAW(" args=%d", args);
 
   LOGGER_INFO("&_board=%X", _board);
 

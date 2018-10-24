@@ -19,9 +19,9 @@
 #ifndef ValueELEMENT_H
 #define ValueELEMENT_H
 
-#include "Board.h"
-#include "Element.h"
 #include <Arduino.h>
+#include <Element.h>
+
 
 /**
  * @brief Timer Element that produces actions based on timing conditions.

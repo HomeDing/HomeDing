@@ -1,12 +1,12 @@
 
 // MicroJsonParser.cpp
 
-#include "MicroJsonParser.h"
 #include <Arduino.h>
-#include <FS.h>
+#include <MicroJsonParser.h>
 
-#define LOGGER_MODULE "mj"
-#include "core/Logger.h"
+#include <core/Logger.h>
+
+#include <FS.h>
 
 // Remarks:
 // * No Arrays
@@ -74,7 +74,7 @@ void MicroJson::parseFile(const char *fName)
   size_t len;
 
   if (SPIFFS.exists(fName)) {
-    LOGGER_TRACE("parsing file %s", fName);
+    LOGGER_RAW("parsing file %s", fName);
 
     _state = MJ_STATE_INIT;
     _level = 0;
@@ -121,7 +121,7 @@ void MicroJson::parse(char ch)
 
   } else if (_state == MJ_STATE_ERROR) {
     // stay in error status
-    // LOGGER_TRACE(" -err");
+    // LOGGER_RAW(" -err");
 
   } else if (_state == MJ_STATE_DONE) {
     // already finished, anything is error
@@ -145,7 +145,7 @@ void MicroJson::parse(char ch)
     if (ch != '"') {
       strncat(_name, ch, sizeof(_name));
     } else {
-      // LOGGER_TRACE(" name=%s", _name);
+      // LOGGER_RAW(" name=%s", _name);
       _state = MJ_NEWSTATE(MJ_STATE_ASSIGN);
     } // if
 
@@ -182,7 +182,7 @@ void MicroJson::parse(char ch)
 
     } else {
       // this character doesn't belong to the value any more.
-      // LOGGER_TRACE(" value=%s", _value);
+      // LOGGER_RAW(" value=%s", _value);
       if (_callbackFn)
         (_callbackFn)(_level, _path, _name, _value);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
@@ -198,7 +198,7 @@ void MicroJson::parse(char ch)
       strncat(_value, ch, sizeof(_value));
 
     } else {
-      // LOGGER_TRACE(" value=%s", _value);
+      // LOGGER_RAW(" value=%s", _value);
       if (_callbackFn)
         (_callbackFn)(_level, _path, _name, _value);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);

@@ -10,13 +10,9 @@
 // Changelog: see ElementRegistry.h
 // -----
 
-#include "ElementRegistry.h"
-#include "Element.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Registry"
-#include "core/Logger.h"
-
+#include <ElementRegistry.h>
+#include <Element.h>
+#include <core/logger.h>
 
 // allocate static variables
 int ElementRegistry::_count;
@@ -31,7 +27,7 @@ bool ElementRegistry::registerElement(const char *elementTypeName,
                                       Element *(*CreateElementFn)(void))
 {
   // This functio is called during static variable initialization. Serial
-  // doesn't work so early: LOGGER_TRACE("register(%s)", elementTypeName);
+  // doesn't work so early: LOGGER_RAW("register(%s)", elementTypeName);
   if (_count < REG_MAX_TYPES - 1) {
     _names[_count] = elementTypeName;
     _func[_count] = CreateElementFn;
@@ -45,7 +41,7 @@ bool ElementRegistry::registerElement(const char *elementTypeName,
 Element *ElementRegistry::createElement(const char *elementTypeName)
 {
   static bool done_once = false;
-  LOGGER_TRACE("createElement(%s)", elementTypeName);
+  // LOGGER_RAW("createElement(%s)", elementTypeName);
   int n;
   Element *e = NULL;
 

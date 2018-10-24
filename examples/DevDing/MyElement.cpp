@@ -16,11 +16,8 @@
 
 
 #include "MyElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "my"
-#include "core/Logger.h"
+#include <ElementRegistry.h>
+#include <Board.h>
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -36,19 +33,20 @@
  */
 Element *MyElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new MyElement());
 } // create()
 
 
 /* ===== Element functions ===== */
 
+// MyElement::MyElement() {}
+
 
 // maybe: overwrite the init() function.
 
 // void MyElement::init(Board *board)
 // {
-//   LOGGER_TRACE("init()");
+//   LOGGER_ETRACE("init()");
 //   Element::init(board);
 //   // do something here like initialization
 // } // init()
@@ -59,7 +57,7 @@ Element *MyElement::create()
  */
 bool MyElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
@@ -85,7 +83,7 @@ bool MyElement::set(const char *name, const char *value)
  */
 void MyElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
 
   // Verify parameters
 

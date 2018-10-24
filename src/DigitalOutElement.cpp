@@ -10,13 +10,9 @@
 // Changelog: see DigitalOutElement.h
 // -----
 
-#include "DigitalOutElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "DigitalOut"
-#include "core/Logger.h"
-
+#include <DigitalOutElement.h>
+#include <ElementRegistry.h>
+#include <Board.h>
 
 /**
  * @brief static factory function to create a new DigitalOutElement.
@@ -24,14 +20,13 @@
  */
 Element *DigitalOutElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new DigitalOutElement());
 } // create()
 
 
 bool DigitalOutElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "pin") == 0) {
@@ -62,7 +57,7 @@ bool DigitalOutElement::set(const char *name, const char *value)
 void DigitalOutElement::start()
 {
   if (_pin < 0) {
-    LOGGER_ERR("no meaningful pin");
+    LOGGER_EERR("no meaningful pin");
 
   } else {
     Element::start();

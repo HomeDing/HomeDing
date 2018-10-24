@@ -15,13 +15,9 @@
  * Changelog: see TimeElement.h
  */
 
-#include "TimeElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Time"
-#define LOGGER_ENABLE_TRACE
-#include "core/Logger.h"
+#include <TimeElement.h>
+#include <ElementRegistry.h>
+#include <Board.h>
 
 #include "time.h"
 
@@ -41,7 +37,6 @@ static const char *TIME_timestampFmt = "%Y-%m-%d %H:%M:%S";
  */
 Element *TimeElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new TimeElement());
 } // create()
 
@@ -51,7 +46,7 @@ Element *TimeElement::create()
  */
 bool TimeElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, TIME_ontime) == 0) {
@@ -78,7 +73,7 @@ bool TimeElement::set(const char *name, const char *value)
  */
 void TimeElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
 
   // set some defaults
   _lastTimestamp = 0;
@@ -132,7 +127,7 @@ void TimeElement::loop()
 void TimeElement::_sendAction(String &action, const char *fmt, time_t tStamp)
 {
   if (action.length()) {
-    LOGGER_TRACE("_send(%s)", action.c_str());
+    LOGGER_ETRACE("_send(%s)", action.c_str());
     char b[32];
     struct tm *tmp = localtime(&tStamp);
     strftime(b, sizeof(b), fmt, tmp);

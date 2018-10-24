@@ -10,12 +10,9 @@
 // Changelog: see TimerElement.h
 // -----
 
-#include "TimerElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Timer"
-#include "core/Logger.h"
+#include <TimerElement.h>
+#include <ElementRegistry.h>
+#include <Board.h>
 
 /**
  * @brief All timing variables in this class are in seconds.
@@ -35,7 +32,6 @@
  */
 Element *TimerElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new TimerElement());
 } // create()
 
@@ -45,7 +41,7 @@ Element *TimerElement::create()
  */
 bool TimerElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   unsigned long now = millis() / TIMER_UNIT;
   bool ret = true;
 
@@ -53,7 +49,7 @@ bool TimerElement::set(const char *name, const char *value)
     if (_stricmp(value, "LOOP") == 0) {
       _type = TIMER_TYPE_LOOP;
     } else {
-      LOGGER_ERR("unknown type");
+      LOGGER_EERR("unknown type");
       ret = false;
     }
 
@@ -108,14 +104,14 @@ bool TimerElement::set(const char *name, const char *value)
  */
 void TimerElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
 
   if (_cycleTime < _waitTime + _pulseTime) {
     _cycleTime = _waitTime + _pulseTime;
   } // if
 
   if ((_pulseTime == 0) || (_pulseTime == _cycleTime)) {
-    LOGGER_ERR("no meaningful timing");
+    LOGGER_EERR("no meaningful timing");
 
   } else {
     // start Timer

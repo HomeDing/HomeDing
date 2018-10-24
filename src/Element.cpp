@@ -10,11 +10,9 @@
 // Changelog: see Element.h
 // -----
 
-#define LOGGER_MODULE "element"
-
-#include "Element.h"
-#include "ElementRegistry.h"
-
+#include <Board.h>
+#include <Element.h>
+#include <ElementRegistry.h>
 
 /* ===== Element functions ===== */
 
@@ -23,7 +21,6 @@
  */
 void Element::init(Board *board)
 {
-  LOGGER_TRACE("init()");
   _board = board;
 } // init()
 
@@ -37,7 +34,7 @@ void Element::init(Board *board)
  */
 bool Element::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "start") == 0) {
@@ -47,12 +44,16 @@ bool Element::set(const char *name, const char *value)
   } else if (_stricmp(name, "stop") == 0) {
     term();
 
-  // do not report an error for the following properties, as they are used in the web ui.
+  } else if (_stricmp(name, "loglevel") == 0) {
+    loglevel = atoi(value);
+
+    // do not report an error for the following properties, as they are used in
+    // the web ui.
   } else if (_stricmp(name, "description") == 0) {
   } else if (_stricmp(name, "room") == 0) {
 
   } else {
-    LOGGER_ERR("cannot set unknown property %s", name);
+    LOGGER_EERR("cannot set unknown property %s", name);
     ret = false;
   } // if
   return (ret);
@@ -64,7 +65,7 @@ bool Element::set(const char *name, const char *value)
  */
 void Element::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
   active = true;
 } // start()
 
@@ -90,11 +91,11 @@ void Element::pushState(
  */
 const char *Element::get(const char *propName)
 {
-  LOGGER_TRACE("get(%s)", propName);
+  LOGGER_ETRACE("get(%s)", propName);
   String ret;
 
   pushState([this, propName, &ret](const char *name, const char *value) {
-    // LOGGER_TRACE("-%s:%s", name, value);
+    // LOGGER_ETRACE("-%s:%s", name, value);
     if (_stricmp(name, propName) == 0) {
       ret = value;
     }
@@ -109,7 +110,7 @@ const char *Element::get(const char *propName)
  */
 void Element::term()
 {
-  LOGGER_TRACE("term()");
+  LOGGER_ETRACE("term()");
   active = false;
 } // term()
 

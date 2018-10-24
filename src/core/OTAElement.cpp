@@ -10,10 +10,9 @@
 // Changelog: see OTAElement.h
 // -----
 
-#define LOGGER_MODULE "ota"
-
-#include "OTAElement.h"
-#include "ElementRegistry.h"
+#include <core/OTAElement.h>
+#include <ElementRegistry.h>
+#include <Board.h>
 
 #include <ArduinoOTA.h>
 
@@ -26,7 +25,6 @@
  */
 Element *OTAElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new OTAElement());
 } // create()
 
@@ -43,7 +41,7 @@ OTAElement::OTAElement()
  */
 bool OTAElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "port") == 0) {
@@ -65,7 +63,7 @@ bool OTAElement::set(const char *name, const char *value)
  */
 void OTAElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
 
   ArduinoOTA.setHostname(_board->deviceName.c_str());
 
@@ -73,8 +71,8 @@ void OTAElement::start()
   if (_passwd.length() > 0)
     ArduinoOTA.setPassword((const char *)_passwd.c_str());
 
-  ArduinoOTA.onStart([]() { LOGGER_INFO("Starting"); });
-  ArduinoOTA.onEnd([]() { LOGGER_INFO("End."); });
+  ArduinoOTA.onStart([this]() { LOGGER_EINFO("Starting"); });
+  ArduinoOTA.onEnd([this]() { LOGGER_EINFO("End."); });
 
   // The onProgress function is called very often. Only report progress on
   // full percentages.
@@ -89,18 +87,18 @@ void OTAElement::start()
     }
   });
 
-  ArduinoOTA.onError([](ota_error_t error) {
-    LOGGER_ERR("Error[%u]: ", error);
+  ArduinoOTA.onError([this](ota_error_t error) {
+    LOGGER_EERR("Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR)
-      LOGGER_ERR("Auth Failed");
+      LOGGER_EERR("Auth Failed");
     else if (error == OTA_BEGIN_ERROR)
-      LOGGER_ERR("Begin Failed");
+      LOGGER_EERR("Begin Failed");
     else if (error == OTA_CONNECT_ERROR)
-      LOGGER_ERR("Connect Failed");
+      LOGGER_EERR("Connect Failed");
     else if (error == OTA_RECEIVE_ERROR)
-      LOGGER_ERR("Receive Failed");
+      LOGGER_EERR("Receive Failed");
     else if (error == OTA_END_ERROR)
-      LOGGER_ERR("End Failed");
+      LOGGER_EERR("End Failed");
   });
   ArduinoOTA.begin();
   Element::start();

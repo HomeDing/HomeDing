@@ -14,8 +14,8 @@
  * Changelog, see DisplayDotElement.h.
  */
 
-#include <DisplayDotElement.h>
 #include <Board.h>
+#include <DisplayDotElement.h>
 
 /**
  * @brief static factory function to create a new DisplayDotElement.
@@ -43,8 +43,10 @@ bool DisplayDotElement::set(const char *name, const char *value)
 
   } else if (!active) {
     // no actions.
-    LOGGER_ETRACE("not active: %d.", _display);
-
+    ret = Element::set(name, value);
+    if (!ret) {
+      LOGGER_EERR("inactive");
+    }
 
   } else if (_stricmp(name, "clear") == 0) {
     _display->clear();

@@ -51,7 +51,7 @@ public:
   {
     // test if a display device is attached
     Wire.begin(_sda, _scl);
-    Serial.printf("connect %d %d\n", _sda, _scl);
+    LOGGER_TRACE("connect %d %d", _sda, _scl);
 
     Wire.beginTransmission(_address);
     int error = Wire.endTransmission();

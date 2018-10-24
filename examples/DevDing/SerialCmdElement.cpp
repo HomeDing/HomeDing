@@ -16,12 +16,8 @@
  */
 
 #include "SerialCmdElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "cmd"
-#include "core/Logger.h"
-
+#include <ElementRegistry.h>
+#include <Board.h>
 
 /**
  * @brief static factory function to create a new SerialCmdElement.
@@ -29,7 +25,6 @@
  */
 Element *SerialCmdElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new SerialCmdElement());
 } // create()
 
@@ -39,7 +34,7 @@ Element *SerialCmdElement::create()
  */
 bool SerialCmdElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "preset0") == 0) {
@@ -60,17 +55,17 @@ void SerialCmdElement::loop()
 {
   while (Serial.available()) {
     char ch = Serial.read();
-    // LOGGER_INFO(">>%c", ch);
+    // LOGGER_EINFO(">>%c", ch);
 
     if ((ch == '\n') || (ch == '\r') || (ch == ',')) {
       if (_cmdLine == "+") {
         // increase loggging Level
-        LOGGER_INFO("Trace Level Logging enabled.");
+        LOGGER_EINFO("Trace Level Logging enabled.");
         Logger::logger_level = LOGGER_LEVEL_TRACE;
 
       } else if (_cmdLine == "-") {
         // standard loggging Level
-        LOGGER_INFO("Error Level Logging enabled.");
+        LOGGER_EINFO("Error Level Logging enabled.");
         Logger::logger_level = LOGGER_LEVEL_ERR;
 
       } else if (_cmdLine.length() == 1) {
@@ -81,7 +76,7 @@ void SerialCmdElement::loop()
           _cmdLine = _preset1;
 
       } else {
-        LOGGER_INFO("dispatch %s", _cmdLine.c_str());
+        LOGGER_EINFO("dispatch %s", _cmdLine.c_str());
         _board->dispatch(_cmdLine);
         _cmdLine = "";
       }

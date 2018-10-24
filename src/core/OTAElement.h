@@ -18,9 +18,7 @@
 #define OTAELEMENT_H
 
 #include <Arduino.h>
-
-#include "Board.h"
-#include "Element.h"
+#include <Element.h>
 
 class OTAElement : public Element
 {

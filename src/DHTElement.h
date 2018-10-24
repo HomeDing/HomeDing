@@ -20,9 +20,8 @@
 #ifndef DHTELEMENT_H
 #define DHTELEMENT_H
 
-#include "Board.h"
-#include "Element.h"
 #include <Arduino.h>
+#include <Element.h>
 
 #include <DHTesp.h>
 

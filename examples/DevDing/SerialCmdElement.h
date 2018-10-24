@@ -30,9 +30,7 @@
 #define SERIALCMDELEMENT_H
 
 #include <Arduino.h>
-
-#include "Board.h"
-#include "Element.h"
+#include <Element.h>
 
 /**
  * @brief The SerialCmdElement is an special Element that reads from the serial

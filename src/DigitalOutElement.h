@@ -19,9 +19,7 @@
 #define DIGITALOUT_H
 
 #include <Arduino.h>
-
-#include "Board.h"
-#include "Element.h"
+#include <Element.h>
 
 /**
  * @brief The DigitalOutElement is an Element that creates an digital output

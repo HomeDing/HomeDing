@@ -17,10 +17,11 @@
  */
 
 #include "DHTElement.h"
-#include "ElementRegistry.h"
+#include <ElementRegistry.h>
+#include <Board.h>
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "DHT"
+#undef LOGGER_EMODULE
+#define LOGGER_EMODULE "DHT"
 #include "core/Logger.h"
 
 
@@ -30,7 +31,6 @@
  */
 Element *DHTElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new DHTElement());
 } // create()
 
@@ -50,7 +50,7 @@ DHTElement::DHTElement()
  */
 bool DHTElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "type") == 0) {
@@ -89,10 +89,10 @@ bool DHTElement::set(const char *name, const char *value)
  */
 void DHTElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
   unsigned int now = (millis() / 1000);
   if (_pin < 0) {
-    LOGGER_ERR("no meaningful pin");
+    LOGGER_EERR("no meaningful pin");
 
   } else {
     _dht.setup(_pin, _type);
@@ -114,16 +114,16 @@ void DHTElement::loop()
   int v;
 
   if (_nextRead <= now) {
-    // LOGGER_LOG("reading...");
+    // LOGGER_ETRACE("reading...");
     values = _dht.getTempAndHumidity();
     DHTesp::DHT_ERROR_t dhterr = _dht.getStatus();
 
-    // LOGGER_LOG("t=%f h=%f", values.temperature, values.humidity);
+    // LOGGER_ETRACE("t=%f h=%f", values.temperature, values.humidity);
     if (dhterr == DHTesp::ERROR_TIMEOUT) {
-      LOGGER_ERR("timeout");
+      LOGGER_EERR("timeout");
 
     } else if (dhterr == DHTesp::ERROR_CHECKSUM) {
-      LOGGER_ERR("checksum");
+      LOGGER_EERR("checksum");
 
     } else {
       v = (int)(values.temperature * 100);
@@ -142,7 +142,7 @@ void DHTElement::loop()
 
   } else if ((_resendTime > 0) && (_nextResend <= now)) {
     // dispatch values again.
-    LOGGER_LOG("resending");
+    LOGGER_ETRACE("resending");
     _dispatch(_tempAction, _lastTemp);
     _dispatch(_humAction, _lastHum);
     _nextResend = now + _resendTime;

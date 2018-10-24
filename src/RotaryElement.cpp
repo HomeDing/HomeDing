@@ -15,8 +15,8 @@
  */
 
 #include <RotaryElement.h>
+#include <ElementRegistry.h>
 #include <Board.h>
-#include "ElementRegistry.h"
 
 #include <RotaryEncoder.h>
 
@@ -37,7 +37,6 @@ RotaryEncoder *__encoder;
  */
 Element *RotaryElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new RotaryElement());
 } // create()
 
@@ -49,7 +48,7 @@ Element *RotaryElement::create()
  */
 bool RotaryElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
@@ -88,14 +87,14 @@ void __checkPosition()
  */
 void RotaryElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
 
   // Verify parameters
   if ((_pin1 < 0) || (_pin2 < 0)) {
-    LOGGER_ERR("pin values are required.");
+    LOGGER_EERR("pin values are required.");
 
   } else {
-    LOGGER_INFO("connect %d %d\n", _pin1, _pin2);
+    // LOGGER_ETRACE("connect %d %d\n", _pin1, _pin2);
     __encoder = new RotaryEncoder(_pin1, _pin2);
     pinMode(_pin1, INPUT_PULLUP);
     attachInterrupt(_pin1,  __checkPosition, CHANGE);

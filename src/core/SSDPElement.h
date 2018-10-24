@@ -15,9 +15,8 @@
 #ifndef SSDPELEMENT_H
 #define SSDPELEMENT_H
 
-#include "Board.h"
-#include "Element.h"
 #include <Arduino.h>
+#include <Element.h>
 
 /// enable the SSDP Protocol to find the device in the network
 

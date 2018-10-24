@@ -40,10 +40,6 @@
 
 #include <FS.h>
 
-// =====
-
-#define LOGGER_MODULE "main"
-
 #include <Board.h>
 #include <BoardServer.h>
 #include <FileServer.h>
@@ -81,7 +77,7 @@ Board mainBoard;
 // Send out a JSON object with all files in dir
 void handleFileList()
 {
-  LOGGER_TRACE("handleFileList()");
+  LOGGER_RAW("handleFileList()");
 
   String json;
   json.reserve(512);
@@ -124,7 +120,7 @@ void setup(void)
               ESP.getBootMode());
 
   // Enable the next line to start detailed tracing
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
+  Logger::logger_level = LOGGER_LEVEL_INFO;
 
   // ----- setup the file system and load configuration -----
 
@@ -133,12 +129,12 @@ void setup(void)
 
   // ----- adding web server handlers -----
 
-  LOGGER_TRACE("register handlers.\n");
+  LOGGER_RAW("register handlers.\n");
 
   // redirect to index.htm of only domain name is given.
   server.on("/", HTTP_GET, []() {
     server.sendHeader("Location", "/index.htm", true);
-    LOGGER_TRACE("Redirect...");
+    LOGGER_RAW("Redirect...");
     server.send(301, "text/plain", "");
   });
 
@@ -182,7 +178,7 @@ void setup(void)
   server.addHandler(new BoardHandler("/$board", &mainBoard));
 
   server.on("/$reboot", HTTP_GET, []() {
-    LOGGER_INFO("rebooting...");
+    LOGGER_INFO("remote rebooting...");
     server.send(200, "text/plain", "");
     delay(500);
     ESP.reset();
@@ -190,7 +186,7 @@ void setup(void)
 
   server.addHandler(new FileServerHandler(SPIFFS, "/", "NO-CACHE"));
 
-  LOGGER_TRACE("sketch setup done.\n");
+  LOGGER_INFO("sketch setup done.");
 } // setup
 
 

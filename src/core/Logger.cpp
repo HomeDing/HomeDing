@@ -15,42 +15,74 @@
  * see Logger.h
  */
 
-#include "core/Logger.h"
+#include <FS.h>
+
+#include <core/Logger.h>
 
 void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
 {
   char buffer[200];
 
   if (level <= logger_level) {
-    // Logger prefix "><module>:<loglevel>: ....."
-    const char *levString;
-    if (level == LOGGER_LEVEL_ERR) {
-      levString = "e";
-    } else if (level == LOGGER_LEVEL_LOG) {
-      levString = "l";
-    } else if (level == LOGGER_LEVEL_TRACE) {
-      levString = "t";
-    } else if (level == LOGGER_LEVEL_INFO) {
-      levString = "i";
-    } else {
-      levString = "---";
-    }
-    snprintf(buffer, sizeof(buffer), ">%s:%s: ", module, levString);
-#ifdef DEBUG_ESP_PORT
-    DEBUG_ESP_PORT.print(buffer);
-#endif
+    printPrefix(buffer, module, level);
+    char *p = strchr(buffer, '\0');
 
     va_list args;
     va_start(args, fmt);
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    vsnprintf(p, sizeof(buffer) - 40, fmt, args);
     va_end(args);
 #ifdef DEBUG_ESP_PORT
     DEBUG_ESP_PORT.println(buffer);
 #endif
+    if (level < LOGGER_LEVEL_TRACE) {
+      printFile(buffer);
+    }
+
   } // if
 } // LoggerPrint
 
-int Logger::logger_level = LOGGER_LEVEL_LOG; //  LOGGER_LEVEL_ERR;
+
+void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
+{
+  char buffer[200];
+
+  if ((level <= logger_level) || (level <= elem->loglevel)) {
+    printPrefix(buffer, elem->id, level);
+    char *p = strchr(buffer, '\0');
+
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(p, sizeof(buffer) - 40, fmt, args);
+    va_end(args);
+#ifdef DEBUG_ESP_PORT
+    DEBUG_ESP_PORT.println(buffer);
+#endif
+    if (level < LOGGER_LEVEL_TRACE) {
+      printFile(buffer);
+    }
+
+  } // if
+} // LoggerEPrint
+
+
+void Logger::printPrefix(char *buffer, const char *module, int level)
+{
+  const char *levString = "eit";
+  sprintf(buffer, ">%s:%c:", module, *(levString + level));
+};
+
+void Logger::printFile(char *buffer)
+{
+  File f = SPIFFS.open("/log.txt", "a");
+  int s = f.size();
+  LOGGER_RAW("log.txt size=%d", s);
+  if (s < (4 * 1024 - 100)) {
+    f.println(buffer);
+  }
+  f.close();
+};
+
+int Logger::logger_level = LOGGER_LEVEL_INFO; // LOGGER_LEVEL_ERR;
 
 
 // end.

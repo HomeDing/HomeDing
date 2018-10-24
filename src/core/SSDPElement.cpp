@@ -11,10 +11,9 @@
 // Changelog: see SSDPElement.h
 // -----
 
-#define LOGGER_MODULE "ssdp"
-
-#include "SSDPElement.h"
-#include "ElementRegistry.h"
+#include <core/SSDPElement.h>
+#include <ElementRegistry.h>
+#include <Board.h>
 
 
 /* ===== Static factory function ===== */
@@ -25,7 +24,6 @@
  */
 Element *SSDPElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new SSDPElement());
 } // create()
 
@@ -37,7 +35,7 @@ Element *SSDPElement::create()
  */
 void SSDPElement::init(Board *board)
 {
-  LOGGER_TRACE("init()");
+  LOGGER_ETRACE("init()");
   Element::init(board);
 
   // set default values
@@ -58,7 +56,7 @@ void SSDPElement::init(Board *board)
  */
 bool SSDPElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "Manufacturer") == 0) {
@@ -86,7 +84,7 @@ bool SSDPElement::set(const char *name, const char *value)
  */
 void SSDPElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
 
   Element *deviceElement = _board->getElement("device");
   if ((deviceElement) && (_board->server)) {

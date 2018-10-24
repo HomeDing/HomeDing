@@ -16,11 +16,9 @@
 
 
 #include "ValueElement.h"
-#include "ElementRegistry.h"
+#include <ElementRegistry.h>
+#include <Board.h>
 
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Value"
-#include "core/Logger.h"
 
 /**
  * @brief static factory function to create a new ValueElement
@@ -28,7 +26,6 @@
  */
 Element *ValueElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new ValueElement());
 } // create()
 
@@ -38,7 +35,7 @@ Element *ValueElement::create()
  */
 bool ValueElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {

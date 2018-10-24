@@ -20,17 +20,7 @@
 #define TIMEELEMENT_H
 
 #include <Arduino.h>
-#include "Board.h"
-#include "Element.h"
-
-#include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
-
-// not properties:
-
-// local port to listen for UDP packets
-#define localPort 1337
-
+#include <Element.h>
 
 /**
  * @brief The TimeElement is an special Element that creates actions based on

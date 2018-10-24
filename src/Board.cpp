@@ -15,11 +15,9 @@
  * Changelog: see Board.h
  */
 
-#define LOGGER_MODULE "board"
-
-#include "Board.h"
-#include "Element.h"
-#include "ElementRegistry.h"
+#include <Board.h>
+#include <Element.h>
+#include <ElementRegistry.h>
 
 #include "MicroJsonParser.h"
 
@@ -128,7 +126,7 @@ void Board::start(Element_StartupMode startupMode)
 // switch to a new state
 void Board::_newState(BoardState newState)
 {
-  LOGGER_TRACE("do BoardState %d", newState);
+  // LOGGER_TRACE("do BoardState %d", newState);
   boardState = newState;
 }
 
@@ -145,9 +143,9 @@ void Board::loop()
     // load all config files and create+start elements
     addElements();
     start(Element_StartupMode::System);
-    LOGGER_TRACE("SYS Elements started.");
+    // LOGGER_TRACE("SYS Elements started.");
 
-    LOGGER_TRACE("devicename=%s", deviceName.c_str());
+    LOGGER_INFO("devicename=%s", deviceName.c_str());
     WiFi.hostname(deviceName);
 
     if (display) {
@@ -228,7 +226,7 @@ void Board::loop()
       if (netMode) {
         _newState(BOARDSTATE_CONNECT);
       } else {
-        LOGGER_TRACE("restarting...");
+        LOGGER_INFO("no-net restarting...");
         delay(10000);
         ESP.restart();
       }
@@ -308,12 +306,12 @@ Element *Board::findById(String &id)
 
 Element *Board::findById(const char *id)
 {
-  LOGGER_TRACE("findById(%s)", id);
+  // LOGGER_TRACE("findById(%s)", id);
 
   Element *l = _list2;
   while (l != NULL) {
     if (strcmp(l->id, id) == 0) {
-      LOGGER_TRACE(" found:%s", l->id);
+      // LOGGER_TRACE(" found:%s", l->id);
       break; // while
     } // if
     l = l->next;
@@ -324,13 +322,13 @@ Element *Board::findById(const char *id)
 
 void Board::_dispatchSingle(String evt)
 {
-  LOGGER_TRACE("dispatchSingle(%s)", evt.c_str());
+  // LOGGER_TRACE("dispatchSingle(%s)", evt.c_str());
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);
   int pos2 = evt.indexOf(ELEM_VALUE);
 
   if (pos1 <= 0) {
-    LOGGER_ERR("No action given");
+    LOGGER_ERR("No action given: %s", evt.c_str());
 
   } else {
     String targetName, name, value;
@@ -341,7 +339,7 @@ void Board::_dispatchSingle(String evt)
     Element *target = findById(targetName);
 
     if (!target) {
-      LOGGER_ERR("target %s not found", targetName.c_str());
+      LOGGER_ERR("dispatch target %s not found", targetName.c_str());
 
     } else {
       if (pos2 > 0) {
@@ -384,13 +382,13 @@ void Board::dispatch(const char *action, const char *value)
 
 void Board::getState(String &out, String path)
 {
-  LOGGER_TRACE("getState(%s)", path.c_str());
+  // LOGGER_TRACE("getState(%s)", path.c_str());
   String ret = "{";
   const char *cPath = path.c_str();
 
   Element *l = _list2;
   while (l != NULL) {
-    LOGGER_TRACE("  ->%s", l->id);
+    // LOGGER_TRACE("  ->%s", l->id);
     if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
       ret += "\"";
       ret += l->id;
@@ -431,8 +429,7 @@ void Board::getState(String &out, String path)
 
 void Board::setState(String &path, String property, String value)
 {
-  LOGGER_TRACE("setState(%s, %s, %s)", path.c_str(), property.c_str(),
-               value.c_str());
+  // LOGGER_TRACE("setState(%s, %s, %s)", path.c_str(), property.c_str(), value.c_str());
   Element *e = findById(path);
   if (e != NULL) {
     e->set(property.c_str(), value.c_str());
@@ -482,7 +479,7 @@ time_t Board::getTimeOfDay()
  */
 Element *Board::getElement(const char *elementTypeName)
 {
-  LOGGER_TRACE("getElement(%s)", elementTypeName);
+  // LOGGER_TRACE("getElement(%s)", elementTypeName);
 
   String tn = elementTypeName;
   tn.concat(ELEM_ID_SEPARATOR);
@@ -495,7 +492,7 @@ Element *Board::getElement(const char *elementTypeName)
     } // if
     l = l->next;
   } // while
-  LOGGER_TRACE("found: %d", l);
+  // LOGGER_TRACE("found: %d", l);
   return (l);
 } // getElement
 
@@ -505,7 +502,7 @@ Element *Board::getElement(const char *elementTypeName)
  */
 void Board::_add(const char *id, Element *e)
 {
-  LOGGER_TRACE("_add(%s)", id);
+  // LOGGER_TRACE("_add(%s)", id);
 
   strcpy(e->id, id);
   e->next = NULL;

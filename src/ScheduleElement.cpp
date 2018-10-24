@@ -16,14 +16,8 @@
 
 
 #include "ScheduleElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Sched"
-#include "core/Logger.h"
-
-#undef LOGGER_TRACE
-#define LOGGER_TRACE LOGGER_INFO
+#include <ElementRegistry.h>
+#include <Board.h>
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -39,7 +33,6 @@
  */
 Element *ScheduleElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new ScheduleElement());
 } // create()
 
@@ -51,7 +44,7 @@ Element *ScheduleElement::create()
  */
 void ScheduleElement::init(Board *board)
 {
-  LOGGER_TRACE("init()");
+  LOGGER_ETRACE("init()");
   Element::init(board);
 
   _onTime = TIME_T_NOT;
@@ -64,7 +57,7 @@ void ScheduleElement::init(Board *board)
  */
 bool ScheduleElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "ontime") == 0) {
@@ -92,13 +85,13 @@ bool ScheduleElement::set(const char *name, const char *value)
  */
 void ScheduleElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
 
   // Verify parameters
   _init = false;
 
   if ((_onTime == TIME_T_NOT) && (_offTime == TIME_T_NOT)) {
-    LOGGER_ERR("no time span set.");
+    LOGGER_EERR("no time span set.");
   } else {
     Element::start();
   } // if

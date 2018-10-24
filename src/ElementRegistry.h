@@ -14,9 +14,8 @@
 #ifndef ELEMENTREGISTRY_H
 #define ELEMENTREGISTRY_H
 
-#include "Board.h"
-#include "Element.h"
 #include <Arduino.h>
+#include <Element.h>
 
 #define REG_MAX_TYPES 32
 

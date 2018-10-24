@@ -28,13 +28,12 @@
  * Changelog: see NTPTimeElement.h
  */
 
-#define LOGGER_MODULE "ntptime"
+#include <NTPTimeElement.h>
+#include <ElementRegistry.h>
+#include <Board.h>
 
-#include "NTPTimeElement.h"
-#include "ElementRegistry.h"
-
-#include "sntp.h"
-#include "time.h"
+#include <sntp.h>
+#include <time.h>
 
 // String constants, only once in Memory
 static const char *NTPE_ntpserver = "ntpserver";
@@ -48,7 +47,6 @@ static const char *NTPE_readtime = "readtime";
  */
 Element *NTPTimeElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new NTPTimeElement());
 } // create()
 
@@ -61,7 +59,7 @@ NTPTimeElement::NTPTimeElement()
   _nextRead = 0;
 
   uint32 rtc_time = system_get_rtc_time();
-  LOGGER_TRACE("rtc_time=%d", rtc_time);
+  LOGGER_ETRACE("rtc_time=%d", rtc_time);
 } // NTPTimeElement()
 
 
@@ -70,7 +68,7 @@ NTPTimeElement::NTPTimeElement()
  */
 bool NTPTimeElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, NTPE_ntpserver) == 0) {
@@ -94,7 +92,7 @@ bool NTPTimeElement::set(const char *name, const char *value)
  */
 void NTPTimeElement::start()
 {
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
   unsigned long now = (millis() / 1000);
 
   _nextRead = now + 2; // now + min. 2 sec., don't hurry
@@ -117,7 +115,7 @@ void NTPTimeElement::loop()
   uint32 current_stamp = sntp_get_current_timestamp();
 
   if ((_state != 1) && (_nextRead < now)) {
-    LOGGER_TRACE("request sntp sync");
+    LOGGER_ETRACE("request sntp sync");
     sntp_setservername(0, (char *)_ntpServer.c_str());
     sntp_set_timezone(_zone);
     // sntp_set_daylight(3600);
@@ -130,7 +128,7 @@ void NTPTimeElement::loop()
     if (current_stamp < (24 * 60 * 60)) {
       // not synced yet => wait.
     } else {
-      LOGGER_LOG("got time: %d", current_stamp);
+      LOGGER_EINFO("got time: %d", current_stamp);
       _state = 2;
       _nextRead = now + _readTime;
       sntp_stop();
@@ -139,7 +137,7 @@ void NTPTimeElement::loop()
 
   } else if (_state == 1) {
     // no respnse within 8 seconds.
-    LOGGER_ERR("No NTP Response :-(");
+    LOGGER_EERR("No NTP Response :-(");
     _state = 0;
     _nextRead = now + _readTime;
     sntp_stop();

@@ -15,26 +15,18 @@
  */
 
 
-#include "RFSendElement.h"
+#include <RFSendElement.h>
+#include <ElementRegistry.h>
+#include <Board.h>
 
 #include <TabRF.h>
 #include <intertechno2.h> // use the intertechno2 code defintions
 
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "RFSend"
-#include "core/Logger.h"
 
 /* ===== Define local constants and often used strings ===== */
 
-// like:
-// #define TIMER_UNIT 1000
-
-
 // Define static class variables here.
 int RFSendElement::_rfpin;
-
 
 /* ===== Static factory function ===== */
 
@@ -44,7 +36,6 @@ int RFSendElement::_rfpin;
  */
 Element *RFSendElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new RFSendElement());
 } // create()
 
@@ -60,7 +51,7 @@ Element *RFSendElement::create()
  */
 bool RFSendElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s, %s)", name, value);
+  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
@@ -68,10 +59,10 @@ bool RFSendElement::set(const char *name, const char *value)
 
     if (active) {
       if (_lastValue) {
-        LOGGER_TRACE("send(%s)", _codeOn.c_str());
+        LOGGER_ETRACE("send(%s)", _codeOn.c_str());
         tabRF.send(_codeOn.c_str());
       } else {
-        LOGGER_TRACE("send(%s)", _codeOff.c_str());
+        LOGGER_ETRACE("send(%s)", _codeOff.c_str());
         tabRF.send(_codeOff.c_str());
       }
     } // if
@@ -99,11 +90,11 @@ bool RFSendElement::set(const char *name, const char *value)
 void RFSendElement::start()
 {
   static bool initialized = false;
-  LOGGER_TRACE("start()");
+  LOGGER_ETRACE("start()");
 
   // initialize the tabrf library only once.
   if (!initialized) {
-    LOGGER_TRACE("start on pin=%d", _rfpin);
+    LOGGER_ETRACE("start on pin=%d", _rfpin);
 
     tabRF.init(NO_PIN, _rfpin); // input at D1 = pin #2 , output at D4, pin # 9
     tabRF.setupDefition(&Intertechno2_Sequence);

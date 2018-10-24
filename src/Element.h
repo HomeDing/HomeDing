@@ -22,6 +22,9 @@
 
 // forward class declarations
 class Board;
+class Element;
+
+#include <core/Logger.h>
 
 /**
  * @brief Startup Mode specifies when is the right moment to try
@@ -56,6 +59,7 @@ public:
    */
   char id[MAX_ID_LENGTH]; // TODO: convert to String
 
+  int loglevel = LOGGER_LEVEL_ERR;
 
   /**
    * @brief The Element will be marked active after passing valid parameters and

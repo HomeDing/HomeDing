@@ -15,14 +15,10 @@
  */
 
 #include "ButtonElement.h"
-#include "ElementRegistry.h"
-
-#undef LOGGER_MODULE
-#define LOGGER_MODULE "Button"
-#include "core/Logger.h"
+#include <ElementRegistry.h>
+#include <Board.h>
 
 // #include <OneButton.h>
-
 
 /**
  * @brief static factory function to create a new ButtonElement.
@@ -30,7 +26,6 @@
  */
 Element *ButtonElement::create()
 {
-  LOGGER_TRACE("create()");
   return (new ButtonElement());
 } // create()
 
@@ -40,7 +35,7 @@ Element *ButtonElement::create()
  */
 bool ButtonElement::set(const char *name, const char *value)
 {
-  LOGGER_TRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "type") == 0) {
@@ -49,7 +44,7 @@ bool ButtonElement::set(const char *name, const char *value)
     } else if (_stricmp(value, "toggle") == 0) {
       _type = BUTTON_TYPE_TOGGLE;
     } else {
-      LOGGER_ERR("unknown type");
+      LOGGER_EERR("unknown type");
     }
 
   } else if (_stricmp(name, "pin") == 0) {
@@ -80,7 +75,7 @@ bool ButtonElement::set(const char *name, const char *value)
 void ButtonElement::start()
 {
   if (_pin < 0) {
-    LOGGER_ERR("no meaningful pin");
+    LOGGER_EERR("no meaningful pin");
 
   } else {
     pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);

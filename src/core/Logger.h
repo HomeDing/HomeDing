@@ -26,11 +26,11 @@
 #include <Arduino.h>
 #include <memory>
 
-// always send out errors to debug port and log file.
-#define LOGGER_LEVEL_ERR 0
-
 // information to debug port and log file.
-#define LOGGER_LEVEL_INFO 1
+#define LOGGER_LEVEL_INFO 0
+
+// always send out errors to debug port and log file.
+#define LOGGER_LEVEL_ERR 1
 
 // detailed trace level to debug port only.
 #define LOGGER_LEVEL_TRACE 2
@@ -49,7 +49,7 @@
 
 #ifdef DEBUG_ESP_PORT
 #define LOGGER_RAW(...)                                                        \
-  DEBUG_ESP_PORT.printf(">sys::" __VA_ARGS__);                                 \
+  DEBUG_ESP_PORT.printf("  >" __VA_ARGS__);                                 \
   DEBUG_ESP_PORT.print("\n")
 #else
 #define LOGGER_RAW(...)

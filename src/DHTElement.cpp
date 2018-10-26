@@ -16,14 +16,9 @@
  * Changelog: see DHTElement.h
  */
 
-#include "DHTElement.h"
+#include <DHTElement.h>
 #include <ElementRegistry.h>
 #include <Board.h>
-
-#undef LOGGER_EMODULE
-#define LOGGER_EMODULE "DHT"
-#include "core/Logger.h"
-
 
 /**
  * @brief static factory function to create a new DHTElement
@@ -40,7 +35,7 @@ DHTElement::DHTElement()
   _type = DHTesp::AUTO_DETECT;
   _pin = -1;
   _lastTemp = _lastHum = -666;
-  _readTime = 10; // seconds ??? 60
+  _readTime = 60; // read from sensor once a minute
   _resendTime = 0; // Not enabled resending probes.
 } // DHTElement()
 

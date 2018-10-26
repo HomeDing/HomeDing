@@ -82,7 +82,7 @@ void Logger::printFile(char *buffer)
   f.close();
 };
 
-int Logger::logger_level = LOGGER_LEVEL_INFO; // LOGGER_LEVEL_ERR;
+int Logger::logger_level = LOGGER_LEVEL_ERR; // LOGGER_LEVEL_ERR;
 
 
 // end.

@@ -15,16 +15,24 @@
  * see Logger.h
  */
 
+#include <memory>
+
 #include <FS.h>
 
 #include <core/Logger.h>
+
+#define LOGFILE_MAXSIZE (4 * 1024 - 200)
+
+// String constants, only once in Memory
+static const char *LOGFILE_NAME = "/log.txt";
+static const char *LOGFILE_OLD_NAME = "/log_old.txt";
 
 void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
 {
   char buffer[200];
 
   if (level <= logger_level) {
-    printPrefix(buffer, module, level);
+    _printPrefix(buffer, module, level);
     char *p = strchr(buffer, '\0');
 
     va_list args;
@@ -35,7 +43,7 @@ void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
     DEBUG_ESP_PORT.println(buffer);
 #endif
     if (level < LOGGER_LEVEL_TRACE) {
-      printFile(buffer);
+      _printToFile(buffer);
     }
 
   } // if
@@ -47,7 +55,7 @@ void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
   char buffer[200];
 
   if ((level <= logger_level) || (level <= elem->loglevel)) {
-    printPrefix(buffer, elem->id, level);
+    _printPrefix(buffer, elem->id, level);
     char *p = strchr(buffer, '\0');
 
     va_list args;
@@ -58,31 +66,35 @@ void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
     DEBUG_ESP_PORT.println(buffer);
 #endif
     if (level < LOGGER_LEVEL_TRACE) {
-      printFile(buffer);
+      _printToFile(buffer);
     }
 
   } // if
 } // LoggerEPrint
 
 
-void Logger::printPrefix(char *buffer, const char *module, int level)
+void Logger::_printPrefix(char *buffer, const char *module, int level)
 {
   const char *levString = "eit";
   sprintf(buffer, ">%s:%c:", module, *(levString + level));
 };
 
-void Logger::printFile(char *buffer)
+
+void Logger::_printToFile(char *buffer)
 {
-  File f = SPIFFS.open("/log.txt", "a");
-  int s = f.size();
-  LOGGER_RAW("log.txt size=%d", s);
-  if (s < (4 * 1024 - 100)) {
-    f.println(buffer);
-  }
+  File f = SPIFFS.open(LOGFILE_NAME, "a");
+
+  if (f.size() > LOGFILE_MAXSIZE) {
+    // rename to LOGFILE_OLD_NAME
+    f.close();
+    SPIFFS.remove(LOGFILE_OLD_NAME);
+    SPIFFS.rename(LOGFILE_NAME, LOGFILE_OLD_NAME);
+    f = SPIFFS.open(LOGFILE_NAME, "a");
+  } // if
+  f.println(buffer);
   f.close();
 };
 
-int Logger::logger_level = LOGGER_LEVEL_ERR; // LOGGER_LEVEL_ERR;
-
-
+// Default: Log INFO and ERROR
+int Logger::logger_level = LOGGER_LEVEL_ERR;
 // end.

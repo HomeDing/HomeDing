@@ -16,15 +16,13 @@
  * * 24.10.2018 logging for elements using element->id
  * *   logging for elements using element->loglevel;
  * *   log errors and info to file log.txt
- * 
- * A log line always looks like: ">element/id:c: ....."
+ * * 27.10.2018 rolling logfiles and log_old.txt.
  */
 
 #ifndef LOGGER_H
 #define LOGGER_H
 
 #include <Arduino.h>
-#include <memory>
 
 // information to debug port and log file.
 #define LOGGER_LEVEL_INFO 0
@@ -87,9 +85,9 @@ public:
   static void LoggerEPrint(Element *module, int level, const char *fmt, ...);
 
 private:
-  static void printPrefix(char *buffer, const char *module, int level);
+  static void _printPrefix(char *buffer, const char *module, int level);
 
-  static void printFile(char *buffer);
+  static void _printToFile(char *buffer);
 };
 
 #endif

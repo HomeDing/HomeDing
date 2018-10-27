@@ -94,7 +94,7 @@ void DeviceElement::loop()
 {
   unsigned long now = millis() / 1000;
   if ((_rebootTime > 0) && (now > _nextBoot)) {
-    LOGGER_EINFO("device restart");
+    LOGGER_EINFO("device restart initiated.");
     delay(100);
     ESP.restart();
     delay(100);

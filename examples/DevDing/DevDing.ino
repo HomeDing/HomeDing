@@ -129,7 +129,7 @@ void setup(void)
 
   // ----- adding web server handlers -----
 
-  LOGGER_RAW("register handlers.\n");
+  LOGGER_RAW("register handlers.");
 
   // redirect to index.htm of only domain name is given.
   server.on("/", HTTP_GET, []() {

@@ -81,11 +81,11 @@ void Logger::_printPrefix(char *buffer, const char *module, int level)
   uint32 current_stamp = sntp_get_current_timestamp();
   char b[16];
 
-  LOGGER_RAW("getTime=%d", current_stamp);
+  // LOGGER_RAW("getTime=%d", current_stamp);
 
   if (current_stamp < (30 * 24 * 60 * 60)) {
     current_stamp = millis()/1000;
-    LOGGER_RAW("using millis() = %d", current_stamp);
+    // LOGGER_RAW("using millis() = %d", current_stamp);
   }
   struct tm *tmp = localtime((const time_t *)(&current_stamp));
   strftime(b, sizeof(b), "%H:%M:%S", tmp);

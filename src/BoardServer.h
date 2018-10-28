@@ -1,6 +1,7 @@
 /**
  * @file boardServer.h
- * @brief Implementation of a web server request hander to handle the IoT board REST services.
+ * @brief Implementation of a web server request hander to handle the IoT board
+ * REST services.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -20,8 +21,8 @@
 
 #include <functional>
 
-#include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
 
 
 /**
@@ -87,8 +88,6 @@ public:
 
     int args = server.args();
     // LOGGER_RAW(" args=%d", args);
-
-  LOGGER_INFO("&_board=%X", _board);
 
     if ((args == 0) && (requestMethod == HTTP_GET)) {
       String output;

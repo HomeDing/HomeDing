@@ -17,8 +17,8 @@
  */
 
 #include "DeviceElement.h"
-#include <ElementRegistry.h>
 #include <Board.h>
+#include <ElementRegistry.h>
 
 /* ===== Static factory function ===== */
 
@@ -60,12 +60,14 @@ bool DeviceElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "log") == 0) {
     // Log a information with time.
-    unsigned long now = millis() / 1000; // make seconds
+    unsigned long now = _board->getTimeOfDay();
+    if (!now)
+      now = millis() / 1000; // make seconds
 
     // ALWAYS send to log
     // LOGGER_EINFO(...
-    DEBUG_ESP_PORT.printf("%3u:%02u:%02u %s\n", (now / 3600), (now / 60) % 60,
-                          now % 60, value ? value : "NULL");
+    LOGGER_RAW("%3u:%02u:%02u %s", (now / 3600), (now / 60) % 60, now % 60,
+               value ? value : "NULL");
 
   } else {
     ret = Element::set(name, value);

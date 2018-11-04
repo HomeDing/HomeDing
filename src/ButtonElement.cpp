@@ -1,6 +1,6 @@
 /**
  * @file ButtonElement.cpp
- * @brief Input Element for the IoT Board Library typicaly used with momentary
+ * @brief Input Element for the IoT Board Library typically used with momentary
  * buttons or switches.
  * @author Matthias Hertel, https://www.mathertel.de
  *

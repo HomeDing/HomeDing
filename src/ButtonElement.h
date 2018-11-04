@@ -1,7 +1,7 @@
 /**
  * @file ButtonElement.h
  *
- * @brief Core Input Element for the HomeDing Library typicaly used with
+ * @brief Core Input Element for the HomeDing Library typically used with
  * momentary buttons or switches.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
@@ -64,7 +64,7 @@ public:
   virtual void start();
 
   /**
-   * @brief check the state of the input signal and evenuallt emit actions.
+   * @brief check the state of the input signal and eventually emit actions.
    */
   virtual void loop();
 

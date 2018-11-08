@@ -97,7 +97,7 @@ void RFSendElement::start()
     LOGGER_ETRACE("start on pin=%d", _rfpin);
 
     tabRF.init(NO_PIN, _rfpin); // input at D1 = pin #2 , output at D4, pin # 9
-    tabRF.setupDefition(&Intertechno2_Sequence);
+    tabRF.setupDefinition(&Intertechno2_Sequence);
     initialized = true;
   }
 

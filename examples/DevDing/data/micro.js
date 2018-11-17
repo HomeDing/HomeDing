@@ -24,8 +24,8 @@ function loadAsync(url, mime, loadCallback, errorCallback) {
 
 
 function dispatch(id, prop, val) {
-  // loadAsync(url, mime, loadCallback, errorCallback)
-  alert(id + "?" + prop + "=" + val);
+  var url = "/$board" + id + "?" + prop + "=" + val;
+  loadAsync(url, null, function(txt) {}, function(txt) {})
 }
 
 
@@ -131,13 +131,6 @@ var MicroHub = function() {
 var hub = new MicroHub();
 window.addEventListener('unload', hub.onunload.bind(hub), false);
 
-/*
- <div class="microRoot">
-  <div microControl="">...</div>
-</div> 
-*/
-
-
 var MicroJCL = function() {
     this._templates = {};
     this._behaviors = {};
@@ -145,40 +138,65 @@ var MicroJCL = function() {
     /// A list with all objects that are attached to any behaviour
     this.List = [];
 
-    this.loadTemplates = function(rootObj, bRemove) {
-        var all = rootObj.querySelectorAll("[microControl]");
+    /** add all defined templates to the list. */
+    this.loadTemplates = function(rootObj) {
+        var all = rootObj.querySelectorAll("[microcontrol]");
         for (var n = 0; n < all.length; n++) {
-          var t = all[n].getAttribute('microControl');
-          this._templates[t] = all[n].outerHTML;
+          var t = all[n].getAttribute('microcontrol');
+          this._templates[t] = all[n];
         } // for
-        if (bRemove) {
-          rootObj.parentNode.removeChild(rootObj);
-        } // bRemove
       } // load()
 
 
     // attach all behaviours
     this.attachAll = function(root) {
-        var elems = root.querySelectorAll("[microBehavior]");
+        var elems = root.querySelectorAll("[microbehavior]");
         for (var n = 0; n < elems.length; n++) {
-          var mb = elems[n].getAttribute('microBehavior');
+          var mb = elems[n].getAttribute('microbehavior');
           var bc = this._behaviors[mb];
           if (bc) this.LoadBehaviour(elems[n], bc);
         } // for
       } // attachAll()
 
+    this.setProperties = function(obj, props) {
+        if (obj.nodeType == 3) {
+          // text node
+          var v = obj.textContent;
+          for (var p in props) {
+            v = v.replace(new RegExp('\\$\\{' + p + '\\}', 'g'), props[p]);
+          }
+          obj.textContent = v;
+          return;
+        } // if
+
+        for (var i = 0; i < obj.attributes.length; i++) {
+          var n = obj.attributes[i].name;
+          var v = obj.attributes[i].value;
+          if (v.indexOf('${') >= 0) {
+            for (var p in props) {
+              v = v.replace(new RegExp('\\$\\{' + p + '\\}', 'g'), props[p]);
+            }
+            obj[n] = obj.attributes[i].value = v;
+          } // if
+        }
+
+        var n = obj.firstChild;
+        while (n) {
+          this.setProperties(n, props);
+          n = n.nextSibling;
+        }
+      } // setProperties
 
     this.insertTemplate = function(root, controlName, props) {
         var e = null;
         if ((root) && (controlName)) {
           var te = this._templates[controlName];
-          if (te) {
-            for (var p in props) {
-              te = te.replace(new RegExp('\\$\\{' + p + '\\}', 'g'), props[p]);
-            }
-            te = te.replace(/\$\{microcontrol\}/g, controlName);
-            root.insertAdjacentHTML('beforeend', te);
-            this.attachAll(root.lastElementChild);
+          if (te) e = te.cloneNode(true);
+
+          if (e) {
+            this.setProperties(e, props);
+            root.appendChild(e);
+            this.attachAll(e);
           } // if
         } // if
         return (e);
@@ -193,6 +211,11 @@ var MicroJCL = function() {
         alert("LoadBehaviour: behaviour argument is missing.");
 
       } else {
+        if (behaviour.inheritFrom) {
+          jcl.LoadBehaviour(obj, behaviour.inheritFrom);
+          jcl.List.pop();
+        }
+
         if (obj.attributes) { // IE9 compatible
           // copy all new attributes to properties
           for (var n = 0; n < obj.attributes.length; n++)
@@ -248,6 +271,7 @@ var MicroJCL = function() {
 
   } // MicroDOMTemplate class
 
+
 var jcl = new MicroJCL();
 window.addEventListener('unload', jcl.onunload.bind(jcl), false);
 
@@ -257,5 +281,35 @@ function forAllNodeList(nodeList, callbackFn) {
     callbackFn(nodeList[n]);
   }
 } // forAllNodeList()
+
+
+var MicroTQ = new(function() {
+  this._queue = [];
+  this._tHandle = null;
+
+  this.startTask = function(func) {
+      this._queue.push(func); // add at the end of array
+      if (!this._tHandle) {
+        this._tHandle = window.setTimeout(this.nextTask.bind(this), 1);
+      } // if
+    } // startTask
+
+  this.nextTask = function() {
+      this._tHandle = null;
+      if (this._queue.length > 0) {
+        var func = this._queue.shift();
+        func();
+      } // if
+      if ((!this._tHandle) && (this._queue.length > 0)) {
+        this._tHandle = window.setTimeout(this.nextTask.bind(this), 1);
+      } // if
+    } // nextTask
+
+  this.clear = function() {
+      this._queue = [];
+    } // clear
+
+}); // MicroTQ
+
 
 // End

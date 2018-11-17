@@ -60,6 +60,7 @@
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 
 #include <HomeDing.h>
+#include "bootpage.h"
 
 // ===== WLAN credentials =====
 
@@ -100,6 +101,33 @@ void handleFileList()
 } // handleFileList
 
 
+void returnOK() {
+  server.send(200, "text/plain", "");
+}
+
+// void handleCreate() {
+//   if (server.args() == 0) {
+//     return returnFail("BAD ARGS");
+//   }
+//   String path = server.arg(0);
+//   if (path == "/" || SD.exists((char *)path.c_str())) {
+//     returnFail("BAD PATH");
+//     return;
+//   }
+
+//   if (path.indexOf('.') > 0) {
+//     File file = SD.open((char *)path.c_str(), FILE_WRITE);
+//     if (file) {
+//       file.write((const char *)0);
+//       file.close();
+//     }
+//   } else {
+//     SD.mkdir((char *)path.c_str());
+//   }
+//   returnOK();
+// }
+
+
 /**
  * Setup all components and Serial debugging helpers
  */
@@ -120,11 +148,13 @@ void setup(void)
               ESP.getBootMode());
 
   // Enable the next line to start detailed tracing
-  Logger::logger_level = LOGGER_LEVEL_INFO;
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   // ----- setup the file system and load configuration -----
 
+
   SPIFFS.begin();
+  LOGGER_RAW("1.");
   mainBoard.init(&server);
 
   // ----- adding web server handlers -----
@@ -174,6 +204,7 @@ void setup(void)
 
   // list directory
   server.on("/$list", HTTP_GET, handleFileList);
+  server.on("/$upload", HTTP_GET, []() {server.send(200, "text/html", bootpageContent);});
 
   server.addHandler(new BoardHandler("/$board", &mainBoard));
 

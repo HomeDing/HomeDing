@@ -20,8 +20,8 @@
 
 #include <functional>
 
-#include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
 
 /**
  * @brief Request Handler implementation for static files in file system.
@@ -58,8 +58,18 @@ public:
   */
   bool canHandle(HTTPMethod requestMethod, String requestUri) override
   {
-    return ((requestMethod == HTTP_GET) || (requestMethod == HTTP_PUT) ||
-            (requestMethod == HTTP_DELETE));
+    LOGGER_RAW("canHandle(%s)", requestUri.c_str());
+    return (
+        (requestMethod == HTTP_GET) ||
+        (requestMethod == HTTP_PUT) || // upload text to files
+        (requestMethod == HTTP_POST) || // canUpload is handling file uploads
+        (requestMethod == HTTP_DELETE));
+  }
+
+  bool canUpload(String uri)
+  {
+    LOGGER_RAW("++ canUpload(%s)", uri.c_str());
+    return true;
   }
 
   /**
@@ -100,6 +110,7 @@ public:
 
   /**
      @brief Handle uploading a file using HTTP_PUT method.
+     Can only handle text based files, not containing a \0 character.
      @param server the running server.
      @param path full qualified path to file.
   */
@@ -124,9 +135,20 @@ public:
 
       fsUploadFile.close();
     } // if
+    server.send(200);
+  } // handlePut()
 
-    server.send(200, "text/plain", "");
+  /**
+   * @brief handle post requests. Not in use as today.
+   * @param server
+   * @param path
+   */
+  void handlePost(ESP8266WebServer &server, String path)
+  {
+    LOGGER_RAW("post: path=%s", path.c_str());
+    server.send(200);
   }
+
 
   /**
      @brief Handle deleting a file using HTTP_DELETE method.
@@ -155,16 +177,59 @@ public:
 
     if (requestMethod == HTTP_GET) {
       handleGet(server, path);
+
     } else if (requestMethod == HTTP_PUT) {
       handlePut(server, path);
+
+    } else if (requestMethod == HTTP_POST) {
+      handlePost(server, path);
+
     } else if (requestMethod == HTTP_DELETE) {
       handleDelete(server, path);
+
     } else {
       return (false);
     } // if
 
     return (true);
   }
+
+  void upload(ESP8266WebServer &server, String requestUri, HTTPUpload &upload)
+  {
+    LOGGER_RAW("++ upload(%s)", requestUri.c_str());
+    LOGGER_RAW("++ .filename='%s'", upload.filename.c_str());
+
+    (void)server;
+    if (upload.status == UPLOAD_FILE_START) {
+      LOGGER_RAW("++ ->UPLOAD_FILE_START");
+      // remove existing file to retain file system space.
+      if (_fs.exists(upload.filename)) {
+        _fs.remove(upload.filename);
+      } // if
+
+      _fsUploadFile = _fs.open(upload.filename, "w");
+
+      // DBG_OUTPUT_PORT.print("Upload: START, filename: ");
+      // DBG_OUTPUT_PORT.println(upload.filename);
+
+    } else if (upload.status == UPLOAD_FILE_WRITE) {
+      LOGGER_RAW("++ ->UPLOAD_FILE_WRITE(%d)", upload.currentSize);
+      if (_fsUploadFile) {
+        _fsUploadFile.write(upload.buf, upload.currentSize);
+      }
+      // DBG_OUTPUT_PORT.print("Upload: WRITE, Bytes: ");
+      // DBG_OUTPUT_PORT.println(upload.currentSize);
+
+    } else if (upload.status == UPLOAD_FILE_END) {
+      LOGGER_RAW("++ ->UPLOAD_FILE_END(%d)", upload.totalSize);
+      if (_fsUploadFile) {
+        _fsUploadFile.close();
+      }
+      // DBG_OUTPUT_PORT.print("Upload: END, Size: ");
+      // DBG_OUTPUT_PORT.println(upload.totalSize);
+    }
+  }
+
 
   static String getContentType(const String &path)
   {
@@ -201,6 +266,8 @@ public:
 
 protected:
   FS _fs;
+  File _fsUploadFile;
+
   String _path;
   String _cache_header;
   String _404_response;

@@ -5,61 +5,16 @@
     }
   },
 
-  "remote": {
-    "display-t": {
-      "host": "weatherdisplay",
-      "remoteid": "display/t",
-      "description": "Display temperature on remode thing."
-    },
-    "display-h": {
-      "host": "weatherdisplay",
-      "remoteid": "display/h",
-      "description": "Display humidity on remode thing."
-    }
-
-  },
-
-  "displaytext": {
-    "temp": {
-      "x": 0,
-      "y": 0,
-      "prefix": "Temp:",
-      "postfix": "\u00dfC",
-      "description": "Display temperature on local display"
-    },
-    "hum": {
-      "x": 0,
-      "y": 1,
-      "prefix": "Hum.:",
-      "postfix": "%",
-      "description": "Display humidity on local display"
-    }
-  },
-
   "displaydot": {
     "b": {
-      "x": 15,
-      "y": 0,
-      "description": "Display a bink"
+      "x": 10,
+      "y": 35,
+      "description": "Display a blink"
     }
   },
 
-  "dht": {
-    "on": {
-      "pin": "D4",
-      "type": "DHT22",
-      "readtime": "30s",
-      "resendtime": "2m",
-      "onTemperature": "device/0?log=temp:$v,displaytext/temp?show=$v,remote/display-t?show=$v",
-      "onHumidity": "device/0?log=hum:$v%,displaytext/hum?show=$v,remote/display-h?show=$v",
-      "description": "Local DHT sensor"
-    }
-  },
-
-  "ntptime": {
-    "on": {
-      "readtime": "2m",
-      "zone": 2,
+  "time": {
+    "0": {
       "onminute": "device/0?log=time:$v"
     }
   },
@@ -67,9 +22,9 @@
   "timer": {
     "blink": {
       "type": "LOOP",
-      "waittime": "0",
-      "pulsetime": "1m",
-      "cycletime": "3m",
+      "waittime": "8",
+      "pulsetime": "8",
+      "cycletime": "20",
       "onon": "displaydot/b?show=1",
       "onoff": "displaydot/b?show=0",
       "description": "Water Timer for testing"
@@ -102,15 +57,6 @@
       "max": 255,
       "onchange": "pwmout/led?value=$v",
       "description": "Build-in LED"
-    }
-  },
-
-  "digitalout": {
-    "led": {
-      "pin": "D4",
-      "invers": "false",
-      "level": "false",
-      "description": "Builtin LED is on Port GPIO16"
     }
   },
 

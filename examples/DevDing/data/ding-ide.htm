@@ -3,10 +3,6 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-  <link rel="apple-touch-icon-precomposed" href="/favicon-256.png">
-  <link rel="xx-manifest" href="/watermanifest.json">
   <title>IoT-IDE</title>
   <link Content-Type="text/css" href="iotstyle.css" rel="stylesheet" />
   <script src="micro.js"></script>
@@ -15,8 +11,8 @@
     body {
       height: 100%;
     }
-    
-    .file-icon,
+
+    .file-icon, .file-icon img,
     .file-entry,
     .file-delete {
       cursor: pointer;
@@ -24,26 +20,26 @@
       padding: 0 0.1em;
       height: 1.2em;
     }
-    
+
     .file-entry {
       overflow: hidden;
     }
-    
+
     #files {
       border: solid 1px black;
       background-color: white;
       font-size: 1.2rem;
       overflow-y: scroll;
     }
-    
+
     #files .row:hover {
       background-color: #eeeeee;
     }
-    
+
     .file-icon {
       min-width: 1.4em;
     }
-    
+
     pre.code {
       display: block;
       margin: 0;
@@ -59,24 +55,25 @@
       height: 100%;
       width: 100%;
     }
-    
+
     #dropzone {
       background-color: #eeeeee;
       padding: 1rem;
       border: 1px dashed black;
     }
-    
+
     #progressPanel {
       position: absolute;
-      top: 0.4rem;
-      right: 0.4rem;
+      top: 0.6rem;
+      right: 0.1rem;
       width: 300px;
       height: 1.4rem;
       border: 0.1rem solid black;
-      visibility: visible;
       opacity: 1;
+      pointer-events: none;
+      background-color: white;
     }
-    
+
     #progressPanel.fadeout {
       transition-delay: 2s;
       transition-property: opacity;
@@ -84,25 +81,25 @@
       transition-timing-function: linear;
       opacity: 0;
     }
-    
+
     #progressBar,
     #progressText {
       position: absolute;
-      z-index: 1;
+      z-index: 10;
       overflow-x: visible;
       word-break: keep-all;
       width: 12%;
       height: 100%;
     }
-    
+
     #progressBar {
       background-color: #00A000;
     }
-    
+
     #progressText {
       margin-left: 0.4rem;
     }
-    
+
     #checker {
       display: inline-block;
       padding: 0.2rem;
@@ -111,17 +108,17 @@
       border: 2px solid silver;
       background-color: #EEEEEE
     }
-    
+
     #checker.invalid {
       border: 2px solid #FF0000;
       background-color: #FFcccc
     }
-    
+
     #checker.valid {
       border: 2px solid #00CC00;
       background-color: #ccFFcc
     }
-    
+
     button:disabled.once {
       background-image: url(/spinner.gif);
       background-size: 2em;
@@ -141,19 +138,19 @@
     </div>
 
     <div class="u-header">
-      <a href="/"><img class="icon" src="/i/device.svg" /></a>
+      <a href="/"><img class="icon" src="/favicon.svg" /></a>
       <h1>Device</h1>
       <a href="/index.htm"><img class="icon" src="/i/home.svg" /></a>
-      <a href="/index.htm">Home</a>
+      <a href="/index.htm" class="hidden-xs">Home</a>
       <a href="/ding-ide.htm"><img class="icon" src="/i/ide.svg" /></a>
-      <a href="/ding-ide.htm">IDE</a>
+      <a href="/ding-ide.htm" class="hidden-xs">IDE</a>
 
       <a href="/ding.htm">[UI]</a>
       <a href="/ding-info.htm">[Info]</a>
       <a href="/$sysinfo">[$sysinfo]</a>
-
-      <button class="once" id="resetbutton">reset</button>
-
+      <span style="flex-grow: 1"></span>
+      <button class="once" id="doReset">reset</button>
+            <span style="flex-grow: 1"></span>
     </div>
 
     <div class="row" style="flex:0 0 auto">
@@ -163,7 +160,7 @@
       </div>
       <div class="col stretch" style="align-self: flex-end">
         <h2 style="display: inline-block;margin:0">File: <span id="activeFile"></span></h2>
-        <button style="float: right;" onclick="handleSave()">save</button>
+        <button class="once" style="float: right;" onclick="handleSave()">save</button>
       </div>
       <div class="col-1"><span id="checker" class="valid">inactive</span></div>
       <div class="col-1" id="dropzone">Drop files here.</div>
@@ -174,30 +171,38 @@
         files in here...
       </div>
       <div class="col stretch" style="align-self: stretch;overflow:hidden">
-        <pre class="code" contenteditable id="content" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></pre>
+        <pre class="code" contenteditable id="content" autocomplete="off" autocorrect="off" autocapitalize="off"
+          spellcheck="false"></pre>
       </div>
     </div>
   </div>
   <script src="ding-ide.js"></script>
   <script>
+    MicroTQ.startTask(function () {
+      var cacheImage = new Image();
+      cacheImage.src = "/spinner.gif";
+    });
+
     // call this to start blocking the button while activity is running.
     function runOnce() {
+      var scope = this;
       this.disabled = true;
-
-      loadAsync("/$reboot", runDone, runDone);
-
-      // start here
-      window.setTimeout(runDone.bind(this), 2000);
+      MicroTQ.startTask(function () {
+          loadAsync("/$reboot", null, runDone.bind(scope), runWait.bind(scope));
+      });
     } // runOnce
 
+    // call this to stop blocking the button.
+    function runWait(evt) {
+      window.setTimeout(runDone.bind(this), 500);
+    } // runWait
 
     // call this to stop blocking the button.
     function runDone(evt) {
       this.disabled = false;
     } // runDone
 
-
-    var resetObj = document.getElementById("resetbutton");
+    var resetObj = document.getElementById("doReset");
     resetObj.addEventListener("click", runOnce);
   </script>
 </body>

@@ -11,11 +11,6 @@
   <link Content-Type="text/css" href="iotstyle.css" rel="stylesheet" />
   <script src="micro.js"></script>
   <style>
-    .header {
-      margin-top: 0.2rem;
-      background-color: lightgoldenrodyellow
-    }
-    
     .panel {
       background-color: lightsteelblue
     }
@@ -31,54 +26,109 @@
     img.light.active {
       background-image: url(green.svg);
     }
+    
+    .u-bar {
+      position: relative;
+      height: 1.4em;
+      width: 80%;
+      background-color: #aaaaaa;
+    }
+    
+    .u-bar>.pulse,
+    .u-bar>.current {
+      display: inline-block;
+      position: absolute;
+    }
+    
+    .u-bar>.pulse {
+      top: 0;
+      left: 0;
+      height: 1.4em;
+      background-color: green
+    }
+    
+    .u-bar>.current {
+      top: 0.3em;
+      height: 0.8em;
+      background-color: red;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <div class="row header">
+    <div class="row wrap header">
+      <div class="col-2">
+        <img class="icon menuicon" src="i/default.svg" style="float:left" />
+        <h1>Control</h1>
+      </div>
+
       <div class="col stretch">
-        <img class="icon" src="timer/icon.svg" style="float:left" />
-        <h1>Control the Ding</h1>
+        <a href="/index.htm" title="Home"><img class="icon menuicon" src="i/home.svg" style="float:left" /></a>
+        <a href="/ding-ide.htm" title="IDE"><img class="icon menuicon" src="i/ide.svg" style="float:left" /></a>
+        <a><img class="icon menuicon" src="i/timer.svg" style="float:left" /></a>
       </div>
     </div>
 
-    <div microID="/timer/water" microBehavior='generic'>
+
+    <div microID="/rfsend/i1" microBehavior='generic'>
       <div class="row panel">
-        <div class="col-1">
-          <label>Active:</label>
+        <div class="col-3">
+          <span property='description'>.</span>
         </div>
-        <div class="col stretch">
-          <img class="light" property='active' />
-          <span property='description'></span>
-        </div>
-      </div>
-      <div class="row panel">
-        <div class="col-1">
-          <label>State:</label>
-        </div>
-        <div class="col stretch">
-          <span property='state'>.</span>
-        </div>
-      </div>
-      <div class="row panel">
-        <div class="col-1">
-          <label>Time:</label>
-        </div>
-        <div class="col stretch">
-          <span property='time'>.</span>, <span property='waittime'>.</span> <span property='pulsetime'>.</span>
-        </div>
-      </div>
-      <div class="row panel">
-        <div class="col-1">
-        </div>
-        <div class="col stretch">
-          <button property='start'>Start</button>
-          <button property='stop'>Stop</button>
-          <button property='reset'>Reset</button>
+        <div class="col-3">
+          <button property='value' value='1'>On</button>
+          <button property='value' value='0'>Off</button>
         </div>
       </div>
     </div>
+
+    <div microID="/rfsend/i2" microBehavior='generic'>
+      <div class="row panel">
+        <div class="col-3">
+          <span property='description'>.</span>
+        </div>
+        <div class="col-3">
+          <button property='value' value='1'>On</button>
+          <button property='value' value='0'>Off</button>
+        </div>
+      </div>
+    </div>
+
+    <div microID="/rfsend/i3" microBehavior='generic'>
+      <div class="row panel">
+        <div class="col-3">
+          <span property='description'>.</span>
+        </div>
+        <div class="col-3">
+          <button property='value' value='1'>On</button>
+          <button property='value' value='0'>Off</button>
+        </div>
+      </div>
+    </div>
+    <hr />
+
+    <div microID="/timer/blink" microBehavior='timer'>
+      <div class="row panel">
+        <div class="col-3">
+          <span property='description'>.</span>
+        </div>
+        <div class="col-3">
+          <span property='time'>.</span>
+          <span property='waittime'>.</span>
+          <span property='pulsetime'>.</span>
+        </div>
+      </div>
+      <div class="row panel">
+        <div class="col-6">
+          <div class="u-bar">
+            <span class="pulse"></span>
+            <span class="current"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -113,15 +163,89 @@
         var src = e.srcElement;
         dispatch(this.microid, src.getAttribute('property'), e.srcElement.value);
         // debugger;
+      },
+
+      onclick: function(e) {
+        var src = e.srcElement;
+        dispatch(this.microid, src.getAttribute('property'), e.srcElement.value);
+        // debugger;
       }
+
     }; // GenericElementBehavior
 
+    TimerElementBehavior = {
+      microID: "",
+      wt: 0,
+      pt: 0,
+      ct: 0,
+      time: 0,
+
+      _timeToSec: function(v) {
+        v = v.toLowerCase();
+        if (v.endsWith('m')) {
+          v = parseInt(v, 10) * 60;
+        } // if
+        return (v);
+      },
+
+      init: function() {
+        hub.subscribe(this.microid + "?*", this.newData.bind(this));
+      }, // init
+
+      newData: function(path, key, value) {
+        // alert(key);
+        if (key == "waittime") {
+          this.wt = this._timeToSec(value);
+        } else if (key == "pulsetime") {
+          this.pt = this._timeToSec(value);
+        } else if (key == "cycletime") {
+          this.ct = this._timeToSec(value);
+        } else if (key == "time") {
+          this.time = this._timeToSec(value);
+        }
+
+        if (this.ct < this.wt + this.pt)
+          this.ct = this.wt + this.pt
+
+        // update bars
+        if (this.ct > 0) {
+          var el = this.querySelectorAll(".u-bar")[0];
+          var f = el.clientWidth / this.ct;
+          var pto = el.querySelectorAll(".pulse")[0];
+          pto.style.left = Math.floor(this.wt * f) + "px";
+          pto.style.width = Math.floor(this.pt * f) + "px";
+          var cto = el.querySelectorAll(".current")[0];
+          cto.style.width = Math.floor(this.time * f) + "px";
+        }
+
+        forAllNodeList(this.querySelectorAll("span[property='" + key + "']"), function(e) {
+          e.textContent = value;
+          e.title = value;
+        });
+
+      }, // newData()
+
+      onchange: function(e) {
+        var src = e.srcElement;
+        dispatch(this.microid, src.getAttribute('property'), e.srcElement.value);
+        // debugger;
+      },
+
+      onclick: function(e) {
+        var src = e.srcElement;
+        dispatch(this.microid, src.getAttribute('property'), e.srcElement.value);
+        // debugger;
+      }
+
+    }; // TimerElementBehavior
+
+    jcl.registerBehaviour("timer", TimerElementBehavior);
     jcl.registerBehaviour("generic", GenericElementBehavior);
 
     jcl.attachAll(document.body);
 
     function loadConfig() {
-      loadAsync("config.json", "application/json", function(txt) {
+      loadAsync("/config.json", "application/json", function(txt) {
         var obj = JSON.parse(txt);
         hub.publishObj(obj);
       });
@@ -137,7 +261,7 @@
     } // updateState()
 
     loadConfig();
-    window.setInterval(updateState, 8000);
+    window.setInterval(updateState, 4000);
   </script>
 
 </body>

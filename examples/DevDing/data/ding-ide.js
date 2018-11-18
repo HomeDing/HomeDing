@@ -29,7 +29,9 @@ function handleLoadFile(e) {
   var s = e.target.innerText;
   activeFileName = s.split(' ')[0];
   activeFileObj.innerText = activeFileName;
-  loadAsync(activeFileName, null, function(txt) { contentObj.innerText = txt });
+  loadAsync(activeFileName, null, function (txt) {
+    contentObj.innerText = txt
+  });
 } // handleLoadFile()
 
 
@@ -78,10 +80,9 @@ function addFileEntry(container, f) {
   entry.innerText = entry.title = f.name + " (" + f.size + ")";
   row.appendChild(entry);
 
-
   var delx = document.createElement("div");
   delx.className = "col file-delete";
-  delx.innerText = "[del]";
+  delx.innerText = "[X]";
   delx.addEventListener("click", handleDeleteFile);
   row.appendChild(delx);
 } // addFileEntry()
@@ -91,16 +92,16 @@ function listFiles(fileList) {
   // remove all exiting entries
   filesObj.innerHTML = "";
 
-  fileList.forEach(function(f) {
+  fileList.forEach(function (f) {
     addFileEntry(filesObj, f);
   })
 } // listFiles()
 
 
 function handleReloadFS() {
-  loadAsync('/$list', "application/json", function(result) {
+  loadAsync('/$list', "application/json", function (result) {
     var x = JSON.parse(result);
-    x.sort(function(a, b) {
+    x.sort(function (a, b) {
       var an = a.name.toLowerCase();
       var bn = b.name.toLowerCase();
       if (an < bn) {
@@ -136,12 +137,12 @@ function startUpload(filename, contentType, content) {
   objHTTP.setRequestHeader("Content-Type", contentType + "; charset=utf-8");
 
   if (objHTTP.upload) {
-    objHTTP.upload.addEventListener('progress', function(e) {
+    objHTTP.upload.addEventListener('progress', function (e) {
       progressBarObj.style.width = Math.round(100 * e.loaded / e.total) + "%";
     });
   } // if 
 
-  objHTTP.addEventListener("readystatechange", function(p) {
+  objHTTP.addEventListener("readystatechange", function (p) {
     if ((objHTTP.readyState == 4) && (objHTTP.status >= 200) && (objHTTP.status < 300)) {
       window.setTimeout(handleReloadFS, 100);
       progressTextObj.innerText = "done.";
@@ -158,7 +159,7 @@ function startPutFile(file, contentType) {
 
   // show progress
 
-  reader.onload = function(evt) {
+  reader.onload = function (evt) {
     startUpload("/" + file.name, contentType, evt.target.result);
   }; // onload
 
@@ -173,25 +174,40 @@ function handleSave() {
     startUpload(activeFileName, "text/html", contentObj.innerText);
 } // handleSave()
 
-// file was dropped on dropzone
+// http://html5doctor.com/drag-and-drop-to-server/
+
+// files was dropped on dropzone
 function drop(e) {
+  progressPanelObj.classList.remove("fadeout");
+  progressTextObj.innerText = "saving...";
   progressBarObj.style.width = "0";
   e.stopPropagation();
   e.preventDefault();
 
   var dtFiles = e.dataTransfer.files;
-  // event.dataTransfer.files may contain a list of files. now only process one file.
-  if (dtFiles.length > 0) {
-    activeFile = dtFiles[0];
-    activeFileName = "/" + activeFile.name;
 
-    var reader = new FileReader();
-    reader.onload = function(evt) {
-      startPutFile(activeFile, "text/html");
-    };
-    // start a transfer as a text based file 
-    reader.readAsText(activeFile, "UTF-8");
+  var formData = new FormData();
+  var root = '/' + (location.hash ? location.hash.substr(1) + '/' : '')
+  for (var i = 0; i < dtFiles.length; i++) {
+    formData.append('file', dtFiles[i], root + dtFiles[i].name);
   }
+
+  var xmlHttp = new XMLHttpRequest();
+
+  xmlHttp.upload.addEventListener('progress', function (e) {
+    progressBarObj.style.width = Math.round(100 * e.loaded / e.total) + "%";
+  });
+
+  xmlHttp.addEventListener("readystatechange", function (p) {
+    if ((xmlHttp.readyState == 4) && (xmlHttp.status >= 200) && (xmlHttp.status < 300)) {
+      window.setTimeout(handleReloadFS, 100);
+      progressTextObj.innerText = "done.";
+      progressPanelObj.classList.add("fadeout");
+      // fade progress
+    } // if
+  });
+  xmlHttp.open("POST", "/");
+  xmlHttp.send(formData);
 }
 
 var box = document.getElementById("dropzone");
@@ -199,7 +215,9 @@ box.addEventListener("dragenter", dragHelper, false);
 box.addEventListener("dragover", dragHelper, false);
 box.addEventListener("drop", drop, false);
 
-window.addEventListener("load", function() { window.setTimeout(handleReloadFS, 400) });
+window.addEventListener("load", function () {
+  window.setTimeout(handleReloadFS, 400)
+});
 
 function jsonCheck() {
   var fName = activeFileObj.innerText;

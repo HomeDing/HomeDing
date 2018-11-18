@@ -33,8 +33,6 @@ extern const char *password;
 #define NetMode_PSK 2
 #define NetMode_PASS 1
 
-#define SYS_LED 2 // TODO: make configurable
-
 /**
  * @brief Initialize a blank board.
  */
@@ -42,7 +40,9 @@ void Board::init(ESP8266WebServer *s)
 {
   LOGGER_TRACE("init()");
   server = s;
+  sysLED = 2; // TODO: make configurable
   boardState = BOARDSTATE_NONE;
+  WiFi.begin();
   deviceName = WiFi.hostname(); // use mac based default device name
 } // init()
 
@@ -186,8 +186,10 @@ void Board::loop()
     } // if
 
     _newState(BOARDSTATE_CONFWAIT);
-    pinMode(SYS_LED, OUTPUT);
-    digitalWrite(SYS_LED, HIGH);
+    if (sysLED >= 0) {
+      pinMode(sysLED, OUTPUT);
+      digitalWrite(sysLED, HIGH);
+    }
 
     // wait max 30 seconds for connecting to the network
     connectPhaseEnd = now + (30 * 1000); // TODO: make configurable
@@ -197,18 +199,21 @@ void Board::loop()
     if (now < configPhaseEnd) {
       // just continue waiting, Blink and wait for clicks...
 
-      // MAKE SYS LED blink
-      if (((configPhaseEnd - now) % 700) > 350) {
-        digitalWrite(SYS_LED, HIGH);
-      } else {
-        digitalWrite(SYS_LED, LOW);
-      }
-      delay(100);
+      if (sysLED >= 0) {
+        // MAKE SYS LED blink
+        if (((configPhaseEnd - now) % 700) > 350) {
+          digitalWrite(sysLED, HIGH);
+        } else {
+          digitalWrite(sysLED, LOW);
+        }
+      } // if
 
     } else {
-      // stop using system LED
-      digitalWrite(SYS_LED, HIGH);
-      pinMode(SYS_LED, INPUT);
+      if (sysLED >= 0) {
+        // stop using system LED
+        digitalWrite(sysLED, HIGH);
+        pinMode(sysLED, INPUT);
+      } // if
       _newState(BOARDSTATE_WAIT);
     }
 
@@ -259,7 +264,8 @@ void Board::loop()
   } else if (boardState == BOARDSTATE_START) {
 
     if (!validTime) {
-      // check if time is valid now -> start all elements with Element_StartupMode::Time
+      // check if time is valid now -> start all elements with
+      // Element_StartupMode::Time
       uint32 current_stamp = sntp_get_current_timestamp();
       if (current_stamp > MIN_VALID_TIME) {
         start(Element_StartupMode::Time);
@@ -429,7 +435,8 @@ void Board::getState(String &out, String path)
 
 void Board::setState(String &path, String property, String value)
 {
-  // LOGGER_TRACE("setState(%s, %s, %s)", path.c_str(), property.c_str(), value.c_str());
+  // LOGGER_TRACE("setState(%s, %s, %s)", path.c_str(), property.c_str(),
+  // value.c_str());
   Element *e = findById(path);
   if (e != NULL) {
     e->set(property.c_str(), value.c_str());

@@ -1,57 +1,56 @@
 {
-  "device": {
+  "serialcmd": {
     "0": {
-      "name": "RFdevice",
-      "reboottime": "8h",
-      "description": "IoT Dev-Device for sending RF Signals"
-    }
-  },
-
-  "ota": {
-    "0": {
-      "port": 8266,
-      "passwd": "123",
-      "description": "Listen for 'over the air' OTA Updates"
-    }
-  },
-
-  "ssdp": {
-    "0": {
-      "ModelUrl": "https://www.mathertel.de/Arduino"
-    }
-  },
-
-  "button": {
-    "up": {
-      "pin": 12,
-      "inverse": "true",
-      "onoff": "rfsend/0?value=1"
-    },
-    "down": {
-      "pin": 13,
-      "inverse": "true",
-      "onoff": "rfsend/0?value=0"
+      "description": "Listen for commands on the Serial in line"
     }
   },
 
   "rfsend": {
     "i1": {
-      "pin": "D4",
-      "codeOn": "s_##___#____#_#__###_____#__#____x",
-      "codeOff": "s_##___#____#_#__###_____#_______x",
-      "description": "Send out specifc RF signal"
+      "loglevel": 2,
+      "pin": "D3",
+      "codeOn": "s_#_###__#_#__#_##_#_###_#__#____x",
+      "codeOff": "s_#_###__#_#__#_##_#_###_#_______x",
+      "description": "Switch fan."
     },
     "i2": {
-      "pin": "D4",
-      "codeOn": "s_##___#____#_#__###_____#__#___#x",
-      "codeOff": "s_##___#____#_#__###_____#______#x",
-      "description": "Send out specifc RF signal"
+      "loglevel": 2,
+      "codeOn": "s_#_###__#_#__#_##_#_###_#__#___#x",
+      "codeOff": "s_#_###__#_#__#_##_#_###_#______#x",
+      "description": "Switch light 1"
     },
     "i3": {
-      "pin": "D4",
-      "codeOn": "s_##___#____#_#__###_____#__#__#_x",
-      "codeOff": "s_##___#____#_#__###_____#_____#_x",
-      "description": "Send out specifc RF signal"
+      "loglevel": 2,
+      "codeOn": "s_#_###__#_#__#_##_#_###_#__#__#_x",
+      "codeOff": "s_#_###__#_#__#_##_#_###_#_____#_x",
+      "description": "Switch light 2"
+    },
+
+    "a1": {
+      "codeOn": "s_##__##__#__####____##__#__#____x",
+      "codeOff": "s_##__##__#__####____##__#_______x",
+      "description": "Springbrunnen"
+    },
+
+    "a2": {
+      "codeOn": "s_##__##__#__####____##__#__#___#x",
+      "codeOff": "s_##__##__#__####____##__#______#x",
+      "description": "Balcony Light"
+    },
+    "a3": {
+      "codeOn": "s_##__##__#__####____##__#__#__#_x",
+      "codeOff": "s_##__##__#__####____##__#_____#_x",
+      "description": "spare"
+    },
+    "aa": {
+      "codeOn": "s_##__##__#__####____##__#_#_____x",
+      "description": "All off outside"
+    },
+
+    "d1": {
+      "codeOn": "BFF000F000FFFB",
+      "codeOff": "BFF000F000FF0B",
+      "description": "Dampfabzugshaube"
     }
   }
 }

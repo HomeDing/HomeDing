@@ -10,21 +10,15 @@
 // Changelog: see TimerElement.h
 // -----
 
-#include <TimerElement.h>
-#include <ElementRegistry.h>
 #include <Board.h>
+#include <ElementRegistry.h>
+#include <TimerElement.h>
 
 /**
  * @brief All timing variables in this class are in seconds.
  * The result of millis() must be divied by 1000 to get seconds.
  */
 #define TIMER_UNIT 1000
-
-
-/**
- * @brief type for looping the timer after cycletime is over.
- */
-#define TIMER_TYPE_LOOP 0x01
 
 /**
  * @brief static factory function to create a new TimerElement
@@ -46,8 +40,10 @@ bool TimerElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "type") == 0) {
-    if (_stricmp(value, "LOOP") == 0) {
+    if (_stricmp(value, "loop") == 0) {
       _type = TIMER_TYPE_LOOP;
+    } else if (_stricmp(value, "once") == 0) {
+      _type = TIMER_TYPE_ONCE;
     } else {
       LOGGER_EERR("unknown type");
       ret = false;
@@ -64,7 +60,7 @@ bool TimerElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "onon") == 0) {
     _onAction = value;
-  
+
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
@@ -113,7 +109,8 @@ void TimerElement::start()
     _cycleTime = _waitTime + _pulseTime;
   } // if
 
-  if ((_pulseTime == 0) || (_pulseTime == _cycleTime)) {
+  if ((_pulseTime == 0) ||
+      ((_pulseTime == _cycleTime) && (_type == TIMER_TYPE_LOOP))) {
     LOGGER_EERR("no meaningful timing");
 
   } else {
@@ -174,7 +171,7 @@ void TimerElement::pushState(
   callback("state", String(_state).c_str());
   if (_state == 3)
     callback("time", "0");
-  else 
+  else
     callback("time", String(now - _startTime).c_str());
   callback("value", (_state == 1) ? "1" : "0");
 } // pushState()

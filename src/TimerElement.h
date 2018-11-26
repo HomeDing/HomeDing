@@ -51,6 +51,14 @@ minimum of waittime+pulsetime. The units are in minutes
 @endverbatim
  */
 
+
+/**
+ * @brief type for looping the timer after cycletime is over.
+ */
+#define TIMER_TYPE_ONCE 0x00
+#define TIMER_TYPE_LOOP 0x01
+
+
 class TimerElement : public Element
 {
 public:
@@ -102,7 +110,7 @@ private:
   /**
    * @brief type of timer like LOOP
    */
-  int _type;
+  int _type = TIMER_TYPE_ONCE;
 
   /**
    * @brief time of a complete timer cycle.

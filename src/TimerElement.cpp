@@ -68,6 +68,9 @@ bool TimerElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
+  } else if (_stricmp(name, "onvalue") == 0) {
+    _valueAction = value;
+
   } else if (_stricmp(name, "next") == 0) {
     if (_state == 0) {
       _startTime = now - _waitTime;
@@ -136,6 +139,7 @@ void TimerElement::loop()
       // switch state to 1 and submit ON action
       _state = 1;
       _board->dispatch(_onAction);
+      _board->dispatch(_valueAction, "1");
     } // if
 
   } else if (_state == 1) {
@@ -143,6 +147,7 @@ void TimerElement::loop()
       // switch state to 2 and submit OFF action
       _state = 2;
       _board->dispatch(_offAction);
+      _board->dispatch(_valueAction, "0");
     } // if
 
   } else if (_state == 2) {

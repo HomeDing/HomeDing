@@ -135,9 +135,14 @@ private:
   /**
    * @brief The _offAction holds the actions that is submitted when the pulse
    * period ends.
-   *
    */
   String _offAction;
+
+  /**
+   * @brief The _valueAction holds the actions that are submitted when a new pulse
+   * level is available on start or end of the pulse period.
+   */
+  String _valueAction;
 
   /**
    * @brief The effective time (in seconds) the timer has started.

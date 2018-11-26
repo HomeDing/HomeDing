@@ -62,7 +62,7 @@ private:
   int _pin = -1;
 
   // when _inverse == true: logical HIGH will produce a physical LOW level.
-  bool _invers = false;
+  bool _inverse = false;
 
   // The last logical value LOW or HIGH
   int _lastValue = LOW; //

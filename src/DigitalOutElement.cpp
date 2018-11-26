@@ -33,7 +33,7 @@ bool DigitalOutElement::set(const char *name, const char *value)
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "inverse") == 0) {
-    _invers = _atob(value);
+    _inverse = _atob(value);
 
   } else if (_stricmp(name, "value") == 0) {
     _setLevel(_atob(value));
@@ -83,7 +83,7 @@ void DigitalOutElement::pushState(
 void DigitalOutElement::_setLevel(bool logicalHigh)
 {
   _lastValue = (logicalHigh ? HIGH : LOW);
-  int physLevel = (_invers ? (!_lastValue) : _lastValue);
+  int physLevel = (_inverse ? (!_lastValue) : _lastValue);
   if (active)
     digitalWrite(_pin, physLevel);
 } // _setLevel

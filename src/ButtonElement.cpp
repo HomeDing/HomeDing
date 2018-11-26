@@ -51,7 +51,7 @@ bool ButtonElement::set(const char *name, const char *value)
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "inverse") == 0) {
-    _invers = _atob(value);
+    _inverse = _atob(value);
 
   } else if (_stricmp(name, "pullup") == 0) {
     _pullup = _atob(value);
@@ -95,7 +95,7 @@ void ButtonElement::loop()
   if (lev != _lastInLevel) {
     _lastInLevel = lev;
 
-    if (_invers)
+    if (_inverse)
       lev = !lev;
 
     if (_type == BUTTON_TYPE_TOGGLE) {

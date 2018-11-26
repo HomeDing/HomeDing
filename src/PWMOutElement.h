@@ -60,7 +60,7 @@ private:
   int _pin = -1;
 
   // when _inverse == true: logical HIGH will produce a physical LOW level.
-  bool _invers = false;
+  bool _inverse = false;
 
   // Set the range from 0 to _range. 0...1023 is the default. 
   int _range = 1023;

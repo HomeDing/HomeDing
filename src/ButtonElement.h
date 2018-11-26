@@ -78,7 +78,7 @@ public:
 private:
   int _type = BUTTON_TYPE_LEVEL;
   int _pin = -1;
-  bool _invers = false;
+  bool _inverse  = false;
   bool _pullup = false;
 
   //  OneButton *_button = NULL;

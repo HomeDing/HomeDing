@@ -33,7 +33,7 @@ bool PWMOutElement::set(const char *name, const char *value)
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "inverse") == 0) {
-    _invers = _atob(value);
+    _inverse = _atob(value);
 
   } else if (_stricmp(name, "range") == 0) {
     _range = atoi(value);
@@ -84,7 +84,7 @@ void PWMOutElement::_setValue(int newValue)
   _value = newValue;
 
   if (active) {
-    analogWrite(_pin, (_invers) ? _range - _value : _value);
+    analogWrite(_pin, (_inverse) ? _range - _value : _value);
   } // if
 } // _setValue
 

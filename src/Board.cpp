@@ -368,21 +368,23 @@ void Board::_dispatchSingle(String evt)
  */
 void Board::dispatch(String &action, const char *value)
 {
-  dispatch(action.c_str(), value);
+  if (action.length() > 0)
+    dispatch(action.c_str(), value);
 } // dispatch
 
 
 void Board::dispatch(const char *action, const char *value)
 {
-  String tmp = action;
+  if ((action != NULL) && (*action)) {
+    String tmp = action;
+    if (value != NULL)
+      tmp.replace("$v", value);
 
-  if (value != NULL)
-    tmp.replace("$v", value);
-
-  // append to existing _actionList
-  if (_actionList.length() > 0)
-    _actionList.concat(ACTION_SEPARATOR);
-  _actionList.concat(tmp);
+    // append to existing _actionList
+    if (_actionList.length() > 0)
+      _actionList.concat(ACTION_SEPARATOR);
+    _actionList.concat(tmp);
+  } // if
 } // dispatch
 
 

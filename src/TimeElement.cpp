@@ -41,6 +41,13 @@ Element *TimeElement::create()
 } // create()
 
 
+/* ===== Element functions ===== */
+
+TimeElement::TimeElement() {
+  startupMode = Element_StartupMode::Time;
+}
+
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */

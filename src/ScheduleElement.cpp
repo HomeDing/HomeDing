@@ -39,6 +39,11 @@ Element *ScheduleElement::create()
 
 /* ===== Element functions ===== */
 
+ScheduleElement::ScheduleElement()
+{
+  startupMode = Element_StartupMode::Time;
+}
+
 /**
  * @brief initialize the common functionality of all element objects.
  */

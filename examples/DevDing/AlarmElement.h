@@ -1,35 +1,50 @@
 /**
- * @file ScheduleElement.h
- * @brief Element Template class.
- *
+ * @file AlarmElement.h
+ * @brief Create Action based on a specified time of the day.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- *
+ * 
  * More information on https://www.mathertel.de/Arduino
- *
+ * 
  * Changelog:
- * * 30.07.2018 created by Matthias Hertel
+ * * 20.11.2018 created by Matthias Hertel
  */
 
-#ifndef ScheduleELEMENT_H
-#define ScheduleELEMENT_H
+#ifndef AlarmELEMENT_H
+#define AlarmELEMENT_H
 
 #include <Arduino.h>
 #include <Element.h>
 
+#define TIME_T_NOT (48 * 60 * 60)
+
 /**
- * @brief The ScheduleElement can trigger a ON and OFF action per day based on
- * real time.
+ * @brief AlarmElement implements...
+ * @details
+@verbatim
+
+The AlarmElement can ...
+"alarm": {
+  "wakeup": {
+    "time": "08:00:00",
+    "onTime": "",
+    "description": "create Action at 8:00 in the morning." 
+  }
+}
+
+@endverbatim
  */
-class ScheduleElement : public Element
+
+class AlarmElement : public Element
 {
 public:
   /**
-   * @brief Factory function to create a ScheduleElement.
+   * @brief Factory function to create a AlarmElement.
    * @return Element*
    */
   static Element *create();
@@ -40,15 +55,15 @@ public:
   static bool registered;
 
   /**
-   * @brief Construct a new ScheduleElement
+   * @brief Construct a new AlarmElement
    */
-  ScheduleElement();
+  AlarmElement();
 
   /**
    * @brief initialize a new Element.
    * @param board The board reference.
    */
-  virtual void init(Board *board);
+  // virtual void init(Board *board);
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -80,29 +95,17 @@ public:
 
 private:
   /**
-   * @brief The actual value.
+   * @brief The time the alarm event should be created.
    */
-  int _value;
+  time_t _time;
+
+
+  time_t _lastTime = TIME_T_NOT;
 
   /**
-   * @brief remember that a first time was processed already.
+   * @brief The _timeAction holds the actions that is submitted when ...
    */
-  bool _init;
-
-  time_t _onTime;
-  time_t _offTime;
-
-  /**
-   * @brief The _xAction holds the actions that is submitted when ...
-   */
-  String _onAction;
-  String _offAction;
+  String _timeAction;
 };
-
-#ifdef HOMEDING_REGISTER
-// Register the ScheduleElement onto the ElementRegistry.
-bool ScheduleElement::registered =
-    ElementRegistry::registerElement("schedule", ScheduleElement::create);
-#endif
 
 #endif

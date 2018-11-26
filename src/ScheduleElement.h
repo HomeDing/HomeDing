@@ -93,10 +93,19 @@ private:
   time_t _offTime;
 
   /**
-   * @brief The _xAction holds the actions that is submitted when ...
+   * @brief The _onAction holds the actions that is submitted when the scheduled time period starts.
    */
   String _onAction;
+
+  /**
+   * @brief The _offAction holds the actions that is submitted when the scheduled time period ends.
+   */
   String _offAction;
+
+  /**
+   * @brief The _valueAction holds the actions that is submitted when the scheduled time period starts or ends with a value of 1 and 0.
+   */
+  String _valueAction;
 };
 
 #ifdef HOMEDING_REGISTER

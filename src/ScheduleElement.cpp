@@ -77,6 +77,9 @@ bool ScheduleElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
+  } else if (_stricmp(name, "onvalue") == 0) {
+    _valueAction = value;
+
   } else {
     ret = Element::set(name, value);
   } // if
@@ -128,8 +131,10 @@ void ScheduleElement::loop()
       // no need to send an action.
     } else if (val) {
       _board->dispatch(_onAction);
+      _board->dispatch(_valueAction, "1");
     } else {
       _board->dispatch(_offAction);
+      _board->dispatch(_valueAction, "0");
     }
     _value = val;
     _init = true;

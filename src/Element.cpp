@@ -34,7 +34,7 @@ void Element::init(Board *board)
  */
 bool Element::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
+  // LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "start") == 0) {
@@ -53,7 +53,7 @@ bool Element::set(const char *name, const char *value)
   } else if (_stricmp(name, "room") == 0) {
 
   } else {
-    LOGGER_EERR("cannot set unknown property %s", name);
+    LOGGER_EERR("cannot set property %s:", name, value);
     ret = false;
   } // if
   return (ret);
@@ -65,7 +65,6 @@ bool Element::set(const char *name, const char *value)
  */
 void Element::start()
 {
-  LOGGER_ETRACE("start()");
   active = true;
 } // start()
 

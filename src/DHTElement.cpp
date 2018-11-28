@@ -3,7 +3,7 @@
  *
  * @brief Optional Input Element for the HomeDing Library to read DHT11 and
  * DHT22 sensors and create actions.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -16,9 +16,9 @@
  * Changelog: see DHTElement.h
  */
 
+#include <Board.h>
 #include <DHTElement.h>
 #include <ElementRegistry.h>
-#include <Board.h>
 
 /**
  * @brief static factory function to create a new DHTElement
@@ -158,6 +158,7 @@ void DHTElement::pushState(
 
 // ===== private functions =====
 
+// Formatting a int as decimal number.
 char *DHTElement::DHTElement::_fmt(int v, char *s)
 {
   // raw format first
@@ -174,11 +175,14 @@ char *DHTElement::DHTElement::_fmt(int v, char *s)
 } // _fmt()
 
 
+// dispatch a single value including formatting as decimal number.
 void DHTElement::_dispatch(String &evt, int value)
 {
-  char tmp[10];
-  _fmt(value, tmp);
-  _board->dispatch(evt, tmp);
+  if (evt.length() > 0) {
+    char tmp[10];
+    _fmt(value, tmp);
+    _board->dispatch(evt, tmp);
+  } // if
 } // _dispatch()
 
 

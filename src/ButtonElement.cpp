@@ -15,8 +15,8 @@
  */
 
 #include "ButtonElement.h"
-#include <ElementRegistry.h>
 #include <Board.h>
+#include <ElementRegistry.h>
 
 // #include <OneButton.h>
 
@@ -38,7 +38,10 @@ bool ButtonElement::set(const char *name, const char *value)
   LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "type") == 0) {
+  if (_stricmp(name, "value") == 0) {
+    _webLevel = _atob(value);
+
+  } else if (_stricmp(name, "type") == 0) {
     if (_stricmp(value, "level") == 0) {
       _type = BUTTON_TYPE_LEVEL;
     } else if (_stricmp(value, "toggle") == 0) {
@@ -62,6 +65,9 @@ bool ButtonElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
+  } else if (_stricmp(name, "onvalue") == 0) {
+    _valueAction = value;
+
   } else {
     ret = Element::set(name, value);
   } // if
@@ -74,14 +80,18 @@ bool ButtonElement::set(const char *name, const char *value)
  */
 void ButtonElement::start()
 {
-  if (_pin < 0) {
-    LOGGER_EERR("no meaningful pin");
-
-  } else {
+  if (_pin >= 0) {
     pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
-    _lastInLevel = digitalRead(_pin);
-    Element::start();
+    // read the current level
+    _lastPinLevel = digitalRead(_pin);
+    if (_inverse)
+      _lastPinLevel = !_lastPinLevel;
+  } else {
+    _lastPinLevel = 0;
   } // if
+  _lastWebLevel = 0;
+
+  Element::start();
 } // start()
 
 
@@ -90,32 +100,41 @@ void ButtonElement::start()
  */
 void ButtonElement::loop()
 {
-  int lev = digitalRead(_pin);
-
-  if (lev != _lastInLevel) {
-    _lastInLevel = lev;
-
+  if (_pin >= 0) {
+    int lev = digitalRead(_pin);
     if (_inverse)
       lev = !lev;
 
-    if (_type == BUTTON_TYPE_TOGGLE) {
-      if (lev) {
-        return; // without dispatching on UP.
-      } else {
-        // toggle _lastOutLevel
-        _lastOutLevel = !_lastOutLevel;
-      }
-
-    } else {
-      _lastOutLevel = lev;
+    if ((_type == BUTTON_TYPE_TOGGLE) && (_lastPinLevel > lev)) {
+      // toggle _outLevel
+      _outLevel = !_outLevel;
     }
+    _lastPinLevel = lev;
+  } // if
 
-    if (_lastOutLevel) {
+  if (_type == BUTTON_TYPE_TOGGLE) {
+    if (_lastWebLevel > _webLevel) {
+      // toggle _outLevel
+      _outLevel = !_outLevel;
+    } // if
+    _lastWebLevel = _webLevel;
+
+  } else if (_type == BUTTON_TYPE_LEVEL) {
+    _outLevel = (_lastPinLevel || _lastWebLevel);
+  } // if
+
+  if (_outLevel != _lastOutLevel) {
+    // LOGGER_ETRACE("output level=%d (%d,%d)", _outLevel, _lastPinLevel, _lastWebLevel);
+    if (_outLevel) {
       _board->dispatch(_onAction);
+      _board->dispatch(_valueAction, "1");
+
     } else {
       _board->dispatch(_offAction);
+      _board->dispatch(_valueAction, "0");
     } // if
-  }
+    _lastOutLevel = _outLevel;
+  } // if
 } // loop()
 
 

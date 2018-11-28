@@ -3,7 +3,7 @@
  *
  * @brief Core Input Element for the HomeDing Library typically used with
  * momentary buttons or switches.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -16,6 +16,8 @@
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
  * * 16.09.2018 pullup config added.
+ * * 27.11.2018 also can be defined without a physical pin to be controlled by
+ * the web ui.
  */
 
 #ifndef BUTTON_H
@@ -24,7 +26,7 @@
 #include <Arduino.h>
 #include <Element.h>
 
-#define BUTTON_TYPE_LEVEL  0x00
+#define BUTTON_TYPE_LEVEL 0x00
 #define BUTTON_TYPE_TOGGLE 0x01
 
 // class OneButton;
@@ -78,12 +80,15 @@ public:
 private:
   int _type = BUTTON_TYPE_LEVEL;
   int _pin = -1;
-  bool _inverse  = false;
+  bool _inverse = false;
   bool _pullup = false;
 
   //  OneButton *_button = NULL;
-  int _lastInLevel;
+  int _lastPinLevel;
+  int _webLevel;
+  int _lastWebLevel;
   int _lastOutLevel;
+  int _outLevel;
 
   /**
    * @brief The _onAction is emitted when the logical input level is going from
@@ -98,6 +103,8 @@ private:
    * time when the input level is going from HIGH to LOW (Button is released).
    */
   String _offAction;
+
+  String _valueAction;
 };
 
 #ifdef HOMEDING_REGISTER

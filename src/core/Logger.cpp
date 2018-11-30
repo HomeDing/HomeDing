@@ -79,17 +79,22 @@ void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
 void Logger::_printPrefix(char *buffer, const char *module, int level)
 {
   uint32 current_stamp = sntp_get_current_timestamp();
-  char b[16];
+  char timeBuffer[16];
 
   // LOGGER_RAW("getTime=%d", current_stamp);
 
   if (current_stamp < (30 * 24 * 60 * 60)) {
+    // using millis() when no time is available
     current_stamp = millis()/1000;
-    // LOGGER_RAW("using millis() = %d", current_stamp);
-  }
+  } // if
+
   struct tm *tmp = localtime((const time_t *)(&current_stamp));
-  strftime(b, sizeof(b), "%H:%M:%S", tmp);
-  sprintf(buffer, "%s %s:%c:", b, module, *(LOGGER_LEVELS + level));
+  strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", tmp);
+  if (module) {
+  sprintf(buffer, "%s %s:%c:", timeBuffer, module, *(LOGGER_LEVELS + level));
+  } else {
+    sprintf(buffer, "%s ", timeBuffer);
+  }
 };
 
 

@@ -35,11 +35,14 @@
 
 // for non-element classes
 
-#define LOGGER_ERR(...)                                                        \
-  Logger::LoggerPrint("sys", LOGGER_LEVEL_ERR, __VA_ARGS__)
+#define LOGGER_JUSTINFO(...)                                                   \
+  Logger::LoggerPrint(NULL, LOGGER_LEVEL_INFO, __VA_ARGS__)
 
 #define LOGGER_INFO(...)                                                       \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_INFO, __VA_ARGS__)
+
+#define LOGGER_ERR(...)                                                        \
+  Logger::LoggerPrint("sys", LOGGER_LEVEL_ERR, __VA_ARGS__)
 
 // send some logging to serial output
 #define LOGGER_TRACE(...)                                                      \
@@ -47,7 +50,7 @@
 
 #ifdef DEBUG_ESP_PORT
 #define LOGGER_RAW(...)                                                        \
-  DEBUG_ESP_PORT.printf("  >" __VA_ARGS__);                                 \
+  DEBUG_ESP_PORT.printf("  >" __VA_ARGS__);                                    \
   DEBUG_ESP_PORT.print("\n")
 #else
 #define LOGGER_RAW(...)

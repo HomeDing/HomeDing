@@ -64,10 +64,8 @@ bool DeviceElement::set(const char *name, const char *value)
     if (!now)
       now = millis() / 1000; // make seconds
 
-    // ALWAYS send to log
-    // LOGGER_EINFO(...
-    LOGGER_RAW("%3u:%02u:%02u %s", (now / 3600), (now / 60) % 60, now % 60,
-               value ? value : "NULL");
+    // ALWAYS send INFO to log
+    LOGGER_JUSTINFO(value ? value : "NULL");
 
   } else {
     ret = Element::set(name, value);

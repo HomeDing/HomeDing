@@ -32,6 +32,7 @@
 
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
+#define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_DigitalOut
@@ -53,6 +54,10 @@
 
 #ifdef HOMEDING_INCLUDE_Button
 #include <ButtonElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_Analog
+#include <AnalogElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_Timer

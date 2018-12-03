@@ -10,8 +10,8 @@
 // Changelog: see ElementRegistry.h
 // -----
 
-#include <ElementRegistry.h>
 #include <Element.h>
+#include <ElementRegistry.h>
 #include <core/logger.h>
 
 // allocate static variables
@@ -51,8 +51,12 @@ Element *ElementRegistry::createElement(const char *elementTypeName)
     for (n = 0; n < _count; n++) {
       s.concat(" ");
       s.concat(_names[n]);
+      if (n % 10 == 9) {
+        LOGGER_INFO("Registered Libraries:%s", s.c_str());
+        s = "";
+      }
     } // for
-    LOGGER_INFO("Registered Libraries:%s\n", s.c_str());
+    LOGGER_INFO("Registered Libraries:%s", s.c_str());
     done_once = true;
   } // if
 

@@ -60,7 +60,7 @@
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 
 #include <HomeDing.h>
-#include "bootpage.h"
+#include "upload.h"
 
 // ===== WLAN credentials =====
 
@@ -181,7 +181,7 @@ void setup(void)
 
   // list directory
   server.on("/$list", HTTP_GET, handleFileList);
-  server.on("/$upload", HTTP_GET, []() {server.send(200, "text/html", bootpageContent);});
+  server.on("/$upload", HTTP_GET, []() {server.send(200, "text/html", uploadContent);});
 
   server.addHandler(new BoardHandler("/$board", &mainBoard));
 

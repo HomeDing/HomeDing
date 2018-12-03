@@ -40,14 +40,14 @@ public:
   FileServerHandler(FS &fs, const char *path, const char *cache_header)
       : _fs(fs), _path(path), _cache_header(cache_header)
   {
-    LOGGER_RAW("init: path=%s cache_header=%s", path, cache_header);
+    // LOGGER_RAW("init: path=%s cache_header=%s", path, cache_header);
     if (_path.endsWith("/"))
       _path.remove(_path.length() - 1);
 
     _404_response =
         "<html><head><title>Oops! File not found</title></head><body>Oops! "
         "File not found</body></html>";
-    LOGGER_RAW("init: _path=%s", _path.c_str());
+    // LOGGER_RAW("init: _path=%s", _path.c_str());
   }
 
   /**
@@ -58,7 +58,7 @@ public:
   */
   bool canHandle(HTTPMethod requestMethod, String requestUri) override
   {
-    LOGGER_RAW("canHandle(%s)", requestUri.c_str());
+    // LOGGER_RAW("canHandle(%s)", requestUri.c_str());
     return (
         (requestMethod == HTTP_GET) ||
         (requestMethod == HTTP_PUT) || // upload text to files
@@ -68,7 +68,7 @@ public:
 
   bool canUpload(String uri)
   {
-    LOGGER_RAW("++ canUpload(%s)", uri.c_str());
+    // LOGGER_RAW("++ canUpload(%s)", uri.c_str());
     return true;
   }
 
@@ -94,7 +94,7 @@ public:
 
     File f = _fs.open(path, "r");
     if (!f) {
-      LOGGER_RAW(" file not found.");
+      // LOGGER_RAW(" file not found.");
       server.send(404, "text/html", _404_response);
 
     } else {
@@ -103,7 +103,7 @@ public:
       // server.setContentLength(f.size());
       // server.send(200, contentType, "");
       server.streamFile(f, contentType);
-      LOGGER_RAW(" %lu ms. %s", (millis() - now), contentType.c_str());
+      // LOGGER_RAW(" %lu ms. %s", (millis() - now), contentType.c_str());
 
     } // if
   } // handleGet()
@@ -116,13 +116,13 @@ public:
   */
   void handlePut(ESP8266WebServer &server, String path)
   {
-    LOGGER_RAW(" size=%d", server.arg("plain").length());
+    // LOGGER_RAW(" size=%d", server.arg("plain").length());
 
     File fsUploadFile = _fs.open(path, "w");
     if (fsUploadFile) {
       size_t written;
 
-      LOGGER_RAW(" UploadFile opened.");
+      // LOGGER_RAW(" UploadFile opened.");
       char *c = (char *)(server.arg("plain").c_str());
 
       written = 0;
@@ -131,7 +131,7 @@ public:
         c++;
         yield();
       }
-      LOGGER_RAW(" %d bytes written", written);
+      // LOGGER_RAW(" %d bytes written", written);
 
       fsUploadFile.close();
     } // if
@@ -145,7 +145,7 @@ public:
    */
   void handlePost(ESP8266WebServer &server, String path)
   {
-    LOGGER_RAW("post: path=%s", path.c_str());
+    // LOGGER_RAW("post: path=%s", path.c_str());
     server.send(200);
   }
 
@@ -157,7 +157,7 @@ public:
   */
   void handleDelete(ESP8266WebServer &server, String path)
   {
-    LOGGER_RAW("delete: path=%s", path.c_str());
+    // LOGGER_RAW("delete: path=%s", path.c_str());
 
     if (_fs.exists(path)) {
       _fs.remove(path);
@@ -170,7 +170,7 @@ public:
   bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
               String requestUri) override
   {
-    LOGGER_RAW("handle(%s)", requestUri.c_str());
+    // LOGGER_RAW("handle(%s)", requestUri.c_str());
 
     String path(_path);
     path += requestUri;
@@ -196,12 +196,12 @@ public:
 
   void upload(ESP8266WebServer &server, String requestUri, HTTPUpload &upload)
   {
-    LOGGER_RAW("++ upload(%s)", requestUri.c_str());
-    LOGGER_RAW("++ .filename='%s'", upload.filename.c_str());
+    // LOGGER_RAW("++ upload(%s)", requestUri.c_str());
+    // LOGGER_RAW("++ .filename='%s'", upload.filename.c_str());
 
     (void)server;
     if (upload.status == UPLOAD_FILE_START) {
-      LOGGER_RAW("++ ->UPLOAD_FILE_START");
+      // LOGGER_RAW("++ ->UPLOAD_FILE_START");
       // remove existing file to retain file system space.
       if (_fs.exists(upload.filename)) {
         _fs.remove(upload.filename);
@@ -213,7 +213,7 @@ public:
       // DBG_OUTPUT_PORT.println(upload.filename);
 
     } else if (upload.status == UPLOAD_FILE_WRITE) {
-      LOGGER_RAW("++ ->UPLOAD_FILE_WRITE(%d)", upload.currentSize);
+      // LOGGER_RAW("++ ->UPLOAD_FILE_WRITE(%d)", upload.currentSize);
       if (_fsUploadFile) {
         _fsUploadFile.write(upload.buf, upload.currentSize);
       }
@@ -221,7 +221,7 @@ public:
       // DBG_OUTPUT_PORT.println(upload.currentSize);
 
     } else if (upload.status == UPLOAD_FILE_END) {
-      LOGGER_RAW("++ ->UPLOAD_FILE_END(%d)", upload.totalSize);
+      // LOGGER_RAW("++ ->UPLOAD_FILE_END(%d)", upload.totalSize);
       if (_fsUploadFile) {
         _fsUploadFile.close();
       }

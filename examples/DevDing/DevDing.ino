@@ -151,7 +151,7 @@ void setup(void)
     FSInfo fs_info;
 
     String json = "{";
-    json += " 'build': '" __DATE__ "'\n";
+    json += " 'build': '" __DATE__ ",'\n";
     json += " 'free heap':" + String(ESP.getFreeHeap()) + ",\n";
 
     json += " 'flash-size':" + String(ESP.getFlashChipSize()) + ",\n";

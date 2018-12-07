@@ -39,7 +39,7 @@ void SSDPElement::init(Board *board)
   Element::init(board);
 
   // set default values
-  SSDP.setSchemaURL("description.xml");
+  SSDP.setSchemaURL("$desc.xml");
   SSDP.setHTTPPort(80);
   SSDP.setSerialNumber(ESP.getChipId());
   SSDP.setURL("/");
@@ -92,7 +92,7 @@ void SSDPElement::start()
     SSDP.setModelName(deviceElement->get("description"));
     SSDP.begin();
     ESP8266WebServer *server = _board->server;
-    server->on("/description.xml", HTTP_GET,
+    server->on("/$desc.xml", HTTP_GET,
                [server]() { SSDP.schema(server->client()); });
     Element::start();
   } // if

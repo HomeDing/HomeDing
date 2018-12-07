@@ -58,12 +58,17 @@ public:
   */
   bool canHandle(HTTPMethod requestMethod, String requestUri) override
   {
-    // LOGGER_RAW("canHandle(%s)", requestUri.c_str());
-    return (
-        (requestMethod == HTTP_GET) ||
-        (requestMethod == HTTP_PUT) || // upload text to files
-        (requestMethod == HTTP_POST) || // canUpload is handling file uploads
-        (requestMethod == HTTP_DELETE));
+    // LOGGER_TRACE("canHandle(%s)", requestUri.c_str());
+    if (requestUri.startsWith("/$")) {
+      // LOGGER_RAW("can no handle(%s)", requestUri.c_str());
+      return (false);
+    } else {
+      return (
+          (requestMethod == HTTP_GET) ||
+          (requestMethod == HTTP_PUT) || // upload text to files
+          (requestMethod == HTTP_POST) || // canUpload is handling file uploads
+          (requestMethod == HTTP_DELETE));
+    } // if
   }
 
   bool canUpload(String uri)

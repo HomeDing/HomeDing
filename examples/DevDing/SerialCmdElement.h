@@ -18,8 +18,10 @@
 
  "serialcmd": {
     "0": {
-      "preset0": "",
-      "preset1": "",
+      "onPreset0": "",
+      "onPreset1": "",
+      "onPreset2": "",
+      "onPreset3": "",
       "description": "Listen for commands on the Serial in line"
     }
   },
@@ -69,8 +71,10 @@ public:
 
 private:
   String _cmdLine;
-  String _preset0;
-  String _preset1;
+  String _action0;
+  String _action1;
+  String _action2;
+  String _action3;
 };
 
 #endif // SERIALCMDOTEELEMENT_H

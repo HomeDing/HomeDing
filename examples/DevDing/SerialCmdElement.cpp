@@ -37,10 +37,14 @@ bool SerialCmdElement::set(const char *name, const char *value)
   LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "preset0") == 0) {
-    _preset0 = value;
-  } else if (_stricmp(name, "preset1") == 0) {
-    _preset1 = value;
+  if (_stricmp(name, "onPreset0") == 0) {
+    _action0 = value;
+  } else if (_stricmp(name, "onPreset1") == 0) {
+    _action1 = value;
+  } else if (_stricmp(name, "onPreset2") == 0) {
+    _action2 = value;
+  } else if (_stricmp(name, "onPreset3") == 0) {
+    _action3 = value;
   } else {
     ret = Element::set(name, value);
   } // if

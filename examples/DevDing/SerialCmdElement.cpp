@@ -38,13 +38,13 @@ bool SerialCmdElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "onPreset0") == 0) {
-    _action0 = value;
+    _preset0 = value;
   } else if (_stricmp(name, "onPreset1") == 0) {
-    _action1 = value;
+    _preset1 = value;
   } else if (_stricmp(name, "onPreset2") == 0) {
-    _action2 = value;
+    _preset2 = value;
   } else if (_stricmp(name, "onPreset3") == 0) {
-    _action3 = value;
+    _preset3 = value;
   } else {
     ret = Element::set(name, value);
   } // if

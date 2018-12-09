@@ -71,10 +71,10 @@ public:
 
 private:
   String _cmdLine;
-  String _action0;
-  String _action1;
-  String _action2;
-  String _action3;
+  String _preset0;
+  String _preset1;
+  String _preset2;
+  String _preset3;
 };
 
 #endif // SERIALCMDOTEELEMENT_H

@@ -117,11 +117,11 @@ void ButtonElement::loop()
       // toggle _outLevel
       _outLevel = !_outLevel;
     } // if
-    _lastWebLevel = _webLevel;
 
   } else if (_type == BUTTON_TYPE_LEVEL) {
-    _outLevel = (_lastPinLevel || _lastWebLevel);
+    _outLevel = (_lastPinLevel || _webLevel);
   } // if
+  _lastWebLevel = _webLevel;
 
   if (_outLevel != _lastOutLevel) {
     // LOGGER_ETRACE("output level=%d (%d,%d)", _outLevel, _lastPinLevel, _lastWebLevel);

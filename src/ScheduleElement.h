@@ -89,8 +89,8 @@ private:
    */
   bool _init;
 
-  time_t _onTime;
-  time_t _offTime;
+  time_t _startTime;
+  time_t _endTime;
 
   /**
    * @brief The _onAction holds the actions that is submitted when the scheduled time period starts.

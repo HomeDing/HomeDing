@@ -52,8 +52,8 @@ void ScheduleElement::init(Board *board)
   LOGGER_ETRACE("init()");
   Element::init(board);
 
-  _onTime = TIME_T_NOT;
-  _offTime = TIME_T_NOT;
+  _startTime = TIME_T_NOT;
+  _endTime = TIME_T_NOT;
 } // init()
 
 
@@ -66,10 +66,10 @@ bool ScheduleElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "ontime") == 0) {
-    _onTime = _atotime(value);
+    _startTime = _atotime(value);
 
   } else if (_stricmp(name, "offtime") == 0) {
-    _offTime = _atotime(value);
+    _endTime = _atotime(value);
 
   } else if (_stricmp(name, "onon") == 0) {
     _onAction = value;
@@ -98,7 +98,7 @@ void ScheduleElement::start()
   // Verify parameters
   _init = false;
 
-  if ((_onTime == TIME_T_NOT) && (_offTime == TIME_T_NOT)) {
+  if ((_startTime == TIME_T_NOT) && (_endTime == TIME_T_NOT)) {
     LOGGER_EERR("no time span set.");
   } else {
     Element::start();
@@ -119,12 +119,12 @@ void ScheduleElement::loop()
     // There is a local time available.
 
     // find the current value
-    if (_onTime < _offTime) {
+    if (_startTime < _endTime) {
       // during the day.
-      val = ((ct >= _onTime) && (ct < _offTime));
+      val = ((ct >= _startTime) && (ct < _endTime));
     } else {
       // overnight.
-      val = ((ct >= _onTime) || (ct < _offTime));
+      val = ((ct >= _startTime) || (ct < _endTime));
     }
 
     if ((val == _value) && (_init)) {

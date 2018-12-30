@@ -45,7 +45,7 @@ bool Element::set(const char *name, const char *value)
     term();
 
   } else if (_stricmp(name, "loglevel") == 0) {
-    loglevel = atoi(value);
+    loglevel = _atoi(value);
 
     // do not report an error for the following properties, as they are used in
     // the web ui.
@@ -114,6 +114,14 @@ void Element::term()
 } // term()
 
 
+/* Return an integer from a string.
+  Supports various formats like "0x3C" == "60" */
+int Element::_atoi(const char *value) {
+  long ret = strtol(value, nullptr, 0);
+  return((int) ret);
+} // _atoi()
+
+
 /* Return a boolean value from a string. */
 bool Element::_atob(const char *value)
 {
@@ -178,11 +186,11 @@ int Element::_atopin(const char *value)
 
   int pin = -1;
   if ((value) && (*value == 'D')) {
-    int n = atoi(value + 1);
+    int n = _atoi(value + 1);
     if ((n >= 0) && (n <= 10))
       pin = GPIO[n];
   } else {
-    pin = atoi(value);
+    pin = _atoi(value);
   }
   return (pin);
 } // _atopin()

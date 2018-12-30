@@ -74,4 +74,19 @@ Element *ElementRegistry::createElement(const char *elementTypeName)
 } // createElement()
 
 
+/**
+ * @brief List all registered elements in JSON array format:
+ * @param buffer for the names.
+ */
+void ElementRegistry::list(String &buffer){
+    buffer = "[";
+    for (int n = 0; n < _count; n++) {
+      if (n > 0) buffer.concat(',');
+      buffer.concat('\"');
+      buffer.concat(_names[n]);
+      buffer.concat('\"');
+    } // for
+    buffer.concat(']');
+} // list()
+
 // End

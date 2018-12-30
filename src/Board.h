@@ -57,20 +57,23 @@
  * State of Board
  */
 typedef enum {
+  // ===== startup operation states
   BOARDSTATE_NONE = 0, // unspecified
-  BOARDSTATE_CONFIG =
-      1, // read all configurations and create elements. Start SYS Elements
+  BOARDSTATE_CONFIG = 1, // read all configurations and create elements. Start SYS Elements
   BOARDSTATE_CONNECT = 2, // try to reconnect to last known network.
   BOARDSTATE_CONFWAIT = 3, // Wait for clicks.
   BOARDSTATE_WAIT = 5, // Wait for network connectivity and clicks.
-  BOARDSTATE_AP = 7, // AP Mode, create a AccessPoint to allow configuration
-  BOARDSTATE_WPS = 9, // WPS Mode, waiting for configuration
-
+  
+  // ===== normal operation states
   BOARDSTATE_GREET = 10, // start all NET Elements
-
-  BOARDSTATE_START = 12 // start all NET Elements
+  BOARDSTATE_RUN = 12, // run
   // start TIME Elements
   // restart on network lost > 30 secs.
+
+  // ===== config operation states
+  BOARDSTATE_SCAN = 21, // Scan local available Networks
+  BOARDSTATE_NETCONF = 22 // Enable Network Configuration UI
+
 } BoardState;
 
 
@@ -130,7 +133,7 @@ public:
    * @param out Output String for the result.
    * @param path Path of an Element or null to get state of all elements.
    */
-  void getState(String &out, String path);
+  void getState(String &out, const String &path);
 
 
   /*
@@ -139,7 +142,7 @@ public:
    * @param property Name of the property
    * @param value New value of the property.
    */
-  void setState(String &path, String property, String value);
+  void setState(String &path, const String &property, const String &value);
 
   // Time functionality
 
@@ -157,6 +160,7 @@ public:
 
   // System LED
   int sysLED = -1;
+  int sysButton = 0;
 
   // WebServer
   ESP8266WebServer *server;

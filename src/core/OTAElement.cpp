@@ -45,7 +45,7 @@ bool OTAElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "port") == 0) {
-    _port = atoi(value);
+    _port = _atoi(value);
 
   } else if (_stricmp(name, "passwd") == 0) {
     _passwd = value;

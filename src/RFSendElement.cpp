@@ -55,7 +55,7 @@ bool RFSendElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
-    _lastValue = atoi(value);
+    _lastValue = _atoi(value);
 
     if (active) {
       if (_lastValue) {

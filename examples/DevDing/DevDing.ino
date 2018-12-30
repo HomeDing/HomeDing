@@ -42,6 +42,7 @@
 
 #include <Board.h>
 #include <BoardServer.h>
+#include <ElementRegistry.h>
 #include <FileServer.h>
 
 #define NET_DEBUG 0
@@ -58,9 +59,10 @@
 // Use some more Elements for Displays
 #define HOMEDING_INCLUDE_DISPLAYLCD
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
+#define HOMEDING_INCLUDE_DISPLAYSH1106
 
-#include <HomeDing.h>
 #include "upload.h"
+#include <HomeDing.h>
 
 // ===== WLAN credentials =====
 
@@ -75,11 +77,82 @@ Board mainBoard;
 
 // ===== implement =====
 
+// ===== JSON Composer helping functions =====
+// to output JSON formatted data a String is used and appended by new JSON
+// elements. Here JSON Strings are always created with comma separators after
+// every object. The generated output must be finished by using the jc_sanitize
+// function before transmitted.
+
+// Create a property with String value
+void jc_prop(String &json, const char *key, String value)
+{
+  value.replace("\"", "\\\"");
+  json.concat('\"');
+  json.concat(key);
+  json.concat("\":\"");
+  json.concat(value);
+  json.concat("\","); // comma may be wrong.
+} // jc_prop
+
+// Create a property with int value
+void jc_prop(String &json, const char *key, int n)
+{
+  jc_prop(json, key, String(n));
+  // json.concat('\"');
+  // json.concat(key);
+  // json.concat("\":\"");
+  // json.concat(n);
+  // json.concat("\","); // comma may be wrong.
+} // jc_prop
+
+const char *jc_sanitize(String &json)
+{
+  json.replace(",]", "]");
+  json.replace(",}", "}");
+  return (json.c_str());
+} // jc_sanitize()
+
+
+// Send out a minimal html file for uploading files.
+void handleUploadUI()
+{
+  server.send(200, "text/html", uploadContent);
+}
+
+
+// Return list of local networks.
+void handleScan()
+{
+  int8_t scanState = WiFi.scanComplete();
+  if (scanState == WIFI_SCAN_FAILED) {
+    // restart a scan
+    WiFi.scanNetworks(true);
+    server.send(200, "text/json", "[]");
+  } else if (scanState == WIFI_SCAN_RUNNING) {
+    server.send(200, "text/json", "[]");
+  } else {
+    // return scan result
+    String json = "[";
+    json.reserve(512);
+
+    for (int i = 0; i < scanState; i++) {
+      json += "{";
+      jc_prop(json, "id", WiFi.SSID(i));
+      jc_prop(json, "rssi", WiFi.RSSI(i));
+      jc_prop(json, "open", WiFi.encryptionType(i) == ENC_TYPE_NONE);
+      json += "},";
+    }
+    json += "]";
+    server.send(200, "text/json", jc_sanitize(json));
+    WiFi.scanDelete();
+  }
+} // handleScan()
+
+
 // Send out a JSON object with all files in dir
 void handleFileList()
 {
-  LOGGER_RAW("handleFileList()");
-
+  // LOGGER_RAW("handleFileList()");
   String json;
   json.reserve(512);
 
@@ -87,22 +160,58 @@ void handleFileList()
   Dir dir = SPIFFS.openDir("/");
 
   while (dir.next()) {
-    json += "{'type': 'file',";
-    json += "'name':'" + dir.fileName() + "',";
-    json += "'size':" + String(dir.fileSize());
-    json += "},\n";
+    json += "{";
+    jc_prop(json, "type", "file");
+    jc_prop(json, "name", dir.fileName());
+    jc_prop(json, "size", dir.fileSize());
+    json += "},";
   } // while
-
   json += "]";
-  json.replace('\'', '"');
-  json.replace(",\n]", "\n]");
-
-  server.send(200, "text/json", json);
+  server.send(200, "text/json", jc_sanitize(json));
 } // handleFileList
 
 
-void returnOK() {
-  server.send(200, "text/plain", "");
+// Send out some device information.
+// call
+void handleSysInfo()
+{
+  String json = "{";
+  jc_prop(json, "devicename", mainBoard.deviceName);
+  jc_prop(json, "build", __DATE__);
+  jc_prop(json, "free heap", ESP.getFreeHeap());
+
+  jc_prop(json, "flash-size", ESP.getFlashChipSize());
+  jc_prop(json, "flash-real-size", ESP.getFlashChipRealSize());
+
+  FSInfo fs_info;
+  SPIFFS.info(fs_info);
+  jc_prop(json, "fs-totalBytes", fs_info.totalBytes);
+  jc_prop(json, "fs-usedBytes", fs_info.usedBytes);
+
+  // WIFI info
+  jc_prop(json, "ssid", WiFi.SSID());
+  // jc_prop(json, "bssid", WiFi.BSSIDstr());
+
+  // json += " 'wifi-opmode':" + String(wifi_get_opmode()) + "\n";
+  // json += " 'wifi-phymode':" + String(wifi_get_phy_mode()) + "\n";
+  // json += " 'wifi-channel':" + String(wifi_get_channel()) + "\n";
+  // json += " 'wifi-ap-id':" + String(wifi_station_get_current_ap_id()) +
+  // "\n"; json += " 'wifi-status':" +
+  // String(wifi_station_get_connect_status()) + "\n";
+
+  json += "}";
+  // json.replace('\'', '"');
+  server.send(200, "text/json", jc_sanitize(json));
+  json = String();
+}
+
+
+// Send out a minimal html file for uploading files.
+void handleElements()
+{
+  String buffer;
+  ElementRegistry::list(buffer);
+  server.send(200, "text/html", buffer);
 }
 
 
@@ -125,8 +234,11 @@ void setup(void)
   LOGGER_INFO("HomDing Device is starting... (%s), %d", __DATE__,
               ESP.getBootMode());
 
-  // Enable the next line to start detailed tracing
+  // Output of Info and Errors is standard
   Logger::logger_level = LOGGER_LEVEL_ERR;
+
+  // Enable the next line to start detailed tracing
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   // ----- setup the file system and load configuration -----
 
@@ -138,54 +250,32 @@ void setup(void)
 
   LOGGER_RAW("register handlers.");
 
-  // redirect to index.htm of only domain name is given.
+  // redirect to index.htm when only domain name is given.
   server.on("/", HTTP_GET, []() {
     server.sendHeader("Location", "/index.htm", true);
     LOGGER_RAW("Redirect...");
     server.send(301, "text/plain", "");
   });
 
-  // get heap status, analog input value and all GPIO statuses in one json
-  // call
-  server.on("/$sysinfo", HTTP_GET, []() {
-    FSInfo fs_info;
+  // return some system information
+  server.on("/$sysinfo", HTTP_GET, handleSysInfo);
 
-    String json = "{";
-    json += " 'devicename':'" + mainBoard.deviceName + "',\n";    
-    json += " 'build': '" __DATE__ "',\n";
-    json += " 'free heap':" + String(ESP.getFreeHeap()) + ",\n";
+  // Bulk File Upload UI.
+  server.on("/$upload", HTTP_GET, handleUploadUI);
 
-    json += " 'flash-size':" + String(ESP.getFlashChipSize()) + ",\n";
-    json += " 'flash-real-size':" + String(ESP.getFlashChipRealSize()) + ",\n";
+  // Bulk File Upload UI.
+  server.on("/$scan", HTTP_GET, handleScan);
 
-    SPIFFS.info(fs_info);
-    json += " 'fs-totalBytes':" + String(fs_info.totalBytes) + ",\n";
-    json += " 'fs-usedBytes':" + String(fs_info.usedBytes) + ",\n";
-
-    // WIFI info
-    json += " 'ssid':'" + WiFi.SSID() + "',\n";
-    json += " 'bssid':'" + WiFi.BSSIDstr() + "'\n";
-
-    // json += " 'wifi-opmode':" + String(wifi_get_opmode()) + "\n";
-    // json += " 'wifi-phymode':" + String(wifi_get_phy_mode()) + "\n";
-    // json += " 'wifi-channel':" + String(wifi_get_channel()) + "\n";
-    // json += " 'wifi-ap-id':" + String(wifi_station_get_current_ap_id()) +
-    // "\n"; json += " 'wifi-status':" +
-    // String(wifi_station_get_connect_status()) + "\n";
-
-    json += "}";
-    json.replace('\'', '"');
-
-    server.send(200, "text/json", json);
-    json = String();
-  });
-
-  // list directory
+  // list files in filesystem
   server.on("/$list", HTTP_GET, handleFileList);
-  server.on("/$upload", HTTP_GET, []() {server.send(200, "text/html", uploadContent);});
 
-  server.addHandler(new BoardHandler("/$board", &mainBoard));
+  // list all registered elements.
+  server.on("/$elements", HTTP_GET, handleElements);
 
+  // Board status and actions
+  server.addHandler(new BoardHandler(&mainBoard));
+
+  // Remote reboot
   server.on("/$reboot", HTTP_GET, []() {
     LOGGER_INFO("remote rebooting...");
     server.send(200, "text/plain", "");
@@ -193,6 +283,7 @@ void setup(void)
     ESP.reset();
   });
 
+  // Static files in the file system.
   server.addHandler(new FileServerHandler(SPIFFS, "/", "NO-CACHE"));
 
   LOGGER_INFO("sketch setup done.");

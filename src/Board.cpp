@@ -126,7 +126,7 @@ void Board::start(Element_StartupMode startupMode)
 // switch to a new state
 void Board::_newState(BoardState newState)
 {
-  // LOGGER_TRACE("do BoardState %d", newState);
+  LOGGER_TRACE("BoardState = %d", newState);
   boardState = newState;
 }
 
@@ -157,7 +157,7 @@ void Board::loop()
     netMode = NetMode_AUTO;
 
     // wait at least 6 seconds for offering config mode
-    configPhaseEnd = now + (4 * 1000); // TODO: make configurable
+    configPhaseEnd = now + (6 * 1000); // TODO: make configurable
 
   } else if (boardState == BOARDSTATE_CONNECT) {
     bool autoCon = WiFi.getAutoConnect();
@@ -185,59 +185,62 @@ void Board::loop()
       WiFi.begin(ssid, password);
     } // if
 
-    _newState(BOARDSTATE_CONFWAIT);
+    // Enable sysLED for blinking while waiting for network or config mode
     if (sysLED >= 0) {
       pinMode(sysLED, OUTPUT);
       digitalWrite(sysLED, HIGH);
     }
 
+    // Enable sysButton for entering config mode
+    if (sysButton >= 0) {
+      pinMode(sysButton, INPUT_PULLUP);
+    }
+
     // wait max 30 seconds for connecting to the network
     connectPhaseEnd = now + (30 * 1000); // TODO: make configurable
 
-  } else if (boardState == BOARDSTATE_CONFWAIT) {
+    _newState(BOARDSTATE_CONFWAIT);
 
-    if (now < configPhaseEnd) {
-      // just continue waiting, Blink and wait for clicks...
+  } else if ((boardState == BOARDSTATE_CONFWAIT) ||
+             (boardState == BOARDSTATE_WAIT)) {
+    // make sysLED blink
+    if (sysLED >= 0)
+      digitalWrite(sysLED, ((configPhaseEnd - now) % 700) > 350 ? HIGH : LOW);
 
-      if (sysLED >= 0) {
-        // MAKE SYS LED blink
-        if (((configPhaseEnd - now) % 700) > 350) {
-          digitalWrite(sysLED, HIGH);
-        } else {
-          digitalWrite(sysLED, LOW);
-        }
-      } // if
-
-    } else {
-      if (sysLED >= 0) {
-        // stop using system LED
-        digitalWrite(sysLED, HIGH);
-        pinMode(sysLED, INPUT);
-      } // if
-      _newState(BOARDSTATE_WAIT);
-    }
-
-  } else if (boardState == BOARDSTATE_WAIT) {
-    wl_status_t wifi_status = WiFi.status();
-
-    if (wifi_status == WL_CONNECTED) {
-      LOGGER_TRACE("connected.");
-      _newState(BOARDSTATE_GREET);
-
-    } else if ((wifi_status == WL_NO_SSID_AVAIL) ||
-               (wifi_status == WL_CONNECT_FAILED) || (now >= connectPhaseEnd)) {
-      netMode -= 1;
-      LOGGER_TRACE("next connect method = %d", netMode);
-      if (netMode) {
-        _newState(BOARDSTATE_CONNECT);
-      } else {
-        LOGGER_INFO("no-net restarting...");
-        delay(10000);
-        ESP.restart();
+    // check sysButton
+    if (sysButton >= 0) {
+      if (digitalRead(sysButton) == LOW) {
+        _newState(BOARDSTATE_SCAN);
       }
-    } else {
-      delay(100);
     }
+
+    if (boardState == BOARDSTATE_CONFWAIT) {
+      if (now > configPhaseEnd)
+        _newState(BOARDSTATE_WAIT);
+
+    } else if (boardState == BOARDSTATE_WAIT) {
+      wl_status_t wifi_status = WiFi.status();
+
+      if (wifi_status == WL_CONNECTED) {
+        LOGGER_TRACE("connected.");
+        _newState(BOARDSTATE_GREET);
+
+      } else if ((wifi_status == WL_NO_SSID_AVAIL) ||
+                 (wifi_status == WL_CONNECT_FAILED) ||
+                 (now >= connectPhaseEnd)) {
+        netMode -= 1;
+        LOGGER_TRACE("next connect method = %d", netMode);
+        if (netMode) {
+          _newState(BOARDSTATE_CONNECT);
+        } else {
+          LOGGER_INFO("no-net restarting...");
+          delay(10000);
+          ESP.restart();
+        }
+      } else {
+        delay(100);
+      }
+    } // if (BOARDSTATE_WAIT)
 
   } else if (boardState == BOARDSTATE_GREET) {
     LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
@@ -259,9 +262,9 @@ void Board::loop()
 
     server->begin();
     start(Element_StartupMode::Network);
-    _newState(BOARDSTATE_START);
+    _newState(BOARDSTATE_RUN);
 
-  } else if (boardState == BOARDSTATE_START) {
+  } else if (boardState == BOARDSTATE_RUN) {
 
     if (!validTime) {
       // check if time is valid now -> start all elements with
@@ -301,6 +304,12 @@ void Board::loop()
       }
       _next2 = _next2->next;
     } // if
+
+  } else if (boardState == BOARDSTATE_SCAN) {
+    // wait until UI triggers scanning.
+
+  } else if (boardState == BOARDSTATE_NETCONF) {
+
   } // if
 } // loop()
 
@@ -388,7 +397,7 @@ void Board::dispatch(const char *action, const char *value)
 } // dispatch
 
 
-void Board::getState(String &out, String path)
+void Board::getState(String &out, const String &path)
 {
   // LOGGER_TRACE("getState(%s)", path.c_str());
   String ret = "{";
@@ -435,7 +444,7 @@ void Board::getState(String &out, String path)
 } // getState
 
 
-void Board::setState(String &path, String property, String value)
+void Board::setState(String &path, const String &property, const String &value)
 {
   // LOGGER_TRACE("setState(%s, %s, %s)", path.c_str(), property.c_str(),
   // value.c_str());

@@ -94,6 +94,10 @@
 #include <displays/DisplaySSD1306Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYSH1106
+#include <displays/DisplaySH1106Element.h>
+#endif
+
 // ===== OPTIONAL ELEMENTS =====
 
 #ifdef HOMEDING_INCLUDE_DHT

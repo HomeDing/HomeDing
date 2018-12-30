@@ -17,7 +17,7 @@
 #include <Arduino.h>
 #include <Element.h>
 
-#define REG_MAX_TYPES 32
+#define REG_MAX_TYPES 48
 
 typedef Element *(*CreateElementFn)(void);
 
@@ -41,6 +41,12 @@ public:
                               Element *(*CreateElementFn)(void));
 
   static Element *createElement(const char *elementTypeName);
+
+  /**
+   * @brief List all registered elements in JSON array format:
+   * @param buffer for the names.
+   */
+  static void list(String &buffer);
 
 private:
   static int _count;

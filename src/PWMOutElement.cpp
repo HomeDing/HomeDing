@@ -36,10 +36,10 @@ bool PWMOutElement::set(const char *name, const char *value)
     _inverse = _atob(value);
 
   } else if (_stricmp(name, "range") == 0) {
-    _range = atoi(value);
+    _range = _atoi(value);
 
   } else if (_stricmp(name, "value") == 0) {
-    _setValue(atoi(value));
+    _setValue(_atoi(value));
 
   } else {
     ret = Element::set(name, value);

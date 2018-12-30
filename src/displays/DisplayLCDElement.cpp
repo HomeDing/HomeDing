@@ -48,7 +48,7 @@ bool DisplayLCDElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "address") == 0) {
-    _address = atoi(value);
+    _address = strtol(value, nullptr, 0);
 
   } else if (_stricmp(name, "sda") == 0) {
     _sda = _atopin(value);

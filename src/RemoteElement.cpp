@@ -118,8 +118,8 @@ void RemoteElement::loop()
       String line = _httpClient.readStringUntil('\n');
       LOGGER_ETRACE(" line:%s", line.c_str());
       if (line.startsWith("Content-Length:")) {
-        contentLength = atoi(line.c_str() + 15);
-        // contentLength = atoi(line.substring(15).c_str());
+        contentLength = _atoi(line.c_str() + 15);
+        // contentLength = _atoi(line.substring(15).c_str());
         LOGGER_ETRACE(" contentLength=%d", contentLength);
 
       } else if (line.equals("\r")) {

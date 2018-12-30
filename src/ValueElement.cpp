@@ -39,22 +39,22 @@ bool ValueElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
-    _setValue(atoi(value));
+    _setValue(_atoi(value));
 
   } else if (_stricmp(name, "min") == 0) {
-    _min = atoi(value);
+    _min = _atoi(value);
 
   } else if (_stricmp(name, "max") == 0) {
-    _max = atoi(value);
+    _max = _atoi(value);
 
   } else if (_stricmp(name, "onchange") == 0) {
     _changeAction = value;
 
   } else if (_stricmp(name, "up") == 0) {
-    _setValue(_value += atoi(value));
+    _setValue(_value += _atoi(value));
 
   } else if (_stricmp(name, "down") == 0) {
-    _setValue(_value -= atoi(value));
+    _setValue(_value -= _atoi(value));
 
   } else {
     ret = Element::set(name, value);

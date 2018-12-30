@@ -52,7 +52,7 @@ bool DisplaySSD1306Element::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "address") == 0) {
-    _address = atoi(value);
+    _address = _atoi(value);
 
   } else if (_stricmp(name, "sda") == 0) {
     _sda = _atopin(value);
@@ -64,7 +64,7 @@ bool DisplaySSD1306Element::set(const char *name, const char *value)
     _resetpin = _atopin(value);
 
   } else if (_stricmp(name, "height") == 0) {
-    _height = atoi(value);
+    _height = _atoi(value);
 
   } else {
     ret = Element::set(name, value);

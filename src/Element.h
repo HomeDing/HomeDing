@@ -136,6 +136,13 @@ public:
 
 protected:
   /**
+   * @brief Return an integer value from a string.
+   * @param value Given value as string.
+   * @return value
+   */
+  int _atoi(const char *value);
+
+  /**
    * @brief Return a boolean value from a string.
    * @param value Given value as string.
    * @return true Return for "true", "on", "1", "high".

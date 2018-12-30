@@ -1,7 +1,7 @@
 /**
  * @file boardServer.h
  * @brief Implementation of a web server request hander to handle the IoT board
- * REST services.
+ * REST services to get the current state of elements and send actions to active elements.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -14,12 +14,32 @@
  *
  * Changelog:
  * * 30.05.2018 created by Matthias Hertel
+ * * 21.12.2018 refactoring.
+ * 
+ * @details
+@verbatim
+  This handler registers to all http GET request to the base url `/$board`.
+  
+  The state of all existing elements can be retrieved by using the base url like:
+  <http://devding/$board>.
+
+  The state of a special existing element can be retrieved by using a more specific url like:
+  <http://devding/$board/timer/blink>.
+
+  To send an action to a element a parameter can be added like:
+  <http://devding/$board/displaydot/b?value=1> or <http://devding/$board/displaytext/info?show=Hello>
+
+@endverbatim
  */
 
 #ifndef BOARDSERVER_H
 #define BOARDSERVER_H
 
 #include <functional>
+
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
 
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
@@ -41,16 +61,11 @@ class BoardHandler : public RequestHandler
 {
 public:
   /**
-   * @brief Construct a new State Handler object
+   * @brief Construct a new BoardHandler object
    * @param path The root path of the state ressources.
    * @param board reference to the board.
    */
-  BoardHandler(const char *path, Board *board)
-  {
-    _path = path;
-    _board = board;
-    LOGGER_RAW("BoardHandler:init: %s", _path.c_str());
-  }
+  BoardHandler(Board *board);
 
   /**
    * @brief Verify if the method and requestUri can be handles by this module.
@@ -58,13 +73,7 @@ public:
    * @param requestUri current url of the request.
    * @return true When the method and requestUri match a state request.
    */
-  bool canHandle(HTTPMethod requestMethod, String requestUri) override
-  {
-    bool ret = ((requestMethod == HTTP_GET) || (requestMethod == HTTP_PUT)) &&
-               (requestUri.startsWith(_path));
-    // LOGGER_RAW("BoardHandler:canHandle(%s)=%u", requestUri.c_str(), ret);
-    return (ret);
-  }
+  bool canHandle(HTTPMethod requestMethod, String requestUri);
 
   /**
    * @brief Handle the request of the state.
@@ -75,37 +84,7 @@ public:
    * @return false
    */
   bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
-              String requestUri) override
-  {
-    LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
-
-    // cut off the registered path from the url.
-    String localPath(requestUri.substring(_path.length()));
-
-    if ((localPath.length() > 0) && (localPath.charAt(0) == '/')) {
-      localPath.remove(0, 1);
-    }
-
-    int args = server.args();
-    // LOGGER_RAW(" args=%d", args);
-
-    if ((args == 0) && (requestMethod == HTTP_GET)) {
-      String output;
-      _board->getState(output, localPath);
-
-      server.sendHeader("Cache-control", "NO-CACHE");
-      server.send(200, "text/json", output);
-      // DEBUG_LOG("  ret:%s\n", output.c_str());
-
-    } else if ((args > 0) && (requestMethod == HTTP_GET)) {
-      // like http://newdevice/$board/display/info?show=Hello
-      // like http://logger/$board/display/f?show=27.30
-      _board->setState(localPath, server.argName(0), server.arg(0));
-      server.send(200, "text/plain", "");
-    }
-
-    return (true);
-  } // handle()
+              String requestUri);
 
 protected:
   /**

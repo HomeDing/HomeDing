@@ -140,7 +140,7 @@ protected:
    * @param value Given value as string.
    * @return value
    */
-  int _atoi(const char *value);
+  static int _atoi(const char *value);
 
   /**
    * @brief Return a boolean value from a string.
@@ -148,7 +148,7 @@ protected:
    * @return true Return for "true", "on", "1", "high".
    * @return false Return false as the default case.
    */
-  bool _atob(const char *value);
+  static bool _atob(const char *value);
 
   /**
    * @brief Return a time value from a string.
@@ -165,7 +165,7 @@ protected:
    * @param value Given value as string.
    * @return time or duration as seconds.
    */
-  unsigned long _atotime(const char *value);
+  static unsigned long _atotime(const char *value);
 
   /**
    * @brief Return a pin value from a string.
@@ -187,12 +187,12 @@ protected:
    * @param value Given value as string.
    * @return GPIO Number.
    */
-  int _atopin(const char *value);
+  static int _atopin(const char *value);
 
   /**
    * @brief replacement of the CPP stricmp function not available on Arduino.
    */
-  int _stricmp(const char *str1, const char *str2);
+  static int _stricmp(const char *str1, const char *str2);
 
   /**
    * @brief A reference to the board the Element is on.

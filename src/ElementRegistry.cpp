@@ -40,25 +40,9 @@ bool ElementRegistry::registerElement(const char *elementTypeName,
 
 Element *ElementRegistry::createElement(const char *elementTypeName)
 {
-  static bool done_once = false;
   // LOGGER_RAW("createElement(%s)", elementTypeName);
   int n;
   Element *e = NULL;
-
-  if (!done_once) {
-    // report registered libraries
-    String s;
-    for (n = 0; n < _count; n++) {
-      s.concat(" ");
-      s.concat(_names[n]);
-      if (n % 10 == 9) {
-        LOGGER_INFO("Registered Libraries:%s", s.c_str());
-        s = "";
-      }
-    } // for
-    LOGGER_INFO("Registered Libraries:%s", s.c_str());
-    done_once = true;
-  } // if
 
   // search for the the typeName
   n = 0;

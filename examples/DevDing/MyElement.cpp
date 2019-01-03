@@ -61,7 +61,7 @@ bool MyElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
-    _value = atoi(value);
+    _value = _atoi(value);
 
     // } else if (_stricmp(name, "onChange") == 0) {
     // save the actions

@@ -68,6 +68,10 @@
 
 #include "secrets.h"
 
+static const char *TEXT_PLAIN = "text/plain";
+static const char *TEXT_HTML = "text/html";
+static const char *TEXT_JSON = "text/json";
+
 // need a WebServer
 ESP8266WebServer server(80);
 
@@ -94,16 +98,13 @@ void jc_prop(String &json, const char *key, String value)
   json.concat("\","); // comma may be wrong.
 } // jc_prop
 
+
 // Create a property with int value
 void jc_prop(String &json, const char *key, int n)
 {
   jc_prop(json, key, String(n));
-  // json.concat('\"');
-  // json.concat(key);
-  // json.concat("\":\"");
-  // json.concat(n);
-  // json.concat("\","); // comma may be wrong.
 } // jc_prop
+
 
 const char *jc_sanitize(String &json)
 {
@@ -116,8 +117,26 @@ const char *jc_sanitize(String &json)
 // Send out a minimal html file for uploading files.
 void handleUploadUI()
 {
-  server.send(200, "text/html", uploadContent);
+  server.send(200, TEXT_HTML, uploadContent);
 }
+
+
+void handleRedirect()
+{
+  BoardState bs = mainBoard.boardState;
+  LOGGER_RAW("Redirect...");
+  LOGGER_RAW(" BoardState=%d", bs);
+  String url;
+  if (bs < BOARDSTATE_STARTCAPTIVE) {
+    url = F("/index.htm");
+  } else {
+    url = String(F("http://")) + WiFi.softAPIP().toString() +
+          F("/setup.htm"); // ; mainBoard.deviceName
+  }
+  server.sendHeader("Location", url, true);
+  server.send(302, TEXT_PLAIN, "");
+  server.client().stop();
+} // handleRedirect()
 
 
 // Return list of local networks.
@@ -127,9 +146,9 @@ void handleScan()
   if (scanState == WIFI_SCAN_FAILED) {
     // restart a scan
     WiFi.scanNetworks(true);
-    server.send(200, "text/json", "[]");
+    server.send(200);
   } else if (scanState == WIFI_SCAN_RUNNING) {
-    server.send(200, "text/json", "[]");
+    server.send(200);
   } else {
     // return scan result
     String json = "[";
@@ -143,7 +162,7 @@ void handleScan()
       json += "},";
     }
     json += "]";
-    server.send(200, "text/json", jc_sanitize(json));
+    server.send(200, TEXT_JSON, jc_sanitize(json));
     WiFi.scanDelete();
   }
 } // handleScan()
@@ -167,7 +186,7 @@ void handleFileList()
     json += "},";
   } // while
   json += "]";
-  server.send(200, "text/json", jc_sanitize(json));
+  server.send(200, TEXT_JSON, jc_sanitize(json));
 } // handleFileList
 
 
@@ -197,11 +216,11 @@ void handleSysInfo()
   // json += " 'wifi-channel':" + String(wifi_get_channel()) + "\n";
   // json += " 'wifi-ap-id':" + String(wifi_station_get_current_ap_id()) +
   // "\n"; json += " 'wifi-status':" +
-  // String(wifi_station_get_connect_status()) + "\n";
+  // String(wifi_station_get_ct_status()) + "\n";
 
   json += "}";
   // json.replace('\'', '"');
-  server.send(200, "text/json", jc_sanitize(json));
+  server.send(200, TEXT_JSON, jc_sanitize(json));
   json = String();
 }
 
@@ -211,8 +230,16 @@ void handleElements()
 {
   String buffer;
   ElementRegistry::list(buffer);
-  server.send(200, "text/html", buffer);
+  server.send(200, TEXT_HTML, buffer);
 }
+
+void handleReboot(ESP8266WebServer &server, bool wipe = false)
+{
+  LOGGER_INFO("rebooting...");
+  server.send(200);
+  server.client().stop();
+  mainBoard.reboot(wipe);
+} // handleReboot()
 
 
 /**
@@ -220,7 +247,7 @@ void handleElements()
  */
 void setup(void)
 {
-  unsigned long now = millis();
+  // unsigned long now = millis();
   DisplayAdapter *display = NULL;
 
   Serial.begin(115200);
@@ -251,14 +278,14 @@ void setup(void)
   LOGGER_RAW("register handlers.");
 
   // redirect to index.htm when only domain name is given.
-  server.on("/", HTTP_GET, []() {
-    server.sendHeader("Location", "/index.htm", true);
-    LOGGER_RAW("Redirect...");
-    server.send(301, "text/plain", "");
-  });
+  server.on("/", HTTP_GET, handleRedirect);
 
   // return some system information
   server.on("/$sysinfo", HTTP_GET, handleSysInfo);
+  // list all registered elements.
+  server.on("/$elements", HTTP_GET, handleElements);
+  server.on("/$reboot", []() { handleReboot(server, false); });
+  server.on("/$reset", []() { handleReboot(server, true); });
 
   // Bulk File Upload UI.
   server.on("/$upload", HTTP_GET, handleUploadUI);
@@ -269,22 +296,50 @@ void setup(void)
   // list files in filesystem
   server.on("/$list", HTTP_GET, handleFileList);
 
-  // list all registered elements.
-  server.on("/$elements", HTTP_GET, handleElements);
 
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));
 
-  // Remote reboot
-  server.on("/$reboot", HTTP_GET, []() {
-    LOGGER_INFO("remote rebooting...");
-    server.send(200, "text/plain", "");
-    delay(500);
-    ESP.reset();
+  // Helpers for the captive portal
+  server.on("/generate_204", HTTP_GET, handleRedirect);
+  server.on("/chat", HTTP_GET, handleRedirect);
+
+  // modify network connection and reboot.
+  server.on("/$connect", HTTP_GET, []() {
+    unsigned long connectTimeout =
+        millis() + (30 * 1000); // TODO: make configurable
+    LOGGER_INFO("setup network...");
+    server.send(200);
+
+    if (server.hasArg("n")) {
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(server.arg("n").c_str(), server.arg("p").c_str());
+    } else if (server.hasArg("wps")) {
+      // TODO: start using wps
+      // WiFi.beginWPSConfig();
+    } // if
+
+    while (connectTimeout > millis()) {
+      delay(500);
+      wl_status_t wifi_status = WiFi.status();
+
+      if ((wifi_status == WL_CONNECTED) || (wifi_status == WL_NO_SSID_AVAIL) ||
+          (wifi_status == WL_CONNECT_FAILED)) {
+        LOGGER_INFO("status = %d", wifi_status);
+        break;
+      } // if
+    } // while
+    mainBoard.reboot(false);
   });
 
   // Static files in the file system.
   server.addHandler(new FileServerHandler(SPIFFS, "/", "NO-CACHE"));
+
+  server.onNotFound([]() {
+    LOGGER_RAW("NotFound... %s", server.uri().c_str());
+    server.send(404, TEXT_PLAIN, "");
+  });
+
 
   LOGGER_INFO("sketch setup done.");
 } // setup

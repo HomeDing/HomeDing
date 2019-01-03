@@ -59,11 +59,12 @@
 typedef enum {
   // ===== startup operation states
   BOARDSTATE_NONE = 0, // unspecified
-  BOARDSTATE_CONFIG = 1, // read all configurations and create elements. Start SYS Elements
+  BOARDSTATE_CONFIG =
+      1, // read all configurations and create elements. Start SYS Elements
   BOARDSTATE_CONNECT = 2, // try to reconnect to last known network.
   BOARDSTATE_CONFWAIT = 3, // Wait for clicks.
   BOARDSTATE_WAIT = 5, // Wait for network connectivity and clicks.
-  
+
   // ===== normal operation states
   BOARDSTATE_GREET = 10, // start all NET Elements
   BOARDSTATE_RUN = 12, // run
@@ -71,8 +72,8 @@ typedef enum {
   // restart on network lost > 30 secs.
 
   // ===== config operation states
-  BOARDSTATE_SCAN = 21, // Scan local available Networks
-  BOARDSTATE_NETCONF = 22 // Enable Network Configuration UI
+  BOARDSTATE_STARTCAPTIVE = 21, // Scan local available Networks
+  BOARDSTATE_RUNCAPTIVE = 22 // Enable Network Configuration UI
 
 } BoardState;
 
@@ -174,7 +175,11 @@ public:
    */
   Element *getElement(const char *elementTypeName);
 
+  static void reboot(bool wipe);
+
   String deviceName;
+
+  BoardState boardState;
 
 private:
   /**
@@ -201,10 +206,10 @@ private:
   void _dispatchSingle(String evt);
 
   // state and timing
-
-  BoardState boardState;
   unsigned long configPhaseEnd; // for offering config mode
   unsigned long connectPhaseEnd; // for waiting on net connection
+  unsigned long
+      _captiveEnd; // when in captive portal mode, reset after 5 minutes.
   void _newState(BoardState newState);
 
   bool active = false;

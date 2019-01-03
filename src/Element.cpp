@@ -186,7 +186,7 @@ int Element::_atopin(const char *value)
 
   int pin = -1;
   if ((value) && (*value == 'D')) {
-    int n = _atoi(value + 1);
+    int n = _atoi(value + 1); // scan a number right after the 'D'
     if ((n >= 0) && (n <= 10))
       pin = GPIO[n];
   } else {

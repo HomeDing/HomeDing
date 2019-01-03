@@ -27,11 +27,19 @@
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
 extern const char *ssid;
-extern const char *password;
+extern const char *passPhrase;
 
 #define NetMode_AUTO 3
 #define NetMode_PSK 2
 #define NetMode_PASS 1
+
+#include <DNSServer.h>
+
+DNSServer dnsServer;
+IPAddress apIP(192, 168, 4, 1);
+IPAddress netMsk(255, 255, 255, 0);
+
+const byte DNS_PORT = 53;
 
 /**
  * @brief Initialize a blank board.
@@ -130,7 +138,6 @@ void Board::_newState(BoardState newState)
   boardState = newState;
 }
 
-
 // loop next element, only one at a time!
 void Board::loop()
 {
@@ -171,18 +178,28 @@ void Board::loop()
     LOGGER_TRACE("wifi status=(%d)", wifi_status);
 
     if (netMode == NetMode_AUTO) {
+      // 1. priority:
       // give autoconnect the chance to do it.
+      // works only after a successfull network connection in the past.
       LOGGER_TRACE("start NetMode_AUTO");
 
     } else if (netMode == NetMode_PSK) {
+      // 2. priority:
+      // explicit connect with the saved passwords.
+      // works only after a successfull network connection in the past.
       LOGGER_TRACE("start NetMode_PSK");
       WiFi.mode(WIFI_STA);
       WiFi.begin();
 
     } else if (netMode == NetMode_PASS) {
-      LOGGER_TRACE("start NetMode_PASS");
-      WiFi.mode(WIFI_STA);
-      WiFi.begin(ssid, password);
+      // 3. priority:
+      // use fixed network and passPhrase known at compile time.
+      // works only after a successfull network connection in the past.
+      if (*ssid) {
+        LOGGER_TRACE("start NetMode_PASS");
+        WiFi.mode(WIFI_STA);
+        WiFi.begin(ssid, passPhrase);
+      }
     } // if
 
     // Enable sysLED for blinking while waiting for network or config mode
@@ -210,7 +227,7 @@ void Board::loop()
     // check sysButton
     if (sysButton >= 0) {
       if (digitalRead(sysButton) == LOW) {
-        _newState(BOARDSTATE_SCAN);
+        _newState(BOARDSTATE_STARTCAPTIVE);
       }
     }
 
@@ -305,11 +322,26 @@ void Board::loop()
       _next2 = _next2->next;
     } // if
 
-  } else if (boardState == BOARDSTATE_SCAN) {
-    // wait until UI triggers scanning.
+  } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
+    WiFi.softAPConfig(apIP, apIP, netMsk);
+    WiFi.softAP("HomeDing");
+    delay(500);
+    LOGGER_TRACE(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
-  } else if (boardState == BOARDSTATE_NETCONF) {
+    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer.start(DNS_PORT, "*", apIP);
 
+    server->begin();
+
+    _newState(BOARDSTATE_RUNCAPTIVE);
+    _captiveEnd = now + (5 * 60 * 1000);
+
+  } else if (boardState == BOARDSTATE_RUNCAPTIVE) {
+    // server.handleClient(); needs to be called in main loop.
+    dnsServer.processNextRequest();
+
+    if (now > _captiveEnd)
+      reboot(false);
   } // if
 } // loop()
 
@@ -514,6 +546,15 @@ Element *Board::getElement(const char *elementTypeName)
   return (l);
 } // getElement
 
+
+void Board::reboot(bool wipe)
+{
+  LOGGER_INFO("reboot...");
+  if (wipe)
+    WiFi.disconnect(true);
+  delay(1000);
+  ESP.reset();
+};
 
 /**
  * @brief Add another element to the board into the list of created elements.

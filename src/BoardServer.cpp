@@ -40,7 +40,7 @@ BoardHandler::BoardHandler(Board *board)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 {
   bool ret = ((requestMethod == HTTP_GET) && (requestUri.startsWith(_path)));
-  // LOGGER_RAW("BoardHandler:canHandle(%s)=%u", requestUri.c_str(), ret);
+  LOGGER_RAW("BoardHandler:canHandle(%s)=%u", requestUri.c_str(), ret);
   return (ret);
 }
 

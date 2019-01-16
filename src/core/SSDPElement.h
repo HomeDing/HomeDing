@@ -73,11 +73,7 @@ public:
 
   // loop() is not required because no local activities
   // pushState() is not required because no dynamic properties
-
-  /**
-   * @brief stop all activities of the timer and go inactive.
-   */
-  virtual void term();
+  // term() is not required because no terminateion functionality
 
 private:
 

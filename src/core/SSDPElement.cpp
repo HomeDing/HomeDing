@@ -39,7 +39,7 @@ void SSDPElement::init(Board *board)
   Element::init(board);
 
   // set default values
-  SSDP.setSchemaURL("$desc.xml");
+  SSDP.setSchemaURL("$desc.xml"); // url to get the SSDP detailed information
   SSDP.setHTTPPort(80);
   SSDP.setSerialNumber(ESP.getChipId());
   SSDP.setURL("/");
@@ -99,16 +99,7 @@ void SSDPElement::start()
 } // start()
 
 
-/**
- * @brief stop all activities of the timer and go inactive.
- */
-void SSDPElement::term()
-{
-  Element::term();
-} // term()
-
-
-// Always register the SSDPElement in the ElementRegistry.
+// Register the SSDPElement in the ElementRegistry
 bool SSDPElement::registered =
     ElementRegistry::registerElement("ssdp", SSDPElement::create);
 

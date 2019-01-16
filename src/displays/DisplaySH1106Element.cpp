@@ -53,7 +53,6 @@ bool DisplaySH1106Element::set(const char *name, const char *value)
 
   if (_stricmp(name, "address") == 0) {
     _address = strtol(value, nullptr, 0);
-    LOGGER_RAW("_address = %d)", _address);
 
   } else if (_stricmp(name, "sda") == 0) {
     _sda = _atopin(value);

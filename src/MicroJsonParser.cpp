@@ -74,7 +74,7 @@ void MicroJson::parseFile(const char *fName)
   size_t len;
 
   if (SPIFFS.exists(fName)) {
-    LOGGER_RAW("parsing file %s", fName);
+    // LOGGER_RAW("parsing file %s", fName);
 
     _state = MJ_STATE_INIT;
     _level = 0;

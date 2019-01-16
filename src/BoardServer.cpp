@@ -40,7 +40,7 @@ BoardHandler::BoardHandler(Board *board)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 {
   bool ret = ((requestMethod == HTTP_GET) && (requestUri.startsWith(_path)));
-  LOGGER_RAW("BoardHandler:canHandle(%s)=%u", requestUri.c_str(), ret);
+  // LOGGER_RAW("BoardHandler:canHandle(%s)=%u", requestUri.c_str(), ret);
   return (ret);
 }
 
@@ -55,7 +55,7 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
             String requestUri)
 {
-  LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
+  // LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
 
   // cut off the registered path from the url.
   String localPath(requestUri.substring(_path.length()));

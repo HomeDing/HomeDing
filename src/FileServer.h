@@ -60,8 +60,8 @@ public:
   {
     // LOGGER_TRACE("canHandle(%s)", requestUri.c_str());
     if (requestUri.startsWith("/$")) {
-      // LOGGER_RAW("can no handle(%s)", requestUri.c_str());
       return (false);
+
     } else {
       return (
           (requestMethod == HTTP_GET) ||

@@ -167,7 +167,7 @@ private:
   SSD1306Wire *display;
 
   /**
-   * @brief I2C Deisplay device address.
+   * @brief I2C Device address.
    */
   int _address;
 

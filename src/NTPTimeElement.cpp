@@ -13,8 +13,7 @@
  *
  * More information on https://www.mathertel.de/Arduino.
  *
- * The sntp functions are documented in the ESP8266 Non-OS SDK  API Reference
- * See
+ * The sntp functions are documented in the ESP8266 Non-OS SDK API Reference
  * https://www.espressif.com/sites/default/files/documentation/2c-esp8266_non_os_sdk_api_reference_en.pdf
  *
  * For format options in strftime see
@@ -57,9 +56,6 @@ NTPTimeElement::NTPTimeElement()
   _ntpServer = "pool.ntp.org";
   _zone = 1; // Central Europe
   _nextRead = 0;
-
-  uint32 rtc_time = system_get_rtc_time();
-  LOGGER_ETRACE("rtc_time=%d", rtc_time);
 } // NTPTimeElement()
 
 

@@ -80,7 +80,7 @@ void DisplayLCDElement::start()
     Element::start();
 
   } else {
-    LOGGER_EERR("no display found.\n");
+    LOGGER_EERR("no display found.");
     delete d;
   } // if
 } // start()

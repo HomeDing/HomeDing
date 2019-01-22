@@ -28,11 +28,26 @@ Element *DisplayTextElement::create()
 
 
 /**
+ * @brief send current text to display
+ */
+void DisplayTextElement::_drawText() {
+  // LOGGER_EINFO("draw %d (%s)", active, _value.c_str());
+  if (active) {
+    _display->clear(_x, _y, _w, _h);
+    String msg(_prefix);
+    msg.concat(_value);
+    msg.concat(_postfix);
+    _w = _display->drawText(_x, _y, _h, msg);
+    _display->flush();
+  }
+}
+
+/**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DisplayTextElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s:%s)", name, value);
+  // LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "prefix") == 0) {
@@ -55,23 +70,16 @@ bool DisplayTextElement::set(const char *name, const char *value)
       _h = s;
     } // if
 
+  } else if (_stricmp(name, "value") == 0) {
+    _value = value;
+    _drawText();
+
   } else if (! active) {
     // no actions.
-    LOGGER_ETRACE(" not active: %d.", _display);
-
+    LOGGER_ETRACE(" not active.");
 
   } else if (_stricmp(name, "clear") == 0) {
     _display->clear();
-    _display->flush();
-
-  } else if ((_stricmp(name, "show") == 0) || (_stricmp(name, "value") == 0)) {
-    _display->clear(_x, _y, _w, _h);
-    _value = value;
-
-    String msg(_prefix);
-    msg.concat(value);
-    msg.concat(_postfix);
-    _w = _display->drawText(_x, _y, _h, msg);
     _display->flush();
 
   } else {
@@ -95,6 +103,7 @@ void DisplayTextElement::start()
   } else {
     _display = d;
     Element::start();
+    _drawText();
   } // if
 } // start()
 

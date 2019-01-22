@@ -101,6 +101,11 @@ private:
   int _h = 10; // also used as _fontsize
 
   DisplayAdapter *_display = NULL;
+
+  /**
+   * @brief  send current text to display
+   */
+  void _drawText();
 };
 
 #ifdef HOMEDING_REGISTER

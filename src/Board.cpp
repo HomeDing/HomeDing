@@ -170,6 +170,9 @@ void Board::loop()
     bool autoCon = WiFi.getAutoConnect();
     LOGGER_TRACE("autoconnect =(%d)", autoCon);
 
+    // no accesspoint network when starting up normally.
+    WiFi.softAPdisconnect(true);
+
     if ((!autoCon) && (netMode == NetMode_AUTO))
       netMode = NetMode_PSK;
 
@@ -182,6 +185,7 @@ void Board::loop()
       // give autoconnect the chance to do it.
       // works only after a successfull network connection in the past.
       LOGGER_TRACE("start NetMode_AUTO");
+      WiFi.mode(WIFI_STA);
 
     } else if (netMode == NetMode_PSK) {
       // 2. priority:
@@ -488,17 +492,10 @@ void Board::setState(String &path, const String &property, const String &value)
 
 // ===== Time functionality =====
 
-// fill the time structure from a timestamp;
-void Board::getTime(struct tm *time)
+unsigned long Board::getSeconds()
 {
-  uint32 current_stamp = sntp_get_current_timestamp();
-  if (current_stamp > MIN_VALID_TIME) {
-    struct tm *tmp = localtime((time_t *)(&current_stamp));
-    memcpy(time, tmp, sizeof(struct tm));
-  } else {
-    memset(time, 0, sizeof(struct tm));
-  }
-} // getTime()
+  return (millis() / 1000);
+}
 
 
 // return the seconds since 1.1.1970 00:00:00

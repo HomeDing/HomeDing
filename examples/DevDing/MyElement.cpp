@@ -22,7 +22,7 @@
 /* ===== Define local constants and often used strings ===== */
 
 // like:
-// #define TIMER_UNIT 1000
+// #define ANYCONSTANT 1000
 
 
 /* ===== Static factory function ===== */

@@ -85,7 +85,7 @@ bool DHTElement::set(const char *name, const char *value)
 void DHTElement::start()
 {
   LOGGER_ETRACE("start()");
-  unsigned int now = (millis() / 1000);
+  unsigned int now = _board->getSeconds();
   if (_pin < 0) {
     LOGGER_EERR("no meaningful pin");
 
@@ -104,7 +104,7 @@ void DHTElement::start()
  */
 void DHTElement::loop()
 {
-  unsigned int now = millis() / 1000;
+  unsigned int now = _board->getSeconds();
   TempAndHumidity values;
   int v;
 

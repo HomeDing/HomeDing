@@ -90,8 +90,6 @@ void RemoteElement::start()
 void RemoteElement::loop()
 {
   // see if a answer has come back
-  unsigned long now_ms = millis();
-
   if ((_status == 1) && (!_httpClient.connected())) {
     LOGGER_EERR("no connection.");
     _httpClient.stop();
@@ -100,7 +98,7 @@ void RemoteElement::loop()
 
   } else if ((_status == 1) && (!_httpClient.available() == 0)) {
     // wait or drop.
-    if ((_startTime + 12000) > now_ms) {
+    if (_board->getSeconds() - _startTime > 12) {
       LOGGER_EERR("timed out.");
       _httpClient.stop();
       _status = 0;
@@ -151,7 +149,7 @@ void RemoteElement::loop()
 void RemoteElement::_startRemote(String url)
 {
   LOGGER_ETRACE("_startRemote(%s)", url.c_str());
-  _startTime = millis();
+  _startTime = _board->getSeconds();
 
   // 1. connect to server
   if (!_httpClient.connect(_host, 80)) {

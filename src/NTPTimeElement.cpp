@@ -89,7 +89,7 @@ bool NTPTimeElement::set(const char *name, const char *value)
 void NTPTimeElement::start()
 {
   LOGGER_ETRACE("start()");
-  unsigned long now = (millis() / 1000);
+  unsigned long now = _board->getSeconds();
 
   _nextRead = now + 2; // now + min. 2 sec., don't hurry
   _sendTime = 0;
@@ -106,8 +106,7 @@ void NTPTimeElement::start()
  */
 void NTPTimeElement::loop()
 {
-  unsigned long now_m = millis();
-  unsigned int now = now_m / 1000;
+  unsigned int now = _board->getSeconds();
   uint32 current_stamp = sntp_get_current_timestamp();
 
   if ((_state != 1) && (_nextRead < now)) {
@@ -118,9 +117,9 @@ void NTPTimeElement::loop()
 
     sntp_init();
     _state = 1;
-    _sendTime = now_m;
+    _sendTime = now;
 
-  } else if ((_state == 1) && (now_m - _sendTime < 8000)) {
+  } else if ((_state == 1) && (now - _sendTime < 8)) {
     if (current_stamp < (24 * 60 * 60)) {
       // not synced yet => wait.
     } else {

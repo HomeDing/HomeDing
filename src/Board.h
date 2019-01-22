@@ -92,6 +92,26 @@ typedef enum {
 class Board
 {
 public:
+  // ----- Time functionality -----
+
+  /**
+   * @brief return the seconds since starting the device.
+   */
+  static unsigned long getSeconds();
+
+  /**
+   * @brief return the seconds since 1.1.1970 00:00:00
+   * This method will return 0 when no real time is available.
+   */
+  static time_t getTime();
+
+  /**
+   * @brief Return the seconds of today.
+   * This method will return 0 when no real time is available.
+   */
+  static time_t getTimeOfDay();
+
+
   /**
    * @brief Initialize a blank board.
    * @param s The WebServer is always required.
@@ -144,17 +164,6 @@ public:
    * @param value New value of the property.
    */
   void setState(String &path, const String &property, const String &value);
-
-  // Time functionality
-
-  // fill the time structure from a timestamp;
-  void getTime(struct tm *time);
-
-  // return the seconds since 1.1.1970 00:00:00
-  time_t getTime();
-
-  // return the seconds of today.
-  time_t getTimeOfDay();
 
   // Display
   DisplayAdapter *display = NULL;

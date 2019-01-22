@@ -22,6 +22,7 @@
 #include <FS.h>
 
 #include <core/Logger.h>
+#include <Board.h>
 
 #define LOGFILE_MAXSIZE (4 * 1024 - 200)
 
@@ -85,7 +86,7 @@ void Logger::_printPrefix(char *buffer, const char *module, int level)
 
   if (current_stamp < (30 * 24 * 60 * 60)) {
     // using millis() when no time is available
-    current_stamp = millis()/1000;
+    current_stamp = Board::getSeconds();
   } // if
 
   struct tm *tmp = localtime((const time_t *)(&current_stamp));

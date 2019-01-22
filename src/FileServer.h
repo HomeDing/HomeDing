@@ -85,7 +85,6 @@ public:
   void handleGet(ESP8266WebServer &server, String path)
   {
     String contentType = getContentType(path);
-    unsigned long now = millis();
 
     // look for gz file, only if the original specified path is not a gz.  So
     // part only works to send gzip via content encoding when a non compressed
@@ -107,6 +106,8 @@ public:
         server.sendHeader("Cache-Control", _cache_header);
       // server.setContentLength(f.size());
       // server.send(200, contentType, "");
+
+      // unsigned long now = millis();
       server.streamFile(f, contentType);
       // LOGGER_RAW(" %lu ms. %s", (millis() - now), contentType.c_str());
 

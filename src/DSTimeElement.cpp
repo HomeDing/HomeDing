@@ -142,7 +142,7 @@ void DSTimeElement::_setTime(const char *value)
     if (*pEnd == '-')
       pEnd++;
     t.tm_mday = strtol(pEnd, &pEnd, 10);
-    if (*pEnd == ' ')
+    if ((*pEnd == ' ') || (*pEnd == 'T'))
       pEnd++;
     t.tm_hour = strtol(pEnd, &pEnd, 10);
     if (*pEnd == ':')
@@ -217,9 +217,9 @@ void DSTimeElement::start()
 
   Wire.begin();
 
-  unsigned long now = (millis() / 1000);
+  unsigned long now = _board->getSeconds();
 
-  _nextRead = now + 2; // now + min. 2 sec., don't hurry
+  _nextRead = now + 1; // now + min. 2 sec., don't hurry
   _state = 0;
   Element::start();
 } // start()
@@ -232,8 +232,7 @@ static void sntp_set_system_time(uint32_t t);
  */
 void DSTimeElement::loop()
 {
-  unsigned long now_m = millis();
-  unsigned int now = now_m / 1000;
+  unsigned long now = _board->getSeconds();
   struct tm t;
 
   if ((_state != 1) && (_nextRead < now)) {
@@ -274,6 +273,7 @@ void DSTimeElement::pushState(
   Element::pushState(callback);
   strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&tStamp));
   callback("now", tmp);
+  callback("wire-address", String(_address).c_str());
 } // pushState()
 
 // End.

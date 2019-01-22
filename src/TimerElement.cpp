@@ -14,11 +14,6 @@
 #include <ElementRegistry.h>
 #include <TimerElement.h>
 
-/**
- * @brief All timing variables in this class are in seconds.
- * The result of millis() must be divied by 1000 to get seconds.
- */
-#define TIMER_UNIT 1000
 
 /**
  * @brief static factory function to create a new TimerElement
@@ -36,7 +31,7 @@ Element *TimerElement::create()
 bool TimerElement::set(const char *name, const char *value)
 {
   LOGGER_ETRACE("set(%s, %s)", name, value);
-  unsigned long now = millis() / TIMER_UNIT;
+  unsigned long now = _board->getSeconds();
   bool ret = true;
 
   if (_stricmp(name, "type") == 0) {
@@ -126,7 +121,7 @@ void TimerElement::start()
  */
 void TimerElement::loop()
 {
-  unsigned long now = millis() / TIMER_UNIT;
+  unsigned long now = _board->getSeconds();
 
   // time from start in seconds
   uint16_t tfs = now - _startTime;
@@ -165,7 +160,7 @@ void TimerElement::loop()
 void TimerElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  unsigned long now = millis() / TIMER_UNIT;
+  unsigned long now = _board->getSeconds();
 
   Element::pushState(callback);
   callback("state", String(_state).c_str());
@@ -193,7 +188,7 @@ void TimerElement::term()
 void TimerElement::_startTimer()
 {
   _state = 0;
-  _startTime = millis() / TIMER_UNIT;
+  _startTime = _board->getSeconds();
 }
 
 /**

@@ -75,9 +75,7 @@ bool AnalogElement::set(const char *name, const char *value)
  */
 void AnalogElement::start()
 {
-  unsigned int now = (millis() / 1000);
-  _nextRead = now + 2;
-  // _nextResend = now + _resendTime;
+  _nextRead = _board->getSeconds() + 2;
   _lastReference = -1;
 
   Element::start();
@@ -89,7 +87,7 @@ void AnalogElement::start()
  */
 void AnalogElement::loop()
 {
-  unsigned int now = (millis() / 1000);
+  unsigned int now = _board->getSeconds();
 
   if (_nextRead <= now) {
     int v = analogRead(_pin);

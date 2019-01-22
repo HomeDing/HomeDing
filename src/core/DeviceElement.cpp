@@ -62,7 +62,7 @@ bool DeviceElement::set(const char *name, const char *value)
     // Log a information with time.
     unsigned long now = _board->getTimeOfDay();
     if (!now)
-      now = millis() / 1000; // make seconds
+      now = Board::getSeconds();
 
     // ALWAYS send INFO to log
     LOGGER_JUSTINFO(value ? value : "NULL");
@@ -80,7 +80,7 @@ bool DeviceElement::set(const char *name, const char *value)
  */
 void DeviceElement::start()
 {
-  unsigned long now = millis() / 1000;
+  unsigned long now = _board->getSeconds();
 
   if (_rebootTime > 0) {
     _nextBoot = now + _rebootTime;
@@ -92,7 +92,7 @@ void DeviceElement::start()
 
 void DeviceElement::loop()
 {
-  unsigned long now = millis() / 1000;
+  unsigned long now = _board->getSeconds();
   if ((_rebootTime > 0) && (now > _nextBoot)) {
     LOGGER_EINFO("device restart initiated.");
     delay(100);
@@ -113,7 +113,7 @@ void DeviceElement::loop()
 void DeviceElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  unsigned long now = millis() / 1000;
+  unsigned long now = _board->getSeconds();
 
   Element::pushState(callback);
   callback("name", _board->deviceName.c_str());

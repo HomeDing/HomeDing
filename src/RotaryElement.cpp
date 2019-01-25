@@ -51,10 +51,7 @@ bool RotaryElement::set(const char *name, const char *value)
   LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
-    _value = _atoi(value);
-
-  } else if (_stricmp(name, "step") == 0) {
+  if (_stricmp(name, "step") == 0) {
     _step = _atoi(value);
 
   } else if (_stricmp(name, "pin1") == 0) {

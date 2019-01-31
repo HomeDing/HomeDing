@@ -65,7 +65,7 @@ public:
     } else {
       return (
           (requestMethod == HTTP_GET) ||
-          (requestMethod == HTTP_PUT) || // upload text to files
+          // (requestMethod == HTTP_PUT) || // upload text to files
           (requestMethod == HTTP_POST) || // canUpload is handling file uploads
           (requestMethod == HTTP_DELETE));
     } // if
@@ -114,35 +114,39 @@ public:
     } // if
   } // handleGet()
 
+
   /**
      @brief Handle uploading a file using HTTP_PUT method.
      Can only handle text based files, not containing a \0 character.
      @param server the running server.
      @param path full qualified path to file.
   */
-  void handlePut(ESP8266WebServer &server, String path)
-  {
-    // LOGGER_RAW(" size=%d", server.arg("plain").length());
+  /*
+   void handlePut(ESP8266WebServer &server, String path)
+   {
+     // LOGGER_RAW(" size=%d", server.arg("plain").length());
 
-    File fsUploadFile = _fs.open(path, "w");
-    if (fsUploadFile) {
-      size_t written;
+     File fsUploadFile = _fs.open(path, "w");
+     if (fsUploadFile) {
+       size_t written;
 
-      // LOGGER_RAW(" UploadFile opened.");
-      char *c = (char *)(server.arg("plain").c_str());
+       // LOGGER_RAW(" UploadFile opened.");
+       char *c = (char *)(server.arg("plain").c_str());
 
-      written = 0;
-      while (*c) {
-        written += fsUploadFile.write((uint8_t)(*c));
-        c++;
-        yield();
-      }
-      // LOGGER_RAW(" %d bytes written", written);
+       written = 0;
+       while (*c) {
+         written += fsUploadFile.write((uint8_t)(*c));
+         c++;
+         yield();
+       }
+       // LOGGER_RAW(" %d bytes written", written);
 
-      fsUploadFile.close();
-    } // if
-    server.send(200);
-  } // handlePut()
+       fsUploadFile.close();
+     } // if
+     server.send(200);
+   } // handlePut()
+ */
+
 
   /**
    * @brief handle post requests. Not in use as today.
@@ -184,8 +188,8 @@ public:
     if (requestMethod == HTTP_GET) {
       handleGet(server, path);
 
-    } else if (requestMethod == HTTP_PUT) {
-      handlePut(server, path);
+    // } else if (requestMethod == HTTP_PUT) {
+    //   handlePut(server, path);
 
     } else if (requestMethod == HTTP_POST) {
       handlePost(server, path);

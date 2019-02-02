@@ -52,6 +52,9 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "led") == 0) {
     _board->sysLED = _atopin(value);
 
+  } else if (_stricmp(name, "button") == 0) {
+    _board->sysButton = _atopin(value);
+
   } else if (_stricmp(name, "description") == 0) {
     _description = value;
 
@@ -59,13 +62,12 @@ bool DeviceElement::set(const char *name, const char *value)
     _rebootTime = _atotime(value);
 
   } else if (_stricmp(name, "log") == 0) {
-    // Log a information with time.
-    unsigned long now = _board->getTimeOfDay();
-    if (!now)
-      now = Board::getSeconds();
-
     // ALWAYS send INFO to log
     LOGGER_JUSTINFO(value ? value : "NULL");
+
+  } else if (_stricmp(name, "loglevel") == 0) {
+    // Set global logger loglevel
+    Logger::logger_level = _atoi(value);
 
   } else {
     ret = Element::set(name, value);

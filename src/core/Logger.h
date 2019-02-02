@@ -17,12 +17,14 @@
  * *   logging for elements using element->loglevel;
  * *   log errors and info to file log.txt
  * * 27.10.2018 rolling logfiles and log_old.txt.
+ * * 02.02.2019 reduce Flash memory, optimizing
  */
 
 #ifndef LOGGER_H
 #define LOGGER_H
 
 #include <Arduino.h>
+#include <cstdarg> 
 
 // information to debug port and log file.
 #define LOGGER_LEVEL_INFO 0
@@ -88,8 +90,10 @@ public:
   static void LoggerEPrint(Element *module, int level, const char *fmt, ...);
 
 private:
-  static void _printPrefix(char *buffer, const char *module, int level);
+  // Print log message
+  static void _print(const char *module, int level, const char *fmt, va_list args);
 
+  // Print to logfile
   static void _printToFile(char *buffer);
 };
 

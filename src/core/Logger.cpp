@@ -16,13 +16,16 @@
  */
 
 #include <memory>
+#include <stdio.h>
+#include <string.h>
+
 #include <sntp.h>
 #include <time.h>
 
 #include <FS.h>
 
-#include <core/Logger.h>
 #include <Board.h>
+#include <core/Logger.h>
 
 #define LOGFILE_MAXSIZE (4 * 1024 - 200)
 
@@ -31,72 +34,67 @@ static const char *LOGGER_LEVELS = "eit";
 static const char *LOGFILE_NAME = "/log.txt";
 static const char *LOGFILE_OLD_NAME = "/log_old.txt";
 
-void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
+/**
+ * @brief Print out logging information
+ */
+void Logger::_print(const char *module, int level, const char *fmt,
+                    va_list args)
 {
   char buffer[200];
+  char *p = buffer; // end of string : next segment of logline
 
+  // timestamp into buffer, using millis() when no time is available
+  unsigned long now = Board::getTimeOfDay();
+  if (!now)
+    now = Board::getSeconds();
+
+  struct tm *tmp = localtime((const time_t *)(&now));
+  p += strftime(p, sizeof(buffer), "%H:%M:%S ", tmp); // %T
+
+  // module and loglevel into buffer
+  if (module) {
+    p += sprintf(p, "%s:%c ", module, *(LOGGER_LEVELS + level));
+    // p = strchr(buffer, '\0');
+  } // if
+
+  // message into buffer
+  vsnprintf(p, sizeof(buffer) - 40, fmt, args);
+
+#ifdef DEBUG_ESP_PORT
+  DEBUG_ESP_PORT.println(buffer);
+#endif
+
+  if ((module) && (level < LOGGER_LEVEL_TRACE)) {
+    _printToFile(buffer);
+  }
+} // _print
+
+/**
+ * @brief Print Log entry from system (not element)
+ */
+void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
+{
   if (level <= logger_level) {
-    _printPrefix(buffer, module, level);
-    char *p = strchr(buffer, '\0');
-
     va_list args;
     va_start(args, fmt);
-    vsnprintf(p, sizeof(buffer) - 40, fmt, args);
+    Logger::_print(module, level, fmt, args);
     va_end(args);
-#ifdef DEBUG_ESP_PORT
-    DEBUG_ESP_PORT.println(buffer);
-#endif
-    if (level < LOGGER_LEVEL_TRACE) {
-      _printToFile(buffer);
-    }
-
   } // if
 } // LoggerPrint
 
 
+/**
+ * @brief Print Log entry from element.
+ */
 void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
 {
-  char buffer[200];
-
   if ((level <= logger_level) || (level <= elem->loglevel)) {
-    _printPrefix(buffer, elem->id, level);
-    char *p = strchr(buffer, '\0');
-
     va_list args;
     va_start(args, fmt);
-    vsnprintf(p, sizeof(buffer) - 40, fmt, args);
+    Logger::_print(elem->id, level, fmt, args);
     va_end(args);
-#ifdef DEBUG_ESP_PORT
-    DEBUG_ESP_PORT.println(buffer);
-#endif
-    if (level < LOGGER_LEVEL_TRACE) {
-      _printToFile(buffer);
-    }
-
   } // if
 } // LoggerEPrint
-
-
-void Logger::_printPrefix(char *buffer, const char *module, int level)
-{
-  uint32 current_stamp = sntp_get_current_timestamp();
-  char timeBuffer[16];
-
-  // LOGGER_RAW("getTime=%d", current_stamp);
-
-  if (current_stamp < (30 * 24 * 60 * 60)) {
-    // using millis() when no time is available
-    current_stamp = Board::getSeconds();
-  } // if
-
-  struct tm *tmp = localtime((const time_t *)(&current_stamp));
-  strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", tmp);
-  if (module) {
-  sprintf(buffer, "%s %s:%c:", timeBuffer, module, *(LOGGER_LEVELS + level));
-  } else {
-    sprintf(buffer, "%s ", timeBuffer);
-  }
-};
 
 
 void Logger::_printToFile(char *buffer)

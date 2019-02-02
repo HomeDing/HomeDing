@@ -44,14 +44,20 @@ const byte DNS_PORT = 53;
 /**
  * @brief Initialize a blank board.
  */
-void Board::init(ESP8266WebServer *s)
+void Board::init(ESP8266WebServer *serv)
 {
   LOGGER_TRACE("init()");
-  server = s;
-  sysLED = 2; // TODO: make configurable
+  server = serv;
+  sysLED = -1; // configured by device-element
+  sysButton = -1; // configured by device-element
   boardState = BOARDSTATE_NONE;
+
   WiFi.begin();
   deviceName = WiFi.hostname(); // use mac based default device name
+
+  // check save-mode
+  savemode = false;
+
 } // init()
 
 
@@ -576,4 +582,5 @@ void Board::_add(const char *id, Element *e)
   } // if
   e->init(this);
 } // _add()
+
 // End

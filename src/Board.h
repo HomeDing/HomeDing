@@ -170,7 +170,12 @@ public:
 
   // System LED
   int sysLED = -1;
-  int sysButton = 0;
+
+  // System Button
+  int sysButton = -1;
+
+  // Save Mode
+  bool savemode = false;
 
   // WebServer
   ESP8266WebServer *server;
@@ -218,7 +223,7 @@ private:
   unsigned long configPhaseEnd; // for offering config mode
   unsigned long connectPhaseEnd; // for waiting on net connection
   unsigned long
-      _captiveEnd; // when in captive portal mode, reset after 5 minutes.
+      _captiveEnd; // terminate/reset captive portal mode after 5 minutes.
   void _newState(BoardState newState);
 
   bool active = false;

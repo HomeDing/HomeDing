@@ -52,7 +52,7 @@ bool DisplayDotElement::set(const char *name, const char *value)
     _display->clear();
     _display->flush();
 
-  } else if ((_stricmp(name, "show") == 0) || (_stricmp(name, "value") == 0)) {
+  } else if (_stricmp(name, "value") == 0) {
     _value = _atob(value);
 
   } else {

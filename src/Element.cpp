@@ -116,9 +116,10 @@ void Element::term()
 
 /* Return an integer from a string.
   Supports various formats like "0x3C" == "60" */
-int Element::_atoi(const char *value) {
+int Element::_atoi(const char *value)
+{
   long ret = strtol(value, nullptr, 0);
-  return((int) ret);
+  return ((int)ret);
 } // _atoi()
 
 
@@ -185,12 +186,18 @@ int Element::_atopin(const char *value)
   static int GPIO[11] = {16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1};
 
   int pin = -1;
-  if ((value) && (*value == 'D')) {
-    int n = _atoi(value + 1); // scan a number right after the 'D'
-    if ((n >= 0) && (n <= 10))
-      pin = GPIO[n];
-  } else {
-    pin = _atoi(value);
+  if (value) {
+    if (*value == 'D') {
+      int n = _atoi(value + 1); // scan a number right after the 'D'
+      if ((n >= 0) && (n <= 10))
+        pin = GPIO[n];
+        
+    } else if (*value == 'A') {
+      pin = A0; // only analog pin on ESP8266
+
+    } else {
+      pin = _atoi(value);
+    }
   }
   return (pin);
 } // _atopin()

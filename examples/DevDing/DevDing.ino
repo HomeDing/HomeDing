@@ -61,16 +61,19 @@
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
 
-#include "upload.h"
 #include <HomeDing.h>
+
+const char *respond404 =
+    "<html><head><title>File not found</title></head><body>File not "
+    "found</body></html>";
 
 // ===== WLAN credentials =====
 
 #include "secrets.h"
 
 static const char *TEXT_PLAIN = "text/plain";
-static const char *TEXT_HTML = "text/html";
 static const char *TEXT_JSON = "text/json";
+static const char *TEXT_HTML = "text/html";
 
 // need a WebServer
 ESP8266WebServer server(80);
@@ -114,27 +117,19 @@ const char *jc_sanitize(String &json)
 } // jc_sanitize()
 
 
-// Send out a minimal html file for uploading files.
-void handleUploadUI()
-{
-  server.send(200, TEXT_HTML, uploadContent);
-}
-
-
 void handleRedirect()
 {
-  BoardState bs = mainBoard.boardState;
   LOGGER_RAW("Redirect...");
-  LOGGER_RAW(" BoardState=%d", bs);
+
   String url;
-  if (bs < BOARDSTATE_STARTCAPTIVE) {
+  if (mainBoard.boardState < BOARDSTATE_STARTCAPTIVE) {
     url = F("/index.htm");
   } else {
     url = String(F("http://")) + WiFi.softAPIP().toString() +
           F("/setup.htm"); // ; mainBoard.deviceName
   }
   server.sendHeader("Location", url, true);
-  server.send(302, TEXT_PLAIN, "");
+  server.send(302);
   server.client().stop();
 } // handleRedirect()
 
@@ -168,80 +163,6 @@ void handleScan()
 } // handleScan()
 
 
-// Send out a JSON object with all files in dir
-void handleFileList()
-{
-  // LOGGER_RAW("handleFileList()");
-  String json;
-  json.reserve(512);
-
-  json = "[";
-  Dir dir = SPIFFS.openDir("/");
-
-  while (dir.next()) {
-    json += "{";
-    jc_prop(json, "type", "file");
-    jc_prop(json, "name", dir.fileName());
-    jc_prop(json, "size", dir.fileSize());
-    json += "},";
-  } // while
-  json += "]";
-  server.send(200, TEXT_JSON, jc_sanitize(json));
-} // handleFileList
-
-
-// Send out some device information.
-// call
-void handleSysInfo()
-{
-  String json = "{";
-  jc_prop(json, "devicename", mainBoard.deviceName);
-  jc_prop(json, "build", __DATE__);
-  jc_prop(json, "free heap", ESP.getFreeHeap());
-
-  jc_prop(json, "flash-size", ESP.getFlashChipSize());
-  jc_prop(json, "flash-real-size", ESP.getFlashChipRealSize());
-
-  FSInfo fs_info;
-  SPIFFS.info(fs_info);
-  jc_prop(json, "fs-totalBytes", fs_info.totalBytes);
-  jc_prop(json, "fs-usedBytes", fs_info.usedBytes);
-
-  // WIFI info
-  jc_prop(json, "ssid", WiFi.SSID());
-  // jc_prop(json, "bssid", WiFi.BSSIDstr());
-
-  // json += " 'wifi-opmode':" + String(wifi_get_opmode()) + "\n";
-  // json += " 'wifi-phymode':" + String(wifi_get_phy_mode()) + "\n";
-  // json += " 'wifi-channel':" + String(wifi_get_channel()) + "\n";
-  // json += " 'wifi-ap-id':" + String(wifi_station_get_current_ap_id()) +
-  // "\n"; json += " 'wifi-status':" +
-  // String(wifi_station_get_ct_status()) + "\n";
-
-  json += "}";
-  // json.replace('\'', '"');
-  server.send(200, TEXT_JSON, jc_sanitize(json));
-  json = String();
-}
-
-
-// Send out a minimal html file for uploading files.
-void handleElements()
-{
-  String buffer;
-  ElementRegistry::list(buffer);
-  server.send(200, TEXT_HTML, buffer);
-}
-
-void handleReboot(ESP8266WebServer &server, bool wipe = false)
-{
-  LOGGER_INFO("rebooting...");
-  server.send(200);
-  server.client().stop();
-  mainBoard.reboot(wipe);
-} // handleReboot()
-
-
 /**
  * Setup all components and Serial debugging helpers
  */
@@ -258,51 +179,21 @@ void setup(void)
   Serial.setDebugOutput(false);
 #endif
 
-  LOGGER_INFO("HomDing Device is starting... (%s), %d", __DATE__,
-              ESP.getBootMode());
-
-  // Output of Info and Errors is standard
-  Logger::logger_level = LOGGER_LEVEL_ERR;
-
-  // Enable the next line to start detailed tracing
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
+  LOGGER_INFO("HomeDing Device is starting... (%s)",
+              ESP.getResetReason().c_str());
 
   // ----- setup the file system and load configuration -----
-
-
   SPIFFS.begin();
   mainBoard.init(&server);
 
   // ----- adding web server handlers -----
-
-  LOGGER_RAW("register handlers.");
+  // LOGGER_RAW("register handlers.");
 
   // redirect to index.htm when only domain name is given.
   server.on("/", HTTP_GET, handleRedirect);
 
-  // return some system information
-  server.on("/$sysinfo", HTTP_GET, handleSysInfo);
-  // list all registered elements.
-  server.on("/$elements", HTTP_GET, handleElements);
-  server.on("/$reboot", []() { handleReboot(server, false); });
-  server.on("/$reset", []() { handleReboot(server, true); });
-
-  // Bulk File Upload UI.
-  server.on("/$upload", HTTP_GET, handleUploadUI);
-
   // Bulk File Upload UI.
   server.on("/$scan", HTTP_GET, handleScan);
-
-  // list files in filesystem
-  server.on("/$list", HTTP_GET, handleFileList);
-
-
-  // Board status and actions
-  server.addHandler(new BoardHandler(&mainBoard));
-
-  // Helpers for the captive portal
-  server.on("/generate_204", HTTP_GET, handleRedirect);
-  server.on("/chat", HTTP_GET, handleRedirect);
 
   // modify network connection and reboot.
   server.on("/$connect", HTTP_GET, []() {
@@ -332,16 +223,24 @@ void setup(void)
     mainBoard.reboot(false);
   });
 
+  // Board status and actions
+  server.addHandler(new BoardHandler(&mainBoard));
+
   // Static files in the file system.
-  server.addHandler(new FileServerHandler(SPIFFS, "/", "NO-CACHE"));
+  server.addHandler(new FileServerHandler(SPIFFS, "NO-CACHE"));
 
   server.onNotFound([]() {
-    LOGGER_RAW("NotFound... %s", server.uri().c_str());
-    server.send(404, TEXT_PLAIN, "");
+    // LOGGER_RAW("NotFound... %s", server.uri().c_str());
+
+    if (mainBoard.boardState == BOARDSTATE_RUNCAPTIVE) {
+      handleRedirect();
+    } else {
+      // standard not found in browser.
+      server.send(404, TEXT_HTML, respond404);
+    }
   });
 
-
-  LOGGER_INFO("sketch setup done.");
+  LOGGER_INFO("setup done.");
 } // setup
 
 

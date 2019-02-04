@@ -1,7 +1,8 @@
 /**
  * @file boardServer.h
  * @brief Implementation of a web server request hander to handle the IoT board
- * REST services to get the current state of elements and send actions to active elements.
+ * REST services to get the current state of elements and send actions to active
+elements.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,19 +16,21 @@
  * Changelog:
  * * 30.05.2018 created by Matthias Hertel
  * * 21.12.2018 refactoring.
- * 
+ *
  * @details
 @verbatim
   This handler registers to all http GET request to the base url `/$board`.
   
-  The state of all existing elements can be retrieved by using the base url like:
-  <http://devding/$board>.
 
-  The state of a special existing element can be retrieved by using a more specific url like:
-  <http://devding/$board/timer/blink>.
+  The state of all existing elements can be retrieved by using the base url
+like: <http://devding/$board>.
+
+  The state of a special existing element can be retrieved by using a more
+specific url like: <http://devding/$board/timer/blink>.
 
   To send an action to a element a parameter can be added like:
-  <http://devding/$board/displaydot/b?value=1> or <http://devding/$board/displaytext/info?show=Hello>
+  <http://devding/$board/displaydot/b?value=1> or
+<http://devding/$board/displaytext/info?show=Hello>
 
 @endverbatim
  */
@@ -38,8 +41,8 @@
 #include <functional>
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
@@ -86,6 +89,7 @@ public:
   bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
               String requestUri);
 
+
 protected:
   /**
    * @brief reference to the board.
@@ -96,6 +100,10 @@ protected:
    * @brief root path where the state ressource can be accessed. e.g. /$board.
    */
   String _path;
+
+  void handleReboot(ESP8266WebServer &server, bool wipe = false);
+  void handleElements(ESP8266WebServer &server);
+
 };
 
 #endif

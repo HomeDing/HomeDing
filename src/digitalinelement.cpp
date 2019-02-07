@@ -35,7 +35,7 @@ Element *DigitalInElement::create()
  */
 bool DigitalInElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s:%s)", name, value);
+  // LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "pin") == 0) {
@@ -69,6 +69,7 @@ bool DigitalInElement::set(const char *name, const char *value)
 void DigitalInElement::start()
 {
   // only start with valid pin as input.
+  // LOGGER_ETRACE("start (%d)", _pin);
   if (_pin >= 0) {
     pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
     _lastOutLevel = digitalRead(_pin);
@@ -84,27 +85,24 @@ void DigitalInElement::start()
  */
 void DigitalInElement::loop()
 {
-  int lev = 0;
-
   if (_pin >= 0) {
-    lev = digitalRead(_pin);
+    int lev = digitalRead(_pin);
     if (_inverse)
       lev = !lev;
-  } // if
 
-  if (lev != _lastOutLevel) {
-    // LOGGER_ETRACE("output level= %d->%d)", _lastOutLevel, lev);
-    if (lev) {
-      _board->dispatch(_highAction);
-      _board->dispatch(_valueAction, "1");
+    if (lev != _lastOutLevel) {
+      // LOGGER_ETRACE("output %d->%d)", _lastOutLevel, lev);
+      if (lev) {
+        _board->dispatch(_highAction);
+        _board->dispatch(_valueAction, "1");
 
-    } else {
-      _board->dispatch(_lowAction);
-      _board->dispatch(_valueAction, "0");
+      } else {
+        _board->dispatch(_lowAction);
+        _board->dispatch(_valueAction, "0");
+      } // if
+      _lastOutLevel = lev;
     } // if
-    _lastOutLevel = lev;
   } // if
-
 } // loop()
 
 

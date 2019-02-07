@@ -35,6 +35,7 @@
 #define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
+#define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
 #define HOMEDING_INCLUDE_DisplayText
@@ -66,6 +67,10 @@
 
 #ifdef HOMEDING_INCLUDE_Schedule
 #include <ScheduleElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DigitalIn
+#include <DigitalInElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DigitalOut

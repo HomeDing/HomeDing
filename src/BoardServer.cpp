@@ -122,7 +122,7 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
                           String requestUri)
 {
-  LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
+  // LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
   String output;
   const char *output_type = nullptr; // when output_type is set then send output as response. 
 

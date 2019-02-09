@@ -287,6 +287,12 @@ void Board::loop()
       display->flush();
     } // if
 
+    // release sysLED
+    if (sysLED >= 0) {
+      digitalWrite(sysLED, HIGH);
+      pinMode(sysLED, INPUT);
+    }
+
     server->begin();
     start(Element_StartupMode::Network);
     _newState(BOARDSTATE_RUN);
@@ -333,10 +339,15 @@ void Board::loop()
     } // if
 
   } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
+    LOGGER_INFO("start captive portal...");
+
     WiFi.softAPConfig(apIP, apIP, netMsk);
     WiFi.softAP("HomeDing");
     delay(500);
-    LOGGER_TRACE(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
+    LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
+
+    if (sysLED >= 0)
+      digitalWrite(sysLED, LOW);
 
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);

@@ -108,4 +108,12 @@ private:
   String _timeAction;
 };
 
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+// Register the AlarmElement onto the ElementRegistry.
+bool AlarmElement::registered =
+    ElementRegistry::registerElement("alarm", AlarmElement::create);
+#endif
+
 #endif

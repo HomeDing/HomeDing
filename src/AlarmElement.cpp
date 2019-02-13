@@ -117,22 +117,4 @@ void AlarmElement::pushState(
 } // pushState()
 
 
-// maybe: overwrite the term() function,
-
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_My should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to AlarmElement.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the AlarmElement onto the ElementRegistry.
-bool AlarmElement::registered =
-    ElementRegistry::registerElement("alarm", AlarmElement::create);
-// #endif
-
 // End

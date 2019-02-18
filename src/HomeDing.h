@@ -36,6 +36,7 @@
 #define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
+#define HOMEDING_INCLUDE_Alarm
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
@@ -72,6 +73,10 @@
 
 #ifdef HOMEDING_INCLUDE_Schedule
 #include <ScheduleElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_Alarm
+#include <AlarmElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DigitalIn
@@ -111,7 +116,7 @@
 // ===== OPTIONAL ELEMENTS =====
 
 #ifdef HOMEDING_INCLUDE_DHT
-#include <DHTElement.h>
+#include <sensors/DHTElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_RFSend
@@ -121,5 +126,10 @@
 #ifdef HOMEDING_INCLUDE_ROTARY
 #include <RotaryElement.h>
 #endif
+
+#ifdef HOMEDING_INCLUDE_BME680
+#include <sensors/BME680Element.h>
+#endif
+
 
 #endif

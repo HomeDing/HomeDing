@@ -17,7 +17,7 @@
  */
 
 #include <Board.h>
-#include <DHTElement.h>
+#include <sensors/DHTElement.h>
 #include <ElementRegistry.h>
 
 /**

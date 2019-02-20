@@ -36,7 +36,7 @@ Element *RemoteElement::create()
  */
 bool RemoteElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s:%s)", name, value);
+  // LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "host") == 0) {
@@ -67,18 +67,11 @@ bool RemoteElement::set(const char *name, const char *value)
  */
 void RemoteElement::start()
 {
-  bool ret = true;
   if (_host.length() == 0) {
-    LOGGER_EERR("missing host configuration");
-    ret = false;
-  }
-
-  if (_remoteId.length() == 0) {
-    LOGGER_EERR("missing remoteId configuration");
-    ret = false;
-  }
-
-  if (ret) {
+    LOGGER_EERR("no host configuration");
+  } else if (_remoteId.length() == 0) {
+    LOGGER_EERR("no remoteId configuration");
+  } else {
     Element::start();
   } // if
 } // start()
@@ -117,7 +110,6 @@ void RemoteElement::loop()
       LOGGER_ETRACE(" line:%s", line.c_str());
       if (line.startsWith("Content-Length:")) {
         contentLength = _atoi(line.c_str() + 15);
-        // contentLength = _atoi(line.substring(15).c_str());
         LOGGER_ETRACE(" contentLength=%d", contentLength);
 
       } else if (line.equals("\r")) {
@@ -126,17 +118,17 @@ void RemoteElement::loop()
       } // if
     } // while
 
-    // 4. receive payload
-    String ret;
+    // // 4. receive payload
+    // String ret;
 
-    if (_httpClient.connected() && (contentLength > 0)) {
-      // LOGGER_EINFO(" received bytes:%d", contentLength);
-      char *buffer = (char *)malloc(contentLength + 1);
-      memset(buffer, 0, contentLength + 1);
-      contentLength -= _httpClient.readBytes(buffer, contentLength);
-      ret = buffer;
-      free(buffer);
-    } // if
+    // if (_httpClient.connected() && (contentLength > 0)) {
+    //   // LOGGER_EINFO(" received bytes:%d", contentLength);
+    //   char *buffer = (char *)malloc(contentLength + 1);
+    //   memset(buffer, 0, contentLength + 1);
+    //   contentLength -= _httpClient.readBytes(buffer, contentLength);
+    //   ret = buffer;
+    //   free(buffer);
+    // } // if
 
     _httpClient.stop();
     _status = 0;

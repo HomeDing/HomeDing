@@ -75,8 +75,18 @@
 #include <ScheduleElement.h>
 #endif
 
+// ===== Time related Elements =====
+
 #ifdef HOMEDING_INCLUDE_Alarm
-#include <AlarmElement.h>
+#include <time/AlarmElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DSTIME
+#include <time/DSTimeElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_NTPTIME
+#include <time/NTPTimeElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DigitalIn

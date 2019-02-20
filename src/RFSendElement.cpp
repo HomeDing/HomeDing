@@ -51,7 +51,7 @@ Element *RFSendElement::create()
  */
 bool RFSendElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
+  // LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
@@ -90,7 +90,7 @@ bool RFSendElement::set(const char *name, const char *value)
 void RFSendElement::start()
 {
   static bool initialized = false;
-  LOGGER_ETRACE("start()");
+  // LOGGER_ETRACE("start()");
 
   // initialize the tabrf library only once.
   if (!initialized) {
@@ -101,22 +101,8 @@ void RFSendElement::start()
     initialized = true;
   }
 
-  // Verify parameters
-
-  // if (parameters ok) {
   Element::start();
-  // } // if
-
 } // start()
-
-
-/**
- * @brief Give some processing time to the Element to check for next actions.
- */
-void RFSendElement::loop()
-{
-  // do something
-} // loop()
 
 
 /**

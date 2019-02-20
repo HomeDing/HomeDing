@@ -27,9 +27,9 @@
  * Changelog: see NTPTimeElement.h
  */
 
-#include <NTPTimeElement.h>
-#include <ElementRegistry.h>
 #include <Board.h>
+#include <ElementRegistry.h>
+#include <time/NTPTimeElement.h>
 
 #include <sntp.h>
 #include <time.h>

@@ -66,11 +66,6 @@ public:
   virtual void start();
 
   /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop();
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */

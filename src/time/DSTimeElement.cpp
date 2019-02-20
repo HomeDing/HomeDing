@@ -19,8 +19,8 @@
  */
 
 #include <Board.h>
-#include <DSTimeElement.h>
 #include <ElementRegistry.h>
+#include <time/DSTimeElement.h>
 
 #include <Wire.h>
 #include <sntp.h>
@@ -213,8 +213,7 @@ bool DSTimeElement::set(const char *name, const char *value)
  */
 void DSTimeElement::start()
 {
-  LOGGER_ETRACE("start()");
-
+  // LOGGER_ETRACE("start()");
   Wire.begin();
 
   unsigned long now = _board->getSeconds();
@@ -236,10 +235,7 @@ void DSTimeElement::loop()
   struct tm t;
 
   if ((_state != 1) && (_nextRead < now)) {
-    LOGGER_ETRACE("check the chip now");
-
     int status = _readRegister(DS3231_ADDRESS, DS3231_REGSTATUS);
-    // Serial.printf("status: %x\n", status);
 
     // The OSF flag shows if the time is valid / no power lost since last
     // adjustment.
@@ -249,16 +245,9 @@ void DSTimeElement::loop()
 
     } else {
       _getDSTime(_address, &t);
-
-      // Serial.printf("Setting time: %s", asctime(&t));
       _setSystemTime(&t);
       _state = 2;
       _nextRead = now + _readTime;
-
-      // test:
-      // uint32 current_stamp = sntp_get_current_timestamp();
-      // struct tm *tmp = localtime((const time_t *)(&current_stamp));
-      // Serial.printf("Got time: %s", asctime(tmp));
     }
   } // if
 } // loop()

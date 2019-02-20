@@ -105,10 +105,10 @@ private:
   void _setTime(const char *value);
 };
 
+#ifdef HOMEDING_REGISTER
 // Register the DSTimeElement onto the ElementRegistry.
 bool DSTimeElement::registered =
     ElementRegistry::registerElement("dstime", DSTimeElement::create);
-#ifdef HOMEDING_REGISTER
 #endif
 
 #endif // DSTIMEELEMENT_H

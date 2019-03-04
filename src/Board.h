@@ -148,6 +148,8 @@ public:
    */
   void dispatch(String &action, const char *value = NULL);
 
+  void dispatch(String &action, int value);
+
 
   /**
    * @brief Get the state (current values) of a single or all objects

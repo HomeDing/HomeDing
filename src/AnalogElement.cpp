@@ -98,14 +98,8 @@ void AnalogElement::loop()
 
     if ((v >= _value + _hysteresis) || (v <= _value - _hysteresis)) {
       _value = v;
-      // LOGGER_ETRACE("dispatch(%d)", v);
-
-      if (_valueAction.length() > 0) {
-        // send value action
-        char tmp[10];
-        itoa(v, tmp, 10);
-        _board->dispatch(_valueAction, tmp);
-      } // if
+      if (_valueAction.length() > 0)
+        _board->dispatch(_valueAction, v);
 
       if (_referenceAction.length() > 0) {
       // compare against reference and send reference action

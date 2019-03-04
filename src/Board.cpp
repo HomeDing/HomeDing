@@ -428,6 +428,20 @@ void Board::_dispatchSingle(String evt)
 /**
  * @brief prepare sending all the actions to the right elements.
  */
+void Board::dispatch(String &action, int value)
+{
+  if (action.length() > 0) {
+    char tmp[16];
+    itoa(value, tmp, sizeof(tmp));
+    dispatch(action.c_str(), tmp);
+  } // if
+
+} // dispatch
+
+
+/**
+ * @brief prepare sending all the actions to the right elements.
+ */
 void Board::dispatch(String &action, const char *value)
 {
   if (action.length() > 0)

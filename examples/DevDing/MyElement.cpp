@@ -115,6 +115,13 @@ void MyElement::pushState(
 
 
 // maybe: overwrite the term() function,
+// void Element::term()
+// {
+//   LOGGER_ETRACE("term()");
+//   active = false;
+// } // term()
+
+
 
 
 /* ===== Register the Element ===== */

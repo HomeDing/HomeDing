@@ -16,9 +16,10 @@
 
 
 #include "ValueElement.h"
-#include <ElementRegistry.h>
 #include <Board.h>
+#include <ElementRegistry.h>
 
+#include <functional>
 
 /**
  * @brief static factory function to create a new ValueElement
@@ -94,12 +95,9 @@ void ValueElement::_setValue(int newValue)
   if (_value > _max)
     _value = _max;
 
-  if (active) {
-    char tmp[10];
-    itoa(_value, tmp, sizeof(tmp));
+  if ((active) && (_changeAction.length() > 0))
+    _board->dispatch(_changeAction, _value);
 
-    _board->dispatch(_changeAction, tmp);
-  } // if
 } // _setValue()
 
 // End

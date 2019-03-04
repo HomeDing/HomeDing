@@ -1,6 +1,6 @@
 /**
  * @file TimerElement.h
- * @brief Input Element for creating timer based actions.
+ * @brief Timer Element that produces actions based on timing conditions.
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -23,7 +23,6 @@
 #include <Element.h>
 
 /**
- * @brief Timer Element that produces actions based on timing conditions.
  * @details
 @verbatim
 

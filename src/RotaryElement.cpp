@@ -109,13 +109,11 @@ void RotaryElement::loop()
 {
   // do something
   __encoder->tick(); // just call tick() to check the state.
-  char tmp[10];
 
   long newPos = __encoder->getPosition();
   if (newPos != _value) {
     // send an action with the delta
-    itoa(_step * (newPos - _value), tmp, sizeof(tmp));
-    _board->dispatch(_changeAction, tmp);
+    _board->dispatch(_changeAction, _step * (newPos - _value));
   }
   _value = newPos;
 } // loop()

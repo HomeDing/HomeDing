@@ -11,11 +11,11 @@
  *
  * More information on https://www.mathertel.de/Arduino
  *
- * Changelog:see ScheduleElement.h
+ * Changelog:see time/ScheduleElement.h
  */
 
 
-#include "ScheduleElement.h"
+#include "time/ScheduleElement.h"
 #include <ElementRegistry.h>
 #include <Board.h>
 
@@ -160,6 +160,6 @@ void ScheduleElement::pushState(
 // When transferred to the HomeDing library a #define like the
 // HOMEDING_INCLUDE_My should be used to allow the sketch to select the
 // available Elements. See <HomeDing.h> the move these lines to
-// ScheduleElement.h
+// time/ScheduleElement.h
 
 // End

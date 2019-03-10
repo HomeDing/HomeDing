@@ -1,5 +1,5 @@
 /**
- * @file DSTimeElement.h
+ * @file time/DSTimeElement.h
  *
  * @brief Core Element for the HomeDing Library to get the actual local time
  * using a RTC DS3231 chip.

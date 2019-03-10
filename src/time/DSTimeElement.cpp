@@ -15,7 +15,7 @@
  *
  * https://abzman2k.wordpress.com/2015/09/24/esp8266-rtc-and-ntp/
  *
- * Changelog: see DSTimeElement.h
+ * Changelog: see time/DSTimeElement.h
  */
 
 #include <Board.h>

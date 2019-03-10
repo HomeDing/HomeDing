@@ -15,9 +15,9 @@
  * Changelog: see TimeElement.h
  */
 
-#include <TimeElement.h>
 #include <ElementRegistry.h>
 #include <Board.h>
+#include <time/TimeElement.h>
 
 #include "time.h"
 

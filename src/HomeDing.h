@@ -67,15 +67,9 @@
 #include <AnalogElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_Timer
-#include <TimerElement.h>
-#endif
-
-#ifdef HOMEDING_INCLUDE_Schedule
-#include <ScheduleElement.h>
-#endif
-
 // ===== Time related Elements =====
+
+#include <time/TimeElement.h>
 
 #ifdef HOMEDING_INCLUDE_Alarm
 #include <time/AlarmElement.h>
@@ -88,6 +82,15 @@
 #ifdef HOMEDING_INCLUDE_NTPTIME
 #include <time/NTPTimeElement.h>
 #endif
+
+#ifdef HOMEDING_INCLUDE_Timer
+#include <time/TimerElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_Schedule
+#include <time/ScheduleElement.h>
+#endif
+
 
 #ifdef HOMEDING_INCLUDE_DigitalIn
 #include <DigitalInElement.h>

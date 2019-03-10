@@ -7,12 +7,12 @@
 // See https://www.mathertel.de/License.aspx.
 // More information on https://www.mathertel.de/Arduino
 // -----
-// Changelog: see TimerElement.h
+// Changelog: see time/TimerElement.h
 // -----
 
 #include <Board.h>
 #include <ElementRegistry.h>
-#include <TimerElement.h>
+#include <time/TimerElement.h>
 
 
 /**

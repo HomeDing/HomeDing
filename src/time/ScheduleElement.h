@@ -1,5 +1,5 @@
 /**
- * @file ScheduleElement.h
+ * @file time/ScheduleElement.h
  * @brief Element Template class.
  *
  * @author Matthias Hertel, https://www.mathertel.de

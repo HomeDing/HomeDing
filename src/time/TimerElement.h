@@ -1,5 +1,5 @@
 /**
- * @file TimerElement.h
+ * @file time/TimerElement.h
  * @brief Timer Element that produces actions based on timing conditions.
  * @author Matthias Hertel, https://www.mathertel.de
  *

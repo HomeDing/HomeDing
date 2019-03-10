@@ -1,5 +1,5 @@
 /**
- * @file NTPTimeElement.h
+ * @file time/NTPTimeElement.h
  *
  * @brief Core Element for the HomeDing Library to get the actual time using the
  * NTP protocol.

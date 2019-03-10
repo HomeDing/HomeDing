@@ -432,7 +432,7 @@ void Board::dispatch(String &action, int value)
 {
   if (action.length() > 0) {
     char tmp[16];
-    itoa(value, tmp, sizeof(tmp));
+    itoa(value, tmp, 10);
     dispatch(action.c_str(), tmp);
   } // if
 

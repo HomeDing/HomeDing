@@ -134,7 +134,7 @@ void NTPTimeElement::loop()
     // no respnse within 8 seconds.
     LOGGER_EERR("No NTP Response :-(");
     _state = 0;
-    _nextRead = now + _readTime;
+    _nextRead = now + 20; // try in some seconds again
     sntp_stop();
 
   } else if (_state == 2) {

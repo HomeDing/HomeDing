@@ -19,6 +19,7 @@
 #define ELEMENT_H
 
 #include <Arduino.h>
+#include <functional>
 
 // forward class declarations
 class Board;

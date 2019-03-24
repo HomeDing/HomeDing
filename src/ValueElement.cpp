@@ -15,11 +15,9 @@
  */
 
 
-#include "ValueElement.h"
+#include <ValueElement.h>
 #include <Board.h>
 #include <ElementRegistry.h>
-
-#include <functional>
 
 /**
  * @brief static factory function to create a new ValueElement

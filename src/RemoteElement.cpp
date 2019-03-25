@@ -21,6 +21,30 @@
 #include <ElementRegistry.h>
 #include <RemoteElement.h>
 
+#include <ESP8266WiFi.h>
+
+#define MAX_WAIT_FOR_RESPONSE 12
+#define DNS_TIMEOUT (uint32_t)4
+
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+// #define TRACE(...)
+
+/**
+ * State of RemoteElement
+ */
+typedef enum {
+  // ===== startup operation states
+  REMOTESTATE_IDLE = 0, // no remote activity
+
+  REMOTESTATE_START = 11, // action was received, now start
+  REMOTESTATE_OUT = 12,
+  REMOTESTATE_SENT = 13, // try to reconnect to last known network.
+
+  REMOTESTATE_ABORT = 99, // stop connection to remote
+
+} REMOTESTATE;
+
+
 /**
  * @brief static factory function to create a new RemoteElement.
  * @return RemoteElement* as Element* created element
@@ -45,18 +69,22 @@ bool RemoteElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "remoteid") == 0) {
     _remoteId = value;
 
+  } else if (_stricmp(name, "loglevel") == 0) {
+    ret = Element::set(name, value);
+
   } else if (!active) {
     ret = Element::set(name, value);
     LOGGER_EERR("inactive");
 
   } else {
     // must be a remote action
-    String url = _remoteId + '?' + name + '=' + value;
-    if (_status != 0) {
+    if (_status != REMOTESTATE_IDLE) {
       LOGGER_EERR("Remote Element is busy. Action dropped.");
     } else {
-      _startRemote(url);
-    }
+      _action = _remoteId + '?' + name + '=' + value;
+      _status = REMOTESTATE_START;
+      // _startRemote(_action);
+    } // if
   } // if
   return (ret);
 } // set()
@@ -68,9 +96,9 @@ bool RemoteElement::set(const char *name, const char *value)
 void RemoteElement::start()
 {
   if (_host.length() == 0) {
-    LOGGER_EERR("no host configuration");
+    LOGGER_EERR("no host configured");
   } else if (_remoteId.length() == 0) {
-    LOGGER_EERR("no remoteId configuration");
+    LOGGER_EERR("no remoteId configured");
   } else {
     Element::start();
   } // if
@@ -82,85 +110,101 @@ void RemoteElement::start()
  */
 void RemoteElement::loop()
 {
-  // see if a answer has come back
-  if ((_status == 1) && (!_httpClient.connected())) {
-    LOGGER_EERR("no connection.");
-    _httpClient.stop();
-    _status = 0;
-    return;
+  if ((_status == REMOTESTATE_START) && (_IPaddr))
+    _status = REMOTESTATE_OUT; // shortcut.
 
-  } else if ((_status == 1) && (!_httpClient.available() == 0)) {
-    // wait or drop.
-    if (_board->getSeconds() - _startTime > 12) {
-      LOGGER_EERR("timed out.");
-      _httpClient.stop();
-      _status = 0;
-      return;
+  if (_status == REMOTESTATE_START) {
+    // aks for IP address
+    TRACE("start DNS...");
+    int b = WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
+    TRACE(".got %d %s", b, _IPaddr.toString().c_str());
+    if (_IPaddr) {
+      _status = REMOTESTATE_OUT;
+    } else {
+      if (!_errNoHostSent) {
+        LOGGER_EERR("host %s is unknown.", _host.c_str());
+        _errNoHostSent = true;
+      }
+      _status = REMOTESTATE_ABORT;
+    }
+
+  } else if (_status == REMOTESTATE_OUT) {
+    // start remote communication,
+    _startTime = _board->getSeconds();
+
+    // connect to server
+    if (!_httpClient.connect(_IPaddr, 80)) {
+      LOGGER_EERR(".no connect");
+      _status = REMOTESTATE_ABORT;
+    } else {
+      TRACE("connected to server...");
+      // 2. send request
+      String request =
+          "GET /$board/$1 HTTP/1.1\r\nHost: $2\r\nConnection: close\r\n\r\n";
+      request.replace("$1", _action);
+      request.replace("$2", _host);
+      _httpClient.write(request.c_str());
+      _status = REMOTESTATE_SENT;
     } // if
 
-  } else if (_status == 1) {
+  } else if (_status == REMOTESTATE_SENT) {
+    // see if a answer has come back
 
-    // 3. receive header.
-    bool headerDone = false;
-    int contentLength = 0;
+    if (!_httpClient.connected()) {
+      LOGGER_EERR("no connection");
+      _status = REMOTESTATE_ABORT;
 
-    // Read the header lines of the reply from server
-    while (_httpClient.connected() && (!headerDone)) {
-      String line = _httpClient.readStringUntil('\n');
-      LOGGER_ETRACE(" line:%s", line.c_str());
-      if (line.startsWith("Content-Length:")) {
-        contentLength = _atoi(line.c_str() + 15);
-        LOGGER_ETRACE(" contentLength=%d", contentLength);
-
-      } else if (line.equals("\r")) {
-        LOGGER_ETRACE(" header end.");
-        headerDone = true;
+    } else if (_httpClient.available() == 0) {
+      // wait or drop.
+      if (_board->getSeconds() - _startTime > MAX_WAIT_FOR_RESPONSE) {
+        LOGGER_EERR("timed out");
+        _status = REMOTESTATE_ABORT;
       } // if
-    } // while
 
-    // // 4. receive payload
-    // String ret;
+    } else {
+      // Response is available.
 
-    // if (_httpClient.connected() && (contentLength > 0)) {
-    //   // LOGGER_EINFO(" received bytes:%d", contentLength);
-    //   char *buffer = (char *)malloc(contentLength + 1);
-    //   memset(buffer, 0, contentLength + 1);
-    //   contentLength -= _httpClient.readBytes(buffer, contentLength);
-    //   ret = buffer;
-    //   free(buffer);
-    // } // if
+      // 3. receive header.
+      bool headerDone = false;
+      int contentLength = 0;
 
+      // Read the header lines of the reply from server
+      while (_httpClient.connected() && (!headerDone)) {
+        String line = _httpClient.readStringUntil('\n');
+        // TRACE(" line:%s", line.c_str());
+        if (line.startsWith("Content-Length:")) {
+          contentLength = _atoi(line.c_str() + 15);
+          // TRACE(" contentLength=%d", contentLength);
+
+        } else if (line.equals("\r")) {
+          // TRACE(" header end.");
+          headerDone = true;
+        } // if
+      } // while
+
+      // // 4. receive payload
+      // String ret;
+
+      // if (_httpClient.connected() && (contentLength > 0)) {
+      //   // LOGGER_EINFO(" received bytes:%d", contentLength);
+      //   char *buffer = (char *)malloc(contentLength + 1);
+      //   memset(buffer, 0, contentLength + 1);
+      //   contentLength -= _httpClient.readBytes(buffer, contentLength);
+      //   ret = buffer;
+      //   free(buffer);
+      // } // if
+      _status = REMOTESTATE_ABORT;
+
+    } // if
+
+  } // if
+
+  if (_status == REMOTESTATE_ABORT) {
     _httpClient.stop();
-    _status = 0;
-
+    _status = REMOTESTATE_IDLE;
   } // if
 
 } // loop()
-
-
-void RemoteElement::_startRemote(String url)
-{
-  LOGGER_ETRACE("_startRemote(%s)", url.c_str());
-  _startTime = _board->getSeconds();
-
-  // 1. connect to server
-  if (!_httpClient.connect(_host, 80)) {
-    LOGGER_EERR("no connection to host %s", _host.c_str());
-    _httpClient.stop();
-    _status = 0;
-    return;
-  } // if
-  // LOGGER_ETRACE("connected to server");
-
-  // 2. send request
-  String request =
-      "GET /$board/$id HTTP/1.1\r\nHost $hostConnection: close\r\n\r\n";
-  request.replace("$id", url);
-  _httpClient.write(request.c_str());
-
-  _status = 1;
-  // receive bytes in loop()
-} // _startRemote()
 
 
 // Register the RemoteElement in the ElementRegistry.

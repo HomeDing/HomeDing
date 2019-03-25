@@ -15,6 +15,7 @@
  *
  * Changelog:
  * * 22.04.2018 created by Matthias Hertel
+ * * 17.03.2019 splitting connect into getHostByName and connect by IP.
  */
 
 #ifndef REMOTEELEMENT_H
@@ -68,17 +69,23 @@ public:
   // pushState is not required because no dynamic properties
 
 private:
-  String _host;
-  String _remoteId;
+// configuration
+  String _host; // name of the remote device
+  String _remoteId; // id of element in remote device
+
+// processing
+  int _status; // 0: not active, 1: has sent out, waiting for incomming packet
+  IPAddress _IPaddr; // ip of the remote device
+  String _action; // next action to be sent
+
   WiFiClient _httpClient;
-  int _status; // 0: no t active, 1: has sent out, waiting for incomming packet
 
   /**
    * @brief time when the request was started.
    */
   unsigned long _startTime;
 
-  void _startRemote(String url);
+  bool _errNoHostSent = false; // avoid sending this error all the time
 };
 
 #endif // REMOTEELEMENT_H

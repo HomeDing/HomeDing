@@ -40,9 +40,14 @@
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
+#endif
+
+// Easy include of all elements for an attached display.
+// by defining HOMEDING_INCLUDE_DISPLAY
+
+#ifdef HOMEDING_INCLUDE_DISPLAY
 #define HOMEDING_INCLUDE_DisplayText
 #define HOMEDING_INCLUDE_DisplayDot
-
 #endif
 
 #include <core/logger.h>

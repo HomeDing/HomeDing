@@ -18,6 +18,7 @@
 #include <Board.h>
 #include <Element.h>
 #include <ElementRegistry.h>
+#include <string.h>
 
 #include "MicroJsonParser.h"
 
@@ -54,6 +55,8 @@ void Board::init(ESP8266WebServer *serv)
 
   WiFi.begin();
   deviceName = WiFi.hostname(); // use mac based default device name
+  deviceName.replace("_", ""); // Underline in hostname is not conformant, see
+                               // https://tools.ietf.org/html/rfc1123 952
 
   // check save-mode
   savemode = false;
@@ -117,7 +120,7 @@ void Board::addElements()
 
 void Board::start(Element_StartupMode startupMode)
 {
-  LOGGER_TRACE("start()");
+  LOGGER_TRACE("start(%d)", startupMode);
 
   // make elements active that match
   Element *l = _list2;
@@ -148,11 +151,16 @@ void Board::_newState(BoardState newState)
 void Board::loop()
 {
   unsigned long now = millis();
+  wl_status_t wifi_status = WiFi.status();
+  bool autoCon = WiFi.getAutoConnect();
+  String ipStr;
 
-  if (boardState == BOARDSTATE_NONE) {
-    _newState(BOARDSTATE_CONFIG);
+  switch (boardState) {
+  case BOARDSTATE_NONE:
+    _newState(BOARDSTATE_LOAD);
+    break;
 
-  } else if (boardState == BOARDSTATE_CONFIG) {
+  case BOARDSTATE_LOAD:
     // load all config files and create+start elements
     addElements();
     start(Element_StartupMode::System);
@@ -166,15 +174,22 @@ void Board::loop()
       display->flush();
     } // if
 
-    _newState(BOARDSTATE_CONNECT);
     netMode = NetMode_AUTO;
 
-    // wait at least 6 seconds for offering config mode
-    configPhaseEnd = now + (6 * 1000); // TODO: make configurable
+    // detect no configured network situation
+    if ((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) {
+      // start hotspot right now.
+      _newState(BOARDSTATE_STARTCAPTIVE);
+    } else {
+      _newState(BOARDSTATE_CONNECT);
+    }
 
-  } else if (boardState == BOARDSTATE_CONNECT) {
-    bool autoCon = WiFi.getAutoConnect();
-    LOGGER_TRACE("autoconnect =(%d)", autoCon);
+    // wait at least 6 seconds for offering config mode
+    configPhaseEnd = now + nextModeTime;
+    break;
+
+  case BOARDSTATE_CONNECT:
+    LOGGER_TRACE("autoconnect=%d", autoCon);
 
     // no accesspoint network when starting up normally.
     WiFi.softAPdisconnect(true);
@@ -183,21 +198,21 @@ void Board::loop()
       netMode = NetMode_PSK;
 
     // connect to a same network as before ?
-    wl_status_t wifi_status = WiFi.status();
     LOGGER_TRACE("wifi status=(%d)", wifi_status);
+    LOGGER_TRACE("wifi ssid=(%s)", WiFi.SSID().c_str());
 
     if (netMode == NetMode_AUTO) {
       // 1. priority:
       // give autoconnect the chance to do it.
       // works only after a successfull network connection in the past.
-      LOGGER_TRACE("start NetMode_AUTO");
+      LOGGER_TRACE("NetMode_AUTO");
       WiFi.mode(WIFI_STA);
 
     } else if (netMode == NetMode_PSK) {
       // 2. priority:
       // explicit connect with the saved passwords.
       // works only after a successfull network connection in the past.
-      LOGGER_TRACE("start NetMode_PSK");
+      LOGGER_TRACE("NetMode_PSK");
       WiFi.mode(WIFI_STA);
       WiFi.begin();
 
@@ -206,9 +221,10 @@ void Board::loop()
       // use fixed network and passPhrase known at compile time.
       // works only after a successfull network connection in the past.
       if (*ssid) {
-        LOGGER_TRACE("start NetMode_PASS");
+        LOGGER_TRACE("NetMode_PASS");
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, passPhrase);
+      } else {
       }
     } // if
 
@@ -224,15 +240,16 @@ void Board::loop()
     }
 
     // wait max 30 seconds for connecting to the network
-    connectPhaseEnd = now + (30 * 1000); // TODO: make configurable
+    connectPhaseEnd = now + captiveTime;
 
     _newState(BOARDSTATE_CONFWAIT);
-
-  } else if ((boardState == BOARDSTATE_CONFWAIT) ||
-             (boardState == BOARDSTATE_WAIT)) {
+    break;
+  case BOARDSTATE_CONFWAIT:
+  case BOARDSTATE_WAIT:
     // make sysLED blink
-    if (sysLED >= 0)
+    if (sysLED >= 0) {
       digitalWrite(sysLED, ((configPhaseEnd - now) % 700) > 350 ? HIGH : LOW);
+    } // if
 
     // check sysButton
     if (sysButton >= 0) {
@@ -245,9 +262,7 @@ void Board::loop()
       if (now > configPhaseEnd)
         _newState(BOARDSTATE_WAIT);
 
-    } else if (boardState == BOARDSTATE_WAIT) {
-      wl_status_t wifi_status = WiFi.status();
-
+    } else {
       if (wifi_status == WL_CONNECTED) {
         LOGGER_TRACE("connected.");
         _newState(BOARDSTATE_GREET);
@@ -268,12 +283,12 @@ void Board::loop()
         delay(100);
       }
     } // if (BOARDSTATE_WAIT)
+    break;
 
-  } else if (boardState == BOARDSTATE_GREET) {
+  case BOARDSTATE_GREET:
+    ipStr = WiFi.localIP().toString();
     LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
     LOGGER_TRACE("  as: %s", WiFi.hostname().c_str());
-
-    String ipStr = WiFi.localIP().toString();
     LOGGER_TRACE("  IP: %s", ipStr.c_str());
     LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
 
@@ -296,14 +311,14 @@ void Board::loop()
     server->begin();
     start(Element_StartupMode::Network);
     _newState(BOARDSTATE_RUN);
+    break;
 
-  } else if (boardState == BOARDSTATE_RUN) {
-
+  case BOARDSTATE_RUN:
     if (!validTime) {
       // check if time is valid now -> start all elements with
       // Element_StartupMode::Time
-      uint32 current_stamp = sntp_get_current_timestamp();
-      if (current_stamp > MIN_VALID_TIME) {
+      time_t current_stamp = getTime();
+      if (current_stamp) {
         start(Element_StartupMode::Time);
         validTime = true;
         return;
@@ -337,8 +352,9 @@ void Board::loop()
       }
       _next2 = _next2->next;
     } // if
+    break;
 
-  } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
+  case BOARDSTATE_STARTCAPTIVE:
     LOGGER_INFO("start captive portal...");
 
     WiFi.softAPConfig(apIP, apIP, netMsk);
@@ -356,14 +372,20 @@ void Board::loop()
 
     _newState(BOARDSTATE_RUNCAPTIVE);
     _captiveEnd = now + (5 * 60 * 1000);
+    break;
 
-  } else if (boardState == BOARDSTATE_RUNCAPTIVE) {
+  case BOARDSTATE_RUNCAPTIVE:
     // server.handleClient(); needs to be called in main loop.
     dnsServer.processNextRequest();
 
     if (now > _captiveEnd)
       reboot(false);
-  } // if
+    break;
+
+    // default:
+    //   break;
+  } // switch
+
 } // loop()
 
 

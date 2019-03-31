@@ -52,11 +52,16 @@
 
 // Use some more Elements that need additional libraries
 #define HOMEDING_INCLUDE_DHT
+#define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
 #define HOMEDING_INCLUDE_RFSend
 #define HOMEDING_INCLUDE_ROTARY
 
+#define HOMEDING_INCLUDE_NTPTIME
+#define HOMEDING_INCLUDE_DSTIME
+
 // Use some more Elements for Displays
+#define HOMEDING_INCLUDE_DISPLAY
 #define HOMEDING_INCLUDE_DISPLAYLCD
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
@@ -168,7 +173,6 @@ void handleScan()
  */
 void setup(void)
 {
-  // unsigned long now = millis();
   DisplayAdapter *display = NULL;
 
   Serial.begin(115200);
@@ -179,6 +183,8 @@ void setup(void)
   Serial.setDebugOutput(false);
 #endif
 
+  // Logger::logger_level = LOGGER_LEVEL_TRACE;
+
   LOGGER_INFO("HomeDing Device is starting... (%s)",
               ESP.getResetReason().c_str());
 
@@ -187,13 +193,13 @@ void setup(void)
   mainBoard.init(&server);
 
   // ----- adding web server handlers -----
-  // LOGGER_RAW("register handlers.");
-
   // redirect to index.htm when only domain name is given.
   server.on("/", HTTP_GET, handleRedirect);
 
   // Bulk File Upload UI.
   server.on("/$scan", HTTP_GET, handleScan);
+
+  // server.on("/$format", HTTP_GET, []() { SPIFFS.format(); });
 
   // modify network connection and reboot.
   server.on("/$connect", HTTP_GET, []() {
@@ -230,9 +236,13 @@ void setup(void)
   server.addHandler(new FileServerHandler(SPIFFS, "NO-CACHE"));
 
   server.onNotFound([]() {
-    // LOGGER_RAW("NotFound... %s", server.uri().c_str());
+    const char *uri = server.uri().c_str();
+    LOGGER_RAW("notFound: %s", uri);
 
-    if (mainBoard.boardState == BOARDSTATE_RUNCAPTIVE) {
+    if ((mainBoard.boardState == BOARDSTATE_RUNCAPTIVE) &&
+        ((strcmp(uri, "/connecttest.txt") == 0) ||
+         (strcmp(uri, "/redirect") == 0)||
+         (strcmp(uri, "/more.txt") == 0))) {
       handleRedirect();
     } else {
       // standard not found in browser.

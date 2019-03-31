@@ -59,14 +59,13 @@
 typedef enum {
   // ===== startup operation states
   BOARDSTATE_NONE = 0, // unspecified
-  BOARDSTATE_CONFIG =
-      1, // read all configurations and create elements. Start SYS Elements
+  BOARDSTATE_LOAD = 1, // load configurations and create elements. Start SYS
   BOARDSTATE_CONNECT = 2, // try to reconnect to last known network.
   BOARDSTATE_CONFWAIT = 3, // Wait for clicks.
   BOARDSTATE_WAIT = 5, // Wait for network connectivity and clicks.
 
   // ===== normal operation states
-  BOARDSTATE_GREET = 10, // start all NET Elements
+  BOARDSTATE_GREET = 10, // start NET Elements
   BOARDSTATE_RUN = 12, // run
   // start TIME Elements
   // restart on network lost > 30 secs.
@@ -174,10 +173,16 @@ public:
   int sysLED = -1;
 
   // System Button
-  int sysButton = -1;
+  int sysButton = 0; // == D3, flash mode pin as default
 
   // Save Mode
   bool savemode = false;
+
+  // switch to next network connect mode
+  int nextModeTime = 6*1000;
+
+  // max. captive mode time
+  int captiveTime = 30*1000;
 
   // WebServer
   ESP8266WebServer *server;

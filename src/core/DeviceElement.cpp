@@ -63,7 +63,7 @@ bool DeviceElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "log") == 0) {
     // ALWAYS send INFO to log
-    LOGGER_JUSTINFO(value ? value : "NULL");
+    Logger::logger_file = _atob(value);
 
   } else if (_stricmp(name, "loglevel") == 0) {
     // Set global logger loglevel

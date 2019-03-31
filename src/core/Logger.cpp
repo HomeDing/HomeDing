@@ -64,7 +64,7 @@ void Logger::_print(const char *module, int level, const char *fmt,
   DEBUG_ESP_PORT.println(buffer);
 #endif
 
-  if ((module) && (level < LOGGER_LEVEL_TRACE)) {
+  if ((logger_file) && (module) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
   }
 } // _print
@@ -114,4 +114,7 @@ void Logger::_printToFile(char *buffer)
 
 // Default: Log INFO and ERROR
 int Logger::logger_level = LOGGER_LEVEL_ERR;
+
+bool Logger::logger_file = false;
+
 // end.

@@ -77,6 +77,8 @@ class Logger
 public:
   static int logger_level; // initialized to 0 === LOGGER_LEVEL_ERR;
 
+  static bool logger_file; // initialized to false === no logging to file;
+
   /**
    * @brief Create Logger entry line from given format and args.
    *

@@ -71,9 +71,11 @@ bool PMSElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "pintx") == 0) {
     _pintx = _atopin(value);
 
+  } else if (_stricmp(name, "readtime") == 0) {
+     _readTime = _atotime(value);
+
   } else if (_stricmp(name, "onChange") == 0) {
-    // save the actions
-    _changeAction = value;
+    _changeAction = value; // save the actions
     // } else if (_stricmp(name, "doAction") == 0) {
     // make something
 
@@ -95,9 +97,9 @@ void PMSElement::start()
   // _pmsSerial->begin(9600);
   // _pmsSerial->
   isOpen = false;
+  _nextRead = _board->getSeconds() + 4;
 
   Element::start();
-
 } // start()
 
 
@@ -106,75 +108,71 @@ void PMSElement::start()
  */
 void PMSElement::loop()
 {
-  // do something
+  unsigned int now = _board->getSeconds();
 
-  //   uint8_t _data[32];
-  // int _datapos;
+  if (_nextRead <= now) {
+    // do something
 
-  //   if (!isOpen)
-  //     _pmsSerial->begin(9600);
-  //     _pmsSerial->stopListening();
-  // isOpen = true;
-
-  if (!isOpen) {
-    if (!_pmsSerial)
-      _pmsSerial = new SoftwareSerial(_pinrx, _pintx, false, 128);
-    _pmsSerial->begin(9600);
-    isOpen = true;
-    _datapos = 0;
-  }
-
-  if (_pmsSerial->overflow()) {
-    Serial.printf("X");
-    _pmsSerial->end();
-    // delete _pmsSerial;
-    // _pmsSerial = nullptr;
-    isOpen = false;
-    return;
-  }
-
-  while (_pmsSerial->available()) {
-    int b = _pmsSerial->read();
-
-    // raw logging
-    // if (b == 0x42)
-    //   Serial.printf("\n");
-    // Serial.printf("%02x", b);
-
-    // collect data to buffer
-    if ((_datapos == 0) && (b == 0x42)) {
-      // possibly new data package
-      _data[_datapos++] = b; // 0x42 (fixed) starts the data sequence
-    } else if ((_datapos == 1) && (b == 0x4d)) {
-      _data[_datapos++] = b; // 0x4d (fixed) starts the data sequence
-    } else if (_datapos > 1) {
-      _data[_datapos++] = b; // data
-
-      if (_datapos == 32) {
-        // all data received
-        _pmsSerial->end();
-        isOpen = false;
-
-        // check checksum
-        int checksum = 0;
-        int n;
-        for (n = 0; n < 32-2; n++) checksum += _data[n];
-
-        if (checksum == PWSDATA(14)) {
-          // valid data
-          _value = PWSDATA(2);
-          _datapos = 0;
-          // LOGGER_EINFO("value = %02x", _value);
-
-          if (_changeAction.length() > 0)
-            _board->dispatch(_changeAction, _value);
-
-          // for (n = 0; n < 32; n++) Serial.printf("%02x", _data[n]);
-          // Serial.printf("\n");
-        } // if
-
-      } // if
+    if (!isOpen) {
+      if (!_pmsSerial)
+        _pmsSerial = new SoftwareSerial(_pinrx, _pintx, false, 128);
+      _pmsSerial->begin(9600);
+      isOpen = true;
+      _datapos = 0;
     } // if
+
+    if (_pmsSerial->overflow()) {
+      Serial.printf("X");
+      _pmsSerial->end();
+      // just try again
+      isOpen = false;
+      return;
+    } // if
+
+    while (_pmsSerial->available()) {
+      int b = _pmsSerial->read();
+
+      // raw logging
+      // if (b == 0x42)
+      //   Serial.printf("\n");
+      // Serial.printf("%02x", b);
+
+      // collect data to buffer
+      if ((_datapos == 0) && (b == 0x42)) {
+        // possibly new data package
+        _data[_datapos++] = b; // 0x42 (fixed) starts the data sequence
+      } else if ((_datapos == 1) && (b == 0x4d)) {
+        _data[_datapos++] = b; // 0x4d (fixed) starts the data sequence
+      } else if (_datapos > 1) {
+        _data[_datapos++] = b; // data
+
+        if (_datapos == 32) {
+          // all data received
+          _pmsSerial->end();
+          isOpen = false;
+          _nextRead = now + _readTime;
+
+          // check checksum
+          int checksum = 0;
+          int n;
+          for (n = 0; n < 32-2; n++) checksum += _data[n];
+
+          if (checksum == PWSDATA(14)) {
+            // valid data
+            _value = PWSDATA(2);
+            _datapos = 0;
+            LOGGER_ETRACE("value = %d", _value);
+
+            if (_changeAction.length() > 0)
+              _board->dispatch(_changeAction, _value);
+
+            // for (n = 0; n < 32; n++) Serial.printf("%02x", _data[n]);
+            // Serial.printf("\n");
+          } // if
+
+        } // if
+      } // if
+    } // while
   }
 
 } // loop()

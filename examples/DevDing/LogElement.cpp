@@ -111,7 +111,7 @@ bool LogElement::set(const char *name, const char *value)
  */
 void LogElement::start()
 {
-  LOGGER_ETRACE("start()");
+  LOGGER_ETRACE("start(%s)", _logfileName.c_str());
 
   // Verify parameters
   if (_logfileName.length() > 0) {

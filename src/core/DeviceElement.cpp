@@ -61,13 +61,20 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
 
-  } else if (_stricmp(name, "log") == 0) {
-    // ALWAYS send INFO to log
+  } else if (_stricmp(name, "logfile") == 0) {
+    // enable/disable logfile feature
     Logger::logger_file = _atob(value);
 
   } else if (_stricmp(name, "loglevel") == 0) {
     // Set global logger loglevel
     Logger::logger_level = _atoi(value);
+
+  } else if (_stricmp(name, "log") == 0) {
+    // Log a information with time.
+    unsigned long now = _board->getTimeOfDay();
+    if (!now)
+      now = millis() / 1000; // make seconds
+    LOGGER_JUSTINFO(value ? value : "NULL");
 
   } else {
     ret = Element::set(name, value);

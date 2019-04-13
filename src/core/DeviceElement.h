@@ -82,9 +82,19 @@ public:
 
 private:
   /**
-   * @brief Short description of the device.
+   * @brief Title of the device for usage in Web UI.
+   */
+  String _title;
+
+  /**
+   * @brief Description of the device for usage in Web UI.
    */
   String _description;
+
+  /**
+   * @brief Name of the room of the device.
+   */
+  String _room;
 
   /**
    * @brief hours to wait until a fresh reboot will be started,

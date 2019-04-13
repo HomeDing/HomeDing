@@ -58,6 +58,15 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "description") == 0) {
     _description = value;
 
+  } else if (_stricmp(name, "title") == 0) {
+    _title = value;
+
+  } else if (_stricmp(name, "room") == 0) {
+    _room = value;
+
+  } else if (_stricmp(name, "homepage") == 0) {
+    _board->homepage = value;
+
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
 

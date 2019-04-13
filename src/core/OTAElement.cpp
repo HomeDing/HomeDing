@@ -100,7 +100,7 @@ void OTAElement::start()
     else if (error == OTA_END_ERROR)
       LOGGER_EERR("End Failed");
   });
-  ArduinoOTA.begin();
+  ArduinoOTA.begin(true);
   Element::start();
 } // start()
 

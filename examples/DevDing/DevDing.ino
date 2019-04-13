@@ -1,3 +1,4 @@
+
 /**
  * @file DevDing.ino
  * @brief Sketch that uses the HomeDing Library to implement Things attached the
@@ -128,7 +129,7 @@ void handleRedirect()
 
   String url;
   if (mainBoard.boardState < BOARDSTATE_STARTCAPTIVE) {
-    url = F("/index.htm");
+    url = mainBoard.homepage;
   } else {
     url = String(F("http://")) + WiFi.softAPIP().toString() +
           F("/setup.htm"); // ; mainBoard.deviceName

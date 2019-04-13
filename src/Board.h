@@ -179,10 +179,10 @@ public:
   bool savemode = false;
 
   // switch to next network connect mode
-  int nextModeTime = 6*1000;
+  int nextModeTime = 6 * 1000;
 
   // max. captive mode time
-  int captiveTime = 30*1000;
+  int captiveTime = 30 * 1000;
 
   // WebServer
   ESP8266WebServer *server;
@@ -199,6 +199,7 @@ public:
   static void reboot(bool wipe);
 
   String deviceName;
+  String homepage = "/index.htm";
 
   BoardState boardState;
 

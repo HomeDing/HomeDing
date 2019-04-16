@@ -221,7 +221,7 @@ void Board::loop()
       // use fixed network and passPhrase known at compile time.
       // works only after a successfull network connection in the past.
       if (*ssid) {
-        LOGGER_TRACE("NetMode_PASS");
+        LOGGER_TRACE("NetMode_PASS: %s %s", ssid, passPhrase);
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, passPhrase);
       } else {

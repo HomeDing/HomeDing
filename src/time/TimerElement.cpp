@@ -14,7 +14,6 @@
 #include <ElementRegistry.h>
 #include <time/TimerElement.h>
 
-
 /**
  * @brief static factory function to create a new TimerElement
  * @return TimerElement* created element
@@ -59,28 +58,31 @@ bool TimerElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
+  } else if (_stricmp(name, "onend") == 0) {
+    _endAction = value;
+
   } else if (_stricmp(name, "onvalue") == 0) {
     _valueAction = value;
 
   } else if (_stricmp(name, "next") == 0) {
-    if (_state == 0) {
+    if (_state == TIMERSTATE_WAIT) {
       _startTime = now - _waitTime;
-    } else if (_state == 1) {
+    } else if (_state == TIMERSTATE_PULSE) {
       _startTime = now - (_waitTime + _pulseTime);
-    } else if (_state == 2) {
+    } else if (_state == TIMERSTATE_CYCLE) {
       _startTimer();
     }
 
   } else if (_stricmp(name, "start") == 0) {
     // turn off and do a fresh start
-    if (_state == 1) {
+    if (_state == TIMERSTATE_PULSE) {
       _board->dispatch(_offAction);
     }
     _startTimer();
 
   } else if (_stricmp(name, "stop") == 0) {
     // turn off and do a fresh start
-    if (_state == 1) {
+    if (_state == TIMERSTATE_PULSE) {
       _board->dispatch(_offAction);
     }
     _stopTimer();
@@ -126,24 +128,25 @@ void TimerElement::loop()
   // time from start in seconds
   uint16_t tfs = now - _startTime;
 
-  if (_state == 0) {
+  if (_state == TIMERSTATE_WAIT) {
     if (tfs >= _waitTime) {
       // switch state to 1 and submit ON action
-      _state = 1;
+      _state = TIMERSTATE_PULSE;
       _board->dispatch(_onAction);
       _board->dispatch(_valueAction, "1");
     } // if
 
-  } else if (_state == 1) {
+  } else if (_state == TIMERSTATE_PULSE) {
     if (tfs >= _waitTime + _pulseTime) {
       // switch state to 2 and submit OFF action
-      _state = 2;
+      _state = TIMERSTATE_CYCLE;
       _board->dispatch(_offAction);
       _board->dispatch(_valueAction, "0");
     } // if
 
-  } else if (_state == 2) {
+  } else if (_state == TIMERSTATE_CYCLE) {
     if (tfs >= _cycleTime) {
+      _board->dispatch(_endAction);
       if (_type == TIMER_TYPE_LOOP) {
         _startTimer();
       } else {
@@ -164,11 +167,11 @@ void TimerElement::pushState(
 
   Element::pushState(callback);
   callback("state", String(_state).c_str());
-  if (_state == 3)
+  if (_state == TIMERSTATE_ENDED)
     callback("time", "0");
   else
     callback("time", String(now - _startTime).c_str());
-  callback("value", (_state == 1) ? "1" : "0");
+  callback("value", (_state == TIMERSTATE_PULSE) ? "1" : "0");
 } // pushState()
 
 
@@ -187,7 +190,7 @@ void TimerElement::term()
  */
 void TimerElement::_startTimer()
 {
-  _state = 0;
+  _state = TIMERSTATE_WAIT;
   _startTime = _board->getSeconds();
 }
 
@@ -196,10 +199,10 @@ void TimerElement::_startTimer()
  */
 void TimerElement::_stopTimer()
 {
-  if (_state == 1) {
+  if (_state == TIMERSTATE_PULSE) {
     _board->dispatch(_offAction);
   } // if
-  _state = 3;
+  _state = TIMERSTATE_ENDED;
 }
 
 // End

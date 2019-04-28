@@ -58,6 +58,17 @@ minimum of waittime+pulsetime. The units are in minutes
 #define TIMER_TYPE_LOOP 0x01
 
 
+/**
+ * @brief current state of the timer.
+ */
+typedef enum {
+  TIMERSTATE_WAIT = 0, // while waittime is running
+  TIMERSTATE_PULSE = 1, // while pulsetime is running.
+  TIMERSTATE_CYCLE = 2, // while cycletime is not over.
+  TIMERSTATE_ENDED = 3 // cycletime ended but type != LOOP.
+} TimerState;
+
+
 class TimerElement : public Element
 {
 public:
@@ -152,6 +163,11 @@ private:
   String _valueAction;
 
   /**
+   * @brief The _endAction holds the actions that is submitted when the timer cycletime is over.
+   */
+  String _endAction;
+
+  /**
    * @brief The effective time (in seconds) the timer has started.
    */
   unsigned long _startTime;
@@ -163,7 +179,7 @@ private:
    * 2: while cycletime is not over.
    * 3: cycletime ended but type != LOOP.
    */
-  int _state = 0;
+  TimerState _state = TIMERSTATE_WAIT;
 
   /**
    * @brief start the timer from the beginning.

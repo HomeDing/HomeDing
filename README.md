@@ -14,4 +14,4 @@ It supports:
 * retrieving actions from other devices
 * a small IDE (Integrated Development Environment) that allows changing the configuration
 
-More documentation can be found in the  [HomeDing Wiki](https://github.com/HomeDing/HomeDing/wiki)
+More documentation can be found in the  [HomeDing documentation site](https://homeding.github.io)

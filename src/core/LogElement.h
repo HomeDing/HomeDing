@@ -1,40 +1,38 @@
 /**
- * @file PMSElement.h
+ * @file LogElement.h
  * @brief Element Template class.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
  */
 
-#ifndef PMSELEMENT_H
-#define PMSELEMENT_H
-
-#include <SoftwareSerial.h>
+#ifndef LOGELEMENT_H
+#define LOGELEMENT_H
 
 /**
- * @brief PMSElement implements...
+ * @brief LogElement implements...
  * @details
 @verbatim
 
-The PMSElement can ...
+The LogElement can ...
 
 @endverbatim
  */
 
-class PMSElement : public Element
+class LogElement : public Element
 {
 public:
   /**
-   * @brief Factory function to create a PMSElement.
+   * @brief Factory function to create a LogElement.
    * @return Element*
    */
   static Element *create();
@@ -45,10 +43,16 @@ public:
   static bool registered;
 
   /**
+   * @brief Construct a new LogElement
+   */
+  LogElement();
+
+
+  /**
    * @brief initialize a new Element.
    * @param board The board reference.
    */
-  // virtual void init(Board *board);
+  virtual void init(Board *board);
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -79,26 +83,25 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
+  void _logToFile();
+
   /**
    * @brief The actual value.
    */
-  int _value;
+  String _value;
+  time_t _timestamp;
+  bool _changed;
 
-  int _pinrx = D4;
-  int _pintx = D3;
-
-  unsigned long _readTime = 60;
-  unsigned long _nextRead;
-
-  uint8_t _data[32];
-  int _datapos;
-
-  SoftwareSerial *_pmsSerial;
-
-  /**
-   * @brief The _changeAction holds the actions that is submitted when new data was received from the sensor.
-   */
-  String _changeAction;
+  String _logfileName;
+  String _logfileOldName;
 };
+
+
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+bool LogElement::registered =
+    ElementRegistry::registerElement("log", LogElement::create);
+#endif
 
 #endif

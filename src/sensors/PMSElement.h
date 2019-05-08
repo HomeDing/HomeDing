@@ -1,38 +1,40 @@
 /**
- * @file LogElement.h
+ * @file PMSElement.h
  * @brief Element Template class.
- *
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- *
+ * 
  * More information on https://www.mathertel.de/Arduino
- *
+ * 
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
  */
 
-#ifndef LOGELEMENT_H
-#define LOGELEMENT_H
+#ifndef PMSELEMENT_H
+#define PMSELEMENT_H
+
+#include <SoftwareSerial.h>
 
 /**
- * @brief LogElement implements...
+ * @brief PMSElement implements...
  * @details
 @verbatim
 
-The LogElement can ...
+The PMSElement can ...
 
 @endverbatim
  */
 
-class LogElement : public Element
+class PMSElement : public Element
 {
 public:
   /**
-   * @brief Factory function to create a LogElement.
+   * @brief Factory function to create a PMSElement.
    * @return Element*
    */
   static Element *create();
@@ -43,16 +45,10 @@ public:
   static bool registered;
 
   /**
-   * @brief Construct a new LogElement
-   */
-  LogElement();
-
-
-  /**
    * @brief initialize a new Element.
    * @param board The board reference.
    */
-  virtual void init(Board *board);
+  // virtual void init(Board *board);
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -76,11 +72,6 @@ public:
   virtual void loop();
 
   /**
-   * @brief stop all activities and go inactive.
-   */
-  // virtual void term();
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
@@ -88,23 +79,36 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
-  void _logToFile();
-
   /**
    * @brief The actual value.
    */
-  String _value;
-  time_t _timestamp;
-  bool _changed;
+  int _value;
 
-  String _logfileName;
-  String _logfileOldName;
+  int _pinrx = D4;
+  int _pintx = D3;
 
+  unsigned long _readTime = 60;
+  unsigned long _nextRead;
+
+  bool _isOpen = false;
+
+  uint8_t _data[32];
+  int _datapos;
+
+  SoftwareSerial *_pmsSerial;
 
   /**
-   * @brief The _xAction holds the actions that is submitted when ...
+   * @brief The _changeAction holds the actions that is submitted when new data was received from the sensor.
    */
-  String _xAction;
+  String _changeAction;
 };
+
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+bool PMSElement::registered =
+    ElementRegistry::registerElement("pms", PMSElement::create);
+#endif
+
 
 #endif

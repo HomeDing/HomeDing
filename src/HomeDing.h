@@ -37,6 +37,8 @@
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
+#define HOMEDING_INCLUDE_LOG
+#define HOMEDING_INCLUDE_PMS
 #endif
 
 // Easy include of all elements for an attached display.
@@ -106,13 +108,14 @@
 #include <PWMOutElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_DisplayText
-#include <DisplayTextElement.h>
+#ifdef HOMEDING_INCLUDE_LOG
+#include <core/LogElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_DisplayDot
-#include <DisplayDotElement.h>
+#ifdef HOMEDING_INCLUDE_PMS
+#include <sensors/PMSElement.h>
 #endif
+
 
 // ===== OPTIONAL DISPLAY ELEMENTS =====
 
@@ -126,6 +129,14 @@
 
 #ifdef HOMEDING_INCLUDE_DISPLAYSH1106
 #include <displays/DisplaySH1106Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DisplayText
+#include <DisplayTextElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DisplayDot
+#include <DisplayDotElement.h>
 #endif
 
 // ===== OPTIONAL ELEMENTS =====

@@ -34,9 +34,6 @@
 
 /* ===== Static factory function ===== */
 
-// SoftwareSerial pmsSerial2(2, 0, false, 256);
-bool isOpen = false;
-
 /**
  * @brief static factory function to create a new PMSElement
  * @return PMSElement* created element
@@ -48,17 +45,6 @@ Element *PMSElement::create()
 
 
 /* ===== Element functions ===== */
-
-// PMSElement::PMSElement() {}
-
-// maybe: overwrite the init() function.
-// void PMSElement::init(Board *board)
-// {
-//   LOGGER_ETRACE("init()");
-//   Element::init(board);
-//   // do something here like initialization
-// } // init()
-
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -97,9 +83,7 @@ void PMSElement::start()
 {
   LOGGER_ETRACE("start(%d, %d)", _pinrx, _pintx);
 
-  // _pmsSerial->begin(9600);
-  // _pmsSerial->
-  isOpen = false;
+  _isOpen = false;
   _nextRead = _board->getSeconds() + 4;
 
   Element::start();
@@ -116,11 +100,11 @@ void PMSElement::loop()
   if (_nextRead <= now) {
     // do something
 
-    if (!isOpen) {
+    if (!_isOpen) {
       if (!_pmsSerial)
         _pmsSerial = new SoftwareSerial(_pinrx, _pintx, false, 128);
       _pmsSerial->begin(9600);
-      isOpen = true;
+      _isOpen = true;
       _datapos = 0;
     } // if
 
@@ -128,17 +112,12 @@ void PMSElement::loop()
       Serial.printf("X");
       _pmsSerial->end();
       // just try again
-      isOpen = false;
+      _isOpen = false;
       return;
     } // if
 
     while (_pmsSerial->available()) {
       int b = _pmsSerial->read();
-
-      // raw logging
-      // if (b == 0x42)
-      //   Serial.printf("\n");
-      // Serial.printf("%02x", b);
 
       // collect data to buffer
       if ((_datapos == 0) && (b == 0x42)) {
@@ -152,7 +131,7 @@ void PMSElement::loop()
         if (_datapos == 32) {
           // all data received
           _pmsSerial->end();
-          isOpen = false;
+          _isOpen = false;
           _nextRead = now + _readTime;
 
           // check checksum
@@ -168,16 +147,12 @@ void PMSElement::loop()
 
             if (_changeAction.length() > 0)
               _board->dispatch(_changeAction, _value);
-
-            // for (n = 0; n < 32; n++) Serial.printf("%02x", _data[n]);
-            // Serial.printf("\n");
           } // if
 
         } // if
       } // if
     } // while
-  }
-
+  } // if
 } // loop()
 
 
@@ -190,24 +165,5 @@ void PMSElement::pushState(
   Element::pushState(callback);
   callback("value", String(_value).c_str());
 } // pushState()
-
-
-// maybe: overwrite the term() function,
-
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_My should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to PMSElement.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the PMSElement onto the ElementRegistry.
-bool PMSElement::registered =
-    ElementRegistry::registerElement("pms", PMSElement::create);
-// #endif
 
 // End

@@ -20,8 +20,6 @@
 #ifndef DSTIMEELEMENT_H
 #define DSTIMEELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
 #include <ElementRegistry.h>
 
 /**

@@ -10,9 +10,12 @@
 // Changelog: see DigitalOutElement.h
 // -----
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
+
 #include <DigitalOutElement.h>
 #include <ElementRegistry.h>
-#include <Board.h>
 
 /**
  * @brief static factory function to create a new DigitalOutElement.

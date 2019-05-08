@@ -18,9 +18,6 @@
 #ifndef DIGITALOUT_H
 #define DIGITALOUT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief The DigitalOutElement is an Element that creates an digital output
  * signal based on actions.

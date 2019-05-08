@@ -16,8 +16,11 @@
  * Changelog: see DeviceElement.h
  */
 
-#include "DeviceElement.h"
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include "DeviceElement.h"
 #include <ElementRegistry.h>
 
 /* ===== Static factory function ===== */
@@ -49,12 +52,6 @@ bool DeviceElement::set(const char *name, const char *value)
   if (_stricmp(name, "name") == 0) {
     _board->deviceName = value;
 
-  } else if (_stricmp(name, "led") == 0) {
-    _board->sysLED = _atopin(value);
-
-  } else if (_stricmp(name, "button") == 0) {
-    _board->sysButton = _atopin(value);
-
   } else if (_stricmp(name, "description") == 0) {
     _description = value;
 
@@ -64,6 +61,17 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "room") == 0) {
     _room = value;
 
+    // === WiFi Manager Settings
+  } else if (_stricmp(name, "led") == 0) {
+    _board->sysLED = _atopin(value);
+
+  } else if (_stricmp(name, "button") == 0) {
+    _board->sysButton = _atopin(value);
+
+  } else if (_stricmp(name, "connecttime") == 0) {
+    _board->nextModeTime = _atotime(value) * 1000;
+
+// === startup behavior
   } else if (_stricmp(name, "homepage") == 0) {
     _board->homepage = value;
 
@@ -78,6 +86,7 @@ bool DeviceElement::set(const char *name, const char *value)
     // Set global logger loglevel
     Logger::logger_level = _atoi(value);
 
+// === Log something
   } else if (_stricmp(name, "log") == 0) {
     // Log a information with time.
     unsigned long now = _board->getTimeOfDay();

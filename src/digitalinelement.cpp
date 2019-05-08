@@ -14,8 +14,11 @@
  * Changelog: see DigitalInElement.h
  */
 
-#include "DigitalInElement.h"
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include "DigitalInElement.h"
 #include <ElementRegistry.h>
 
 // #include <OneButton.h>

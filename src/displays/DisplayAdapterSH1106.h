@@ -14,9 +14,6 @@
 #ifndef DisplayAdapterSH1106_H
 #define DisplayAdapterSH1106_H
 
-#include <Arduino.h>
-#include <displays/DisplayAdapter.h>
-
 #include <SH1106Wire.h>
 
 class DisplayAdapterSH1106 : DisplayAdapter

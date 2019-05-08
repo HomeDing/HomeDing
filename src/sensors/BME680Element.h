@@ -18,9 +18,6 @@
 #ifndef BME680ELEMENT_H
 #define BME680ELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 #include <Adafruit_BME680.h>
 
 /**

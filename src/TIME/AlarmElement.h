@@ -18,9 +18,6 @@
 #ifndef AlarmELEMENT_H
 #define AlarmELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 #define TIME_T_NOT (48 * 60 * 60)
 
 /**

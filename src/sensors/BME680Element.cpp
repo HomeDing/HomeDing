@@ -14,8 +14,10 @@
  * Changelog:see BME680Element.h
  */
 
-
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
 #include <sensors/BME680Element.h>
 #include <ElementRegistry.h>
 

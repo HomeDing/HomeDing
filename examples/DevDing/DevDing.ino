@@ -35,13 +35,16 @@
  * * 11.10.2018 move network initialization into board loop.
  */
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
+
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
 #include <FS.h>
 
-#include <Board.h>
 #include <BoardServer.h>
 #include <ElementRegistry.h>
 #include <FileServer.h>

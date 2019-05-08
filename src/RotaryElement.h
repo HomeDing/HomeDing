@@ -18,9 +18,6 @@
 #ifndef RotaryElement_H
 #define RotaryElement_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief RotaryElement implements...
  * @details

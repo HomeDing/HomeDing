@@ -15,9 +15,12 @@
  */
 
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
+
 #include "time/ScheduleElement.h"
 #include <ElementRegistry.h>
-#include <Board.h>
 
 /* ===== Define local constants and often used strings ===== */
 

@@ -10,9 +10,12 @@
 // Changelog: see OTAElement.h
 // -----
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
+
 #include <core/OTAElement.h>
 #include <ElementRegistry.h>
-#include <Board.h>
 
 #include <ArduinoOTA.h>
 

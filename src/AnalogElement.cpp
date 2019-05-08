@@ -13,8 +13,11 @@
  * Changelog: see AnalogElement.h
  */
 
-#include "AnalogElement.h"
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include "AnalogElement.h"
 #include <ElementRegistry.h>
 
 /**

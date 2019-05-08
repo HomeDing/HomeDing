@@ -14,7 +14,6 @@
 #ifndef DisplayAdapterSSD1306_H
 #define DisplayAdapterSSD1306_H
 
-#include <Arduino.h>
 #include <displays/DisplayAdapter.h>
 
 #include <SSD1306Wire.h>

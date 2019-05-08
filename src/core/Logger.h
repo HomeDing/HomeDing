@@ -23,9 +23,6 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include <Arduino.h>
-#include <cstdarg> 
-
 // information to debug port and log file.
 #define LOGGER_LEVEL_INFO 0
 

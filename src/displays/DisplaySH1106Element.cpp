@@ -14,8 +14,11 @@
  * Changelog:see DisplaySH1106Element.h
  */
 
-#include "DisplaySH1106Element.h"
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include "DisplaySH1106Element.h"
 #include <ElementRegistry.h>
 
 #include <displays/DisplayAdapterSH1106.h>

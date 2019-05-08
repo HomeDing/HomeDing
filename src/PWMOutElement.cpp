@@ -10,8 +10,11 @@
 // Changelog: see PWMOutElement.h
 // -----
 
-#include <PWMOutElement.h>
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include <PWMOutElement.h>
 #include <ElementRegistry.h>
 
 /**

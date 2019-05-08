@@ -27,7 +27,10 @@
  * Changelog: see time/NTPTimeElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
 #include <ElementRegistry.h>
 #include <time/NTPTimeElement.h>
 

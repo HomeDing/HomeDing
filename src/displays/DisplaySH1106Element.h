@@ -18,9 +18,6 @@
 #ifndef DisplaySH1106Element_H
 #define DisplaySH1106Element_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief DisplaySH1106Element implements creating an Display Adapter for a LCD
  * attached to the I2C bus.

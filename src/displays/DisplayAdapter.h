@@ -19,8 +19,6 @@
 #ifndef DisplayAdapter_H
 #define DisplayAdapter_H
 
-#include <Arduino.h>
-
 class DisplayAdapter
 {
 public:

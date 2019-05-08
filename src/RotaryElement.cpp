@@ -14,9 +14,12 @@
  * Changelog:see RotaryElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
+
 #include <RotaryElement.h>
 #include <ElementRegistry.h>
-#include <Board.h>
 
 #include <RotaryEncoder.h>
 

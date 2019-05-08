@@ -18,8 +18,10 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
 
-#include <Arduino.h>
+#include <string.h>
 #include <functional>
+#include <memory>
+#include <cstdarg> 
 
 // forward class declarations
 class Board;

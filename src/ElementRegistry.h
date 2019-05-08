@@ -14,9 +14,6 @@
 #ifndef ELEMENTREGISTRY_H
 #define ELEMENTREGISTRY_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 #define REG_MAX_TYPES 48
 
 typedef Element *(*CreateElementFn)(void);

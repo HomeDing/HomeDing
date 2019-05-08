@@ -18,9 +18,6 @@
 #ifndef MyELEMENT_H
 #define MyELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief MyElement implements...
  * @details

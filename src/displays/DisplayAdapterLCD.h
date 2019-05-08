@@ -14,7 +14,6 @@
 #ifndef DisplayAdapterLCD_H
 #define DisplayAdapterLCD_H
 
-#include <Arduino.h>
 #include <Wire.h>
 
 #include <LiquidCrystal_PCF8574.h>

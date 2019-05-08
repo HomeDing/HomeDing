@@ -10,8 +10,10 @@
 // Changelog: see Element.h
 // -----
 
-#include <Board.h>
+#include <Arduino.h>
 #include <Element.h>
+#include <Board.h>
+
 #include <ElementRegistry.h>
 
 /* ===== Element functions ===== */

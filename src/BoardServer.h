@@ -38,12 +38,6 @@ specific url like: <http://devding/$board/timer/blink>.
 #ifndef BOARDSERVER_H
 #define BOARDSERVER_H
 
-#include <functional>
-
-#include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 

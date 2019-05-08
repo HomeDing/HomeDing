@@ -20,9 +20,6 @@
 #ifndef ANALOG_H
 #define ANALOG_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief The AnalogElement is an special Element that creates actions based on
  * a digital IO signal.

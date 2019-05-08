@@ -17,7 +17,10 @@
  * Changelog: see RemoteElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
 #include <ElementRegistry.h>
 #include <RemoteElement.h>
 

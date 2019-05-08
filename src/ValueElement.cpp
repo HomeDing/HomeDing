@@ -14,9 +14,11 @@
  * Changelog:see ValueElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
 
 #include <ValueElement.h>
-#include <Board.h>
 #include <ElementRegistry.h>
 
 /**

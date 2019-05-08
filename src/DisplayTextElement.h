@@ -21,9 +21,6 @@
 #ifndef DisplayTextElement_H
 #define DisplayTextElement_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 #include <displays/DisplayAdapter.h>
 
 /**

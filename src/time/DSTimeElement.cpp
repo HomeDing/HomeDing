@@ -18,7 +18,10 @@
  * Changelog: see time/DSTimeElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
 #include <ElementRegistry.h>
 #include <time/DSTimeElement.h>
 

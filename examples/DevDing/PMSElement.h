@@ -18,8 +18,6 @@
 #ifndef PMSELEMENT_H
 #define PMSELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
 #include <SoftwareSerial.h>
 
 /**

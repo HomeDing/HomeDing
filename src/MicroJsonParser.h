@@ -4,8 +4,6 @@
 #ifndef MICROJSON_H
 #define MICROJSON_H
 
-#include <functional>
-
 #define MICROJSON_PATH_SEPARATOR '/'
 #define MICROJSON_PATH_SEPARATOR_S "/"
 

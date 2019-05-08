@@ -20,9 +20,6 @@
 #ifndef DHTELEMENT_H
 #define DHTELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 #include <DHTesp.h>
 
 /**

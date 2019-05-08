@@ -19,8 +19,6 @@
 #ifndef FILESERVER_H
 #define FILESERVER_H
 
-#include <functional>
-
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 

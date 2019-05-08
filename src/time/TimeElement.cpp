@@ -15,8 +15,11 @@
  * Changelog: see TimeElement.h
  */
 
-#include <ElementRegistry.h>
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include <ElementRegistry.h>
 #include <time/TimeElement.h>
 
 #include "time.h"

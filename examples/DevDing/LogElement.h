@@ -18,9 +18,6 @@
 #ifndef LOGELEMENT_H
 #define LOGELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief LogElement implements...
  * @details

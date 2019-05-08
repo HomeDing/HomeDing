@@ -16,7 +16,10 @@
  * Changelog: see DHTElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
 #include <sensors/DHTElement.h>
 #include <ElementRegistry.h>
 

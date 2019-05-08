@@ -10,7 +10,10 @@
 // Changelog: see time/TimerElement.h
 // -----
 
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
 #include <ElementRegistry.h>
 #include <time/TimerElement.h>
 

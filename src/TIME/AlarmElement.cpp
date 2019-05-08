@@ -14,8 +14,10 @@
  * Changelog:see AlarmElement.h
  */
 
-
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
 #include <ElementRegistry.h>
 #include <time/AlarmElement.h>
 

@@ -14,7 +14,10 @@
  * Changelog, see DisplayDotElement.h.
  */
 
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
 #include <DisplayDotElement.h>
 
 /**

@@ -15,6 +15,10 @@
  * Changelog: see BoardServer.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
+
 #include <BoardServer.h>
 #include <ElementRegistry.h>
 

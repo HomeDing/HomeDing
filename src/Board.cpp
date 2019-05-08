@@ -15,32 +15,33 @@
  * Changelog: see Board.h
  */
 
-#include <Board.h>
+#include <Arduino.h>
 #include <Element.h>
+#include <Board.h>
+
 #include <ElementRegistry.h>
-#include <string.h>
 
 #include "MicroJsonParser.h"
 
 #include "sntp.h"
 
+#include <DNSServer.h>
+
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
-extern const char *ssid;
-extern const char *passPhrase;
-
-#define NetMode_AUTO 3
-#define NetMode_PSK 2
 #define NetMode_PASS 1
-
-#include <DNSServer.h>
+#define NetMode_PSK 2
+#define NetMode_AUTO 3
 
 DNSServer dnsServer;
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
 
 const byte DNS_PORT = 53;
+
+extern const char *ssid;
+extern const char *passPhrase;
 
 /**
  * @brief Initialize a blank board.

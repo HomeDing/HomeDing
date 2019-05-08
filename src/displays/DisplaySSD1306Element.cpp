@@ -14,8 +14,11 @@
  * Changelog:see DisplaySSD1306Element.h
  */
 
-#include "DisplaySSD1306Element.h"
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include "DisplaySSD1306Element.h"
 #include <ElementRegistry.h>
 
 #include <displays/DisplayAdapterSSD1306.h>

@@ -14,8 +14,11 @@
  * Changelog, see DisplayTextElement.h.
  */
 
-#include <DisplayTextElement.h>
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include <DisplayTextElement.h>
 
 /**
  * @brief static factory function to create a new DisplayTextElement.

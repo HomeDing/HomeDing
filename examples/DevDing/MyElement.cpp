@@ -14,10 +14,12 @@
  * Changelog:see MyElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
 
 #include "MyElement.h"
 #include <ElementRegistry.h>
-#include <Board.h>
 
 /* ===== Define local constants and often used strings ===== */
 

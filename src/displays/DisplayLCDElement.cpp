@@ -14,8 +14,11 @@
  * Changelog:see DisplayLCDElement.h
  */
 
-#include <displays/DisplayLCDElement.h>
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include <displays/DisplayLCDElement.h>
 #include <ElementRegistry.h>
 
 #include <displays/DisplayAdapterLCD.h>

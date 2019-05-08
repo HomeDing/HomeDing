@@ -31,9 +31,6 @@
 #ifndef SERIALCMDELEMENT_H
 #define SERIALCMDELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief The SerialCmdElement is an special Element that reads from the serial
  * input and executes the actions.

@@ -29,12 +29,9 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <Arduino.h>
 #include <ESP8266WebServer.h>
-#include <memory>
 #include <time.h>
 
-#include <Element.h>
 #include <displays/DisplayAdapter.h>
 
 #include "core/Logger.h"
@@ -178,7 +175,7 @@ public:
   // Save Mode
   bool savemode = false;
 
-  // switch to next network connect mode
+  // switch to next network connect mode in msec.
   int nextModeTime = 6 * 1000;
 
   // max. captive mode time

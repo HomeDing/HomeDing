@@ -19,9 +19,6 @@
 #ifndef TIMERELEMENT_H
 #define TIMERELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @details
 @verbatim

@@ -21,9 +21,6 @@
 #ifndef DISPLAYDOTELEMENT_H
 #define DISPLAYDOTELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 #include <displays/DisplayAdapter.h>
 
 /**

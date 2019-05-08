@@ -15,9 +15,12 @@
  * Changelog: see SerialCmdElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
+
 #include "SerialCmdElement.h"
 #include <ElementRegistry.h>
-#include <Board.h>
 
 /**
  * @brief static factory function to create a new SerialCmdElement.

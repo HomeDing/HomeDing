@@ -19,9 +19,6 @@
 #ifndef TIMEELEMENT_H
 #define TIMEELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief The TimeElement is an special Element that creates actions based on
  * a digital IO signal.

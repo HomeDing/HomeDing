@@ -20,9 +20,6 @@
 #ifndef RFSendElement_H
 #define RFSendElement_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief RFSend Element that produces actions based on timing conditions.
  * @details

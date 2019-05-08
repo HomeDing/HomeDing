@@ -14,9 +14,11 @@
  * Changelog:see LogElement.h
  */
 
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
 
 #include "LogElement.h"
-#include <Board.h>
 #include <ElementRegistry.h>
 
 #include <FS.h>

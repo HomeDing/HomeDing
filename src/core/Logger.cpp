@@ -15,9 +15,11 @@
  * see Logger.h
  */
 
-#include <memory>
+#include <Arduino.h>
+#include <Element.h>
+#include <Board.h>
+
 #include <stdio.h>
-#include <string.h>
 
 #include <sntp.h>
 #include <time.h>

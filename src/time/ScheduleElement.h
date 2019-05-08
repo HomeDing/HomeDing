@@ -18,9 +18,6 @@
 #ifndef ScheduleELEMENT_H
 #define ScheduleELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief The ScheduleElement can trigger a ON and OFF action per day based on
  * real time.

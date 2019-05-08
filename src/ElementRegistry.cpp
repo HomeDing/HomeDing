@@ -10,7 +10,10 @@
 // Changelog: see ElementRegistry.h
 // -----
 
+#include <Arduino.h>
 #include <Element.h>
+#include <Board.h>
+
 #include <ElementRegistry.h>
 #include <core/logger.h>
 

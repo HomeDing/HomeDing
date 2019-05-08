@@ -21,9 +21,6 @@
 #ifndef SWITCH_H
 #define SWITCH_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 /**
  * @brief The SwitchElement is an special Element that creates actions based on
  * a digital IO signal.

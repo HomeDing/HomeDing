@@ -21,9 +21,6 @@
 #ifndef REMOTEELEMENT_H
 #define REMOTEELEMENT_H
 
-#include <Arduino.h>
-#include <Element.h>
-
 #include <WiFiClient.h>
 
 /**

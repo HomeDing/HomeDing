@@ -13,8 +13,11 @@
  * Changelog: see SwitchElement.h
  */
 
-#include "SwitchElement.h"
+#include <Arduino.h>
+#include <Element.h>
 #include <Board.h>
+
+#include "SwitchElement.h"
 #include <ElementRegistry.h>
 
 /**

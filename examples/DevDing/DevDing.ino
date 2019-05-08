@@ -1,4 +1,3 @@
-
 /**
  * @file DevDing.ino
  * @brief Sketch that uses the HomeDing Library to implement Things attached the
@@ -33,7 +32,7 @@
  * * 10.10.2018 more robust startup.
  * * 10.10.2018 extend sysinfo
  * * 11.10.2018 move network initialization into board loop.
- */
+*/
 
 #include <Arduino.h>
 #include <Element.h>

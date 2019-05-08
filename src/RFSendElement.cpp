@@ -44,10 +44,6 @@ Element *RFSendElement::create()
 
 /* ===== Element functions ===== */
 
-
-// maybe: overwrite the init() function.
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */

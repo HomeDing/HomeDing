@@ -15,8 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "ButtonElement.h"
 #include <ElementRegistry.h>
@@ -38,38 +38,27 @@ Element *ButtonElement::create()
  */
 bool ButtonElement::set(const char *name, const char *value)
 {
-  // LOGGER_ETRACE("set(%s:%s)", name, value);
+  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
-    _webLevel = _atob(value);
+    _inputLevel = _atob(value);
 
-  } else if (_stricmp(name, "type") == 0) {
-    if (_stricmp(value, "level") == 0) {
-      _type = BUTTON_TYPE_LEVEL;
-    } else if (_stricmp(value, "toggle") == 0) {
-      _type = BUTTON_TYPE_TOGGLE;
-    } else {
-      LOGGER_EERR("unknown type");
-    }
+    // explicitly set the number of millisec that have to pass by before a click
+    // is detected. _clickTicks
 
-  } else if (_stricmp(name, "pin") == 0) {
-    _pin = _atopin(value);
+    // explicitly set the number of millisec that have to pass by before a long
+    // button press is detected.
+    // _pressTicks
 
-  } else if (_stricmp(name, "inverse") == 0) {
-    _inverse = _atob(value);
+  } else if (_stricmp(name, "onclick") == 0) {
+    _clickAction = value;
 
-  } else if (_stricmp(name, "pullup") == 0) {
-    _pullup = _atob(value);
+  } else if (_stricmp(name, "ondoubleclick") == 0) {
+    _doubleClickAction = value;
 
-  } else if (_stricmp(name, "onon") == 0) {
-    _onAction = value;
-
-  } else if (_stricmp(name, "onoff") == 0) {
-    _offAction = value;
-
-  } else if (_stricmp(name, "onvalue") == 0) {
-    _valueAction = value;
+  } else if (_stricmp(name, "onpress") == 0) {
+    _pressAction = value;
 
   } else {
     ret = Element::set(name, value);
@@ -83,61 +72,74 @@ bool ButtonElement::set(const char *name, const char *value)
  */
 void ButtonElement::start()
 {
-  if (_pin >= 0) {
-    pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
-    // read the current level
-    _lastPinLevel = digitalRead(_pin);
-    if (_inverse)
-      _lastPinLevel = !_lastPinLevel;
-  } else {
-    _lastPinLevel = 0;
-  } // if
-  _lastWebLevel = 0;
-
   Element::start();
 } // start()
 
+#define STATE_INIT 0 // waiting for input
+#define STATE_HIGH1 1 // got a first high
+#define STATE_LOW1 2 // went low again
+#define STATE_HIGH2 3 // went up a second time shortly after the first
+#define STATE_PRESSHIGH 6 // is high since a long time.
 
 /**
- * @brief check the state of the input.
+ * @brief check the input level.
  */
 void ButtonElement::loop()
 {
-  if (_pin >= 0) {
-    int lev = digitalRead(_pin);
-    if (_inverse)
-      lev = !lev;
+  unsigned long now = millis(); // current (relative) time in msecs.
 
-    if ((_type == BUTTON_TYPE_TOGGLE) && (_lastPinLevel > lev)) {
-      // toggle _outLevel
-      _outLevel = !_outLevel;
-    }
-    _lastPinLevel = lev;
-  } // if
+  // LOGGER_ETRACE("loop-%d)", _state);
 
-  if (_type == BUTTON_TYPE_TOGGLE) {
-    if (_lastWebLevel > _webLevel) {
-      // toggle _outLevel
-      _outLevel = !_outLevel;
+  // state machine
+  if (_state == STATE_INIT) { // waiting for menu pin being pressed.
+
+    if (_inputLevel) {
+      _state = STATE_HIGH1; // step to state 1
+      _startTime = now; // remember starting time
     } // if
 
-  } else if (_type == BUTTON_TYPE_LEVEL) {
-    _outLevel = (_lastPinLevel || _webLevel);
-  } // if
-  _lastWebLevel = _webLevel;
+  } else if (_state == STATE_HIGH1) { // waiting for menu pin being released.
+    if (!_inputLevel) {
+      _state = STATE_LOW1;
 
-  if (_outLevel != _lastOutLevel) {
-    // LOGGER_ETRACE("output level=%d (%d,%d)", _outLevel, _lastPinLevel, _lastWebLevel);
-    if (_outLevel) {
-      _board->dispatch(_onAction);
-      _board->dispatch(_valueAction, "1");
+    } else if ((_inputLevel) &&
+               ((unsigned long)(now - _startTime) > _pressTicks)) {
+      _board->dispatch(_pressAction);
+      _state = STATE_PRESSHIGH;
 
     } else {
-      _board->dispatch(_offAction);
-      _board->dispatch(_valueAction, "0");
+      // wait. Stay in this state.
     } // if
-    _lastOutLevel = _outLevel;
+
+  } else if (_state == STATE_LOW1) {
+    // waiting for menu pin being pressed the second time or timeout.
+
+    if (_doubleClickAction.length() == 0 ||
+        (unsigned long)(now - _startTime) > _clickTicks) {
+      // this was only a single short click
+      _board->dispatch(_clickAction);
+      _state = STATE_INIT; // restart.
+
+    } else if (_inputLevel) {
+      _state = STATE_HIGH2;
+      // _startTime = now; // remember starting time
+    } // if
+
+  } else if (_state ==
+             STATE_HIGH2) { // waiting for menu pin being released finally.
+    if (!_inputLevel) {
+      // this was a 2 click sequence.
+      _board->dispatch(_doubleClickAction);
+      _state = STATE_INIT;
+    } // if
+
+  } else if (_state == STATE_PRESSHIGH) {
+    // waiting for menu pin being release after long press.
+    if (!_inputLevel) {
+      _state = STATE_INIT;
+    } // if
   } // if
+
 } // loop()
 
 
@@ -145,7 +147,6 @@ void ButtonElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_lastOutLevel).c_str());
 } // pushState()
 
 // End

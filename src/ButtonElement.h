@@ -16,17 +16,14 @@
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
  * * 16.09.2018 pullup config added.
- * * 27.11.2018 also can be defined without a physical pin to be controlled by
- * the web ui.
+ * * 27.11.2018 also can be defined without a physical pin to be controlled by the web ui.
+ * * 10.05.2019 reworked to be used as a processing element with no dependencies to pins.
+ *              Used state machine from the OneButton library.
+ *              Debouncing should be done in the Element that sends the actions to Button.
  */
 
 #ifndef BUTTON_H
 #define BUTTON_H
-
-#define BUTTON_TYPE_LEVEL 0x00
-#define BUTTON_TYPE_TOGGLE 0x01
-
-// class OneButton;
 
 /**
  * @brief The ButtonElement is an special Element that creates actions based on
@@ -75,33 +72,40 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
-  int _type = BUTTON_TYPE_LEVEL;
-  int _pin = -1;
-  bool _inverse = false;
-  bool _pullup = false;
+  bool _inputLevel = 0;
 
-  //  OneButton *_button = NULL;
-  int _lastPinLevel;
-  int _webLevel;
-  int _lastWebLevel;
-  int _lastOutLevel;
-  int _outLevel;
+  /** state of the button behavior */
+  int _state;
+
+  /** start time of level going HIGH. */
+  unsigned long _startTime;
 
   /**
-   * @brief The _onAction is emitted when the logical input level is going from
-   * LOW to HIGH. With type == TOGGLE this action will be emitted every second
-   * time when the input level is going from HIGH to LOW (Button is released).
+   * Number of ticks that have to pass by before a long button press is detected
    */
-  String _onAction;
+  unsigned long _pressTicks = 1000;
 
   /**
-   * @brief The _offAction is emitted when the logical input level is going from
-   * HIGH to LOW. With type == TOGGLE this action will be emitted every second
-   * time when the input level is going from HIGH to LOW (Button is released).
+   * Number of milliseconds that have to pass by before a click is detected.
    */
-  String _offAction;
+  unsigned long _clickTicks = 600;
 
-  String _valueAction;
+
+  /**
+   * The _clickAction is emitted when the input level has been HIGH(1) then
+   * LOW(0) and no other level change has observed since `_clickTicks`.
+   */
+  String _clickAction;
+
+  /**
+   * The _doubleClickAction is emitted
+   */
+  String _doubleClickAction;
+
+  /**
+   * @brief The _pressAction is emitted
+   */
+  String _pressAction;
 };
 
 #ifdef HOMEDING_REGISTER

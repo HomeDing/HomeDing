@@ -74,11 +74,12 @@ private:
 
   int _min = -2147483648;
   int _max = 2147483647;
+  int _step = 1;
 
   /**
    * @brief The _xAction holds the actions that is submitted when ...
    */
-  String _changeAction;
+  String _valueAction;
 
   void _setValue(int newValue);
 };

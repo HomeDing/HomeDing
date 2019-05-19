@@ -98,10 +98,10 @@ private:
   int _pin2 = -1;
 
   /**
-   * @brief The _changeAction holds the actions that are submitted when the
+   * @brief The _valueAction holds the actions that are submitted when the
    * rotary was changed.
    */
-  String _changeAction;
+  String _valueAction;
 };
 
 

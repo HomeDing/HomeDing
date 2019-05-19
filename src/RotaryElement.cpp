@@ -15,21 +15,30 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
-#include <RotaryElement.h>
 #include <ElementRegistry.h>
+#include <RotaryElement.h>
 
 #include <RotaryEncoder.h>
+
 
 /* ===== statics ===== */
 
 /**
  * @brief The Instance of the Rotary Encoder library.
- * Because of the interrupt implementation ther can be only one rotary encoder used at the same time.
+ * Because of the interrupt implementation ther can be only ONE rotary encoder used at the same time.
  */
 RotaryEncoder *__encoder;
+
+/**
+ * @brief The interrupt service routine to check the signals from the rotary encoder 
+ */
+ICACHE_RAM_ATTR void __checkPosition()
+{
+  __encoder->tick(); // just call tick() to check the state.
+}
 
 
 /* ===== Static factory function ===== */
@@ -63,8 +72,11 @@ bool RotaryElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "pin2") == 0) {
     _pin2 = _atopin(value);
 
-  } else if (_stricmp(name, "onChange") == 0) {
-    _changeAction = value;
+  } else if (_stricmp(name, "onValue") == 0) {
+    _valueAction = value;
+
+  } else if (_stricmp(name, "onChange") == 0) { // deprecated: use onValue
+    _valueAction = value;
 
   } else {
     ret = Element::set(name, value);
@@ -73,14 +85,6 @@ bool RotaryElement::set(const char *name, const char *value)
   return (ret);
 } // set()
 
-
-/**
- * @brief Check the signals from the rotary encoder 
- */
-void __checkPosition()
-{
-  __encoder->tick(); // just call tick() to check the state.
-}
 
 /**
  * @brief Activate the RotaryElement.
@@ -97,9 +101,9 @@ void RotaryElement::start()
     // LOGGER_ETRACE("connect %d %d\n", _pin1, _pin2);
     __encoder = new RotaryEncoder(_pin1, _pin2);
     pinMode(_pin1, INPUT_PULLUP);
-    attachInterrupt(_pin1,  __checkPosition, CHANGE);
+    attachInterrupt(_pin1, __checkPosition, CHANGE);
     pinMode(_pin2, INPUT_PULLUP);
-    attachInterrupt(_pin2,  __checkPosition, CHANGE);
+    attachInterrupt(_pin2, __checkPosition, CHANGE);
     Element::start();
   } // if
 } // start()
@@ -116,7 +120,7 @@ void RotaryElement::loop()
   long newPos = __encoder->getPosition();
   if (newPos != _value) {
     // send an action with the delta
-    _board->dispatch(_changeAction, _step * (newPos - _value));
+    _board->dispatch(_valueAction, _step * (newPos - _value));
   }
   _value = newPos;
 } // loop()

@@ -42,20 +42,26 @@ bool ValueElement::set(const char *name, const char *value)
   if (_stricmp(name, "value") == 0) {
     _setValue(_atoi(value));
 
+  } else if (_stricmp(name, "up") == 0) {
+    _setValue(_value += _atoi(value) * _step);
+
+  } else if (_stricmp(name, "down") == 0) {
+    _setValue(_value -= _atoi(value) * _step);
+
   } else if (_stricmp(name, "min") == 0) {
     _min = _atoi(value);
 
   } else if (_stricmp(name, "max") == 0) {
     _max = _atoi(value);
 
-  } else if (_stricmp(name, "onchange") == 0) {
-    _changeAction = value;
+  } else if (_stricmp(name, "step") == 0) {
+    _step = _atoi(value);
 
-  } else if (_stricmp(name, "up") == 0) {
-    _setValue(_value += _atoi(value));
+  } else if (_stricmp(name, "onvalue") == 0) {
+    _valueAction = value;
 
-  } else if (_stricmp(name, "down") == 0) {
-    _setValue(_value -= _atoi(value));
+  } else if (_stricmp(name, "onchange") == 0) { // deprecated: use onValue
+    _valueAction = value;
 
   } else {
     ret = Element::set(name, value);
@@ -95,8 +101,8 @@ void ValueElement::_setValue(int newValue)
   if (_value > _max)
     _value = _max;
 
-  if ((active) && (_changeAction.length() > 0))
-    _board->dispatch(_changeAction, _value);
+  if ((active) && (_valueAction.length() > 0))
+    _board->dispatch(_valueAction, _value);
 
 } // _setValue()
 

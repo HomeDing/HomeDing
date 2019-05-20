@@ -15,11 +15,11 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
-#include <ValueElement.h>
 #include <ElementRegistry.h>
+#include <ValueElement.h>
 
 /**
  * @brief static factory function to create a new ValueElement
@@ -57,6 +57,9 @@ bool ValueElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "step") == 0) {
     _step = _atoi(value);
 
+  } else if (_stricmp(name, "label") == 0) {
+    _label = value;
+
   } else if (_stricmp(name, "onvalue") == 0) {
     _valueAction = value;
 
@@ -74,6 +77,12 @@ bool ValueElement::set(const char *name, const char *value)
 void ValueElement::start()
 {
   Element::start();
+
+  // Generate label from id if not given
+  if (_label.length() == 0) {
+    _label = strchr(id, ELEM_ID_SEPARATOR) + 1;
+  }
+
   // send out the actual defined value
   _setValue(_value);
 } // start()
@@ -89,6 +98,17 @@ void ValueElement::pushState(
   callback("value", String(_value).c_str());
 } // pushState()
 
+/** return actual value */
+int ValueElement::getValue()
+{
+  return (_value);
+}
+
+/** return actual value */
+const char *ValueElement::getLabel()
+{
+  return (_label.c_str());
+}
 
 // set a new value, maybe adjust to range
 void ValueElement::_setValue(int newValue)

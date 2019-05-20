@@ -66,6 +66,9 @@ public:
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
 
+  int getValue();
+  const char *getLabel();
+
 private:
   /**
    * @brief The actual value.
@@ -75,6 +78,8 @@ private:
   int _min = -2147483648;
   int _max = 2147483647;
   int _step = 1;
+
+  String _label;
 
   /**
    * @brief The _xAction holds the actions that is submitted when ...

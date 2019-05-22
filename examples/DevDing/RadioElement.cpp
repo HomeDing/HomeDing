@@ -60,10 +60,6 @@ void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t blo
 }
 
 
-// http://lcddevice/$board/radio/r?volume=1
-// http://lcddevice/$board/radio/r?volume=12
-// http://lcddevice/$board/board/0?loglevel=1
-
 /* ===== Static factory function ===== */
 
 /**
@@ -82,20 +78,6 @@ RadioElement::RadioElement()
 {
   startupMode = Element_StartupMode::System;
 }
-
-
-// maybe: overwrite the init() function.
-
-// void RadioElement::init(Board *board)
-// {
-//   LOGGER_ETRACE("init()");
-//   Element::init(board);
-//   // do something here like initialization
-// } // init()
-
-// int _volume = FIX_VOLUME;
-// int _freq = FIX_STATION;
-
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -121,6 +103,26 @@ bool RadioElement::set(const char *name, const char *value)
       _board->dispatch(_frequencyAction, v);
     }
     _freq = _atoi(value);
+
+  } else if (_stricmp(name, "mono") == 0) {
+    if (active) {
+      radio.setMono(_atob(value));
+    }
+
+  } else if (_stricmp(name, "mute") == 0) {
+    if (active) {
+      radio.setMute(_atob(value));
+    }
+
+  } else if (_stricmp(name, "softmute") == 0) {
+    if (active) {
+      radio.setSoftMute(_atob(value));
+    }
+
+  } else if (_stricmp(name, "bassboost") == 0) {
+    if (active) {
+      radio.setBassBoost(_atob(value));
+    }
 
   } else if (_stricmp(name, "onStationName") == 0) {
     _stationAction = value;

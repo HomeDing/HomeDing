@@ -44,30 +44,11 @@ public:
   virtual bool set(const char *name, const char *value);
 
   /**
-   * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
-   */
-  virtual void start();
-
-  /**
    * @brief Give some processing time to the timer to check for next action.
    */
   virtual void loop();
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback);
-
 private:
-  /**
-   * @brief The actual value.
-   */
-  int _value;
-
   /** The actual active visualized and changeable value */
   int _active = 0;
 
@@ -78,17 +59,25 @@ ValueElement *valueList[MAXMENUVALUES];
 
   /** Flag for need to update the value. */
   bool _updateV = false;
+
+  /** Flag for need to update the menu. */
   bool _updateM = false;
 
 
   /**
-   * @brief The _xAction holds the actions that is submitted when ...
+   * @brief The _displayAction holds the actions that is submitted when a new menu item was selected or the value has changed.
    */
   String _displayAction;
+
+  /**
+   * @brief The _valueAction holds the actions that is submitted when the value has changed.
+   */
   String _valueAction;
+
+  /**
+   * @brief The _menuAction holds the actions that is submitted when a new menu item was selected.
+   */
   String _menuAction;
-
-
 };
 
 #endif

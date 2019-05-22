@@ -23,11 +23,6 @@
 #include <ElementRegistry.h>
 
 
-/* ===== Define local constants and often used strings ===== */
-
-// like:
-// #define ANYCONSTANT 1000
-
 /* ===== Static factory function ===== */
 
 /**
@@ -42,25 +37,16 @@ Element *MenuElement::create()
 
 /* ===== Element functions ===== */
 
-// http://lcddevice/$board/menu/0?value=1
-// http://lcddevice/$board/menu/0?value=-1
-
-// http://lcddevice/$board/menu/0?select=1
-// http://lcddevice/$board/rotary/0?onvalue=menu/0?value=$v
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool MenuElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
+  // LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
     if (_count > 0) {
-      // LOGGER_RAW("_active:%d", _active);
-      // LOGGER_RAW("valueList[]:%ld", valueList[_active]);
       valueList[_active]->set("up", value);
       _updateV = true;
     }
@@ -83,7 +69,6 @@ bool MenuElement::set(const char *name, const char *value)
       String n = s.substring(0, pos);
       ValueElement *v = (ValueElement *)_board->getElement("value", n.c_str());
       if ((v) && _count < MAXMENUVALUES) {
-        LOGGER_RAW("** ADD %s", n.c_str());
         valueList[_count++] = v;
       }
       s.remove(0, pos+1);
@@ -110,28 +95,6 @@ bool MenuElement::set(const char *name, const char *value)
 
 
 /**
- * @brief Activate the MenuElement.
- */
-void MenuElement::start()
-{
-  LOGGER_ETRACE("start()");
-
-  // Verify parameters
-
-  // if (parameters ok) {
-  Element::start();
-
-  // valueList[0] = (ValueElement *)_board->getElement("value", "volume");
-  // valueList[1] = (ValueElement *)_board->getElement("value", "frequency");
-
-  // LOGGER_ETRACE("start: %ld %ld", valueList[0], valueList[1]);
-
-  // } // if
-
-} // start()
-
-
-/**
  * @brief Give some processing time to the Element to check for next actions.
  */
 void MenuElement::loop()
@@ -141,8 +104,6 @@ void MenuElement::loop()
   }
 
   if ((_updateM) && _menuAction.length() > 0) {
-    LOGGER_RAW("do menuAction...");
-
     _board->dispatch(_menuAction, valueList[_active]->getValue());
   }
 
@@ -156,25 +117,6 @@ void MenuElement::loop()
   _updateV = false;
   _updateM = false;
 } // loop()
-
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void MenuElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  Element::pushState(callback);
-  callback("value", String(_value).c_str());
-} // pushState()
-
-
-// maybe: overwrite the term() function,
-// void Element::term()
-// {
-//   LOGGER_ETRACE("term()");
-//   active = false;
-// } // term()
 
 
 /* ===== Register the Element ===== */

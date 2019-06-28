@@ -194,6 +194,15 @@ public:
    */
   Element *getElement(const char *elementTypeName);
 
+
+  /**
+   * @brief Get an Element by type and name. Returns found element.
+   * @param elementType type of element.
+   * @param elementName name of element.
+   * @return Element* element in list with this type/name.
+   */
+  Element *getElement(const char *elementType, const char *elementName);
+
   static void reboot(bool wipe);
 
   String deviceName;

@@ -604,7 +604,27 @@ Element *Board::getElement(const char *elementTypeName)
   } // while
   // LOGGER_TRACE("found: %d", l);
   return (l);
-} // getElement
+} // getElement()
+
+
+Element *Board::getElement(const char *elementType, const char *elementName) {
+  // LOGGER_TRACE("getElement(%s/%s)", elementType, elementName);
+
+  String tn = elementType;
+  tn.concat('/');
+  tn.concat(elementName);
+
+  Element *l = _list2;
+  while (l != NULL) {
+    if (String(l->id).equalsIgnoreCase(tn)) {
+      break; // while
+    } // if
+    l = l->next;
+  } // while
+  // LOGGER_TRACE("found: %d", l);
+  return (l);
+
+} // getElement()
 
 
 void Board::reboot(bool wipe)

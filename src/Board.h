@@ -145,6 +145,7 @@ public:
   void dispatch(String &action, const char *value = NULL);
 
   void dispatch(String &action, int value);
+  void dispatch(String &action, String &value);
 
 
   /**

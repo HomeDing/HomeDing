@@ -472,6 +472,15 @@ void Board::dispatch(String &action, const char *value)
 } // dispatch
 
 
+/**
+ * @brief prepare sending all the actions to the right elements.
+ */
+void Board::dispatch(String &action, String &value)
+{
+  if (action.length() > 0)
+    dispatch(action.c_str(), value.c_str());
+} // dispatch
+
 void Board::dispatch(const char *action, const char *value)
 {
   if ((action != NULL) && (*action)) {

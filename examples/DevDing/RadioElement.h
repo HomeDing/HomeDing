@@ -97,6 +97,8 @@ private:
    */
   int _freq = 0;
 
+  bool _mute = false;
+  
   /**
    * @brief The actions that are submitted when a station name is recognized through RDS...
    */

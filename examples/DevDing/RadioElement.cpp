@@ -91,10 +91,11 @@ bool RadioElement::set(const char *name, const char *value)
   if (_stricmp(name, "volume") == 0) {
     v = _atoi(value);
     if (active && v != _volume) {
+      _volume = v;
       radio.setVolume(v);
+      radio.setMute(_mute || (v == 0));
       _board->dispatch(_volumeAction, v);
     }
-    _volume = v;
 
   } else if (_stricmp(name, "frequency") == 0) {
     v = _atoi(value);
@@ -111,7 +112,8 @@ bool RadioElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "mute") == 0) {
     if (active) {
-      radio.setMute(_atob(value));
+      _mute = _atob(value);
+      radio.setMute(_mute || (_volume == 0));
     }
 
   } else if (_stricmp(name, "softmute") == 0) {
@@ -138,9 +140,6 @@ bool RadioElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "onRSSI") == 0) {
     _rssiAction = value;
-
-    // } else if (_stricmp(name, "doAction") == 0) {
-    // make something
 
   } else {
     ret = Element::set(name, value);
@@ -171,7 +170,7 @@ void RadioElement::start()
   radio.setBandFrequency(FIX_BAND, FIX_STATION);
   radio.setVolume(_volume);
   radio.setMono(false);
-  radio.setMute(false);
+  radio.setMute(_mute || (_volume == 0));
 
   // if (parameters ok) {
   Element::start();
@@ -180,8 +179,6 @@ void RadioElement::start()
 
   // setup the information chain for RDS data.
   radio.attachReceiveRDS(RDS_process);
-
-  // _scope = this;
 
   rds.attachServicenNameCallback([](char *value) {
     LOGGER_RAW("STATION: %s", value);
@@ -194,8 +191,6 @@ void RadioElement::start()
     _rdsText = value;
     _newR = true;
   });
-
-  // } // if
 
 } // start()
 
@@ -227,7 +222,6 @@ void RadioElement::loop()
     memcpy(&_ri, &newri, sizeof(RADIO_INFO));
     _nextCheck = now + _checkInfo;
   }
-
 } // loop()
 
 

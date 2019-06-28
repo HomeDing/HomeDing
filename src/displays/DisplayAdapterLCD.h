@@ -65,9 +65,9 @@ public:
       display = new LiquidCrystal_PCF8574(_address);
       display->begin(16, 2);
 
-      byte dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
+      int dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
                         0b10001, 0b01110, 0b00000, 0b00000};
-      byte dotOn[8] = {0b00000, 0b01110, 0b11111, 0b11111,
+      int dotOn[8] = {0b00000, 0b01110, 0b11111, 0b11111,
                        0b11111, 0b01110, 0b00000, 0b00000};
 
       display->createChar(1, dotOff);

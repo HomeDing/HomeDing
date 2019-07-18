@@ -14,12 +14,9 @@
  * Changelog:see AndElement.h
  */
 
-// http://nodeding/$board/and/a?value02=0
-// http://nodeding/$board/and/a?value02=1
-
 #include <Arduino.h>
-#include <Board.h>
 #include <Element.h>
+#include <Board.h>
 
 #include "AndElement.h"
 #include <ElementRegistry.h>
@@ -99,21 +96,5 @@ void AndElement::pushState(
   Element::pushState(callback);
   callback("value", String(_outValue).c_str());
 } // pushState()
-
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_My should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to AndElement.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the AndElement onto the ElementRegistry.
-bool AndElement::registered =
-    ElementRegistry::registerElement("and", AndElement::create);
-// #endif
 
 // End

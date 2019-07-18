@@ -30,6 +30,7 @@
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Switch
+#define HOMEDING_INCLUDE_AND
 #define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
@@ -65,6 +66,10 @@
 
 #ifdef HOMEDING_INCLUDE_Switch
 #include <SwitchElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_AND
+#include <AndElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_Analog

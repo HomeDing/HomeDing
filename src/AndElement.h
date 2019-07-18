@@ -1,6 +1,6 @@
 /**
  * @file AndElement.h
- * @brief Element Template class.
+ * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -17,16 +17,6 @@
 
 #ifndef ANDELEMENT_H
 #define ANDELEMENT_H
-
-/**
- * @brief AndElement implements...
- * @details
-@verbatim
-
-The AndElement can ...
-
-@endverbatim
- */
 
 #define AndElementInputs 2
 
@@ -78,5 +68,20 @@ private:
    */
   String _valueAction;
 };
+
+/* ===== Register the Element ===== */
+
+// As long as the Element is project specific or is a element always used
+// the registration is placed here without using a register #define.
+
+// When transferred to the HomeDing library a #define like the
+// HOMEDING_INCLUDE_My should be used to allow the sketch to select the
+// available Elements. See <HomeDing.h> the move these lines to AndElement.h:
+
+#ifdef HOMEDING_REGISTER
+// Register the AndElement onto the ElementRegistry.
+bool AndElement::registered =
+    ElementRegistry::registerElement("and", AndElement::create);
+#endif
 
 #endif

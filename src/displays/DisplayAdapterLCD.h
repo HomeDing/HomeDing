@@ -23,14 +23,13 @@ class DisplayAdapterLCD : DisplayAdapter
 {
 public:
   /**
-   * @brief Construct a new Display Adapter for a SSD1306 display
-   * using common parameters.
-   * I2C defaults to 4(SDA) and 5(SCL) for most boards.
+   * @brief Construct a new Display Adapter for a LiquidCrystal display
+   * using common address 0x27 and 2*16 layout
    */
   DisplayAdapterLCD()
   {
     // use parameters of a common display board.
-    DisplayAdapterLCD(0x27, SDA, SCL);
+    DisplayAdapterLCD(0x27, 2, 16);
   } // DisplayAdapterLCD()
 
 
@@ -38,8 +37,8 @@ public:
    * @brief Construct a new Display Adapter for a SSD1306 display
    * using specific parameters.
    */
-  DisplayAdapterLCD(int address, int sda, int scl)
-      : _address(address), _sda(sda), _scl(scl)
+  DisplayAdapterLCD(int address, int lines, int columns)
+      : _address(address), _lines(lines), _cols(columns)
   {
     lineHeight = 1;
     charWidth = 1;
@@ -49,9 +48,7 @@ public:
   bool init()
   {
     // test if a display device is attached
-    Wire.begin(_sda, _scl);
-    LOGGER_TRACE("connect %d %d", _sda, _scl);
-
+    Wire.begin();
     Wire.beginTransmission(_address);
     int error = Wire.endTransmission();
 
@@ -63,7 +60,7 @@ public:
     } else {
       Serial.printf("setupDisplay...\n");
       display = new LiquidCrystal_PCF8574(_address);
-      display->begin(16, 2);
+      display->begin(_cols, _lines);
 
       int dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
                         0b10001, 0b01110, 0b00000, 0b00000};
@@ -157,15 +154,8 @@ private:
    */
   int _address;
 
-  /**
-   * @brief GPIO pin for the I2C SCL Line.
-   */
-  int _scl;
-
-  /**
-   * @brief GPIO pin for the I2C SDA Line.
-   */
-  int _sda;
+  int _lines;
+  int _cols;
 };
 
 #endif // DisplayAdapterLCD_H

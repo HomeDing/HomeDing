@@ -53,11 +53,11 @@ bool DisplayLCDElement::set(const char *name, const char *value)
   if (_stricmp(name, "address") == 0) {
     _address = strtol(value, nullptr, 0);
 
-  } else if (_stricmp(name, "sda") == 0) {
-    _sda = _atopin(value);
+  } else if (_stricmp(name, "lines") == 0) {
+    _lines = strtol(value, nullptr, 0);
 
-  } else if (_stricmp(name, "scl") == 0) {
-    _scl = _atopin(value);
+  } else if (_stricmp(name, "columns") == 0) {
+    _cols = strtol(value, nullptr, 0);
 
   } else {
     ret = Element::set(name, value);
@@ -74,8 +74,8 @@ bool DisplayLCDElement::set(const char *name, const char *value)
 void DisplayLCDElement::start()
 {
   DisplayAdapter *d;
-  LOGGER_ETRACE("start(0x%x,%d,%d)", _address, _sda, _scl);
-  d = (DisplayAdapter *)(new DisplayAdapterLCD(_address, _sda, _scl));
+  LOGGER_ETRACE("start(0x%x)", _address);
+  d = (DisplayAdapter *)(new DisplayAdapterLCD(_address, _lines, _cols));
 
   bool success = d->init();
   if (success) {

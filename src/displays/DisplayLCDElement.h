@@ -62,8 +62,8 @@ public:
 
 private:
   int _address = 0x27;
-  int _sda = SDA;
-  int _scl = SCL;
+  int _lines = 2;
+  int _cols = 16;
 };
 
 #ifdef HOMEDING_REGISTER

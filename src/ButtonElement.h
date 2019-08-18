@@ -20,6 +20,8 @@
  * * 10.05.2019 reworked to be used as a processing element with no dependencies to pins.
  *              Used state machine from the OneButton library.
  *              Debouncing should be done in the Element that sends the actions to Button.
+ * * 18.08.2019 Settings in tick for timing
+ * * 18.08.2019 Remote actions
  */
 
 #ifndef BUTTON_H

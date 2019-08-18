@@ -72,6 +72,13 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
+  /** Actions */
+  typedef enum {
+    ACTION_CLICK = 1,
+    ACTION_DOUBLECLICK = 2,
+    ACTION_PRESS = 9
+  } ACTIONS;
+
   bool _inputLevel = 0;
 
   /** state of the button behavior */
@@ -106,6 +113,16 @@ private:
    * @brief The _pressAction is emitted
    */
   String _pressAction;
+
+  /**
+   * @brief The _actionAction is emitted
+   */
+  String _actionAction;
+
+  /**
+   * @brief ...
+   */
+  void _send(ACTIONS action);
 };
 
 #ifdef HOMEDING_REGISTER

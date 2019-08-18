@@ -21,7 +21,13 @@
 #include "ButtonElement.h"
 #include <ElementRegistry.h>
 
-// #include <OneButton.h>
+
+#define STATE_INIT 0 // waiting for input
+#define STATE_HIGH1 1 // got a first high
+#define STATE_LOW1 2 // went low again
+#define STATE_HIGH2 3 // went up a second time shortly after the first
+#define STATE_PRESSHIGH 6 // is high since a long time.
+
 
 /**
  * @brief static factory function to create a new ButtonElement.
@@ -44,12 +50,21 @@ bool ButtonElement::set(const char *name, const char *value)
   if (_stricmp(name, "value") == 0) {
     _inputLevel = _atob(value);
 
-    // explicitly set the number of millisec that have to pass by before a click
-    // is detected. _clickTicks
+  } else if (_stricmp(name, "action") == 0) {
+    // received an action that will be processedn
+    if (_stricmp(value, "click") == 0) {
+      _send(ACTION_CLICK);
+    } else if (_stricmp(value, "doubleclick") == 0) {
+      _send(ACTION_DOUBLECLICK);
+    } else if (_stricmp(value, "press") == 0) {
+      _send(ACTION_PRESS);
+    }
 
-    // explicitly set the number of millisec that have to pass by before a long
-    // button press is detected.
-    // _pressTicks
+  } else if (_stricmp(name, "clickticks") == 0) {
+    _clickTicks = _atoi(value);
+
+  } else if (_stricmp(name, "pressticks") == 0) {
+    _pressTicks = _atoi(value);
 
   } else if (_stricmp(name, "onclick") == 0) {
     _clickAction = value;
@@ -59,6 +74,9 @@ bool ButtonElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "onpress") == 0) {
     _pressAction = value;
+
+  } else if (_stricmp(name, "onaction") == 0) {
+    _actionAction = value;
 
   } else {
     ret = Element::set(name, value);
@@ -75,11 +93,6 @@ void ButtonElement::start()
   Element::start();
 } // start()
 
-#define STATE_INIT 0 // waiting for input
-#define STATE_HIGH1 1 // got a first high
-#define STATE_LOW1 2 // went low again
-#define STATE_HIGH2 3 // went up a second time shortly after the first
-#define STATE_PRESSHIGH 6 // is high since a long time.
 
 /**
  * @brief check the input level.
@@ -88,7 +101,8 @@ void ButtonElement::loop()
 {
   unsigned long now = millis(); // current (relative) time in msecs.
 
-  // LOGGER_ETRACE("loop-%d)", _state);
+  // if (_state != STATE_INIT)
+  //   LOGGER_ETRACE("loop-%d)", _state);
 
   // state machine
   if (_state == STATE_INIT) { // waiting for menu pin being pressed.
@@ -104,7 +118,7 @@ void ButtonElement::loop()
 
     } else if ((_inputLevel) &&
                ((unsigned long)(now - _startTime) > _pressTicks)) {
-      _board->dispatch(_pressAction);
+      _send(ACTION_PRESS);
       _state = STATE_PRESSHIGH;
 
     } else {
@@ -114,10 +128,10 @@ void ButtonElement::loop()
   } else if (_state == STATE_LOW1) {
     // waiting for menu pin being pressed the second time or timeout.
 
-    if (_doubleClickAction.length() == 0 ||
-        (unsigned long)(now - _startTime) > _clickTicks) {
+    // if (_doubleClickAction.length() == 0 || ...
+    if ((unsigned long)(now - _startTime) > _clickTicks) {
       // this was only a single short click
-      _board->dispatch(_clickAction);
+      _send(ACTION_CLICK);
       _state = STATE_INIT; // restart.
 
     } else if (_inputLevel) {
@@ -125,11 +139,10 @@ void ButtonElement::loop()
       // _startTime = now; // remember starting time
     } // if
 
-  } else if (_state ==
-             STATE_HIGH2) { // waiting for menu pin being released finally.
+  } else if (_state == STATE_HIGH2) { // waiting for menu pin being released finally.
     if (!_inputLevel) {
       // this was a 2 click sequence.
-      _board->dispatch(_doubleClickAction);
+      _send(ACTION_DOUBLECLICK);
       _state = STATE_INIT;
     } // if
 
@@ -148,5 +161,30 @@ void ButtonElement::pushState(
 {
   Element::pushState(callback);
 } // pushState()
+
+
+void ButtonElement::_send(ACTIONS action)
+{
+  String a;
+  const char *actionName = NULL;
+
+  if (action == ACTION_CLICK) {
+    a = _clickAction;
+    actionName = "click";
+
+  } else if (action == ACTION_DOUBLECLICK) {
+    a = _doubleClickAction;
+    actionName = "doubleclick";
+
+  } else if (action == ACTION_PRESS) {
+    a = _pressAction;
+    actionName = "press";
+  }
+
+  if (a.length() > 0)
+    _board->dispatch(a);
+  if (actionName)
+    _board->dispatch(_actionAction, actionName);
+} // _send()
 
 // End

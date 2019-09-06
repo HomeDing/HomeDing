@@ -46,7 +46,6 @@ DeviceElement::DeviceElement()
 
 bool DeviceElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "name") == 0) {

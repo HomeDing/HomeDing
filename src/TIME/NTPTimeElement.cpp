@@ -67,7 +67,6 @@ NTPTimeElement::NTPTimeElement()
  */
 bool NTPTimeElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, NTPE_ntpserver) == 0) {

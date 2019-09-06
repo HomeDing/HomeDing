@@ -32,7 +32,6 @@ Element *TimerElement::create()
  */
 bool TimerElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
   unsigned long now = _board->getSeconds();
   bool ret = true;
 

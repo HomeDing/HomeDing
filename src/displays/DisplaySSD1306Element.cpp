@@ -51,7 +51,6 @@ DisplaySSD1306Element::DisplaySSD1306Element()
  */
 bool DisplaySSD1306Element::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "address") == 0) {

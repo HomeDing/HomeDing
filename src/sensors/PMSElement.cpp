@@ -51,7 +51,6 @@ Element *PMSElement::create()
  */
 bool PMSElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "pinrx") == 0) {

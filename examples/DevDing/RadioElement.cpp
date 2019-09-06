@@ -84,7 +84,6 @@ RadioElement::RadioElement()
  */
 bool RadioElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
   int v;
 

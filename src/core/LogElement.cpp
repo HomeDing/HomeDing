@@ -81,7 +81,6 @@ void LogElement::init(Board *board)
  */
 bool LogElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "filename") == 0) {

@@ -15,8 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <DisplayTextElement.h>
 
@@ -33,7 +33,8 @@ Element *DisplayTextElement::create()
 /**
  * @brief send current text to display
  */
-void DisplayTextElement::_drawText() {
+void DisplayTextElement::_drawText()
+{
   // LOGGER_EINFO("draw %d (%s)", active, _value.c_str());
   if (active) {
     _display->clear(_x, _y, _w, _h);
@@ -50,7 +51,6 @@ void DisplayTextElement::_drawText() {
  */
 bool DisplayTextElement::set(const char *name, const char *value)
 {
-  // LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "prefix") == 0) {
@@ -77,13 +77,11 @@ bool DisplayTextElement::set(const char *name, const char *value)
     _value = value;
     _drawText();
 
-  } else if (! active) {
-    // no actions.
-    LOGGER_ETRACE(" not active.");
-
   } else if (_stricmp(name, "clear") == 0) {
-    _display->clear();
-    _display->flush();
+    if (active) {
+      _display->clear();
+      _display->flush();
+    }
 
   } else {
     ret = Element::set(name, value);

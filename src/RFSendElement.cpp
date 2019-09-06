@@ -49,7 +49,6 @@ Element *RFSendElement::create()
  */
 bool RFSendElement::set(const char *name, const char *value)
 {
-  // LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {

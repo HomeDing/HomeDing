@@ -56,7 +56,6 @@ TimeElement::TimeElement() {
  */
 bool TimeElement::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s:%s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, TIME_ontime) == 0) {
@@ -137,7 +136,6 @@ void TimeElement::loop()
 void TimeElement::_sendAction(String &action, const char *fmt, time_t tStamp)
 {
   if (action.length()) {
-    LOGGER_ETRACE("_send(%s)", action.c_str());
     char b[32];
     struct tm *tmp = localtime(&tStamp);
     strftime(b, sizeof(b), fmt, tmp);

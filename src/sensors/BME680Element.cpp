@@ -55,7 +55,6 @@ Element *BME680Element::create()
  */
 bool BME680Element::set(const char *name, const char *value)
 {
-  LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "readtime") == 0) {

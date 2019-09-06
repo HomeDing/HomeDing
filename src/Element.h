@@ -27,6 +27,20 @@
 class Board;
 class Element;
 
+
+// ===== Pins =====
+// some EPS8266 boards do not have Dx pins defined.+
+// Here fore compatibility reasons...
+#ifndef D3
+#define D3 0
+#endif
+
+#ifndef D4
+#define D4 2
+#endif
+
+
+// ===== Helping classes =====
 #include <core/Logger.h>
 
 /**

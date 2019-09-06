@@ -35,8 +35,8 @@
 */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
@@ -244,7 +244,7 @@ void setup(void)
 
     if ((mainBoard.boardState == BOARDSTATE_RUNCAPTIVE) &&
         ((strcmp(uri, "/connecttest.txt") == 0) ||
-         (strcmp(uri, "/redirect") == 0)||
+         (strcmp(uri, "/redirect") == 0) ||
          (strcmp(uri, "/more.txt") == 0))) {
       handleRedirect();
     } else {

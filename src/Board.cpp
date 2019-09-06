@@ -16,8 +16,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <ElementRegistry.h>
 
@@ -57,11 +57,30 @@ void Board::init(ESP8266WebServer *serv)
   WiFi.begin();
   deviceName = WiFi.hostname(); // use mac based default device name
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
-                               // https://tools.ietf.org/html/rfc1123 952
+      // https://tools.ietf.org/html/rfc1123 952
 
   // check save-mode
   savemode = false;
 
+  // if autoconnect is enabled there was a privious networc connection.
+  // Try to reconnect very early, now. - Configuration may take too long.
+
+  if (WiFi.getAutoConnect()) {
+    LOGGER_TRACE("autoconnect start...");
+
+    unsigned long ct = millis() + (4 * 1000); // TODO: make configurable
+    wl_status_t wifi_status;
+    while (ct > millis()) {
+      delay(100);
+      wifi_status = WiFi.status();
+
+      if ((wifi_status == WL_CONNECTED) || (wifi_status == WL_NO_SSID_AVAIL) ||
+          (wifi_status == WL_CONNECT_FAILED)) {
+        break;
+      } // if
+    } // while
+    LOGGER_TRACE("autoconnect done %d", wifi_status);
+  } // if
 } // init()
 
 
@@ -81,7 +100,7 @@ void Board::addElements()
 
         if (level == 3) {
           if (name == NULL) {
-            LOGGER_TRACE(" new Element %s", path);
+            LOGGER_TRACE("new %s", path);
             // path = <elem-type>/<elem-name>
 
             // create that element using the typename
@@ -91,7 +110,7 @@ void Board::addElements()
             char *p = strchr(tmp, MICROJSON_PATH_SEPARATOR);
             if (p)
               *p = '\0'; // cut at first path separator. The type remains in the
-                         // buffer.
+                  // buffer.
 
             _lastElem = ElementRegistry::createElement(tmp);
             if (_lastElem == NULL) {
@@ -104,7 +123,7 @@ void Board::addElements()
 
           } else if (_lastElem != NULL) {
             // add a parameter to the last Element
-            LOGGER_TRACE(" add %s=%s", name, value);
+            LOGGER_TRACE(" %s:%s", name, value);
             _lastElem->set(name, value);
           } // if
         } // if
@@ -155,6 +174,7 @@ void Board::loop()
   wl_status_t wifi_status = WiFi.status();
   bool autoCon = WiFi.getAutoConnect();
   String ipStr;
+  delay(10);
 
   switch (boardState) {
   case BOARDSTATE_NONE:
@@ -165,10 +185,9 @@ void Board::loop()
     // load all config files and create+start elements
     addElements();
     start(Element_StartupMode::System);
-    // LOGGER_TRACE("SYS Elements started.");
 
-    LOGGER_INFO("devicename=%s", deviceName.c_str());
     WiFi.hostname(deviceName);
+    LOGGER_INFO("n3-status = %d <%s>", WiFi.status(), WiFi.hostname().c_str());
 
     if (display) {
       display->drawText(0, 0, 0, "HomeDing...");
@@ -190,10 +209,9 @@ void Board::loop()
     break;
 
   case BOARDSTATE_CONNECT:
-    LOGGER_TRACE("autoconnect=%d", autoCon);
-
-    // no accesspoint network when starting up normally.
-    WiFi.softAPdisconnect(true);
+    LOGGER_TRACE("state: ac=%d mode=%d", autoCon, WiFi.getMode());
+    // WiFi.mode(WIFI_STA);
+    // WiFi.begin();
 
     if ((!autoCon) && (netMode == NetMode_AUTO))
       netMode = NetMode_PSK;
@@ -201,13 +219,14 @@ void Board::loop()
     // connect to a same network as before ?
     LOGGER_TRACE("wifi status=(%d)", wifi_status);
     LOGGER_TRACE("wifi ssid=(%s)", WiFi.SSID().c_str());
+    _newState(BOARDSTATE_CONFWAIT);
 
     if (netMode == NetMode_AUTO) {
       // 1. priority:
       // give autoconnect the chance to do it.
       // works only after a successfull network connection in the past.
       LOGGER_TRACE("NetMode_AUTO");
-      WiFi.mode(WIFI_STA);
+      // WiFi.mode(WIFI_STA);
 
     } else if (netMode == NetMode_PSK) {
       // 2. priority:
@@ -226,6 +245,9 @@ void Board::loop()
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, passPhrase);
       } else {
+        LOGGER_TRACE("NetMode_PASS SKIP");
+        connectPhaseEnd = now;
+        return;
       }
     } // if
 
@@ -242,8 +264,6 @@ void Board::loop()
 
     // wait max 30 seconds for connecting to the network
     connectPhaseEnd = now + captiveTime;
-
-    _newState(BOARDSTATE_CONFWAIT);
     break;
   case BOARDSTATE_CONFWAIT:
   case BOARDSTATE_WAIT:
@@ -253,30 +273,31 @@ void Board::loop()
     } // if
 
     // check sysButton
-    if (sysButton >= 0) {
-      if (digitalRead(sysButton) == LOW) {
+    if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
         _newState(BOARDSTATE_STARTCAPTIVE);
-      }
-    }
 
-    if (boardState == BOARDSTATE_CONFWAIT) {
-      if (now > configPhaseEnd)
+    } else if (boardState == BOARDSTATE_CONFWAIT) {
+      if (now > configPhaseEnd) {
         _newState(BOARDSTATE_WAIT);
+      }
 
     } else {
       if (wifi_status == WL_CONNECTED) {
         LOGGER_TRACE("connected.");
+        WiFi.setAutoReconnect(true);
+        WiFi.setAutoConnect(true);
         _newState(BOARDSTATE_GREET);
 
       } else if ((wifi_status == WL_NO_SSID_AVAIL) ||
                  (wifi_status == WL_CONNECT_FAILED) ||
                  (now >= connectPhaseEnd)) {
         netMode -= 1;
-        LOGGER_TRACE("next connect method = %d", netMode);
+        LOGGER_TRACE("wifi status=(%d)", wifi_status);
+        LOGGER_TRACE("next connect method = %d\n", netMode);
         if (netMode) {
           _newState(BOARDSTATE_CONNECT);
         } else {
-          LOGGER_INFO("no-net restarting...");
+          LOGGER_INFO("no-net restarting...\n");
           delay(10000);
           ESP.restart();
         }
@@ -326,7 +347,7 @@ void Board::loop()
       } // if
     }
 
-    // dispatch next action if any
+    // dispatch next action from _actionList if any
     if (_actionList.length() > 0) {
       String _lastAction;
 
@@ -411,9 +432,10 @@ Element *Board::findById(const char *id)
 } // findById
 
 
+// send a event out to the defined target.
 void Board::_dispatchSingle(String evt)
 {
-  // LOGGER_TRACE("dispatchSingle(%s)", evt.c_str());
+  LOGGER_TRACE("dispatch %s", evt.c_str());
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);
   int pos2 = evt.indexOf(ELEM_VALUE);
@@ -441,6 +463,10 @@ void Board::_dispatchSingle(String evt)
         value = "";
       }
       bool ret = target->set(name.c_str(), value.c_str());
+      // also show action in log when target has trace loglevel
+      if ((Logger::logger_level < LOGGER_LEVEL_TRACE) && (target->loglevel >= LOGGER_LEVEL_TRACE))
+        Logger::LoggerPrint("sys", LOGGER_LEVEL_TRACE, "dispatch (%s)", evt.c_str());
+
       if (!ret)
         LOGGER_ERR("Event '%s' was not handled", evt.c_str());
     }
@@ -449,7 +475,7 @@ void Board::_dispatchSingle(String evt)
 
 
 /**
- * @brief prepare sending all the actions to the right elements.
+ * @brief Save an action to the _actionList.
  */
 void Board::dispatch(String &action, int value)
 {
@@ -463,7 +489,7 @@ void Board::dispatch(String &action, int value)
 
 
 /**
- * @brief prepare sending all the actions to the right elements.
+ * @brief Save an action to the _actionList.
  */
 void Board::dispatch(String &action, const char *value)
 {
@@ -473,7 +499,7 @@ void Board::dispatch(String &action, const char *value)
 
 
 /**
- * @brief prepare sending all the actions to the right elements.
+ * @brief Save an action to the _actionList.
  */
 void Board::dispatch(String &action, String &value)
 {
@@ -481,6 +507,10 @@ void Board::dispatch(String &action, String &value)
     dispatch(action.c_str(), value.c_str());
 } // dispatch
 
+
+/**
+ * @brief Save an action to the _actionList.
+ */
 void Board::dispatch(const char *action, const char *value)
 {
   if ((action != NULL) && (*action)) {
@@ -587,11 +617,11 @@ time_t Board::getTimeOfDay()
 /**
  * @brief Get a Element by typename. Returns the first found element.
  */
-Element *Board::getElement(const char *elementTypeName)
+Element *Board::getElement(const char *elementType)
 {
-  // LOGGER_TRACE("getElement(%s)", elementTypeName);
+  // LOGGER_TRACE("getElement(%s)", elementType);
 
-  String tn = elementTypeName;
+  String tn = elementType;
   tn.concat(ELEM_ID_SEPARATOR);
   int tnLength = tn.length();
 
@@ -607,7 +637,8 @@ Element *Board::getElement(const char *elementTypeName)
 } // getElement()
 
 
-Element *Board::getElement(const char *elementType, const char *elementName) {
+Element *Board::getElement(const char *elementType, const char *elementName)
+{
   // LOGGER_TRACE("getElement(%s/%s)", elementType, elementName);
 
   String tn = elementType;

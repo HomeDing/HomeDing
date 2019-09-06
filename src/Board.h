@@ -177,7 +177,7 @@ public:
   bool savemode = false;
 
   // switch to next network connect mode in msec.
-  int nextModeTime = 6 * 1000;
+  int nextModeTime = 4 * 1000;
 
   // max. captive mode time
   int captiveTime = 30 * 1000;

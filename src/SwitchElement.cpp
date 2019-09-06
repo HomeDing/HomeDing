@@ -48,7 +48,6 @@ bool SwitchElement::_setValue(int val, bool forceAction)
 
 void SwitchElement::init(Board *board)
 {
-  LOGGER_ETRACE("init()");
   ValueElement::init(board);
 
   // The Switch is like a value element with the range 0..1

@@ -48,7 +48,6 @@ Element *MyElement::create()
 
 // void MyElement::init(Board *board)
 // {
-//   LOGGER_ETRACE("init()");
 //   Element::init(board);
 //   // do something here like initialization
 // } // init()

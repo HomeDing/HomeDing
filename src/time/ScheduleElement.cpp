@@ -52,7 +52,6 @@ ScheduleElement::ScheduleElement()
  */
 void ScheduleElement::init(Board *board)
 {
-  LOGGER_ETRACE("init()");
   Element::init(board);
 
   _startTime = TIME_T_NOT;

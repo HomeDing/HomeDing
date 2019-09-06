@@ -44,7 +44,6 @@ Element *BME680Element::create()
 
 // void BME680Element::init(Board *board)
 // {
-//   LOGGER_ETRACE("init()");
 //   Element::init(board);
 //   // do something here like initialization
 // } // init()

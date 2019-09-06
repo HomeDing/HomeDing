@@ -31,6 +31,26 @@ Element *ValueElement::create()
 } // create()
 
 
+// set a new value, maybe adjust to range
+bool ValueElement::_setValue(int newValue, bool forceAction)
+{
+  bool ret = false;
+
+  if (newValue < _minRange)
+    newValue = _minRange;
+
+  if (newValue > _maxRange)
+    newValue = _maxRange;
+
+  if (forceAction || ((active) && (_value != newValue))) {
+    _board->dispatch(_valueAction, newValue);
+    ret = true;
+  }
+  _value = newValue;
+  return (ret);
+} // _setValue()
+
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -49,10 +69,10 @@ bool ValueElement::set(const char *name, const char *value)
     _setValue(_value -= _atoi(value) * _step);
 
   } else if (_stricmp(name, "min") == 0) {
-    _min = _atoi(value);
+    _minRange = _atoi(value);
 
   } else if (_stricmp(name, "max") == 0) {
-    _max = _atoi(value);
+    _maxRange = _atoi(value);
 
   } else if (_stricmp(name, "step") == 0) {
     _step = _atoi(value);
@@ -60,10 +80,8 @@ bool ValueElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "label") == 0) {
     _label = value;
 
+  // } else if (_stricmp(name, "onchange") == 0) { // deprecated: use onValue
   } else if (_stricmp(name, "onvalue") == 0) {
-    _valueAction = value;
-
-  } else if (_stricmp(name, "onchange") == 0) { // deprecated: use onValue
     _valueAction = value;
 
   } else {
@@ -71,7 +89,7 @@ bool ValueElement::set(const char *name, const char *value)
   } // if
 
   return (ret);
-} // set()
+} // set()  
 
 
 void ValueElement::start()
@@ -110,20 +128,5 @@ const char *ValueElement::getLabel()
   return (_label.c_str());
 }
 
-// set a new value, maybe adjust to range
-void ValueElement::_setValue(int newValue)
-{
-  _value = newValue;
-
-  if (_value < _min)
-    _value = _min;
-
-  if (_value > _max)
-    _value = _max;
-
-  if ((active) && (_valueAction.length() > 0))
-    _board->dispatch(_valueAction, _value);
-
-} // _setValue()
 
 // End

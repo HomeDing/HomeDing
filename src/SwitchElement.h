@@ -16,16 +16,19 @@
  * * 16.09.2018 pullup config added.
  * * 27.11.2018 also can be defined without a physical pin to be controlled by
  * the web ui.
+ * * 06.09.2019 derivation of switch element
  */
 
 #ifndef SWITCH_H
 #define SWITCH_H
 
+#include "ValueElement.h"
+
 /**
  * @brief The SwitchElement is an special Element that creates actions based on
  * a digital IO signal.
  */
-class SwitchElement : public Element
+class SwitchElement : public ValueElement
 {
 public:
   /**
@@ -40,6 +43,13 @@ public:
   static bool registered;
 
   /**
+   * @brief initialize a new Element.
+   * @param board The board reference.
+   */
+  virtual void init(Board *board);
+
+
+  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.
@@ -48,36 +58,21 @@ public:
    */
   virtual bool set(const char *name, const char *value);
 
-
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback);
+protected:
+  virtual bool _setValue(int val, bool forceAction = false);
 
 private:
-  // current output value of the switch.
-  bool _value = false;
-
   /**
-   * @brief The _onAction is emitted when the logical output level is going from
+   * @brief The _highAction is emitted when the logical output level is going from
    * LOW to HIGH.
    */
   String _highAction;
 
   /**
-   * @brief The _offAction is emitted when the logical output level is going from
+   * @brief The _lowAction is emitted when the logical output level is going from
    * HIGH to LOW.
    */
   String _lowAction;
-
-  /**
-   * @brief The _valueAction is emitted when the logical output level changed.
-   */
-  String _valueAction;
-
-  void _newValue(bool val);
 };
 
 #ifdef HOMEDING_REGISTER

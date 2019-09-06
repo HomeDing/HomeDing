@@ -14,6 +14,7 @@
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
  * * 31.07.2018 min and max added.
+ * * 06.09.2019 derivation of switch element
  */
 
 #ifndef ValueELEMENT_H
@@ -69,24 +70,26 @@ public:
   int getValue();
   const char *getLabel();
 
-private:
+protected:
   /**
    * @brief The actual value.
    */
   int _value = 0;
 
-  int _min = -2147483648;
-  int _max = 2147483647;
+  int _minRange = -2147483648;
+  int _maxRange = 2147483647;
   int _step = 1;
 
-  String _label;
-
   /**
-   * @brief The _xAction holds the actions that is submitted when ...
+   * @brief The _valueAction holds the actions that is submitted when the value has changed.
    */
   String _valueAction;
 
-  void _setValue(int newValue);
+  virtual bool _setValue(int val, bool forceAction = false);
+
+private:
+  String _label;
+
 };
 
 #ifdef HOMEDING_REGISTER

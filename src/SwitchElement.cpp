@@ -14,8 +14,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "SwitchElement.h"
 #include <ElementRegistry.h>
@@ -30,20 +30,31 @@ Element *SwitchElement::create()
 } // create()
 
 
-void SwitchElement::_newValue(bool val) {
-  if (val != _value) {
-    if (val) {
+bool SwitchElement::_setValue(int val, bool forceAction)
+{
+  bool hasChanged = ValueElement::_setValue(val, forceAction);
+
+ if (hasChanged) {
+    if (_value) {
       _board->dispatch(_highAction);
-      _board->dispatch(_valueAction, "1");
 
     } else {
       _board->dispatch(_lowAction);
-      _board->dispatch(_valueAction, "0");
     } // if
-    _value = val;
   } // if
-} // _newValue()
+  return(hasChanged);
+} // _setValue()
 
+
+void SwitchElement::init(Board *board)
+{
+  LOGGER_ETRACE("init()");
+  ValueElement::init(board);
+
+  // The Switch is like a value element with the range 0..1
+  _minRange = 0;
+  _maxRange = 1;
+}
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -54,10 +65,10 @@ bool SwitchElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "value") == 0) {
-    _newValue(_atob(value));
+    _setValue(_atob(value));
 
   } else if (_stricmp(name, "toggle") == 0) {
-    _newValue(! _value);
+    _setValue(!_value);
 
   } else if (_stricmp(name, "onhigh") == 0) {
     _highAction = value;
@@ -65,21 +76,10 @@ bool SwitchElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onlow") == 0) {
     _lowAction = value;
 
-  } else if (_stricmp(name, "onvalue") == 0) {
-    _valueAction = value;
-
   } else {
-    ret = Element::set(name, value);
+    ret = ValueElement::set(name, value);
   } // if
   return (ret);
 } // set()
-
-
-void SwitchElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  Element::pushState(callback);
-  callback("value", String(_value).c_str());
-} // pushState()
 
 // End

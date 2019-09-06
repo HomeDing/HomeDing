@@ -32,8 +32,11 @@
 #define SVC_SYSINFO "/$sysinfo"
 
 #define SVC_ELEMENTS "/$elements"
-#define SVC_UPLOAD "/$upload"
 #define SVC_LISTFILES "/$list"
+
+#define PAGE_SETUP "/$setup"
+#define PAGE_BOOT "/$boot"
+#define SVC_UPLOAD "/$upload"
 
 #define SVC_BOARD "/$board"
 
@@ -167,6 +170,16 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     // List all registered Elements
     ElementRegistry::list(output);
     output_type = TEXT_JSON;
+
+  } else if (requestUri.startsWith(PAGE_SETUP)) {
+    // Network Config Page
+    output = setupContent;
+    output_type = TEXT_HTML;
+
+  } else if (requestUri.startsWith(PAGE_BOOT)) {
+    // Bootstrap page
+    output = bootContent;
+    output_type = TEXT_HTML;
 
   } else if (requestUri.startsWith(SVC_UPLOAD)) {
     // Bulk File Upload UI.

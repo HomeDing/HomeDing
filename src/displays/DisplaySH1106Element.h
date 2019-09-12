@@ -66,8 +66,6 @@ public:
 
 private:
   int _address = 0x3c;
-  int _sda = SDA;
-  int _scl = SCL;
   int _height = 64;
   int _resetpin = -1;
 };

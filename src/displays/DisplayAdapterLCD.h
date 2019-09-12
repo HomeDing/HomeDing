@@ -14,10 +14,8 @@
 #ifndef DisplayAdapterLCD_H
 #define DisplayAdapterLCD_H
 
-#include <Wire.h>
-
-#include <LiquidCrystal_PCF8574.h>
 #include <displays/DisplayAdapter.h>
+#include <LiquidCrystal_PCF8574.h>
 
 class DisplayAdapterLCD : DisplayAdapter
 {
@@ -45,10 +43,10 @@ public:
   } // DisplayAdapterLCD()
 
 
-  bool init()
+  bool init(Board *board)
   {
     // test if a display device is attached
-    Wire.begin();
+    Wire.begin(board->I2cSda, board->I2cScl);
     Wire.beginTransmission(_address);
     int error = Wire.endTransmission();
 

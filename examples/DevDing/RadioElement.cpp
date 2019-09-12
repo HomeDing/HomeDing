@@ -154,7 +154,7 @@ bool RadioElement::set(const char *name, const char *value)
  */
 void RadioElement::start()
 {
-  LOGGER_ETRACE("start(%d, %d)", SDA, SCL);
+  LOGGER_ETRACE("start()");
 
   // Verify parameters
   // __radioelement = this;

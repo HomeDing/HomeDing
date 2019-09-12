@@ -32,6 +32,9 @@
 #include <ESP8266WebServer.h>
 #include <time.h>
 
+// forward class declarations
+class Board;
+
 #include <displays/DisplayAdapter.h>
 
 #include "core/Logger.h"
@@ -181,6 +184,10 @@ public:
 
   // max. captive mode time
   int captiveTime = 30 * 1000;
+
+  // Common I2C settings
+  int I2cSda = PIN_WIRE_SDA;
+  int I2cScl = PIN_WIRE_SCL;
 
   // WebServer
   ESP8266WebServer *server;

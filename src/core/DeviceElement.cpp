@@ -17,8 +17,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "DeviceElement.h"
 #include <ElementRegistry.h>
@@ -48,19 +48,39 @@ bool DeviceElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "name") == 0) {
+  // ===== Log something =====
+
+  if (_stricmp(name, "log") == 0) {
+    // Log a information with time.
+    unsigned long now = _board->getTimeOfDay();
+    if (!now)
+      now = millis() / 1000; // make seconds
+    LOGGER_JUSTINFO(value ? value : "NULL");
+
+    // ===== Setup =====
+
+  } else if (_stricmp(name, "name") == 0) {
     _board->deviceName = value;
+
+  } else if (_stricmp(name, "reboottime") == 0) {
+    _rebootTime = _atotime(value);
 
   } else if (_stricmp(name, "description") == 0) {
     _description = value;
 
-  } else if (_stricmp(name, "title") == 0) {
-    _title = value;
-
   } else if (_stricmp(name, "room") == 0) {
     _room = value;
 
-    // === WiFi Manager Settings
+  } else if (_stricmp(name, "loglevel") == 0) {
+    // Set global logger loglevel
+    Logger::logger_level = _atoi(value);
+
+  } else if (_stricmp(name, "logfile") == 0) {
+    // enable/disable logfile feature
+    Logger::logger_file = _atob(value);
+
+    // ===== WiFi Manager =====
+
   } else if (_stricmp(name, "led") == 0) {
     _board->sysLED = _atopin(value);
 
@@ -70,28 +90,24 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "connecttime") == 0) {
     _board->nextModeTime = _atotime(value) * 1000;
 
-// === startup behavior
+
+    // ===== I2C bus =====
+
+  } else if (_stricmp(name, "i2c-sda") == 0) {
+    _board->I2cSda = _atopin(value);
+
+  } else if (_stricmp(name, "i2c-scl") == 0) {
+    _board->I2cScl = _atopin(value);
+
+
+    // ===== Web UI =====
+
+  } else if (_stricmp(name, "title") == 0) {
+    _title = value;
+
+    // === startup behavior
   } else if (_stricmp(name, "homepage") == 0) {
     _board->homepage = value;
-
-  } else if (_stricmp(name, "reboottime") == 0) {
-    _rebootTime = _atotime(value);
-
-  } else if (_stricmp(name, "logfile") == 0) {
-    // enable/disable logfile feature
-    Logger::logger_file = _atob(value);
-
-  } else if (_stricmp(name, "loglevel") == 0) {
-    // Set global logger loglevel
-    Logger::logger_level = _atoi(value);
-
-// === Log something
-  } else if (_stricmp(name, "log") == 0) {
-    // Log a information with time.
-    unsigned long now = _board->getTimeOfDay();
-    if (!now)
-      now = millis() / 1000; // make seconds
-    LOGGER_JUSTINFO(value ? value : "NULL");
 
   } else {
     ret = Element::set(name, value);

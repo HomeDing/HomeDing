@@ -22,12 +22,11 @@ public:
   /**
    * @brief Construct a new Display Adapter for a SH1106 display
    * using common parameters.
-   * I2C defaults to 4(SDA) and 5(SCL) for most boards.
    */
   DisplayAdapterSH1106()
   {
     // use parameters of a common display board.
-    DisplayAdapterSH1106(0x3c, 5, 4, 64);
+    DisplayAdapterSH1106(0x3c, 64);
   } // DisplayAdapterSH1106()
 
 
@@ -35,8 +34,8 @@ public:
    * @brief Construct a new Display Adapter for a SH1106 display
    * using specific parameters.
    */
-  DisplayAdapterSH1106(int address, int sda, int scl, int h)
-      : _address(address), _sda(sda), _scl(scl)
+  DisplayAdapterSH1106(int address, int h)
+      : _address(address)
   {
     if (h == 32)
       _resolution = GEOMETRY_128_32;
@@ -47,10 +46,10 @@ public:
   } // DisplayAdapterSH1106()
 
 
-  bool init()
+  bool init(Board *board)
   {
     // test if a display device is attached
-    Wire.begin(_sda, _scl);
+    Wire.begin(board->I2cSda, board->I2cScl);
     Wire.beginTransmission(_address);
     int error = Wire.endTransmission();
 
@@ -61,7 +60,7 @@ public:
 
     } else {
       Serial.printf("setupDisplay...\n");
-      display = new SH1106Wire(_address, _sda, _scl, _resolution);
+      display = new SH1106Wire(_address, board->I2cSda, board->I2cScl, _resolution);
 
       display->init();
       display->connect();
@@ -167,16 +166,6 @@ private:
    * @brief I2C Deisplay device address.
    */
   int _address;
-
-  /**
-   * @brief GPIO pin for the I2C SCL Line.
-   */
-  int _scl;
-
-  /**
-   * @brief GPIO pin for the I2C SDA Line.
-   */
-  int _sda;
 
 
   bool _dirty;

@@ -24,12 +24,11 @@ public:
   /**
    * @brief Construct a new Display Adapter for a SSD1306 display
    * using common parameters.
-   * I2C defaults to 4(SDA) and 5(SCL) for most boards.
    */
   DisplayAdapterSSD1306()
   {
     // use parameters of a common display board.
-    DisplayAdapterSSD1306(0x3c, 5, 4, 64);
+    DisplayAdapterSSD1306(0x3c, 64);
   } // DisplayAdapterSSD1306()
 
 
@@ -37,8 +36,8 @@ public:
    * @brief Construct a new Display Adapter for a SSD1306 display
    * using specific parameters.
    */
-  DisplayAdapterSSD1306(int address, int sda, int scl, int h)
-      : _address(address), _sda(sda), _scl(scl)
+  DisplayAdapterSSD1306(int address, int h)
+      : _address(address)
   {
     if (h == 32)
       _resolution = GEOMETRY_128_32;
@@ -49,10 +48,10 @@ public:
   } // DisplayAdapterSSD1306()
 
 
-  bool init()
+  bool init(Board *board)
   {
     // test if a display device is attached
-    Wire.begin(_sda, _scl);
+    Wire.begin(board->I2cSda, board->I2cScl);
     Wire.beginTransmission(_address);
     int error = Wire.endTransmission();
 
@@ -63,7 +62,7 @@ public:
 
     } else {
       Serial.printf("setupDisplay...\n");
-      display = new SSD1306Wire(_address, _sda, _scl, _resolution);
+      display = new SSD1306Wire(_address, board->I2cSda, board->I2cScl, _resolution);
 
       display->init();
       display->connect();
@@ -169,17 +168,6 @@ private:
    * @brief I2C Device address.
    */
   int _address;
-
-  /**
-   * @brief GPIO pin for the I2C SCL Line.
-   */
-  int _scl;
-
-  /**
-   * @brief GPIO pin for the I2C SDA Line.
-   */
-  int _sda;
-
 
   bool _dirty;
 

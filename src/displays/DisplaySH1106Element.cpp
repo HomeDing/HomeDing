@@ -56,12 +56,6 @@ bool DisplaySH1106Element::set(const char *name, const char *value)
   if (_stricmp(name, "address") == 0) {
     _address = strtol(value, nullptr, 0);
 
-  } else if (_stricmp(name, "sda") == 0) {
-    _sda = _atopin(value);
-
-  } else if (_stricmp(name, "scl") == 0) {
-    _scl = _atopin(value);
-
   } else if (_stricmp(name, "resetpin") == 0) {
     _resetpin = _atopin(value);
 
@@ -82,8 +76,8 @@ bool DisplaySH1106Element::set(const char *name, const char *value)
  */
 void DisplaySH1106Element::start()
 {
+  LOGGER_ETRACE("start()");
   DisplayAdapter *d;
-  LOGGER_ETRACE("start(0x%x,%d,%d)", _address, _sda, _scl);
 
   // reset of the display is available on GPIO
   if (_resetpin >= 0) {
@@ -93,10 +87,9 @@ void DisplaySH1106Element::start()
     digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
   } // if
 
-  d = (DisplayAdapter *)(new DisplayAdapterSH1106(_address, _sda, _scl,
-                                                  _height));
+  d = (DisplayAdapter *)(new DisplayAdapterSH1106(_address, _height));
 
-  bool success = d->init();
+  bool success = d->init(_board);
   if (success) {
     _board->display = d;
     Element::start();

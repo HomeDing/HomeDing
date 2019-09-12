@@ -19,6 +19,9 @@
 #ifndef DisplayAdapter_H
 #define DisplayAdapter_H
 
+#include <Wire.h>
+#include <Board.h>
+
 class DisplayAdapter
 {
 public:
@@ -27,7 +30,7 @@ public:
    * @return true when display is ready for operation.
    * @return false otherwise.
    */
-  virtual bool init();
+  virtual bool init(Board *board);
 
   /**
    * @brief Clear the complete display

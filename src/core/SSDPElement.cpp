@@ -89,7 +89,7 @@ void SSDPElement::start()
 
   Element *deviceElement = _board->getElement("device");
   if ((deviceElement) && (_board->server)) {
-    SSDP.setName(deviceElement->get("name"));
+    SSDP.setName(_board->deviceName);
     SSDP.setModelName(deviceElement->get("description"));
     SSDP.begin();
     ESP8266WebServer *server = _board->server;

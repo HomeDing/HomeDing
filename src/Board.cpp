@@ -172,16 +172,11 @@ void Board::loop()
 {
   unsigned long now = millis();
   wl_status_t wifi_status = WiFi.status();
-  bool autoCon = WiFi.getAutoConnect();
-  String ipStr;
-  delay(10);
 
-  switch (boardState) {
-  case BOARDSTATE_NONE:
+  if (boardState == BOARDSTATE_NONE) {
     _newState(BOARDSTATE_LOAD);
-    break;
 
-  case BOARDSTATE_LOAD:
+  } else if (boardState == BOARDSTATE_LOAD) {
     // load all config files and create+start elements
     addElements();
     start(Element_StartupMode::System);
@@ -189,29 +184,23 @@ void Board::loop()
     WiFi.hostname(deviceName);
     LOGGER_INFO("n3-status = %d <%s>", WiFi.status(), WiFi.hostname().c_str());
 
-    if (display) {
-      display->drawText(0, 0, 0, "HomeDing...");
-      display->flush();
-    } // if
+    _info(HOMEDING_GREETING);
 
     netMode = NetMode_AUTO;
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) {
-      // start hotspot right now.
-      _newState(BOARDSTATE_STARTCAPTIVE);
+      _newState(BOARDSTATE_STARTCAPTIVE);       // start hotspot right now.
     } else {
       _newState(BOARDSTATE_CONNECT);
     }
 
-    // wait at least 6 seconds for offering config mode
+    // wait at least some seconds for offering config mode
     configPhaseEnd = now + nextModeTime;
-    break;
 
-  case BOARDSTATE_CONNECT:
+  } else if (boardState == BOARDSTATE_CONNECT) {
+    bool autoCon = WiFi.getAutoConnect();
     LOGGER_TRACE("state: ac=%d mode=%d", autoCon, WiFi.getMode());
-    // WiFi.mode(WIFI_STA);
-    // WiFi.begin();
 
     if ((!autoCon) && (netMode == NetMode_AUTO))
       netMode = NetMode_PSK;
@@ -264,9 +253,8 @@ void Board::loop()
 
     // wait max 30 seconds for connecting to the network
     connectPhaseEnd = now + captiveTime;
-    break;
-  case BOARDSTATE_CONFWAIT:
-  case BOARDSTATE_WAIT:
+
+  } else if ((boardState == BOARDSTATE_CONFWAIT) || (boardState == BOARDSTATE_WAIT)) {
     // make sysLED blink
     if (sysLED >= 0) {
       digitalWrite(sysLED, ((configPhaseEnd - now) % 700) > 350 ? HIGH : LOW);
@@ -274,7 +262,7 @@ void Board::loop()
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
-        _newState(BOARDSTATE_STARTCAPTIVE);
+      _newState(BOARDSTATE_STARTCAPTIVE);
 
     } else if (boardState == BOARDSTATE_CONFWAIT) {
       if (now > configPhaseEnd) {
@@ -304,21 +292,14 @@ void Board::loop()
       } else {
         delay(100);
       }
-    } // if (BOARDSTATE_WAIT)
-    break;
+    } // if
 
-  case BOARDSTATE_GREET:
-    ipStr = WiFi.localIP().toString();
+  } else if (boardState == BOARDSTATE_GREET) {
+    _info(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
     LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
-    LOGGER_TRACE("  as: %s", WiFi.hostname().c_str());
-    LOGGER_TRACE("  IP: %s", ipStr.c_str());
-    LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
+    // LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
 
     if (display) {
-      display->clear();
-      display->drawText(0, 0, 0, deviceName);
-      display->drawText(0, display->lineHeight, 0, ipStr.c_str());
-      display->flush();
       delay(1600);
       display->clear();
       display->flush();
@@ -333,9 +314,8 @@ void Board::loop()
     server->begin();
     start(Element_StartupMode::Network);
     _newState(BOARDSTATE_RUN);
-    break;
 
-  case BOARDSTATE_RUN:
+  } else if (boardState == BOARDSTATE_RUN) {
     if (!validTime) {
       // check if time is valid now -> start all elements with
       // Element_StartupMode::Time
@@ -374,15 +354,14 @@ void Board::loop()
       }
       _next2 = _next2->next;
     } // if
-    break;
 
-  case BOARDSTATE_STARTCAPTIVE:
-    LOGGER_INFO("start captive portal...");
+  } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
+    _info("config..");
 
     WiFi.softAPConfig(apIP, apIP, netMsk);
-    WiFi.softAP("HomeDing");
-    delay(500);
-    LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
+    WiFi.softAP(HOMEDING_GREETING);
+    delay(5);
+    // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
     if (sysLED >= 0)
       digitalWrite(sysLED, LOW);
@@ -394,19 +373,15 @@ void Board::loop()
 
     _newState(BOARDSTATE_RUNCAPTIVE);
     _captiveEnd = now + (5 * 60 * 1000);
-    break;
 
-  case BOARDSTATE_RUNCAPTIVE:
+  } else if (boardState == BOARDSTATE_RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
     dnsServer.processNextRequest();
 
     if (now > _captiveEnd)
       reboot(false);
-    break;
 
-    // default:
-    //   break;
-  } // switch
+  } // if
 
 } // loop()
 
@@ -690,5 +665,21 @@ void Board::_add(const char *id, Element *e)
   } // if
   e->init(this);
 } // _add()
+
+
+void Board::_info(const char *text1, const char *text2)
+{
+  LOGGER_INFO(text1);
+  if (text2)
+    LOGGER_INFO(text2);
+  if (display) {
+    display->clear();
+    display->drawText(0, 0, 0, text1);
+    if (text2)
+      display->drawText(0, display->lineHeight, 0, text2);
+    display->flush();
+    // delay(1200);
+  } // if
+}
 
 // End

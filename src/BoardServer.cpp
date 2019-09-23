@@ -162,6 +162,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
 
     // WIFI info
     jc_prop(output, "ssid", WiFi.SSID());
+
     output += "}";
     jc_sanitize(output);
     output_type = TEXT_JSON;

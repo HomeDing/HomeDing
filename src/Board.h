@@ -39,6 +39,8 @@ class Board;
 
 #include "core/Logger.h"
 
+#define HOMEDING_GREETING "HomeDing"
+
 /**
  * @brief The env.json file contains all the settings for registering the device
  * in a local environment. This includes devicename and network settings.
@@ -90,7 +92,9 @@ typedef enum {
  */
 class Board
 {
+ 
 public:
+
   // ----- Time functionality -----
 
   /**
@@ -240,6 +244,8 @@ private:
   Element *findById(String &id);
 
   void _dispatchSingle(String evt);
+
+  void _info(const char *text1, const char *text2 = NULL);
 
   // state and timing
   unsigned long configPhaseEnd; // for offering config mode

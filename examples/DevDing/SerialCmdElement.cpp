@@ -16,8 +16,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "SerialCmdElement.h"
 #include <ElementRegistry.h>
@@ -40,13 +40,13 @@ bool SerialCmdElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "onPreset0") == 0) {
-    _preset0 = value;
+    _preset[0] = value;
   } else if (_stricmp(name, "onPreset1") == 0) {
-    _preset1 = value;
+    _preset[1] = value;
   } else if (_stricmp(name, "onPreset2") == 0) {
-    _preset2 = value;
+    _preset[2] = value;
   } else if (_stricmp(name, "onPreset3") == 0) {
-    _preset3 = value;
+    _preset[3] = value;
   } else {
     ret = Element::set(name, value);
   } // if
@@ -61,33 +61,45 @@ void SerialCmdElement::loop()
 {
   while (Serial.available()) {
     char ch = Serial.read();
-    // LOGGER_EINFO(">>%c", ch);
 
-    if ((ch == '\n') || (ch == '\r') || (ch == ',')) {
-      if (_cmdLine == "+") {
+    if ((ch != '\n') && (ch != '\r') && (ch != ',')) {
+      _cmdLine.concat(ch);
+
+    } else {
+      _cmdLine.toLowerCase();
+      LOGGER_RAW(">%s", _cmdLine.c_str());
+
+      if (_cmdLine == "trace") {
         // increase loggging Level
-        LOGGER_EINFO("Trace Level Logging enabled.");
         Logger::logger_level = LOGGER_LEVEL_TRACE;
+        LOGGER_RAW("Trace Level Logging enabled.");
 
-      } else if (_cmdLine == "-") {
+      } else if (_cmdLine == "error") {
         // standard loggging Level
-        LOGGER_EINFO("Error Level Logging enabled.");
         Logger::logger_level = LOGGER_LEVEL_ERR;
+        LOGGER_RAW("Error Level Logging enabled.");
 
-      } else if (_cmdLine.length() == 1) {
+      } else if (_cmdLine.startsWith("run ")) {
+        int n = _cmdLine.charAt(4) - '0';
         // substitude preset values
-        if (_cmdLine.charAt(0) == '0')
-          _cmdLine = _preset0;
-        else if (_cmdLine.charAt(0) == '1')
-          _cmdLine = _preset1;
+        if ((n >= 0) && (n < 4)) {
+          LOGGER_RAW("dispatch %s", _preset[n].c_str());
+          _board->dispatch(_preset[n]);
+        }
+
+      } else if (_cmdLine == "help") {
+        LOGGER_RAW("Commands:");
+        LOGGER_RAW(" help - show all commands");
+        LOGGER_RAW(" trace - enable trace logging");
+        LOGGER_RAW(" error - enable error logging");
+        LOGGER_RAW(" run {n} - execute messages preset {n}");
+        LOGGER_RAW(" {s} - dispatch {s}");
 
       } else {
-        LOGGER_EINFO("dispatch %s", _cmdLine.c_str());
+        LOGGER_RAW("dispatch %s", _cmdLine.c_str());
         _board->dispatch(_cmdLine);
-        _cmdLine = "";
       }
-    } else {
-      _cmdLine.concat(ch);
+      _cmdLine = "";
     } // if
   } // while
 } // loop()

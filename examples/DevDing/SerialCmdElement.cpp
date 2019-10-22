@@ -87,13 +87,30 @@ void SerialCmdElement::loop()
           _board->dispatch(_preset[n]);
         }
 
+      } else if (_cmdLine == "elements") {
+        String out;
+        ElementRegistry::list(out);
+        DEBUG_ESP_PORT.println(out);
+
+      } else if (_cmdLine == "state") {
+        String out;
+        _board->getState(out, _cmdLine.substring(6));
+        DEBUG_ESP_PORT.println(out);
+
+      } else  if (_cmdLine.startsWith("/")) {
+        _cmdLine = _cmdLine.substring(1);
+        LOGGER_RAW("dispatch %s", _cmdLine.c_str());
+        _board->dispatch(_cmdLine);
+
       } else if (_cmdLine == "help") {
         LOGGER_RAW("Commands:");
         LOGGER_RAW(" help - show all commands");
         LOGGER_RAW(" trace - enable trace logging");
         LOGGER_RAW(" error - enable error logging");
+        LOGGER_RAW(" elements - list the available elements");
+        LOGGER_RAW(" state - output the current state");
         LOGGER_RAW(" run {n} - execute messages preset {n}");
-        LOGGER_RAW(" {s} - dispatch {s}");
+        LOGGER_RAW(" /{type}/{id}?{property}={value} - dispatch it");
 
       } else {
         LOGGER_RAW("dispatch %s", _cmdLine.c_str());

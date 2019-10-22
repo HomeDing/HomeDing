@@ -29,6 +29,7 @@
 
 #define SVC_REBOOT "/$reboot"
 #define SVC_RESET "/$reset"
+#define SVC_RESETALL "/$resetall"
 #define SVC_SYSINFO "/$sysinfo"
 
 #define SVC_ELEMENTS "/$elements"
@@ -142,6 +143,11 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     // Reboot device
     handleReboot(server, false);
 
+  } else if (requestUri.startsWith(SVC_RESETALL)) {
+    // Reset network parameters and reboot
+    SPIFFS.format();
+    handleReboot(server, true);
+
   } else if (requestUri.startsWith(SVC_RESET)) {
     // Reset network parameters and reboot
     handleReboot(server, true);
@@ -174,17 +180,17 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
 
   } else if (requestUri.startsWith(PAGE_SETUP)) {
     // Network Config Page
-    output = setupContent;
+    output = FPSTR(setupContent);
     output_type = TEXT_HTML;
 
   } else if (requestUri.startsWith(PAGE_BOOT)) {
     // Bootstrap page
-    output = bootContent;
+    output = FPSTR(bootContent);
     output_type = TEXT_HTML;
 
   } else if (requestUri.startsWith(SVC_UPLOAD)) {
     // Bulk File Upload UI.
-    output = uploadContent;
+    output = FPSTR(uploadContent);
     output_type = TEXT_HTML;
 
   } else if (requestUri.startsWith(SVC_LISTFILES)) {

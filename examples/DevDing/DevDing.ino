@@ -134,7 +134,7 @@ void handleRedirect()
     url = mainBoard.homepage;
   } else {
     url = String(F("http://")) + WiFi.softAPIP().toString() +
-          F("/setup.htm"); // ; mainBoard.deviceName
+          F("/$setup"); // ; mainBoard.deviceName
   }
   server.sendHeader("Location", url, true);
   server.send(302);
@@ -176,8 +176,6 @@ void handleScan()
  */
 void setup(void)
 {
-  DisplayAdapter *display = NULL;
-
   Serial.begin(115200);
 
 #if NET_DEBUG
@@ -186,6 +184,7 @@ void setup(void)
   Serial.setDebugOutput(false);
 #endif
 
+  // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   // Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("HomeDing Device is starting... (%s)",
@@ -245,6 +244,7 @@ void setup(void)
     if ((mainBoard.boardState == BOARDSTATE_RUNCAPTIVE) &&
         ((strcmp(uri, "/connecttest.txt") == 0) ||
          (strcmp(uri, "/redirect") == 0) ||
+         (strcmp(uri, "/generate_204") == 0) ||
          (strcmp(uri, "/more.txt") == 0))) {
       handleRedirect();
     } else {

@@ -80,4 +80,15 @@ ValueElement *valueList[MAXMENUVALUES];
   String _menuAction;
 };
 
+/* ===== Register the Element ===== */
+
+//  should be used to allow the sketch to select the
+// available Elements. See <HomeDing.h> the move these lines to MenuElement.h:
+
+#ifdef HOMEDING_REGISTER
+// Register the MenuElement onto the ElementRegistry.
+bool MenuElement::registered =
+    ElementRegistry::registerElement("menu", MenuElement::create);
+#endif
+
 #endif

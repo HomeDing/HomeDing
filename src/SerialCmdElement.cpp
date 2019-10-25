@@ -90,12 +90,12 @@ void SerialCmdElement::loop()
       } else if (_cmdLine == "elements") {
         String out;
         ElementRegistry::list(out);
-        DEBUG_ESP_PORT.println(out);
+        Serial.println(out);
 
       } else if (_cmdLine == "state") {
         String out;
         _board->getState(out, _cmdLine.substring(6));
-        DEBUG_ESP_PORT.println(out);
+        Serial.println(out);
 
       } else  if (_cmdLine.startsWith("/")) {
         _cmdLine = _cmdLine.substring(1);
@@ -121,9 +121,5 @@ void SerialCmdElement::loop()
   } // while
 } // loop()
 
-
-// Register the SerialCmdElement in the ElementRegistry.
-bool SerialCmdElement::registered =
-    ElementRegistry::registerElement("serialcmd", SerialCmdElement::create);
 
 // End

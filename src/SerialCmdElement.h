@@ -16,7 +16,7 @@
  * 
  * 
 
- "serialcmd": {
+ "sli": {
     "0": {
       "onPreset0": "",
       "onPreset1": "",
@@ -70,5 +70,12 @@ private:
   String _cmdLine;
   String _preset[4];
 };
+
+#ifdef HOMEDING_REGISTER
+// Register the SerialCmdElement in the ElementRegistry.
+bool SerialCmdElement::registered =
+    ElementRegistry::registerElement("sli", SerialCmdElement::create);
+#endif
+
 
 #endif // SERIALCMDOTEELEMENT_H

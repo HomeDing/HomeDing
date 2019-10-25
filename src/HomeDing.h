@@ -162,5 +162,12 @@
 #include <sensors/BME680Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_MENU
+#include <MenuElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_SERIALLINE
+#include <SerialCmdElement.h>
+#endif
 
 #endif

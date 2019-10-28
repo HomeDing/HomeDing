@@ -1,0 +1,197 @@
+<div class="col card" u-control="dht" id="${id}" microID="${id}" u-is="generic">
+  <div class="block">
+    <img title="${id}" src="/i/dht.svg" style="float: left;height:5rem;margin-right:0.8rem" />
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+    <table>
+      <tr>
+        <td colspan="3">
+          <h4 u-text="title"></h4>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3"><span u-text="description"></span></td>
+      </tr>
+      <tr>
+        <td style="font-size: 2rem"><span u-text="temperature">__.__</span>&deg;C</td>
+        <td style="width:1rem"></td>
+        <td style="font-size: 2rem"><span u-text="humidity">__.__</span>%</td>
+      </tr>
+      <tr>
+        <td>Temperature</td>
+        <td></td>
+        <td>Humidity</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="col card" u-control="timer" microID="${id}" u-is="timer">
+  <div class="block header">
+    <img src="/i/timer.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    <span class="u-bool ux-value" u-active="value" style="position: absolute;top:0.5rem;right:0.5rem"></span>
+    <label>wait:</label><span u-text="waittime">.</span> <label>pulse:</label><span u-text="pulsetime">.</span>
+  </div>
+  <div class="block">
+    <div class="u-bar">
+      <span class="pulse"></span>
+      <span class="current"></span>
+    </div>
+  </div>
+  <hr />
+  <div class="block">
+    <button u-action="start" value="1">Start</button>
+    <button u-action="next" value="1">Next</button>
+    <button u-action="stop" value="1">Stop</button>
+  </div>
+</div>
+
+<div class="col card" u-control="rfsend" microID="${id}" u-is="generic">
+  <div class="block header">
+    <img src="/i/rfsend.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block Element">
+    <div>
+      <button u-action="value" value="1">On</button>
+      <button u-action="value" value="0">Off</button>
+    </div>
+    <div class="form-group"><label>last value:</label><span u-text="value"></span></div>
+  </div>
+</div>
+
+<div class="col card" u-control="button" microID="${id}" u-is="button">
+  <div class="block header">
+    <img src="/i/button.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    <span><img src="/i/button.svg" class="u-button"
+        style="border-radius:3rem; float: left;height:5rem;margin-right:1rem" /></span>
+  </div>
+</div>
+
+<div class="col card" u-control="digitalout" microID="${id}" u-is="generic">
+  <div class="block header">
+    <img src="/i/digitalout.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+
+  <div class="block Element">
+    <img src="/i/digitalout.svg" style="float:left;height:4rem;margin-right:1rem" />
+    <span class="u-bool ux-value" u-active="value" style="position: absolute;top:0.5rem;right:0.5rem"></span>
+  </div>
+</div>
+
+<div class="col card" u-control="pwmout" u-is="pwmout" microID="${id}">
+  <div class="block header">
+    <img src="/i/pwmout.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block" style="position: relative;min-height: 5rem">
+    <span class="ux-levelbar ux-value"></span>
+    <div style="font-size: 2rem"><span u-text="value"></span> / <span u-text="range"></span></div>
+  </div>
+</div>
+
+<div class="col card" u-control="log" u-is="log" microID="${id}">
+  <div class="block header">
+    <img src="/i/log.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    <object data="lineChart.svg" type="image/svg+xml" style="width:360px;height:136px"></object>
+  </div>
+</div>
+
+<!-- Display -->
+
+<div class="col card" u-control="displayssd1306" u-is="generic" microID="${id}">
+  <div class="block header">
+    <img src="/i/displayssd1306.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    <div class="display" style="font-family: sans-serif">
+    </div>
+  </div>
+</div>
+
+<div class="col card" u-control="displaysh1106" u-is="generic" microID="${id}">
+  <div class="block header">
+    <img src="/i/displaysh1106.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    <div class="display" style="font-family: sans-serif">
+    </div>
+  </div>
+</div>
+
+<div class="col card" u-control="displaylcd" u-is="generic" microID="${id}">
+  <div class="block header">
+    <img src="/i/displaylcd.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    <div class="display" grid="10" style="height: 20px;width: 112px;font-family: monospace">
+    </div>
+  </div>
+</div>
+
+<div class="col card hidden" u-control="displaytext" u-is="displaytext" microID="${id}">
+  <div class="block header">
+    <img src="/i/${type}.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
+  </div>
+</div>
+
+<div class="col card hidden" u-control="displaydot" u-is="displaydot" microID="${id}">
+  <div class="block header">
+    <img src="/i/${type}.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
+  </div>
+</div>
+

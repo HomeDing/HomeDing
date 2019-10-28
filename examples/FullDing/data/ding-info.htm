@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elements</title>
+  <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
+
+  <style>
+    .card img.active {
+      background-color: limegreen;
+    }
+
+    .Element .KV {
+      display: block;
+      clear: both;
+      height: 1.5em;
+    }
+
+    .activeState {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      height: 1.4rem;
+      width: 1.4rem;
+      background-image: url(/i/stop.svg);
+      background-size: 1.4rem;
+    }
+
+    .activeState.active {
+      background-image: url(/i/start.svg);
+      background-size: 1.4rem;
+    }
+
+    span.setconfig {
+      position: absolute;
+      top: 0.4rem;
+      right: 2.2rem;
+      height: 1.4rem;
+      width: 1.4rem;
+      background-image: url(/i/config.svg);
+      background-size: 1.4rem;
+    }
+
+    #modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #modalBack {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: silver;
+      opacity: 0.75;
+    }
+
+    #modalContainer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+    }
+
+    .closedlg {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      height: 1.8rem;
+      width: 1.8rem;
+      font-size: 1.6rem;
+      background-color: red;
+      text-align: center;
+    }
+
+    img,
+    #panel {
+      user-select: none;
+      -ms-user-select: none;
+    }
+  </style>
+  <script src="polyfill.js"></script>
+  <script src="es6-promise.auto.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script> -->
+  <script src="micro.js"></script>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="u-header">
+      <a href="/" title="Start-Page"><img class="icon" src="/i/device.svg" /></a>
+      <h1>Config</h1>
+    </div>
+    <div class="u-navbar">
+      <button onclick="window.location='/'">Home</button>
+      <button onclick="window.location='/ding-info.htm'">Board</button>
+      <button onclick="window.location='/ding-ide.htm'">IDE</button>
+      <button onclick="window.location='/ding-log.htm'">Log</button>
+      <button id="sysButton" class="func">sys</button>
+      <button id="addButton" class="func">+</button>
+    </div>
+
+    <div id="panel" class="row wrap"></div>
+
+    <div id="u-templates" style="border:2px solid green;padding:1rem;display:none">
+      <div class="col card" u-control="generic" u-is="generic" microID="${id}">
+        <div class="block header">
+          <img src="/i/${type}.svg" class="icon" />
+          <h3>${id}</h3>
+          <h4 u-text="description"></h4>
+          <span class="activeState" u-active="active"></span>
+          <span class="setconfig"></span>
+        </div>
+        <div class="block">
+          <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
+        </div>
+      </div>
+
+      <div class="col card" u-control="schedule" id="${id}" u-is="generic" microID="${id}">
+        <div class="block header">
+          <img src="/i/schedule.svg" class="icon" />
+          <h3>${id}</h3>
+          <h4 u-text="description"></h4>
+          <span class="activeState" u-active="active"></span>
+          <span class="setconfig"></span>
+        </div>
+        <div class="block">
+          <div class="form-group">
+            <label>Start:</label>
+            <span u-text="ontime"></span>
+          </div>
+          <div class="form-group">
+            <label>End:</label>
+            <span u-text="offtime"></span>
+          </div>
+          <span class="u-bool ux-value" u-active="value"></span>
+        </div>
+      </div>
+
+      <div class="col card" u-control="dstime" id="${id}" u-is="dstime" microID="${id}">
+        <div class="block header">
+          <img src="/i/time.svg" class="icon" />
+          <h3>${id}</h3>
+          <h4 u-text="description"></h4>
+          <span class="activeState" u-active="active"></span>
+          <span class="setconfig"></span>
+        </div>
+        <div class="block">
+          <div class="form-group">
+            <label>ReadTime:</label>
+            <input u-value="readtime" type="time" step="1" />
+          </div>
+          <div class="form-group">
+            <label>Now:</label>
+            <span u-text="now"></span>
+          </div>
+          <div class="form-group">
+            <label>set Time:</label>
+            <span class="now"></span>
+          </div>
+          <button class=" " style="float:right">set</button>
+        </div>
+      </div>
+
+      <div class="col card" u-control="switch" id="${id}" u-is="switch" microID="${id}">
+        <div class="block header">
+          <img src="/i/switch.svg" class="icon" />
+          <h3>${id}</h3>
+          <h4 u-text="description"></h4>
+          <span class="activeState" u-active="active"></span>
+          <span class="setconfig"></span>
+        </div>
+        <div class="block">
+          <span class="u-bool ux-value" u-active="value"></span>
+          <div class="u-slider u-switch" u-active="value">
+            <label value="0">off</label>
+            <div class="box">
+              <div class="handle"></div>
+            </div>
+            <label value="1">on</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col card" u-control="value" u-is="slider" microID="${id}">
+        <div class="block header">
+          <img src="/i/value.svg" class="icon" />
+          <h3>${id}</h3>
+          <h4 u-text="description"></h4>
+          <span class="activeState" u-active="active"></span>
+          <span class="setconfig"></span>
+        </div>
+        <div class="block">
+          <div class="form-group"><label>value:</label><span u-text="value"></span></div>
+          <div class="u-slider">
+            <label class="down"><img src="i/minus.svg"></label>
+            <div class="box" style="width:240px">
+              <div class="handle"></div>
+            </div>
+            <label class="up"><img src="i/plus.svg"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col card" u-control="and" id="${id}" u-is="generic" microID="${id}">
+        <div class="block header">
+          <img src="/i/and.svg" class="icon" />
+          <h3>${id}</h3>
+          <h4 u-text="description"></h4>
+          <span class="activeState" u-active="active"></span>
+          <span class="setconfig"></span>
+        </div>
+        <div class="block">
+          <span class="u-bool ux-value" u-active="value"></span>
+          <div class="form-group"><label>value:</label><span u-text="value"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="hidden">
+    <div id="modalBack"></div>
+    <div class="closedlg" onclick="micro.closeModal()">&#x00D7;</div>
+    <div id="modalContainer" style="width:260px;height:260px">Hello, this is modal</div>
+  </div>
+
+  <script>
+    var panelObj = document.getElementById('panel');
+    var addObj = document.getElementById('addButton');
+    var sysObj = document.getElementById('sysButton');
+    var updateTimer;
+    var elementDef;
+    var params = getHashParams({
+      sys: false
+    });
+    window.addEventListener('hashchange', function () {
+      window.location.reload();
+    });
+
+    sysObj.addEventListener('click', function (evt) {
+      params.sys = !toBool(params.sys);
+      window.location.hash = 'sys=' + params.sys;
+    });
+
+    addObj.addEventListener('click', function (evt) {
+      micro.openModal('newelementdlg');
+    });
+
+    function createElement(path, key, value) {
+      if (path) {
+        var hElem = document.querySelector("[microID='" + path + "']");
+        if (!hElem) {
+          var t = path.split('/')[1];
+          var p = {
+            id: path,
+            type: t
+          };
+
+          if (toBool(params.sys) || !elementDef[t] || toBool(elementDef[t].sys) == false) {
+            var e = micro.insertTemplate(panelObj, t, p);
+            if (!e) { micro.insertTemplate(panelObj, 'generic', p); }
+          } // if
+        } // if
+      } // if
+    } // createElement()
+    hub.subscribe('/*/*', createElement);
+
+    function updateAsap(ev) {
+      if (updateTimer)
+        window.clearTimeout(updateTimer);
+      updateTimer = null;
+      updateTimer = window.setTimeout(updateState, 20);
+    }
+
+    function updateState(ev) {
+      if (updateTimer)
+        window.clearTimeout(updateTimer);
+      updateTimer = null;
+
+      fetch('/$board')
+        .then(function (result) {
+          return result.json();
+        })
+        .then(function (json) {
+          hub.publishObj(json);
+        })
+        .then(function (json) {
+          updateTimer = window.setTimeout(updateState, 4000);
+        });
+    } // updateState()
+
+    function init() {
+      // load templates from other file.
+      var p0 = Promise.all([micro.loadFile('/ding-templates.htm'), micro.loadFile('/ding-info-new.htm')]);
+
+      // element definitions -> env.json -> config.json
+      var p1 = fetch('/elements.json')
+        .then(function (result) {
+          return result.json();
+        })
+        .then(function (json) {
+          elementDef = json;
+
+          return fetch('/env.json');
+        })
+        .then(function (result) {
+          return result.json();
+        })
+        .then(function (json) {
+          hub.publishObj(json);
+
+          return fetch('/config.json');
+        })
+        .then(function (result) {
+          return result.json();
+        })
+        .then(function (json) {
+          hub.write('config', JSON.stringify(json));
+          hub.write('config2', json);
+          hub.publishObj(json);
+        });
+
+      Promise.all([p0, p1]).then(function () {
+        updateState();
+        // window.setTimeout(updateState, 4000);
+      });
+    } // init()
+
+    window.addEventListener('load', init);
+
+    window.addEventListener('error', function (err) {
+      alert(JSON.stringify(err, null, 1));
+    })
+  </script>
+</body>
+
+</html>

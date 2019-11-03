@@ -104,7 +104,6 @@ void BoardHandler::handleConnect(ESP8266WebServer &server)
     const char *netName = server.arg("n").c_str();
     const char *netPass = server.arg("p").c_str();
 
-    LOGGER_INFO("setup network <%s> <%s> ...", netName, netPass);
     _board->displayInfo("setup network", netName);
     WiFi.mode(WIFI_STA);
     WiFi.begin(netName, netPass);
@@ -123,6 +122,7 @@ void BoardHandler::handleConnect(ESP8266WebServer &server)
       break;
     } else if ((wifi_status == WL_NO_SSID_AVAIL) || (wifi_status == WL_CONNECT_FAILED)) {
       _board->displayInfo("failed.");
+      WiFi.disconnect(true);
       break;
     } // if
   } // while

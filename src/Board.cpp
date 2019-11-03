@@ -97,6 +97,7 @@ void Board::addElements()
   mj = new MicroJson(
       [this, &_lastElem](int level, char *path, char *name, char *value) {
         // LOGGER_TRACE("callback %d %s", level, path);
+        delay(0);
 
         if (level == 3) {
           if (name == NULL) {
@@ -135,6 +136,14 @@ void Board::addElements()
   // config the Elements of the thing
   mj->parseFile(CONF_FILENAME);
 
+  //   mj->parse(R"==(
+  // "sli": {
+  //   "0": {
+  //     "description": "Listen for commands on the Serial in line"
+  //   }
+  // }
+  //   )==");
+
 } // addElements()
 
 
@@ -143,7 +152,7 @@ void Board::start(Element_StartupMode startupMode)
   LOGGER_TRACE("start(%d)", startupMode);
 
   // make elements active that match
-  Element *l = _list2;
+  Element *l = _elementList;
   while (l != NULL) {
 
     if ((!l->active) && (l->startupMode <= startupMode)) {
@@ -156,7 +165,7 @@ void Board::start(Element_StartupMode startupMode)
   } // while
 
   active = true;
-  _next2 = NULL;
+  _nextElement = NULL;
 } // start()
 
 
@@ -173,7 +182,48 @@ void Board::loop()
   unsigned long now = millis();
   wl_status_t wifi_status = WiFi.status();
 
-  if (boardState == BOARDSTATE_NONE) {
+  if (boardState == BOARDSTATE_RUN) {
+    // Most common state.
+    if (!validTime) {
+      // check if time is valid now -> start all elements with
+      // Element_StartupMode::Time
+      time_t current_stamp = getTime();
+      if (current_stamp) {
+        start(Element_StartupMode::Time);
+        validTime = true;
+        return;
+      } // if
+    }
+
+    // dispatch next action from _actionList if any
+    if (_actionList.length() > 0) {
+      String _lastAction;
+
+      // extract first action
+      int pos = _actionList.indexOf(ACTION_SEPARATOR);
+      if (pos > 0) {
+        _lastAction = _actionList.substring(0, pos);
+        _actionList.remove(0, pos + 1);
+      } else {
+        _lastAction = _actionList;
+        _actionList = (const char *)NULL;
+      } // if
+      _dispatchSingle(_lastAction);
+      return;
+    } // if
+
+    // give some time to next active element
+    if (_nextElement == NULL) {
+      _nextElement = _elementList;
+    } // if
+    if (_nextElement) {
+      if (_nextElement->active) {
+        _nextElement->loop();
+      }
+      _nextElement = _nextElement->next;
+    } // if
+
+  } else if (boardState == BOARDSTATE_NONE) {
     _newState(BOARDSTATE_LOAD);
 
   } else if (boardState == BOARDSTATE_LOAD) {
@@ -184,13 +234,13 @@ void Board::loop()
     WiFi.hostname(deviceName);
     LOGGER_INFO("n3-status = %d <%s>", WiFi.status(), WiFi.hostname().c_str());
 
-    _info(HOMEDING_GREETING);
+    displayInfo(HOMEDING_GREETING);
 
     netMode = NetMode_AUTO;
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) {
-      _newState(BOARDSTATE_STARTCAPTIVE);       // start hotspot right now.
+      _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
     } else {
       _newState(BOARDSTATE_CONNECT);
     }
@@ -295,7 +345,7 @@ void Board::loop()
     } // if
 
   } else if (boardState == BOARDSTATE_GREET) {
-    _info(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
+    displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
     LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
     // LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
 
@@ -315,48 +365,8 @@ void Board::loop()
     start(Element_StartupMode::Network);
     _newState(BOARDSTATE_RUN);
 
-  } else if (boardState == BOARDSTATE_RUN) {
-    if (!validTime) {
-      // check if time is valid now -> start all elements with
-      // Element_StartupMode::Time
-      time_t current_stamp = getTime();
-      if (current_stamp) {
-        start(Element_StartupMode::Time);
-        validTime = true;
-        return;
-      } // if
-    }
-
-    // dispatch next action from _actionList if any
-    if (_actionList.length() > 0) {
-      String _lastAction;
-
-      // extract first action
-      int pos = _actionList.indexOf(ACTION_SEPARATOR);
-      if (pos > 0) {
-        _lastAction = _actionList.substring(0, pos);
-        _actionList.remove(0, pos + 1);
-      } else {
-        _lastAction = _actionList;
-        _actionList = (const char *)NULL;
-      } // if
-      _dispatchSingle(_lastAction);
-      return;
-    } // if
-
-    // give some time to next active element
-    if (_next2 == NULL) {
-      _next2 = _list2;
-    } // if
-    if (_next2) {
-      if (_next2->active) {
-        _next2->loop();
-      }
-      _next2 = _next2->next;
-    } // if
-
   } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
-    _info("config..");
+    displayInfo("config..");
 
     WiFi.softAPConfig(apIP, apIP, netMsk);
     WiFi.softAP(HOMEDING_GREETING);
@@ -395,7 +405,7 @@ Element *Board::findById(const char *id)
 {
   // LOGGER_TRACE("findById(%s)", id);
 
-  Element *l = _list2;
+  Element *l = _elementList;
   while (l != NULL) {
     if (strcmp(l->id, id) == 0) {
       // LOGGER_TRACE(" found:%s", l->id);
@@ -507,7 +517,7 @@ void Board::getState(String &out, const String &path)
   String ret = "{";
   const char *cPath = path.c_str();
 
-  Element *l = _list2;
+  Element *l = _elementList;
   while (l != NULL) {
     // LOGGER_TRACE("  ->%s", l->id);
     if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
@@ -600,7 +610,7 @@ Element *Board::getElement(const char *elementType)
   tn.concat(ELEM_ID_SEPARATOR);
   int tnLength = tn.length();
 
-  Element *l = _list2;
+  Element *l = _elementList;
   while (l != NULL) {
     if (String(l->id).substring(0, tnLength).equalsIgnoreCase(tn)) {
       break; // while
@@ -620,7 +630,7 @@ Element *Board::getElement(const char *elementType, const char *elementName)
   tn.concat('/');
   tn.concat(elementName);
 
-  Element *l = _list2;
+  Element *l = _elementList;
   while (l != NULL) {
     if (String(l->id).equalsIgnoreCase(tn)) {
       break; // while
@@ -642,32 +652,8 @@ void Board::reboot(bool wipe)
   ESP.reset();
 };
 
-/**
- * @brief Add another element to the board into the list of created elements.
- */
-void Board::_add(const char *id, Element *e)
-{
-  // LOGGER_TRACE("_add(%s)", id);
 
-  strcpy(e->id, id);
-  e->next = NULL;
-  Element *l = _list2;
-
-  // append to end of list.
-  if (l == NULL) {
-    // first Element.
-    _list2 = e;
-  } else {
-    // search last Element.
-    while (l->next != NULL)
-      l = l->next;
-    l->next = e;
-  } // if
-  e->init(this);
-} // _add()
-
-
-void Board::_info(const char *text1, const char *text2)
+void Board::displayInfo(const char *text1, const char *text2)
 {
   LOGGER_INFO(text1);
   if (text2)
@@ -681,5 +667,31 @@ void Board::_info(const char *text1, const char *text2)
     // delay(1200);
   } // if
 }
+
+
+/**
+ * @brief Add another element to the board into the list of created elements.
+ */
+void Board::_add(const char *id, Element *e)
+{
+  // LOGGER_TRACE("_add(%s)", id);
+
+  strcpy(e->id, id);
+  e->next = NULL;
+  Element *l = _elementList;
+
+  // append to end of list.
+  if (l == NULL) {
+    // first Element.
+    _elementList = e;
+  } else {
+    // search last Element.
+    while (l->next != NULL)
+      l = l->next;
+    l->next = e;
+  } // if
+  e->init(this);
+} // _add()
+
 
 // End

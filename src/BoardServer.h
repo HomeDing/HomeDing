@@ -95,9 +95,19 @@ protected:
    */
   String _path;
 
+  /**
+   * @brief execute a restart or reboot 
+   * @param wipe if true unregister from the network.
+  */
   void handleReboot(ESP8266WebServer &server, bool wipe = false);
+
+  /** @brief Return list of available elements. */
   void handleElements(ESP8266WebServer &server);
 
+  /** @brief Return list of local networks. */
+  void handleScan(ESP8266WebServer &server);
+
+  void handleConnect(ESP8266WebServer &server);
 };
 
 #endif

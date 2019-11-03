@@ -216,6 +216,13 @@ public:
 
   static void reboot(bool wipe);
 
+  /**
+   * @brief Display some info to display(optional) and log.
+   * @param text1
+   * @param text2
+   */
+  void displayInfo(const char *text1, const char *text2 = NULL);
+
   String deviceName;
   String homepage = "/index.htm";
 
@@ -245,8 +252,6 @@ private:
 
   void _dispatchSingle(String evt);
 
-  void _info(const char *text1, const char *text2 = NULL);
-
   // state and timing
   unsigned long configPhaseEnd; // for offering config mode
   unsigned long connectPhaseEnd; // for waiting on net connection
@@ -255,12 +260,18 @@ private:
   void _newState(BoardState newState);
 
   bool active = false;
+  
+  /** set to true when a locl date/time is valid */
   bool validTime = false;
 
+  /** net connection mode */
   int netMode;
 
-  Element *_list2;
-  Element *_next2;
+  /** list of active elements */
+  Element *_elementList;
+
+  /** next element that will be used in loop() */
+  Element *_nextElement;
 
   String _actionList;
 

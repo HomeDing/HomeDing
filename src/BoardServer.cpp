@@ -94,6 +94,70 @@ BoardHandler::BoardHandler(Board *board)
 
 // void handleStatus() {}
 
+void BoardHandler::handleConnect(ESP8266WebServer &server)
+{
+  unsigned long connectTimeout =
+      millis() + (60 * 1000); // TODO: make configurable
+  server.send(200);
+
+  if (server.hasArg("n")) {
+    const char *netName = server.arg("n").c_str();
+    const char *netPass = server.arg("p").c_str();
+
+    LOGGER_INFO("setup network <%s> <%s> ...", netName, netPass);
+    _board->displayInfo("setup network", netName);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(netName, netPass);
+
+  } else if (server.hasArg("wps")) {
+    // TODO: start using wps
+    // WiFi.beginWPSConfig();
+  } // if
+
+  while (connectTimeout > millis()) {
+    delay(100);
+    wl_status_t wifi_status = WiFi.status();
+
+    if (wifi_status == WL_CONNECTED) {
+      _board->displayInfo("ok.");
+      break;
+    } else if ((wifi_status == WL_NO_SSID_AVAIL) || (wifi_status == WL_CONNECT_FAILED)) {
+      _board->displayInfo("failed.");
+      break;
+    } // if
+  } // while
+  delay(800);
+  _board->reboot(false);
+} // handleConnect()
+
+
+// Return list of local networks.
+void BoardHandler::handleScan(ESP8266WebServer &server)
+{
+  int8_t scanState = WiFi.scanComplete();
+  if (scanState == WIFI_SCAN_FAILED) {
+    // restart a scan
+    WiFi.scanNetworks(true);
+    server.send(200);
+  } else if (scanState == WIFI_SCAN_RUNNING) {
+    server.send(200);
+  } else {
+    // return scan result
+    String json = "[";
+    json.reserve(512);
+
+    for (int i = 0; i < scanState; i++) {
+      json += "{";
+      jc_prop(json, "id", WiFi.SSID(i));
+      jc_prop(json, "rssi", WiFi.RSSI(i));
+      jc_prop(json, "open", WiFi.encryptionType(i) == ENC_TYPE_NONE);
+      json += "},";
+    }
+    json += "]";
+    server.send(200, TEXT_JSON, jc_sanitize(json));
+    WiFi.scanDelete();
+  }
+} // handleScan()
 
 // reset or reboot the device
 void BoardHandler::handleReboot(ESP8266WebServer &server, bool wipe)
@@ -139,12 +203,30 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
   requestUri.toLowerCase();
   output.reserve(512);
 
-  if (requestUri == SVC_REBOOT) {
+  if (requestUri.startsWith(SVC_BOARD)) {
+    // most common request
+    // everything behind  "/$board/" is used to address a specific element
+    String eId(requestUri.substring(8));
+
+    if (server.args() == 0) {
+      // get status of all or the specified element
+      _board->getState(output, eId);
+
+      server.sendHeader("Cache-control", "NO-CACHE");
+      // DEBUG_LOG("  ret:%s\n", output.c_str());
+
+    } else {
+      // send action to the specified element
+      _board->setState(eId, server.argName(0), server.arg(0));
+    } // if
+      output_type = TEXT_JSON;
+
+  } else if (requestUri == SVC_REBOOT) {
     // Reboot device
-    handleReboot(server, false);
+    handleReboot(server);
 
   } else if (requestUri.startsWith(SVC_RESETALL)) {
-    // Reset network parameters and reboot
+    // Reset SPIFFS, network parameters and reboot
     SPIFFS.format();
     handleReboot(server, true);
 
@@ -209,26 +291,11 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     jc_sanitize(output);
     output_type = TEXT_JSON;
 
-  } else if (requestUri.startsWith(SVC_BOARD)) {
+  } else if (requestUri == "/$scan") {
+    handleScan(server);
 
-    // everything behind  "/$board/" is used to address a specific element
-    String eId(requestUri.substring(8));
-
-    // LOGGER_RAW("eId(%s)", eId.c_str());
-    // LOGGER_RAW(" args=%d", server.args());
-
-    if (server.args() == 0) {
-      // get status of all or the specified element
-      _board->getState(output, eId);
-
-      server.sendHeader("Cache-control", "NO-CACHE");
-      // DEBUG_LOG("  ret:%s\n", output.c_str());
-
-    } else {
-      // send action to the specified element
-      _board->setState(eId, server.argName(0), server.arg(0));
-    } // if
-      output_type = TEXT_JSON;
+  } else if (requestUri == "/$connect") {
+    handleConnect(server);
 
   } else {
     ret = false;

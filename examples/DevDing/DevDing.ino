@@ -34,6 +34,8 @@
  * * 11.10.2018 move network initialization into board loop.
 */
 
+#include <GDBStub.h>
+
 #include <Arduino.h>
 #include <Board.h>
 #include <Element.h>
@@ -145,41 +147,13 @@ void handleRedirect()
 } // handleRedirect()
 
 
-// Return list of local networks.
-void handleScan()
-{
-  int8_t scanState = WiFi.scanComplete();
-  if (scanState == WIFI_SCAN_FAILED) {
-    // restart a scan
-    WiFi.scanNetworks(true);
-    server.send(200);
-  } else if (scanState == WIFI_SCAN_RUNNING) {
-    server.send(200);
-  } else {
-    // return scan result
-    String json = "[";
-    json.reserve(512);
-
-    for (int i = 0; i < scanState; i++) {
-      json += "{";
-      jc_prop(json, "id", WiFi.SSID(i));
-      jc_prop(json, "rssi", WiFi.RSSI(i));
-      jc_prop(json, "open", WiFi.encryptionType(i) == ENC_TYPE_NONE);
-      json += "},";
-    }
-    json += "]";
-    server.send(200, TEXT_JSON, jc_sanitize(json));
-    WiFi.scanDelete();
-  }
-} // handleScan()
-
-
 /**
  * Setup all components and Serial debugging helpers
  */
 void setup(void)
 {
   Serial.begin(115200);
+  gdbstub_init();
 
 #if NET_DEBUG
   Serial.setDebugOutput(true);
@@ -200,39 +174,6 @@ void setup(void)
   // ----- adding web server handlers -----
   // redirect to index.htm when only domain name is given.
   server.on("/", HTTP_GET, handleRedirect);
-
-  // Bulk File Upload UI.
-  server.on("/$scan", HTTP_GET, handleScan);
-
-  // server.on("/$format", HTTP_GET, []() { SPIFFS.format(); });
-
-  // modify network connection and reboot.
-  server.on("/$connect", HTTP_GET, []() {
-    unsigned long connectTimeout =
-        millis() + (30 * 1000); // TODO: make configurable
-    LOGGER_INFO("setup network...");
-    server.send(200);
-
-    if (server.hasArg("n")) {
-      WiFi.mode(WIFI_STA);
-      WiFi.begin(server.arg("n").c_str(), server.arg("p").c_str());
-    } else if (server.hasArg("wps")) {
-      // TODO: start using wps
-      // WiFi.beginWPSConfig();
-    } // if
-
-    while (connectTimeout > millis()) {
-      delay(500);
-      wl_status_t wifi_status = WiFi.status();
-
-      if ((wifi_status == WL_CONNECTED) || (wifi_status == WL_NO_SSID_AVAIL) ||
-          (wifi_status == WL_CONNECT_FAILED)) {
-        LOGGER_INFO("status = %d", wifi_status);
-        break;
-      } // if
-    } // while
-    mainBoard.reboot(false);
-  });
 
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));

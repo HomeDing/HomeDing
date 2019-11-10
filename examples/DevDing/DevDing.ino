@@ -75,10 +75,11 @@
 #define HOMEDING_INCLUDE_SERIALLINE
 
 #include <HomeDing.h>
+#include <MicroJsonComposer.h>
 
-const char *respond404 =
-    "<html><head><title>File not found</title></head><body>File not "
-    "found</body></html>";
+static const char respond404[] PROGMEM =
+R"==(<html><head><title>File not found</title></head><body>
+File not found</body></html>)==";
 
 // ===== WLAN credentials =====
 
@@ -97,39 +98,6 @@ Board mainBoard;
 
 // ===== implement =====
 
-// ===== JSON Composer helping functions =====
-// to output JSON formatted data a String is used and appended by new JSON
-// elements. Here JSON Strings are always created with comma separators after
-// every object. The generated output must be finished by using the jc_sanitize
-// function before transmitted.
-
-// Create a property with String value
-void jc_prop(String &json, const char *key, String value)
-{
-  value.replace("\"", "\\\"");
-  json.concat('\"');
-  json.concat(key);
-  json.concat("\":\"");
-  json.concat(value);
-  json.concat("\","); // comma may be wrong.
-} // jc_prop
-
-
-// Create a property with int value
-void jc_prop(String &json, const char *key, int n)
-{
-  jc_prop(json, key, String(n));
-} // jc_prop
-
-
-const char *jc_sanitize(String &json)
-{
-  json.replace(",]", "]");
-  json.replace(",}", "}");
-  return (json.c_str());
-} // jc_sanitize()
-
-
 void handleRedirect()
 {
   LOGGER_RAW("Redirect...");
@@ -138,8 +106,9 @@ void handleRedirect()
   if (mainBoard.boardState < BOARDSTATE_STARTCAPTIVE) {
     url = mainBoard.homepage;
   } else {
-    url = String(F("http://")) + WiFi.softAPIP().toString() +
-          F("/$setup"); // ; mainBoard.deviceName
+    url = "http://";
+    url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
+    url.concat("/$setup");
   }
   server.sendHeader("Location", url, true);
   server.send(302);
@@ -167,6 +136,9 @@ void setup(void)
   LOGGER_INFO("HomeDing Device is starting... (%s)",
               ESP.getResetReason().c_str());
 
+  LOGGER_INFO("Free Memory: %d", ESP.getFreeHeap());
+
+
   // ----- setup the file system and load configuration -----
   SPIFFS.begin();
   mainBoard.init(&server);
@@ -193,7 +165,7 @@ void setup(void)
       handleRedirect();
     } else {
       // standard not found in browser.
-      server.send(404, TEXT_HTML, respond404);
+      server.send(404, TEXT_HTML, FPSTR(respond404));
     }
   });
 

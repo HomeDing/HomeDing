@@ -61,27 +61,11 @@ void Board::init(ESP8266WebServer *serv)
 
   // check save-mode
   savemode = false;
-
-  // if autoconnect is enabled there was a privious networc connection.
-  // Try to reconnect very early, now. - Configuration may take too long.
-
-  if (WiFi.getAutoConnect()) {
-    LOGGER_TRACE("autoconnect start...");
-
-    unsigned long ct = millis() + (4 * 1000); // TODO: make configurable
-    wl_status_t wifi_status;
-    while (ct > millis()) {
-      delay(100);
-      wifi_status = WiFi.status();
-
-      if ((wifi_status == WL_CONNECTED) || (wifi_status == WL_NO_SSID_AVAIL) ||
-          (wifi_status == WL_CONNECT_FAILED)) {
-        break;
-      } // if
-    } // while
-    LOGGER_TRACE("autoconnect done %d", wifi_status);
-  } // if
 } // init()
+
+
+// Remark: some settings on the board class can be modifies using the device element.
+// see deviceElement.cpp
 
 
 /**
@@ -302,7 +286,7 @@ void Board::loop()
     }
 
     // wait max 30 seconds for connecting to the network
-    connectPhaseEnd = now + captiveTime;
+    connectPhaseEnd = now + maxConnectTime;
 
   } else if ((boardState == BOARDSTATE_CONFWAIT) || (boardState == BOARDSTATE_WAIT)) {
     // make sysLED blink

@@ -136,34 +136,35 @@ public:
   }
 
 
-  static String getContentType(const String &path)
+  /** return http content type from filetype */
+  static String getContentType(const String &fName)
   {
-    if (path.endsWith(".html"))
+    if (fName.endsWith(".htm"))
       return "text/html";
-    else if (path.endsWith(".htm"))
-      return "text/html";
-    else if (path.endsWith(".css"))
+    // else if (fName.endsWith(".html"))
+    //   return "text/html";
+    else if (fName.endsWith(".css"))
       return "text/css";
-    else if (path.endsWith(".txt"))
+    else if (fName.endsWith(".txt"))
       return "text/plain";
-    else if (path.endsWith(".js"))
+    else if (fName.endsWith(".js"))
       return "application/javascript";
-    else if (path.endsWith(".png"))
+    else if (fName.endsWith(".png"))
       return "image/png";
-    else if (path.endsWith(".gif"))
-      return "image/gif";
-    else if (path.endsWith(".jpg"))
-      return "image/jpeg";
-    else if (path.endsWith(".json"))
+    // else if (fName.endsWith(".gif"))
+    //   return "image/gif";
+    // else if (fName.endsWith(".jpg"))
+    //   return "image/jpeg";
+    else if (fName.endsWith(".json"))
       return "application/json";
-    else if (path.endsWith(".ico"))
+    else if (fName.endsWith(".ico"))
       return "image/x-icon";
-    else if (path.endsWith(".svg"))
+    else if (fName.endsWith(".svg"))
       return "image/svg+xml";
-    else if (path.endsWith(".xml"))
-      return "text/xml";
-    else if (path.endsWith(".zip"))
-      return "application/zip";
+    // else if (fName.endsWith(".xml"))
+    //   return "text/xml";
+    // else if (fName.endsWith(".zip"))
+    //   return "application/zip";
     return "application/octet-stream";
   }
 

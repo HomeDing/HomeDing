@@ -16,14 +16,16 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <BoardServer.h>
 #include <ElementRegistry.h>
 
 #include "upload.h"
 #include <FS.h>
+
+#include <MicroJsonComposer.h>
 
 #define SVC_ANY "/$"
 
@@ -43,40 +45,6 @@
 
 static const char *TEXT_JSON = "text/json";
 static const char *TEXT_HTML = "text/html";
-
-
-// ===== JSON Composer helping functions =====
-// to output JSON formatted data a String is used and appended by new JSON
-// elements. Here JSON Strings are always created with comma separators after
-// every object. The generated output must be finished by using the jc_sanitize
-// function before transmitted.
-
-// Create a property with String value
-extern void jc_prop(String &json, const char *key, String value);
-// {
-//   value.replace("\"", "\\\"");
-//   json.concat('\"');
-//   json.concat(key);
-//   json.concat("\":\"");
-//   json.concat(value);
-//   json.concat("\","); // comma may be wrong.
-// } // jc_prop
-
-
-// Create a property with int value
-extern void jc_prop(String &json, const char *key, int n);
-// {
-//   jc_prop(json, key, String(n));
-// } // jc_prop
-
-
-extern const char *jc_sanitize(String &json);
-// {
-//   json.replace(",]", "]");
-//   json.replace(",}", "}");
-//   return (json.c_str());
-// } // jc_sanitize()
-
 
 /**
  * @brief Construct a new State Handler object
@@ -143,18 +111,18 @@ void BoardHandler::handleScan(ESP8266WebServer &server)
     server.send(200);
   } else {
     // return scan result
-    String json = "[";
-    json.reserve(512);
+    MicroJsonComposer jc;
+    jc.openArray();
 
     for (int i = 0; i < scanState; i++) {
-      json += "{";
-      jc_prop(json, "id", WiFi.SSID(i));
-      jc_prop(json, "rssi", WiFi.RSSI(i));
-      jc_prop(json, "open", WiFi.encryptionType(i) == ENC_TYPE_NONE);
-      json += "},";
+      jc.openObject();
+      jc.addProperty("id", WiFi.SSID(i));
+      jc.addProperty("rssi", WiFi.RSSI(i));
+      jc.addProperty("open", WiFi.encryptionType(i) == ENC_TYPE_NONE);
+      jc.closeObject();
     }
-    json += "]";
-    server.send(200, TEXT_JSON, jc_sanitize(json));
+    jc.closeArray();
+    server.send(200, TEXT_JSON, jc.stringify());
     WiFi.scanDelete();
   }
 } // handleScan()
@@ -196,7 +164,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
 {
   // LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
   String output;
-  const char *output_type = nullptr; // when output_type is set then send output as response. 
+  const char *output_type = nullptr; // when output_type is set then send output as response.
 
   bool ret = true;
 
@@ -219,7 +187,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
       // send action to the specified element
       _board->setState(eId, server.argName(0), server.arg(0));
     } // if
-      output_type = TEXT_JSON;
+    output_type = TEXT_JSON;
 
   } else if (requestUri == SVC_REBOOT) {
     // Reboot device
@@ -235,24 +203,26 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     handleReboot(server, true);
 
   } else if (requestUri.startsWith(SVC_SYSINFO)) {
-    output = "{";
-    jc_prop(output, "devicename", _board->deviceName);
-    jc_prop(output, "build", __DATE__);
-    jc_prop(output, "free heap", ESP.getFreeHeap());
+    MicroJsonComposer jc;
 
-    jc_prop(output, "flash-size", ESP.getFlashChipSize());
-    // jc_prop(output, "flash-real-size", ESP.getFlashChipRealSize());
+    jc.openObject();
+    jc.addProperty("devicename", _board->deviceName);
+    jc.addProperty("build", __DATE__);
+    jc.addProperty("free heap", ESP.getFreeHeap());
+
+    jc.addProperty("flash-size", ESP.getFlashChipSize());
+    // jc.addProperty("flash-real-size", ESP.getFlashChipRealSize());
 
     FSInfo fs_info;
     SPIFFS.info(fs_info);
-    jc_prop(output, "fs-totalBytes", fs_info.totalBytes);
-    jc_prop(output, "fs-usedBytes", fs_info.usedBytes);
+    jc.addProperty("fs-totalBytes", fs_info.totalBytes);
+    jc.addProperty("fs-usedBytes", fs_info.usedBytes);
 
     // WIFI info
-    jc_prop(output, "ssid", WiFi.SSID());
+    jc.addProperty("ssid", WiFi.SSID());
 
-    output += "}";
-    jc_sanitize(output);
+    jc.closeObject();
+    output = jc.stringify();
     output_type = TEXT_JSON;
 
   } else if (requestUri.startsWith(SVC_ELEMENTS)) {
@@ -277,18 +247,19 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
 
   } else if (requestUri.startsWith(SVC_LISTFILES)) {
     // List files in filesystem
-    output = "[";
+    MicroJsonComposer jc;
     Dir dir = SPIFFS.openDir("/");
 
+    jc.openArray();
     while (dir.next()) {
-      output += "{";
-      jc_prop(output, "type", "file");
-      jc_prop(output, "name", dir.fileName());
-      jc_prop(output, "size", dir.fileSize());
-      output += "},";
+      jc.openObject();
+      jc.addProperty("type", "file");
+      jc.addProperty("name", dir.fileName());
+      jc.addProperty("size", dir.fileSize());
+      jc.closeObject();
     } // while
-    output += "]";
-    jc_sanitize(output);
+    jc.closeArray();
+    output = jc.stringify();
     output_type = TEXT_JSON;
 
   } else if (requestUri == "/$scan") {

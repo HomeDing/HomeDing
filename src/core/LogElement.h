@@ -18,6 +18,8 @@
 #ifndef LOGELEMENT_H
 #define LOGELEMENT_H
 
+#include <HomeDing.h>
+
 /**
  * @brief LogElement implements...
  * @details

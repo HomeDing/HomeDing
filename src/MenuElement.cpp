@@ -18,9 +18,7 @@
 #include <Board.h>
 #include <Element.h>
 
-#include "ValueElement.h"
 #include "MenuElement.h"
-#include <ElementRegistry.h>
 
 
 /* ===== Static factory function ===== */
@@ -44,7 +42,7 @@ bool MenuElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     if (_count > 0) {
       valueList[_active]->set("up", value);
       _updateV = true;

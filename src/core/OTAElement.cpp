@@ -15,7 +15,6 @@
 #include <Board.h>
 
 #include <core/OTAElement.h>
-#include <ElementRegistry.h>
 
 #include <ArduinoOTA.h>
 

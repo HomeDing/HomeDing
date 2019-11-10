@@ -17,6 +17,8 @@
 #ifndef OTAELEMENT_H
 #define OTAELEMENT_H
 
+#include <HomeDing.h>
+
 class OTAElement : public Element
 {
 public:

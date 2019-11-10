@@ -19,7 +19,6 @@
 #include <Board.h>
 
 #include <RFSendElement.h>
-#include <ElementRegistry.h>
 
 #include <TabRF.h>
 #include <intertechno2.h> // use the intertechno2 code defintions
@@ -51,7 +50,7 @@ bool RFSendElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     _lastValue = _atoi(value);
 
     if (active) {
@@ -109,7 +108,7 @@ void RFSendElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", (_lastValue == 1) ? "1" : "0");
+  callback(PROP_VALUE, (_lastValue == 1) ? "1" : "0");
 } // pushState()
 
 

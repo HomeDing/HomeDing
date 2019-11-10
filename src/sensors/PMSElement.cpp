@@ -162,7 +162,7 @@ void PMSElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_value).c_str());
+  callback(PROP_VALUE, String(_value).c_str());
 } // pushState()
 
 // End

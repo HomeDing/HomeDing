@@ -21,7 +21,6 @@
 #include <Board.h>
 
 #include <sensors/DHTElement.h>
-#include <ElementRegistry.h>
 
 /**
  * @brief static factory function to create a new DHTElement

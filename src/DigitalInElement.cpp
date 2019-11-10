@@ -19,9 +19,6 @@
 #include <Board.h>
 
 #include "DigitalInElement.h"
-#include <ElementRegistry.h>
-
-// #include <OneButton.h>
 
 /**
  * @brief static factory function to create a new DigitalInElement.
@@ -112,7 +109,7 @@ void DigitalInElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_lastOutLevel).c_str());
+  callback(PROP_VALUE, String(_lastOutLevel).c_str());
 } // pushState()
 
 // End

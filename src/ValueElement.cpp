@@ -18,7 +18,6 @@
 #include <Board.h>
 #include <Element.h>
 
-#include <ElementRegistry.h>
 #include <ValueElement.h>
 
 /**
@@ -58,7 +57,7 @@ bool ValueElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     _setValue(_atoi(value));
 
   } else if (_stricmp(name, "up") == 0) {
@@ -112,7 +111,7 @@ void ValueElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_value).c_str());
+  callback(PROP_VALUE, String(_value).c_str());
 } // pushState()
 
 /** return actual value */

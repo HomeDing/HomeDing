@@ -53,7 +53,11 @@ bool DisplayTextElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "prefix") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
+    _value = value;
+    _drawText();
+
+  } else if (_stricmp(name, "prefix") == 0) {
     if (strlen(value) < sizeof(_prefix))
       strcpy(_prefix, value);
 
@@ -72,10 +76,6 @@ bool DisplayTextElement::set(const char *name, const char *value)
     if ((s == 10) || (s == 16) || (s == 24)) {
       _h = s;
     } // if
-
-  } else if (_stricmp(name, "value") == 0) {
-    _value = value;
-    _drawText();
 
   } else if (_stricmp(name, "clear") == 0) {
     if (active) {
@@ -116,7 +116,7 @@ void DisplayTextElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", _value.c_str());
+  callback(PROP_VALUE, _value.c_str());
 } // pushState()
 
 // End

@@ -14,7 +14,6 @@
 #include <Element.h>
 #include <Board.h>
 
-#include <ElementRegistry.h>
 #include <time/TimerElement.h>
 
 /**
@@ -173,7 +172,7 @@ void TimerElement::pushState(
     callback("time", "0");
   else
     callback("time", String(now - _startTime).c_str());
-  callback("value", (_state == TIMERSTATE_PULSE) ? "1" : "0");
+  callback(PROP_VALUE, (_state == TIMERSTATE_PULSE) ? "1" : "0");
 } // pushState()
 
 

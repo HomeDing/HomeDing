@@ -21,6 +21,7 @@
 #ifndef DISPLAYDOTELEMENT_H
 #define DISPLAYDOTELEMENT_H
 
+#include <HomeDing.h>
 #include <displays/DisplayAdapter.h>
 
 /**

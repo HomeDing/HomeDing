@@ -21,7 +21,6 @@
 #include <Element.h>
 #include <Board.h>
 
-#include <ElementRegistry.h>
 #include <RemoteElement.h>
 
 #include <ESP8266WiFi.h>

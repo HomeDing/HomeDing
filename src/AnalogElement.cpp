@@ -18,7 +18,6 @@
 #include <Board.h>
 
 #include "AnalogElement.h"
-#include <ElementRegistry.h>
 
 /**
  * @brief static factory function to create a new AnalogElement.
@@ -122,7 +121,7 @@ void AnalogElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_value).c_str());
+  callback(PROP_VALUE, String(_value).c_str());
   callback("reference", String(_lastReference).c_str());
 } // pushState()
 

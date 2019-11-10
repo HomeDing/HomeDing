@@ -19,7 +19,6 @@
 #include <Element.h>
 
 #include "ButtonElement.h"
-#include <ElementRegistry.h>
 
 
 #define STATE_INIT 0 // waiting for input
@@ -46,7 +45,7 @@ bool ButtonElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     _inputLevel = _atob(value);
 
   } else if (_stricmp(name, "action") == 0) {

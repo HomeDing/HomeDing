@@ -18,6 +18,8 @@
 #ifndef ANDELEMENT_H
 #define ANDELEMENT_H
 
+#include <HomeDing.h>
+
 #define AndElementInputs 2
 
 class AndElement : public Element

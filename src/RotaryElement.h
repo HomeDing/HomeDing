@@ -18,6 +18,8 @@
 #ifndef RotaryElement_H
 #define RotaryElement_H
 
+#include <HomeDing.h>
+
 /**
  * @brief RotaryElement implements...
  * @details

@@ -18,7 +18,6 @@
 #include <Element.h>
 
 #include "SwitchElement.h"
-#include <ElementRegistry.h>
 
 /**
  * @brief static factory function to create a new SwitchElement.
@@ -62,7 +61,7 @@ bool SwitchElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     _setValue(_atob(value));
 
   } else if (_stricmp(name, "toggle") == 0) {

@@ -37,7 +37,10 @@ bool DisplayDotElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "x") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
+    _value = _atob(value);
+
+  } else if (_stricmp(name, "x") == 0) {
     _x = _atoi(value);
 
   } else if (_stricmp(name, "y") == 0) {
@@ -53,9 +56,6 @@ bool DisplayDotElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "clear") == 0) {
     _display->clear();
     _display->flush();
-
-  } else if (_stricmp(name, "value") == 0) {
-    _value = _atob(value);
 
   } else {
     ret = Element::set(name, value);
@@ -104,7 +104,7 @@ void DisplayDotElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", _value ? "1" : "0");
+  callback(PROP_VALUE, _value ? "1" : "0");
 } // pushState()
 
 // End

@@ -20,6 +20,8 @@
 #ifndef ValueELEMENT_H
 #define ValueELEMENT_H
 
+#include <HomeDing.h>
+
 /**
  * @brief Timer Element that produces actions based on timing conditions.
  * @details

@@ -15,7 +15,6 @@
 #include <Board.h>
 
 #include <DigitalOutElement.h>
-#include <ElementRegistry.h>
 
 /**
  * @brief static factory function to create a new DigitalOutElement.
@@ -31,14 +30,14 @@ bool DigitalOutElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "pin") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
+    _setLevel(_atob(value));
+
+  } else if (_stricmp(name, "pin") == 0) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "inverse") == 0) {
     _inverse = _atob(value);
-
-  } else if (_stricmp(name, "value") == 0) {
-    _setLevel(_atob(value));
 
   } else if (_stricmp(name, "on") == 0) {
     _setLevel(true);
@@ -74,7 +73,7 @@ void DigitalOutElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_lastValue).c_str());
+  callback(PROP_VALUE, String(_lastValue).c_str());
 } // pushState()
 
 

@@ -21,6 +21,7 @@
 #ifndef REMOTEELEMENT_H
 #define REMOTEELEMENT_H
 
+#include <HomeDing.h>
 #include <WiFiClient.h>
 
 /**

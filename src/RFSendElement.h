@@ -20,6 +20,8 @@
 #ifndef RFSendElement_H
 #define RFSendElement_H
 
+#include <HomeDing.h>
+
 /**
  * @brief RFSend Element that produces actions based on timing conditions.
  * @details

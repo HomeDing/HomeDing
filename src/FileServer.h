@@ -140,23 +140,23 @@ public:
   static String getContentType(const String &fName)
   {
     if (fName.endsWith(".htm"))
-      return "text/html";
+      return TEXT_HTML;
     // else if (fName.endsWith(".html"))
-    //   return "text/html";
+    //   return TEXT_HTML;
     else if (fName.endsWith(".css"))
       return "text/css";
     else if (fName.endsWith(".txt"))
-      return "text/plain";
+      return TEXT_PLAIN;
     else if (fName.endsWith(".js"))
       return "application/javascript";
     else if (fName.endsWith(".png"))
-      return "image/png";
+      return IMAGE_PNG;
     // else if (fName.endsWith(".gif"))
     //   return "image/gif";
     // else if (fName.endsWith(".jpg"))
     //   return "image/jpeg";
     else if (fName.endsWith(".json"))
-      return "application/json";
+      return TEXT_JSON;
     else if (fName.endsWith(".ico"))
       return "image/x-icon";
     else if (fName.endsWith(".svg"))

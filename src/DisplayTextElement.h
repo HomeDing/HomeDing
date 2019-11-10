@@ -21,6 +21,8 @@
 #ifndef DisplayTextElement_H
 #define DisplayTextElement_H
 
+#include <HomeDing.h>
+
 #include <displays/DisplayAdapter.h>
 
 /**

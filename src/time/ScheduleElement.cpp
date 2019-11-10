@@ -20,7 +20,6 @@
 #include <Board.h>
 
 #include "time/ScheduleElement.h"
-#include <ElementRegistry.h>
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -150,7 +149,7 @@ void ScheduleElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_value).c_str());
+  callback(PROP_VALUE, String(_value).c_str());
 } // pushState()
 
 /* ===== Register the Element ===== */

@@ -18,6 +18,7 @@
 #ifndef PMSELEMENT_H
 #define PMSELEMENT_H
 
+#include <HomeDing.h>
 #include <SoftwareSerial.h>
 
 /**

@@ -18,6 +18,8 @@
 #ifndef RADIOELEMENT_H
 #define RADIOELEMENT_H
 
+#include <HomeDing.h>
+
 /**
  * @brief RadioElement implements...
  * @details

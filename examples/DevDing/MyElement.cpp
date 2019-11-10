@@ -18,8 +18,10 @@
 #include <Element.h>
 #include <Board.h>
 
+#include <HomeDing.h>
+
 #include "MyElement.h"
-#include <ElementRegistry.h>
+
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -60,7 +62,7 @@ bool MyElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     _value = _atoi(value);
 
     // } else if (_stricmp(name, "onChange") == 0) {
@@ -110,7 +112,7 @@ void MyElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_value).c_str());
+  callback(PROP_VALUE, String(_value).c_str());
 } // pushState()
 
 

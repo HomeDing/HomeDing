@@ -27,6 +27,8 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
+#include <HomeDing.h>
+
 /**
  * @brief The ButtonElement is an special Element that creates actions based on
  * a digital IO signal.

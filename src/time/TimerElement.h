@@ -19,6 +19,8 @@
 #ifndef TIMERELEMENT_H
 #define TIMERELEMENT_H
 
+#include <HomeDing.h>
+
 /**
  * @details
 @verbatim

@@ -19,7 +19,6 @@
 #include <Board.h>
 
 #include "LogElement.h"
-#include <ElementRegistry.h>
 
 #include <FS.h>
 
@@ -82,7 +81,14 @@ bool LogElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "filename") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
+    if (active) {
+      _value = value;
+      _timestamp = _board->getTime();
+      _changed = true;
+    }
+
+  } else if (_stricmp(name, "filename") == 0) {
     // name of logfile
     _logfileName = value;
     _logfileOldName = value;
@@ -90,13 +96,6 @@ bool LogElement::set(const char *name, const char *value)
 
     // } else if (_stricmp(name, "doAction") == 0) {
     // make something
-
-  } else if (_stricmp(name, "value") == 0) {
-    if (active) {
-      _value = value;
-      _timestamp = _board->getTime();
-      _changed = true;
-    }
 
   } else {
     ret = Element::set(name, value);
@@ -139,7 +138,7 @@ void LogElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_value).c_str());
+  callback(PROP_VALUE, String(_value).c_str());
 } // pushState()
 
 

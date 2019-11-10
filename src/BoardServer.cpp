@@ -43,9 +43,6 @@
 
 #define SVC_BOARD "/$board"
 
-static const char *TEXT_JSON = "text/json";
-static const char *TEXT_HTML = "text/html";
-
 /**
  * @brief Construct a new State Handler object
  * @param path The root path of the state ressources.

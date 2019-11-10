@@ -5,25 +5,32 @@
 #ifndef HOMEDING_H
 #define HOMEDING_H
 
+#include <Element.h>
 #include <ElementRegistry.h>
 
-// ===== SYS Elements =====
+// some common property names
 
-// Elements that are required in any case add themselves to the ElementRegistry
-// See SSDPElement.cpp or DeviceElement.cpp as examples.
+extern const char *PROP_VALUE;
 
-// easy include of all libraries that do not require a separate library
 
+// ===== SYS and Common Elements =====
+
+// These elements that are required in any case add themselves to the ElementRegistry.
+// They are registered into the ElementRegistry using the initialization of ::registered in the *.cpp files:
+// See 
+// DeviceElement.cpp, SSDPElement.cpp, TimeElement, NTPTimeElement, RemoteElement, OTAElement
+// There are no HOMEDING_INCLUDE_ defines for these Elements:
 
 // ===== CORE Elements =====
 
-// The Core Elements that are required in any case add themselves to the ElementRegistry.
-// There are no HOMEDING_INCLUDE_ defines for these Elements:
-// Device, SSDP, OTA
-// because they are required for every HomeDing device.
-
+// The Core Elements that are very common and add themselves to the ElementRegistry
+// when the corresponding HOMEDING_INCLUDE_Xxxx macro is defined. 
 // Easy include of all elements that do not require a separate library
-// by defining HOMEDING_INCLUDE_CORE
+// by defining HOMEDING_INCLUDE_CORE.
+
+// The MACRO HOMEDING_REGISTER set to 1 and the full list of HOMEDING_INCLUDE_Xxxx defines must exist only once
+// and is done in the main sketch file to allow small and full configurations.
+// See <ConfigureSketchElements.md>
 
 #ifdef HOMEDING_INCLUDE_CORE
 
@@ -53,8 +60,6 @@
 #include <core/logger.h>
 
 // Register the Elements by including the definition with defined HOMEDING_REGISTER
-
-#define HOMEDING_REGISTER 1
 
 #ifdef HOMEDING_INCLUDE_Value
 #include <ValueElement.h>

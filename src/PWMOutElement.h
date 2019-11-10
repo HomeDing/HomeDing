@@ -17,6 +17,8 @@
 #ifndef PWMOut_H
 #define PWMOut_H
 
+#include <HomeDing.h>
+
 /**
  * @brief The PWMOutElement is an Element that creates an pwm digital output signal based on actions.
  */

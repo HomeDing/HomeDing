@@ -19,7 +19,6 @@
 #include <Board.h>
 
 #include "AndElement.h"
-#include <ElementRegistry.h>
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -44,7 +43,7 @@ bool AndElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (strstr(name, "value") == name) {
+  if (strstr(name, PROP_VALUE) == name) {
     // name starts with "value"
     int indx = _atoi(name + 5);
     // LOGGER_EINFO("vx(%s, %d)", name, indx);
@@ -93,7 +92,7 @@ void AndElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_outValue).c_str());
+  callback(PROP_VALUE, String(_outValue).c_str());
 } // pushState()
 
 // End

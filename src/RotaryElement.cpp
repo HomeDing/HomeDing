@@ -18,7 +18,6 @@
 #include <Board.h>
 #include <Element.h>
 
-#include <ElementRegistry.h>
 #include <RotaryElement.h>
 
 #include <RotaryEncoder.h>
@@ -132,7 +131,7 @@ void RotaryElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("value", String(_value).c_str());
+  callback(PROP_VALUE, String(_value).c_str());
 } // pushState()
 
 // End

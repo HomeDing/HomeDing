@@ -52,6 +52,8 @@
 
 #define NET_DEBUG 0
 
+#define HOMEDING_REGISTER 1
+
 // Use the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
 
@@ -84,10 +86,6 @@ File not found</body></html>)==";
 // ===== WLAN credentials =====
 
 #include "secrets.h"
-
-static const char *TEXT_PLAIN = "text/plain";
-static const char *TEXT_JSON = "text/json";
-static const char *TEXT_HTML = "text/html";
 
 // need a WebServer
 ESP8266WebServer server(80);

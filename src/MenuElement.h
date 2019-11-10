@@ -18,6 +18,9 @@
 #ifndef MENUELEMENT_H
 #define MENUELEMENT_H
 
+#include <HomeDing.h>
+#include <ValueElement.h>
+
 #define MAXMENUVALUES 8
 
 class MenuElement : public Element

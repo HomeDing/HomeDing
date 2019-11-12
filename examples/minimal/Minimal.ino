@@ -1,6 +1,6 @@
 /**
- * @file Standard.ino
- * @brief Standard Sketch that uses the HomeDing Library to implement Things attached the
+ * @file Minimal.ino
+ * @brief Minimal Sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -12,7 +12,7 @@
  * More information on https://www.mathertel.de/Arduino and https://homeding.github.io/.
  *
  * Changelog:
- * * 12.11.2019 Standard Example created from development sketch.
+ * * 12.11.2019 Minimal Example created from development sketch.
  */
 
 #include <Arduino.h>
@@ -32,24 +32,38 @@
 #define HOMEDING_REGISTER 1
 
 // Use the Core Elements of the HomeDing Library
-#define HOMEDING_INCLUDE_CORE
+// #define HOMEDING_INCLUDE_CORE
+
+#define HOMEDING_INCLUDE_Value
+#define HOMEDING_INCLUDE_Button
+#define HOMEDING_INCLUDE_Switch
+#define HOMEDING_INCLUDE_AND
+#define HOMEDING_INCLUDE_Analog
+#define HOMEDING_INCLUDE_Timer
+#define HOMEDING_INCLUDE_Schedule
+#define HOMEDING_INCLUDE_Alarm
+#define HOMEDING_INCLUDE_DigitalIn
+#define HOMEDING_INCLUDE_DigitalOut
+#define HOMEDING_INCLUDE_PWMOut
+// #define HOMEDING_INCLUDE_LOG
+#define HOMEDING_INCLUDE_PMS
 
 // Use some more Elements that need additional libraries
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
-#define HOMEDING_INCLUDE_RFSend
-#define HOMEDING_INCLUDE_ROTARY
-#define HOMEDING_INCLUDE_MENU
+// #define HOMEDING_INCLUDE_RFSend
+// #define HOMEDING_INCLUDE_ROTARY
+// #define HOMEDING_INCLUDE_MENU
 
 #define HOMEDING_INCLUDE_NTPTIME
-#define HOMEDING_INCLUDE_DSTIME
+// #define HOMEDING_INCLUDE_DSTIME
 
 // Use some more Elements for Displays
-#define HOMEDING_INCLUDE_DISPLAY
-#define HOMEDING_INCLUDE_DISPLAYLCD
-#define HOMEDING_INCLUDE_DISPLAYSSD1306
-#define HOMEDING_INCLUDE_DISPLAYSH1106
+// #define HOMEDING_INCLUDE_DISPLAY
+// #define HOMEDING_INCLUDE_DISPLAYLCD
+// #define HOMEDING_INCLUDE_DISPLAYSSD1306
+// #define HOMEDING_INCLUDE_DISPLAYSH1106
 
 // #define HOMEDING_INCLUDE_SERIALLINE
 

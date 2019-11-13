@@ -64,7 +64,17 @@ void Board::init(ESP8266WebServer *serv)
 } // init()
 
 
-// Remark: some settings on the board class can be modifies using the device element.
+void Board::_checkNetState()
+{
+  wl_status_t newState = WiFi.status();
+  if (newState != _wifi_status) {
+    LOGGER_RAW("new netstate: %d", newState);
+    _wifi_status = newState;
+  }
+}
+
+
+// Remark: some settings on the board class can be modified using the device element.
 // see deviceElement.cpp
 
 
@@ -81,7 +91,7 @@ void Board::addElements()
   mj = new MicroJson(
       [this, &_lastElem](int level, char *path, char *name, char *value) {
         // LOGGER_TRACE("callback %d %s", level, path);
-        delay(0);
+        _checkNetState();
 
         if (level == 3) {
           if (name == NULL) {
@@ -116,9 +126,11 @@ void Board::addElements()
 
   // config the thing to the local network
   mj->parseFile(ENV_FILENAME);
+  _checkNetState();
 
   // config the Elements of the thing
   mj->parseFile(CONF_FILENAME);
+  _checkNetState();
 
   //   mj->parse(R"==(
   // "sli": {
@@ -164,7 +176,7 @@ void Board::_newState(BoardState newState)
 void Board::loop()
 {
   unsigned long now = millis();
-  wl_status_t wifi_status = WiFi.status();
+  _checkNetState();
 
   if (boardState == BOARDSTATE_RUN) {
     // Most common state.
@@ -211,13 +223,14 @@ void Board::loop()
     _newState(BOARDSTATE_LOAD);
 
   } else if (boardState == BOARDSTATE_LOAD) {
+
     // load all config files and create+start elements
     addElements();
-    start(Element_StartupMode::System);
 
     WiFi.hostname(deviceName);
-    LOGGER_INFO("n3-status = %d <%s>", WiFi.status(), WiFi.hostname().c_str());
+    // LOGGER_INFO("net-status: %d <%s>", WiFi.status(), WiFi.hostname().c_str());
 
+    start(Element_StartupMode::System);
     displayInfo(HOMEDING_GREETING);
 
     netMode = NetMode_AUTO;
@@ -240,7 +253,7 @@ void Board::loop()
       netMode = NetMode_PSK;
 
     // connect to a same network as before ?
-    LOGGER_TRACE("wifi status=(%d)", wifi_status);
+    LOGGER_TRACE("wifi status=(%d)", _wifi_status);
     LOGGER_TRACE("wifi ssid=(%s)", WiFi.SSID().c_str());
     _newState(BOARDSTATE_CONFWAIT);
 
@@ -249,7 +262,6 @@ void Board::loop()
       // give autoconnect the chance to do it.
       // works only after a successfull network connection in the past.
       LOGGER_TRACE("NetMode_AUTO");
-      // WiFi.mode(WIFI_STA);
 
     } else if (netMode == NetMode_PSK) {
       // 2. priority:
@@ -304,17 +316,17 @@ void Board::loop()
       }
 
     } else {
-      if (wifi_status == WL_CONNECTED) {
+      if (_wifi_status == WL_CONNECTED) {
         LOGGER_TRACE("connected.");
         WiFi.setAutoReconnect(true);
         WiFi.setAutoConnect(true);
         _newState(BOARDSTATE_GREET);
 
-      } else if ((wifi_status == WL_NO_SSID_AVAIL) ||
-                 (wifi_status == WL_CONNECT_FAILED) ||
+      } else if ((_wifi_status == WL_NO_SSID_AVAIL) ||
+                 (_wifi_status == WL_CONNECT_FAILED) ||
                  (now >= connectPhaseEnd)) {
         netMode -= 1;
-        LOGGER_TRACE("wifi status=(%d)", wifi_status);
+        LOGGER_TRACE("wifi status=(%d)", _wifi_status);
         LOGGER_TRACE("next connect method = %d\n", netMode);
         if (netMode) {
           _newState(BOARDSTATE_CONNECT);

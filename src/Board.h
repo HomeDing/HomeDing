@@ -284,16 +284,20 @@ private:
   void _dispatchSingle(String evt);
 
   // state and timing
+
   unsigned long configPhaseEnd; // for offering config mode
   unsigned long connectPhaseEnd; // for waiting on net connection
-  unsigned long
-      _captiveEnd; // terminate/reset captive portal mode after 5 minutes.
+  unsigned long _captiveEnd; // terminate/reset captive portal mode after 5 minutes.
   void _newState(BoardState newState);
 
   bool active = false;
 
   /** set to true when a locl date/time is valid */
   bool validTime = false;
+
+  /** connection status */
+  void _checkNetState();
+  wl_status_t _wifi_status;
 
   /** net connection mode */
   int netMode;

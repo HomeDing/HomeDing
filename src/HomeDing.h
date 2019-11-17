@@ -155,6 +155,10 @@ extern const char *PROP_VALUE;
 #include <sensors/DHTElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_NEOPIXEL
+#include <NeoElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_RFSend
 #include <RFSendElement.h>
 #endif

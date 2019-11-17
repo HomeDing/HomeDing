@@ -11,8 +11,8 @@
 // -----
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <ElementRegistry.h>
 
@@ -192,7 +192,7 @@ int Element::_atopin(const char *value)
       int n = _atoi(value + 1); // scan a number right after the 'D'
       if ((n >= 0) && (n <= 10))
         pin = GPIO[n];
-        
+
     } else if (*value == 'A') {
       pin = A0; // only analog pin on ESP8266
 
@@ -204,6 +204,33 @@ int Element::_atopin(const char *value)
 } // _atopin()
 
 
+uint32_t Element::_atoColor(const char *value)
+{
+  uint32_t ret = 0x00000000; // black
+
+  if (value) {
+    char ch0 = value[0];
+
+    if ((ch0 == '#') || (ch0 == 'x')) {
+      ret = strtol(value + 1, nullptr, 16);
+    } else if ((ch0 >= '0') && (ch0 <= '9')) {
+      ret = strtol(value, nullptr, 0);
+    } else if (_stricmp(value, "black") == 0)  {
+      ret = 0x00000000;
+    } else if (_stricmp(value, "red") == 0)  {
+      ret = 0x00FF0000;
+    } else if (_stricmp(value, "green") == 0)  {
+      ret = 0x0000FF00;
+    } else if (_stricmp(value, "blue") == 0)  {
+      ret = 0x000000FF;
+    } else if (_stricmp(value, "white") == 0)  {
+      ret = 0x00FFFFFF;
+    }
+  } // if
+  return ret;
+} // _atoColor()
+
+
 int Element::_stricmp(const char *str1, const char *str2)
 {
   char c1, c2;
@@ -212,6 +239,7 @@ int Element::_stricmp(const char *str1, const char *str2)
     c1 = *str1++;
     c2 = *str2++;
 
+    // convert characters from upper to to lowercase
     if ((c1 >= 'A') && (c1 <= 'Z'))
       c1 += 'a' - 'A';
     if ((c2 >= 'A') && (c2 <= 'Z'))

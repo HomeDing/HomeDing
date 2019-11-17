@@ -206,6 +206,15 @@ protected:
    */
   static int _atopin(const char *value);
 
+
+  /**
+   * @brief Return a color value as 32 bits: 0xWWRRGGBB from a string.
+   * @param value Given value as string.
+   * @return color value
+   */
+  uint32_t _atoColor(const char *value);
+
+
   /**
    * @brief replacement of the CPP stricmp function not available on Arduino.
    */

@@ -61,10 +61,10 @@ bool ValueElement::set(const char *name, const char *value)
     _setValue(_atoi(value));
 
   } else if (_stricmp(name, "up") == 0) {
-    _setValue(_value += _atoi(value) * _step);
+    _setValue(_value + _atoi(value) * _step);
 
   } else if (_stricmp(name, "down") == 0) {
-    _setValue(_value -= _atoi(value) * _step);
+    _setValue(_value - _atoi(value) * _step);
 
   } else if (_stricmp(name, "min") == 0) {
     _minRange = _atoi(value);
@@ -100,7 +100,7 @@ void ValueElement::start()
   }
 
   // send out the actual defined value
-  _setValue(_value);
+  _setValue(_value, true);
 } // start()
 
 

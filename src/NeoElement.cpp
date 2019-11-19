@@ -100,7 +100,7 @@ bool NeoElement::set(const char *name, const char *value)
   if (_stricmp(name, "value") == 0) {
     _mode = Mode::color;
     _colors = value;
-    if (_strip )
+    if (_strip)
       _setColors(value);
 
   } else if (_stricmp(name, "mode") == 0) {
@@ -114,10 +114,10 @@ bool NeoElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "brightness") == 0) {
     _brightness = _atoi(value);
     if (_strip) {
+      _strip->setBrightness(_brightness);
       if (_mode == Mode::color) {
         _setColors(_colors);
       }
-      _strip->setBrightness(_brightness);
       _needShow = true;
     }
 

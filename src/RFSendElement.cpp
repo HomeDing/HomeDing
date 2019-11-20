@@ -63,7 +63,7 @@ bool RFSendElement::set(const char *name, const char *value)
       }
     } // if
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (_stricmp(name, PROP_PIN) == 0) {
     _rfpin = _atopin(value);
 
   } else if (_stricmp(name, "codeOn") == 0) {

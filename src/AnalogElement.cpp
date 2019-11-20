@@ -55,7 +55,7 @@ bool AnalogElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "hysteresis") == 0) {
     _hysteresis = _atoi(value);
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (_stricmp(name, PROP_PIN) == 0) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "reference") == 0) {
@@ -64,7 +64,7 @@ bool AnalogElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onreference") == 0) {
     _referenceAction = value;
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
   } else {

@@ -77,7 +77,7 @@ bool ScheduleElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
   } else {

@@ -37,10 +37,10 @@ bool DigitalInElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "pin") == 0) {
+  if (_stricmp(name, PROP_PIN) == 0) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, "inverse") == 0) {
+  } else if (_stricmp(name, PROP_INVERSE) == 0) {
     _inverse = _atob(value);
 
   } else if (_stricmp(name, "pullup") == 0) {
@@ -52,7 +52,7 @@ bool DigitalInElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onlow") == 0) {
     _lowAction = value;
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
   } else {

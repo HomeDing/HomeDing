@@ -11,7 +11,10 @@
 // some common property names
 
 extern const char *PROP_VALUE;
+extern const char *PROP_PIN;
+extern const char *PROP_INVERSE;
 
+extern const char *ACTION_ONVALUE;
 
 // ===== SYS and Common Elements =====
 

@@ -75,7 +75,7 @@ bool MenuElement::set(const char *name, const char *value)
     // save the actions
     _displayAction = value;
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     // save the actions
     _valueAction = value;
 

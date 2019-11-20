@@ -55,7 +55,7 @@ bool AndElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "invert") == 0) {
     _invert = _atob(value);
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
   } else {
     ret = Element::set(name, value);

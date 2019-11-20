@@ -101,8 +101,8 @@ void PMSElement::loop()
 
     if (!_isOpen) {
       if (!_pmsSerial)
-        _pmsSerial = new SoftwareSerial(_pinrx, _pintx, false, 128);
-      _pmsSerial->begin(9600);
+        _pmsSerial = new SoftwareSerial();
+      _pmsSerial->begin(9600, SWSERIAL_8N1, _pinrx, _pintx, false, 128);
       _isOpen = true;
       _datapos = 0;
     } // if

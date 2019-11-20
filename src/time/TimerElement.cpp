@@ -62,7 +62,7 @@ bool TimerElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onend") == 0) {
     _endAction = value;
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
   } else if (_stricmp(name, "next") == 0) {

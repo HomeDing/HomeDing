@@ -20,6 +20,8 @@
 #ifndef DHTELEMENT_H
 #define DHTELEMENT_H
 
+#include <HomeDing.h>
+
 #include <DHTesp.h>
 
 /**

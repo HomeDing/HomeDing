@@ -70,7 +70,7 @@ bool RotaryElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "pin2") == 0) {
     _pin2 = _atopin(value);
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
   } else if (_stricmp(name, "onChange") == 0) { // deprecated: use onValue

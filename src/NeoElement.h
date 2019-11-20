@@ -19,6 +19,8 @@
 #ifndef NEOELEMENT_H
 #define NEOELEMENT_H
 
+#include <HomeDing.h>
+
 // https://github.com/adafruit/Adafruit_NeoPixel
 #include <Adafruit_NeoPixel.h>
 

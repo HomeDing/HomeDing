@@ -58,7 +58,7 @@ bool DHTElement::set(const char *name, const char *value)
       _type = DHTesp::AUTO_DETECT;
     }
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (_stricmp(name, PROP_PIN) == 0) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "readtime") == 0) {

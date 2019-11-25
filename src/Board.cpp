@@ -359,6 +359,10 @@ void Board::loop()
 
     server->begin();
     start(Element_StartupMode::Network);
+
+    // start file server for static files in the file system.
+    server->serveStatic("/", SPIFFS, "/", "NO-CACHE");
+
     _newState(BOARDSTATE_RUN);
 
   } else if (boardState == BOARDSTATE_STARTCAPTIVE) {

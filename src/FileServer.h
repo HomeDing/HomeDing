@@ -14,6 +14,7 @@
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
  * * 04.02.2019 simplifications, saving memory.
+ * * 24.11.2019 simplifications, using serveStatic for delivering filesystem files.
  */
 
 #ifndef FILESERVER_H
@@ -49,72 +50,32 @@ public:
   */
   bool canHandle(HTTPMethod requestMethod, String requestUri) override
   {
-    // LOGGER_TRACE("canHandle(%s)", requestUri.c_str());
-
-    bool ret = false;
-    if (requestUri.startsWith("/$")) {
-      // ret = false;
-
-    } else if ((requestMethod == HTTP_GET) || (requestMethod == HTTP_DELETE)) {
-      // file must exist.
-      ret = _fs.exists(requestUri);
-
-    } else if (requestMethod == HTTP_POST) {
-      // canUpload is handling file uploads
-      ret = true;
-
-    } // if
-    return (ret);
+    return ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE));
   } // canHandle()
 
 
-  bool canUpload(String uri)
+  bool canUpload(String requestUri)
   {
-    // LOGGER_RAW("++ canUpload(%s)", uri.c_str());
-    return true;
+    return ((requestUri.startsWith("/")) && (!requestUri.startsWith("/$")));
   }
-
-  /**
-     @brief stream a file to the client.
-     @param server the running server.
-     @param path full qualified path to file.
-  */
-  void handleGet(ESP8266WebServer &server, String path)
-  {
-    // file is existing. was checked in canHandle().
-    String contentType = getContentType(path);
-
-    File f = _fs.open(path, "r");
-    if (f) {
-      if (_cache_header.length() != 0)
-        server.sendHeader("Cache-Control", _cache_header);
-      server.streamFile(f, contentType);
-    } // if
-  } // handleGet()
 
 
   bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
-              String path) override
+              String requestUri) override
   {
-    // LOGGER_RAW("handle(%s)", requestUri.c_str());
-
-    if (requestMethod == HTTP_GET) {
-      handleGet(server, path);
-
-    } else if (requestMethod == HTTP_POST) {
+    if (requestMethod == HTTP_POST) {
       server.send(200); // all done in upload. no other forms.
 
     } else if (requestMethod == HTTP_DELETE) {
-      // file is existing. was checked in canHandle().
-      _fs.remove(path);
-      server.send(200);
+      if (_fs.exists(requestUri)) {
+        _fs.remove(requestUri);
+      }
 
-    } else {
-      return (false);
     } // if
-
+    server.send(200); // all done.
     return (true);
-  }
+  } // handle()
+
 
   void upload(ESP8266WebServer &server, String requestUri, HTTPUpload &upload)
   {
@@ -128,45 +89,13 @@ public:
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       if (_fsUploadFile)
         _fsUploadFile.write(upload.buf, upload.currentSize);
+      yield();
 
     } else if (upload.status == UPLOAD_FILE_END) {
       if (_fsUploadFile)
         _fsUploadFile.close();
     }
-  }
-
-
-  /** return http content type from filetype */
-  static String getContentType(const String &fName)
-  {
-    if (fName.endsWith(".htm"))
-      return TEXT_HTML;
-    // else if (fName.endsWith(".html"))
-    //   return TEXT_HTML;
-    else if (fName.endsWith(".css"))
-      return "text/css";
-    else if (fName.endsWith(".txt"))
-      return TEXT_PLAIN;
-    else if (fName.endsWith(".js"))
-      return "application/javascript";
-    else if (fName.endsWith(".png"))
-      return IMAGE_PNG;
-    // else if (fName.endsWith(".gif"))
-    //   return "image/gif";
-    // else if (fName.endsWith(".jpg"))
-    //   return "image/jpeg";
-    else if (fName.endsWith(".json"))
-      return TEXT_JSON;
-    else if (fName.endsWith(".ico"))
-      return "image/x-icon";
-    else if (fName.endsWith(".svg"))
-      return "image/svg+xml";
-    // else if (fName.endsWith(".xml"))
-    //   return "text/xml";
-    // else if (fName.endsWith(".zip"))
-    //   return "application/zip";
-    return "application/octet-stream";
-  }
+  } // upload()
 
 protected:
   FS _fs;

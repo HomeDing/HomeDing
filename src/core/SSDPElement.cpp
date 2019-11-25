@@ -38,18 +38,31 @@ Element *SSDPElement::create()
  */
 void SSDPElement::init(Board *board)
 {
+  // LOGGER_ETRACE("init()");
   Element::init(board);
 
   // set default values
-  SSDP.setSchemaURL("$desc.xml"); // url to get the SSDP detailed information
+  SSDP.setSchemaURL("ssdp.xml"); // url to get the SSDP detailed information
   SSDP.setHTTPPort(80);
   SSDP.setSerialNumber(ESP.getChipId());
   SSDP.setURL("/");
   SSDP.setModelNumber(__DATE__);
-  SSDP.setModelURL("http://www.mathertel.de/Arduino/Board");
+  SSDP.setModelURL("https://homeding.github.io/");
   SSDP.setManufacturer("Matthias Hertel");
   SSDP.setManufacturerURL("https://www.mathertel.de");
   SSDP.setDeviceType("upnp:rootdevice");
+
+  Element *deviceElement = board->getElement("device");
+  if ((deviceElement) && (board->server)) {
+    SSDP.setName(board->deviceName);
+    SSDP.setModelName(deviceElement->get(PROP_DESCRIPTION));
+    SSDP.begin();
+    ESP8266WebServer *server = board->server;
+    server->on("/ssdp.xml", HTTP_GET, [server]() {
+      SSDP.schema(server->client());
+    });
+  } // if
+
 } // init()
 
 
@@ -78,26 +91,6 @@ bool SSDPElement::set(const char *name, const char *value)
 
   return (ret);
 } // set()
-
-
-/**
- * @brief Activate the SSDPElement.
- */
-void SSDPElement::start()
-{
-  LOGGER_ETRACE("start()");
-
-  Element *deviceElement = _board->getElement("device");
-  if ((deviceElement) && (_board->server)) {
-    SSDP.setName(_board->deviceName);
-    SSDP.setModelName(deviceElement->get("description"));
-    SSDP.begin();
-    ESP8266WebServer *server = _board->server;
-    server->on("/$desc.xml", HTTP_GET,
-               [server]() { SSDP.schema(server->client()); });
-    Element::start();
-  } // if
-} // start()
 
 
 // Register the SSDPElement in the ElementRegistry

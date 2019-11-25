@@ -11,6 +11,7 @@
 // some common property names
 
 extern const char *PROP_VALUE;
+extern const char *PROP_DESCRIPTION;
 extern const char *PROP_PIN;
 extern const char *PROP_INVERSE;
 

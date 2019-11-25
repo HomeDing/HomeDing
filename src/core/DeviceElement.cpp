@@ -140,11 +140,6 @@ void DeviceElement::loop()
     delay(100);
     ESP.restart();
     delay(100);
-
-    // ESP.deepSleep(8000);
-    // abort();
-    // ESP.reset();
-
   } // if
 } // loop()
 
@@ -159,7 +154,7 @@ void DeviceElement::pushState(
 
   Element::pushState(callback);
   callback("name", _board->deviceName.c_str());
-  callback("description", _description.c_str());
+  callback(PROP_DESCRIPTION, _description.c_str());
   callback("nextboot", String(_nextBoot - now).c_str());
 } // pushState()
 

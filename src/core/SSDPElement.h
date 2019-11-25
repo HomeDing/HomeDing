@@ -15,12 +15,13 @@
 #ifndef SSDPELEMENT_H
 #define SSDPELEMENT_H
 
+#include <HomeDing.h>
+
 /// enable the SSDP Protocol to find the device in the network
 
 #include <ESP8266SSDP.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
-
 
 /**
  * @brief Element for enabling Element discovery using the SSDP protocol.
@@ -61,18 +62,15 @@ public:
    */
   virtual bool set(const char *name, const char *value);
 
-  /**
-   * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
-   */
-  virtual void start();
 
+  // start() is not required;
   // loop() is not required because no local activities
   // pushState() is not required because no dynamic properties
   // term() is not required because no terminateion functionality
 
 private:
+
+void _sendSchema();
 
 };
 

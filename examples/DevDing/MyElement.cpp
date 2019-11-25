@@ -132,7 +132,7 @@ void MyElement::pushState(
 // the registration is placed here without using a register #define.
 
 // When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_My should be used to allow the sketch to select the
+// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
 // available Elements. See <HomeDing.h> the move these lines to MyElement.h:
 
 // #ifdef HOMEDING_REGISTER

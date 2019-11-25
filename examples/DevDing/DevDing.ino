@@ -149,8 +149,10 @@ void setup(void)
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));
 
-  // Static files in the file system.
+  // Static files POST and DELETE in the file system.
   server.addHandler(new FileServerHandler(SPIFFS, "NO-CACHE"));
+
+  // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {
     const char *uri = server.uri().c_str();

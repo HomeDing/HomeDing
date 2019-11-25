@@ -22,6 +22,8 @@
 #ifndef DEVICEELEMENT_H
 #define DEVICEELEMENT_H
 
+#include <HomeDing.h>
+
 /**
  * @brief The Device is an Element that offers some geeral and useful
  * functionality required to build IoT Things.

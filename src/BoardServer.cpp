@@ -141,10 +141,7 @@ void BoardHandler::handleReboot(ESP8266WebServer &server, bool wipe)
  */
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 {
-  // LOGGER_RAW("BoardHandler:canHandle(%s)=%u", requestUri.c_str(), ret);
-  requestUri.toLowerCase();
-  return ((requestMethod == HTTP_GET) && (requestUri.startsWith(SVC_ANY)) &&
-          (requestUri != "/$desc.xml"));
+  return (requestUri.startsWith(SVC_ANY));
 } // canHandle
 
 
@@ -171,6 +168,8 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
   if (requestUri.startsWith(SVC_BOARD)) {
     // most common request
     // everything behind  "/$board/" is used to address a specific element
+    LOGGER_RAW("handle(%s)", requestUri.c_str());
+
     String eId(requestUri.substring(8));
 
     if (server.args() == 0) {

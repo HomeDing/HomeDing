@@ -60,12 +60,14 @@ bool PMSElement::set(const char *name, const char *value)
     _pintx = _atopin(value);
 
   } else if (_stricmp(name, "readtime") == 0) {
-     _readTime = _atotime(value);
+    _readTime = _atotime(value);
 
   } else if (_stricmp(name, "onChange") == 0) {
-    _changeAction = value; // save the actions
-    // } else if (_stricmp(name, "doAction") == 0) {
-    // make something
+    LOGGER_EERR("do not use `onchange` -> `onvalue`");
+    _valueAction = value; // save the actions
+
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+    _valueAction = value; // save the actions
 
   } else {
     ret = Element::set(name, value);
@@ -82,15 +84,23 @@ void PMSElement::start()
 {
   LOGGER_ETRACE("start(%d, %d)", _pinrx, _pintx);
 
-  _isOpen = false;
   _nextRead = _board->getSeconds() + 4;
 
   Element::start();
+
+  _pmsSerial = new SoftwareSerial();
+  _pmsSerial->begin(9600, SWSERIAL_8N1, _pinrx, _pintx, false, 128);
+  _pmsSerial->enableRx(false);
+  _datapos = -1; // means input is not open
+
 } // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
+ * Example bytes:
+ * #42 #4d #00 #1c #00 #06 #00 #0d #00 #12 #00 #06 #00 #0d #00 #12
+ * #04 #e3 #01 #73 #00 #5d #00 #18 #00 #08 #00 #00 #98 #00 #03 #65
  */
 void PMSElement::loop()
 {
@@ -99,57 +109,65 @@ void PMSElement::loop()
   if (_nextRead <= now) {
     // do something
 
-    if (!_isOpen) {
-      if (!_pmsSerial)
-        _pmsSerial = new SoftwareSerial();
-      _pmsSerial->begin(9600, SWSERIAL_8N1, _pinrx, _pintx, false, 128);
-      _isOpen = true;
+    if (_datapos < 0) {
+      // enable receive mode in SoftwareSerial
+      _pmsSerial->enableRx(true);
       _datapos = 0;
     } // if
 
     if (_pmsSerial->overflow()) {
-      Serial.printf("X");
-      _pmsSerial->end();
-      // just try again
-      _isOpen = false;
+      // just try again in next loop()
+      _pmsSerial->enableRx(false);
+      _datapos = -1;
       return;
     } // if
 
-    while (_pmsSerial->available()) {
+    while ((_datapos >= 0) && (_pmsSerial->available())) {
       int b = _pmsSerial->read();
 
       // collect data to buffer
-      if ((_datapos == 0) && (b == 0x42)) {
-        // possibly new data package
-        _data[_datapos++] = b; // 0x42 (fixed) starts the data sequence
-      } else if ((_datapos == 1) && (b == 0x4d)) {
-        _data[_datapos++] = b; // 0x4d (fixed) starts the data sequence
-      } else if (_datapos > 1) {
-        _data[_datapos++] = b; // data
+      if (_datapos == 0) {
+        if (b == 0x42) {
+          // new data package start with 0x42
+          _data[_datapos++] = b;
+        }
 
-        if (_datapos == 32) {
-          // all data received
-          _pmsSerial->end();
-          _isOpen = false;
-          _nextRead = now + _readTime;
+      } else if (_datapos == 1) {
+        if (b == 0x4d) {
+          _data[_datapos++] = b; // 0x4d (fixed) starts the data sequence
+        } else {
+          _datapos = 0; // re-start
+        }
 
-          // check checksum
-          int checksum = 0;
-          int n;
-          for (n = 0; n < 32-2; n++) checksum += _data[n];
+      } else if (_datapos < 32) {
+        _data[_datapos++] = b; // real data
 
-          if (checksum == PWSDATA(14)) {
-            // valid data
-            _value = PWSDATA(2);
-            _datapos = 0;
-            LOGGER_ETRACE("value = %d", _value);
+      } else if (_datapos == 32) {
+        // all data received
+        _pmsSerial->enableRx(false);
 
-            if (_changeAction.length() > 0)
-              _board->dispatch(_changeAction, _value);
-          } // if
+        // check checksum
+        int checksum = 0;
+        int n;
+        for (n = 0; n < 32 - 2; n++)
+          checksum += _data[n];
 
+        if (checksum == PWSDATA(14)) {
+          // valid data
+          _value = PWSDATA(2);
+          LOGGER_ETRACE("value: %d", _value);
+
+          if (_valueAction.length() > 0) {
+            // gdb_do_break();
+            _board->dispatch(_valueAction, _value);
+          }
+        } else {
+          LOGGER_ETRACE("bad checksum.");
         } // if
+        _datapos = -1;
+        _nextRead = now + _readTime;
       } // if
+      yield();
     } // while
   } // if
 } // loop()

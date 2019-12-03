@@ -13,6 +13,8 @@
  * 
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
+ * * 01.12.2019 enable/disable rx instead of begin/end.
+ * * 01.12.2019 use onValue not onChange (as usual)
  */
 
 #ifndef PMSELEMENT_H
@@ -91,17 +93,17 @@ private:
   unsigned long _readTime = 60;
   unsigned long _nextRead;
 
-  bool _isOpen = false;
-
+  // buffer for data from sensor 
   uint8_t _data[32];
-  int _datapos;
+
+  int _datapos; // current position in input buffer, -1 means not receiving
 
   SoftwareSerial *_pmsSerial;
 
   /**
    * @brief The _changeAction holds the actions that is submitted when new data was received from the sensor.
    */
-  String _changeAction;
+  String _valueAction;
 };
 
 /* ===== Register the Element ===== */

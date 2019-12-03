@@ -51,7 +51,6 @@
 BoardHandler::BoardHandler(Board *board)
 {
   // LOGGER_RAW("BoardHandler:init: %s", path);
-  _path = SVC_BOARD;
   _board = board;
 }
 

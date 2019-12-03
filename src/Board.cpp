@@ -563,7 +563,7 @@ void Board::setState(String &path, const String &property, const String &value)
   // LOGGER_TRACE("setState(%s, %s, %s)", path.c_str(), property.c_str(),
   // value.c_str());
   Element *e = findById(path);
-  if (e != NULL) {
+  if (e) {
     e->set(property.c_str(), value.c_str());
   }
 }
@@ -677,6 +677,7 @@ void Board::_add(const char *id, Element *e)
   // LOGGER_TRACE("_add(%s)", id);
 
   strcpy(e->id, id);
+  Element::_strlower(e->id);
   e->next = NULL;
   Element *l = _elementList;
 

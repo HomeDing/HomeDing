@@ -42,7 +42,6 @@ void NeoElement::_setColors(String colList)
     } // if
 
     col = _atoColor(sCol.c_str());
-    LOGGER_RAW(" c[%d]= (%06x)", n, col);
     _strip->setPixelColor(n++, col);
   } // while
 
@@ -74,7 +73,6 @@ Element *NeoElement::create()
 /** set initial/default values on properties. */
 void NeoElement::init(Board *board)
 {
-  // LOGGER_ETRACE("init()");
   Element::init(board);
 
   // set defaults:
@@ -93,10 +91,9 @@ void NeoElement::init(Board *board)
  */
 bool NeoElement::set(const char *name, const char *value)
 {
-  // LOGGER_ETRACE("set(%s, %s)", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     _mode = Mode::color;
     _colors = value;
     if (_strip)
@@ -142,9 +139,6 @@ bool NeoElement::set(const char *name, const char *value)
  */
 void NeoElement::start()
 {
-  // LOGGER_EINFO("start(%s)", _colors.c_str());
-  // LOGGER_EINFO("bright(%d)", _brightness);
-
   Element::start();
 
   _strip = new Adafruit_NeoPixel(_count, _pin, NEO_GRB + NEO_KHZ400);

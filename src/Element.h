@@ -151,7 +151,6 @@ public:
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
 
-protected:
   /**
    * @brief Return an integer value from a string.
    * @param value Given value as string.
@@ -220,6 +219,12 @@ protected:
    */
   static int _stricmp(const char *str1, const char *str2);
 
+  /**
+   * @brief to lowercase a c string.
+   */
+  static void _strlower(char *str);
+
+protected:
   /**
    * @brief A reference to the board the Element is on.
    */

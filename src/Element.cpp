@@ -215,15 +215,15 @@ uint32_t Element::_atoColor(const char *value)
       ret = strtol(value + 1, nullptr, 16);
     } else if ((ch0 >= '0') && (ch0 <= '9')) {
       ret = strtol(value, nullptr, 0);
-    } else if (_stricmp(value, "black") == 0)  {
+    } else if (_stricmp(value, "black") == 0) {
       ret = 0x00000000;
-    } else if (_stricmp(value, "red") == 0)  {
+    } else if (_stricmp(value, "red") == 0) {
       ret = 0x00FF0000;
-    } else if (_stricmp(value, "green") == 0)  {
+    } else if (_stricmp(value, "green") == 0) {
       ret = 0x0000FF00;
-    } else if (_stricmp(value, "blue") == 0)  {
+    } else if (_stricmp(value, "blue") == 0) {
       ret = 0x000000FF;
-    } else if (_stricmp(value, "white") == 0)  {
+    } else if (_stricmp(value, "white") == 0) {
       ret = 0x00FFFFFF;
     }
   } // if
@@ -247,5 +247,18 @@ int Element::_stricmp(const char *str1, const char *str2)
   } while ((c1) && (c1 == c2));
   return (int)(c1 - c2);
 } // _stricmp
+
+
+void Element::_strlower(char *str)
+{
+  if (str) {
+    while (*str) {
+      if ((*str >= 'A') && (*str <= 'Z'))
+        *str += 'a' - 'A';
+      str++;
+    } // while
+  } // if
+} // _strlower
+
 
 // End

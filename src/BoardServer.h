@@ -95,11 +95,6 @@ protected:
   Board *_board;
 
   /**
-   * @brief root path where the state ressource can be accessed. e.g. /$board.
-   */
-  String _path;
-
-  /**
    * @brief execute a restart or reboot 
    * @param wipe if true unregister from the network.
   */

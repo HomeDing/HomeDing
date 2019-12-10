@@ -94,9 +94,6 @@ bool LogElement::set(const char *name, const char *value)
     _logfileOldName = value;
     _logfileOldName.replace(".", "_old.");
 
-    // } else if (_stricmp(name, "doAction") == 0) {
-    // make something
-
   } else {
     ret = Element::set(name, value);
   } // if

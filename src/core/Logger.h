@@ -23,27 +23,30 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-// information to debug port and log file.
+/** Information to debug port and log file. Always. */
 #define LOGGER_LEVEL_INFO 0
 
-// always send out errors to debug port and log file.
+/** send out errors to debug port and log file. Requires loglevel 1(err) or more. */
 #define LOGGER_LEVEL_ERR 1
 
-// detailed trace level to debug port only.
+/** detailed trace level to debug port only. Requires loglevel 2(trace). */
 #define LOGGER_LEVEL_TRACE 2
 
 // for non-element classes
 
+/** Send Information to Serial output only. */
 #define LOGGER_JUSTINFO(...)                                                   \
   Logger::LoggerPrint(NULL, LOGGER_LEVEL_INFO, __VA_ARGS__)
 
+/** Send information to logfile and serial output. */
 #define LOGGER_INFO(...)                                                       \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_INFO, __VA_ARGS__)
 
+/** Send error to Logfile and serial output. */
 #define LOGGER_ERR(...)                                                        \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_ERR, __VA_ARGS__)
 
-// send some logging to serial output
+/** Send trace information to logfile and serial output. */
 #define LOGGER_TRACE(...)                                                      \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 

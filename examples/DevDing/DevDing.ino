@@ -34,7 +34,11 @@
  * * 11.10.2018 move network initialization into board loop.
 */
 
+// #define DBG_GDB
+
+#ifdef DBG_GDB
 #include <GDBStub.h>
+#endif
 
 #include <Arduino.h>
 #include <Board.h>
@@ -81,8 +85,7 @@
 #include <MicroJsonComposer.h>
 
 static const char respond404[] PROGMEM =
-R"==(<html><head><title>File not found</title></head><body>
-File not found</body></html>)==";
+    R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
 
 // ===== WLAN credentials =====
 
@@ -121,7 +124,10 @@ void handleRedirect()
 void setup(void)
 {
   Serial.begin(115200);
+
+#ifdef DBG_GDB
   gdbstub_init();
+#endif
 
 #if NET_DEBUG
   Serial.setDebugOutput(true);
@@ -135,8 +141,8 @@ void setup(void)
   LOGGER_INFO("HomeDing Device is starting... (%s)",
               ESP.getResetReason().c_str());
 
-  LOGGER_INFO("Free Memory: %d", ESP.getFreeHeap());
-
+  LOGGER_JUSTINFO("Free Memory: %d", ESP.getFreeHeap());
+  LOGGER_JUSTINFO("RESET Reason %s", ESP.getResetReason().c_str());
 
   // ----- setup the file system and load configuration -----
   SPIFFS.begin();

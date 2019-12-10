@@ -43,12 +43,64 @@ const byte DNS_PORT = 53;
 extern const char *ssid;
 extern const char *passPhrase;
 
+
+// ===== detect request for network config and non-save mode using 2 resets in less than 2 sec.
+// this is implemented by using the RTC memory at offset with a special value flag
+
+/** The offset of the 4 byte signature, must be a multiple of 4 */
+#define NETRESET_OFFSET 32
+
+/** The magic 4-byte number indicating that a reset has happened before, "RST". Byte 4 is the counter */
+#define NETRESET_FLAG ((uint32)0x52535400)
+#define NETRESET_MASK ((uint32)0xFFFFFF00)
+#define NETRESET_VALUEMASK ((uint32)0x00000000FF)
+
+/** The time when board was initialized + time for double reset. */
+static unsigned long bootMillis;
+
+// get the number of resets in the last seconds using rtc memory for counting.
+int getResetCount()
+{
+  int res = 0;
+  uint32 netResetValue;
+
+  LOGGER_TRACE("getResetCount");
+
+  // check NETRESET_FLAG
+  ESP.rtcUserMemoryRead(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
+  // LOGGER_TRACE("RESET read %08x", netResetValue);
+
+  if ((netResetValue & NETRESET_MASK) == NETRESET_FLAG) {
+    // reset was pressed twice.
+    // LOGGER_TRACE("RESET detected.");
+    netResetValue++;
+    res = (netResetValue & 0x000000FF);
+  } else {
+    netResetValue = NETRESET_FLAG;
+  }
+
+  // store NETRESET_FLAG and counter to rtc memory
+  ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
+  return (res);
+} // getResetCount()
+
+
+// get the number of resets in the last seconds using rtc memory for counting.
+void clearResetCount()
+{
+  LOGGER_TRACE("clearResetCount");
+  uint32 netResetValue = 0;
+  ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
+}
+
 /**
  * @brief Initialize a blank board.
  */
 void Board::init(ESP8266WebServer *serv)
 {
-  LOGGER_TRACE("init()");
+  bootMillis = millis() + 2000;
+  LOGGER_JUSTINFO("init(%d)", bootMillis);
+
   server = serv;
   sysLED = -1; // configured by device-element
   sysButton = -1; // configured by device-element
@@ -59,8 +111,15 @@ void Board::init(ESP8266WebServer *serv)
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
       // https://tools.ietf.org/html/rfc1123 952
 
+  _resetCount = getResetCount();
+  LOGGER_JUSTINFO("RESET # %d", _resetCount);
+
   // check save-mode
   savemode = false;
+  if (_resetCount == 1) {
+    LOGGER_TRACE("starting unsave mode.");
+    savemode = true;
+  } // if
 } // init()
 
 
@@ -238,6 +297,8 @@ void Board::loop()
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) {
       _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
+    } else if (_resetCount == 2) {
+      _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
     } else {
       _newState(BOARDSTATE_CONNECT);
     }
@@ -332,7 +393,7 @@ void Board::loop()
           _newState(BOARDSTATE_CONNECT);
         } else {
           LOGGER_INFO("no-net restarting...\n");
-          delay(10000);
+          delay(3000);
           ESP.restart();
         }
       } else {
@@ -341,6 +402,8 @@ void Board::loop()
     } // if
 
   } else if (boardState == BOARDSTATE_GREET) {
+    clearResetCount();
+
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
     LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
     // LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
@@ -366,6 +429,7 @@ void Board::loop()
     _newState(BOARDSTATE_RUN);
 
   } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
+    clearResetCount();
     displayInfo("config..");
 
     WiFi.softAPConfig(apIP, apIP, netMsk);
@@ -373,8 +437,10 @@ void Board::loop()
     delay(5);
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
-    if (sysLED >= 0)
+    if (sysLED >= 0) {
+      pinMode(sysLED, OUTPUT);
       digitalWrite(sysLED, LOW);
+    }
 
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);
@@ -664,7 +730,6 @@ void Board::displayInfo(const char *text1, const char *text2)
     if (text2)
       display->drawText(0, display->lineHeight, 0, text2);
     display->flush();
-    // delay(1200);
   } // if
 }
 

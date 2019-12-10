@@ -21,6 +21,7 @@
  * * 26.08.2018 Later display initialization, enabling display configuration.
  * * 09.10.2018 Get time in time_t format.
  * * 11.10.2018 move network initialization into board loop.
+ * * 10.12.2019 reset counter to enter unsave mode and config mode.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -67,7 +68,7 @@ typedef enum {
   BOARDSTATE_WAIT = 5, // Wait for network connectivity and clicks.
 
   // ===== normal operation states
-  BOARDSTATE_GREET = 10, // start NET Elements
+  BOARDSTATE_GREET = 10, // network established, start NET Elements
   BOARDSTATE_RUN = 12, // run
   // start TIME Elements
   // restart on network lost > 30 secs.
@@ -193,7 +194,12 @@ public:
   /**
    * Save Mode
    */
-  bool savemode = false;
+  bool savemode;
+
+  /**
+   * Reset Count
+   */
+  int _resetCount;
 
   /**
    * Switch to next network connect mode in msec.

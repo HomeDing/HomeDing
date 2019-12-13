@@ -12,6 +12,7 @@
 // 15.05.2018 set = properties and actions interface.
 // 24.09.2018 port and passwd configuration added.
 // 10.10.2018 startup as NET element
+// 13.12.2019 no OTA when running in savemode
 // -----
 
 #ifndef OTAELEMENT_H

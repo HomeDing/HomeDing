@@ -11,8 +11,8 @@
 // -----
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <core/OTAElement.h>
 
@@ -68,41 +68,43 @@ void OTAElement::start()
 
   ArduinoOTA.setHostname(_board->deviceName.c_str());
 
-  ArduinoOTA.setPort(_port); // defaults = 8266
-  if (_passwd.length() > 0)
-    ArduinoOTA.setPassword((const char *)_passwd.c_str());
+  if (! _board->savemode) {
+    ArduinoOTA.setPort(_port); // defaults = 8266
+    if (_passwd.length() > 0)
+      ArduinoOTA.setPassword((const char *)_passwd.c_str());
 
-  ArduinoOTA.onStart([this]() { LOGGER_EINFO("Starting"); });
-  ArduinoOTA.onEnd([this]() { LOGGER_EINFO("End."); });
+    ArduinoOTA.onStart([this]() { LOGGER_EINFO("Starting"); });
+    ArduinoOTA.onEnd([this]() { LOGGER_EINFO("End."); });
 
-  // The onProgress function is called very often. Only report progress on
-  // full percentages.
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    static int lastPC = 0;
-    int pc = (progress / (total / 100));
-    if (pc != lastPC) {
-      Serial.print('.');
-      if (pc % 50 == 0)
-        Serial.printf(" %d %%\n", pc);
-      lastPC = pc;
-    }
-  });
+    // The onProgress function is called very often. Only report progress on
+    // full percentages.
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+      static int lastPC = 0;
+      int pc = (progress / (total / 100));
+      if (pc != lastPC) {
+        Serial.print('.');
+        if (pc % 50 == 0)
+          Serial.printf(" %d %%\n", pc);
+        lastPC = pc;
+      }
+    });
 
-  ArduinoOTA.onError([this](ota_error_t error) {
-    LOGGER_EERR("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR)
-      LOGGER_EERR("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR)
-      LOGGER_EERR("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR)
-      LOGGER_EERR("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR)
-      LOGGER_EERR("Receive Failed");
-    else if (error == OTA_END_ERROR)
-      LOGGER_EERR("End Failed");
-  });
-  ArduinoOTA.begin(true);
-  Element::start();
+    ArduinoOTA.onError([this](ota_error_t error) {
+      LOGGER_EERR("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR)
+        LOGGER_EERR("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR)
+        LOGGER_EERR("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR)
+        LOGGER_EERR("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR)
+        LOGGER_EERR("Receive Failed");
+      else if (error == OTA_END_ERROR)
+        LOGGER_EERR("End Failed");
+    });
+    ArduinoOTA.begin(true);
+    Element::start();
+  } // if
 } // start()
 
 

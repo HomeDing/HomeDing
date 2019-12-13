@@ -97,6 +97,7 @@ ESP8266WebServer server(80);
 // ===== application state variables =====
 
 Board mainBoard;
+FileServerHandler *fsh;
 
 // ===== implement =====
 
@@ -156,7 +157,8 @@ void setup(void)
   server.addHandler(new BoardHandler(&mainBoard));
 
   // Static files POST and DELETE in the file system.
-  server.addHandler(new FileServerHandler(SPIFFS, "NO-CACHE"));
+  fsh = new FileServerHandler(SPIFFS, "NO-CACHE", &mainBoard);
+  server.addHandler(fsh);
 
   // GET static files is added after network connectivity is given.
 

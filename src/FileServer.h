@@ -15,10 +15,13 @@
  * * 29.04.2018 created by Matthias Hertel
  * * 04.02.2019 simplifications, saving memory.
  * * 24.11.2019 simplifications, using serveStatic for delivering filesystem files.
+ * * 13.12.2019 no upload and delete when running in savemode
  */
 
 #ifndef FILESERVER_H
 #define FILESERVER_H
+
+#include <HomeDing.h>
 
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
@@ -37,10 +40,11 @@ public:
    * Serving static data down and upload.
    * @param cache_header Cache Header to be used in replies.
    */
-  FileServerHandler(FS &fs, const char *cache_header)
-      : _fs(fs), _cache_header(cache_header)
+  FileServerHandler(FS &fs, const char *cache_header, Board *board)
+      : _fs(fs), _cache_header(cache_header), _board(board)
   {
   }
+
 
   /**
     @brief check wether the request can be handled by this implementation.
@@ -50,14 +54,14 @@ public:
   */
   bool canHandle(HTTPMethod requestMethod, String requestUri) override
   {
-    return ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE));
+    return ((!_board->savemode) && (requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE));
   } // canHandle()
 
 
   bool canUpload(String requestUri)
   {
-    return ((requestUri.startsWith("/")) && (!requestUri.startsWith("/$")));
-  }
+    return ((!_board->savemode) && (requestUri.startsWith("/")) && (!requestUri.startsWith("/$")));
+  } // canUpload()
 
 
   bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
@@ -100,6 +104,7 @@ public:
 protected:
   FS _fs;
   File _fsUploadFile;
+  Board *_board;
 
   String _cache_header;
 };

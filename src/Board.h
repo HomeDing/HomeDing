@@ -192,7 +192,7 @@ public:
 
 
   /**
-   * Save Mode
+   * Save Mode flag
    */
   bool savemode;
 

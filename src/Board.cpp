@@ -113,13 +113,6 @@ void Board::init(ESP8266WebServer *serv)
 
   _resetCount = getResetCount();
   LOGGER_JUSTINFO("RESET # %d", _resetCount);
-
-  // check save-mode
-  savemode = false;
-  if (_resetCount == 1) {
-    LOGGER_TRACE("starting unsave mode.");
-    savemode = true;
-  } // if
 } // init()
 
 
@@ -285,6 +278,13 @@ void Board::loop()
 
     // load all config files and create+start elements
     addElements();
+
+    // disable savemode when rebooting twice in 
+    if (_resetCount == 1) {
+      LOGGER_INFO("unsave mode");
+      savemode = false;
+    } // if
+
 
     WiFi.hostname(deviceName);
     // LOGGER_INFO("net-status: %d <%s>", WiFi.status(), WiFi.hostname().c_str());

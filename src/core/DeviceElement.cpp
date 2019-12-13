@@ -65,7 +65,7 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
 
-  } else if (_stricmp(name, "description") == 0) {
+  } else if (_stricmp(name, PROP_DESCRIPTION) == 0) {
     _description = value;
 
   } else if (_stricmp(name, "room") == 0) {
@@ -78,6 +78,10 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "logfile") == 0) {
     // enable/disable logfile feature
     Logger::logger_file = _atob(value);
+
+  } else if (_stricmp(name, "savemode") == 0) {
+    // Set board savemode
+    _board->savemode = _atob(value);
 
     // ===== WiFi Manager =====
 
@@ -154,7 +158,7 @@ void DeviceElement::pushState(
 
   Element::pushState(callback);
   callback("name", _board->deviceName.c_str());
-  callback(PROP_DESCRIPTION, _description.c_str());
+  callback("savemode", _board->savemode ? "true" : "false");
   callback("nextboot", String(_nextBoot - now).c_str());
 } // pushState()
 

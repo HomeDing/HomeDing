@@ -184,19 +184,6 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     } // if
     output_type = TEXT_JSON;
 
-  } else if (requestUri == SVC_REBOOT) {
-    // Reboot device
-    handleReboot(server);
-
-  } else if (requestUri.startsWith(SVC_RESETALL)) {
-    // Reset SPIFFS, network parameters and reboot
-    SPIFFS.format();
-    handleReboot(server, true);
-
-  } else if (requestUri.startsWith(SVC_RESET)) {
-    // Reset network parameters and reboot
-    handleReboot(server, true);
-
   } else if (requestUri.startsWith(SVC_SYSINFO)) {
     MicroJsonComposer jc;
 
@@ -220,48 +207,67 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     output = jc.stringify();
     output_type = TEXT_JSON;
 
+  } else if (!_board->savemode) {
+    
+    // ===== these actions are only in non-save mode
+
+    if (requestUri.startsWith(SVC_RESETALL)) {
+      // Reset SPIFFS, network parameters and reboot
+      SPIFFS.format();
+      handleReboot(server, true);
+
+    } else if (requestUri.startsWith(SVC_RESET)) {
+      // Reset network parameters and reboot
+      handleReboot(server, true);
+
+    } else if (requestUri.startsWith(PAGE_SETUP)) {
+      // Network Config Page
+      output = FPSTR(setupContent);
+      output_type = TEXT_HTML;
+
+    } else if (requestUri.startsWith(PAGE_BOOT)) {
+      // Bootstrap page
+      output = FPSTR(bootContent);
+      output_type = TEXT_HTML;
+
+    } else if (requestUri.startsWith(SVC_UPLOAD)) {
+      // Bulk File Upload UI.
+      output = FPSTR(uploadContent);
+      output_type = TEXT_HTML;
+
+    } else if (requestUri.startsWith(SVC_LISTFILES)) {
+      // List files in filesystem
+      MicroJsonComposer jc;
+      Dir dir = SPIFFS.openDir("/");
+
+      jc.openArray();
+      while (dir.next()) {
+        jc.openObject();
+        jc.addProperty("type", "file");
+        jc.addProperty("name", dir.fileName());
+        jc.addProperty("size", dir.fileSize());
+        jc.closeObject();
+      } // while
+      jc.closeArray();
+      output = jc.stringify();
+      output_type = TEXT_JSON;
+
+    } else if (requestUri == "/$scan") {
+      handleScan(server);
+
+    } else if (requestUri == "/$connect") {
+      handleConnect(server);
+
+    } // if
+
+  } else if (requestUri == SVC_REBOOT) {
+    // Reboot device
+    handleReboot(server);
+
   } else if (requestUri.startsWith(SVC_ELEMENTS)) {
     // List all registered Elements
     ElementRegistry::list(output);
     output_type = TEXT_JSON;
-
-  } else if (requestUri.startsWith(PAGE_SETUP)) {
-    // Network Config Page
-    output = FPSTR(setupContent);
-    output_type = TEXT_HTML;
-
-  } else if (requestUri.startsWith(PAGE_BOOT)) {
-    // Bootstrap page
-    output = FPSTR(bootContent);
-    output_type = TEXT_HTML;
-
-  } else if (requestUri.startsWith(SVC_UPLOAD)) {
-    // Bulk File Upload UI.
-    output = FPSTR(uploadContent);
-    output_type = TEXT_HTML;
-
-  } else if (requestUri.startsWith(SVC_LISTFILES)) {
-    // List files in filesystem
-    MicroJsonComposer jc;
-    Dir dir = SPIFFS.openDir("/");
-
-    jc.openArray();
-    while (dir.next()) {
-      jc.openObject();
-      jc.addProperty("type", "file");
-      jc.addProperty("name", dir.fileName());
-      jc.addProperty("size", dir.fileSize());
-      jc.closeObject();
-    } // while
-    jc.closeArray();
-    output = jc.stringify();
-    output_type = TEXT_JSON;
-
-  } else if (requestUri == "/$scan") {
-    handleScan(server);
-
-  } else if (requestUri == "/$connect") {
-    handleConnect(server);
 
   } else {
     ret = false;

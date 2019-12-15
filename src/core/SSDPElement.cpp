@@ -38,7 +38,6 @@ Element *SSDPElement::create()
  */
 void SSDPElement::init(Board *board)
 {
-  // LOGGER_ETRACE("init()");
   Element::init(board);
 
   // set default values

@@ -40,22 +40,6 @@
 #include <GDBStub.h>
 #endif
 
-#include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-
-#include <FS.h>
-
-#include <BoardServer.h>
-#include <ElementRegistry.h>
-#include <FileServer.h>
-
-#define NET_DEBUG 0
-
 #define HOMEDING_REGISTER 1
 
 // Use the Core Elements of the HomeDing Library
@@ -81,7 +65,23 @@
 
 #define HOMEDING_INCLUDE_SERIALLINE
 
+#define NET_DEBUG 0
+
+#include <Arduino.h>
+
+#include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+
+#include <FS.h>
+
+#include <Board.h>
+#include <Element.h>
 #include <HomeDing.h>
+
+#include <BoardServer.h>
+#include <FileServer.h>
+
 #include <MicroJsonComposer.h>
 
 static const char respond404[] PROGMEM =

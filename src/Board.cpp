@@ -280,7 +280,7 @@ void Board::loop()
     addElements();
 
     // disable savemode when rebooting twice in 
-    if (_resetCount == 1) {
+    if (_resetCount >= 1) {
       LOGGER_INFO("unsave mode");
       savemode = false;
     } // if

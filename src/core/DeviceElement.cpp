@@ -47,6 +47,7 @@ DeviceElement::DeviceElement()
 bool DeviceElement::set(const char *name, const char *value)
 {
   bool ret = true;
+  // LOGGER_EERR("set %s='%s'", name, value);
 
   // ===== Log something =====
 
@@ -56,36 +57,6 @@ bool DeviceElement::set(const char *name, const char *value)
     if (!now)
       now = millis() / 1000; // make seconds
     LOGGER_JUSTINFO(value ? value : "NULL");
-
-  } else if (!active) {
-    // ===== Change board properties only before activation through config files =====
-
-    if (_stricmp(name, "name") == 0) {
-      _board->deviceName = value;
-
-    } else if (_stricmp(name, "savemode") == 0) {
-      _board->savemode = _atob(value);
-
-
-      // ===== WiFi Manager =====
-    } else if (_stricmp(name, "led") == 0) {
-      _board->sysLED = _atopin(value);
-
-    } else if (_stricmp(name, "button") == 0) {
-      _board->sysButton = _atopin(value);
-
-    } else if (_stricmp(name, "connecttime") == 0) {
-      _board->nextModeTime = _atotime(value) * 1000;
-
-
-      // ===== I2C bus =====
-    } else if (_stricmp(name, "i2c-sda") == 0) {
-      _board->I2cSda = _atopin(value);
-
-    } else if (_stricmp(name, "i2c-scl") == 0) {
-      _board->I2cScl = _atopin(value);
-    }
-
 
     // ===== Web UI =====
   } else if (_stricmp(name, "homepage") == 0) {
@@ -110,6 +81,33 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "logfile") == 0) {
     // enable/disable logfile feature
     Logger::logger_file = _atob(value);
+
+
+    // ===== Change board properties only before activation through config files =====
+  } else if ((!active) && (_stricmp(name, "name") == 0)) {
+    _board->deviceName = value;
+
+  } else if ((!active) && (_stricmp(name, "savemode") == 0)) {
+    _board->savemode = _atob(value);
+
+
+    // ===== WiFi Manager =====
+  } else if ((!active) && (_stricmp(name, "led") == 0)) {
+    _board->sysLED = _atopin(value);
+
+  } else if ((!active) && (_stricmp(name, "button") == 0)) {
+    _board->sysButton = _atopin(value);
+
+  } else if ((!active) && (_stricmp(name, "connecttime") == 0)) {
+    _board->nextModeTime = _atotime(value) * 1000;
+
+
+    // ===== I2C bus =====
+  } else if ((!active) && (_stricmp(name, "i2c-sda") == 0)) {
+    _board->I2cSda = _atopin(value);
+
+  } else if ((!active) && (_stricmp(name, "i2c-scl") == 0)) {
+    _board->I2cScl = _atopin(value);
 
 
   } else {

@@ -59,6 +59,7 @@ NTPTimeElement::NTPTimeElement()
   _ntpServer = "pool.ntp.org";
   _zone = 1; // Central Europe
   _nextRead = 0;
+  _readTime = 24*60*60; // once a day
 } // NTPTimeElement()
 
 
@@ -133,7 +134,7 @@ void NTPTimeElement::loop()
     } // if
 
   } else if (_state == 1) {
-    // no respnse within 8 seconds.
+    // no response within 8 seconds.
     LOGGER_EERR("No NTP Response :-(");
     _state = 0;
     _nextRead = now + 20; // try in some seconds again

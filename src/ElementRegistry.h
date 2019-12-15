@@ -52,10 +52,4 @@ private:
 };
 
 
-#ifdef HOMEDING_REGISTER
-// Register the RotaryElement onto the ElementRegistry.
-bool RotaryElement::registered =
-    ElementRegistry::registerElement("rotary", RotaryElement::create);
-#endif
-
 #endif

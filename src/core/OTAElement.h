@@ -13,6 +13,7 @@
 // 24.09.2018 port and passwd configuration added.
 // 10.10.2018 startup as NET element
 // 13.12.2019 no OTA when running in savemode
+// 17.12.2019 less memory and cpu consumption
 // -----
 
 #ifndef OTAELEMENT_H

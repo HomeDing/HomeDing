@@ -20,10 +20,10 @@ The major diversity of functionality is implemented into the element classes tha
 
 The display is one of the components that exists only once but is used by different Elements. These types of classes, often called singletons are created by the board and are available to all Elements.
 
-![Overview](https://www.mathertel.de/Arduino/Board/ComponentOverview.png "Overview")
+More documentation can be found in the [HomeDing documentation site](https://homeding.github.io)
 
 
-## Implemented Elements
+## Some Implemented Elements
 
 * **Button Element**
 

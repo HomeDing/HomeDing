@@ -28,6 +28,7 @@
 #define MAX_WAIT_FOR_RESPONSE 12
 #define DNS_TIMEOUT (uint32_t)4
 
+/** The TRACE Macro is used for trace output for development/debugging purpose. */
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 // #define TRACE(...)
 
@@ -115,7 +116,7 @@ void RemoteElement::loop()
     _status = REMOTESTATE_OUT; // shortcut.
 
   if (_status == REMOTESTATE_START) {
-    // aks for IP address
+    // ask for IP address
     TRACE("start DNS...");
     int b = WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
     TRACE(".got %d %s", b, _IPaddr.toString().c_str());
@@ -174,7 +175,7 @@ void RemoteElement::loop()
         String line = _httpClient.readStringUntil('\n');
         // TRACE(" line:%s", line.c_str());
         if (line.startsWith("Content-Length:")) {
-          contentLength = _atoi(line.c_str() + 15);
+          contentLength = atoi(line.c_str() + 15);
           // TRACE(" contentLength=%d", contentLength);
 
         } else if (line.equals("\r")) {

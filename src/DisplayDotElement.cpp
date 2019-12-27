@@ -41,10 +41,10 @@ bool DisplayDotElement::set(const char *name, const char *value)
     _value = _atob(value);
 
   } else if (_stricmp(name, "x") == 0) {
-    _x = _atoi(value);
+    _x = atoi(value);
 
   } else if (_stricmp(name, "y") == 0) {
-    _y = _atoi(value);
+    _y = atoi(value);
 
   } else if (!active) {
     // no actions.

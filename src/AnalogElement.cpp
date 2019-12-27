@@ -53,13 +53,13 @@ bool AnalogElement::set(const char *name, const char *value)
     _readTime = _atotime(value);
 
   } else if (_stricmp(name, "hysteresis") == 0) {
-    _hysteresis = _atoi(value);
+    _hysteresis = atoi(value);
 
   } else if (_stricmp(name, PROP_PIN) == 0) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "reference") == 0) {
-    _reference = _atoi(value);
+    _reference = atoi(value);
 
   } else if (_stricmp(name, "onreference") == 0) {
     _referenceAction = value;

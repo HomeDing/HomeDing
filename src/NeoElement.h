@@ -85,6 +85,7 @@ public:
     color = 0,
     wheel = 1,
     flow = 2,
+    pulse = 3,
     more
   };
 

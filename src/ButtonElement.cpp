@@ -27,6 +27,10 @@
 #define STATE_HIGH2 3 // went up a second time shortly after the first
 #define STATE_PRESSHIGH 6 // is high since a long time.
 
+/** The TRACE Macro is used for trace output for development/debugging purpose. */
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+// #define TRACE(...)
+
 
 /**
  * @brief static factory function to create a new ButtonElement.
@@ -37,6 +41,8 @@ Element *ButtonElement::create()
   return (new ButtonElement());
 } // create()
 
+// http://lcddevice/$board/neo/d3?color=0
+// http://lcddevice/$board/button/on?action=click
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -44,6 +50,7 @@ Element *ButtonElement::create()
 bool ButtonElement::set(const char *name, const char *value)
 {
   bool ret = true;
+  TRACE("set %s=%s", name, value);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
     _inputLevel = _atob(value);
@@ -59,10 +66,10 @@ bool ButtonElement::set(const char *name, const char *value)
     }
 
   } else if (_stricmp(name, "clickticks") == 0) {
-    _clickTicks = _atoi(value);
+    _clickTicks = atoi(value);
 
   } else if (_stricmp(name, "pressticks") == 0) {
-    _pressTicks = _atoi(value);
+    _pressTicks = atoi(value);
 
   } else if (_stricmp(name, "onclick") == 0) {
     _clickAction = value;

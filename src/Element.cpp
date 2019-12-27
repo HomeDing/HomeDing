@@ -16,6 +16,10 @@
 
 #include <ElementRegistry.h>
 
+/** The TRACE Macro is used for trace output for development/debugging purpose. */
+#define TRACE(...) LOGGER_TRACE(__VA_ARGS__)
+// #define TRACE(...)
+
 /* ===== Element functions ===== */
 
 /**
@@ -46,7 +50,7 @@ bool Element::set(const char *name, const char *value)
     term();
 
   } else if (_stricmp(name, "loglevel") == 0) {
-    loglevel = _atoi(value);
+    loglevel = atoi(value);
 
     // do not report an error for the following properties, as they are used in
     // the web ui.
@@ -95,7 +99,7 @@ const char *Element::get(const char *propName)
   String ret;
 
   pushState([this, propName, &ret](const char *name, const char *value) {
-    // LOGGER_ETRACE("-%s:%s", name, value);
+    // TRACE("-%s:%s", name, value);
     if (_stricmp(name, propName) == 0) {
       ret = value;
     }
@@ -110,18 +114,9 @@ const char *Element::get(const char *propName)
  */
 void Element::term()
 {
-  LOGGER_ETRACE("term()");
+  TRACE("term()");
   active = false;
 } // term()
-
-
-/* Return an integer from a string.
-  Supports various formats like "0x3C" == "60" */
-int Element::_atoi(const char *value)
-{
-  long ret = strtol(value, nullptr, 0);
-  return ((int)ret);
-} // _atoi()
 
 
 /* Return a boolean value from a string. */
@@ -150,7 +145,6 @@ bool Element::_atob(const char *value)
 unsigned long Element::_atotime(const char *value)
 {
   unsigned long ret = 0;
-  unsigned long f = 1;
   char *pEnd;
 
   if (strchr(value, ':') != NULL) {
@@ -161,22 +155,14 @@ unsigned long Element::_atotime(const char *value)
     if (*pEnd == ':')
       ret += strtol(pEnd + 1, &pEnd, 10);
 
-  } else if (strchr(value, 'd') != NULL) {
-    ret = strtol(value, &pEnd, 10) * 24 * 60 * 60;
-
-  } else if (strchr(value, 'h') != NULL) {
-    ret = strtol(value, &pEnd, 10) * 60 * 60;
-
-  } else if (strchr(value, 'm') != NULL) {
-    ret = strtol(value, &pEnd, 10) * 60;
-
-  } else if (strchr(value, 's') != NULL) {
-    ret = strtol(value, &pEnd, 10);
-
   } else {
     ret = strtol(value, &pEnd, 10);
-
+    if (*pEnd == 'd') { ret *= (24 * 60 * 60); }
+    if (*pEnd == 'h') { ret *=      (60 * 60); }
+    if (*pEnd == 'm') { ret *=           (60); }
+    // if (*pEnd == 's') { ret *= 1 }
   } // if
+  TRACE("_atotime %s = %d", value, ret);
   return (ret);
 } // _atotime()
 
@@ -189,7 +175,7 @@ int Element::_atopin(const char *value)
   int pin = -1;
   if (value) {
     if (*value == 'D') {
-      int n = _atoi(value + 1); // scan a number right after the 'D'
+      int n = atoi(value + 1); // scan a number right after the 'D'
       if ((n >= 0) && (n <= 10))
         pin = GPIO[n];
 
@@ -197,7 +183,7 @@ int Element::_atopin(const char *value)
       pin = A0; // only analog pin on ESP8266
 
     } else {
-      pin = _atoi(value);
+      pin = atoi(value);
     }
   }
   return (pin);

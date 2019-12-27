@@ -45,7 +45,7 @@ bool AndElement::set(const char *name, const char *value)
 
   if (strstr(name, PROP_VALUE) == name) {
     // name starts with "value"
-    int indx = _atoi(name + 5);
+    int indx = atoi(name + 5);
     // LOGGER_EINFO("vx(%s, %d)", name, indx);
     if ((indx > 0) && (indx <= AndElementInputs))
       _value[indx - 1] = _atob(value);

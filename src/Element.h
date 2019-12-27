@@ -152,13 +152,6 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
   /**
-   * @brief Return an integer value from a string.
-   * @param value Given value as string.
-   * @return value
-   */
-  static int _atoi(const char *value);
-
-  /**
    * @brief Return a boolean value from a string.
    * @param value Given value as string.
    * @return true Return for "true", "on", "1", "high".

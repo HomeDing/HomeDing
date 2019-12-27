@@ -68,8 +68,8 @@ public:
 
 private:
 // configuration
-  String _host; // name of the remote device
-  String _remoteId; // id of element in remote device
+  String _host; /** name of the remote device */
+  String _remoteId; /** type/id of element in remote device. */
 
 // processing
   int _status; // 0: not active, 1: has sent out, waiting for incomming packet

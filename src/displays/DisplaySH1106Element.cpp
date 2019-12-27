@@ -60,7 +60,7 @@ bool DisplaySH1106Element::set(const char *name, const char *value)
     _resetpin = _atopin(value);
 
   } else if (_stricmp(name, "height") == 0) {
-    _height = _atoi(value);
+    _height = atoi(value);
 
   } else {
     ret = Element::set(name, value);

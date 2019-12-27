@@ -106,9 +106,11 @@ bool NeoElement::set(const char *name, const char *value)
       _mode = Mode::wheel;
     else if (_stricmp(value, "flow") == 0)
       _mode = Mode::flow;
+    else if (_stricmp(value, "pulse") == 0)
+      _mode = Mode::pulse;
 
   } else if (_stricmp(name, "brightness") == 0) {
-    _brightness = _atoi(value);
+    _brightness = atoi(value);
     if (_strip) {
       _strip->setBrightness(_brightness);
       if (_mode == Mode::color) {
@@ -121,10 +123,10 @@ bool NeoElement::set(const char *name, const char *value)
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "count") == 0) {
-    _count = _atoi(value);
+    _count = atoi(value);
 
   } else if (_stricmp(name, "duration") == 0) {
-    _duration = _atoi(value);
+    _duration = atoi(value);
 
   } else {
     ret = Element::set(name, value);
@@ -157,7 +159,7 @@ void NeoElement::start()
 void NeoElement::loop()
 {
   if (_strip) {
-    if ((_mode == Mode::wheel) || (_mode == Mode::flow)) {
+    if (_mode != Mode::color) {
       unsigned long now = millis(); // current (relative) time in msecs.
       unsigned int hue = (now * 65536 / _duration) % 65536;
 
@@ -171,6 +173,14 @@ void NeoElement::loop()
         for (int i = 0; i < pixels; i++) {
           _strip->setPixelColor(i, _strip->ColorHSV((hue + i * 256 * 5) % 65536));
         }
+
+      } else if (_mode == Mode::pulse) {
+        // 0...255...1 = 256+254 = 510 steps
+        int b = (now * 510 / _duration) % 510;
+        _strip->setBrightness(b > 255 ? 510 - b : b);
+        _setColors(_colors);
+        _needShow = true;
+
       } // if
       _needShow = true;
     }

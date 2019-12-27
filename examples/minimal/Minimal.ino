@@ -13,21 +13,8 @@
  *
  * Changelog:
  * * 12.11.2019 Minimal Example created from development sketch.
+ * * 20.12.2019 updated from DevDing example
  */
-
-#include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-
-#include <FS.h>
-
-#include <BoardServer.h>
-#include <ElementRegistry.h>
-#include <FileServer.h>
 
 #define HOMEDING_REGISTER 1
 
@@ -45,35 +32,34 @@
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
-// #define HOMEDING_INCLUDE_LOG
-#define HOMEDING_INCLUDE_PMS
 
 // Use some more Elements that need additional libraries
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
 #define HOMEDING_INCLUDE_NEOPIXEL
-// #define HOMEDING_INCLUDE_RFSend
-// #define HOMEDING_INCLUDE_ROTARY
-// #define HOMEDING_INCLUDE_MENU
 
 #define HOMEDING_INCLUDE_NTPTIME
-// #define HOMEDING_INCLUDE_DSTIME
 
-// Use some more Elements for Displays
-// #define HOMEDING_INCLUDE_DISPLAY
-// #define HOMEDING_INCLUDE_DISPLAYLCD
-// #define HOMEDING_INCLUDE_DISPLAYSSD1306
-// #define HOMEDING_INCLUDE_DISPLAYSH1106
+#include <Arduino.h>
 
-// #define HOMEDING_INCLUDE_SERIALLINE
+#include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
 
+#include <FS.h>
+
+#include <Board.h>
+#include <Element.h>
 #include <HomeDing.h>
+
+#include <BoardServer.h>
+#include <FileServer.h>
+
 #include <MicroJsonComposer.h>
 
 static const char respond404[] PROGMEM =
-R"==(<html><head><title>File not found</title></head><body>
-File not found</body></html>)==";
+    R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
 
 // ===== WLAN credentials =====
 
@@ -85,6 +71,7 @@ ESP8266WebServer server(80);
 // ===== application state variables =====
 
 Board mainBoard;
+FileServerHandler *fsh;
 
 // ===== implement =====
 
@@ -128,8 +115,11 @@ void setup(void)
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));
 
-  // Static files in the file system.
-  server.addHandler(new FileServerHandler(SPIFFS, "NO-CACHE"));
+  // Static files POST and DELETE in the file system.
+  fsh = new FileServerHandler(SPIFFS, "NO-CACHE", &mainBoard);
+  server.addHandler(fsh);
+
+  // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {
     const char *uri = server.uri().c_str();

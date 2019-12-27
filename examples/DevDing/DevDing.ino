@@ -34,11 +34,15 @@
  * * 11.10.2018 move network initialization into board loop.
 */
 
+// ----- activatable debug options
+
 // #define DBG_GDB
+// #define NET_DEBUG
 
 #ifdef DBG_GDB
 #include <GDBStub.h>
 #endif
+// ------
 
 #define HOMEDING_REGISTER 1
 
@@ -64,8 +68,6 @@
 #define HOMEDING_INCLUDE_DISPLAYSH1106
 
 #define HOMEDING_INCLUDE_SERIALLINE
-
-#define NET_DEBUG 0
 
 #include <Arduino.h>
 
@@ -130,7 +132,7 @@ void setup(void)
   gdbstub_init();
 #endif
 
-#if NET_DEBUG
+#ifdef NET_DEBUG
   Serial.setDebugOutput(true);
 #else
   Serial.setDebugOutput(false);

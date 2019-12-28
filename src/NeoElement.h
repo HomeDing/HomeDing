@@ -14,6 +14,7 @@
  * Changelog:
  * * 30.07.2019 created by Matthias Hertel
  * * 15.11.2019 some more modes implemented
+ * * 28.12.2019 less blocked time in loop()
  */
 
 #ifndef NEOELEMENT_H
@@ -100,6 +101,11 @@ private:
    */
   String _colors;
 
+  /**
+   * @brief set to true after a color has been prepares to be send to the pixels next loop().
+  */
+  boolean _needShow;
+
   /** Number of pixels in the stripe */
   int _count;
 
@@ -114,8 +120,6 @@ private:
 
   /** set color pattern */
   void _setColors(String colList);
-
-  boolean _needShow;
 
   Adafruit_NeoPixel *_strip = (Adafruit_NeoPixel *)NULL;
 

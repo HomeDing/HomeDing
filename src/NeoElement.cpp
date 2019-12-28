@@ -159,7 +159,12 @@ void NeoElement::start()
 void NeoElement::loop()
 {
   if (_strip) {
-    if (_mode != Mode::color) {
+    if (_needShow) {
+      // this time send to strip
+      _strip->show();
+      _needShow = false;
+
+    } else if ((_duration != 0) && (_mode != Mode::color)) {
       unsigned long now = millis(); // current (relative) time in msecs.
       unsigned int hue = (now * 65536 / _duration) % 65536;
 
@@ -179,17 +184,10 @@ void NeoElement::loop()
         int b = (now * 510 / _duration) % 510;
         _strip->setBrightness(b > 255 ? 510 - b : b);
         _setColors(_colors);
-        _needShow = true;
 
       } // if
       _needShow = true;
     }
-
-    // send data to _strip.
-    if (_needShow) {
-      _strip->show();
-      _needShow = false;
-    } // if
   } // if
 } // loop()
 

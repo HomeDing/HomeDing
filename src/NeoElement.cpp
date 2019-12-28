@@ -126,7 +126,7 @@ bool NeoElement::set(const char *name, const char *value)
     _count = atoi(value);
 
   } else if (_stricmp(name, "duration") == 0) {
-    _duration = atoi(value);
+    _duration = _atotime(value) * 1000;
 
   } else {
     ret = Element::set(name, value);

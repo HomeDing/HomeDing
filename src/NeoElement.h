@@ -115,8 +115,8 @@ private:
   /** Brightness level */
   int _brightness;
 
-  /** duration of animation */
-  int _duration;
+  /** duration of animation in msecs */
+  unsigned long _duration;
 
   /** set color pattern */
   void _setColors(String colList);

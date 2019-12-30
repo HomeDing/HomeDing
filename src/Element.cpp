@@ -162,7 +162,6 @@ unsigned long Element::_atotime(const char *value)
     if (*pEnd == 'm') { ret *=           (60); }
     // if (*pEnd == 's') { ret *= 1 }
   } // if
-  TRACE("_atotime %s = %d", value, ret);
   return (ret);
 } // _atotime()
 

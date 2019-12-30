@@ -67,16 +67,33 @@ public:
   // pushState is not required because no dynamic properties
 
 private:
-// configuration
+  /** State of RemoteElement */
+  typedef enum {
+    IDLE = 0, // no remote activity
+
+    GETIP = 11, // resolve an IP address from hostname.
+    SENDING = 12, // send out any request
+    CHECK = 13, // check result, if any
+
+    HEADERS = 20, // process result.
+    BODY = 21,
+
+    ABORT = 99, // stop connection to remote
+  } STATE;
+
+
+  // configuration
   String _host; /** name of the remote device */
   String _remoteId; /** type/id of element in remote device. */
 
-// processing
-  int _status; // 0: not active, 1: has sent out, waiting for incomming packet
+  STATE _state; /// current processing State
+
   IPAddress _IPaddr; // ip of the remote device
   String _action; // next action to be sent
 
   WiFiClient _httpClient;
+
+  void _header(String &key, String &value);
 
   /**
    * @brief time when the request was started.

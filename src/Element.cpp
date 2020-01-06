@@ -58,7 +58,7 @@ bool Element::set(const char *name, const char *value)
   } else if (_stricmp(name, "room") == 0) {
 
   } else {
-    LOGGER_EERR("cannot set property %s:", name, value);
+    // LOGGER_EERR("cannot set property %s:", name, value); // not an error when used for testing common properties
     ret = false;
   } // if
   return (ret);

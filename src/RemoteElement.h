@@ -16,6 +16,7 @@
  * Changelog:
  * * 22.04.2018 created by Matthias Hertel
  * * 17.03.2019 splitting connect into getHostByName and connect by IP.
+ * * 05.01.2020 using HttpClientElement
  */
 
 #ifndef REMOTEELEMENT_H
@@ -23,12 +24,13 @@
 
 #include <HomeDing.h>
 #include <WiFiClient.h>
+#include <HttpClientElement.h>
 
 /**
  * @brief The RemoteElement is an special Element that creates actions based on
  * a digital IO signal.
  */
-class RemoteElement : public Element
+class RemoteElement : public HttpClientElement
 {
 public:
   /**
@@ -64,43 +66,17 @@ public:
   virtual void loop();
 
 
+  // virtual void processHeader(String &key, String &value);
+  // virtual void processBody(char *value);
+
   // pushState is not required because no dynamic properties
 
 private:
-  /** State of RemoteElement */
-  typedef enum {
-    IDLE = 0, // no remote activity
-
-    GETIP = 11, // resolve an IP address from hostname.
-    SENDING = 12, // send out any request
-    CHECK = 13, // check result, if any
-
-    HEADERS = 20, // process result.
-    BODY = 21,
-
-    ABORT = 99, // stop connection to remote
-  } STATE;
-
 
   // configuration
-  String _host; /** name of the remote device */
   String _remoteId; /** type/id of element in remote device. */
 
-  STATE _state; /// current processing State
-
-  IPAddress _IPaddr; // ip of the remote device
   String _action; // next action to be sent
-
-  WiFiClient _httpClient;
-
-  void _header(String &key, String &value);
-
-  /**
-   * @brief time when the request was started.
-   */
-  unsigned long _startTime;
-
-  bool _errNoHostSent = false; // avoid sending this error all the time
 };
 
 #endif // REMOTEELEMENT_H

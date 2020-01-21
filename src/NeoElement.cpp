@@ -144,7 +144,7 @@ void NeoElement::start()
 {
   Element::start();
 
-  _strip = new Adafruit_NeoPixel(_count, _pin, NEO_GRB + NEO_KHZ400);
+  _strip = new Adafruit_NeoPixel(_count, _pin, NEO_GRB + NEO_KHZ800);
   if (_strip) {
     _strip->begin();
     _setColors(_colors);

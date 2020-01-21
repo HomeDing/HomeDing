@@ -1,6 +1,18 @@
-
-// MicroJsonParser.cpp
-
+/**
+ * @file MicroJsonParser.cpp
+ * @brief Streamin JSON Parser.
+ *
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license.
+ * https://www.mathertel.de/License.aspx.
+ *
+ * More information on https://www.mathertel.de/Arduino
+ *
+ * Changelog:see MicroJsonParser.h
+ */
 #include <Arduino.h>
 #include <MicroJsonParser.h>
 
@@ -28,16 +40,24 @@
 #define MJ_STATE_Q_VALUE (0x22)
 #define MJ_STATE_Q_VALUE_ESC (0x23)
 #define MJ_STATE_Q_VALUE_ESCU (0x24)
-#define MJ_STATE_VALUE (0x25)
+#define MJ_STATE_NUM_VALUE (0x25)
+
+// Arrays
+#define MJ_STATE_PRE_ITEM (0x42 + MJ_IGNOREBLANCS)
+#define MJ_STATE_POST_ITEM (0x43 + MJ_IGNOREBLANCS)
+
 #define MJ_STATE_PRE_DONE (0x31 + MJ_IGNOREBLANCS)
 #define MJ_STATE_DONE (0x32 + MJ_IGNOREBLANCS)
 #define MJ_STATE_ERROR (0x50 + MJ_IGNOREBLANCS)
 
 #define NUL '\0'
 
+#define MJ_OBJECTLEVEL (-1)
+#define MJ_ARRAYLEVEL (0)
+
 #if 0
 // DEBUG State transitions
-#define MJ_NEWSTATE(newState) (LOGGER_INFO("state %x", newState), newState)
+#define MJ_NEWSTATE(newState) (LOGGER_INFO("state %x %d:<%s>:", newState & 0xFF, _level, _path), newState)
 #else
 #define MJ_NEWSTATE(newState) (newState)
 #endif
@@ -61,6 +81,8 @@ void MicroJson::parse(const char *s)
 {
   _state = MJ_STATE_INIT;
   _level = 0;
+  _index[0] = MJ_OBJECTLEVEL;
+
   while ((s != NULL) && (*s != '\0')) {
     parse(*s++);
   }
@@ -73,11 +95,10 @@ void MicroJson::parseFile(const char *fName)
   char *p;
   size_t len;
 
+  parse(""); // init 
+
   if (SPIFFS.exists(fName)) {
     // LOGGER_RAW("parsing file %s", fName);
-
-    _state = MJ_STATE_INIT;
-    _level = 0;
 
     File file = SPIFFS.open(fName, "r");
     while (file.available()) {
@@ -114,8 +135,12 @@ void strncat(char *s, char ch, int len)
  */
 void MicroJson::parse(char ch)
 {
-  // LOGGER_INFO("parse(%c)", ch);
-  if ((_state & MJ_IGNOREBLANCS) && isblank(ch)) {
+  // create some debug output on relevant input characters
+  // if (!(_state & MJ_IGNOREBLANCS) || !isspace(ch)) {
+  //   LOGGER_INFO("> (%c)", ch);
+  // }
+
+  if ((_state & MJ_IGNOREBLANCS) && isspace(ch)) {
     // ignore white space here.
     // LOGGER_INFO(" ignored");
 
@@ -132,13 +157,15 @@ void MicroJson::parse(char ch)
       _state = MJ_ERROR("'{' expected");
     } else {
       _level++;
+      _index[_level] = MJ_OBJECTLEVEL;
+
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
-      _name[0] = _value[0] = NUL;
       if (_callbackFn)
         (_callbackFn)(_level, _path, NULL, NULL);
     }
 
   } else if ((_state == MJ_STATE_PRE_NAME) && (ch == '"')) {
+    _name[0] = _value[0] = NUL;
     _state = MJ_NEWSTATE(MJ_STATE_Q_NAME);
 
   } else if (_state == MJ_STATE_Q_NAME) {
@@ -157,27 +184,75 @@ void MicroJson::parse(char ch)
     }
 
 
+  } else if (_state == MJ_STATE_PRE_ITEM) {
+    if (ch == '{') {
+      char tmp[16];
+      itoa(_index[_level], tmp, 10);
+      strncat(_path, '[', sizeof(_path));
+      strncat(_path, tmp, sizeof(_path));
+      strncat(_path, ']', sizeof(_path));
+
+      _level++;
+      _index[_level] = MJ_OBJECTLEVEL;
+      _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
+    }
+
+  } else if (_state == MJ_STATE_POST_ITEM) {
+
+    if (ch == ',') {
+      // another item in the array
+      _index[_level]++;
+      _state = MJ_NEWSTATE(MJ_STATE_PRE_ITEM);
+
+    } else if (ch == ']') {
+      // close array
+      if (_level > 2) {
+        *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
+      } else {
+        _path[0] = NUL;
+      }
+      _level--;
+      _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
+    }
+
   } else if (_state == MJ_STATE_PRE_VALUE) {
     if (ch == '"') {
+      // quoted value / string
       _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE);
 
     } else if (ch == '{') {
+      // nested object
       _level++;
+      _index[_level] = MJ_OBJECTLEVEL;
+
       if (_path[0] != NUL)
         strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
-      _name[0] = _value[0] = NUL;
+      // _name[0] = _value[0] = NUL; ??
       if (_callbackFn)
         (_callbackFn)(_level, _path, NULL, NULL);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
 
+    } else if (ch == '[') {
+      // open array
+
+      _level++;
+      _index[_level] = MJ_ARRAYLEVEL;
+
+      if (_path[0] != NUL)
+        strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
+      strncat(_path, _name, sizeof(_path));
+      if (_callbackFn)
+        (_callbackFn)(_level, _path, NULL, NULL);
+      _state = MJ_NEWSTATE(MJ_STATE_PRE_ITEM);
+
+
     } else if (isdigit(ch)) {
       strncat(_value, ch, sizeof(_value));
-      _state = MJ_NEWSTATE(MJ_STATE_VALUE);
+      _state = MJ_NEWSTATE(MJ_STATE_NUM_VALUE);
     }
-
-  } else if (_state == MJ_STATE_VALUE) {
-    if (isdigit(ch)) {
+  } else if (_state == MJ_STATE_NUM_VALUE) {
+    if (isdigit(ch) || (ch == '.')) {
       strncat(_value, ch, sizeof(_value));
 
     } else {
@@ -188,7 +263,6 @@ void MicroJson::parse(char ch)
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
       parse(ch); // parse this character again.
     }
-
   } else if (_state == MJ_STATE_Q_VALUE) {
     if (ch == '\\') {
       _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE_ESC);
@@ -203,7 +277,6 @@ void MicroJson::parse(char ch)
         (_callbackFn)(_level, _path, _name, _value);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
     }
-
   } else if (_state == MJ_STATE_Q_VALUE_ESC) {
     // single char escape sequences
     if (ch == 'b') {
@@ -229,7 +302,6 @@ void MicroJson::parse(char ch)
       strncat(_value, ch, sizeof(_value));
       _state = MJ_STATE_Q_VALUE;
     } // if
-
   } else if (_state == MJ_STATE_Q_VALUE_ESCU) {
     strncat(_esc, ch, sizeof(_esc));
     if (strlen(_esc) == 4) {
@@ -240,30 +312,39 @@ void MicroJson::parse(char ch)
     } // if
 
   } else if (_state == MJ_STATE_PRE_DONE) {
+    // after a property-key/value.
+
     if (ch == ',') {
-      _name[0] = _value[0] = NUL;
-      _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
+      // new object property expected
+      if (_index[_level] == MJ_OBJECTLEVEL) {
+        _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
+
+      } else {
+        _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
+      }
 
     } else if (ch == '}') {
-      if (_level > 2) {
-        // remove last path element
-        char *p = strrchr(_path, MICROJSON_PATH_SEPARATOR);
-        *p = NUL;
-        _level--;
+      // close the object
+      _level--;
+      if (_index[_level] != MJ_OBJECTLEVEL) {
+        *strrchr(_path, '[') = NUL;
+        _state = MJ_NEWSTATE(MJ_STATE_POST_ITEM);
 
       } else if (_level > 1) {
         // remove last path element
-        _path[0] = NUL;
-        _level--;
+        *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
+        // _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE); // stay in the same state
 
       } else if (_level == 1) {
-        _level == 0;
+        // remove last path element
         _path[0] = NUL;
+
+      } else if (_level == 0) {
         _state = MJ_NEWSTATE(MJ_STATE_DONE);
       } else {
         _state = MJ_ERROR("to many '}'");
       }
-    }
+    } // if
   }
 } // parse()
 

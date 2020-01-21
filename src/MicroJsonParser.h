@@ -1,5 +1,23 @@
+/**
+ * @file MicroJsonParser.h
+ * 
+ * @brief Streaming JSON parser with minimal memory impact.
+ * This class is part of the HomeDing Library.
+ * 
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license,
+ * https://www.mathertel.de/License.aspx.
+ *
+ * More information on https://www.mathertel.de/Arduino.
+ *
+ * Changelog:
+ * * created by Matthias Hertel
+ * * 21.01.2020 supporting arrays
+ */
 
-// MicroJsonParser.h
 
 #ifndef MICROJSON_H
 #define MICROJSON_H
@@ -46,6 +64,7 @@ protected:
   int _level;
 
   char _path[64];
+  int  _index[12]; // -1 for object
   char _name[16];
   char _value[200];
   char _esc[8];

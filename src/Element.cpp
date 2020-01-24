@@ -53,7 +53,7 @@ bool Element::set(const char *name, const char *value)
     loglevel = atoi(value);
 
     // do not report an error for the following properties, as they are used in
-    // the web ui.
+    // the web ui but only stored in the config files.
   } else if (_stricmp(name, "description") == 0) {
   } else if (_stricmp(name, "room") == 0) {
 

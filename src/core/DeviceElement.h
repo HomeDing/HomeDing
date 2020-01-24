@@ -17,6 +17,7 @@
  * * 04.05.2018 created by Matthias Hertel
  * * 24.09.2018 description added.
  * * 10.10.2018 startup as SYS element
+ * * 24.01.2020 enable reboot via action
  */
 
 #ifndef DEVICEELEMENT_H
@@ -89,11 +90,6 @@ private:
    * @brief Description of the device for usage in Web UI.
    */
   String _description;
-
-  /**
-   * @brief Name of the room of the device.
-   */
-  String _room;
 
   /**
    * @brief hours to wait until a fresh reboot will be started,

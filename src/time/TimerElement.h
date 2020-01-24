@@ -14,6 +14,7 @@
  * * 14.04.2018 created by Matthias Hertel
  * * 27.04.2018 Based on Element class.
  * * 15.05.2018 set = properties and actions interface.
+ * * 24.01.2020 timer type once doesn't start automatically. 
  */
 
 #ifndef TIMERELEMENT_H
@@ -61,10 +62,10 @@ minimum of waittime+pulsetime. The units are in minutes
  * @brief current state of the timer.
  */
 typedef enum {
-  TIMERSTATE_WAIT = 0, // while waittime is running
-  TIMERSTATE_PULSE = 1, // while pulsetime is running.
-  TIMERSTATE_CYCLE = 2, // while cycletime is not over.
-  TIMERSTATE_ENDED = 3 // cycletime ended but type != LOOP.
+  TIMERSTATE_ENDED = 0, // cycletime ended but type != LOOP.
+  TIMERSTATE_WAIT = 1, // while waittime is running
+  TIMERSTATE_PULSE = 2, // while pulsetime is running.
+  TIMERSTATE_CYCLE = 3 // while cycletime is not over.
 } TimerState;
 
 
@@ -178,7 +179,7 @@ private:
    * 2: while cycletime is not over.
    * 3: cycletime ended but type != LOOP.
    */
-  TimerState _state = TIMERSTATE_WAIT;
+  TimerState _state = TIMERSTATE_ENDED;
 
   /**
    * @brief start the timer from the beginning.

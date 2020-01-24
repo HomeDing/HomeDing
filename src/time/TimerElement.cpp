@@ -11,8 +11,8 @@
 // -----
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <time/TimerElement.h>
 
@@ -38,7 +38,7 @@ bool TimerElement::set(const char *name, const char *value)
     if (_stricmp(value, "loop") == 0) {
       _type = TIMER_TYPE_LOOP;
     } else if (_stricmp(value, "once") == 0) {
-      _type = TIMER_TYPE_ONCE;
+      _type = TIMER_TYPE_ONCE; // wait for action to start, no auto re-starting
     } else {
       LOGGER_EERR("unknown type");
       ret = false;
@@ -82,10 +82,7 @@ bool TimerElement::set(const char *name, const char *value)
     _startTimer();
 
   } else if (_stricmp(name, "stop") == 0) {
-    // turn off and do a fresh start
-    if (_state == TIMERSTATE_PULSE) {
-      _board->dispatch(_offAction);
-    }
+    // turn off 
     _stopTimer();
 
   } else {
@@ -101,19 +98,16 @@ bool TimerElement::set(const char *name, const char *value)
  */
 void TimerElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // LOGGER_ETRACE("start()");
 
   if (_cycleTime < _waitTime + _pulseTime) {
     _cycleTime = _waitTime + _pulseTime;
   } // if
 
-  if ((_pulseTime == 0) ||
-      ((_pulseTime == _cycleTime) && (_type == TIMER_TYPE_LOOP))) {
-    LOGGER_EERR("no meaningful timing");
+  Element::start();
 
-  } else {
-    // start Timer
-    Element::start();
+  if (_type == TIMER_TYPE_LOOP) {
+    // start Timer automatically
     _startTimer();
   } // if
 } // start()
@@ -124,34 +118,34 @@ void TimerElement::start()
  */
 void TimerElement::loop()
 {
-  unsigned long now = _board->getSeconds();
+  if (_state != TIMERSTATE_ENDED) {
+    // time from start in seconds
+    uint16_t tfs = _board->getSeconds() - _startTime;
 
-  // time from start in seconds
-  uint16_t tfs = now - _startTime;
+    if (_state == TIMERSTATE_WAIT) {
+      if (tfs >= _waitTime) {
+        // switch state to 1 and submit ON action
+        _state = TIMERSTATE_PULSE;
+        _board->dispatch(_onAction);
+        _board->dispatch(_valueAction, "1");
+      } // if
 
-  if (_state == TIMERSTATE_WAIT) {
-    if (tfs >= _waitTime) {
-      // switch state to 1 and submit ON action
-      _state = TIMERSTATE_PULSE;
-      _board->dispatch(_onAction);
-      _board->dispatch(_valueAction, "1");
-    } // if
+    } else if (_state == TIMERSTATE_PULSE) {
+      if (tfs >= _waitTime + _pulseTime) {
+        // switch state to 2 and submit OFF action
+        _state = TIMERSTATE_CYCLE;
+        _board->dispatch(_offAction);
+        _board->dispatch(_valueAction, "0");
+      } // if
 
-  } else if (_state == TIMERSTATE_PULSE) {
-    if (tfs >= _waitTime + _pulseTime) {
-      // switch state to 2 and submit OFF action
-      _state = TIMERSTATE_CYCLE;
-      _board->dispatch(_offAction);
-      _board->dispatch(_valueAction, "0");
-    } // if
-
-  } else if (_state == TIMERSTATE_CYCLE) {
-    if (tfs >= _cycleTime) {
-      _board->dispatch(_endAction);
-      if (_type == TIMER_TYPE_LOOP) {
-        _startTimer();
-      } else {
-        _stopTimer();
+    } else if (_state == TIMERSTATE_CYCLE) {
+      if (tfs >= _cycleTime) {
+        _board->dispatch(_endAction);
+        if (_type == TIMER_TYPE_LOOP) {
+          _startTimer();
+        } else {
+          _stopTimer();
+        } // if
       } // if
     } // if
   } // if

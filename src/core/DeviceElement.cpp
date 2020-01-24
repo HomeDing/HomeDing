@@ -79,8 +79,9 @@ bool DeviceElement::set(const char *name, const char *value)
     // enable/disable logfile feature
     Logger::logger_file = _atob(value);
 
-      // TODO: ESP.reset(); "reset"
-
+  } else if (_stricmp(name, "reset") == 0) {
+    // reboot is called reset in ESP
+    _board->reboot(false);
 
   } else {
     ret = Element::set(name, value);
@@ -89,27 +90,27 @@ bool DeviceElement::set(const char *name, const char *value)
   if ((!ret) && (!active)) {
     // These actions are only allowed during setup / before activation.
 
-    if ((!active) && (_stricmp(name, "name") == 0)) {
+    if (_stricmp(name, "name") == 0) {
       _board->deviceName = value;
-    } else if ((!active) && (_stricmp(name, "savemode") == 0)) {
+    } else if (_stricmp(name, "savemode") == 0) {
       _board->savemode = _atob(value);
 
       // ===== WiFi Manager =====
-    } else if ((!active) && (_stricmp(name, "led") == 0)) {
+    } else if (_stricmp(name, "led") == 0) {
       _board->sysLED = _atopin(value);
 
-    } else if ((!active) && (_stricmp(name, "button") == 0)) {
+    } else if (_stricmp(name, "button") == 0) {
       _board->sysButton = _atopin(value);
 
-    } else if ((!active) && (_stricmp(name, "connecttime") == 0)) {
+    } else if (_stricmp(name, "connecttime") == 0) {
       _board->nextModeTime = _atotime(value) * 1000;
 
 
       // ===== I2C bus =====
-    } else if ((!active) && (_stricmp(name, "i2c-sda") == 0)) {
+    } else if (_stricmp(name, "i2c-sda") == 0) {
       _board->I2cSda = _atopin(value);
 
-    } else if ((!active) && (_stricmp(name, "i2c-scl") == 0)) {
+    } else if (_stricmp(name, "i2c-scl") == 0) {
       _board->I2cScl = _atopin(value);
 
     } // if

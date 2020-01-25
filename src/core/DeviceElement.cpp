@@ -94,6 +94,10 @@ bool DeviceElement::set(const char *name, const char *value)
       _board->deviceName = value;
     } else if (_stricmp(name, "savemode") == 0) {
       _board->savemode = _atob(value);
+    } else if (_stricmp(name, "onsysstart") == 0) {
+      _board->sysStartAction = value;
+    } else if (_stricmp(name, "onstart") == 0) {
+      _board->startAction = value;
 
       // ===== WiFi Manager =====
     } else if (_stricmp(name, "led") == 0) {

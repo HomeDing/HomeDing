@@ -22,6 +22,7 @@
  * * 09.10.2018 Get time in time_t format.
  * * 11.10.2018 move network initialization into board loop.
  * * 10.12.2019 reset counter to enter unsave mode and config mode.
+ * * 25.01.2020 device startup actions added.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -69,7 +70,7 @@ typedef enum {
 
   // ===== normal operation states
   BOARDSTATE_GREET = 10, // network established, start NET Elements
-  BOARDSTATE_RUN = 12, // run
+  BOARDSTATE_RUN = 12, // in normal operation mode.  
   // start TIME Elements
   // restart on network lost > 30 secs.
 
@@ -262,6 +263,8 @@ public:
    */
   String homepage = "/index.htm";
 
+  String sysStartAction;
+  String startAction;
 
   BoardState boardState;
 
@@ -298,8 +301,11 @@ private:
 
   bool active = false;
 
-  /** set to true when a locl date/time is valid */
-  bool validTime = false;
+  /** set to true when any time requesting elements defined. */
+  bool hasTimeElements = false;
+
+  /** set to true when all elements have been started. */
+  bool startComplete = false;
 
   /** connection status */
   void _checkNetState();

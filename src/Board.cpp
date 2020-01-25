@@ -207,6 +207,7 @@ void Board::start(Element_StartupMode startupMode)
       // start element when not already active
       LOGGER_TRACE("starting %s...", l->id);
       l->start();
+      yield();
     } // if
 
     l = l->next;
@@ -232,16 +233,22 @@ void Board::loop()
 
   if (boardState == BOARDSTATE_RUN) {
     // Most common state.
-    if (!validTime) {
+    if (!startComplete) {
+      if (!hasTimeElements) {
+        startComplete = true;
+      } else {
       // check if time is valid now -> start all elements with
-      // Element_StartupMode::Time
       time_t current_stamp = getTime();
       if (current_stamp) {
         start(Element_StartupMode::Time);
-        validTime = true;
-        return;
+          startComplete = true;
+        } // if
       } // if
+
+      if (startComplete) {
+        dispatch(startAction); // dispatched when all elements are active.
     }
+    } // if ! startComplete
 
     // dispatch next action from _actionList if any
     if (_actionList.length() > 0) {
@@ -279,7 +286,16 @@ void Board::loop()
     // load all config files and create+start elements
     addElements();
 
-    // disable savemode when rebooting twice in 
+    // search any time requesting elements
+    Element *l = _elementList;
+    while (l != nullptr) {
+      if (l->startupMode == Element_StartupMode::Network) {
+        hasTimeElements = true;
+      } // if
+      l = l->next;
+    } // while
+
+    // disable savemode when rebooting twice in a row
     if (_resetCount >= 1) {
       LOGGER_INFO("unsave mode");
       savemode = false;
@@ -422,6 +438,7 @@ void Board::loop()
 
     server->begin();
     start(Element_StartupMode::Network);
+    dispatch(sysStartAction); // dispatched when network is available
 
     // start file server for static files in the file system.
     server->serveStatic("/", SPIFFS, "/", "NO-CACHE");

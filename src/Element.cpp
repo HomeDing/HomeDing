@@ -173,12 +173,13 @@ int Element::_atopin(const char *value)
 
   int pin = -1;
   if (value) {
-    if (*value == 'D') {
+    char ch = tolower(*value);
+    if (ch == 'd') {
       int n = atoi(value + 1); // scan a number right after the 'D'
       if ((n >= 0) && (n <= 10))
         pin = GPIO[n];
 
-    } else if (*value == 'A') {
+    } else if (ch == 'a') {
       pin = A0; // only analog pin on ESP8266
 
     } else {

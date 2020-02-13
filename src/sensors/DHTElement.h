@@ -15,12 +15,14 @@
  *
  * Changelog:
  * * 21.05.2018 created by Matthias Hertel
+ * * 12.02.2020 rebased on SensorElement.
  */
 
 #ifndef DHTELEMENT_H
 #define DHTELEMENT_H
 
 #include <HomeDing.h>
+#include <sensors/SensorElement.h>
 
 #include <DHTesp.h>
 
@@ -28,7 +30,7 @@
  * @brief The DHTElement is an special Element that creates actions based on a
  * digital IO signal.
  */
-class DHTElement : public Element
+class DHTElement : public SensorElement
 {
 public:
   /**
@@ -42,10 +44,6 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Construct a new DHTElement object.
-   */
-  DHTElement();
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -64,20 +62,19 @@ public:
   virtual void start();
 
   /**
-   * @brief check the state of the DHT values and eventually create actions.
-   */
-  virtual void loop();
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
 
+protected:
+  virtual bool _readSensorData();
+  virtual void _sendSensorData();
+
 private:
-  DHTesp::DHT_MODEL_t _type;
-  int _pin;
+  DHTesp::DHT_MODEL_t _type = DHTesp::AUTO_DETECT;
+  int _pin =-1;
 
   /**
    * @brief Last meassured temperature in celsius * 100.
@@ -101,22 +98,7 @@ private:
    */
   String _humAction;
 
-  /**
-   * @brief The temperature change and humidity change actions are emitted after
-   * some time.
-   */
-  int _resendTime;
-
-  /**
-   * @brief The time between reading 2 probes.
-   */
-  unsigned long _readTime;
-
-
   DHTesp _dht;
-
-  unsigned long _nextRead;
-  unsigned long _nextResend;
 
   /**
    * @brief Format number to string with 2 digits.

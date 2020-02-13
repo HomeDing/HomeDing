@@ -28,17 +28,6 @@ class SensorElement : public Element
 {
 public:
   /**
-   * @brief Factory function to create a SensorElement.
-   * @return Element*
-   */
-  static Element *create();
-
-  /**
-   * @brief static variable to ensure registering in static init phase.
-   */
-  static bool registered;
-
-  /**
    * @brief Construct a new SensorElement object.
    */
   SensorElement();
@@ -72,6 +61,11 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 protected:
+  virtual unsigned long _startSensor();
+  virtual bool _readSensorData();
+  virtual void _sendSensorData();
+
+private:
   /**
    * @brief The current values should be emitted again after some time even when not changing.
    */
@@ -82,13 +76,9 @@ protected:
    */
   unsigned long _readTime;
 
+  unsigned long _nextStart;
   unsigned long _nextRead;
   unsigned long _nextResend;
-
-  virtual bool _readSensorData();
-  virtual void _sendSensorData();
-
-  void _dispatch(String &evt, int value);
 };
 
 

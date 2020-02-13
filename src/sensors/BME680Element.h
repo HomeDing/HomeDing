@@ -13,10 +13,14 @@
  *
  * Changelog:
  * * 15.02.2019 created by Matthias Hertel
+ * * 12.02.2020 rebased on SensorElement.
  */
 
 #ifndef BME680ELEMENT_H
 #define BME680ELEMENT_H
+
+#include <HomeDing.h>
+#include <sensors/SensorElement.h>
 
 #include <Adafruit_BME680.h>
 
@@ -30,7 +34,7 @@ The BME680Element can ...
 @endverbatim
  */
 
-class BME680Element : public Element
+class BME680Element : public SensorElement
 {
 public:
   /**
@@ -67,19 +71,19 @@ public:
   virtual void start();
 
   /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop();
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
 
+protected:
+  virtual unsigned long _startSensor();
+  virtual bool _readSensorData();
+  virtual void _sendSensorData();
+
 private:
-  void _newValue(String &strVal, const char *fmt, float value, String &actions);
+  bool _readValue(String &strVal, const char *fmt, float value);
 
   /** @brief The last reported /actual values of the sensor.
    * The values are formatted as strings as they are formatted in the action
@@ -98,21 +102,6 @@ private:
   int _state;
 
   int _address = BME680_DEFAULT_ADDRESS;
-
-  /**
-   * @brief Time between 2 sensor readings.
-   */
-  unsigned long _readTime = 60;
-
-  /**
-   * @brief time of next sensor reading.
-   */
-  unsigned long _nextRead;
-
-  /**
-   * @brief time (millis) when sensor data is available.
-   */
-  unsigned long _endTime;
 
   // sensor reading library
   Adafruit_BME680 _bme;

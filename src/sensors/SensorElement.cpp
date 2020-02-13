@@ -21,15 +21,6 @@
 
 #include <sensors/SensorElement.h>
 
-/**
- * @brief static factory function to create a new SensorElement
- * @return SensorElement* created element
- */
-Element *SensorElement::create()
-{
-  return (new SensorElement());
-} // create()
-
 
 SensorElement::SensorElement()
 {
@@ -64,11 +55,11 @@ bool SensorElement::set(const char *name, const char *value)
 void SensorElement::start()
 {
   LOGGER_ETRACE("start()");
-  unsigned int now = _board->getSeconds();
+  unsigned int now = millis();
   Element::start();
 
-  _nextRead = now + 2; // now + min. 2 sec., don't hurry
-  _nextResend = now + _resendTime;
+  _nextStart = _nextRead = now + 2 * 1000; // now + min. 2 sec., don't hurry
+  _nextResend = now + _resendTime * 1000;
 } // start()
 
 
@@ -77,8 +68,12 @@ void SensorElement::start()
  */
 void SensorElement::loop()
 {
-  unsigned int now = _board->getSeconds();
+  unsigned long now = millis();
   bool newData = false;
+
+  if (_nextStart <= now) {
+    _nextRead = _startSensor();
+  }
 
   if (_nextRead <= now) {
     // LOGGER_ETRACE("start reading...");
@@ -88,8 +83,8 @@ void SensorElement::loop()
   if ((newData) || ((_resendTime > 0) && (_nextResend <= now))) {
     // LOGGER_ETRACE("start sending...");
     _sendSensorData();
-    _nextRead = now + _readTime;
-    _nextResend = now + _resendTime;
+    _nextStart = _nextRead = now + _readTime * 1000;
+    _nextResend = now + _resendTime * 1000;
   } // if
 } // loop()
 
@@ -102,6 +97,12 @@ void SensorElement::pushState(
 
 
 // ===== private functions =====
+
+unsigned long SensorElement::_startSensor()
+{
+  // no read
+  return (0); // always over
+};
 
 bool SensorElement::_readSensorData()
 {

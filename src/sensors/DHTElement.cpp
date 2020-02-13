@@ -17,8 +17,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <sensors/DHTElement.h>
 
@@ -32,49 +32,36 @@ Element *DHTElement::create()
 } // create()
 
 
-DHTElement::DHTElement()
-{
-  _type = DHTesp::AUTO_DETECT;
-  _pin = -1;
-  _lastTemp = _lastHum = -666;
-  _readTime = 60; // read from sensor once a minute
-  _resendTime = 0; // Not enabled resending probes.
-} // DHTElement()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DHTElement::set(const char *name, const char *value)
 {
-  bool ret = true;
+  bool ret = SensorElement::set(name, value);
 
-  if (_stricmp(name, "type") == 0) {
-    if (_stricmp(value, "DHT11") == 0) {
-      _type = DHTesp::DHT11;
-    } else if (_stricmp(value, "DHT22") == 0) {
-      _type = DHTesp::DHT22;
-    } else if (_stricmp(value, "AUTO") == 0) {
-      _type = DHTesp::AUTO_DETECT;
-    }
+  if (!ret) {
+    if (_stricmp(name, "type") == 0) {
+      if (_stricmp(value, "DHT11") == 0) {
+        _type = DHTesp::DHT11;
+      } else if (_stricmp(value, "DHT22") == 0) {
+        _type = DHTesp::DHT22;
+      } else if (_stricmp(value, "AUTO") == 0) {
+        _type = DHTesp::AUTO_DETECT;
+      }
+      ret = true;
 
-  } else if (_stricmp(name, PROP_PIN) == 0) {
-    _pin = _atopin(value);
+    } else if (_stricmp(name, PROP_PIN) == 0) {
+      _pin = _atopin(value);
+      ret = true;
 
-  } else if (_stricmp(name, "readtime") == 0) {
-    _readTime = _atotime(value);
+    } else if (_stricmp(name, "ontemperature") == 0) {
+      _tempAction = value;
+      ret = true;
 
-  } else if (_stricmp(name, "resendtime") == 0) {
-    _resendTime = _atotime(value);
-
-  } else if (_stricmp(name, "ontemperature") == 0) {
-    _tempAction = value;
-
-  } else if (_stricmp(name, "onhumidity") == 0) {
-    _humAction = value;
-
-  } else {
-    ret = Element::set(name, value);
+    } else if (_stricmp(name, "onhumidity") == 0) {
+      _humAction = value;
+      ret = true;
+    } // if
   } // if
   return (ret);
 } // set()
@@ -91,67 +78,63 @@ void DHTElement::start()
     LOGGER_EERR("no meaningful pin");
 
   } else {
+    _lastTemp = _lastHum = -666;
+    SensorElement::start();
     _dht.setup(_pin, _type);
     _lastTemp = _lastHum = -666; // force to send out the values
-    _nextRead = now + 2; // now + min. 2 sec., don't hurry
-    _nextResend = now + _resendTime;
-    Element::start();
   } // if
 } // start()
 
 
-/**
- * @brief check the state of the DHT values and eventually create actions.
- */
-void DHTElement::loop()
+bool DHTElement::_readSensorData()
 {
-  unsigned int now = _board->getSeconds();
+  bool newData = false;
+
   TempAndHumidity values;
   int v;
 
-  if (_nextRead <= now) {
-    // LOGGER_ETRACE("reading...");
-    values = _dht.getTempAndHumidity();
-    DHTesp::DHT_ERROR_t dhterr = _dht.getStatus();
+  // LOGGER_ETRACE("reading...");
+  values = _dht.getTempAndHumidity();
+  DHTesp::DHT_ERROR_t dhterr = _dht.getStatus();
 
-    // LOGGER_ETRACE("t=%f h=%f", values.temperature, values.humidity);
-    if (dhterr == DHTesp::ERROR_TIMEOUT) {
-      LOGGER_EERR("timeout");
+  // LOGGER_ETRACE("t=%f h=%f", values.temperature, values.humidity);
+  if (dhterr == DHTesp::ERROR_TIMEOUT) {
+    LOGGER_EERR("timeout");
 
-    } else if (dhterr == DHTesp::ERROR_CHECKSUM) {
-      LOGGER_EERR("checksum");
+  } else if (dhterr == DHTesp::ERROR_CHECKSUM) {
+    LOGGER_EERR("checksum");
 
-    } else {
-      v = (int)(values.temperature * 100);
-      if (v != _lastTemp) {
-        _lastTemp = v;
-        _dispatch(_tempAction, _lastTemp);
-      } // if
+  } else {
+    v = (int)(values.temperature * 100);
+    if (v != _lastTemp) {
+      newData = true;
+      _lastTemp = v;
+    }
 
-      v = (int)(values.humidity * 100);
-      if (v != _lastHum) {
-        _lastHum = v;
-        _dispatch(_humAction, _lastHum);
-      } // if
-    } // if
-    _nextRead = now + _readTime;
-
-  } else if ((_resendTime > 0) && (_nextResend <= now)) {
-    // dispatch values again.
-    LOGGER_ETRACE("resending");
-    _dispatch(_tempAction, _lastTemp);
-    _dispatch(_humAction, _lastHum);
-    _nextResend = now + _resendTime;
+    v = (int)(values.humidity * 100);
+    if (v != _lastHum) {
+      newData = true;
+      _lastHum = v;
+    }
   } // if
 
-} // loop()
+  return (newData);
+} // _readSensorData()
+
+
+void DHTElement::_sendSensorData() {
+  // dispatch values again.
+  LOGGER_ETRACE("resending");
+  _dispatch(_tempAction, _lastTemp);
+  _dispatch(_humAction, _lastHum);
+} // _sendSensorData()
 
 
 void DHTElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   char tmp[40];
-  Element::pushState(callback);
+  SensorElement::pushState(callback);
   callback("temperature", _fmt(_lastTemp, tmp));
   callback("humidity", _fmt(_lastHum, tmp));
 } // pushState()

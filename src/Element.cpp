@@ -247,4 +247,38 @@ void Element::_strlower(char *str)
 } // _strlower
 
 
+
+// https://stackoverflow.com/questions/9072320/split-string-into-string-array
+/** Get item[index] from string */
+String Element::Element::getItemValue(String data, int index)
+{
+  String ret;
+  int found = 0;
+  int startIndex = 0;
+  int endIndex = -1;
+
+  int i = 0;
+  const char *p = data.c_str();
+
+  while (found <= index) {
+    if ((*p == VALUE_SEPARATOR) || (!*p)) {
+      found++;
+      startIndex = endIndex + 1;
+      endIndex = i;
+    }
+    if (!*p) {
+      break;
+    }
+    i++;
+    p++;
+  } // while
+
+  if (found > index) {
+    ret = data.substring(startIndex, endIndex);
+  }
+
+  return (ret);
+} // getItemValue()
+
+
 // End

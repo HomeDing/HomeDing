@@ -58,8 +58,8 @@ void SensorElement::start()
   unsigned int now = millis();
   Element::start();
 
-  _nextStart = _nextRead = now + 2 * 1000; // now + min. 2 sec., don't hurry
-  _nextResend = now + _resendTime * 1000;
+  _nextRead = now + 2 * 1000; // now + min. 2 sec., don't hurry
+  _nextSend = 0;
 } // start()
 
 
@@ -71,20 +71,20 @@ void SensorElement::loop()
   unsigned long now = millis();
   bool newData = false;
 
-  if (_nextStart <= now) {
-    _nextRead = _startSensor();
-  }
-
   if (_nextRead <= now) {
+    // time to get sensor data
     // LOGGER_ETRACE("start reading...");
-    newData = _readSensorData();
+    bool done = getProbe(_values);
+    if (done) {
+      _nextSend = now;
+      _nextRead = now + _readTime * 1000;
+    } // if
   } // if
 
-  if ((newData) || ((_resendTime > 0) && (_nextResend <= now))) {
-    // LOGGER_ETRACE("start sending...");
-    _sendSensorData();
-    _nextStart = _nextRead = now + _readTime * 1000;
-    _nextResend = now + _resendTime * 1000;
+  if (_nextSend && (_nextSend < now)) {
+    // LOGGER_ETRACE("start sending... %d", _resendTime);
+    sendData(_values);
+    _nextSend = _resendTime ? now + _resendTime * 1000 : 0;
   } // if
 } // loop()
 
@@ -98,20 +98,16 @@ void SensorElement::pushState(
 
 // ===== private functions =====
 
-unsigned long SensorElement::_startSensor()
+bool SensorElement::getProbe(String &values)
 {
-  // no read
-  return (0); // always over
+
+  values.clear(); // no values
+  return (true); // always over
 };
 
-bool SensorElement::_readSensorData()
-{
-  // no read
-  return (false);
-};
 
-void SensorElement::_sendSensorData(){
-    // no send
+void SensorElement::sendData(String &values)
+{
 };
 
 

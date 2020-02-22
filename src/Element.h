@@ -56,6 +56,8 @@ enum Element_StartupMode {
 
 #define ACTION_SEPARATOR ','
 
+#define VALUE_SEPARATOR ','
+
 // id can be multi-level when using the slash as a separator.
 // like "device/name"
 #define MAX_ID_LENGTH 32
@@ -216,6 +218,11 @@ public:
    * @brief to lowercase a c string.
    */
   static void _strlower(char *str);
+
+
+/** Get item[index] from string */
+static String getItemValue(String data, int index);
+
 
 protected:
   /**

@@ -1,6 +1,7 @@
 /**
  * @file PMSElement.cpp
- * @brief Element Template class.
+ * 
+ * @brief Sensor Element for the HomeDing Library to read data from a Plantower PMS5003 sensors and create actions.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -16,8 +17,8 @@
 
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "PMSElement.h"
 #include <ElementRegistry.h>
@@ -154,8 +155,19 @@ void PMSElement::loop()
 
         if (checksum == PWSDATA(14)) {
           // valid data
+          // _value = PWSDATA(1); // PM1.0
           _value = PWSDATA(2);
+          // _value = PWSDATA(3); // PM10
           LOGGER_ETRACE("value: %d", _value);
+
+          String vs;
+          vs.concat(PWSDATA(1)); // PM1.0
+          vs.concat(',');
+          vs.concat(PWSDATA(2)); // PM2.5
+          vs.concat(',');
+          vs.concat(PWSDATA(3)); // PM10
+
+          LOGGER_ETRACE("value: %s", vs.c_str());
 
           if (_valueAction.length() > 0) {
             // gdb_do_break();

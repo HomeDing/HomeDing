@@ -78,26 +78,25 @@ void DHTElement::start()
     LOGGER_EERR("no meaningful pin");
 
   } else {
-    _lastTemp = _lastHum = -666;
     SensorElement::start();
     _dht.setup(_pin, _type);
-    _lastTemp = _lastHum = -666; // force to send out the values
   } // if
 } // start()
 
 
-bool DHTElement::_readSensorData()
+bool DHTElement::getProbe(String &values)
 {
   bool newData = false;
+  values.clear();
+  char buffer[16];
 
-  TempAndHumidity values;
+  TempAndHumidity dhtValues;
   int v;
 
   // LOGGER_ETRACE("reading...");
-  values = _dht.getTempAndHumidity();
+  dhtValues = _dht.getTempAndHumidity();
   DHTesp::DHT_ERROR_t dhterr = _dht.getStatus();
 
-  // LOGGER_ETRACE("t=%f h=%f", values.temperature, values.humidity);
   if (dhterr == DHTesp::ERROR_TIMEOUT) {
     LOGGER_EERR("timeout");
 
@@ -105,69 +104,34 @@ bool DHTElement::_readSensorData()
     LOGGER_EERR("checksum");
 
   } else {
-    v = (int)(values.temperature * 100);
-    if (v != _lastTemp) {
-      newData = true;
-      _lastTemp = v;
-    }
-
-    v = (int)(values.humidity * 100);
-    if (v != _lastHum) {
-      newData = true;
-      _lastHum = v;
-    }
+    // LOGGER_ETRACE("t=%f h=%f", dhtValues.temperature, dhtValues.humidity);
+    newData = true;
+    snprintf(buffer, sizeof(buffer), "%.2f,%.2f", dhtValues.temperature, dhtValues.humidity);
+    values = buffer;
   } // if
 
   return (newData);
-} // _readSensorData()
+} // getProbe()
 
 
-void DHTElement::_sendSensorData() {
-  // dispatch values again.
-  LOGGER_ETRACE("resending");
-  _dispatch(_tempAction, _lastTemp);
-  _dispatch(_humAction, _lastHum);
-} // _sendSensorData()
+void DHTElement::sendData(String &values) 
+{
+  if (values.length()) {
+    int pos = values.indexOf(ACTION_SEPARATOR);
+    _board->dispatch(_tempAction, values.substring(0, pos - 1).c_str());
+    _board->dispatch(_humAction, values.substring(pos + 1).c_str());
+  } // if
+} // sendData()
 
 
 void DHTElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  char tmp[40];
   SensorElement::pushState(callback);
-  callback("temperature", _fmt(_lastTemp, tmp));
-  callback("humidity", _fmt(_lastHum, tmp));
+  int pos = _values.indexOf(ACTION_SEPARATOR);
+  callback("temperature", _values.substring(0, pos - 1).c_str());
+  callback("humidity", _values.substring(pos + 1).c_str());
 } // pushState()
-
-
-// ===== private functions =====
-
-// Formatting a int as decimal number.
-char *DHTElement::DHTElement::_fmt(int v, char *s)
-{
-  // raw format first
-  itoa(v, s, 10);
-  int l = strlen(s);
-
-  // insert decimal
-  if (l > 3) {
-    l = l - 2;
-    memcpy(s + l + 1, s + l, 3);
-    s[l] = '.';
-  }
-  return (s);
-} // _fmt()
-
-
-// dispatch a single value including formatting as decimal number.
-void DHTElement::_dispatch(String &evt, int value)
-{
-  if (evt.length() > 0) {
-    char tmp[10];
-    _fmt(value, tmp);
-    _board->dispatch(evt, tmp);
-  } // if
-} // _dispatch()
 
 
 // End

@@ -61,24 +61,24 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 protected:
-  virtual unsigned long _startSensor();
-  virtual bool _readSensorData();
-  virtual void _sendSensorData();
+  String _values;
+
+  virtual bool getProbe(String &values);
+  virtual void sendData(String &values);
 
 private:
-  /**
-   * @brief The current values should be emitted again after some time even when not changing.
-   */
-  int _resendTime;
-
   /**
    * @brief The time between reading 2 probes.
    */
   unsigned long _readTime;
 
-  unsigned long _nextStart;
+  /**
+   * @brief The current values should be emitted again after some time even when not changing.
+   */
+  unsigned long _resendTime;
+
   unsigned long _nextRead;
-  unsigned long _nextResend;
+  unsigned long _nextSend;
 };
 
 

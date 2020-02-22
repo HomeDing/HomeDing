@@ -92,8 +92,6 @@ void BME680Element::start()
     _bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
     _bme.setGasHeater(320, 150); // 320*C for 150 ms
 
-    _state = 0; // no reading initiated
-
     SensorElement::start();
   } // if
 
@@ -113,32 +111,44 @@ bool BME680Element::_readValue(String &strVal, const char *fmt, float value)
 } // _readValue()
 
 
-unsigned long BME680Element::_startSensor()
+bool BME680Element::getProbe(String &values)
 {
-  unsigned long dataAvailable = _bme.beginReading();
-  return (dataAvailable);
-} // _startSensor()
+  bool newData = false;
+  values.clear();
+  char buffer[32];
+
+  if (!_dataAvailable) {
+    // start reading
+    _dataAvailable = _bme.beginReading();
+
+  } else if (_dataAvailable && (millis() < _dataAvailable)) {
+    // wait
+
+  } else if (_dataAvailable) {
+    _bme.endReading();
+    snprintf(buffer, sizeof(buffer),
+             "%.2f,%.2f,%.0f,%.0f",
+             _bme.temperature, _bme.humidity, _bme.pressure, _bme.gas_resistance);
+    values = buffer;
+    _dataAvailable = 0;
+    newData = true;
+  }
+  return (newData);
+} // getProbe()
 
 
-bool BME680Element::_readSensorData()
+void BME680Element::sendData(String &values)
 {
-  bool ret = false;
-  _bme.endReading();
-  ret |= _readValue(_temperature, "%.2f", _bme.temperature);
-  ret |= _readValue(_humidity, "%.2f", _bme.humidity);
-  ret |= _readValue(_pressure, "%.0f", _bme.pressure);
-  ret |= _readValue(_gas, "%.0f", _bme.gas_resistance);
-
-  return (ret);
-};
-
-void BME680Element::_sendSensorData()
-{
-  _board->dispatch(_temperatureAction, _temperature);
-  _board->dispatch(_humidityAction, _humidity);
-  _board->dispatch(_pressureAction, _pressure);
-  _board->dispatch(_gasAction, _gas);
-};
+  // LOGGER_EINFO("send: %s", values.c_str());
+  if (_temperatureAction)
+    _board->dispatch(_temperatureAction, Element::Element::getItemValue(values, 0).c_str());
+  if (_humidityAction)
+    _board->dispatch(_humidityAction, Element::Element::getItemValue(values, 1).c_str());
+  if (_pressureAction)
+    _board->dispatch(_pressureAction, Element::Element::getItemValue(values, 2).c_str());
+  if (_gasAction)
+    _board->dispatch(_gasAction, Element::Element::getItemValue(values, 3).c_str());
+} // sendData()
 
 
 /**
@@ -148,12 +158,10 @@ void BME680Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  callback("temperature", _temperature.c_str());
-  callback("humidity", _humidity.c_str());
-  callback("pressure", _pressure.c_str());
-  callback("gas", _gas.c_str());
+  callback("temperature", Element::Element::getItemValue(_values, 0).c_str());
+  callback("humidity", Element::Element::getItemValue(_values, 1).c_str());
+  callback("pressure", Element::Element::getItemValue(_values, 2).c_str());
+  callback("gas", Element::Element::getItemValue(_values, 3).c_str());
 } // pushState()
-
-// maybe: overwrite the term() function,
 
 // End

@@ -78,28 +78,18 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 protected:
-  virtual unsigned long _startSensor();
-  virtual bool _readSensorData();
-  virtual void _sendSensorData();
+  virtual bool getProbe(String &values);
+  virtual void sendData(String &values);
 
 private:
   bool _readValue(String &strVal, const char *fmt, float value);
-
-  /** @brief The last reported /actual values of the sensor.
-   * The values are formatted as strings as they are formatted in the action
-   * urls.
-   */
-  String _temperature;
-  String _humidity;
-  String _pressure;
-  String _gas;
 
   /**
    * @brief state in reading values from the sensor.
    * 0: wait for next time
    * 1: reading initiated, wait for _endTime
    */
-  int _state;
+  unsigned long _dataAvailable;
 
   int _address = BME680_DEFAULT_ADDRESS;
 

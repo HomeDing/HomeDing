@@ -139,15 +139,10 @@ bool BME680Element::getProbe(String &values)
 
 void BME680Element::sendData(String &values)
 {
-  // LOGGER_EINFO("send: %s", values.c_str());
-  if (_temperatureAction)
-    _board->dispatch(_temperatureAction, Element::Element::getItemValue(values, 0).c_str());
-  if (_humidityAction)
-    _board->dispatch(_humidityAction, Element::Element::getItemValue(values, 1).c_str());
-  if (_pressureAction)
-    _board->dispatch(_pressureAction, Element::Element::getItemValue(values, 2).c_str());
-  if (_gasAction)
-    _board->dispatch(_gasAction, Element::Element::getItemValue(values, 3).c_str());
+  _board->dispatchItem(_temperatureAction, values, 0);
+  _board->dispatchItem(_humidityAction, values, 1);
+  _board->dispatchItem(_pressureAction, values, 2);
+  _board->dispatchItem(_gasAction, values, 3);
 } // sendData()
 
 

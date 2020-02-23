@@ -594,6 +594,20 @@ void Board::dispatch(const char *action, const char *value)
 } // dispatch
 
 
+/**
+ * @brief Save an action to the _actionList using a item part of a value.
+ */
+void Board::dispatchItem(String &action, String &values, int item)
+{
+  if (action && values) {
+    String v = Element::Element::getItemValue(values, item);
+    if (v) {
+      dispatch(action.c_str(), v.c_str());
+    } // if
+  } // if
+} // dispatchItem
+
+
 void Board::getState(String &out, const String &path)
 {
   // LOGGER_TRACE("getState(%s)", path.c_str());

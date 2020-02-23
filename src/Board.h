@@ -138,6 +138,8 @@ public:
    */
   void loop();
 
+  void dispatchItem(String &action, String &values, int item);
+
   /**
    * send all the actions to the right elements.
    * @param action list of actions.

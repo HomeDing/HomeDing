@@ -114,13 +114,10 @@ bool DHTElement::getProbe(String &values)
 } // getProbe()
 
 
-void DHTElement::sendData(String &values) 
+void DHTElement::sendData(String &values)
 {
-  if (values.length()) {
-    int pos = values.indexOf(ACTION_SEPARATOR);
-    _board->dispatch(_tempAction, values.substring(0, pos - 1).c_str());
-    _board->dispatch(_humAction, values.substring(pos + 1).c_str());
-  } // if
+  _board->dispatchItem(_tempAction, values, 0);
+  _board->dispatchItem(_humAction, values, 1);
 } // sendData()
 
 
@@ -128,9 +125,8 @@ void DHTElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  int pos = _values.indexOf(ACTION_SEPARATOR);
-  callback("temperature", _values.substring(0, pos - 1).c_str());
-  callback("humidity", _values.substring(pos + 1).c_str());
+  callback("temperature", Element::getItemValue(_values, 0).c_str());
+  callback("humidity", Element::getItemValue(_values, 1).c_str());
 } // pushState()
 
 

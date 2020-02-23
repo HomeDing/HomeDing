@@ -23,8 +23,8 @@
 #define REMOTEELEMENT_H
 
 #include <HomeDing.h>
-#include <WiFiClient.h>
 #include <HttpClientElement.h>
+#include <WiFiClient.h>
 
 /**
  * @brief The RemoteElement is an special Element that creates actions based on
@@ -65,7 +65,7 @@ public:
    */
   virtual void loop();
 
-
+  // return value is ignored for remote actions
   // virtual void processHeader(String &key, String &value);
   // virtual void processBody(char *value);
 
@@ -78,5 +78,11 @@ private:
 
   String _action; // next action to be sent
 };
+
+#ifdef HOMEDING_REGISTER
+// Register the RemoteElement in the ElementRegistry.
+bool RemoteElement::registered =
+    ElementRegistry::registerElement("remote", RemoteElement::create);
+#endif
 
 #endif // REMOTEELEMENT_H

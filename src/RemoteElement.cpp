@@ -25,9 +25,6 @@
 
 #include <ESP8266WiFi.h>
 
-#define MAX_WAIT_FOR_RESPONSE 12
-#define DNS_TIMEOUT (uint32_t)4
-
 /** The TRACE Macro is used for trace output for development/debugging purpose. */
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 // #define TRACE(...)
@@ -53,14 +50,16 @@ bool RemoteElement::set(const char *name, const char *value)
     if (_stricmp(name, "remoteId") == 0) {
       _remoteId = value;
       ret = true;
+
     } else if (active) {
       // may be a remote action
       if (!_action.isEmpty()) {
         LOGGER_EERR("Remote Element is busy. Action dropped.");
       } else {
-        _action = _remoteId + '?' + name + '=' + value;
+        _action = "/$board/" + _remoteId + '?' + name + '=' + value;
       } // if
       ret = true;
+
     } // if
   } // if
   return (ret);
@@ -80,34 +79,21 @@ void RemoteElement::start()
 } // start()
 
 
-// void RemoteElement::processHeader(String &key, String &value)
-// {
-//   HttpClientElement::processHeader(key, value);
-// };
-
-// void RemoteElement::processBody(char *value)
-// {
-//   HttpClientElement::processBody(value);
-// };
-
 /**
  * @brief check the state of the input.
  */
 void RemoteElement::loop()
 {
-  if ((!HttpClientElement::isActive()) && (!_action.isEmpty())) {
+  if ((!_action.isEmpty()) && (!HttpClientElement::isActive())) {
+    // LOGGER_ETRACE("loop-action(%s)", _action.c_str());
+
     // start the next action.
     HttpClientElement::set("url", _action.c_str());
-    _action.clear();
+    _action = "";
   } // if
 
   // process the HttpClientElement current request.
   HttpClientElement::loop();
 } // loop()
-
-
-// Register the RemoteElement in the ElementRegistry.
-bool RemoteElement::registered =
-    ElementRegistry::registerElement("remote", RemoteElement::create);
 
 // End

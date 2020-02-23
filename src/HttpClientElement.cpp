@@ -83,14 +83,14 @@ bool HttpClientElement::isActive()
 
 void HttpClientElement::processHeader(String &key, String &value)
 {
-  TRACE("   =<%s>:<%s>", key.c_str(), value.c_str());
+  // TRACE(" =<%s>:<%s>", key.c_str(), value.c_str());
   if (key.equalsIgnoreCase("Content-Length")) {
     _contentLength = atoi(value.c_str());
   }
 };
 
 void HttpClientElement::processBody(char *value){
-
+    // TRACE("body:%s", value);
 };
 
 /**
@@ -98,13 +98,14 @@ void HttpClientElement::processBody(char *value){
  */
 void HttpClientElement::loop()
 {
-  if (_state != STATE::IDLE) {
-    TRACE("loop(%d)", _state);
-  } // if
+  // if (_state != STATE::IDLE) {
+  //   TRACE("loop(%d)", _state);
+  // } // if
 
   if (_state == STATE::IDLE) {
     if (!_url.isEmpty()) {
-      _state == STATE::GETIP;
+      // TRACE("new URL: %s", _url.c_str());
+      _state = STATE::GETIP;
     } // if
   } // if
 
@@ -116,9 +117,9 @@ void HttpClientElement::loop()
     _contentLength = 0;
 
     // ask for IP address
-    TRACE("start DNS...");
+    // TRACE("start DNS...");
     int b = WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
-    TRACE(".got %d %s", b, _IPaddr.toString().c_str());
+    // TRACE(".got %d %s", b, _IPaddr.toString().c_str());
     if (_IPaddr) {
       _state = STATE::SENDING;
     } else {
@@ -138,7 +139,7 @@ void HttpClientElement::loop()
       LOGGER_EERR(".no connect");
       _state = STATE::ABORT;
     } else {
-      TRACE("connected to server...");
+      // TRACE("connected to server...");
       // 2. send request
       String request("GET $1 HTTP/1.1\r\nHost: $2\r\nConnection: close\r\n\r\n");
       request.replace("$1", _url);
@@ -192,14 +193,9 @@ void HttpClientElement::loop()
         processHeader(key, val);
       }
 
-      if (line.length() == 0) {
-        TRACE(" header end.");
-        if (_contentLength == 0) {
-          _state = STATE::ABORT; // no need to parse the body
-
-        } else {
-          _state = STATE::BODY;
-        } // if
+      if (line.isEmpty()) {
+        // header end reached.
+        _state = (_contentLength == 0 ? STATE::ABORT : STATE::BODY);
       } // if
     } // while
 
@@ -219,21 +215,14 @@ void HttpClientElement::loop()
     if (_contentLength == 0) {
       _state = STATE::ABORT; // all done.
     }
-
-    // TRACE("   =<%s>:<%s>", key.c_str(), val.c_str());
-
   } // if
 
   if (_state == STATE::ABORT) {
     _httpClient.stop();
+    _url = "";
     _state = STATE::IDLE;
   } // if
 
 } // loop()
-
-
-// // Register the HttpClientElement in the ElementRegistry.
-// bool HttpClientElement::registered =
-//     ElementRegistry::registerElement("remote", HttpClientElement::create);
 
 // End

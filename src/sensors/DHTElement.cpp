@@ -73,7 +73,6 @@ bool DHTElement::set(const char *name, const char *value)
 void DHTElement::start()
 {
   LOGGER_ETRACE("start()");
-  unsigned int now = _board->getSeconds();
   if (_pin < 0) {
     LOGGER_EERR("no meaningful pin");
 
@@ -99,9 +98,11 @@ bool DHTElement::getProbe(String &values)
 
   if (dhterr == DHTesp::ERROR_TIMEOUT) {
     LOGGER_EERR("timeout");
+    term();
 
   } else if (dhterr == DHTesp::ERROR_CHECKSUM) {
     LOGGER_EERR("checksum");
+    term();
 
   } else {
     // LOGGER_ETRACE("t=%f h=%f", dhtValues.temperature, dhtValues.humidity);

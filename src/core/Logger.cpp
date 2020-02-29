@@ -69,6 +69,7 @@ void Logger::_print(const char *module, int level, const char *fmt,
   if ((logger_file) && (module) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
   }
+  yield();
 } // _print
 
 /**

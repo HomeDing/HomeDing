@@ -54,7 +54,6 @@ bool SensorElement::set(const char *name, const char *value)
  */
 void SensorElement::start()
 {
-  LOGGER_ETRACE("start()");
   unsigned int now = millis();
   Element::start();
 
@@ -103,12 +102,12 @@ bool SensorElement::getProbe(String &values)
 
   values.clear(); // no values
   return (true); // always over
-};
+} // getProbe()
 
 
 void SensorElement::sendData(String &values)
 {
-};
+} // sendData()
 
 
 // End

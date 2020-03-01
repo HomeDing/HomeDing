@@ -80,10 +80,10 @@ bool BME680Element::set(const char *name, const char *value)
  */
 void BME680Element::start()
 {
-  LOGGER_ETRACE("start()");
+  // LOGGER_ETRACE("start()");
 
   if (!_bme.begin(_address)) {
-    LOGGER_EERR("no BME680 sensor found");
+    LOGGER_EERR("no sensor found");
   } else {
     // Set up oversampling and filter initialization
     _bme.setTemperatureOversampling(BME680_OS_8X);
@@ -114,7 +114,6 @@ bool BME680Element::_readValue(String &strVal, const char *fmt, float value)
 bool BME680Element::getProbe(String &values)
 {
   bool newData = false;
-  values.clear();
   char buffer[32];
 
   if (!_dataAvailable) {
@@ -153,10 +152,10 @@ void BME680Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  callback("temperature", Element::Element::getItemValue(_values, 0).c_str());
-  callback("humidity", Element::Element::getItemValue(_values, 1).c_str());
-  callback("pressure", Element::Element::getItemValue(_values, 2).c_str());
-  callback("gas", Element::Element::getItemValue(_values, 3).c_str());
+  callback("temperature", Element::Element::getItemValue(_lastValues, 0).c_str());
+  callback("humidity", Element::Element::getItemValue(_lastValues, 1).c_str());
+  callback("pressure", Element::Element::getItemValue(_lastValues, 2).c_str());
+  callback("gas", Element::Element::getItemValue(_lastValues, 3).c_str());
 } // pushState()
 
 // End

@@ -61,7 +61,7 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 protected:
-  String _values;
+  String _lastValues;
 
   virtual bool getProbe(String &values);
   virtual void sendData(String &values);

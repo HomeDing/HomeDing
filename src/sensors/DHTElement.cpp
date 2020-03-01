@@ -72,7 +72,7 @@ bool DHTElement::set(const char *name, const char *value)
  */
 void DHTElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // LOGGER_ETRACE("start()");
   if (_pin < 0) {
     LOGGER_EERR("no meaningful pin");
 
@@ -86,7 +86,6 @@ void DHTElement::start()
 bool DHTElement::getProbe(String &values)
 {
   bool newData = false;
-  values.clear();
   char buffer[16];
 
   TempAndHumidity dhtValues;
@@ -126,8 +125,8 @@ void DHTElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  callback("temperature", Element::getItemValue(_values, 0).c_str());
-  callback("humidity", Element::getItemValue(_values, 1).c_str());
+  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
+  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
 } // pushState()
 
 

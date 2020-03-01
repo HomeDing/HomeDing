@@ -63,26 +63,31 @@ void SensorElement::start()
 
 
 /**
- * @brief check the state of the DHT values and eventually create actions.
+ * @brief read or send sensor data.
  */
 void SensorElement::loop()
 {
   unsigned long now = millis();
   bool newData = false;
+  String value;
 
   if (_nextRead <= now) {
-    // time to get sensor data
-    // LOGGER_ETRACE("start reading...");
-    bool done = getProbe(_values);
-    if (done) {
-      _nextSend = now;
-      _nextRead = now + _readTime * 1000;
-    } // if
-  } // if
+    // time to get sensor data, repeat until returning true
+    // LOGGER_ETRACE("reading...");
+    bool done = getProbe(value);
 
-  if (_nextSend && (_nextSend < now)) {
-    // LOGGER_ETRACE("start sending... %d", _resendTime);
-    sendData(_values);
+    if (done) {
+      _nextRead = now + _readTime * 1000;
+      if (!value.equals(_lastValues)) {
+        _nextSend = now; // enforce sending now
+      } // if
+      _lastValues = value;
+    } // if
+
+  } else if (_nextSend && (_nextSend < now)) {
+    // LOGGER_ETRACE("sending...");
+    if (!_lastValues.isEmpty())
+      sendData(_lastValues);
     _nextSend = _resendTime ? now + _resendTime * 1000 : 0;
   } // if
 } // loop()
@@ -99,9 +104,7 @@ void SensorElement::pushState(
 
 bool SensorElement::getProbe(String &values)
 {
-
-  values.clear(); // no values
-  return (true); // always over
+  return (true); // always simulate data is fine
 } // getProbe()
 
 

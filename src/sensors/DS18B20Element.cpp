@@ -21,6 +21,8 @@
 
 #include <sensors/DS18B20Element.h>
 
+
+
 /**
  * @brief static factory function to create a new DS18B20Element
  * @return DS18B20Element* created element
@@ -39,26 +41,12 @@ bool DS18B20Element::set(const char *name, const char *value)
   bool ret = SensorElement::set(name, value);
 
   if (!ret) {
-    if (_stricmp(name, "type") == 0) {
-      if (_stricmp(value, "DHT11") == 0) {
-        _type = DHTesp::DHT11;
-      } else if (_stricmp(value, "DHT22") == 0) {
-        _type = DHTesp::DHT22;
-      } else if (_stricmp(value, "AUTO") == 0) {
-        _type = DHTesp::AUTO_DETECT;
-      }
-      ret = true;
-
-    } else if (_stricmp(name, PROP_PIN) == 0) {
+    if (_stricmp(name, PROP_PIN) == 0) {
       _pin = _atopin(value);
       ret = true;
 
     } else if (_stricmp(name, "ontemperature") == 0) {
       _tempAction = value;
-      ret = true;
-
-    } else if (_stricmp(name, "onhumidity") == 0) {
-      _humAction = value;
       ret = true;
     } // if
   } // if
@@ -71,74 +59,95 @@ bool DS18B20Element::set(const char *name, const char *value)
  */
 void DS18B20Element::start()
 {
-  LOGGER_ETRACE("start()");
-  unsigned int now = _board->getSeconds();
+  // LOGGER_ETRACE("start()");
+
+  // unsigned int now = _board->getSeconds();
   if (_pin < 0) {
-    LOGGER_EERR("no meaningful pin");
+    LOGGER_ETRACE("no meaningful pin");
+    term();
 
   } else {
-    _lastTemp = _lastHum = -666;
-    SensorElement::start();
-    _dht.setup(_pin, _type);
-    _lastTemp = _lastHum = -666; // force to send out the values
+    _oneWire = new OneWire(_pin);
+
+    // search first device
+    _oneWire->reset_search();
+    if (_oneWire->search(_addr)) {
+      // addr[0] should be 0x28 on a DS18B20 sensor.
+      // LOGGER_ETRACE("Address: %02x%02x.%02x%02x.%02x%02x.%02x%02x", _addr[0], _addr[1], _addr[2], _addr[3], _addr[4], _addr[5], _addr[6], _addr[7]);
+      SensorElement::start();
+
+    } else {
+      LOGGER_ETRACE("no address.");
+      term();
+    }
   } // if
+
 } // start()
 
 
+// ===== OneWire commands and timings
+#define COMMAND_CONVERT 0x44 // This command initiates a temperature conversion.
+#define COMMAND_READ_SCRATCHPAD 0xbe // This command initiates reading the content of the scratchpad.
+#define CONVERT_MSECS 750 // time in msec for 12 bit conversion
+
+/** return true when reading a probe is done.
+  * return any existing value or empty for no data could be read. */
 bool DS18B20Element::getProbe(String &values)
 {
+  // LOGGER_EINFO("getProbe()");
   bool newData = false;
-  values.clear();
 
-  newData = true;
 
-  // TempAndHumidity values;
-  // int v;
+  if (_isReady == 0) {
+    // start conversion now
+    // LOGGER_EINFO("convert");
+    _oneWire->reset();
+    _oneWire->select(_addr);
+    _oneWire->write(COMMAND_CONVERT, 1); // start conversion
+    _isReady = millis() + CONVERT_MSECS;
 
-  // // LOGGER_ETRACE("reading...");
-  // values = _dht.getTempAndHumidity();
-  // DHTesp::DHT_ERROR_t dhterr = _dht.getStatus();
+  } else if (_isReady < millis()) {
+    // fetch data from sensor
+    // LOGGER_EINFO("fetch");
+    uint8_t data[12];
 
-  // // LOGGER_ETRACE("t=%f h=%f", values.temperature, values.humidity);
-  // if (dhterr == DHTesp::ERROR_TIMEOUT) {
-  //   LOGGER_EERR("timeout");
+    _oneWire->reset();
+    _oneWire->select(_addr);
+    _oneWire->write(COMMAND_READ_SCRATCHPAD); // Read Scratchpad
 
-  // } else if (dhterr == DHTesp::ERROR_CHECKSUM) {
-  //   LOGGER_EERR("checksum");
+    // read all 9 scratchpad bytes
+    for (int i = 0; i < 9; i++) {
+      data[i] = _oneWire->read();
+    }
+    // LOGGER_ETRACE("Data: %02x %02x %02x %02x", data[0], data[1], data[2], data[3]);
 
-  // } else {
-  //   v = (int)(values.temperature * 100);
-  //   if (v != _lastTemp) {
-  //     newData = true;
-  //     _lastTemp = v;
-  //   }
+    // no checksum verified
+    int temp = (data[1] << 8) | data[0];
 
-  //   v = (int)(values.humidity * 100);
-  //   if (v != _lastHum) {
-  //     newData = true;
-  //     _lastHum = v;
-  //   }
-  // } // if
+    // LOGGER_ETRACE("raw temperature: %d", temp);
+    values = String((float)temp / 16, 2);
+
+    _isReady = 0;
+    newData = true;
+  } // if
 
   return (newData);
-} // _readSensorData()
+} // getProbe()
 
 
-void DS18B20Element::sendData(String &values) {
-  // dispatch values again.
-  LOGGER_ETRACE("resending");
-  // _dispatch(_tempAction, _lastTemp);
-  // _dispatch(_humAction, _lastHum);
-} // _sendSensorData()
+void DS18B20Element::sendData(String &values)
+{
+  // dispatch value.
+  // LOGGER_ETRACE("sending %s", values.c_str());
+  _board->dispatch(_tempAction, values);
+} // sendData()
 
 
 void DS18B20Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  char tmp[40];
   SensorElement::pushState(callback);
-  callback("temperature", _fmt(_lastTemp, tmp));
-  callback("humidity", _fmt(_lastHum, tmp));
+  callback("temperature", _lastValues.c_str());
 } // pushState()
 
 

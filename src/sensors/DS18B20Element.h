@@ -22,7 +22,7 @@
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
-#include <DHTesp.h>
+#include <OneWire.h>
 
 /**
  * @brief The DS18B20Element  is an special Element that creates actions based on a
@@ -71,32 +71,18 @@ protected:
   virtual void sendData(String &values);
 
 private:
-  DHTesp::DHT_MODEL_t _type = DHTesp::AUTO_DETECT;
   int _pin = -1;
+  OneWire *_oneWire;
+  uint8_t _addr[8];
 
-  /**
-   * @brief Last measured temperature in celsius * 100.
-   */
-  int _lastTemp; //
-
-  /**
-   * @brief Last measured humidity in percentages.
-   */
-  int _lastHum;
+  /** time in msecs when data is ready */
+  unsigned long _isReady;
 
   /**
    * @brief The _tempAction is emitted when a new temp was read from the DHT
    * sensor.
    */
   String _tempAction;
-
-  /**
-   * @brief The _humAction is emitted when a new humidity was read from the DHT
-   * sensor.
-   */
-  String _humAction;
-
-  DHTesp _dht;
 
   /**
    * @brief Format number to string with 2 digits.

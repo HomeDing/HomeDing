@@ -21,6 +21,8 @@
 #define PMSELEMENT_H
 
 #include <HomeDing.h>
+#include <sensors/SensorElement.h>
+
 #include <SoftwareSerial.h>
 
 /**
@@ -33,7 +35,7 @@ The PMSElement can ...
 @endverbatim
  */
 
-class PMSElement : public Element
+class PMSElement : public SensorElement
 {
 public:
   /**
@@ -70,16 +72,15 @@ public:
   virtual void start();
 
   /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop();
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
+
+protected:
+  virtual bool getProbe(String &values);
+  virtual void sendData(String &values);
 
 private:
   /**
@@ -89,9 +90,6 @@ private:
 
   int _pinrx = D4;
   int _pintx = D3;
-
-  unsigned long _readTime = 60;
-  unsigned long _nextRead;
 
   // buffer for data from sensor 
   uint8_t _data[32];

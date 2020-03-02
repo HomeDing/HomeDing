@@ -60,13 +60,6 @@ bool PMSElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "pintx") == 0) {
     _pintx = _atopin(value);
 
-  } else if (_stricmp(name, "readtime") == 0) {
-    _readTime = _atotime(value);
-
-  } else if (_stricmp(name, "onChange") == 0) {
-    LOGGER_EERR("do not use `onchange` -> `onvalue`");
-    _valueAction = value; // save the actions
-
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value; // save the actions
 
@@ -85,44 +78,40 @@ void PMSElement::start()
 {
   LOGGER_ETRACE("start(%d, %d)", _pinrx, _pintx);
 
-  _nextRead = _board->getSeconds() + 4;
-
   Element::start();
 
   _pmsSerial = new SoftwareSerial();
   _pmsSerial->begin(9600, SWSERIAL_8N1, _pinrx, _pintx, false, 128);
   _pmsSerial->enableRx(false);
   _datapos = -1; // means input is not open
-
 } // start()
 
 
 /**
- * @brief Give some processing time to the Element to check for next actions.
- * Example bytes:
+ * Example bytes from the sensor :
  * #42 #4d #00 #1c #00 #06 #00 #0d #00 #12 #00 #06 #00 #0d #00 #12
  * #04 #e3 #01 #73 #00 #5d #00 #18 #00 #08 #00 #00 #98 #00 #03 #65
  */
-void PMSElement::loop()
+
+/** return true when reading a probe is done.
+  * return any existing value or empty for no data could be read. */
+bool PMSElement::getProbe(String &values)
 {
-  unsigned int now = _board->getSeconds();
+  // LOGGER_EINFO("getProbe()");
+  bool newData = false;
 
-  if (_nextRead <= now) {
-    // do something
+  if (_datapos < 0) {
+    // enable receive mode in SoftwareSerial
+    _pmsSerial->enableRx(true);
+    _datapos = 0;
 
-    if (_datapos < 0) {
-      // enable receive mode in SoftwareSerial
-      _pmsSerial->enableRx(true);
-      _datapos = 0;
-    } // if
+  } else if (_pmsSerial->overflow()) {
+    // just try again in next loop()
+    _pmsSerial->enableRx(false);
+    _datapos = -1;
 
-    if (_pmsSerial->overflow()) {
-      // just try again in next loop()
-      _pmsSerial->enableRx(false);
-      _datapos = -1;
-      return;
-    } // if
-
+  } else {
+    // read as much data as available into the data buffer
     while ((_datapos >= 0) && (_pmsSerial->available())) {
       int b = _pmsSerial->read();
 
@@ -153,36 +142,34 @@ void PMSElement::loop()
         for (n = 0; n < 32 - 2; n++)
           checksum += _data[n];
 
-        if (checksum == PWSDATA(14)) {
-          // valid data
-          // _value = PWSDATA(1); // PM1.0
-          _value = PWSDATA(2);
-          // _value = PWSDATA(3); // PM10
-          LOGGER_ETRACE("value: %d", _value);
-
-          String vs;
-          vs.concat(PWSDATA(1)); // PM1.0
-          vs.concat(',');
-          vs.concat(PWSDATA(2)); // PM2.5
-          vs.concat(',');
-          vs.concat(PWSDATA(3)); // PM10
-
-          LOGGER_ETRACE("value: %s", vs.c_str());
-
-          if (_valueAction.length() > 0) {
-            // gdb_do_break();
-            _board->dispatch(_valueAction, _value);
-          }
-        } else {
+        if (checksum != PWSDATA(14)) {
           LOGGER_ETRACE("bad checksum.");
+
+        } else {
+          // valid data
+          char buffer[32];
+
+          // values = PM1.0,PM2.5,PM10
+          snprintf(buffer, sizeof(buffer), "%d,%d,%d", PWSDATA(1), PWSDATA(2), PWSDATA(3));
+          LOGGER_ETRACE("values: %s", buffer);
+
+          newData = true;
+          values = buffer;
+          _datapos = -1;
         } // if
-        _datapos = -1;
-        _nextRead = now + _readTime;
       } // if
       yield();
     } // while
   } // if
-} // loop()
+
+  return (newData);
+} // getProbe()
+
+
+void PMSElement::sendData(String &values)
+{
+  _board->dispatchItem(_valueAction, values, 1);
+} // sendData()
 
 
 /**
@@ -192,7 +179,7 @@ void PMSElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_value).c_str());
+  callback(PROP_VALUE, Element::getItemValue(_lastValues, 1).c_str());
 } // pushState()
 
 // End

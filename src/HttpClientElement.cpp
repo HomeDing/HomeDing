@@ -25,21 +25,14 @@
 
 #include <ESP8266WiFi.h>
 
-#define MAX_WAIT_FOR_RESPONSE 12
+#define MAX_WAIT_FOR_RESPONSE 20
 #define DNS_TIMEOUT (uint32_t)4
 
 /** The TRACE Macro is used for trace output for development/debugging purpose. */
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 // #define TRACE(...)
 
-// /**
-//  * @brief static factory function to create a new HttpClientElement.
-//  * @return HttpClientElement* as Element* created element
-//  */
-// Element *HttpClientElement::create()
-// {
-//   return (new HttpClientElement());
-// } // create()
+#define NEWSTATE(n) _state = n;
 
 
 /**
@@ -89,8 +82,9 @@ void HttpClientElement::processHeader(String &key, String &value)
   }
 };
 
-void HttpClientElement::processBody(char *value){
-    // TRACE("body:%s", value);
+void HttpClientElement::processBody(char *value)
+{
+  TRACE("xbody:%s", value);
 };
 
 /**
@@ -105,14 +99,19 @@ void HttpClientElement::loop()
   if (_state == STATE::IDLE) {
     if (!_url.isEmpty()) {
       // TRACE("new URL: %s", _url.c_str());
-      _state = STATE::GETIP;
+      NEWSTATE(STATE::GETIP);
     } // if
   } // if
 
-  if ((_state == STATE::GETIP) && (_IPaddr))
-    _state = STATE::SENDING; // shortcut, reuse IP address.
+  if (_startTime && (_board->getSeconds() - _startTime > MAX_WAIT_FOR_RESPONSE)) {
+    LOGGER_EERR("timeout");
+    NEWSTATE(STATE::ABORT);
 
-  if (_state == STATE::GETIP) {
+
+  } else if ((_state == STATE::GETIP) && (_IPaddr)) {
+    NEWSTATE(STATE::SENDING); // shortcut, reuse IP address.
+
+  } else if (_state == STATE::GETIP) {
     // init result
     _contentLength = 0;
 
@@ -121,106 +120,182 @@ void HttpClientElement::loop()
     int b = WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
     // TRACE(".got %d %s", b, _IPaddr.toString().c_str());
     if (_IPaddr) {
-      _state = STATE::SENDING;
+      NEWSTATE(STATE::SENDING);
     } else {
       if (!_errNoHostSent) {
         LOGGER_EERR("host %s is unknown.", _host.c_str());
         _errNoHostSent = true;
       }
-      _state = STATE::ABORT;
+      NEWSTATE(STATE::ABORT);
     }
 
   } else if (_state == STATE::SENDING) {
-    // start remote communication,
-    _startTime = _board->getSeconds();
-
-    // connect to server
+    // start remote communication, connect to server
     if (!_httpClient.connect(_IPaddr, 80)) {
-      LOGGER_EERR(".no connect");
-      _state = STATE::ABORT;
+      LOGGER_EERR("nocon");
+      NEWSTATE(STATE::ABORT);
     } else {
-      // TRACE("connected to server...");
       // 2. send request
       String request("GET $1 HTTP/1.1\r\nHost: $2\r\nConnection: close\r\n\r\n");
       request.replace("$1", _url);
       request.replace("$2", _host);
+
+      // TRACE("request:\n%s", request.c_str());
       _httpClient.write(request.c_str());
-      _state = STATE::CHECK;
+      _startTime = _board->getSeconds();
+      NEWSTATE(STATE::CHECK);
     } // if
 
   } else if (_state == STATE::CHECK) {
     // see if an answer has come back
 
-    if (!_httpClient.connected()) {
-      LOGGER_EERR("no connection");
-      _state = STATE::ABORT;
+    if (_httpClient.available() > 0) {
+      NEWSTATE(STATE::HEADERS);
 
-    } else if (_httpClient.available() > 0) {
+    } else if (!_httpClient.connected()) {
+      LOGGER_EERR("nocon");
+      NEWSTATE(STATE::ABORT);
+
+      // while (_httpClient.available()) {
+      //   char c = _httpClient.read();
+      //   Serial.write(c);
+      // }
+      // Serial.println();
+
       // Response is available.
-      _state = STATE::HEADERS;
 
-    } else {
-      // wait or drop.
-      if (_board->getSeconds() - _startTime > MAX_WAIT_FOR_RESPONSE) {
-        LOGGER_EERR("timed out");
-        _state = STATE::ABORT;
-      } // if
+      // } else {
+      //   // wait or drop.
+      //   if (_board->getSeconds() - _startTime > MAX_WAIT_FOR_RESPONSE) {
+      //     LOGGER_EERR("timed out");
+      //     NEWSTATE(STATE::ABORT);
+      //   } // if
+
+      // } else {
+      //   TRACE("w");
 
     } // if
 
   } else if (_state == STATE::HEADERS) {
-    // process response header
 
     // Read the header lines of the reply from server
-    while (_httpClient.connected() && (_state == STATE::HEADERS)) {
+    while (_httpClient.available()) {
       String line = _httpClient.readStringUntil('\n');
+
       if (!line.endsWith("\r")) {
-        // TRACE(" line false.");
-        _state = STATE::ABORT;
+        LOGGER_EERR("lineend");
+        NEWSTATE(STATE::ABORT);
         break;
       }
       line.replace("\r", "");
-      // TRACE(" line=<%s>", line.c_str());
-
-      // isolate header key and value
-      int sepPos = line.indexOf(':');
-      if (sepPos > 0) {
-        String key = line.substring(0, sepPos);
-        String val = line.substring(sepPos + 1);
-        if (val.startsWith(" ")) {
-          val.remove(0, 1);
-        }
-        processHeader(key, val);
-      }
+      // TRACE("raw: %s", line.c_str());
 
       if (line.isEmpty()) {
-        // header end reached.
-        _state = (_contentLength == 0 ? STATE::ABORT : STATE::BODY);
-      } // if
-    } // while
+        if (_contentLength) {
+          NEWSTATE(STATE::BODY);
+        } else {
+          NEWSTATE(STATE::ABORT);
+        }
+        break;
 
+      } else {
+        // isolate header key and value
+        int sepPos = line.indexOf(':');
+        if (sepPos > 0) {
+          String key = line.substring(0, sepPos);
+          String val = line.substring(sepPos + 1);
+          if (val.startsWith(" ")) {
+            val.remove(0, 1);
+          }
+          processHeader(key, val);
+        }
+      }
+      yield();
+    } // while available
 
   } else if (_state == STATE::BODY) {
+    // TRACE("body-remaining: %d", _contentLength);
     size_t bufLen = (_contentLength > 1024 ? 1024 : _contentLength);
 
     if (bufLen) {
       char *buffer = (char *)malloc(bufLen + 1);
       memset(buffer, 0, bufLen + 1);
       size_t r = _httpClient.readBytes(buffer, bufLen);
-      TRACE("  body read %d from %d", r, bufLen);
+      // TRACE("  body read %d from %d", r, bufLen);
       _contentLength -= r;
       processBody(buffer);
       free(buffer);
     }
     if (_contentLength == 0) {
-      _state = STATE::ABORT; // all done.
+      NEWSTATE(STATE::ABORT); // all done.
     }
   } // if
+
+
+  // NEWSTATE(STATE::ABORT);
+
+  // } else if (_state == STATE::HEADERS) {
+  //   // process response header
+
+  //   // Read the header lines of the reply from server
+  //   while (_httpClient.available() && (_state == STATE::HEADERS)) {
+  //     String line = _httpClient.readStringUntil('\n');
+  //     TRACE("raw: %s", line.c_str());
+  //     yield();
+
+  //     if (!line.endsWith("\r")) {
+  //       TRACE(" line false.");
+  //       NEWSTATE(STATE::ABORT);
+  //       break;
+  //     }
+
+  //     // isolate header key and value
+  //     int sepPos = line.indexOf(':');
+  //     if (sepPos > 0) {
+  //       String key = line.substring(0, sepPos);
+  //       String val = line.substring(sepPos + 1);
+  //       if (val.startsWith(" ")) {
+  //         val.remove(0, 1);
+  //       }
+  //       processHeader(key, val);
+  //     }
+
+  //     if (line.isEmpty()) {
+  //       // header end reached.
+  //       _state = (_contentLength == 0 ? STATE::ABORT : STATE::BODY);
+  //       NEWSTATE(_state);
+  //     } // if
+  //     yield();
+  //   } // while
+  //   TRACE("while end.");
+
+  //   if (!_httpClient.connected()) {
+  //     TRACE("connection dropped.");
+  //     // NEWSTATE(STATE::ABORT);
+  //   }
+
+  // } else if (_state == STATE::BODY) {
+  //   TRACE("body-remaining: %d", _contentLength);
+  //   size_t bufLen = (_contentLength > 1024 ? 1024 : _contentLength);
+
+  //   if (bufLen) {
+  //     char *buffer = (char *)malloc(bufLen + 1);
+  //     memset(buffer, 0, bufLen + 1);
+  //     size_t r = _httpClient.readBytes(buffer, bufLen);
+  //     TRACE("  body read %d from %d", r, bufLen);
+  //     _contentLength -= r;
+  //     processBody(buffer);
+  //     free(buffer);
+  //   }
+  //   if (_contentLength == 0) {
+  //     NEWSTATE(STATE::ABORT); // all done.
+  //   }
 
   if (_state == STATE::ABORT) {
     _httpClient.stop();
     _url = "";
-    _state = STATE::IDLE;
+    _startTime = 0;
+    NEWSTATE(STATE::IDLE);
   } // if
 
 } // loop()

@@ -42,15 +42,6 @@ AlarmElement::AlarmElement() {
 }
 
 
-// maybe: overwrite the init() function.
-
-// void AlarmElement::init(Board *board)
-// {
-//   Element::init(board);
-//   // do something here like initialization
-// } // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */

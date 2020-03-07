@@ -92,9 +92,6 @@ private:
   static uint8_t dec2Bcd(uint8_t val);
   static uint8_t bcd2Dec(uint8_t val);
 
-  static int _readRegister(int adr, uint8_t reg);
-  static void _writeRegister(int adr, uint8_t reg, uint8_t data);
-
   static void _getDSTime(int adr, struct tm *t);
   static void _setDSTime(int adr, struct tm *t);
 

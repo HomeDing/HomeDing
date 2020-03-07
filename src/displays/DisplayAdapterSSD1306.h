@@ -52,8 +52,7 @@ public:
   {
     // test if a display device is attached
     Wire.begin(board->I2cSda, board->I2cScl);
-    Wire.beginTransmission(_address);
-    int error = Wire.endTransmission();
+    int error = WireUtils::test(_address);
 
     if (error != 0) {
       Serial.printf("display error %d\n", error);

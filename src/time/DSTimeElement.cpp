@@ -26,6 +26,8 @@
 #include <time/DSTimeElement.h>
 
 #include <Wire.h>
+#include <WireUtils.h>
+
 #include <sntp.h>
 #include <sys/time.h>
 #include <time.h>
@@ -61,69 +63,39 @@ void DSTimeElement::_setSystemTime(struct tm *t)
 } // _setSystemTime()
 
 
-// read a single byte from a DSxxxx register
-int DSTimeElement::_readRegister(int adr, uint8_t reg)
-{
-  int ret;
-
-  Wire.beginTransmission(adr);
-  Wire.write(reg);
-  Wire.endTransmission();
-
-  Wire.requestFrom(adr, 1);
-
-  ret = Wire.read();
-  return (ret);
-} // _readRegister()
-
-
-// write a single byte from a DSxxxx register
-void DSTimeElement::_writeRegister(int adr, uint8_t reg, uint8_t data)
-{
-  int ret;
-
-  Wire.beginTransmission(adr);
-  Wire.write(reg);
-  Wire.write(data);
-  Wire.endTransmission();
-} // _writeRegister()
-
-
 // get time from the RTC chip
 void DSTimeElement::_getDSTime(int adr, struct tm *t)
 {
   memset(t, 0, sizeof(struct tm));
+  uint8_t data[8];
 
-  // read time from registers 0-7
-  Wire.beginTransmission(adr);
-  Wire.write(0);
-  Wire.endTransmission();
+  WireUtils::read(adr, 0, 7, data);
 
-  Wire.requestFrom(adr, 7);
-  t->tm_sec = bcd2Dec(Wire.read());
-  t->tm_min = bcd2Dec(Wire.read());
-  t->tm_hour = bcd2Dec(Wire.read());
-  Wire.read(); // day not used.
-  t->tm_mday = bcd2Dec(Wire.read());
-  t->tm_mon = bcd2Dec(Wire.read());
-  t->tm_year = bcd2Dec(Wire.read()) + 2000 - 1900;
+  t->tm_sec = bcd2Dec(data[0]);
+  t->tm_min = bcd2Dec(data[1]);
+  t->tm_hour = bcd2Dec(data[2]);
+  // data[3]; // day not used.
+  t->tm_mday = bcd2Dec(data[4]);
+  t->tm_mon = bcd2Dec(data[5]);
+  t->tm_year = bcd2Dec(data[6]) + 2000 - 1900;
 } // _getDSTime()
 
 
 // update time in the RTC chip
 void DSTimeElement::_setDSTime(int adr, struct tm *t)
 {
+  uint8_t data[8];
+
   // save time to registers 0-7
-  Wire.beginTransmission(adr);
-  Wire.write(0);
-  Wire.write(dec2Bcd(t->tm_sec));
-  Wire.write(dec2Bcd(t->tm_min));
-  Wire.write(dec2Bcd(t->tm_hour)); // always using 24h mode.
-  Wire.write(0); // day of week not used.
-  Wire.write(dec2Bcd(t->tm_mday));
-  Wire.write(dec2Bcd(t->tm_mon));
-  Wire.write(dec2Bcd(t->tm_year % 100)); // year is alwaysin the range of 20xx
-  Wire.endTransmission();
+  data[0] = dec2Bcd(t->tm_sec);
+  data[1] = dec2Bcd(t->tm_min);
+  data[2] = dec2Bcd(t->tm_hour); // always using 24h mode.
+  data[3] = 0; // day of week not used.
+  data[4] = dec2Bcd(t->tm_mday);
+  data[5] = dec2Bcd(t->tm_mon);
+  data[6] = dec2Bcd(t->tm_year % 100); // year is alwaysin the range of 20xx
+
+  WireUtils::write(adr, 0, 7, data);
 } // _setDSTime()
 
 // http://lcddevice/$board/dstime/0?time=2019-01-19%2018:35:00
@@ -160,9 +132,8 @@ void DSTimeElement::_setTime(const char *value)
 
     // update chip and reset OSF flag.
     _setDSTime(_address, &t);
-    int status = _readRegister(_address, DS3231_REGSTATUS);
-    _writeRegister(_address, DS3231_REGSTATUS,
-                   status & (~DS3231_REGSTATUS_OSF));
+    int status = WireUtils::read(_address, DS3231_REGSTATUS);
+    WireUtils::write(_address, DS3231_REGSTATUS, status & (~DS3231_REGSTATUS_OSF));
   }
 } // _setTime()
 
@@ -237,7 +208,7 @@ void DSTimeElement::loop()
   struct tm t;
 
   if ((_state != 1) && (_nextRead < now)) {
-    int status = _readRegister(DS3231_ADDRESS, DS3231_REGSTATUS);
+    int status = WireUtils::read(DS3231_ADDRESS, DS3231_REGSTATUS);
 
     // The OSF flag shows if the time is valid / no power lost since last
     // adjustment.

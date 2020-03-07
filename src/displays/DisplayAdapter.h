@@ -20,6 +20,8 @@
 #define DisplayAdapter_H
 
 #include <Wire.h>
+#include <WireUtils.h>
+
 #include <Board.h>
 
 class DisplayAdapter

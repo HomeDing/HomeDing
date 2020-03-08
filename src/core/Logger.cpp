@@ -32,7 +32,7 @@
 #define LOGFILE_MAXSIZE (4 * 1024 - 200)
 
 // String constants, only once in Memory
-static const char *LOGGER_LEVELS = "eit";
+static const char *LOGGER_LEVELS = "iet"; // info, error, trace
 static const char *LOGFILE_NAME = "/log.txt";
 static const char *LOGFILE_OLD_NAME = "/log_old.txt";
 

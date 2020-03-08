@@ -108,10 +108,7 @@ private:
    */
   String _humidityAction;
 
-  /**
-   * @brief The actions emitted when a new pressure value was read from the
-   * sensor.
-   */
+  /** The actions emitted when a new pressure value was read from the sensor. */
   String _pressureAction;
 
   /**

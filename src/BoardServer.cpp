@@ -29,6 +29,12 @@
 
 #define SVC_ANY "/$"
 
+// integrated htm files
+#define PAGE_SETUP "/$setup.htm"
+#define PAGE_BOOT "/$boot.htm"
+#define SVC_UPLOAD "/$upload.htm"
+
+// services
 #define SVC_REBOOT "/$reboot"
 #define SVC_RESET "/$reset"
 #define SVC_RESETALL "/$resetall"
@@ -36,10 +42,6 @@
 
 #define SVC_ELEMENTS "/$elements"
 #define SVC_LISTFILES "/$list"
-
-#define PAGE_SETUP "/$setup"
-#define PAGE_BOOT "/$boot"
-#define SVC_UPLOAD "/$upload"
 
 #define SVC_BOARD "/$board"
 

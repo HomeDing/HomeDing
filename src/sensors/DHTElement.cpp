@@ -54,11 +54,11 @@ bool DHTElement::set(const char *name, const char *value)
       _pin = _atopin(value);
       ret = true;
 
-    } else if (_stricmp(name, "ontemperature") == 0) {
+    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
       _tempAction = value;
       ret = true;
 
-    } else if (_stricmp(name, "onhumidity") == 0) {
+    } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
       _humAction = value;
       ret = true;
     } // if
@@ -74,7 +74,7 @@ void DHTElement::start()
 {
   // LOGGER_ETRACE("start()");
   if (_pin < 0) {
-    LOGGER_EERR("no meaningful pin");
+    LOGGER_EERR("no pin");
 
   } else {
     SensorElement::start();

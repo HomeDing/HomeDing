@@ -64,7 +64,7 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg)
 
 
 // read sequence of bytes to buffer
-uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t len, uint8_t *data)
+uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
 {
   uint8_t done = 0;
 
@@ -92,7 +92,7 @@ void WireUtils::write(uint8_t address, uint8_t reg, uint8_t data)
 
 
 // read sequence of bytes to buffer
-void WireUtils::write(uint8_t address, uint8_t reg, uint8_t len, uint8_t *data)
+void WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
 {
   uint8_t done = 0;
 

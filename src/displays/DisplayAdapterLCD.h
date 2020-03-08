@@ -45,13 +45,9 @@ public:
 
   bool init(Board *board)
   {
-    // test if a display device is attached
-    Wire.begin(board->I2cSda, board->I2cScl);
-    int error = WireUtils::test(_address);
-
-    if (error != 0) {
-      Serial.printf("display error %d\n", error);
-      display = NULL;
+    // test if a device is attached
+    if (WireUtils::test(_address)) {
+      LOGGER_ERR("not found");
       return (false);
 
     } else {
@@ -144,7 +140,7 @@ private:
   /**
    * @brief Reference to the used library object
    */
-  LiquidCrystal_PCF8574 *display;
+  LiquidCrystal_PCF8574 *display = NULL;
 
   /**
    * @brief I2C Deisplay device address.

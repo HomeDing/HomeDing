@@ -34,10 +34,10 @@ public:
   static uint8_t test(uint8_t address);
 
   static uint8_t read(uint8_t address, uint8_t reg);
-  static uint8_t read(uint8_t address, uint8_t reg, uint8_t len, uint8_t *data);
+  static uint8_t read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
 
   static void write(uint8_t address, uint8_t reg, uint8_t data);
-  static void write(uint8_t address, uint8_t reg, uint8_t len, uint8_t *data);
+  static void write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
 
 };
 

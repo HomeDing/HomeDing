@@ -83,16 +83,6 @@ private:
    * sensor.
    */
   String _tempAction;
-
-  /**
-   * @brief Format number to string with 2 digits.
-   * @param v The value.
-   * @param s The char buffer (at least 5+1 chars long)
-   * @return char* The char buffer.
-   */
-  char *_fmt(int v, char *s);
-
-  void _dispatch(String &evt, int value);
 };
 
 

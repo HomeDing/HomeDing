@@ -13,9 +13,14 @@
 extern const char *PROP_VALUE;
 extern const char *PROP_DESCRIPTION;
 extern const char *PROP_PIN;
+extern const char *PROP_ADDRESS;
+
 extern const char *PROP_INVERSE;
 
 extern const char *ACTION_ONVALUE;
+extern const char *ACTION_ONTEMPERATURE;
+extern const char *ACTION_ONHUMIDITY;
+extern const char *ACTION_ONPRESSURE;
 
 // ===== SYS and Common Elements =====
 
@@ -41,16 +46,21 @@ extern const char *ACTION_ONVALUE;
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Switch
-#define HOMEDING_INCLUDE_AND
 #define HOMEDING_INCLUDE_Analog
-#define HOMEDING_INCLUDE_Timer
-#define HOMEDING_INCLUDE_Schedule
-#define HOMEDING_INCLUDE_Alarm
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
+
+#define HOMEDING_INCLUDE_AND
+#define HOMEDING_INCLUDE_Timer
+#define HOMEDING_INCLUDE_Schedule
+#define HOMEDING_INCLUDE_Alarm
+
 #define HOMEDING_INCLUDE_LOG
 #define HOMEDING_INCLUDE_PMS
+
+#define HOMEDING_INCLUDE_REMOTE
+
 #endif
 
 // Easy include of all elements for an attached display.
@@ -130,6 +140,13 @@ extern const char *ACTION_ONVALUE;
 #include <sensors/PMSElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_REMOTE
+#include <RemoteElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_WEATHERFEED
+#include <WeatherFeed.h>
+#endif
 
 // ===== OPTIONAL DISPLAY ELEMENTS =====
 
@@ -169,6 +186,14 @@ extern const char *ACTION_ONVALUE;
 
 #ifdef HOMEDING_INCLUDE_ROTARY
 #include <RotaryElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DS18B20
+#include <sensors/DS18B20Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_BMP280
+#include <sensors/BMP280Element.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_BME680

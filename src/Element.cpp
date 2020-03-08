@@ -200,7 +200,7 @@ uint32_t Element::_atoColor(const char *value)
     if ((ch0 == '#') || (ch0 == 'x')) {
       ret = strtol(value + 1, nullptr, 16);
     } else if ((ch0 >= '0') && (ch0 <= '9')) {
-      ret = strtol(value, nullptr, 0);
+      ret = atoi(value);
     } else if (_stricmp(value, "black") == 0) {
       ret = 0x00000000;
     } else if (_stricmp(value, "red") == 0) {

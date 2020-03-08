@@ -15,11 +15,10 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
+#include <HomeDing.h>
 #include <Board.h>
 
 #include "DisplaySSD1306Element.h"
-#include <ElementRegistry.h>
 
 #include <displays/DisplayAdapterSSD1306.h>
 
@@ -53,7 +52,7 @@ bool DisplaySSD1306Element::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "address") == 0) {
+  if (_stricmp(name, PROP_ADDRESS) == 0) {
     _address = atoi(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {

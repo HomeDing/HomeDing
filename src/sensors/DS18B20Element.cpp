@@ -45,7 +45,7 @@ bool DS18B20Element::set(const char *name, const char *value)
       _pin = _atopin(value);
       ret = true;
 
-    } else if (_stricmp(name, "ontemperature") == 0) {
+    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
       _tempAction = value;
       ret = true;
     } // if
@@ -63,7 +63,7 @@ void DS18B20Element::start()
 
   // unsigned int now = _board->getSeconds();
   if (_pin < 0) {
-    LOGGER_ETRACE("no meaningful pin");
+    LOGGER_ETRACE("no pin");
     term();
 
   } else {
@@ -152,33 +152,5 @@ void DS18B20Element::pushState(
 
 
 // ===== private functions =====
-
-// Formatting a int as decimal number.
-char *DS18B20Element::DS18B20Element::_fmt(int v, char *s)
-{
-  // raw format first
-  itoa(v, s, 10);
-  int l = strlen(s);
-
-  // insert decimal
-  if (l > 3) {
-    l = l - 2;
-    memcpy(s + l + 1, s + l, 3);
-    s[l] = '.';
-  }
-  return (s);
-} // _fmt()
-
-
-// dispatch a single value including formatting as decimal number.
-void DS18B20Element::_dispatch(String &evt, int value)
-{
-  if (evt.length() > 0) {
-    char tmp[10];
-    _fmt(value, tmp);
-    _board->dispatch(evt, tmp);
-  } // if
-} // _dispatch()
-
 
 // End

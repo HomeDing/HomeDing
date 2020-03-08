@@ -49,19 +49,19 @@ bool BME680Element::set(const char *name, const char *value)
   bool ret = SensorElement::set(name, value);
 
   if (!ret) {
-    if (_stricmp(name, "address") == 0) {
-      _address = strtol(value, nullptr, 0);
+    if (_stricmp(name, PROP_ADDRESS) == 0) {
+      _address = atoi(value);
       ret = true;
 
-    } else if (_stricmp(name, "ontemperature") == 0) {
+    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
       _temperatureAction = value;
       ret = true;
 
-    } else if (_stricmp(name, "onhumidity") == 0) {
+    } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
       _humidityAction = value;
       ret = true;
 
-    } else if (_stricmp(name, "onpressure") == 0) {
+    } else if (_stricmp(name, ACTION_ONPRESSURE) == 0) {
       _pressureAction = value;
       ret = true;
 

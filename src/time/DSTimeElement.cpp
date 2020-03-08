@@ -19,10 +19,9 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
+#include <HomeDing.h>
 #include <Board.h>
 
-#include <ElementRegistry.h>
 #include <time/DSTimeElement.h>
 
 #include <Wire.h>
@@ -69,7 +68,7 @@ void DSTimeElement::_getDSTime(int adr, struct tm *t)
   memset(t, 0, sizeof(struct tm));
   uint8_t data[8];
 
-  WireUtils::read(adr, 0, 7, data);
+  WireUtils::read(adr, 0, data, 7);
 
   t->tm_sec = bcd2Dec(data[0]);
   t->tm_min = bcd2Dec(data[1]);
@@ -95,7 +94,7 @@ void DSTimeElement::_setDSTime(int adr, struct tm *t)
   data[5] = dec2Bcd(t->tm_mon);
   data[6] = dec2Bcd(t->tm_year % 100); // year is alwaysin the range of 20xx
 
-  WireUtils::write(adr, 0, 7, data);
+  WireUtils::write(adr, 0, data, 7);
 } // _setDSTime()
 
 // http://lcddevice/$board/dstime/0?time=2019-01-19%2018:35:00
@@ -167,8 +166,8 @@ bool DSTimeElement::set(const char *name, const char *value)
   if (_stricmp(name, "readtime") == 0) {
     _readTime = _atotime(value);
 
-  } else if (_stricmp(name, "address") == 0) {
-    _address = strtol(value, nullptr, 0);
+  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
+    _address = atoi(value);
 
   } else if (_stricmp(name, "time") == 0) {
     // adjust date & time

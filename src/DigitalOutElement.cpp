@@ -58,7 +58,7 @@ bool DigitalOutElement::set(const char *name, const char *value)
 void DigitalOutElement::start()
 {
   if (_pin < 0) {
-    LOGGER_EERR("no meaningful pin");
+    LOGGER_EERR("no pin");
 
   } else {
     Element::start();

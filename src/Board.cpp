@@ -184,13 +184,80 @@ void Board::addElements()
   mj->parseFile(CONF_FILENAME);
   _checkNetState();
 
-  //   mj->parse(R"==(
-  // "sli": {
-  //   "0": {
-  //     "description": "Listen for commands on the Serial in line"
-  //   }
-  // }
-  //   )==");
+  // mj->parse(R"==({
+  //   "sli": { "0": {
+  //     "description" : "Listen for commands on the Serial in line"
+  //   }}})==");
+
+#if 0
+
+  LOGGER_INFO("[[START...");
+mj = new MicroJson(
+    [this](int level, char *path, char *name, char *value) {
+      if (name && value) {
+        // LOGGER_INFO("[[ <%s/%s>=\"%s\"", path, name, value);
+
+        String p(path);
+        p.concat('/');
+        p.concat(name);
+        if (p.equalsIgnoreCase("list[1]/main/temp")) {
+          LOGGER_INFO("next temp=%s", value);
+        }
+      }
+    });
+
+  mj->parse(R"==({
+"cod" : "200","message" : 0,"cnt" : 40,
+"list" : [
+  {"dt" : 1578679200,"main" : {"temp" : 277.96,"feels_like" : 274.42,"temp_min" : 277.96,"temp_max" : 280.11,"pressure" : 1025,"sea_level" : 1025,"grnd_level" : 1010,"humidity" : 75,"temp_kf" : -2.15},"weather" : [{"id" : 500,"main" : "Rain","description" : "light rain","icon" : "10n"}],"clouds" : {"all" : 64},"wind" : {"speed" : 2.38,"deg" : 287},"rain" : {"3h" : 0.06},"sys" : {"pod" : "n"},"dt_txt" : "2020-01-10 18:00:00"},
+  {"dt" : 1578690000,
+"main" : {
+"temp" : 277.66,
+"feels_like" : 273.73,
+"temp_min" : 277.66,
+"temp_max" : 279.27,
+"pressure" : 1028,
+"sea_level" : 1028,
+"grnd_level" : 1012,
+"humidity" : 80,
+"temp_kf" : -1.61},
+"weather" : [
+{
+"id" : 801,
+"main" : "Clouds",
+"description" : "few clouds",
+"icon" : "02n"}
+],
+"clouds" : {
+"all" : 20},
+"wind" : {
+"speed" : 3.07,
+"deg" : 290},
+"sys" : {
+"pod" : "n"},
+"dt_txt" : "2020-01-10 21:00:00"},
+{"dt" : 1579100400,"main" : {"temp" : 282.61,"feels_like" : 279.44,"temp_min" : 282.61,"temp_max" : 282.61,"pressure" : 1019,"sea_level" : 1019,"grnd_level" : 1003,"humidity" : 78,"temp_kf" : 0},"weather" : [{"id" : 804,"main" : "Clouds","description" : "overcast clouds","icon" : "04d"
+}
+],
+"clouds" : {"all" : 100},
+"wind" : {"speed" : 3.16,"deg" : 226},
+"sys" : {"pod" : "d"},
+"dt_txt" : "2020-01-15 15:00:00"
+}
+],
+"city" : {
+  "id" : 2924625,
+  "name" : "Friedrichsdorf",
+  "coord" : {"lat" : 50.2496,"lon" : 8.6428 },
+  "country" : "DE",
+  "timezone" : 3600,
+  "sunrise" : 1578640956,
+  "sunset" : 1578670940
+}
+  })==");
+
+      LOGGER_INFO("[[Done.");
+#endif
 
 } // addElements()
 
@@ -237,17 +304,17 @@ void Board::loop()
       if (!hasTimeElements) {
         startComplete = true;
       } else {
-      // check if time is valid now -> start all elements with
-      time_t current_stamp = getTime();
-      if (current_stamp) {
-        start(Element_StartupMode::Time);
+        // check if time is valid now -> start all elements with
+        time_t current_stamp = getTime();
+        if (current_stamp) {
+          start(Element_StartupMode::Time);
           startComplete = true;
         } // if
       } // if
 
       if (startComplete) {
         dispatch(startAction); // dispatched when all elements are active.
-    }
+      }
     } // if ! startComplete
 
     // dispatch next action from _actionList if any
@@ -282,7 +349,6 @@ void Board::loop()
     _newState(BOARDSTATE_LOAD);
 
   } else if (boardState == BOARDSTATE_LOAD) {
-
     // load all config files and create+start elements
     addElements();
 
@@ -301,8 +367,10 @@ void Board::loop()
       savemode = false;
     } // if
 
-
+    // setup system wide stuff
     WiFi.hostname(deviceName);
+    Wire.begin(I2cSda, I2cScl);
+
     // LOGGER_INFO("net-status: %d <%s>", WiFi.status(), WiFi.hostname().c_str());
 
     start(Element_StartupMode::System);
@@ -312,8 +380,10 @@ void Board::loop()
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) {
+      // LOGGER_INFO("ssid empty");
       _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
     } else if (_resetCount == 2) {
+      // LOGGER_INFO("resetcount 2");
       _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
     } else {
       _newState(BOARDSTATE_CONNECT);
@@ -385,6 +455,7 @@ void Board::loop()
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
+      // LOGGER_INFO("sysbutton pressed");
       _newState(BOARDSTATE_STARTCAPTIVE);
 
     } else if (boardState == BOARDSTATE_CONFWAIT) {

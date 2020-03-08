@@ -15,11 +15,10 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
+#include <HomeDing.h>
 #include <Board.h>
 
 #include "DisplaySH1106Element.h"
-#include <ElementRegistry.h>
 
 #include <displays/DisplayAdapterSH1106.h>
 
@@ -53,8 +52,8 @@ bool DisplaySH1106Element::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "address") == 0) {
-    _address = strtol(value, nullptr, 0);
+  if (_stricmp(name, PROP_ADDRESS) == 0) {
+    _address = atoi(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {
     _resetpin = _atopin(value);

@@ -55,7 +55,7 @@ bool PWMOutElement::set(const char *name, const char *value)
 void PWMOutElement::start()
 {
   if (_pin < 0) {
-    LOGGER_EERR("no meaningful pin");
+    LOGGER_EERR("no pin");
 
   } else {
     // enable output and stay off

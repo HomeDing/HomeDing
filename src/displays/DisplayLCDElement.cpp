@@ -15,11 +15,10 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
+#include <HomeDing.h>
 #include <Board.h>
 
 #include <displays/DisplayLCDElement.h>
-#include <ElementRegistry.h>
 
 #include <displays/DisplayAdapterLCD.h>
 
@@ -49,14 +48,14 @@ bool DisplayLCDElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "address") == 0) {
-    _address = strtol(value, nullptr, 0);
+  if (_stricmp(name, PROP_ADDRESS) == 0) {
+    _address = atoi(value);
 
   } else if (_stricmp(name, "lines") == 0) {
-    _lines = strtol(value, nullptr, 0);
+    _lines = atoi(value);
 
   } else if (_stricmp(name, "columns") == 0) {
-    _cols = strtol(value, nullptr, 0);
+    _cols = atoi(value);
 
   } else {
     ret = Element::set(name, value);

@@ -176,6 +176,10 @@ extern const char *ACTION_ONPRESSURE;
 #include <sensors/DHTElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_LIGHT
+#include <LightElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_NEOPIXEL
 #include <NeoElement.h>
 #endif

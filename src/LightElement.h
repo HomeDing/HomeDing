@@ -1,6 +1,6 @@
 /**
  * @file LightElement.h
- * @brief Element Template class.
+ * @brief Output Element to drive LEDs on GPIO pins.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -12,9 +12,7 @@
  * More information on https://www.mathertel.de/Arduino
  * 
  * Changelog:
- * * 30.07.2019 created by Matthias Hertel
- * * 15.11.2019 some more modes implemented
- * * 28.12.2019 less blocked time in loop()
+ * * 10.03.2020 created by Matthias Hertel
  */
 
 #ifndef LIGHTELEMENT_H
@@ -93,14 +91,14 @@ protected:
    */
   String oldValue;
 
-  /** @brief Brightness level */
+  /** @brief Brightness level in percent. */
   int brightness;
 
   /** duration of animation / transition in msecs */
   unsigned long duration;
 
   /** set color pattern */
-  void setOutput(String value);
+  virtual void setOutput(String value);
 
   /**
    * @brief set to true after a color has been prepares to be send to the pixels next loop().
@@ -109,7 +107,7 @@ protected:
 
 
 private:
-  /** Number of pixels in the stripe */
+  /** Number of pixels in the stripe, set by the number of GPIO pins in then pin property. */
   int _count;
 
   /** data output pins (R,G,B) or pins[0] only. */
@@ -117,9 +115,6 @@ private:
 };
 
 /* ===== Register the Element ===== */
-
-// HOMEDING_INCLUDE_LIGHT should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to LightElement.h:
 
 #ifdef HOMEDING_REGISTER
 // Register the LightElement onto the ElementRegistry.

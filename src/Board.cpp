@@ -156,8 +156,7 @@ void Board::addElements()
             tmp[31] = '\0'; // force termination
             char *p = strchr(tmp, MICROJSON_PATH_SEPARATOR);
             if (p)
-              *p = '\0'; // cut at first path separator. The type remains in the
-                  // buffer.
+              *p = '\0'; // cut at first path separator. The type remains in the buffer.
 
             _lastElem = ElementRegistry::createElement(tmp);
             if (_lastElem == NULL) {

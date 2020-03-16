@@ -80,7 +80,7 @@ void NeoElement::init(Board *board)
   _colors = "0";
   _pin = 2;
   _count = 8;
-  _brightness = 64;
+  _brightness = (256/2); // 50%
   _duration = 4000;
   _needShow = false;
 } // init()
@@ -111,7 +111,7 @@ bool NeoElement::set(const char *name, const char *value)
       _mode = Mode::pulse;
 
   } else if (_stricmp(name, "brightness") == 0) {
-    _brightness = atoi(value);
+    _brightness = atoi(value) * 256 / 100;
     if (_strip) {
       _strip->setBrightness(_brightness);
       if (_mode == Mode::color) {

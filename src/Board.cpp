@@ -493,6 +493,7 @@ void Board::loop()
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
     LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
     // LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
+    WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
 
     if (display) {
       delay(1600);
@@ -516,11 +517,18 @@ void Board::loop()
     _newState(BOARDSTATE_RUN);
 
   } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
+    uint8_t mac[6];
+    char ssid[64];
+
     clearResetCount();
-    displayInfo("config..");
 
     WiFi.softAPConfig(apIP, apIP, netMsk);
-    WiFi.softAP(HOMEDING_GREETING);
+    WiFi.macAddress(mac);
+    snprintf(ssid, sizeof(ssid), "%s%02X%02X%02X", HOMEDING_GREETING, mac[3], mac[4], mac[5]);
+
+    displayInfo("config..", ssid);
+
+    WiFi.softAP(ssid);
     delay(5);
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 

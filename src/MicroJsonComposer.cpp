@@ -53,7 +53,7 @@ void MicroJsonComposer::addProperty(const char *key, String value)
 };
 
 // Create a property with int value
-void MicroJsonComposer::addProperty(const char *key, int value)
+void MicroJsonComposer::addProperty(const char *key, long value)
 {
   addProperty(key, String(value));
 };

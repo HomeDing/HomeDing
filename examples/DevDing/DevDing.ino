@@ -113,7 +113,7 @@ void handleRedirect()
   } else {
     url = "http://";
     url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
-    url.concat("/$setup");
+    url.concat("/$setup.htm");
   }
   server.sendHeader("Location", url, true);
   server.send(302);

@@ -179,6 +179,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
       _board->getState(output, eId);
 
       server.sendHeader("Cache-control", "NO-CACHE");
+      server.sendHeader("Access-Control-Allow-Origin", "*");
       // DEBUG_LOG("  ret:%s\n", output.c_str());
 
     } else {
@@ -188,20 +189,22 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     output_type = TEXT_JSON;
 
   } else if (requestUri.startsWith(SVC_SYSINFO)) {
+    unsigned long now = millis();
     MicroJsonComposer jc;
 
     jc.openObject();
     jc.addProperty("devicename", _board->deviceName);
     jc.addProperty("build", __DATE__);
-    jc.addProperty("free heap", ESP.getFreeHeap());
+    jc.addProperty("freeHeap", ESP.getFreeHeap());
 
-    jc.addProperty("flash-size", ESP.getFlashChipSize());
+    jc.addProperty("flashSize", ESP.getFlashChipSize());
     // jc.addProperty("flash-real-size", ESP.getFlashChipRealSize());
 
     FSInfo fs_info;
     SPIFFS.info(fs_info);
-    jc.addProperty("fs-totalBytes", fs_info.totalBytes);
-    jc.addProperty("fs-usedBytes", fs_info.usedBytes);
+    jc.addProperty("fsTotalBytes", fs_info.totalBytes);
+    jc.addProperty("fsUsedBytes", fs_info.usedBytes);
+    jc.addProperty("upTime", now / 1000);
 
     // WIFI info
     jc.addProperty("ssid", WiFi.SSID());
@@ -209,6 +212,8 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     jc.closeObject();
     output = jc.stringify();
     output_type = TEXT_JSON;
+
+    server.sendHeader("Access-Control-Allow-Origin", "*");
 
     // ===== these actions are only in non-save mode
   } else if (unSaveMode && (requestUri.startsWith(SVC_RESETALL))) {
@@ -266,7 +271,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     // List all registered Elements
     ElementRegistry::list(output);
     output_type = TEXT_JSON;
-    
+
   } else {
     ret = false;
   }

@@ -43,13 +43,17 @@ void WireUtils::dump(uint8_t address, uint8_t reg, uint8_t len)
 }
 
 
-uint8_t WireUtils::test(uint8_t address)
+/** check for a device on address */
+bool WireUtils::exists(uint8_t address)
 {
   Wire.beginTransmission(address);
-  return (Wire.endTransmission());
-}
+  uint8_t err = Wire.endTransmission();
+  Serial.printf("i2c test %d,%d\n", address, err);
+  return (err == 0);
+} // exists()
 
-// read single byte
+
+/** read one register value */
 uint8_t WireUtils::read(uint8_t address, uint8_t reg)
 {
   uint8_t data;
@@ -63,7 +67,9 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg)
 } // read()
 
 
-// read sequence of bytes to buffer
+/** read a sequence of register values into a buffer.
+ * @return number of register values read.
+ */
 uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
 {
   uint8_t done = 0;

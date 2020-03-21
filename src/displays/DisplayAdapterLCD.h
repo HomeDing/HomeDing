@@ -14,8 +14,8 @@
 #ifndef DisplayAdapterLCD_H
 #define DisplayAdapterLCD_H
 
-#include <displays/DisplayAdapter.h>
 #include <LiquidCrystal_PCF8574.h>
+#include <displays/DisplayAdapter.h>
 
 class DisplayAdapterLCD : DisplayAdapter
 {
@@ -46,19 +46,19 @@ public:
   bool init(Board *board)
   {
     // test if a device is attached
-    if (WireUtils::test(_address)) {
+    if (!WireUtils::exists(_address)) {
       LOGGER_ERR("not found");
       return (false);
 
     } else {
-      Serial.printf("setupDisplay...\n");
+      // LOGGER_TRACE("setupDisplay...");
       display = new LiquidCrystal_PCF8574(_address);
       display->begin(_cols, _lines);
 
       int dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
-                        0b10001, 0b01110, 0b00000, 0b00000};
+                       0b10001, 0b01110, 0b00000, 0b00000};
       int dotOn[8] = {0b00000, 0b01110, 0b11111, 0b11111,
-                       0b11111, 0b01110, 0b00000, 0b00000};
+                      0b11111, 0b01110, 0b00000, 0b00000};
 
       display->createChar(1, dotOff);
       display->createChar(2, dotOn);

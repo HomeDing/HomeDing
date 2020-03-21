@@ -49,12 +49,12 @@ public:
   bool init(Board *board)
   {
     // test if a device is attached
-    if (WireUtils::test(_address)) {
+    if (!WireUtils::exists(_address)) {
       LOGGER_ERR("not found");
       return (false);
 
     } else {
-      Serial.printf("setupDisplay...\n");
+      // LOGGER_TRACE("setupDisplay...");
       display = new SH1106Wire(_address, board->I2cSda, board->I2cScl, _resolution);
 
       display->init();

@@ -50,7 +50,7 @@ bool BME680Element::set(const char *name, const char *value)
 
   if (!ret) {
     if (_stricmp(name, PROP_ADDRESS) == 0) {
-      _address = atoi(value);
+      _address = _atoi(value);
       ret = true;
 
     } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {

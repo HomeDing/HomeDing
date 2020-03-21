@@ -66,10 +66,10 @@ bool ButtonElement::set(const char *name, const char *value)
     }
 
   } else if (_stricmp(name, "clickticks") == 0) {
-    _clickTicks = atoi(value);
+    _clickTicks = _atoi(value);
 
   } else if (_stricmp(name, "pressticks") == 0) {
-    _pressTicks = atoi(value);
+    _pressTicks = _atoi(value);
 
   } else if (_stricmp(name, "onclick") == 0) {
     _clickAction = value;

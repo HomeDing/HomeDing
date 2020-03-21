@@ -42,7 +42,7 @@ bool BMP280Element::set(const char *name, const char *value)
 
   if (!ret) {
     if (_stricmp(name, PROP_ADDRESS) == 0) {
-      _address = atoi(value);
+      _address = _atoi(value);
       ret = true;
 
     } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
@@ -154,7 +154,7 @@ void BMP280Element::start()
 
   } else {
     // test if a device is attached
-    if (WireUtils::test(_address)) {
+    if (!WireUtils::exists(_address)) {
       LOGGER_EERR("not found");
       term();
     } else {

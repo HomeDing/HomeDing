@@ -167,7 +167,7 @@ bool DSTimeElement::set(const char *name, const char *value)
     _readTime = _atotime(value);
 
   } else if (_stricmp(name, PROP_ADDRESS) == 0) {
-    _address = atoi(value);
+    _address = _atoi(value);
 
   } else if (_stricmp(name, "time") == 0) {
     // adjust date & time

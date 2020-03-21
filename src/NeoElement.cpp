@@ -111,7 +111,7 @@ bool NeoElement::set(const char *name, const char *value)
       _mode = Mode::pulse;
 
   } else if (_stricmp(name, "brightness") == 0) {
-    _brightness = atoi(value) * 256 / 100;
+    _brightness = _atoi(value) * 256 / 100;
     if (_strip) {
       _strip->setBrightness(_brightness);
       if (_mode == Mode::color) {
@@ -124,7 +124,7 @@ bool NeoElement::set(const char *name, const char *value)
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "count") == 0) {
-    _count = atoi(value);
+    _count = _atoi(value);
 
   } else if (_stricmp(name, "duration") == 0) {
     _duration = _atotime(value) * 1000; // in msecs.

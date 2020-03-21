@@ -66,13 +66,13 @@ bool DisplayTextElement::set(const char *name, const char *value)
       strcpy(_postfix, value);
 
   } else if (_stricmp(name, "x") == 0) {
-    _x = atoi(value);
+    _x = _atoi(value);
 
   } else if (_stricmp(name, "y") == 0) {
-    _y = atoi(value);
+    _y = _atoi(value);
 
   } else if (_stricmp(name, "fontsize") == 0) {
-    int s = atoi(value);
+    int s = _atoi(value);
     if ((s == 10) || (s == 16) || (s == 24)) {
       _h = s;
     } // if

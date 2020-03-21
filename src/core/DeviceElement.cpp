@@ -73,7 +73,7 @@ bool DeviceElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "loglevel") == 0) {
     // Set global logger loglevel
-    Logger::logger_level = atoi(value);
+    Logger::logger_level = _atoi(value);
 
   } else if (_stricmp(name, "logfile") == 0) {
     // enable/disable logfile feature

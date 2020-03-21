@@ -77,7 +77,7 @@ bool NTPTimeElement::set(const char *name, const char *value)
     _readTime = _atotime(value);
 
   } else if (_stricmp(name, NTPE_zone) == 0) {
-    _zone = atoi(value);
+    _zone = _atoi(value);
 
   } else {
     ret = Element::set(name, value);

@@ -80,7 +80,7 @@ bool LightElement::set(const char *name, const char *value)
     // needUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
-    int b = atoi(value);
+    int b = _atoi(value);
     if ((b >= 0) && (b <= 100))
       brightness = b;
     needUpdate = true;

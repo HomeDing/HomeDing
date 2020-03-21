@@ -62,7 +62,7 @@ bool RotaryElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "step") == 0) {
-    _step = atoi(value);
+    _step = _atoi(value);
 
   } else if (_stricmp(name, "pin1") == 0) {
     _pin1 = _atopin(value);

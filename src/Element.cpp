@@ -50,7 +50,7 @@ bool Element::set(const char *name, const char *value)
     term();
 
   } else if (_stricmp(name, "loglevel") == 0) {
-    loglevel = atoi(value);
+    loglevel = _atoi(value);
 
     // do not report an error for the following properties, as they are used in
     // the web ui but only stored in the config files.
@@ -119,6 +119,13 @@ void Element::term()
 } // term()
 
 
+/* Return am integer value from a string. */
+int Element::_atoi(const char *value)
+{
+  return (strtol(value, nullptr, 0));
+} // _atoi()
+
+
 /* Return a boolean value from a string. */
 bool Element::_atob(const char *value)
 {
@@ -183,7 +190,7 @@ int Element::_atopin(const char *value)
       pin = A0; // only analog pin on ESP8266
 
     } else {
-      pin = atoi(value);
+      pin = _atoi(value);
     }
   }
   return (pin);
@@ -200,7 +207,7 @@ uint32_t Element::_atoColor(const char *value)
     if ((ch0 == '#') || (ch0 == 'x')) {
       ret = strtol(value + 1, nullptr, 16);
     } else if ((ch0 >= '0') && (ch0 <= '9')) {
-      ret = atoi(value);
+      ret = _atoi(value);
     } else if (_stricmp(value, "black") == 0) {
       ret = 0x00000000;
     } else if (_stricmp(value, "red") == 0) {

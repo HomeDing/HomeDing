@@ -58,22 +58,22 @@ bool ValueElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
-    _setValue(atoi(value));
+    _setValue(_atoi(value));
 
   } else if (_stricmp(name, "up") == 0) {
-    _setValue(_value + atoi(value) * _step);
+    _setValue(_value + _atoi(value) * _step);
 
   } else if (_stricmp(name, "down") == 0) {
-    _setValue(_value - atoi(value) * _step);
+    _setValue(_value - _atoi(value) * _step);
 
   } else if (_stricmp(name, "min") == 0) {
-    _minRange = atoi(value);
+    _minRange = _atoi(value);
 
   } else if (_stricmp(name, "max") == 0) {
-    _maxRange = atoi(value);
+    _maxRange = _atoi(value);
 
   } else if (_stricmp(name, "step") == 0) {
-    _step = atoi(value);
+    _step = _atoi(value);
 
   } else if (_stricmp(name, "label") == 0) {
     _label = value;

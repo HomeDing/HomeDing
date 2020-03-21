@@ -305,7 +305,7 @@ void MicroJson::parse(char ch)
   } else if (_state == MJ_STATE_Q_VALUE_ESCU) {
     strncat(_esc, ch, sizeof(_esc));
     if (strlen(_esc) == 4) {
-      long l = strtol(_esc, NULL, 16);
+      long l = strtol(_esc, nullptr, 16);
       ch = (char)(l % 0x00FF);
       strncat(_value, ch, sizeof(_value));
       _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE);

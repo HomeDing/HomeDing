@@ -49,13 +49,13 @@ bool DisplayLCDElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, PROP_ADDRESS) == 0) {
-    _address = atoi(value);
+    _address = _atoi(value);
 
   } else if (_stricmp(name, "lines") == 0) {
-    _lines = atoi(value);
+    _lines = _atoi(value);
 
   } else if (_stricmp(name, "columns") == 0) {
-    _cols = atoi(value);
+    _cols = _atoi(value);
 
   } else {
     ret = Element::set(name, value);

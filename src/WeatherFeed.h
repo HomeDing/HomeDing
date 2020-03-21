@@ -43,7 +43,6 @@ public:
    */
   static bool registered;
 
-  virtual void init(Board *board);
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -79,7 +78,7 @@ private:
   String _location;
   String _apikey;
 
-  unsigned long _readTime;
+  unsigned long _readTime = 24 * 60 * 60;
   unsigned long _nextRead;
 
   String _pattern;

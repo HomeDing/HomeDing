@@ -39,15 +39,6 @@ Element *WeatherFeedElement::create()
 } // create()
 
 
-void WeatherFeedElement::init(Board *board)
-{
-  HttpClientElement::init(board);
-  // initialization of default values
-  // set("host", "api.openweathermap.org");
-  _readTime = 24 * 60 * 60; // poll once a day
-} // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */

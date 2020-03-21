@@ -36,16 +36,12 @@ public:
    */
   static Element *create();
 
+
   /**
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
 
-  /**
-   * @brief initialize a new Element.
-   * @param board The board reference.
-   */
-  virtual void init(Board *board);
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -92,10 +88,10 @@ protected:
   String oldValue;
 
   /** @brief Brightness level in percent. */
-  int brightness;
+  int brightness = 50; // percent
 
   /** duration of animation / transition in msecs */
-  unsigned long duration;
+  unsigned long duration = 4000;
 
   /** set color pattern */
   virtual void setOutput(String value);
@@ -103,15 +99,15 @@ protected:
   /**
    * @brief set to true after a color has been prepares to be send to the pixels next loop().
   */
-  bool needUpdate;
+  bool needUpdate = false;
 
 
 private:
   /** Number of pixels in the stripe, set by the number of GPIO pins in then pin property. */
-  int _count;
+  int _count = 0;
 
   /** data output pins (R,G,B) or pins[0] only. */
-  int _pins[4];
+  int _pins[4]; //  = {D8, D6, D7, 0};
 };
 
 /* ===== Register the Element ===== */
@@ -121,7 +117,6 @@ private:
 bool LightElement::registered =
     ElementRegistry::registerElement("light", LightElement::create);
 #endif
-
 
 
 #endif

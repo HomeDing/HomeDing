@@ -47,21 +47,6 @@ Element *LightElement::create()
 
 /* ===== Element functions ===== */
 
-/** set initial/default values on properties. */
-void LightElement::init(Board *board)
-{
-  Element::init(board);
-
-  // set defaults:
-  brightness = 50; // percent
-  _pins[0] = D8;
-  _pins[1] = D6;
-  _pins[2] = D7;
-  duration = 4000;
-  needUpdate = false;
-} // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -73,11 +58,6 @@ bool LightElement::set(const char *name, const char *value)
   if (_stricmp(name, PROP_VALUE) == 0) {
     this->value = value;
     this->needUpdate = true;
-
-  } else if (_stricmp(name, "mode") == 0) {
-    // 'W' or 'RGB'
-    // ???
-    // needUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
     int b = _atoi(value);

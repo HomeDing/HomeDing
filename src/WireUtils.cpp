@@ -48,7 +48,6 @@ bool WireUtils::exists(uint8_t address)
 {
   Wire.beginTransmission(address);
   uint8_t err = Wire.endTransmission();
-  Serial.printf("i2c test %d,%d\n", address, err);
   return (err == 0);
 } // exists()
 

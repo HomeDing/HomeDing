@@ -93,6 +93,9 @@ protected:
   /** duration of animation / transition in msecs */
   unsigned long duration = 4000;
 
+  /** data output pins (R,G,B) or pins[0] only. */
+  int _pins[4]; //  = {D8, D6, D7, 0};
+
   /** set color pattern */
   virtual void setOutput(String value);
 
@@ -106,8 +109,6 @@ private:
   /** Number of pixels in the stripe, set by the number of GPIO pins in then pin property. */
   int _count = 0;
 
-  /** data output pins (R,G,B) or pins[0] only. */
-  int _pins[4]; //  = {D8, D6, D7, 0};
 };
 
 /* ===== Register the Element ===== */

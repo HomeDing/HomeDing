@@ -21,6 +21,7 @@
 #define NEOELEMENT_H
 
 #include <HomeDing.h>
+#include <LightElement.h>
 
 // https://github.com/adafruit/Adafruit_NeoPixel
 #include <Adafruit_NeoPixel.h>
@@ -29,7 +30,7 @@
  * @brief NeoElement implements an Element to drive LED stripes with the WS2812 LEDs.
  */
 
-class NeoElement : public Element
+class NeoElement : public LightElement
 {
 public:
   /**
@@ -96,29 +97,13 @@ private:
   */
   Mode _mode;
 
-  /**
-   * @brief The actual value of colors in color mode.
-   */
-  String _colors;
-
-  /**
-   * @brief set to true after a color has been prepares to be send to the pixels next loop().
-  */
-  boolean _needShow;
-
   /** Number of pixels in the stripe */
   int _count;
 
-  /** data output pin */
-  int _pin;
+  /** data output pin is taken from _pins[0]*/
 
-  /** Brightness level */
-  int _brightness;
   /** Brightness level in 0..255 */
   int _brightness_255;
-
-  /** duration of animation in msecs */
-  unsigned long _duration;
 
   /** set color pattern */
   void _setColors(String colList);

@@ -50,25 +50,27 @@ Element *LightElement::create()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool LightElement::set(const char *name, const char *value)
+bool LightElement::set(const char *name, const char *pValue)
 {
   bool ret = true;
-  LOGGER_ETRACE("set %s=%s", name, value);
+  LOGGER_ETRACE("set %s=%s", name, pValue);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
-    this->value = value;
+    this->value = pValue;
     this->needUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
-    int b = _atoi(value);
-    if ((b >= 0) && (b <= 100))
-      brightness = b;
+    brightness = _atoi(pValue);
+    if (brightness < 0)
+      brightness = 0;
+    if (brightness > 100)
+      brightness = 100;
     needUpdate = true;
 
   } else if (_stricmp(name, PROP_PIN) == 0) {
     for (int n = 0; n < LightElement::MAXPINS; n++) {
       _count = n;
-      String p = getItemValue(value, n);
+      String p = getItemValue(pValue, n);
       if (p.isEmpty()) {
         break;
       } // if
@@ -77,10 +79,10 @@ bool LightElement::set(const char *name, const char *value)
     }
 
   } else if (_stricmp(name, "duration") == 0) {
-    duration = _atotime(value) * 1000; // in msecs.
+    duration = _atotime(pValue) * 1000; // in msecs.
 
   } else {
-    ret = Element::set(name, value);
+    ret = Element::set(name, pValue);
   } // if
 
   return (ret);

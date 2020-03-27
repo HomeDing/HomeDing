@@ -52,7 +52,7 @@ void NeoElement::_setColors(String colList)
     col = _strip->getPixelColor(n % def);
     _strip->setPixelColor(n++, col);
   }
-  _needShow = true;
+  needUpdate = true;
 }
 
 
@@ -77,71 +77,55 @@ void NeoElement::init(Board *board)
 
   // set defaults:
   _mode = Mode::color;
-  _colors = "0";
-  _pin = 2;
+  value = "0";
   _count = 8;
-  _brightness = 50;
   _brightness_255 = (255 / 2); // 50%
-  _duration = 4000;
-  _needShow = false;
 } // init()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool NeoElement::set(const char *name, const char *value)
+bool NeoElement::set(const char *name, const char *pValue)
 {
-  bool ret = true;
   // LOGGER_ETRACE("set %s=%s", name, value);
+  bool ret = LightElement::set(name, pValue);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
     _mode = Mode::color;
-    _colors = value;
     if (_strip)
-      _setColors(value);
+      _setColors(pValue);
+    // was handled in LightElement
 
   } else if (_stricmp(name, "mode") == 0) {
-    if (_stricmp(value, "color") == 0)
+    if (_stricmp(pValue, "color") == 0)
       _mode = Mode::color;
-    else if (_stricmp(value, "wheel") == 0)
+    else if (_stricmp(pValue, "wheel") == 0)
       _mode = Mode::wheel;
-    else if (_stricmp(value, "flow") == 0)
+    else if (_stricmp(pValue, "flow") == 0)
       _mode = Mode::flow;
-    else if (_stricmp(value, "pulse") == 0)
+    else if (_stricmp(pValue, "pulse") == 0)
       _mode = Mode::pulse;
     if (_strip) {
       _strip->setBrightness(_brightness_255);
-      _needShow = true;
+      needUpdate = true;
     }
+    ret = true; // not handled in LightElement
 
   } else if (_stricmp(name, "brightness") == 0) {
-    _brightness = _atoi(value);
-    if (_brightness < 0)
-      _brightness = 0;
-    if (_brightness > 100)
-      _brightness = 100;
-    _brightness_255 = _brightness * 255 / 100;
+    _brightness_255 = brightness * 255 / 100;
 
     if (_strip) {
       _strip->setBrightness(_brightness_255);
       if (_mode == Mode::color) {
-        _setColors(_colors);
+        _setColors(pValue);
       }
-      _needShow = true;
     }
-
-  } else if (_stricmp(name, PROP_PIN) == 0) {
-    _pin = _atopin(value);
+    // was handled in LightElement
 
   } else if (_stricmp(name, "count") == 0) {
-    _count = _atoi(value);
-
-  } else if (_stricmp(name, "duration") == 0) {
-    _duration = _atotime(value) * 1000; // in msecs.
-
-  } else {
-    ret = Element::set(name, value);
+    _count = _atoi(pValue);
+    ret = true; // not handled in LightElement
   } // if
 
   return (ret);
@@ -153,16 +137,15 @@ bool NeoElement::set(const char *name, const char *value)
  */
 void NeoElement::start()
 {
-  Element::start();
+  LightElement::start();
 
-  _strip = new Adafruit_NeoPixel(_count, _pin, NEO_GRB + NEO_KHZ800);
+  _strip = new Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
   if (_strip) {
     _strip->begin();
-    _setColors(_colors);
+    _setColors(value);
     _strip->setBrightness(_brightness_255);
-    _needShow = true;
-  }
-  LOGGER_EINFO("start %d,%d", (_strip != nullptr), _brightness);
+  } // if
+  LOGGER_EINFO("start %d,%d", (_strip != nullptr), brightness);
 } // start()
 
 
@@ -172,15 +155,15 @@ void NeoElement::start()
 void NeoElement::loop()
 {
   if (_strip) {
-    if (_needShow) {
+    if (needUpdate) {
       // this time send to strip
       _strip->show();
-      _needShow = false;
+      needUpdate = false;
 
-    } else if ((_mode != Mode::color) && (_duration != 0)) {
+    } else if ((_mode != Mode::color) && (duration != 0)) {
       // dynamic color patterns
       unsigned long now = millis(); // current (relative) time in msecs.
-      unsigned int hue = (now % _duration) * 65536L / _duration;
+      unsigned int hue = (now % duration) * 65536L / duration;
 
       if (_mode == Mode::wheel) {
         _strip->fill(_strip->ColorHSV(hue));
@@ -194,14 +177,14 @@ void NeoElement::loop()
 
       } else if (_mode == Mode::pulse) {
         // 0...255...1 = 256+254 = 510 steps
-        int b = (now % _duration) * 510L / _duration;
+        int b = (now % duration) * 510L / duration;
         if (b > 255)
           b = 510 - b;
-        _strip->setBrightness(b * _brightness / 100);
-        _setColors(_colors);
+        _strip->setBrightness(b * brightness / 100);
+        _setColors(value);
 
       } // if
-      _needShow = true;
+      needUpdate = true;
     }
   } // if
 } // loop()
@@ -213,8 +196,8 @@ void NeoElement::loop()
 void NeoElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  Element::pushState(callback);
-  callback("value", _colors.c_str());
+  LightElement::pushState(callback);
+  // callback("value", value.c_str());
 } // pushState()
 
 

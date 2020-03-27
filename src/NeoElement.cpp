@@ -80,7 +80,8 @@ void NeoElement::init(Board *board)
   _colors = "0";
   _pin = 2;
   _count = 8;
-  _brightness = (256/2); // 50%
+  _brightness = 50;
+  _brightness_255 = (255 / 2); // 50%
   _duration = 4000;
   _needShow = false;
 } // init()
@@ -109,11 +110,21 @@ bool NeoElement::set(const char *name, const char *value)
       _mode = Mode::flow;
     else if (_stricmp(value, "pulse") == 0)
       _mode = Mode::pulse;
+    if (_strip) {
+      _strip->setBrightness(_brightness_255);
+      _needShow = true;
+    }
 
   } else if (_stricmp(name, "brightness") == 0) {
-    _brightness = _atoi(value) * 256 / 100;
+    _brightness = _atoi(value);
+    if (_brightness < 0)
+      _brightness = 0;
+    if (_brightness > 100)
+      _brightness = 100;
+    _brightness_255 = _brightness * 255 / 100;
+
     if (_strip) {
-      _strip->setBrightness(_brightness);
+      _strip->setBrightness(_brightness_255);
       if (_mode == Mode::color) {
         _setColors(_colors);
       }
@@ -148,9 +159,10 @@ void NeoElement::start()
   if (_strip) {
     _strip->begin();
     _setColors(_colors);
-    _strip->setBrightness(_brightness);
+    _strip->setBrightness(_brightness_255);
     _needShow = true;
   }
+  LOGGER_EINFO("start %d,%d", (_strip != nullptr), _brightness);
 } // start()
 
 
@@ -183,7 +195,9 @@ void NeoElement::loop()
       } else if (_mode == Mode::pulse) {
         // 0...255...1 = 256+254 = 510 steps
         int b = (now % _duration) * 510L / _duration;
-        _strip->setBrightness(b > 255 ? 510 - b : b);
+        if (b > 255)
+          b = 510 - b;
+        _strip->setBrightness(b * _brightness / 100);
         _setColors(_colors);
 
       } // if

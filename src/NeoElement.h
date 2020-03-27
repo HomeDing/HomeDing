@@ -114,6 +114,8 @@ private:
 
   /** Brightness level */
   int _brightness;
+  /** Brightness level in 0..255 */
+  int _brightness_255;
 
   /** duration of animation in msecs */
   unsigned long _duration;

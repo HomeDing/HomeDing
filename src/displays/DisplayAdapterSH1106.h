@@ -26,8 +26,8 @@ public:
    */
   DisplayAdapterSH1106(int address, int h)
   {
-    DisplayAdapterOLED(address, h);
     _address = address;
+    _h = h;
   } // DisplayAdapterSH1106()
 
 
@@ -35,12 +35,13 @@ public:
   {
     // test if a device is attached
     if (!WireUtils::exists(_address)) {
-      LOGGER_INFO("not found %d", _address);
+      LOGGER_ERR("not found %d", _address);
       return (false);
 
     } else {
-      // LOGGER_TRACE("setupDisplay...");
-      SH1106Wire *d = new SH1106Wire(_address, board->I2cSda, board->I2cScl, _resolution);
+      OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
+
+      SH1106Wire *d = new SH1106Wire(_address, board->I2cSda, board->I2cScl, res);
       d->init();
       d->connect();
 
@@ -48,6 +49,14 @@ public:
     } // if
     return (true);
   }; // init()
+
+private:
+  /**
+   * @brief I2C Display device address.
+   */
+  int _address;
+
+  int _h;
 
 }; // class
 

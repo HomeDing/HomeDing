@@ -38,19 +38,23 @@ public:
   DisplayAdapterLCD(int address, int lines, int columns)
       : _address(address), _lines(lines), _cols(columns)
   {
-    lineHeight = 1;
-    charWidth = 1;
+    setLineHeight(1);
+    setCharWidth(1);
+
   } // DisplayAdapterLCD()
 
 
   bool init(Board *board)
   {
+
     // test if a device is attached
     if (!WireUtils::exists(_address)) {
       LOGGER_ERR("not found");
       return (false);
 
     } else {
+      DisplayAdapter::init(board);
+
       // LOGGER_TRACE("setupDisplay...");
       display = new LiquidCrystal_PCF8574(_address);
       display->begin(_cols, _lines);

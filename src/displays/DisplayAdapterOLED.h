@@ -14,34 +14,26 @@
 #ifndef DisplayAdapterOLED_H
 #define DisplayAdapterOLED_H
 
-#include <displays/DisplayAdapter.h>
 #include <OLEDDisplay.h>
+#include <displays/DisplayAdapter.h>
 
 class DisplayAdapterOLED : DisplayAdapter
 {
 public:
-  DisplayAdapterOLED() {
-    // don't use this constructor
-  }
-  
   /**
    * @brief Construct a new Display Adapter for a SH1106 display
    * using specific parameters.
    */
-  DisplayAdapterOLED(int address, int h)
-      : _address(address)
+  DisplayAdapterOLED()
   {
-  if (h == 32)
-      _resolution = GEOMETRY_128_32;
-    else if (h == 64)
-      _resolution = GEOMETRY_128_64;
-    lineHeight = 10;
-    charWidth = 8;
+    setLineHeight(10);
+    setCharWidth(8);
   } // DisplayAdapterSH1106()
 
 
   virtual bool init(Board *board, OLEDDisplay *d)
   {
+
     display = d;
     display->flipScreenVertically();
     display->setTextAlignment(TEXT_ALIGN_LEFT);
@@ -133,17 +125,11 @@ public:
     }
   }; // flush()
 
-protected:
+private:
   /**
    * @brief Reference to the used library object
    */
   OLEDDisplay *display = NULL;
-
-  /**
-   * @brief I2C Deisplay device address.
-   */
-  int _address;
-
 
   bool _dirty;
 

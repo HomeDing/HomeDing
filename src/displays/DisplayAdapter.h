@@ -54,9 +54,13 @@ public:
    */
   virtual void clear(int16_t x, int16_t y, int16_t w, int16_t h);
 
-  virtual int drawText(int16_t x, int16_t y, int16_t h, String &text);
+  virtual int drawText(int16_t x, int16_t y, int16_t h, String &text) {
+        return (drawText(x, y, h, text.c_str()));
+  };
 
   virtual int drawText(int16_t x, int16_t y, int16_t h, const char *text);
+
+  virtual int drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {};
 
   virtual int drawDot(int16_t x, int16_t y, int16_t h, bool fill);
 
@@ -64,7 +68,7 @@ public:
    * @brief The flush method must be called after every output sequence to allow
    * combined sending new information to the display.
    */
-  virtual void flush();
+  virtual void flush() {};
 };
 
 #endif // DisplayAdapter_H

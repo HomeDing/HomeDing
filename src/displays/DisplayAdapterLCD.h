@@ -120,21 +120,11 @@ public:
   } // drawText
 
 
-  int drawText(int16_t x, int16_t y, int16_t h, String &text)
-  {
-    return (drawText(x, y, 1, text.c_str()));
-  }; // drawText()
-
-
   int drawDot(int16_t x, int16_t y, int16_t h, bool fill)
   {
     drawText(x, y, 1, fill ? "\02" : "\01");
     return (1);
   }; // drawDot()
-
-
-  void flush(){}; // flush()
-
 
 private:
   /**

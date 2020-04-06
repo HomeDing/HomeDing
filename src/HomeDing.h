@@ -69,6 +69,7 @@ extern const char *ACTION_ONPRESSURE;
 #ifdef HOMEDING_INCLUDE_DISPLAY
 #define HOMEDING_INCLUDE_DisplayText
 #define HOMEDING_INCLUDE_DisplayDot
+#define HOMEDING_INCLUDE_DisplayLine
 #endif
 
 #include <core/logger.h>
@@ -168,6 +169,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_DisplayDot
 #include <DisplayDotElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DisplayLine
+#include <DisplayLineElement.h>
 #endif
 
 // ===== OPTIONAL ELEMENTS =====

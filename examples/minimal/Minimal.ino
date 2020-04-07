@@ -14,6 +14,7 @@
  * Changelog:
  * * 12.11.2019 Minimal Example created from development sketch.
  * * 20.12.2019 updated from DevDing example
+ * * 07.04.2019 updated from DevDing example, no sensor elements, no elements that need libraries.
  */
 
 #define HOMEDING_REGISTER 1
@@ -25,20 +26,11 @@
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Switch
 #define HOMEDING_INCLUDE_AND
-#define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalOut
-#define HOMEDING_INCLUDE_PWMOut
-
-// Use some more Elements that need additional libraries
-#define HOMEDING_INCLUDE_DHT
-#define HOMEDING_INCLUDE_BME680
-#define HOMEDING_INCLUDE_DS18B20
-#define HOMEDING_INCLUDE_NEOPIXEL
-
 #define HOMEDING_INCLUDE_NTPTIME
 
 #include <Arduino.h>
@@ -85,7 +77,7 @@ void handleRedirect()
   } else {
     url = "http://";
     url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
-    url.concat("/$setup");
+    url.concat("/$setup.htm");
   }
   server.sendHeader("Location", url, true);
   server.send(302);
@@ -102,7 +94,7 @@ void setup(void)
 
   Serial.setDebugOutput(false);
 
-  LOGGER_INFO("HomeDing Device is starting...");
+  LOGGER_INFO("Device starting...");
 
   // ----- setup the file system and load configuration -----
   SPIFFS.begin();

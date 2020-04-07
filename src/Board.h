@@ -212,7 +212,7 @@ public:
   /**
    * Max. time to wait for a network connection during startup.
    */
-  int maxConnectTime = 30 * 1000;
+  int maxConnectTime = 10 * 1000;
 
 
   /**

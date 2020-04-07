@@ -69,9 +69,13 @@ public:
   // term() is not required because no terminateion functionality
 
 private:
-
-void _sendSchema();
-
+  void _sendSchema();
 };
+
+#ifdef HOMEDING_REGISTER
+// Register the SSDPElement in the ElementRegistry
+bool SSDPElement::registered =
+    ElementRegistry::registerElement("ssdp", SSDPElement::create);
+#endif
 
 #endif

@@ -157,10 +157,4 @@ void NTPTimeElement::pushState(
 } // pushState()
 
 
-// ===== Register =====
-
-// Register the NTPTimeElement onto the ElementRegistry.
-bool NTPTimeElement::registered =
-    ElementRegistry::registerElement("ntptime", NTPTimeElement::create);
-
 // End.

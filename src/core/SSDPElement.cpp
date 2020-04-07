@@ -92,8 +92,4 @@ bool SSDPElement::set(const char *name, const char *value)
 } // set()
 
 
-// Register the SSDPElement in the ElementRegistry
-bool SSDPElement::registered =
-    ElementRegistry::registerElement("ssdp", SSDPElement::create);
-
 // End

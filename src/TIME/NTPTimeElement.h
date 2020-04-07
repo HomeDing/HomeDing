@@ -91,4 +91,11 @@ private:
   unsigned long _nextRead;
 };
 
+#ifdef HOMEDING_REGISTER
+// Register the NTPTimeElement onto the ElementRegistry.
+bool NTPTimeElement::registered =
+    ElementRegistry::registerElement("ntptime", NTPTimeElement::create);
+#endif
+
+
 #endif // NTPTIMEELEMENT_H

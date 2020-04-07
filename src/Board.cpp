@@ -99,7 +99,6 @@ void clearResetCount()
 void Board::init(ESP8266WebServer *serv)
 {
   bootMillis = millis() + 2000;
-  LOGGER_JUSTINFO("init(%d)", bootMillis);
 
   server = serv;
   sysLED = -1; // configured by device-element
@@ -836,8 +835,9 @@ void Board::displayInfo(const char *text1, const char *text2)
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);
-    if (text2)
-      display->drawText(0, display->lineHeight, 0, text2);
+    if (text2) {
+      display->drawText(0, display->getLineHeight(), 0, text2);
+    }
     display->flush();
   } // if
 }

@@ -9,7 +9,8 @@
  * This work is licensed under a BSD style license,
  * https://www.mathertel.de/License.aspx.
  *
- * More information on https://www.mathertel.de/Arduino.
+ * More information on https://www.mathertel.de/Arduino
+ * and https://homeding.github.io/index.htm#page=/examples/develop.md.
  *
  * Changelog:
  * * 02.06.2016 created using the FSWebServer sample.
@@ -37,7 +38,9 @@
 // ----- activatable debug options
 
 // #define DBG_GDB
+// #define DBG_TRACE
 // #define NET_DEBUG
+
 
 #ifdef DBG_GDB
 #include <GDBStub.h>
@@ -46,19 +49,24 @@
 
 #define HOMEDING_REGISTER 1
 
-// Use the Core Elements of the HomeDing Library
+// Use all the System and Core Elements of the HomeDing Library
+#define HOMEDING_INCLUDE_SYSTEM
 #define HOMEDING_INCLUDE_CORE
 
 // Use some more Elements that need additional libraries
 #define HOMEDING_INCLUDE_DHT //  + 1496‬
+#define HOMEDING_INCLUDE_BMP280  // + 2108
 #define HOMEDING_INCLUDE_BME680 // + 7392‬
 #define HOMEDING_INCLUDE_DS18B20 // + 2436‬
 #define HOMEDING_INCLUDE_RFSend // +1772
-#define HOMEDING_INCLUDE_NEOPIXEL
 #define HOMEDING_INCLUDE_ROTARY // +996
 #define HOMEDING_INCLUDE_MENU // + 924
 
-#define HOMEDING_INCLUDE_NTPTIME
+#define HOMEDING_INCLUDE_LIGHT
+#define HOMEDING_INCLUDE_NEOPIXEL // + 3028‬
+
+#define HOMEDING_INCLUDE_WEATHERFEED
+
 #define HOMEDING_INCLUDE_DSTIME // + 3236
 
 // Use some more Elements for Displays
@@ -138,14 +146,12 @@ void setup(void)
   Serial.setDebugOutput(false);
 #endif
 
+#ifdef DBG_TRACE
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
-  // Logger::logger_level = LOGGER_LEVEL_TRACE;
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
+#endif
 
-  LOGGER_INFO("HomeDing Device is starting... (%s)",
-              ESP.getResetReason().c_str());
-
-  LOGGER_JUSTINFO("Free Memory: %d", ESP.getFreeHeap());
-  LOGGER_JUSTINFO("RESET Reason %s", ESP.getResetReason().c_str());
+  LOGGER_INFO("Device starting...");
 
   // ----- setup the file system and load configuration -----
   SPIFFS.begin();

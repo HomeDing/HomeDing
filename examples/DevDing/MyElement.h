@@ -1,5 +1,5 @@
 /**
- * @file MyElement.h
+ * @file TemplateElement.h
  * @brief Element Template class.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
@@ -15,24 +15,24 @@
  * * 30.07.2018 created by Matthias Hertel
  */
 
-#ifndef MyELEMENT_H
-#define MyELEMENT_H
+#ifndef TEMPLATEELEMENT_H
+#define TEMPLATEELEMENT_H
 
 /**
- * @brief MyElement implements...
+ * @brief TemplateElement implements...
  * @details
 @verbatim
 
-The MyElement can ...
+The TemplateElement can ...
 
 @endverbatim
  */
 
-class MyElement : public Element
+class TemplateElement : public Element
 {
 public:
   /**
-   * @brief Factory function to create a MyElement.
+   * @brief Factory function to create a TemplateElement.
    * @return Element*
    */
   static Element *create();

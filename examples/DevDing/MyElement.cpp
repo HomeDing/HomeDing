@@ -1,5 +1,5 @@
 /**
- * @file MyElement.cpp
+ * @file TemplateElement.cpp
  * @brief Element Template class.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -11,7 +11,7 @@
  *
  * More information on https://www.mathertel.de/Arduino
  *
- * Changelog:see MyElement.h
+ * Changelog:see TemplateElement.h
  */
 
 #include <Arduino.h>
@@ -20,7 +20,7 @@
 
 #include <HomeDing.h>
 
-#include "MyElement.h"
+#include "TemplateElement.h"
 
 
 /* ===== Define local constants and often used strings ===== */
@@ -32,23 +32,23 @@
 /* ===== Static factory function ===== */
 
 /**
- * @brief static factory function to create a new MyElement
- * @return MyElement* created element
+ * @brief static factory function to create a new TemplateElement
+ * @return TemplateElement* created element
  */
-Element *MyElement::create()
+Element *TemplateElement::create()
 {
-  return (new MyElement());
+  return (new TemplateElement());
 } // create()
 
 
 /* ===== Element functions ===== */
 
-// MyElement::MyElement() {}
+// TemplateElement::TemplateElement() {}
 
 
 // maybe: overwrite the init() function.
 
-// void MyElement::init(Board *board)
+// void TemplateElement::init(Board *board)
 // {
 //   Element::init(board);
 //   // do something here like initialization
@@ -58,7 +58,7 @@ Element *MyElement::create()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool MyElement::set(const char *name, const char *value)
+bool TemplateElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
@@ -81,9 +81,9 @@ bool MyElement::set(const char *name, const char *value)
 
 
 /**
- * @brief Activate the MyElement.
+ * @brief Activate the TemplateElement.
  */
-void MyElement::start()
+void TemplateElement::start()
 {
   LOGGER_ETRACE("start()");
 
@@ -99,7 +99,7 @@ void MyElement::start()
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void MyElement::loop()
+void TemplateElement::loop()
 {
   // do something
 } // loop()
@@ -108,7 +108,7 @@ void MyElement::loop()
 /**
  * @brief push the current value of all properties to the callback.
  */
-void MyElement::pushState(
+void TemplateElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
@@ -133,12 +133,12 @@ void MyElement::pushState(
 
 // When transferred to the HomeDing library a #define like the
 // HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to MyElement.h:
+// available Elements. See <HomeDing.h> the move these lines to TemplateElement.h:
 
 // #ifdef HOMEDING_REGISTER
-// Register the MyElement onto the ElementRegistry.
-bool MyElement::registered =
-    ElementRegistry::registerElement("my", MyElement::create);
+// Register the TemplateElement onto the ElementRegistry.
+bool TemplateElement::registered =
+    ElementRegistry::registerElement("template", TemplateElement::create);
 // #endif
 
 // End

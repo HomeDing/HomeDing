@@ -13,6 +13,7 @@
  *
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
+ * * 10.04.2020 filesize property added.
  */
 
 #ifndef LOGELEMENT_H
@@ -93,6 +94,7 @@ private:
   String _value;
   time_t _timestamp;
   bool _changed;
+  uint16_t _filesize;
 
   String _logfileName;
   String _logfileOldName;

@@ -15,8 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "LogElement.h"
 
@@ -24,7 +24,7 @@
 
 /* ===== Define local constants and often used strings ===== */
 
-#define LOGFILE_MAXSIZE (4 * 1024 - 200)
+#define LOGFILE_DEFAULTSIZE (4 * 1024 - 200)
 
 /* ===== Static factory function ===== */
 
@@ -43,6 +43,7 @@ Element *LogElement::create()
 LogElement::LogElement()
 {
   startupMode = Element_StartupMode::Time;
+  _filesize = LOGFILE_DEFAULTSIZE;
 }
 
 
@@ -52,7 +53,7 @@ void LogElement::_logToFile()
 
   File f = SPIFFS.open(_logfileName, "a");
 
-  if (f.size() > LOGFILE_MAXSIZE) {
+  if (f.size() > _filesize) {
     // rename to LOGFILE_OLD_NAME
     f.close();
     SPIFFS.remove(_logfileOldName);
@@ -87,6 +88,9 @@ bool LogElement::set(const char *name, const char *value)
       _timestamp = _board->getTime();
       _changed = true;
     }
+
+  } else if (_stricmp(name, "filesize") == 0) {
+    _filesize = _atoi(value);
 
   } else if (_stricmp(name, "filename") == 0) {
     // name of logfile

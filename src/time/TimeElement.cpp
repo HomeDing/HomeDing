@@ -144,10 +144,4 @@ void TimeElement::_sendAction(String &action, const char *fmt, time_t tStamp)
 } // _sendAction()
 
 
-// ===== Register =====
-
-// Register the TimeElement onto the ElementRegistry.
-bool TimeElement::registered =
-    ElementRegistry::registerElement("time", TimeElement::create);
-
 // End.

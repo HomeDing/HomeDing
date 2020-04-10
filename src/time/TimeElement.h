@@ -85,4 +85,13 @@ private:
   String _dateAction;
 };
 
+// ===== Register =====
+
+#ifdef HOMEDING_REGISTER
+// Register the TimeElement onto the ElementRegistry.
+bool TimeElement::registered =
+    ElementRegistry::registerElement("time", TimeElement::create);
+#endif
+
+
 #endif // TIMEELEMENT_H

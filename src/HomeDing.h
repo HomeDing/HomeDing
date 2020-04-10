@@ -26,9 +26,11 @@ extern const char *ACTION_ONPRESSURE;
 
 // These elements that are required in any case add themselves to the ElementRegistry.
 // They are registered into the ElementRegistry using the initialization of ::registered in the *.cpp files:
-// See 
-// DeviceElement.cpp, OTAElement
-// There are no HOMEDING_INCLUDE_ defines for these Elements:
+//
+// ===== SYSTEM Elements =====
+
+// The only strictly required elements are: DeviceElement and OTAElement. They are included any time.
+// The other system level elements SSDPElement, TimeElement 
 
 // ===== CORE Elements =====
 
@@ -43,6 +45,8 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_CORE
 
+#define HOMEDING_INCLUDE_SYSTEM // all system elements
+
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Switch
@@ -52,16 +56,19 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_PWMOut
 
 #define HOMEDING_INCLUDE_AND
-#define HOMEDING_INCLUDE_Time
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
 
 #define HOMEDING_INCLUDE_LOG
-#define HOMEDING_INCLUDE_PMS
 
 #define HOMEDING_INCLUDE_REMOTE
+#endif
 
+#ifdef HOMEDING_INCLUDE_SYSTEM
+#define HOMEDING_INCLUDE_SSDP
+#define HOMEDING_INCLUDE_NTPTIME
+#define HOMEDING_INCLUDE_Time
 #endif
 
 // Easy include of all elements for an attached display.

@@ -29,7 +29,7 @@
 /**
  * @brief Signature of the callback function.
  */
-typedef std::function<void(int level, char *path, char *name, char *value)>
+typedef std::function<void(int level, char *path, char *value)>
     MicroJsonCallbackFn;
 
 class MicroJson

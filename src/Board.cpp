@@ -27,6 +27,9 @@
 
 #include <DNSServer.h>
 
+#define TRACE(...)
+// #define TRACE(...) LOGGER_INFO(__VA_ARGS__)
+
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
@@ -117,6 +120,7 @@ void Board::init(ESP8266WebServer *serv)
 
 void Board::_checkNetState()
 {
+  delay(0);
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
     LOGGER_RAW("new netstate: %d", newState);
@@ -135,42 +139,42 @@ void Board::_checkNetState()
  */
 void Board::addElements()
 {
-  LOGGER_TRACE("addElements()");
+  TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
   MicroJson *mj;
 
   mj = new MicroJson(
-      [this, &_lastElem](int level, char *path, char *name, char *value) {
-        // LOGGER_TRACE("callback %d %s", level, path);
+      [this, &_lastElem](int level, char *path, char *value) {
+        TRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
 
-        if (level == 3) {
-          if (name == NULL) {
-            LOGGER_TRACE("new %s", path);
-            // path = <elem-type>/<elem-name>
+        if (level == 2) {
+          LOGGER_TRACE("new %s", path);
+          // extract type name
+          char typeName[32];
 
-            // create that element using the typename
-            char tmp[32];
-            strncpy(tmp, path, sizeof(tmp));
-            tmp[31] = '\0'; // force termination
-            char *p = strchr(tmp, MICROJSON_PATH_SEPARATOR);
-            if (p)
-              *p = '\0'; // cut at first path separator. The type remains in the buffer.
+          char *p = path;
+          char *t = typeName;
+          while (*p && *p != MICROJSON_PATH_SEPARATOR) {
+            *t++ = *p++;
+          } // while
+          *t = '\0';
 
-            _lastElem = ElementRegistry::createElement(tmp);
-            if (_lastElem == NULL) {
-              LOGGER_ERR("Cannot create Element type %s", tmp);
+          _lastElem = ElementRegistry::createElement(typeName);
+          if (_lastElem == NULL) {
+            LOGGER_ERR("Cannot create Element type %s", typeName);
 
-            } else {
-              // add to the list of elements
-              _add(path, _lastElem);
-            } // if
-
-          } else if (_lastElem != NULL) {
-            // add a parameter to the last Element
-            LOGGER_TRACE(" %s:%s", name, value);
-            _lastElem->set(name, value);
+          } else {
+            // add to the list of elements
+            _add(path, _lastElem);
           } // if
+
+        } else if ((level > 2) && (_lastElem != NULL)) {
+          char *name = strrchr(path, MICROJSON_PATH_SEPARATOR)+1;
+          LOGGER_TRACE(" %s=%s", name, value ? value : "-");
+          // add a parameter to the last Element
+          // LOGGER_TRACE(" %s:%s", name, value);
+          _lastElem->set(name, value);
         } // if
       });
 
@@ -478,7 +482,8 @@ void Board::loop()
           _newState(BOARDSTATE_CONNECT);
         } else {
           LOGGER_INFO("no-net restarting...\n");
-          delay(3000);
+          clearResetCount();
+          delay(1000);
           ESP.restart();
         }
       } else {

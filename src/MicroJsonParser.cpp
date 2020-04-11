@@ -141,7 +141,7 @@ void strncat(char *s, char ch, int len)
  */
 void MicroJson::parse(char ch)
 {
-  int _level = __level; 
+  int _level = __level;
 
   // // create some debug output on relevant input characters
   // if (!(_state & MJ_IGNOREBLANCS) || !isspace(ch)) {
@@ -166,9 +166,8 @@ void MicroJson::parse(char ch)
     } else {
       _level++;
       _index[_level] = MJ_OBJECTLEVEL;
-
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
-      (_callbackFn)(_level, _path, NULL, NULL);
+      // (_callbackFn)(_level, _path, NULL); // empty not required
     }
 
   } else if ((_state == MJ_STATE_PRE_NAME) && (ch == '"')) {
@@ -237,27 +236,28 @@ void MicroJson::parse(char ch)
       _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE);
 
     } else if (ch == '{') {
+      if (_path[0] != NUL)
+        strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
+      strncat(_path, _name, sizeof(_path));
+      (_callbackFn)(_level , _path, NULL);
+
       // nested object
       _level++;
       _index[_level] = MJ_OBJECTLEVEL;
 
-      if (_path[0] != NUL)
-        strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
-      strncat(_path, _name, sizeof(_path));
-      // _name[0] = _value[0] = NUL; ??
-      (_callbackFn)(_level, _path, NULL, NULL);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
 
     } else if (ch == '[') {
       // open array
-      _level++;
-      TRACE("array open level %d", _level);
-      _index[_level] = MJ_ARRAYLEVEL;
-
+      TRACE("array open level %d", _level+1);
       if (_path[0] != NUL)
         strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
-      (_callbackFn)(_level, _path, NULL, NULL); // array object ???
+      (_callbackFn)(_level, _path, NULL); // array object ???
+
+      _level++;
+      _index[_level] = MJ_ARRAYLEVEL;
+
       _state = MJ_NEWSTATE(MJ_STATE_PRE_ITEM);
 
 
@@ -265,6 +265,7 @@ void MicroJson::parse(char ch)
       strncat(_value, ch, sizeof(_value));
       _state = MJ_NEWSTATE(MJ_STATE_NUM_VALUE);
     }
+
   } else if (_state == MJ_STATE_NUM_VALUE) {
     if (isdigit(ch) || (ch == '.')) {
       strncat(_value, ch, sizeof(_value));
@@ -272,8 +273,10 @@ void MicroJson::parse(char ch)
     } else {
       // this character doesn't belong to the value any more.
       // LOGGER_RAW(" value=%s", _value);
-
-      (_callbackFn)(_level, _path, _name, _value);
+      strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
+      strncat(_path, _name, sizeof(_path));
+      (_callbackFn)(_level, _path, _value);
+      *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
       parse(ch); // parse this character again.
     }
@@ -287,7 +290,10 @@ void MicroJson::parse(char ch)
 
     } else {
       // quoted value completed
-      (_callbackFn)(_level, _path, _name, _value);
+      strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
+      strncat(_path, _name, sizeof(_path));
+      (_callbackFn)(_level, _path, _value);
+      *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
     }
   } else if (_state == MJ_STATE_Q_VALUE_ESC) {
@@ -344,7 +350,7 @@ void MicroJson::parse(char ch)
       // close array
       TRACE("array close.");
       _level--;
-        // remove last path element
+      // remove last path element
       *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
       // _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE); // stay in the same state
 

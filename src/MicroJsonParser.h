@@ -16,6 +16,7 @@
  * Changelog:
  * * created by Matthias Hertel
  * * 21.01.2020 supporting arrays
+ * * 11.04.2020 better supporting arrays
  */
 
 
@@ -61,7 +62,7 @@ protected:
   void parse(char ch);
 
   int _state;
-  int _level;
+  int __level;
 
   char _path[64];
   int  _index[12]; // -1 for object

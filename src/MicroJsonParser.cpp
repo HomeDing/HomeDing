@@ -20,8 +20,10 @@
 
 #include <FS.h>
 
+// enable MJ_TRACE to get some very detailled output on parsing
+// #define MJ_TRACE
+
 // Remarks:
-// * No Arrays
 // * no unquoted names
 
 // State definitions. Use some bits for special functionality
@@ -55,11 +57,13 @@
 #define MJ_OBJECTLEVEL (-1)
 #define MJ_ARRAYLEVEL (0)
 
-#if 0
+#if defined(MJ_TRACE)
 // DEBUG State transitions
-#define MJ_NEWSTATE(newState) (LOGGER_INFO("state %x %d:<%s>:", newState & 0xFF, _level, _path), newState)
+#define MJ_NEWSTATE(newState) (LOGGER_INFO("state %x %d:<%s>:", newState & 0xFF, _level, _path), delay(1), newState)
+#define TRACE(...) LOGGER_INFO(__VA_ARGS__)
 #else
 #define MJ_NEWSTATE(newState) (newState)
+#define TRACE(...)
 #endif
 
 #define MJ_ERROR(reason) (LOGGER_ERR(reason), MJ_STATE_ERROR)
@@ -68,8 +72,6 @@
 MicroJson::MicroJson(MicroJsonCallbackFn callback)
 {
   _callbackFn = callback;
-  _state = MJ_STATE_INIT;
-  _level = 0;
   _path[0] = NUL;
   _name[0] = NUL;
   _value[0] = NUL;
@@ -79,37 +81,41 @@ MicroJson::MicroJson(MicroJsonCallbackFn callback)
 
 void MicroJson::parse(const char *s)
 {
-  _state = MJ_STATE_INIT;
-  _level = 0;
-  _index[0] = MJ_OBJECTLEVEL;
+  if (_callbackFn) {
+    _state = MJ_STATE_INIT;
+    __level = 0;
+    _index[0] = MJ_OBJECTLEVEL;
 
-  while ((s != NULL) && (*s != '\0')) {
-    parse(*s++);
-  }
+    while ((s != NULL) && (*s != '\0')) {
+      parse(*s++);
+    } // while
+  } // if
 };
 
 
 void MicroJson::parseFile(const char *fName)
 {
-  char buffer[64];
+  char buffer[128];
   char *p;
   size_t len;
 
-  parse(""); // init 
+  parse(""); // init
 
-  if (SPIFFS.exists(fName)) {
-    // LOGGER_RAW("parsing file %s", fName);
+  if (_callbackFn) {
+    if (SPIFFS.exists(fName)) {
+      TRACE("parsing file %s", fName);
 
-    File file = SPIFFS.open(fName, "r");
-    while (file.available()) {
-      len = file.readBytes(buffer, sizeof(buffer));
-      p = buffer;
-      while (len > 0) {
-        parse(*p++);
-        len--;
+      File file = SPIFFS.open(fName, "r");
+      while (file.available()) {
+        len = file.readBytes(buffer, sizeof(buffer));
+        p = buffer;
+        while (len > 0) {
+          parse(*p++);
+          len--;
+        }
       }
-    }
-    file.close();
+      file.close();
+    } // if
   } // if
 };
 
@@ -135,14 +141,16 @@ void strncat(char *s, char ch, int len)
  */
 void MicroJson::parse(char ch)
 {
-  // create some debug output on relevant input characters
+  int _level = __level; 
+
+  // // create some debug output on relevant input characters
   // if (!(_state & MJ_IGNOREBLANCS) || !isspace(ch)) {
-  //   LOGGER_INFO("> (%c)", ch);
+  //   TRACE("> (%c)", ch);
   // }
 
   if ((_state & MJ_IGNOREBLANCS) && isspace(ch)) {
     // ignore white space here.
-    // LOGGER_INFO(" ignored");
+    // TRACE(" ignored");
 
   } else if (_state == MJ_STATE_ERROR) {
     // stay in error status
@@ -160,8 +168,7 @@ void MicroJson::parse(char ch)
       _index[_level] = MJ_OBJECTLEVEL;
 
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
-      if (_callbackFn)
-        (_callbackFn)(_level, _path, NULL, NULL);
+      (_callbackFn)(_level, _path, NULL, NULL);
     }
 
   } else if ((_state == MJ_STATE_PRE_NAME) && (ch == '"')) {
@@ -172,7 +179,6 @@ void MicroJson::parse(char ch)
     if (ch != '"') {
       strncat(_name, ch, sizeof(_name));
     } else {
-      // LOGGER_RAW(" name=%s", _name);
       _state = MJ_NEWSTATE(MJ_STATE_ASSIGN);
     } // if
 
@@ -185,16 +191,25 @@ void MicroJson::parse(char ch)
 
 
   } else if (_state == MJ_STATE_PRE_ITEM) {
-    if (ch == '{') {
-      char tmp[16];
-      itoa(_index[_level], tmp, 10);
-      strncat(_path, '[', sizeof(_path));
-      strncat(_path, tmp, sizeof(_path));
-      strncat(_path, ']', sizeof(_path));
+    // new item in array: add [x] to path
+    char tmp[16];
+    itoa(_index[_level], tmp, 10);
+    strncat(_path, '[', sizeof(_path));
+    strncat(_path, tmp, sizeof(_path));
+    strncat(_path, ']', sizeof(_path));
+    TRACE("array item: %s", _path);
 
+    if (ch == '{') {
+      // open object level
       _level++;
       _index[_level] = MJ_OBJECTLEVEL;
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
+
+    } else {
+      // just a value
+      _name[0] = NUL;
+      _state = MJ_NEWSTATE(MJ_STATE_PRE_VALUE);
+      parse(ch); // parse this character again.
     }
 
   } else if (_state == MJ_STATE_POST_ITEM) {
@@ -216,6 +231,7 @@ void MicroJson::parse(char ch)
     }
 
   } else if (_state == MJ_STATE_PRE_VALUE) {
+    _value[0] = NUL;
     if (ch == '"') {
       // quoted value / string
       _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE);
@@ -229,21 +245,19 @@ void MicroJson::parse(char ch)
         strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
       // _name[0] = _value[0] = NUL; ??
-      if (_callbackFn)
-        (_callbackFn)(_level, _path, NULL, NULL);
+      (_callbackFn)(_level, _path, NULL, NULL);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
 
     } else if (ch == '[') {
       // open array
-
       _level++;
+      TRACE("array open level %d", _level);
       _index[_level] = MJ_ARRAYLEVEL;
 
       if (_path[0] != NUL)
         strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
-      if (_callbackFn)
-        (_callbackFn)(_level, _path, NULL, NULL);
+      (_callbackFn)(_level, _path, NULL, NULL); // array object ???
       _state = MJ_NEWSTATE(MJ_STATE_PRE_ITEM);
 
 
@@ -258,8 +272,8 @@ void MicroJson::parse(char ch)
     } else {
       // this character doesn't belong to the value any more.
       // LOGGER_RAW(" value=%s", _value);
-      if (_callbackFn)
-        (_callbackFn)(_level, _path, _name, _value);
+
+      (_callbackFn)(_level, _path, _name, _value);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
       parse(ch); // parse this character again.
     }
@@ -272,9 +286,8 @@ void MicroJson::parse(char ch)
       strncat(_value, ch, sizeof(_value));
 
     } else {
-      // LOGGER_RAW(" value=%s", _value);
-      if (_callbackFn)
-        (_callbackFn)(_level, _path, _name, _value);
+      // quoted value completed
+      (_callbackFn)(_level, _path, _name, _value);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
     }
   } else if (_state == MJ_STATE_Q_VALUE_ESC) {
@@ -320,13 +333,28 @@ void MicroJson::parse(char ch)
         _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
 
       } else {
-        _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
+        // next array item: remove last [x] from path
+        TRACE("array next item");
+        *strrchr(_path, '[') = NUL;
+        _index[_level]++;
+        _state = MJ_NEWSTATE(MJ_STATE_PRE_ITEM);
       }
 
+    } else if (ch == ']') {
+      // close array
+      TRACE("array close.");
+      _level--;
+        // remove last path element
+      *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
+      // _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE); // stay in the same state
+
     } else if (ch == '}') {
+      TRACE("object close.");
       // close the object
       _level--;
       if (_index[_level] != MJ_OBJECTLEVEL) {
+        // array item was closed: remove last [x] from path
+        TRACE("array next item");
         *strrchr(_path, '[') = NUL;
         _state = MJ_NEWSTATE(MJ_STATE_POST_ITEM);
 
@@ -346,6 +374,7 @@ void MicroJson::parse(char ch)
       }
     } // if
   }
+  __level = _level;
 } // parse()
 
 // end.

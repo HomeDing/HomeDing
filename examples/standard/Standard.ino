@@ -9,25 +9,12 @@
  * This work is licensed under a BSD style license,
  * https://www.mathertel.de/License.aspx.
  *
- * More information on https://www.mathertel.de/Arduino and https://homeding.github.io/.
+ * More information on https://www.mathertel.de/Arduino
+ * and https://homeding.github.io/index.htm#page=/examples/develop.md.
  *
  * Changelog:
  * * 12.11.2019 Standard Example created from development sketch.
  */
-
-#include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-
-#include <FS.h>
-
-#include <BoardServer.h>
-#include <ElementRegistry.h>
-#include <FileServer.h>
 
 #define HOMEDING_REGISTER 1
 
@@ -51,14 +38,24 @@
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
 
-// #define HOMEDING_INCLUDE_SERIALLINE
+#include <Arduino.h>
 
+#include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+
+#include <FS.h>
+
+#include <Board.h>
+#include <Element.h>
 #include <HomeDing.h>
-#include <MicroJsonComposer.h>
+#include <BoardServer.h>
+#include <FileServer.h>
+
+// ===== include project specific elements =====
 
 static const char respond404[] PROGMEM =
-R"==(<html><head><title>File not found</title></head><body>
-File not found</body></html>)==";
+    R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
 
 // ===== WLAN credentials =====
 
@@ -83,7 +80,7 @@ void handleRedirect()
   } else {
     url = "http://";
     url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
-    url.concat("/$setup");
+    url.concat("/$setup.htm");
   }
   server.sendHeader("Location", url, true);
   server.send(302);
@@ -100,7 +97,7 @@ void setup(void)
 
   Serial.setDebugOutput(false);
 
-  LOGGER_INFO("HomeDing Device is starting...");
+  LOGGER_INFO("Device starting...");
 
   // ----- setup the file system and load configuration -----
   SPIFFS.begin();
@@ -114,7 +111,8 @@ void setup(void)
   server.addHandler(new BoardHandler(&mainBoard));
 
   // Static files in the file system.
-  server.addHandler(new FileServerHandler(SPIFFS, "NO-CACHE"));
+  server.addHandler(new FileServerHandler(SPIFFS, "NO-CACHE", &mainBoard));
+  // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {
     const char *uri = server.uri().c_str();

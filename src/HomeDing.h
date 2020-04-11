@@ -223,10 +223,6 @@ extern const char *ACTION_ONPRESSURE;
 #include <MenuElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_SERIALLINE
-#include <SerialCmdElement.h>
-#endif
-
 #ifdef HOMEDING_INCLUDE_SSDP
 #include <core/SSDPElement.h>
 #endif

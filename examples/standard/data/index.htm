@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>IoT HomeDing Device</title>
+
+  <link rel="icon" type="image/png" href="/favicon48.png" sizes="48x48">
+  <meta name="application-name" content="Ding" />
+  <meta name="msapplication-config" content="/browserconfig.xml" />
+  <meta name="msapplication-TileColor" content="#2b5797" />
+  <meta name="msapplication-TileImage" content="/favicon144.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon180.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" type="image/png" href="/favicon48.png" sizes="48x48">
+
+  <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
+
+  <script src="/polyfill.js"></script>
+  <script src="/es6-promise.auto.js"></script>
+  <script src="/micro.js"></script>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="u-header">
+      <a href="/" title="Startpage"><img class="icon" src="/i/device.svg" /></a>
+      <h1>Device</h1>
+    </div>
+
+    <div class="u-navbar">
+      <a class="button" href="/">Home</a>
+      <a class="button" href="/board.htm">Board</a>
+      <a class="button" href="/microide.htm">IDE</a>
+      <a class="button" href="/log.htm">Log</a>
+    </div>
+
+    <div class="row wrap">
+      <div class="col card">
+        <div class="block header">
+          <h2><img style="margin-right:0.4em;height:1em" src="/i/home.svg" />Device Pages</h2>
+        </div>
+        <div class="block">
+          <p><a href="log.htm">Log output</a></p>
+          <p><a href="panel.htm">Panel</a></p>
+          <p><a href="ding.htm">Ding</a></p>
+        </div>
+      </div>
+
+      <div class="col card">
+        <div class="block header">
+          <h2>Build-in Setup Pages</h2>
+        </div>
+        <div class="block">
+          <p><a href="$setup.htm">WiFi Setup</a></p>
+          <p><a href="$boot.htm">Web Update</a></p>
+          <p><a href="$upload.htm">File Upload</a></p>
+        </div>
+      </div>
+
+      <div class="col card">
+        <div class="block header">
+          <h2>Insights</h2>
+        </div>
+
+        <div class="block">
+          <p><a href="/env.json">Env file</a></p>
+          <p><a href="/config.json">Config file</a></p>
+
+          <p><a href="/$board">State of elements</a></p>
+          <p><a href="/$list">current files</a></p>
+          <p><a href="/ssdp.xml">SSDP description</a></p>
+          <p><a href="/$reboot">reboot</a></p>
+        </div>
+      </div>
+
+      <div class="col card">
+        <div class="block header">
+          <h2>File System Memory</h2>
+        </div>
+
+        <div class="block">
+          <object id="meminfo" data="pieChart.svg" type="image/svg+xml"
+            style="float:left;width:120px;height:120px;"></object>
+          <p><span id="memTotal"></span> bytes available.</p>
+          <p><span id="memUsed"></span> bytes (<span id="memPart"></span>%) in use</p>
+        </div>
+      </div>
+
+      <div class="col card">
+        <div class="block header">
+          <h2>Network</h2>
+        </div>
+        <div class="block">
+          <div class="form-group"><label>Hostname:</label><span id="hostName"></span></div>
+          <div class="form-group"><label>WiFi:</label> <span id="netName"></span></div>
+        </div>
+      </div>
+
+      <div class="col card">
+        <div class="block header">
+          <h2>SysInfo</h2>
+        </div>
+        <div class="block">
+          <pre id="sysinfo"></pre>
+        </div>
+      </div>
+
+      <div class="col card">
+        <div class="block">
+          <div class="form-group">
+            <label for="elemsel">Element Type:</label>
+            <select id="elemsel">
+              <option disabled>select...</option>
+            </select>
+          </div>
+        </div>
+        <div class="block">
+          <object id="elemsvg" data="element.svg" type="image/svg+xml" style="height:320px; width:800px"></object>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+      var string = msg.toLowerCase();
+      var substring = 'script error';
+      if (string.indexOf(substring) > -1) {
+        alert('Script Error: See Browser Console for Detail');
+      } else {
+        var message = [
+          'Message: ' + msg,
+          'URL: ' + url,
+          'Line: ' + lineNo,
+          'Column: ' + columnNo,
+          'Error object: ' + JSON.stringify(error)
+        ].join(' - ');
+
+        alert(message);
+      }
+
+      return false;
+    };
+  </script>
+
+  <script>
+    var memObj = document.getElementById('meminfo');
+    var elementsData;
+    var selObj = document.getElementById('elemsel');
+    var elemsvgObj = document.getElementById('elemsvg');
+
+    window.addEventListener('load', function () {
+      fetch('/$sysinfo')
+        .then(function (result) {
+          return result.json();
+        })
+        .then(function (d) {
+          var o = document.getElementById('sysinfo');
+          o.innerText = JSON.stringify(d, null, 1)
+            .replace('{\n', '')
+            .replace('\n}', '')
+            .replace(/^\s*/gm, '');
+
+          document.getElementById('memTotal').textContent = d.fsTotalBytes;
+          document.getElementById('memUsed').textContent = d.fsUsedBytes;
+          document.getElementById('memPart').textContent = Math.floor((Number(d.fsUsedBytes) * 100) / Number(d.fsTotalBytes));
+
+          document.getElementById('hostName').textContent = d.devicename;
+          document.getElementById('netName').textContent = d.ssid;
+
+          var memAPI = memObj.getSVGDocument().api;
+          memAPI.setRange([
+            {
+              color: '#304878',
+              part: Number(d['fsUsedBytes'])
+            },
+            {
+              color: '#aaaaaa',
+              part: Number(d.fsTotalBytes) - Number(d.fsUsedBytes)
+            }
+          ]);
+        });
+
+      function elemChange() {
+        var d = elementsData[selObj.value];
+        d.name = selObj.value;
+        elemsvgObj.getSVGDocument().api.create(d);
+      }
+
+      fetch('elements.json')
+        .then(function (result) {
+          return result.json();
+        })
+        .then(function (elList) {
+          elementsData = elList;
+          selObj.innerHTML = '';
+          for (e in elList) {
+            var opt = document.createElement('option');
+            opt.value = e;
+            opt.textContent = e;
+            selObj.appendChild(opt);
+          }
+          elemChange();
+        });
+
+      selObj.addEventListener('change', elemChange);
+    });
+  </script>
+</body>
+
+</html>

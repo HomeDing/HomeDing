@@ -14,6 +14,7 @@
  *
  * Changelog:
  * * 12.11.2019 Standard Example created from development sketch.
+ * * 15.04.2020 fixed library dependencies.
  */
 
 #define HOMEDING_REGISTER 1
@@ -25,7 +26,6 @@
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
-#define HOMEDING_INCLUDE_RFSend
 #define HOMEDING_INCLUDE_ROTARY
 #define HOMEDING_INCLUDE_MENU
 

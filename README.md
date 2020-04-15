@@ -19,7 +19,7 @@ More documentation can be found in the  [HomeDing documentation site](https://ho
 
 ## BSD License
 
-The Homeing library is open-source and uses one of the most permissive licenses so you can use it for any project:
+The HomeDing library is open-source and uses one of the most permissive licenses so you can use it for any project:
 * Private use
 * Commercial use
 * You can modify

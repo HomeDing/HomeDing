@@ -19,12 +19,72 @@
 #include <Element.h>
 
 #include <ElementRegistry.h>
+#include <WireUtils.h>
 #include <sensors/BME680Element.h>
 
 /* ===== Define local constants and often used strings ===== */
 
 // #define SEALEVELPRESSURE_HPA (1013.25)
+struct bme680_dev gas_sensor;
 
+// ===== adapter functions for bme library
+
+static void delay_msec(uint32_t ms)
+{
+  delay(ms);
+}
+
+static int8_t i2c_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
+{
+  int8_t readLen = WireUtils::read(dev_id, reg_addr, reg_data, len);
+  return (readLen != len);
+}
+
+static int8_t i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
+{
+  WireUtils::write(dev_id, reg_addr, reg_data, len);
+  return (0);
+}
+
+
+// ===== provate methods
+
+unsigned long BME680Element::beginReading(void)
+{
+  uint8_t set_required_settings;
+  uint16_t meas_period;
+
+  /* Set the temperature, pressure and humidity settings */
+  gas_sensor.tph_sett.os_hum = BME680_OS_2X;
+  gas_sensor.tph_sett.os_pres = BME680_OS_4X;
+  gas_sensor.tph_sett.os_temp = BME680_OS_8X;
+  gas_sensor.tph_sett.filter = BME680_FILTER_SIZE_3;
+
+  /* Set the remaining gas sensor settings and link the heating profile */
+  gas_sensor.gas_sett.run_gas = BME680_ENABLE_GAS_MEAS;
+  /* Create a ramp heat waveform in 3 steps */
+  gas_sensor.gas_sett.heatr_temp = 320; /* degree Celsius */
+  gas_sensor.gas_sett.heatr_dur = 150; /* milliseconds */
+
+  /* Select the power mode */
+  /* Must be set before writing the sensor configuration */
+  gas_sensor.power_mode = BME680_FORCED_MODE;
+
+  /* Set the required sensor settings needed */
+  set_required_settings = BME680_OST_SEL | BME680_OSP_SEL | BME680_OSH_SEL | BME680_FILTER_SEL | BME680_GAS_SENSOR_SEL;
+
+  /* Set the desired sensor configuration */
+  bme680_set_sensor_settings(set_required_settings, &gas_sensor);
+
+  /* Set the power mode */
+  bme680_set_sensor_mode(&gas_sensor);
+
+  /* Get the total measurement duration so as to sleep or wait till the measurement is complete */
+  bme680_get_profile_dur(&meas_period, &gas_sensor);
+  // LOGGER_ETRACE("meas_period=%d", meas_period);
+
+  return (millis() + meas_period);
+} // beginReading()
 
 /* ===== Static factory function ===== */
 
@@ -81,34 +141,25 @@ bool BME680Element::set(const char *name, const char *value)
 void BME680Element::start()
 {
   // LOGGER_ETRACE("start()");
+  // Setup sensor connectivity and check if sensor is present.
+  gas_sensor.dev_id = _address;
+  gas_sensor.intf = BME680_I2C_INTF;
+  gas_sensor.read = i2c_read;
+  gas_sensor.write = i2c_write;
+  gas_sensor.delay_ms = delay_msec;
+  /* amb_temp can be set to 25 prior to configuring the gas sensor 
+     * or by performing a few temperature readings without operating the gas sensor.
+     */
+  gas_sensor.amb_temp = 25; // just a first guess. will be updated.
 
-  if (!_bme.begin(_address)) {
+  int8_t rslt = bme680_init(&gas_sensor);
+
+  if (rslt != BME680_OK) {
     LOGGER_EERR("no sensor found");
   } else {
-    // Set up oversampling and filter initialization
-    _bme.setTemperatureOversampling(BME680_OS_8X);
-    _bme.setHumidityOversampling(BME680_OS_2X);
-    _bme.setPressureOversampling(BME680_OS_4X);
-    _bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-    _bme.setGasHeater(320, 150); // 320*C for 150 ms
-
     SensorElement::start();
-  } // if
-
-} // start()
-
-
-// read from float value and check if changed.
-bool BME680Element::_readValue(String &strVal, const char *fmt, float value)
-{
-  bool ret = false;
-  char tmp[12];
-  snprintf(tmp, sizeof(tmp), fmt, value);
-  if (!strVal.equals(tmp)) {
-    ret = true;
-    strVal = tmp;
   }
-} // _readValue()
+} // start()
 
 
 bool BME680Element::getProbe(String &values)
@@ -118,19 +169,34 @@ bool BME680Element::getProbe(String &values)
 
   if (!_dataAvailable) {
     // start reading
-    _dataAvailable = _bme.beginReading();
+    _dataAvailable = beginReading();
 
   } else if (_dataAvailable && (millis() < _dataAvailable)) {
     // wait
 
   } else if (_dataAvailable) {
-    _bme.endReading();
-    snprintf(buffer, sizeof(buffer),
-             "%.2f,%.2f,%.0f,%.0f",
-             _bme.temperature, _bme.humidity, _bme.pressure, _bme.gas_resistance);
-    values = buffer;
+    // read data from chip
+    struct bme680_field_data data;
+    int rslt = bme680_get_sensor_data(&data, &gas_sensor);
+    if (rslt) {
+      LOGGER_EERR("get_sensor_data err %d", rslt);
+
+    } else {
+      snprintf(buffer, sizeof(buffer),
+               //  "%.2f,%.2f,%.0f,%.0f,%d",
+               "%d.%02d,%d.%03d,%d,%d",
+               data.temperature / 100, data.temperature % 100,
+               data.humidity / 1000, data.humidity % 1000,
+               data.pressure,
+               data.gas_resistance); // data.gas_index
+      // LOGGER_EINFO("data=%s", buffer);
+      // update ambient temperature for next read
+      gas_sensor.amb_temp = (data.temperature + 50) / 100;
+      // LOGGER_EINFO("amb temp=%d", gas_sensor.amb_temp);
+      values = buffer;
+      newData = true;
+    }
     _dataAvailable = 0;
-    newData = true;
   }
   return (newData);
 } // getProbe()

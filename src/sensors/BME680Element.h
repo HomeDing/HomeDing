@@ -14,6 +14,8 @@
  * Changelog:
  * * 15.02.2019 created by Matthias Hertel
  * * 12.02.2020 rebased on SensorElement.
+ * * 15.04.2020 switch to original bosch https://github.com/BoschSensortec/BME680_driver
+ *              no dependency on Adafruit Unified Sensor and Adafruit BME680 Library.
  */
 
 #ifndef BME680ELEMENT_H
@@ -22,7 +24,7 @@
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
-#include <Adafruit_BME680.h>
+#include <sensors/bme680.h>
 
 /**
  * @brief BME680Element implements...
@@ -82,7 +84,7 @@ protected:
   virtual void sendData(String &values);
 
 private:
-  bool _readValue(String &strVal, const char *fmt, float value);
+  unsigned long beginReading(void);
 
   /**
    * @brief state in reading values from the sensor.
@@ -91,10 +93,7 @@ private:
    */
   unsigned long _dataAvailable;
 
-  int _address = BME680_DEFAULT_ADDRESS;
-
-  // sensor reading library
-  Adafruit_BME680 _bme;
+  int _address = BME680_I2C_ADDR_SECONDARY; // BME680 I2C addresses are 0x76 or 0x77
 
   /**
    * @brief The actions emitted when a new temperature value was read from the

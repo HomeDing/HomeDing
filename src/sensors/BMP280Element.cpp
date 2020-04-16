@@ -170,13 +170,6 @@ void BMP280Element::start()
       WireUtils::write(_address, BMP280_REG_CONTROL, BMP280_MODE_NORMAL | BMP280_OSP_16 | BMP280_OST_16);
 #endif
 
-      WireUtils::dump(_address, BMP280_REG_ID, 1);
-      WireUtils::dump(_address, BMP280_REG_STATE, 1);
-      WireUtils::dump(_address, BMP280_REG_CONTROL, 1);
-      WireUtils::dump(_address, BMP280_REG_CONFIG, 1);
-
-      // WireUtils::dump(_address, BMP280_REG_CALIB, 0x18);
-
       // read all raw calibration data, see table 17
       uint8_t data[24];
       WireUtils::read(_address, BMP280_REG_CALIB, data, 24);

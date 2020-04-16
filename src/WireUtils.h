@@ -32,7 +32,8 @@
 class WireUtils
 {
 public:
-  static void dump(uint8_t address, uint8_t reg, uint8_t len);
+  /** Helper function to inspect a data buffer by dumping in hexadecimal format. */
+  static void dumpBuffer(uint8_t *data, uint8_t len);
 
   /** check for a device on address */
   static bool exists(uint8_t address);
@@ -45,8 +46,8 @@ public:
    */
   static uint8_t read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
 
-  static void write(uint8_t address, uint8_t reg, uint8_t data);
-  static void write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
+  static uint8_t write(uint8_t address, uint8_t reg, uint8_t data);
+  static uint8_t write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
 };
 
 #endif

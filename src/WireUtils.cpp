@@ -19,28 +19,20 @@
 #include "WireUtils.h"
 #include "HardwareSerial.h"
 
-void WireUtils::dump(uint8_t address, uint8_t reg, uint8_t len)
+// activate to get some debug output.
+// #define WIREDUMP
+
+/** Helper function to inspect a data buffer by dumping in hexadecimal format. */
+void WireUtils::dumpBuffer(uint8_t *data, uint8_t len)
 {
-  uint8_t data;
-
-  Serial.printf("i2c dump 0x%02x:", reg);
-
-  Wire.beginTransmission(address);
-  Wire.write(reg);
-  Wire.endTransmission();
-
-  Wire.requestFrom(address, len);
-  while (Wire.available() && (len > 0)) {
-    data = Wire.read();
-    Serial.printf(" %02x", data);
-    len--;
-  }
-  if (len > 0) {
-    Serial.printf(" no more.\n");
-  } else {
-    Serial.printf(".\n");
-  }
-}
+  if (data) {
+    while (len > 0) {
+      Serial.printf(" %02x", *data++);
+      len--;
+    } // while
+    Serial.println();
+  } // if
+} // dumpBuffer()
 
 
 /** check for a device on address */
@@ -71,6 +63,7 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg)
  */
 uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
 {
+  uint8_t *d = data;
   uint8_t done = 0;
 
   Wire.beginTransmission(address);
@@ -79,27 +72,38 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len
 
   Wire.requestFrom(address, len);
   while (Wire.available() && (done < len)) {
-    *data = Wire.read();
+    *d = Wire.read();
     done++;
-    data++;
+    d++;
   }
+
+#ifdef WIREDUMP  
+  Serial.printf("i2c read 0x%02x:", reg);
+  dumpBuffer(data, len);
+#endif
+
   return (done);
 } // read()
 
 
-void WireUtils::write(uint8_t address, uint8_t reg, uint8_t data)
+uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t data)
 {
   Wire.beginTransmission(address); // start transmission to device
   Wire.write(reg); // send register address
   Wire.write(data); // send value to write
-  Wire.endTransmission(); // end transmission
-}
+  return (Wire.endTransmission()); // end transmission
+} // write()
 
 
 // read sequence of bytes to buffer
-void WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
+uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
 {
   uint8_t done = 0;
+
+#ifdef WIREDUMP  
+  Serial.printf("i2c writ 0x%02x:", reg);
+  dumpBuffer(data, len);
+#endif
 
   Wire.beginTransmission(address);
   Wire.write(reg);
@@ -108,8 +112,8 @@ void WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
     len--;
     data++;
   }
-  Wire.endTransmission();
-} // read()
+  return (Wire.endTransmission());
+} // write()
 
 
 // End.

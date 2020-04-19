@@ -85,18 +85,14 @@ void MicroJson::parse(const char *s)
     _state = MJ_STATE_INIT;
     __level = 0;
     _index[0] = MJ_OBJECTLEVEL;
-
-    while ((s != NULL) && (*s != '\0')) {
-      parse(*s++);
-    } // while
+    parseChar(s);
   } // if
 };
 
 
 void MicroJson::parseFile(const char *fName)
 {
-  char buffer[128];
-  char *p;
+  char buffer[128 + 1]; // one extra char for enforced NUL char.
   size_t len;
 
   parse(""); // init
@@ -107,11 +103,10 @@ void MicroJson::parseFile(const char *fName)
 
       File file = SPIFFS.open(fName, "r");
       while (file.available()) {
-        len = file.readBytes(buffer, sizeof(buffer));
-        p = buffer;
-        while (len > 0) {
-          parse(*p++);
-          len--;
+        len = file.readBytes(buffer, sizeof(buffer) - 1);
+        if (len) {
+          buffer[len] = NUL;
+          parseChar(buffer);
         }
       }
       file.close();
@@ -136,11 +131,23 @@ void strncat(char *s, char ch, int len)
 } // strncat()
 
 
+void MicroJson::parseChar(const char *s)
+{
+  if (s != NULL) {
+    while (*s != '\0') {
+      if (parseChar(*s))
+        s++;
+    } // while
+  }
+} // parseChar()
+
+
 /**
  * @brief get the next character from the input and parse.
  */
-void MicroJson::parse(char ch)
+bool MicroJson::parseChar(char ch)
 {
+  bool ret = true; // in most cases
   int _level = __level;
 
   // // create some debug output on relevant input characters
@@ -170,9 +177,14 @@ void MicroJson::parse(char ch)
       // (_callbackFn)(_level, _path, NULL); // empty not required
     }
 
-  } else if ((_state == MJ_STATE_PRE_NAME) && (ch == '"')) {
-    _name[0] = _value[0] = NUL;
-    _state = MJ_NEWSTATE(MJ_STATE_Q_NAME);
+  } else if (_state == MJ_STATE_PRE_NAME) {
+    if (ch == '"') {
+      _name[0] = _value[0] = NUL;
+      _state = MJ_NEWSTATE(MJ_STATE_Q_NAME);
+    } else {
+      _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
+      ret = false; // parse this character again.
+    }
 
   } else if (_state == MJ_STATE_Q_NAME) {
     if (ch != '"') {
@@ -208,7 +220,7 @@ void MicroJson::parse(char ch)
       // just a value
       _name[0] = NUL;
       _state = MJ_NEWSTATE(MJ_STATE_PRE_VALUE);
-      parse(ch); // parse this character again.
+      ret = false; // parse this character again.
     }
 
   } else if (_state == MJ_STATE_POST_ITEM) {
@@ -239,7 +251,7 @@ void MicroJson::parse(char ch)
       if (_path[0] != NUL)
         strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
-      (_callbackFn)(_level , _path, NULL);
+      (_callbackFn)(_level, _path, NULL);
 
       // nested object
       _level++;
@@ -249,7 +261,7 @@ void MicroJson::parse(char ch)
 
     } else if (ch == '[') {
       // open array
-      TRACE("array open level %d", _level+1);
+      TRACE("array open level %d", _level + 1);
       if (_path[0] != NUL)
         strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
@@ -278,7 +290,7 @@ void MicroJson::parse(char ch)
       (_callbackFn)(_level, _path, _value);
       *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
-      parse(ch); // parse this character again.
+      ret = false; // parse this character again.
     }
   } else if (_state == MJ_STATE_Q_VALUE) {
     if (ch == '\\') {
@@ -355,7 +367,7 @@ void MicroJson::parse(char ch)
       // _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE); // stay in the same state
 
     } else if (ch == '}') {
-      TRACE("object close.");
+      TRACE("object close. %d", _level);
       // close the object
       _level--;
       if (_index[_level] != MJ_OBJECTLEVEL) {
@@ -381,6 +393,7 @@ void MicroJson::parse(char ch)
     } // if
   }
   __level = _level;
-} // parse()
+  return(ret);
+} // parseChar()
 
 // end.

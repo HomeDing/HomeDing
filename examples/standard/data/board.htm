@@ -22,86 +22,30 @@
   <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
 
   <style>
-    .activeState {
+    span.activeState,
+    span.setconfig {
       position: absolute;
       top: 0.5rem;
-      right: 0.5rem;
       height: 1.4rem;
       width: 1.4rem;
-      background-image: url(/i/stop.svg);
       background-size: 1.4rem;
     }
 
-    .activeState.active {
+    span.activeState {
+      right: 0.5rem;
+      background-image: url(/i/stop.svg);
+    }
+
+    span.activeState.active {
       background-image: url(/i/start.svg);
-      background-size: 1.4rem;
     }
 
     span.setconfig {
       position: absolute;
-      top: 0.4rem;
       right: 2.2rem;
-      height: 1.4rem;
-      width: 1.4rem;
       background-image: url(/i/config.svg);
-      background-size: 1.4rem;
     }
 
-    #modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    #modalBack {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-color: silver;
-      opacity: 0.75;
-    }
-
-    #modalContainer {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-50%);
-      padding: 0.5em;
-    }
-
-    /* signature dialog */
-    #modalContainer::before,
-    #modalContainer::after {
-      content: "";
-      position: absolute;
-      background-color: red;
-      z-index: -1;
-      width: 40px;
-      height: 40px;
-    }
-
-    #modalContainer::before {
-      top: 0;
-      right: 0;
-    }
-
-    #modalContainer::after {
-      bottom: 0;
-      left: 0;
-    }
-
-    .closedlg {
-      position: absolute;
-      top: 0.4rem;
-      right: 0.4rem;
-      height: 1.8rem;
-      width: 1.8rem;
-      font-size: 1.6rem;
-      background-color: red;
-      text-align: center;
-    }
 
     img,
     #panel {
@@ -276,8 +220,8 @@
   </div>
 
   <div id="modal" class="hidden">
-    <div id="modalBack" onclick="micro.closeModal()"></div>
-    <div id="modalContainer" style="min-width:20px;min-height:20px">Hello, this is modal</div>
+    <div id="modalBack" onclick="modal.close()"></div>
+    <div id="modalContainer"></div>
   </div>
 
   <script>
@@ -299,7 +243,7 @@
     });
 
     addObj.addEventListener('click', function (evt) {
-      micro.openModal('newelementdlg');
+      modal.open('newelementdlg');
     });
 
     function createElement(path, key, value) {

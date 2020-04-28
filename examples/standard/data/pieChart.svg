@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="-24 -24 48 48">
+    <style>
+        .segment{stroke:#fff;stroke-width:.2;stroke-opacity:1}
+    </style>
+    <g id="panel"></g>
+    <script href="microsvg.js"/>
+    <script href="pieChart.js"/>
+</svg>

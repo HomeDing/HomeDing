@@ -18,6 +18,7 @@
  * *   log errors and info to file log.txt
  * * 27.10.2018 rolling logfiles and log_old.txt.
  * * 02.02.2019 reduce Flash memory, optimizing
+ * * 27.04.2019 add some yield(), enabling network events.
  */
 
 #ifndef LOGGER_H

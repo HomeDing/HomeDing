@@ -78,7 +78,6 @@ bool ValueElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "label") == 0) {
     _label = value;
 
-  // } else if (_stricmp(name, "onchange") == 0) { // deprecated: use onValue
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 

@@ -14,7 +14,7 @@
 #ifndef ELEMENTREGISTRY_H
 #define ELEMENTREGISTRY_H
 
-#define REG_MAX_TYPES 48
+#define REG_MAX_TYPES 64
 
 typedef Element *(*CreateElementFn)(void);
 

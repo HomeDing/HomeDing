@@ -59,7 +59,7 @@ NTPTimeElement::NTPTimeElement()
   _ntpServer = "pool.ntp.org";
   _zone = 1; // Central Europe
   _nextRead = 0;
-  _readTime = 24*60*60; // once a day
+  _readTime = 24 * 60 * 60; // once a day
 } // NTPTimeElement()
 
 
@@ -91,15 +91,17 @@ bool NTPTimeElement::set(const char *name, const char *value)
  */
 void NTPTimeElement::start()
 {
-  LOGGER_ETRACE("start()");
   unsigned long now = _board->getSeconds();
 
-  _nextRead = now + 2; // now + min. 2 sec., don't hurry
+  _nextRead = now + 4; // now + min. 2 sec., don't hurry
   _sendTime = 0;
   _state = 0;
   Element::start();
 
+  sntp_stop();
   sntp_set_timezone(_zone);
+  // sntp_set_daylight(3600);
+  sntp_setservername(0, (char *)_ntpServer.c_str());
 } // start()
 
 
@@ -110,37 +112,34 @@ void NTPTimeElement::start()
 void NTPTimeElement::loop()
 {
   unsigned int now = _board->getSeconds();
-  uint32 current_stamp = sntp_get_current_timestamp();
 
-  if ((_state != 1) && (_nextRead < now)) {
-    LOGGER_ETRACE("request sntp sync");
-    sntp_setservername(0, (char *)_ntpServer.c_str());
-    sntp_set_timezone(_zone);
-    // sntp_set_daylight(3600);
-
+  if ((_state == 0) && (_nextRead < now)) {
+    LOGGER_ETRACE("request sync");
     sntp_init();
     _state = 1;
     _sendTime = now;
 
-  } else if ((_state == 1) && (now - _sendTime < 8)) {
-    if (current_stamp < (24 * 60 * 60)) {
-      // not synced yet => wait.
-    } else {
-      LOGGER_EINFO("got time: %d", current_stamp);
-      _state = 2;
-      _nextRead = now + _readTime;
-      sntp_stop();
-
-    } // if
-
   } else if (_state == 1) {
-    // no response within 8 seconds.
-    LOGGER_EERR("No NTP Response :-(");
-    _state = 0;
-    _nextRead = now + 20; // try in some seconds again
-    sntp_stop();
+    if (now - _sendTime < 4) {
+      // wait for response
+      uint32 current_stamp = sntp_get_current_timestamp();
+      if (current_stamp < (24 * 60 * 60)) {
+        // not synced yet => wait.
+      } else {
+        LOGGER_EINFO("got: %d", current_stamp);
+        _state = 0;
+        _nextRead = now + _readTime;
+        sntp_stop();
 
-  } else if (_state == 2) {
+      } // if
+
+    } else {
+      // no response within 4 seconds.
+      LOGGER_EERR("no response");
+      _state = 0;
+      _nextRead = now + 4; // try in some seconds again
+      sntp_stop();
+    } // if
   } // if
 } // loop()
 

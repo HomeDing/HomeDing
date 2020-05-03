@@ -203,28 +203,6 @@ var MicroRegistry = (function () {
     MicroRegistry.prototype.define = function (name, mixin) {
         this._registry[name] = mixin;
     };
-    MicroRegistry.prototype.openModal = function (tmplName, data) {
-        var modalObj = document.getElementById('modal');
-        var containerObj = document.getElementById('modalContainer');
-        if ((modalObj) && (containerObj)) {
-            containerObj.innerHTML = '';
-            containerObj.style.width = "";
-            containerObj.style.height = "";
-            console.log("empty:", containerObj.getBoundingClientRect());
-            micro.insertTemplate(containerObj, tmplName, data);
-            console.log("added:", containerObj.getBoundingClientRect());
-            modalObj.classList.remove('hidden');
-            console.log("visible:", containerObj.getBoundingClientRect());
-        }
-    };
-    MicroRegistry.prototype.closeModal = function () {
-        var modalObj = document.getElementById('modal');
-        var containerObj = document.getElementById('modalContainer');
-        if ((modalObj) && (containerObj)) {
-            modalObj.classList.add('hidden');
-            containerObj.innerHTML = '';
-        }
-    };
     MicroRegistry.prototype.onunload = function (_evt) {
         for (var n in this.List) {
             var obj = this.List[n];
@@ -360,7 +338,10 @@ var GenericWidgetClass = (function (_super) {
         if (src && a)
             this.dispatchAction(a, src['value']);
         if (src.classList.contains('setconfig')) {
-            micro.openModal('configelementdlg', this.data);
+            modal.open('configelementdlg', this.data);
+        }
+        else if (src.tagName == 'H3') {
+            modal.openFocus(this);
         }
     };
     GenericWidgetClass = __decorate([
@@ -641,6 +622,84 @@ var LogWidgetClass = (function (_super) {
     ], LogWidgetClass);
     return LogWidgetClass;
 }(GenericWidgetClass));
+var ModalDialogClass = (function () {
+    function ModalDialogClass() {
+        this._isOpen = false;
+        this._focusStyle = null;
+        this._mObj = null;
+        this._cObj = null;
+        var scope = this;
+        window.addEventListener('load', function () {
+            scope._mObj = document.getElementById('modal');
+            scope._cObj = document.getElementById('modalContainer');
+        });
+    }
+    ModalDialogClass.prototype.isOpen = function () {
+        return (this._isOpen);
+    };
+    ModalDialogClass.prototype.open = function (tmplName, data) {
+        if ((this._mObj) && (this._cObj)) {
+            this._cObj.innerHTML = '';
+            this._cObj.style.width = "";
+            this._cObj.style.height = "";
+            micro.insertTemplate(this._cObj, tmplName, data);
+            this._mObj.classList.remove('hidden');
+            this._isOpen = true;
+        }
+    };
+    ModalDialogClass.prototype.openFocus = function (obj) {
+        var p;
+        if (!this._isOpen && (obj) && (obj.parentElement) && (this._mObj) && (this._cObj)) {
+            this._focusObj = obj;
+            this._focusStyle = obj.getAttribute('style');
+            var r = obj.getBoundingClientRect();
+            p = obj.cloneNode(false);
+            p.style.width = r.width + "px";
+            p.style.height = r.height + "px";
+            obj.parentElement.insertBefore(p, obj);
+            this._placeholderObj = p;
+            obj.classList.add('modalObject');
+            obj.style.top = r.top + 'px';
+            obj.style.left = r.left + 'px';
+            obj.style.width = r.width + 'px';
+            obj.style.height = r.height + 'px';
+            this._cObj.innerHTML = '';
+            this._cObj.style.width = '';
+            this._cObj.style.height = '';
+            var f = 2;
+            f = Math.min(f, (window.innerWidth - 64) / r.width);
+            f = Math.min(f, (window.innerWidth - 64) / r.height);
+            var w = Math.floor(r.width * f) + 'px';
+            var h = Math.floor(r.height * f) + 'px';
+            p = document.createElement('div');
+            p.style.width = w;
+            p.style.height = h;
+            this._cObj.appendChild(p);
+            var r2 = p.getBoundingClientRect();
+            this._mObj.classList.remove('hidden');
+            obj.style.margin = '0';
+            obj.style.top = r2.top + 'px';
+            obj.style.left = r2.left + 'px';
+            obj.style.width = w;
+            obj.style.height = h;
+            this._isOpen = true;
+        }
+    };
+    ModalDialogClass.prototype.close = function () {
+        if ((this._mObj) && (this._cObj)) {
+            this._mObj.classList.add('hidden');
+            if (this._focusObj && this._placeholderObj && this._placeholderObj.parentElement) {
+                this._focusObj.setAttribute('style', this._focusStyle || '');
+                this._focusObj.classList.remove('modalObject');
+                this._placeholderObj.parentElement.removeChild(this._placeholderObj);
+            }
+            this._cObj.innerHTML = '';
+            this._isOpen = false;
+        }
+    };
+    return ModalDialogClass;
+}());
+var modal = new ModalDialogClass();
 var NeoWidgetClass = (function (_super) {
     __extends(NeoWidgetClass, _super);
     function NeoWidgetClass() {
@@ -723,8 +782,8 @@ var SliderWidgetClass = (function (_super) {
         return _this;
     }
     SliderWidgetClass.prototype.connectedCallback = function () {
-        _super.prototype.connectedCallback.call(this);
         this._handle = this.querySelector(".handle");
+        _super.prototype.connectedCallback.call(this);
         if (this._handle) {
             var p = this._handle.parentElement;
             var ps = getComputedStyle(p);

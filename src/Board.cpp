@@ -64,10 +64,9 @@ static unsigned long bootMillis;
 // get the number of resets in the last seconds using rtc memory for counting.
 int getResetCount()
 {
+  // LOGGER_TRACE("getResetCount()");
   int res = 0;
   uint32 netResetValue;
-
-  LOGGER_TRACE("getResetCount");
 
   // check NETRESET_FLAG
   ESP.rtcUserMemoryRead(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
@@ -114,7 +113,7 @@ void Board::init(ESP8266WebServer *serv)
       // https://tools.ietf.org/html/rfc1123 952
 
   _resetCount = getResetCount();
-  LOGGER_JUSTINFO("RESET # %d", _resetCount);
+  LOGGER_INFO("RESET # %d", _resetCount);
 } // init()
 
 
@@ -148,7 +147,9 @@ void Board::addElements()
         TRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
 
-        if (level == 2) {
+        if (level == 1) {
+
+        } else if (level == 2) {
           LOGGER_TRACE("new %s", path);
           // extract type name
           char typeName[32];
@@ -170,7 +171,7 @@ void Board::addElements()
           } // if
 
         } else if ((level > 2) && (_lastElem != NULL)) {
-          char *name = strrchr(path, MICROJSON_PATH_SEPARATOR)+1;
+          char *name = strrchr(path, MICROJSON_PATH_SEPARATOR) + 1;
           LOGGER_TRACE(" %s=%s", name, value ? value : "-");
           // add a parameter to the last Element
           // LOGGER_TRACE(" %s:%s", name, value);
@@ -302,10 +303,12 @@ void Board::loop()
 
   if (boardState == BOARDSTATE_RUN) {
     // Most common state.
+
     if (!startComplete) {
       if (!hasTimeElements) {
         startComplete = true;
       } else {
+        // starting time depending elements
         // check if time is valid now -> start all elements with
         time_t current_stamp = getTime();
         if (current_stamp) {
@@ -357,7 +360,7 @@ void Board::loop()
     // search any time requesting elements
     Element *l = _elementList;
     while (l != nullptr) {
-      if (l->startupMode == Element_StartupMode::Network) {
+      if (l->startupMode == Element_StartupMode::Time) {
         hasTimeElements = true;
       } // if
       l = l->next;
@@ -487,7 +490,7 @@ void Board::loop()
           ESP.restart();
         }
       } else {
-        delay(100);
+        yield();
       }
     } // if
 
@@ -555,9 +558,7 @@ void Board::loop()
 
     if (now > _captiveEnd)
       reboot(false);
-
   } // if
-
 } // loop()
 
 
@@ -834,9 +835,7 @@ void Board::reboot(bool wipe)
 
 void Board::displayInfo(const char *text1, const char *text2)
 {
-  LOGGER_INFO(text1);
-  if (text2)
-    LOGGER_INFO(text2);
+  LOGGER_INFO("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

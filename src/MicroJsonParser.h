@@ -17,6 +17,8 @@
  * * created by Matthias Hertel
  * * 21.01.2020 supporting arrays
  * * 11.04.2020 better supporting arrays
+ * * 18.04.2020 correct handling empty obejcts a.k.a '{}'
+ * * 18.04.2020 reduce memory footprint
  */
 
 
@@ -58,8 +60,15 @@ protected:
   /**
    * @brief get the next character from the input and parse.
    * @param ch input character
+   * @return true, when character was parsed. on false: enter same char again.
    */
-  void parse(char ch);
+  bool parseChar(char ch);
+
+  /**
+   * @brief parset a sequence of chars.
+   * @param s input characters
+   */
+  void parseChar(const char *s);
 
   int _state;
   int __level;

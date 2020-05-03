@@ -83,6 +83,7 @@ void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
     Logger::_print(module, level, fmt, args);
     va_end(args);
   } // if
+  yield();
 } // LoggerPrint
 
 
@@ -97,6 +98,7 @@ void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
     Logger::_print(elem->id, level, fmt, args);
     va_end(args);
   } // if
+  yield();
 } // LoggerEPrint
 
 
@@ -109,10 +111,12 @@ void Logger::_printToFile(char *buffer)
     f.close();
     SPIFFS.remove(LOGFILE_OLD_NAME);
     SPIFFS.rename(LOGFILE_NAME, LOGFILE_OLD_NAME);
+    yield();
     f = SPIFFS.open(LOGFILE_NAME, "a");
   } // if
   f.println(buffer);
   f.close();
+  yield();
 };
 
 // Default: Log INFO and ERROR

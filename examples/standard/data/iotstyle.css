@@ -86,11 +86,15 @@ svg.button .connect { fill: #00cc00; fill-opacity: 1; }
 
 .u-header > * + * { margin-left: 0.6rem; }
 
-.u-header .icon { width: 3rem; height: 3rem; background-color: white; border-radius: 0.2em; }
+.u-header .icon { width: 3rem; height: 3rem; }
 
-.u-navbar { background-color: #304878; padding: 0.5rem 1rem; margin-bottom: 0.5rem; }
+.u-header .close { position: absolute; top: 1rem; right: 1rem; height: 1.8rem; width: 1.8rem; font-size: 1.6rem; background-color: red; text-align: center; z-index: 3 !important; }
 
-.u-navbar > button, .u-navbar .button { min-width: 2em; color: white; }
+.u-navbar { background-color: #304878; padding: 0.5rem 1rem; margin-bottom: 0.5rem; height: 3rem; }
+
+.u-navbar.nogutter { margin: 0; }
+
+.u-navbar > * { display: inline-block; font-size: 1.5em; min-width: 2em !important; height: 1.4em; color: white !important; vertical-align: top; border: 0.1em solid #304878; }
 
 .u-navbar > button:hover, .u-navbar .button:hover { border-color: #4466ee; background-color: #4466ee; }
 
@@ -209,6 +213,8 @@ button.secondary, .button.secondary { background-color: #777777; border-color: #
 .display > span.text { font-size: 10px; line-height: 10px; }
 
 .display > span.dot { height: 10px; width: 10px; border-radius: 50%; }
+
+.display > span.line { border-top: 1px solid black; }
 
 .display > span.dot.active { background-color: green; }
 

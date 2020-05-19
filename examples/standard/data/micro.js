@@ -328,6 +328,10 @@ var GenericWidgetClass = (function (_super) {
             debounce(this.dispatchNext.bind(this))();
         }
     };
+    GenericWidgetClass.prototype.showSys = function () {
+        var p = getHashParams({ sys: false }).sys;
+        return (toBool(p));
+    };
     GenericWidgetClass.prototype.on_change = function (e) {
         var src = e.target;
         this.dispatchAction(src.getAttribute('u-value'), src.value);
@@ -427,6 +431,8 @@ var DisplayDotWidgetClass = (function (_super) {
         _super.prototype.connectedCallback.call(this);
         this._dispElem = document.querySelector("#panel .display");
         hub.subscribe(this.microid + "?*", this.newValue.bind(this), true);
+        if (!this.showSys())
+            this.style.display = "none";
     };
     DisplayDotWidgetClass.prototype.updateDisp = function (create) {
         if (this._dispElem) {
@@ -469,6 +475,53 @@ var DisplayDotWidgetClass = (function (_super) {
     ], DisplayDotWidgetClass);
     return DisplayDotWidgetClass;
 }(GenericWidgetClass));
+var DisplayLineWidgetClass = (function (_super) {
+    __extends(DisplayLineWidgetClass, _super);
+    function DisplayLineWidgetClass() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._dispElem = null;
+        _this._elem = null;
+        _this._x0 = 0;
+        _this._x1 = 0;
+        _this._y0 = 0;
+        _this._y1 = 0;
+        return _this;
+    }
+    DisplayLineWidgetClass.prototype.connectedCallback = function () {
+        _super.prototype.connectedCallback.call(this);
+        this._dispElem = document.querySelector("#panel .display");
+        hub.subscribe(this.microid + "?*", this.newValue.bind(this), true);
+        if (!this.showSys())
+            this.style.display = "none";
+    };
+    DisplayLineWidgetClass.prototype.updateDisp = function () {
+        if (this._dispElem) {
+            if (!this._elem) {
+                this._elem = document.createElement("span");
+                this._dispElem.appendChild(this._elem);
+            }
+            if (this._elem) {
+                this._elem.className = "line";
+                this._elem.style.top = this._y0 + "px";
+                this._elem.style.left = this._x0 + "px";
+                this._elem.style.width = (this._x1 - this._x0) + "px";
+                this._elem.style.height = (this._y1 - this._y0) + "px";
+            }
+        }
+    };
+    DisplayLineWidgetClass.prototype.newValue = function (_path, key, value) {
+        if (key && value) {
+            if (this['_' + key] != null) {
+                this['_' + key] = value;
+            }
+            this.updateDisp();
+        }
+    };
+    DisplayLineWidgetClass = __decorate([
+        MicroControl("displayline")
+    ], DisplayLineWidgetClass);
+    return DisplayLineWidgetClass;
+}(GenericWidgetClass));
 var DisplayTextWidgetClass = (function (_super) {
     __extends(DisplayTextWidgetClass, _super);
     function DisplayTextWidgetClass() {
@@ -494,6 +547,8 @@ var DisplayTextWidgetClass = (function (_super) {
             this._dispElem.appendChild(e);
         }
         hub.subscribe(this.microid + "?*", this.newValue.bind(this), true);
+        if (!this.showSys())
+            this.style.display = "none";
     };
     DisplayTextWidgetClass.prototype.newValue = function (_path, key, value) {
         if (key && value && this._elem) {

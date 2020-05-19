@@ -227,3 +227,17 @@
     <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
   </div>
 </div>
+
+<div class="col card hidden" u-control="displayline" u-is="displayline" microID="${id}">
+  <div class="block header">
+    <img data-src="/i/${type}.svg" class="icon" />
+    <h3>${id}</h3>
+    <h4 u-text="description"></h4>
+    <span class="activeState" u-active="active"></span>
+    <span class="setconfig"></span>
+  </div>
+  <div class="block">
+    (<span u-text="x0"></span>,<span u-text="y0"></span>) /
+    (<span u-text="x1"></span>,<span u-text="y1"></span>)
+  </div>
+</div>

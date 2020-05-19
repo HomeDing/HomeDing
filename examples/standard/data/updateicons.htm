@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Web Icon Update</title>
+  <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
+</head>
+
+
+<body>
+  <h1>Web Icon Update</h1>
+  <table>
+    <tr>
+      <td>
+        <div class="form-group">
+          <label for="namesel">Icon name:</label>
+          <select id="namesel">
+            <option selected disabled>select...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>progress:</label>
+          <progress value=0 max=1 style="width:12em"></progress>
+        </div>
+        <div class="form-group">
+          <span id='info'>.</span>
+        </div>
+      </td>
+      <td><img id="icon" src='/i/default.svg' style="width:80px" /></td>
+    </tr>
+    <tr>
+      <td colspan="2" style="text-align: right;"><button>start</button></td>
+    </tr>
+  </table>
+
+  <script>
+    var repo = 'https://raw.githubusercontent.com/HomeDing/WebIcons/master/favicons/'; // /socket/favicon.svg';
+    var eStart = document.querySelector('button');
+    var eBar = document.querySelector('progress');
+    var eInfo = document.querySelector('#info');
+    var eImg = document.querySelector('#icon');
+    var work = { status: '0', list: null, files: 0, done: 0 };
+    var timer = 0;
+    var seed = "?" + new Date().valueOf();
+    var iconname = '';
+
+    function log(t) {
+      eInfo.innerText = t;
+    } // log
+
+    var selObj = document.querySelector('select#namesel');
+    var list = 'and,bme680,bulb,button,config,default,dht,digitalin,digitalout,door,home,minus,ntptime,ota,plus,pms,power,radio,remote,rfsend,rotary,schedule,socket,ssdp,switch,time,timer,tool,value,water,wifi'.split(',');
+
+
+    list.forEach(function (e) {
+      var opt = document.createElement('option');
+      opt.value = opt.textContent = e;
+      selObj.appendChild(opt);
+    });
+
+    selObj.addEventListener('input', function (evt) {
+      iconname = evt.srcElement.value;
+      eImg.src = '/i/' + iconname + '.svg';
+    });
+
+    // list of files
+    function doStart() {
+      if (!iconname) {
+        log('select a icon name...');
+      } else {
+        log('loading ' + iconname + ' icons');
+        work.list = ['favicon.svg', 'favicon48.png', 'favicon144.png', 'favicon180.png', 'favicon192.png', 'favicon270.png', 'favicon512.png'];
+        work.files = work.list.length;
+        work.status = 'r'; // run
+        timer = window.setInterval(step, 330);
+      }
+    } // doStart()
+
+    // grab next file
+    function doFile() {
+      work.status = 'w'; // wait
+      var theItem = work.list.shift();
+
+
+      // set progress
+      work.done++;
+      eBar.max = work.files;
+      eBar.value = work.done;
+      eInfo.innerText = theItem; // log
+
+
+      var oReq = new XMLHttpRequest();
+      oReq.open("GET", repo + iconname + '/' + theItem + seed, true);
+      oReq.responseType = "arraybuffer";
+
+
+      oReq.onerror = function (evt) {
+        console.log(theItem + ": read failed.");
+        work.status = 'e'; // run
+      };
+
+
+      oReq.onload = function (oEvent) {
+        if (oReq.status != 200) {
+          console.log(theItem + ": error " + oReq.status);
+          work.status = 'r'; // run
+        } else {
+          var arrayBuffer = oReq.response; // Note: not oReq.responseText
+          if (arrayBuffer) {
+            var formData = new FormData();
+            formData.append('file', new Blob([arrayBuffer]), '/' + theItem);
+
+
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.addEventListener('readystatechange', function (p) {
+              if ((xmlHttp.readyState == 4) && (xmlHttp.status >= 200) && (xmlHttp.status < 300)) {
+                work.status = 'r'; // run
+              }
+            });
+            xmlHttp.open('POST', '/');
+            xmlHttp.send(formData);
+
+
+          }
+        }
+        // work.status = (work.list.length == 0 ? 'e' : 'r');
+      };
+      oReq.send(null);
+
+
+      if (work.list.length == 0)
+        work.status = 'e'; // end
+    } // doFile()
+
+
+
+    function step() {
+      if (work.status == '0') {
+      } else if (work.status == 'r') { // run
+        if (work.list.length == 0)
+          work.status = 'e';
+        else
+          doFile();
+      } else if (work.status == 'e') { // end
+        if (timer) {
+          window.clearInterval(timer);
+          log('done');
+          // window.location.href = '/';
+        }
+        timer = 0;
+      }
+    }
+
+
+    eStart.addEventListener('click', doStart);
+  </script>
+</body>
+
+</html>

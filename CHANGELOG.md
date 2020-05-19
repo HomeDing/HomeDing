@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+RF Bridge example
+
 ### Added
 
 * JSON Parser supporting arrays.
@@ -14,6 +16,8 @@ All notable changes to this project will be documented in this file.
 
 
 ## [0.4.0] - 2020-04-16
+
+BME680 optimizations.
 
 ### Added
 

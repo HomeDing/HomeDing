@@ -1,8 +1,16 @@
 # The HomeDing Library
 
+[![arduino-library-badge](https://www.ardu-badge.com/badge/HomeDing.svg?)](https://www.ardu-badge.com/HomeDing)
+[![GitLicense](https://gitlicense.com/badge/HomeDing/HomeDing)](https://gitlicense.com/license/HomeDing/HomeDing)
+
+Documentation can be found in at [HomeDing documentation site](https://homeding.github.io)
+
+## Summary 
+
 The HomeDing library for Arduino enables building IoT devices using ESP8266 based boards.
 It is a complete ecosystem of the required internal functionality based on elements that can be activated and integrated by configuration.
 It is extensible by adding specific elements.
+
 
 The embedded Web Server enables controlling the device and linking devices together.
 

@@ -65,8 +65,8 @@
 <body>
   <div class="container-fluid">
     <div class="u-header">
-      <a href="/" title="Start-Page"><img class="icon" src="/i/device.svg" /></a>
-      <h1>Config</h1>
+      <a href="/" title="Start-Page"><img class="icon" src="/favicon.svg" /></a>
+      <h1>Board</h1>
     </div>
     <div class="u-navbar">
       <a class="button" href="/">Home</a>
@@ -211,6 +211,18 @@
         </div>
       </div>
 
+      <div class="col card" u-control="time" id="${id}" u-is="generic" microID="${id}" style="height:200px;">
+        <div class="block">
+          <object id="meminfo" data="/clock.svg" type="image/svg+xml"
+            style="float:left;min-width:100px;min-height:100px;height:100%" class="icon"></object>
+
+          <h3>${id}</h3>
+          <h4 u-text="description"></h4>
+          <span class="activeState" u-active="active"></span>
+          <span class="setconfig"></span>
+        </div>
+      </div>
+
       <div class="col card" u-control="webbutton" id="${id}" u-is="generic" microID="${id}">
         <div class="block">
           <button u-action="${onclick}" u-text="description"></button>
@@ -331,7 +343,11 @@
       alert(JSON.stringify(err, null, 1));
     })
 
-
+    if (window !== window.top) {
+      // disable header and navbar in portal mode.
+      document.querySelector('.u-header').style.display = 'none';
+      document.querySelector('.u-navbar').style.display = 'none';
+    } // if
   </script>
 </body>
 

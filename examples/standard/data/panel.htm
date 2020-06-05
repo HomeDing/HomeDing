@@ -70,11 +70,11 @@
       <h1>Panel</h1>
     </div>
     <div class="u-navbar">
-        <a class="button" href="/">Home</a>
-        <a class="button" href="/board.htm">Board</a>
-        <a class="button" href="/microide.htm">IDE</a>
-        <a class="button" href="/log.htm">Log</a>
-      </div>
+      <a class="button" href="/">Home</a>
+      <a class="button" href="/board.htm">Board</a>
+      <a class="button" href="/microide.htm">IDE</a>
+      <a class="button" href="/log.htm">Log</a>
+    </div>
 
     <svg id="panel">
       <rect height="100%" width="100%"></rect>
@@ -94,332 +94,337 @@
         <g id="links"></g>
       </g>
     </svg>
+  </div>
 
-    <script>
-      var PANEL_GRIDSIZE = 72; // px
-      var PANEL_WIDTH = 16;
-      var PANEL_HEIGHT = 12;
+  <script>
+    var PANEL_GRIDSIZE = 72; // px
+    var PANEL_WIDTH = 16;
+    var PANEL_HEIGHT = 12;
 
-      var params = getHashParams({
-        sys: false
-      });
-      window.addEventListener("hashchange", function () {
-        window.location.reload();
-      });
+    var params = getHashParams({
+      sys: false
+    });
+    window.addEventListener("hashchange", function () {
+      window.location.reload();
+    });
 
-      var elementDef, envDef, configDef;
+    var elementDef, envDef, configDef;
 
-      var panelObj = document.getElementById('panel');
-      var viewObj = document.getElementById('viewport');
+    var panelObj = document.getElementById('panel');
+    var viewObj = document.getElementById('viewport');
 
-      panelObj.style.width = PANEL_GRIDSIZE * PANEL_WIDTH + "px";
-      panelObj.style.height = PANEL_GRIDSIZE * PANEL_HEIGHT + "px";
+    panelObj.style.width = PANEL_GRIDSIZE * PANEL_WIDTH + "px";
+    panelObj.style.height = PANEL_GRIDSIZE * PANEL_HEIGHT + "px";
 
 
-      var DragObj = null;
-      var DragOffset = null;
+    var DragObj = null;
+    var DragOffset = null;
 
-      var nodes = {};
-      var edges = [];
+    var nodes = {};
+    var edges = [];
 
-      // create all edges from the actions of a node.
-      function createEdges(srcPath, actions) {
-        actions.split(',').forEach(function (a) {
-          var tarPath = a.split('?')[0];
-          edges.push({
-            src: srcPath,
-            srcPin: "out",
-            tar: tarPath,
-            tarPin: "in"
-          });
+    // create all edges from the actions of a node.
+    function createEdges(srcPath, actions) {
+      actions.split(',').forEach(function (a) {
+        var tarPath = a.split('?')[0];
+        edges.push({
+          src: srcPath,
+          srcPin: "out",
+          tar: tarPath,
+          tarPin: "in"
         });
-      } // createEdges()
+      });
+    } // createEdges()
 
-      /*
-      HomeDing config data model ->
-        create nodes = {id, xPos, yPos, onXXX, obj }
-        create edges = {src, srcPin, tar, tarPin, obj}
-      */
+    /*
+    HomeDing config data model ->
+      create nodes = {id, xPos, yPos, onXXX, obj }
+      create edges = {src, srcPin, tar, tarPin, obj}
+    */
 
-      // create all nodes from the HomeDing config file
-      function createNodes(conf) {
-        jsonParse(conf, function (path, key, val) {
-          if ((path.length > 1) && (path[0] === '/'))
-            path = path.substr(1);
-          if (path.split('/').length == 2) {
-            var t = path.split('/')[0].toLowerCase();
-            var i = path.split('/')[1].toLowerCase();
-            var s = JSON.stringify(conf[t][i], null, 2)
+    // create all nodes from the HomeDing config file
+    function createNodes(conf) {
+      jsonParse(conf, function (path, key, val) {
+        if ((path.length > 1) && (path[0] === '/'))
+          path = path.substr(1);
+        if (path.split('/').length == 2) {
+          var t = path.split('/')[0].toLowerCase();
+          var i = path.split('/')[1].toLowerCase();
+          var s = JSON.stringify(conf[t][i], null, 2)
 
-            if (toBool(params.sys) || (!elementDef[t]) || (toBool(elementDef[t].sys) == false)) {
-              var n = nodes[path];
-              if (!n) {
-                n = nodes[path] = {
-                  id: path
-                }; // create a new node
-                n.icon = t;
-                n.conf = s;
-              } // if
-              if (key) {
-                n[key] = val;
-                if (key.substr(0, 2) == 'on') {
-                  createEdges(path, val);
-                }
-              } // if
+          if (toBool(params.sys) || (!elementDef[t]) || (toBool(elementDef[t].sys) == false)) {
+            var n = nodes[path];
+            if (!n) {
+              n = nodes[path] = {
+                id: path
+              }; // create a new node
+              n.icon = t;
+              n.conf = s;
+            } // if
+            if (key) {
+              n[key] = val;
+              if (key.substr(0, 2) == 'on') {
+                createEdges(path, val);
+              }
             } // if
           } // if
-        });
-      } // createNodes()
+        } // if
+      });
+    } // createNodes()
 
 
-      // initial placement of all nodes
-      function placeNodes() {
-        var px = 0;
-        var py = 1;
-        // remove edge going into the nirvana
-        edges = edges.filter(function (l) {
-          return (nodes[l.src] && nodes[l.tar]);
-        });
-
-        // find nodes without edges:
-        p = 0;
-        for (n in nodes) {
-          nodes[n]._out = nodes[n]._in = 0;
-        }
-        edges.forEach(function (l) {
-          nodes[l.src]._out++;
-          nodes[l.tar]._in++;
-        });
-        for (n in nodes) {
-          if (nodes[n]._out == 0 && nodes[n]._in == 0) {
-            // nodes without edges in line 1:
-            nodes[n].xPos = px++;
-            nodes[n].yPos = 0;
-          } else {
-            // nodes with edges vertically;
-            nodes[n].xPos = 5 + nodes[n]._in - nodes[n]._out;
-            nodes[n].yPos = py++;
-          }
-        };
-      } // placeNodes()
-
-      function posInUse(x, y) {
-        var found = null;
-        Object.values(nodes).forEach(function (o) {
-          if ((!found) && (o.xPos == x) && (o.yPos == y))
-            found = o;
-        });
-        return (found);
-      };
-
-      function lineInUse(y) {
-        var found = null;
-        Object.values(nodes).forEach(function (o) {
-          if ((!found) && (o.yPos == y))
-            found = o;
-        });
-        return (found);
-      };
-
-
-      function yForce(nodeId) {
-        var dist = 0;
-        var num = 0;
-        var yPos = nodes[nodeId].yPos;
-        edges.forEach(function (l) {
-          if (l.src == nodeId) {
-            dist += nodes[l.tar].yPos - yPos;
-            num++;
-          }
-          if (l.tar == nodeId) {
-            dist += nodes[l.src].yPos - yPos;
-            num++;
-          }
-        });
-        return (dist / num);
-      };
-
-
-      function moveNodes() {
-        var moved = false;
-        for (var nodeId in nodes) {
-          var node = nodes[nodeId];
-          f = yForce(nodeId);
-          if ((f < -0.5) && (!posInUse(node.xPos, node.yPos - 1))) {
-            node.yPos--;
-            moved = true;
-          }
-        } // for
-
-        for (var n = 0; n < 12; n++) {
-          if (!lineInUse(n)) {
-            for (var nodeId in nodes) {
-              var e = nodes[nodeId];
-              if (e.yPos === n + 1) {
-                e.yPos--;
-                moved = true;
-              }
-            } // for
-          }
-        }
-        return (moved);
-      } // moveNodes()
-
-
-      // create / update svg objects for all nodes
-      function updateNodes() {
-        for (var nodeId in nodes) {
-          var t = nodeId.split('/')[0];
-          var e = nodes[nodeId];
-          var ed = elementDef[t];
-
-          var obj = e.obj;
-          if (!obj) {
-            // create a new svg object for node
-            var nodesObj = document.getElementById('nodes');
-            obj = e.obj = document.querySelector('#templates .node').cloneNode(true);
-            nodesObj.appendChild(obj);
-            // disable outgoing pin ?
-            if (ed) {
-              if ((ed.events) && (ed.events.length == 0)) {
-                var pin = obj.querySelector('[pin="in"]');
-                if (pin) pin.style.display = "none";
-              }
-              if ((ed.actions) && (ed.actions.length == 0)) {
-                var pin = obj.querySelector('[pin="out"]');
-                if (pin) pin.style.display = "none";
-              }
-            }
-            obj.querySelector('.config').addEventListener('click', function (e) {
-              var t = e.target;
-              var d = t.parentNode.getAttribute('data');
-              console.log(d);
-            });
-
-          }
-
-          // update svg object by node properties
-          if (e.icon)
-            obj.querySelector('.icon').setAttribute("xlink:href", "/i/" + e.icon + ".svg");
-          if (e.conf)
-            obj.querySelector('title').textContent = e.conf;
-          obj.setAttribute("data", e.conf);
-          obj.querySelector('.id').firstChild.textContent = nodeId;
-
-          moveSVGGroup(obj, e.xPos * PANEL_GRIDSIZE + 4, e.yPos * PANEL_GRIDSIZE + 4);
-        } // for
-      } // updateNodes()
-
-
-      // create / update all svg objects edges to current position of nodes
-      function updateEdges() {
-        var aPos;
-        var linksObj = document.getElementById('links');
-
-        for (var n = 0; n < edges.length; n++) {
-          var f = edges[n];
-          var sObj = nodes[f.src];
-          var tObj = nodes[f.tar];
-
-          if (sObj && tObj) {
-            var obj = f.obj;
-            if (!obj) {
-              obj = f.obj = linksObj.ownerDocument.createElementNS("http://www.w3.org/2000/svg", 'line');
-              linksObj.appendChild(obj);
-            } // if
-            aPos = _pinPos(sObj, f.srcPin);
-            obj.setAttribute("x1", aPos.x);
-            obj.setAttribute("y1", aPos.y);
-
-            aPos = _pinPos(tObj, f.tarPin);
-            obj.setAttribute("x2", aPos.x);
-            obj.setAttribute("y2", aPos.y);
-          } // for
-        }
-      } // updateEdges()
-
-      // get configuration data
-      var p1 = fetch('/env.json')
-        .then(function (result) {
-          return (result.json())
-        }).then(function (json) {
-          envDef = json;
-          return (fetch('/config.json'));
-        }).then(function (result) {
-          return (result.json())
-        }).then(function (json) {
-          configDef = json;
-        });
-
-      // get element meta data
-      var p2 = fetch('/elements.json')
-        .then(function (result) {
-          return (result.json())
-        }).then(function (json) {
-          elementDef = json;
-        });
-
-      // start when all data is available
-      Promise.all([p1, p2]).then(function () {
-        console.log("all done.");
-        createNodes(envDef);
-        createNodes(configDef);
-        placeNodes();
-        while (moveNodes()) { };
-        updateNodes();
-        updateEdges();
+    // initial placement of all nodes
+    function placeNodes() {
+      var px = 0;
+      var py = 1;
+      // remove edge going into the nirvana
+      edges = edges.filter(function (l) {
+        return (nodes[l.src] && nodes[l.tar]);
       });
 
-      panelObj.addEventListener("mousedown", function (evt) {
-        if (!DragObj) {
-          var o = evt.target;
-          // check for a draggable object.
-          while (o && o.attributes && (!o.attributes["dragabble"]))
-            o = o.parentNode;
-          if (o && o.attributes && (o.attributes["dragabble"]))
-            DragObj = o;
+      // find nodes without edges:
+      p = 0;
+      for (n in nodes) {
+        nodes[n]._out = nodes[n]._in = 0;
+      }
+      edges.forEach(function (l) {
+        nodes[l.src]._out++;
+        nodes[l.tar]._in++;
+      });
+      for (n in nodes) {
+        if (nodes[n]._out == 0 && nodes[n]._in == 0) {
+          // nodes without edges in line 1:
+          nodes[n].xPos = px++;
+          nodes[n].yPos = 0;
+        } else {
+          // nodes with edges vertically;
+          nodes[n].xPos = 5 + nodes[n]._in - nodes[n]._out;
+          nodes[n].yPos = py++;
         }
+      };
+    } // placeNodes()
 
-        if (DragObj) {
-          // calculate Drag Offset = mouse position - drag object position
-          DragOffset = getSVGPos(panelObj, evt);
-          var cc = DragObj.getCTM();
-          DragOffset.x -= cc.e;
-          DragOffset.y -= cc.f;
+    function posInUse(x, y) {
+      var found = null;
+      Object.values(nodes).forEach(function (o) {
+        if ((!found) && (o.xPos == x) && (o.yPos == y))
+          found = o;
+      });
+      return (found);
+    };
+
+    function lineInUse(y) {
+      var found = null;
+      Object.values(nodes).forEach(function (o) {
+        if ((!found) && (o.yPos == y))
+          found = o;
+      });
+      return (found);
+    };
+
+
+    function yForce(nodeId) {
+      var dist = 0;
+      var num = 0;
+      var yPos = nodes[nodeId].yPos;
+      edges.forEach(function (l) {
+        if (l.src == nodeId) {
+          dist += nodes[l.tar].yPos - yPos;
+          num++;
         }
-      }); // mouseDown
+        if (l.tar == nodeId) {
+          dist += nodes[l.src].yPos - yPos;
+          num++;
+        }
+      });
+      return (dist / num);
+    };
 
 
-      panelObj.addEventListener("mousemove", function (evt) {
-        if (DragObj) {
-          var DragPos = getSVGPos(panelObj, evt);
-          moveSVGGroup(DragObj, DragPos.x - DragOffset.x, DragPos.y - DragOffset.y);
-          updateEdges();
-        } // if
-      }); // mousemove
+    function moveNodes() {
+      var moved = false;
+      for (var nodeId in nodes) {
+        var node = nodes[nodeId];
+        f = yForce(nodeId);
+        if ((f < -0.5) && (!posInUse(node.xPos, node.yPos - 1))) {
+          node.yPos--;
+          moved = true;
+        }
+      } // for
 
-
-      panelObj.addEventListener("mouseup", function (evt) {
-        if (DragObj) {
-          var DragPos = getSVGPos(panelObj, evt);
-
-          for (var n in nodes) {
-            if (nodes[n].obj == DragObj) {
-              nodes[n].xPos = Math.floor(DragPos.x / PANEL_GRIDSIZE);
-              nodes[n].yPos = Math.floor(DragPos.y / PANEL_GRIDSIZE);
-              break;
+      for (var n = 0; n < 12; n++) {
+        if (!lineInUse(n)) {
+          for (var nodeId in nodes) {
+            var e = nodes[nodeId];
+            if (e.yPos === n + 1) {
+              e.yPos--;
+              moved = true;
             }
           } // for
-          updateNodes();
-          updateEdges();
-
-          DragObj = null;
-        } // if
-      }); // mouseup
-    </script>
+        }
+      }
+      return (moved);
+    } // moveNodes()
 
 
-  </div>
+    // create / update svg objects for all nodes
+    function updateNodes() {
+      for (var nodeId in nodes) {
+        var t = nodeId.split('/')[0];
+        var e = nodes[nodeId];
+        var ed = elementDef[t];
+
+        var obj = e.obj;
+        if (!obj) {
+          // create a new svg object for node
+          var nodesObj = document.getElementById('nodes');
+          obj = e.obj = document.querySelector('#templates .node').cloneNode(true);
+          nodesObj.appendChild(obj);
+          // disable outgoing pin ?
+          if (ed) {
+            if ((ed.events) && (ed.events.length == 0)) {
+              var pin = obj.querySelector('[pin="in"]');
+              if (pin) pin.style.display = "none";
+            }
+            if ((ed.actions) && (ed.actions.length == 0)) {
+              var pin = obj.querySelector('[pin="out"]');
+              if (pin) pin.style.display = "none";
+            }
+          }
+          obj.querySelector('.config').addEventListener('click', function (e) {
+            var t = e.target;
+            var d = t.parentNode.getAttribute('data');
+            console.log(d);
+          });
+
+        }
+
+        // update svg object by node properties
+        if (e.icon)
+          obj.querySelector('.icon').setAttribute("xlink:href", "/i/" + e.icon + ".svg");
+        if (e.conf)
+          obj.querySelector('title').textContent = e.conf;
+        obj.setAttribute("data", e.conf);
+        obj.querySelector('.id').firstChild.textContent = nodeId;
+
+        moveSVGGroup(obj, e.xPos * PANEL_GRIDSIZE + 4, e.yPos * PANEL_GRIDSIZE + 4);
+      } // for
+    } // updateNodes()
+
+
+    // create / update all svg objects edges to current position of nodes
+    function updateEdges() {
+      var aPos;
+      var linksObj = document.getElementById('links');
+
+      for (var n = 0; n < edges.length; n++) {
+        var f = edges[n];
+        var sObj = nodes[f.src];
+        var tObj = nodes[f.tar];
+
+        if (sObj && tObj) {
+          var obj = f.obj;
+          if (!obj) {
+            obj = f.obj = linksObj.ownerDocument.createElementNS("http://www.w3.org/2000/svg", 'line');
+            linksObj.appendChild(obj);
+          } // if
+          aPos = _pinPos(sObj, f.srcPin);
+          obj.setAttribute("x1", aPos.x);
+          obj.setAttribute("y1", aPos.y);
+
+          aPos = _pinPos(tObj, f.tarPin);
+          obj.setAttribute("x2", aPos.x);
+          obj.setAttribute("y2", aPos.y);
+        } // for
+      }
+    } // updateEdges()
+
+    // get configuration data
+    var p1 = fetch('/env.json')
+      .then(function (result) {
+        return (result.json())
+      }).then(function (json) {
+        envDef = json;
+        return (fetch('/config.json'));
+      }).then(function (result) {
+        return (result.json())
+      }).then(function (json) {
+        configDef = json;
+      });
+
+    // get element meta data
+    var p2 = fetch('/elements.json')
+      .then(function (result) {
+        return (result.json())
+      }).then(function (json) {
+        elementDef = json;
+      });
+
+    // start when all data is available
+    Promise.all([p1, p2]).then(function () {
+      console.log("all done.");
+      createNodes(envDef);
+      createNodes(configDef);
+      placeNodes();
+      while (moveNodes()) { };
+      updateNodes();
+      updateEdges();
+    });
+
+    panelObj.addEventListener("mousedown", function (evt) {
+      if (!DragObj) {
+        var o = evt.target;
+        // check for a draggable object.
+        while (o && o.attributes && (!o.attributes["dragabble"]))
+          o = o.parentNode;
+        if (o && o.attributes && (o.attributes["dragabble"]))
+          DragObj = o;
+      }
+
+      if (DragObj) {
+        // calculate Drag Offset = mouse position - drag object position
+        DragOffset = getSVGPos(panelObj, evt);
+        var cc = DragObj.getCTM();
+        DragOffset.x -= cc.e;
+        DragOffset.y -= cc.f;
+      }
+    }); // mouseDown
+
+
+    panelObj.addEventListener("mousemove", function (evt) {
+      if (DragObj) {
+        var DragPos = getSVGPos(panelObj, evt);
+        moveSVGGroup(DragObj, DragPos.x - DragOffset.x, DragPos.y - DragOffset.y);
+        updateEdges();
+      } // if
+    }); // mousemove
+
+
+    panelObj.addEventListener("mouseup", function (evt) {
+      if (DragObj) {
+        var DragPos = getSVGPos(panelObj, evt);
+
+        for (var n in nodes) {
+          if (nodes[n].obj == DragObj) {
+            nodes[n].xPos = Math.floor(DragPos.x / PANEL_GRIDSIZE);
+            nodes[n].yPos = Math.floor(DragPos.y / PANEL_GRIDSIZE);
+            break;
+          }
+        } // for
+        updateNodes();
+        updateEdges();
+
+        DragObj = null;
+      } // if
+    }); // mouseup
+
+    if (window !== window.top) {
+      // disable header and navbar in portal mode.
+      document.querySelector('.u-header').style.display = 'none';
+      document.querySelector('.u-navbar').style.display = 'none';
+    } // if
+
+  </script>
 </body>
 
 </html>

@@ -43,23 +43,14 @@
     <div class="row wrap">
       <div class="col card">
         <div class="block header">
-          <h2><img style="margin-right:0.4em;height:1em" src="/i/home.svg" />Device Pages</h2>
-        </div>
-        <div class="block">
-          <p><a href="log.htm">Log output</a></p>
-          <p><a href="panel.htm">Panel</a></p>
-          <p><a href="ding.htm">Ding</a></p>
-        </div>
-      </div>
-
-      <div class="col card">
-        <div class="block header">
           <h2>Build-in Setup Pages</h2>
         </div>
         <div class="block">
           <p><a href="$setup.htm">WiFi Setup</a></p>
           <p><a href="$boot.htm">Web Update</a></p>
           <p><a href="$upload.htm">File Upload</a></p>
+          <p><a href="updateicons.htm">Update FavIcons</a></p>
+          <p><a href="/panel.htm">Panel</a></p>
         </div>
       </div>
 
@@ -89,16 +80,6 @@
             style="float:left;width:120px;height:120px;"></object>
           <p><span id="memTotal"></span> bytes available.</p>
           <p><span id="memUsed"></span> bytes (<span id="memPart"></span>%) in use</p>
-        </div>
-      </div>
-
-      <div class="col card">
-        <div class="block header">
-          <h2>Network</h2>
-        </div>
-        <div class="block">
-          <div class="form-group"><label>Hostname:</label><span id="hostName"></span></div>
-          <div class="form-group"><label>WiFi:</label> <span id="netName"></span></div>
         </div>
       </div>
 
@@ -171,9 +152,6 @@
           document.getElementById('memUsed').textContent = d.fsUsedBytes;
           document.getElementById('memPart').textContent = Math.floor((Number(d.fsUsedBytes) * 100) / Number(d.fsTotalBytes));
 
-          document.getElementById('hostName').textContent = d.devicename;
-          document.getElementById('netName').textContent = d.ssid;
-
           var memAPI = memObj.getSVGDocument().api;
           memAPI.setRange([
             {
@@ -211,6 +189,12 @@
 
       selObj.addEventListener('change', elemChange);
     });
+
+    if (window !== window.top) {
+      // disable header and navbar in portal mode.
+      document.querySelector('.u-header').style.display = 'none';
+      document.querySelector('.u-navbar').style.display = 'none';
+    } // if
   </script>
 </body>
 

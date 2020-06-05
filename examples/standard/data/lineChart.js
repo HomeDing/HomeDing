@@ -11,9 +11,9 @@ var redrawTimer = null;
 var REGION_WIDTH = 128;
 var REGION_HEIGHT = 36;
 
-function maxReducer(acc, val) {
-  return Math.max(acc, val);
-}
+// local timezone offset for correct time conversion
+var tzOffset = new Date().getTimezoneOffset() * 60;
+
 
 // point = [x,y], x may be date as seconds
 /* 
@@ -74,16 +74,15 @@ var displayBox = minBox;
 
 // Date and Time formatting
 function fmtDate(t) {
-  var d = new Date(t * 1000);
+  var d = new Date((Number(t) + tzOffset) * 1000);
   return d.toLocaleDateString();
 } // fmtDate
 
 // Date and Time formatting
 function fmtTime(t) {
-  var d = new Date(t * 1000);
+  var d = new Date((Number(t) + tzOffset) * 1000);
   return d.toLocaleTimeString();
 } // fmtTime
-
 
 /** combine to boxes to a new box covering both. */
 function outerBox(box1, box2) {
@@ -284,15 +283,17 @@ VAxisClass = function () {
 
       var high = box.maxY;
       var low = box.minY;
+      var step = this.step;
+      var prec = (step < 1) ? String(step).length - 2 : 0;
 
       var scaleY = REGION_HEIGHT / (high - low);
 
-      for (var n = low; n <= high; n += this.step) {
+      for (var n = low; n <= high; n += step) {
         var txtObj = createSVGNode(YAxisGroup, 'text', {
           x: 11,
           y: -1 * (n - low) * scaleY
         });
-        txtObj.textContent = String(n);
+        txtObj.textContent = String(n.toFixed(prec));
       }
     } // fDraw()
   }

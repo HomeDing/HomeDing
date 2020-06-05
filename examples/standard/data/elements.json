@@ -51,7 +51,7 @@
   },
 
   "displayline": {
-    "sys": "true",
+    "sys": "false",
     "properties": ["loglevel", "description", "x0", "y0", "x1", "y1"]
   },
 

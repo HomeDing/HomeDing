@@ -2,15 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
-RF Bridge example
-
-### Added
+## [0.4.1] - 2020-04-16
 
 * JSON Parser supporting arrays.
 * Avoid long procissing time without yiedl() calls on startup to get faster network connectivity. 
 * Web UI updated
+* internal Web UI updated
 * ntp time fixed according ESP8266 board version 4.7.0
 * CHANGELOG.md file added.  
 

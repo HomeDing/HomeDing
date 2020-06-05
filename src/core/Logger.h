@@ -18,6 +18,7 @@
  * *   log errors and info to file log.txt
  * * 27.10.2018 rolling logfiles and log_old.txt.
  * * 02.02.2019 reduce Flash memory, optimizing
+ * * 27.04.2019 add some yield(), enabling network events.
  */
 
 #ifndef LOGGER_H
@@ -35,24 +36,24 @@
 // for non-element classes
 
 /** Send Information to Serial output only. */
-#define LOGGER_JUSTINFO(...)                                                   \
+#define LOGGER_JUSTINFO(...) \
   Logger::LoggerPrint(NULL, LOGGER_LEVEL_INFO, __VA_ARGS__)
 
 /** Send information to logfile and serial output. */
-#define LOGGER_INFO(...)                                                       \
+#define LOGGER_INFO(...) \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_INFO, __VA_ARGS__)
 
 /** Send error to Logfile and serial output. */
-#define LOGGER_ERR(...)                                                        \
+#define LOGGER_ERR(...) \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_ERR, __VA_ARGS__)
 
 /** Send trace information to logfile and serial output. */
-#define LOGGER_TRACE(...)                                                      \
+#define LOGGER_TRACE(...) \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 #ifdef DEBUG_ESP_PORT
-#define LOGGER_RAW(...)                                                        \
-  DEBUG_ESP_PORT.printf("  >" __VA_ARGS__);                                    \
+#define LOGGER_RAW(...)                     \
+  DEBUG_ESP_PORT.printf("  >" __VA_ARGS__); \
   DEBUG_ESP_PORT.print("\n")
 #else
 #define LOGGER_RAW(...)
@@ -60,13 +61,13 @@
 
 // for Elements:
 
-#define LOGGER_EERR(...)                                                       \
+#define LOGGER_EERR(...) \
   Logger::LoggerEPrint(this, LOGGER_LEVEL_ERR, __VA_ARGS__)
 
-#define LOGGER_EINFO(...)                                                      \
+#define LOGGER_EINFO(...) \
   Logger::LoggerEPrint(this, LOGGER_LEVEL_INFO, __VA_ARGS__)
 
-#define LOGGER_ETRACE(...)                                                     \
+#define LOGGER_ETRACE(...) \
   Logger::LoggerEPrint(this, LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 

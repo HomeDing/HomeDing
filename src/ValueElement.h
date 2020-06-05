@@ -1,6 +1,6 @@
 /**
  * @file ValueElement.h
- * @brief Element TODO: description
+ * @brief The ValueElement combines receiving modifying actions for an value and sending actions on changing the value.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

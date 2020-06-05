@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+    <path d="M8 10c-2.216 0-4 1.784-4 4v20c0 2.216 1.784 4 4 4h32c2.216 0 4-1.784 4-4V14c0-2.216-1.784-4-4-4zm2 4h28c1.108 0 2 .892 2 2v16c0 1.108-.892 2-2 2H10c-1.108 0-2-.892-2-2V16c0-1.108.892-2 2-2z" fill="#304878"/>
+    <text style="line-height:25px;-inkscape-font-specification:Arial" x="9.484" y="23.87" font-weight="400" font-size="10.667" font-family="Arial" letter-spacing="0" word-spacing="0">
+        <tspan x="9.484" y="23.87">OLED</tspan>
+    </text>
+</svg>

@@ -73,13 +73,13 @@
       var ua = src.getAttribute('u-action');
 
       if (ua === 'close') {
-        micro.closeModal();
+        modal.close();
 
       } else if (ua === 'next') {
         if (this.objID.value === "") {
           alert('Please specify a name');
         } else {
-          micro.openModal('configelementdlg', {
+          modal.open('configelementdlg', {
             id: '/' + this.objType.value + '/' + this.objID.value
           });
         }
@@ -129,7 +129,7 @@
       var ua = evt.srcElement.getAttribute('u-action');
 
       if (ua === 'close') {
-        micro.closeModal();
+        modal.close();
 
       } else if (ua === 'save') {
         // var b: HTMLElement;
@@ -140,7 +140,7 @@
           c[e.name] = e.value;
         });
         changeConfig(this._type + '/' + this._id, c);
-        micro.closeModal();
+        modal.close();
       }
     }
   }); // ConfigElementDlgBehavior

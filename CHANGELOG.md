@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### Added
+
+* DevDing example folder for experimental and incubator implementations.
+
+
 ## [0.4.1] - 2020-04-16
 
 * JSON Parser supporting arrays.

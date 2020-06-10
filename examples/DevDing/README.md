@@ -12,3 +12,12 @@ See the short documentation in the *.h file for hints and purpose.
 This is an empty element that can be used as a template for implementing new elements.
 All the vitruals and overwritten methods that may be implemented are present in this implementation.
 They may be removed when not required for implementation to syve some bytes.
+
+## Diag Element
+
+This is an element that registers itself at system startup and sends some diagnostic output to the Serial Console:
+* Reset Reason
+* free heap memory
+* i2c bus configuration
+* scan i2c bus for devices
+

@@ -98,7 +98,6 @@ void handleRedirect()
 void setup(void)
 {
   Serial.begin(115200);
-  delay(2000);
 
   Serial.setDebugOutput(false);
   Logger::logger_level = LOGGER_LEVEL_TRACE;

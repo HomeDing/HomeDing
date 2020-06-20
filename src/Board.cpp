@@ -51,15 +51,13 @@ extern const char *passPhrase;
 // this is implemented by using the RTC memory at offset with a special value flag
 
 /** The offset of the 4 byte signature, must be a multiple of 4 */
-#define NETRESET_OFFSET 32
+#define NETRESET_OFFSET 3
 
 /** The magic 4-byte number indicating that a reset has happened before, "RST". Byte 4 is the counter */
 #define NETRESET_FLAG ((uint32)0x52535400)
 #define NETRESET_MASK ((uint32)0xFFFFFF00)
 #define NETRESET_VALUEMASK ((uint32)0x00000000FF)
 
-/** The time when board was initialized + time for double reset. */
-static unsigned long bootMillis;
 
 // get the number of resets in the last seconds using rtc memory for counting.
 int getResetCount()
@@ -100,8 +98,6 @@ void clearResetCount()
  */
 void Board::init(ESP8266WebServer *serv)
 {
-  bootMillis = millis() + 2000;
-
   server = serv;
   sysLED = -1; // configured by device-element
   sysButton = -1; // configured by device-element
@@ -114,6 +110,11 @@ void Board::init(ESP8266WebServer *serv)
 
   _resetCount = getResetCount();
   LOGGER_INFO("RESET # %d", _resetCount);
+
+  // disable savemode when rebooting twice in a row
+  savemode = (!_resetCount);
+  LOGGER_INFO("savemode=%d", savemode);
+
 } // init()
 
 
@@ -366,12 +367,6 @@ void Board::loop()
       l = l->next;
     } // while
 
-    // disable savemode when rebooting twice in a row
-    if (_resetCount >= 1) {
-      LOGGER_INFO("unsave mode");
-      savemode = false;
-    } // if
-
     // setup system wide stuff
     WiFi.hostname(deviceName);
     Wire.begin(I2cSda, I2cScl);
@@ -453,9 +448,10 @@ void Board::loop()
     connectPhaseEnd = now + maxConnectTime;
 
   } else if ((boardState == BOARDSTATE_CONFWAIT) || (boardState == BOARDSTATE_WAIT)) {
-    // make sysLED blink
+    // make sysLED blink.
+    // short pulses for normal=save mode, long pulses for unsave mode. 
     if (sysLED >= 0) {
-      digitalWrite(sysLED, ((configPhaseEnd - now) % 700) > 350 ? HIGH : LOW);
+      digitalWrite(sysLED, (now % 700) > (savemode ? 100 : 600) ? HIGH : LOW);
     } // if
 
     // check sysButton
@@ -586,7 +582,7 @@ Element *Board::findById(const char *id)
 // send a event out to the defined target.
 void Board::_dispatchSingle(String evt)
 {
-  LOGGER_TRACE("dispatch %s", evt.c_str());
+  // LOGGER_TRACE("dispatch %s", evt.c_str());
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);
   int pos2 = evt.indexOf(ELEM_VALUE);

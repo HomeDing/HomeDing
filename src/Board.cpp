@@ -494,8 +494,7 @@ void Board::loop()
     clearResetCount();
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
-    LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
-    // LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
+    LOGGER_TRACE("Connected to: %s %s", WiFi.SSID().c_str(), (savemode ? "in savemode" : "unsecured"));
     WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
 
     if (display) {

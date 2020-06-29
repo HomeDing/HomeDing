@@ -13,6 +13,9 @@ RF Bridge example
 * Reporting "savemode" in Serial output
 * Reporting "savemode" in /$sysinfo request
 
+* WeatherFeed finalized, see docu.
+* JSONParser fixes.
+ 
 ## [0.4.1] - 2020-04-16
 
 * JSON Parser supporting arrays.

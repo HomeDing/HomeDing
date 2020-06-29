@@ -23,11 +23,15 @@
 
 #include <WeatherFeed.h>
 
+#include "MicroJsonParser.h"
+
 #include <ESP8266WiFi.h>
 
 /** The TRACE Macro is used for trace output for development/debugging purpose. */
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 // #define TRACE(...)
+
+MicroJson *mj = nullptr;
 
 /**
  * @brief static factory function to create a new WeatherFeed.
@@ -44,22 +48,27 @@ Element *WeatherFeedElement::create()
  */
 bool WeatherFeedElement::set(const char *name, const char *value)
 {
-  bool ret = true;
+  bool ret = HttpClientElement::set(name, value); // host, url, loglevel, ...
 
-  if (_stricmp(name, "key") == 0) {
-    _apikey = value;
-  } else if (_stricmp(name, "loc") == 0) {
-    _location = value;
-  } else if (_stricmp(name, "url") == 0) {
-    _url = value;
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-    _valueAction = value;
-  } else if (_stricmp(name, "readtime") == 0) {
-    _readTime = _atotime(value);
-  } else {
-    ret = HttpClientElement::set(name, value); // host, ...
+  if (!ret) {
+    if (_stricmp(name, "get") == 0) {
+      _url = value; // url with parameters
+    } else if (_stricmp(name, "key") == 0) {
+      _apikey = value;
+    } else if (_stricmp(name, "loc") == 0) {
+      _location = value;
+    } else if (_stricmp(name, "readtime") == 0) {
+      _readTime = _atotime(value);
+
+      // save all paths and actions in the vectors.
+    } else if (_stricmp(name, "path") == 0) {
+      _paths.push_back(value);
+    } else if (_stricmp(name, "action") == 0) {
+      _actions.push_back(value);
+
+    } // if
   } // if
-  return (ret);
+  return (true);
 } // set()
 
 
@@ -71,6 +80,13 @@ void WeatherFeedElement::start()
   unsigned int now = _board->getSeconds();
   _nextRead = now + 2; // now + min. 2 sec., don't hurry
   HttpClientElement::start();
+
+  // correct configures paths and actions.
+  _count = std::min(_paths.size(), _actions.size());
+
+  // for (int n = 0; n < _count; n++) {
+  //   TRACE("path %s => action %s", _paths[n].c_str(), _actions[n].c_str());
+  // }
 } // start()
 
 
@@ -82,9 +98,31 @@ void WeatherFeedElement::processHeader(String &key, String &value)
 
 void WeatherFeedElement::processBody(char *value)
 {
-  TRACE("body: <%s>", value);
-  // HttpClientElement::processBody(value);
+  HttpClientElement::processBody(value);
+  if (!value) {
+    delete mj;
+    // TRACE("parser deleted");
+
+  } else {
+    // TRACE("body(%d)", strlen(value));
+    if (!mj) {
+      mj = new MicroJson(
+          [this](int level, char *path, char *value) {
+            if (path && value) {
+              // LOGGER_INFO("<%s>=%s", path, value);
+              // test all defined paths
+              for (int n = 0; n < _count; n++) {
+                if (_paths[n].equalsIgnoreCase(path)) {
+                  _board->dispatch(_actions[n], value);
+                }
+              } // for
+            } // if
+          });
+    }
+    mj->parse(value);
+  }
 };
+
 
 void WeatherFeedElement::loop()
 {

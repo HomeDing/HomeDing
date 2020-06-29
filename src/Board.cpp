@@ -224,7 +224,7 @@ void Board::start(Element_StartupMode startupMode)
 // switch to a new state
 void Board::_newState(BoardState newState)
 {
-  LOGGER_TRACE("BoardState = %d", newState);
+  LOGGER_TRACE("Set state=%d", newState);
   boardState = newState;
 }
 

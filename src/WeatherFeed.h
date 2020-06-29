@@ -25,6 +25,8 @@
 #include <HttpClientElement.h>
 #include <WiFiClient.h>
 
+#include <vector>
+
 /**
  * @brief The WeatherFeed is an special Element that creates actions based on
  * a digital IO signal.
@@ -78,11 +80,16 @@ private:
   String _location;
   String _apikey;
 
-  unsigned long _readTime = 24 * 60 * 60;
+  unsigned long _readTime = 8 * 60 * 60;
   unsigned long _nextRead;
 
-  String _pattern;
+  String _path;
   String _valueAction; // next action to be sent
+
+  int _count; // correct configures paths and actions.
+
+  std::vector<String> _paths;
+  std::vector<String> _actions;
 };
 
 #ifdef HOMEDING_REGISTER

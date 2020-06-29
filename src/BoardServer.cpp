@@ -204,6 +204,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     SPIFFS.info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
+    jc.addProperty("savemode", _board->savemode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);
 
     // WIFI info

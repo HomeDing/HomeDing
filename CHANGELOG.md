@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+RF Bridge example
+
+### Added
+
+* DevDing example folder for experimental and incubator implementations.
+* Diag Element to help analyzing the current I2C devices and memory.
+* Reporting "savemode" in Serial output
+* Reporting "savemode" in /$sysinfo request
+
 ## [0.4.1] - 2020-04-16
 
 * JSON Parser supporting arrays.

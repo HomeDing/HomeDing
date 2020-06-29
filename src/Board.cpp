@@ -51,15 +51,13 @@ extern const char *passPhrase;
 // this is implemented by using the RTC memory at offset with a special value flag
 
 /** The offset of the 4 byte signature, must be a multiple of 4 */
-#define NETRESET_OFFSET 32
+#define NETRESET_OFFSET 3
 
 /** The magic 4-byte number indicating that a reset has happened before, "RST". Byte 4 is the counter */
 #define NETRESET_FLAG ((uint32)0x52535400)
 #define NETRESET_MASK ((uint32)0xFFFFFF00)
 #define NETRESET_VALUEMASK ((uint32)0x00000000FF)
 
-/** The time when board was initialized + time for double reset. */
-static unsigned long bootMillis;
 
 // get the number of resets in the last seconds using rtc memory for counting.
 int getResetCount()
@@ -100,8 +98,6 @@ void clearResetCount()
  */
 void Board::init(ESP8266WebServer *serv)
 {
-  bootMillis = millis() + 2000;
-
   server = serv;
   sysLED = -1; // configured by device-element
   sysButton = -1; // configured by device-element
@@ -114,6 +110,11 @@ void Board::init(ESP8266WebServer *serv)
 
   _resetCount = getResetCount();
   LOGGER_INFO("RESET # %d", _resetCount);
+
+  // disable savemode when rebooting twice in a row
+  savemode = (!_resetCount);
+  LOGGER_INFO("savemode=%d", savemode);
+
 } // init()
 
 
@@ -187,81 +188,13 @@ void Board::addElements()
   mj->parseFile(CONF_FILENAME);
   _checkNetState();
 
+  // mj->init();
   // mj->parse(R"==({
   //   "sli": { "0": {
   //     "description" : "Listen for commands on the Serial in line"
   //   }}})==");
 
-#if 0
-
-  LOGGER_INFO("[[START...");
-mj = new MicroJson(
-    [this](int level, char *path, char *name, char *value) {
-      if (name && value) {
-        // LOGGER_INFO("[[ <%s/%s>=\"%s\"", path, name, value);
-
-        String p(path);
-        p.concat('/');
-        p.concat(name);
-        if (p.equalsIgnoreCase("list[1]/main/temp")) {
-          LOGGER_INFO("next temp=%s", value);
-        }
-      }
-    });
-
-  mj->parse(R"==({
-"cod" : "200","message" : 0,"cnt" : 40,
-"list" : [
-  {"dt" : 1578679200,"main" : {"temp" : 277.96,"feels_like" : 274.42,"temp_min" : 277.96,"temp_max" : 280.11,"pressure" : 1025,"sea_level" : 1025,"grnd_level" : 1010,"humidity" : 75,"temp_kf" : -2.15},"weather" : [{"id" : 500,"main" : "Rain","description" : "light rain","icon" : "10n"}],"clouds" : {"all" : 64},"wind" : {"speed" : 2.38,"deg" : 287},"rain" : {"3h" : 0.06},"sys" : {"pod" : "n"},"dt_txt" : "2020-01-10 18:00:00"},
-  {"dt" : 1578690000,
-"main" : {
-"temp" : 277.66,
-"feels_like" : 273.73,
-"temp_min" : 277.66,
-"temp_max" : 279.27,
-"pressure" : 1028,
-"sea_level" : 1028,
-"grnd_level" : 1012,
-"humidity" : 80,
-"temp_kf" : -1.61},
-"weather" : [
-{
-"id" : 801,
-"main" : "Clouds",
-"description" : "few clouds",
-"icon" : "02n"}
-],
-"clouds" : {
-"all" : 20},
-"wind" : {
-"speed" : 3.07,
-"deg" : 290},
-"sys" : {
-"pod" : "n"},
-"dt_txt" : "2020-01-10 21:00:00"},
-{"dt" : 1579100400,"main" : {"temp" : 282.61,"feels_like" : 279.44,"temp_min" : 282.61,"temp_max" : 282.61,"pressure" : 1019,"sea_level" : 1019,"grnd_level" : 1003,"humidity" : 78,"temp_kf" : 0},"weather" : [{"id" : 804,"main" : "Clouds","description" : "overcast clouds","icon" : "04d"
-}
-],
-"clouds" : {"all" : 100},
-"wind" : {"speed" : 3.16,"deg" : 226},
-"sys" : {"pod" : "d"},
-"dt_txt" : "2020-01-15 15:00:00"
-}
-],
-"city" : {
-  "id" : 2924625,
-  "name" : "Friedrichsdorf",
-  "coord" : {"lat" : 50.2496,"lon" : 8.6428 },
-  "country" : "DE",
-  "timezone" : 3600,
-  "sunrise" : 1578640956,
-  "sunset" : 1578670940
-}
-  })==");
-
-      LOGGER_INFO("[[Done.");
-#endif
-
+  delete mj;
 } // addElements()
 
 
@@ -366,12 +299,6 @@ void Board::loop()
       l = l->next;
     } // while
 
-    // disable savemode when rebooting twice in a row
-    if (_resetCount >= 1) {
-      LOGGER_INFO("unsave mode");
-      savemode = false;
-    } // if
-
     // setup system wide stuff
     WiFi.hostname(deviceName);
     Wire.begin(I2cSda, I2cScl);
@@ -453,9 +380,10 @@ void Board::loop()
     connectPhaseEnd = now + maxConnectTime;
 
   } else if ((boardState == BOARDSTATE_CONFWAIT) || (boardState == BOARDSTATE_WAIT)) {
-    // make sysLED blink
+    // make sysLED blink.
+    // short pulses for normal=save mode, long pulses for unsave mode.
     if (sysLED >= 0) {
-      digitalWrite(sysLED, ((configPhaseEnd - now) % 700) > 350 ? HIGH : LOW);
+      digitalWrite(sysLED, (now % 700) > (savemode ? 100 : 600) ? HIGH : LOW);
     } // if
 
     // check sysButton
@@ -498,8 +426,7 @@ void Board::loop()
     clearResetCount();
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
-    LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
-    // LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
+    LOGGER_TRACE("Connected to: %s %s", WiFi.SSID().c_str(), (savemode ? "in savemode" : "unsecured"));
     WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
 
     if (display) {
@@ -586,7 +513,7 @@ Element *Board::findById(const char *id)
 // send a event out to the defined target.
 void Board::_dispatchSingle(String evt)
 {
-  LOGGER_TRACE("dispatch %s", evt.c_str());
+  // LOGGER_TRACE("dispatch %s", evt.c_str());
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);
   int pos2 = evt.indexOf(ELEM_VALUE);

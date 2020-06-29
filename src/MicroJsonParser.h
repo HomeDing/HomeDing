@@ -19,6 +19,7 @@
  * * 11.04.2020 better supporting arrays
  * * 18.04.2020 correct handling empty obejcts a.k.a '{}'
  * * 18.04.2020 reduce memory footprint
+ * * 27.06.2020 enable parsing partial JSON in junks
  */
 
 
@@ -45,7 +46,13 @@ public:
   MicroJson(MicroJsonCallbackFn callback);
 
   /**
-   * @brief Parse a JSON String
+   * @brief Initialize the JSON parser
+   */
+  void init();
+
+  /**
+   * @brief Parse a JSON String.
+   * This function can be called multiple times in a row when a partial JSON needs to be processed in multiple steps. 
    * @param s The String containing a JSON object.
    */
   void parse(const char *s);
@@ -73,9 +80,9 @@ protected:
   int _state;
   int __level;
 
-  char _path[64];
+  char _path[128];
   int  _index[12]; // -1 for object
-  char _name[16];
+  char _name[64];
   char _value[200];
   char _esc[8];
 

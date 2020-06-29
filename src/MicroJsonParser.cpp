@@ -60,7 +60,7 @@
 #if defined(MJ_TRACE)
 // DEBUG State transitions
 #define MJ_NEWSTATE(newState) (LOGGER_INFO("state %x %d:<%s>:", newState & 0xFF, _level, _path), delay(1), newState)
-#define TRACE(...) LOGGER_INFO(__VA_ARGS__)
+#define TRACE(...) LOGGER_RAW(__VA_ARGS__)
 #else
 #define MJ_NEWSTATE(newState) (newState)
 #define TRACE(...)
@@ -76,15 +76,21 @@ MicroJson::MicroJson(MicroJsonCallbackFn callback)
   _name[0] = NUL;
   _value[0] = NUL;
   _esc[0] = NUL;
+  init();
 };
+
+
+void MicroJson::init()
+{
+  _state = MJ_STATE_INIT;
+  __level = 0;
+  _index[0] = MJ_OBJECTLEVEL;
+}
 
 
 void MicroJson::parse(const char *s)
 {
   if (_callbackFn) {
-    _state = MJ_STATE_INIT;
-    __level = 0;
-    _index[0] = MJ_OBJECTLEVEL;
     parseChar(s);
   } // if
 };
@@ -95,7 +101,7 @@ void MicroJson::parseFile(const char *fName)
   char buffer[128 + 1]; // one extra char for enforced NUL char.
   size_t len;
 
-  parse(""); // init
+  init();
 
   if (_callbackFn) {
     if (SPIFFS.exists(fName)) {
@@ -150,9 +156,9 @@ bool MicroJson::parseChar(char ch)
   bool ret = true; // in most cases
   int _level = __level;
 
-  // // create some debug output on relevant input characters
+  // create some debug output on relevant input characters
   // if (!(_state & MJ_IGNOREBLANCS) || !isspace(ch)) {
-  //   TRACE("> (%c)", ch);
+  //   TRACE("%02x> (%c)", _state, ch);
   // }
 
   if ((_state & MJ_IGNOREBLANCS) && isspace(ch)) {
@@ -274,8 +280,8 @@ bool MicroJson::parseChar(char ch)
 
 
     } else if (isdigit(ch)) {
-      strncat(_value, ch, sizeof(_value));
       _state = MJ_NEWSTATE(MJ_STATE_NUM_VALUE);
+      ret = false; // parse this character again.
     }
 
   } else if (_state == MJ_STATE_NUM_VALUE) {
@@ -393,7 +399,7 @@ bool MicroJson::parseChar(char ch)
     } // if
   }
   __level = _level;
-  return(ret);
+  return (ret);
 } // parseChar()
 
 // end.

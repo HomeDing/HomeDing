@@ -94,13 +94,13 @@ void DiagElement::start()
   LOGGER_ETRACE("start()");
   Element::start();
 
-  LOGGER_EINFO("Reset Reason: %s", ESP.getResetReason().c_str());
-  LOGGER_EINFO(" Free Memory: %d", ESP.getFreeHeap());
-  LOGGER_EINFO("     Chip-Id: 0x%08X", ESP.getChipId());
-  LOGGER_EINFO(" Mac-address: %s", WiFi.macAddress().c_str());
+  LOGGER_ETRACE("Reset Reason: %s", ESP.getResetReason().c_str());
+  LOGGER_ETRACE(" Free Memory: %d", ESP.getFreeHeap());
+  LOGGER_ETRACE("     Chip-Id: 0x%08X", ESP.getChipId());
+  LOGGER_ETRACE(" Mac-address: %s", WiFi.macAddress().c_str());
 
   // ===== scan the the I2C bus and report found devices =====
-  LOGGER_EINFO("Scan i2c (sda=%d, scl=%d)...", _board->I2cSda, _board->I2cScl);
+  LOGGER_ETRACE("Scan i2c (sda=%d, scl=%d)...", _board->I2cSda, _board->I2cScl);
 
   int error, adr;
   int num;
@@ -113,18 +113,18 @@ void DiagElement::start()
     error = Wire.endTransmission();
 
     if (error == 0) {
-      LOGGER_EINFO(" 0x%02x found.", adr);
+      LOGGER_ETRACE(" 0x%02x found.", adr);
       num++;
     } else if (error == 4) {
-      LOGGER_EINFO(" 0x%02x error.", adr);
+      LOGGER_ETRACE(" 0x%02x error.", adr);
     } // if
     yield();
   } // for
-  LOGGER_EINFO(" %2d devices found.", num);
+  LOGGER_ETRACE(" %2d devices found.", num);
 
 
   // dump rtc Memory
-  LOGGER_EINFO("RTC =====");
+  LOGGER_ETRACE("RTC =====");
   uint8_t rtcbuffer[16];
   num = 0;
   for (adr = 0; adr < (512); adr += sizeof(rtcbuffer)) {
@@ -143,7 +143,7 @@ void DiagElement::start()
         chars.concat('.');
       }
     }
-    LOGGER_EINFO("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
+    LOGGER_ETRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
   } // for
 } // start()
 

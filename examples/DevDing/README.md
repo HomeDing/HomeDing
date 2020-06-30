@@ -20,4 +20,6 @@ This is an element that registers itself at system startup and sends some diagno
 * free heap memory
 * i2c bus configuration
 * scan i2c bus for devices
+* dump content of RTC memory
+
 

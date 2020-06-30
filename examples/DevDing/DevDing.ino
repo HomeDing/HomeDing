@@ -42,6 +42,8 @@
 #define HOMEDING_INCLUDE_PMS
 #define HOMEDING_INCLUDE_LIGHT
 
+#define HOMEDING_INCLUDE_WEATHERFEED
+
 #include <Arduino.h>
 
 #include <ESP8266WebServer.h>
@@ -98,6 +100,7 @@ void handleRedirect()
 void setup(void)
 {
   Serial.begin(115200);
+  delay(3000);
 
   Serial.setDebugOutput(false);
   Logger::logger_level = LOGGER_LEVEL_TRACE;

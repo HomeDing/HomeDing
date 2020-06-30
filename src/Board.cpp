@@ -113,8 +113,6 @@ void Board::init(ESP8266WebServer *serv)
 
   // disable savemode when rebooting twice in a row
   savemode = (!_resetCount);
-  LOGGER_INFO("savemode=%d", savemode);
-
 } // init()
 
 

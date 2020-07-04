@@ -41,7 +41,7 @@ public:
    * @param cache_header Cache Header to be used in replies.
    */
   FileServerHandler(FS &fs, const char *cache_header, Board *board)
-      : _fs(fs), _cache_header(cache_header), _board(board)
+      : _fs(fs), _board(board), _cache_header(cache_header)
   {
   }
 
@@ -54,7 +54,7 @@ public:
   */
   bool canHandle(HTTPMethod requestMethod, String requestUri) override
   {
-    return ((!_board->savemode) && (requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE));
+    return ((!_board->savemode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
   } // canHandle()
 
 

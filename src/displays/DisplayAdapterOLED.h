@@ -96,7 +96,7 @@ public:
     return (display->getStringWidth(tmp));
   }
 
-  int drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
+  void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
   {
     display->setColor(WHITE);
     display->drawLine(x0, y0, x1, y1);

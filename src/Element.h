@@ -39,6 +39,7 @@ class Element;
 #define D4 2
 #endif
 
+#define UNUSED __attribute__ ((unused)) 
 
 // ===== Helping classes =====
 #include <core/Logger.h>

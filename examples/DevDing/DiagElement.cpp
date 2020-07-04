@@ -131,7 +131,7 @@ void DiagElement::start()
     ESP.rtcUserMemoryRead(adr / 4, (uint32_t *)rtcbuffer, sizeof(rtcbuffer));
     String bytes;
     String chars;
-    for (int n = 0; n < sizeof(rtcbuffer); n++) {
+    for (unsigned int n = 0; n < sizeof(rtcbuffer); n++) {
       char ch = rtcbuffer[n];
       char buf[8];
       sprintf(buf, "%02X ", ch);

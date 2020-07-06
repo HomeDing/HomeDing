@@ -74,8 +74,14 @@ bool DiagElement::set(const char *name, const char *value)
     // save the actions
     // _changeAction = value;
 
-    // } else if (_stricmp(name, "doAction") == 0) {
-    // make something
+  } else if (_stricmp(name, "heap") == 0) {
+    // log some heap information. using http://nodeding/$board/diag/0?heap=1
+    uint32_t free;
+    uint16_t max;
+    uint8_t frag;
+    ESP.getHeapStats(&free, &max, &frag);
+    LOGGER_EINFO("heap free: %5d - max: %5d - frag: %3d%%", free, max, frag);
+
 
   } else {
     ret = Element::set(name, value);
@@ -121,7 +127,6 @@ void DiagElement::start()
     yield();
   } // for
   LOGGER_ETRACE(" %2d devices found.", num);
-
 
   // dump rtc Memory
   LOGGER_ETRACE("RTC =====");

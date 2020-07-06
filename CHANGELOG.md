@@ -9,13 +9,28 @@ RF Bridge example
 ### Added
 
 * DevDing example folder for experimental and incubator implementations.
-* Diag Element to help analyzing the current I2C devices and memory.
 * Reporting "savemode" in Serial output
 * Reporting "savemode" in /$sysinfo request
 
-* WeatherFeed finalized, see docu.
+### Changed Elements
+
+* **NTPTime** - using newer ANSI ntp time functions. See example `NTP-TZ-DST.ino`.<br/>
+  The zone parameter now can include summer time adjustments.<br/>
+  Changing `zone` parameter of ntptimeElement to use POSIX TZ conformant string.<br/> 
+  Examples can be found at https://sites.google.com/a/usapiens.com/opnode/time-zones
+
+
+### New Elements
+
+* **WeatherFeed** Element got finalized.<br />
+  See docu. at https://homeding.github.io/#page=/elements/weatherfeed.md.
+
+* **Diag** Element is included in the DevDing Example to help analyzing the current I2C devices and memory.
+
+### Fixed
+
 * JSONParser fixes.
- 
+
 ## [0.4.1] - 2020-04-16
 
 * JSON Parser supporting arrays.

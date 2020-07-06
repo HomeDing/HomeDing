@@ -1,5 +1,5 @@
 /**
- * @file StandardDevDing.ino
+ * @file DevDing.ino
  * @brief Experimental sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
  * This sketch is also used as an incubaror project.
@@ -55,6 +55,7 @@
 #include <Board.h>
 #include <Element.h>
 #include <HomeDing.h>
+
 #include <BoardServer.h>
 #include <FileServer.h>
 
@@ -100,7 +101,6 @@ void handleRedirect()
 void setup(void)
 {
   Serial.begin(115200);
-  delay(3000);
 
   Serial.setDebugOutput(false);
   Logger::logger_level = LOGGER_LEVEL_TRACE;
@@ -110,6 +110,7 @@ void setup(void)
   // ----- setup the file system and load configuration -----
   SPIFFS.begin();
   mainBoard.init(&server);
+  yield();
 
   // ----- adding web server handlers -----
   // redirect to index.htm when only domain name is given.

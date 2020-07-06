@@ -57,7 +57,6 @@ void DSTimeElement::_setSystemTime(struct tm *t)
 {
   time_t secs = mktime(t);
   struct timeval tv = {.tv_sec = secs, .tv_usec = 0};
-  sntp_set_timezone(0);
   settimeofday(&tv, NULL);
 } // _setSystemTime()
 
@@ -195,7 +194,6 @@ void DSTimeElement::start()
   Element::start();
 } // start()
 
-static void sntp_set_system_time(uint32_t t);
 
 /**
  * @brief check the state of the local time DHT and eventually request a new
@@ -228,11 +226,11 @@ void DSTimeElement::loop()
 void DSTimeElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  time_t tStamp = sntp_get_current_timestamp();
+  time_t now = time(nullptr);
   char tmp[32];
 
   Element::pushState(callback);
-  strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&tStamp));
+  strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&now));
   callback("now", tmp);
   callback("wire-address", String(_address).c_str());
 } // pushState()

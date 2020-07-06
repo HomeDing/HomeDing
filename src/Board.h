@@ -107,10 +107,10 @@ public:
    * return the seconds since 1.1.1970 00:00:00
    * This method will return 0 when no real time is available.
    */
-  static time_t getTime();
+  static time_t getTime() __attribute__((deprecated)); 
 
   /**
-   * Return the seconds of today.
+   * Return the seconds of today in localtime.
    * This method will return 0 when no real time is available.
    */
   static time_t getTimeOfDay();

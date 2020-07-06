@@ -52,10 +52,6 @@ bool DeviceElement::set(const char *name, const char *value)
   // ===== Log something =====
 
   if (_stricmp(name, "log") == 0) {
-    // Log a information with time.
-    unsigned long now = _board->getTimeOfDay();
-    if (!now)
-      now = millis() / 1000; // make seconds
     LOGGER_JUSTINFO(value ? value : "NULL");
 
     // ===== Web UI =====

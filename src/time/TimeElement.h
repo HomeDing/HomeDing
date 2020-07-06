@@ -66,11 +66,17 @@ public:
   virtual void loop();
 
 private:
-  void _sendAction(String &action, const char *fmt, time_t tStamp);
+  /**
+   * @brief Send out the action after adding the formatted value.
+   * @param action Action template.
+   * @param fmt Format for the value.
+   * @param tmp the local time
+   */
+  void _sendAction(String &action, const char *fmt, struct tm *tmp);
 
-  uint32 _lastTimestamp;
-  uint32 _lastMinute;
-  uint32 _lastDate;
+  time_t _lastTimestamp;
+  time_t _lastMinute;
+  time_t _lastDate;
 
   // action send everytime the time has changed, value = hh:mm:ss
   String _timeAction;

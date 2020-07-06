@@ -85,7 +85,7 @@ bool LogElement::set(const char *name, const char *value)
   if (_stricmp(name, PROP_VALUE) == 0) {
     if (active) {
       _value = value;
-      _timestamp = _board->getTime();
+      _timestamp = time(nullptr);
       _changed = true;
     }
 

@@ -89,11 +89,21 @@ private:
   void _logToFile();
 
   /**
-   * @brief The actual value.
+   * @brief The actual value to be logged.
    */
   String _value;
+ 
+  /**
+   * @brief The actual timestamp of the last value.
+   */
   time_t _timestamp;
+
+  /**
+   * @brief Flag when value has been changed since last logging.
+   */
   bool _changed;
+
+
   uint16_t _filesize;
 
   String _logfileName;

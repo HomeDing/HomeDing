@@ -239,10 +239,11 @@ void Board::loop()
       if (!hasTimeElements) {
         startComplete = true;
       } else {
+
         // starting time depending elements
         // check if time is valid now -> start all elements with
-        time_t current_stamp = getTime();
-        if (current_stamp) {
+        time_t ct = time(nullptr);
+        if (ct) {
           start(Element_StartupMode::Time);
           startComplete = true;
         } // if
@@ -684,24 +685,25 @@ unsigned long Board::getSeconds()
 // return the seconds since 1.1.1970 00:00:00
 time_t Board::getTime()
 {
-  uint32 current_stamp = sntp_get_current_timestamp();
+  time_t current_stamp = time(nullptr);
   if (current_stamp <= MIN_VALID_TIME) {
     current_stamp = 0;
   } // if
-  return ((time_t)(current_stamp));
+  return (current_stamp);
 } // getTime()
 
 
-// return the seconds of today.
+// return the seconds of today in localtime.
 time_t Board::getTimeOfDay()
 {
-  uint32 current_stamp = sntp_get_current_timestamp();
-  if (current_stamp > MIN_VALID_TIME) {
-    current_stamp = current_stamp % (24 * 60 * 60);
+  time_t ct = time(nullptr);
+  tm lt;
+  if (ct) {
+    localtime_r(&ct, &lt);
+    return ((lt.tm_hour * 60 * 60) + (lt.tm_min * 60) + lt.tm_sec);
   } else {
-    current_stamp = 0;
+    return (0);
   }
-  return ((time_t)(current_stamp));
 } // getTimeOfDay()
 
 /**

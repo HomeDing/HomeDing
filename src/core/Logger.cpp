@@ -16,8 +16,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <stdio.h>
 
@@ -46,18 +46,13 @@ void Logger::_print(const char *module, int level, const char *fmt,
   char *p = buffer; // end of string : next segment of logline
 
   // timestamp into buffer, using millis() when no time is available
-  unsigned long now = Board::getTimeOfDay();
+  time_t now = time(nullptr);
   if (!now)
     now = Board::getSeconds();
+  p += strftime(p, sizeof(buffer), "%H:%M:%S ", localtime(&now)); // %T
 
-  struct tm *tmp = localtime((const time_t *)(&now));
-  p += strftime(p, sizeof(buffer), "%H:%M:%S ", tmp); // %T
-
-  // module and loglevel into buffer
-  if (module) {
-    p += sprintf(p, "%s:%c ", module, *(LOGGER_LEVELS + level));
-    // p = strchr(buffer, '\0');
-  } // if
+  // add module and loglevel
+  p += sprintf(p, "%s:%c ", module ? module : "root", *(LOGGER_LEVELS + level));
 
   // message into buffer
   vsnprintf(p, sizeof(buffer) - 40, fmt, args);
@@ -66,7 +61,7 @@ void Logger::_print(const char *module, int level, const char *fmt,
   DEBUG_ESP_PORT.println(buffer);
 #endif
 
-  if ((logger_file) && (module) && (level < LOGGER_LEVEL_TRACE)) {
+  if ((logger_file) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
   }
   yield();

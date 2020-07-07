@@ -190,11 +190,6 @@ void Board::addElements()
     // no elemenmt defined so allow configuration in any case.
     savemode = false;
   }
-  // mj->init();
-  // mj->parse(R"==({
-  //   "sli": { "0": {
-  //     "description" : "Listen for commands on the Serial in line"
-  //   }}})==");
 
   delete mj;
 } // addElements()

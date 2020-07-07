@@ -186,6 +186,10 @@ void Board::addElements()
   mj->parseFile(CONF_FILENAME);
   _checkNetState();
 
+  if (!_elementList) {
+    // no elemenmt defined so allow configuration in any case.
+    savemode = false;
+  }
   // mj->init();
   // mj->parse(R"==({
   //   "sli": { "0": {
@@ -425,7 +429,7 @@ void Board::loop()
     clearResetCount();
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
-    LOGGER_TRACE("Connected to: %s %s", WiFi.SSID().c_str(), (savemode ? "in savemode" : "unsecured"));
+    LOGGER_INFO("Connected to: %s %s", WiFi.SSID().c_str(), (savemode ? "in savemode" : "unsecured"));
     WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
 
     if (display) {
@@ -783,19 +787,20 @@ void Board::_add(const char *id, Element *e)
 
   strcpy(e->id, id);
   Element::_strlower(e->id);
-  e->next = NULL;
   Element *l = _elementList;
 
   // append to end of list.
-  if (l == NULL) {
+  if (!l) {
     // first Element.
     _elementList = e;
   } else {
     // search last Element.
-    while (l->next != NULL)
+    while (l->next)
       l = l->next;
+    // append.
     l->next = e;
   } // if
+  e->next = nullptr;
   e->init(this);
 } // _add()
 

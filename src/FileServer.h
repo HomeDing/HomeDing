@@ -52,7 +52,7 @@ public:
     @param requestUri request ressource from the http request line.
     @return true when method can be handled.
   */
-  bool canHandle(HTTPMethod requestMethod, String requestUri) override
+  bool canHandle(HTTPMethod requestMethod, UNUSED String requestUri) override
   {
     return ((!_board->savemode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
   } // canHandle()
@@ -81,7 +81,7 @@ public:
   } // handle()
 
 
-  void upload(ESP8266WebServer &server, String requestUri, HTTPUpload &upload)
+  void upload(UNUSED ESP8266WebServer &server, String requestUri, HTTPUpload &upload)
   {
     if (upload.status == UPLOAD_FILE_START) {
       if (_fs.exists(upload.filename)) {

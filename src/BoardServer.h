@@ -41,10 +41,8 @@ To send an action to a element a parameter can be added like:
 
 // Content types for http results
 
-static const char *TEXT_PLAIN = "text/plain"; // Content type for plain text.
 static const char *TEXT_JSON = "application/json"; // Content type for JSON.
 static const char *TEXT_HTML = "text/html"; // Content type for HTML.
-static const char *IMAGE_PNG = "image/png"; // Content type for PNG.
 
 /**
  * @brief The BoardHandler is a local class of the main sketch that implements a

@@ -22,6 +22,10 @@ RF Bridge example
 
 ### New Elements
 
+* **CORS** The CORS header is now set on all responses from the build-in web server to allow calling services from web pages located on other devices.
+
+* **mDNS Service Discovery** the HomeDing devices now publish into the local network the availability of a HomeDing device offering the typical HomeDing services. This is implemented using the mDNS-SD with the service signature `_homeding._tcp`. This is not (yet) registered as an official protocol.
+
 * **WeatherFeed** Element got finalized.<br />
   See docu. at https://homeding.github.io/#page=/elements/weatherfeed.md.
 

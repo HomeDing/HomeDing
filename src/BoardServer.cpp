@@ -179,7 +179,6 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
       _board->getState(output, eId);
 
       server.sendHeader("Cache-control", "NO-CACHE");
-      server.sendHeader("Access-Control-Allow-Origin", "*");
       // DEBUG_LOG("  ret:%s\n", output.c_str());
 
     } else {
@@ -213,8 +212,6 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     jc.closeObject();
     output = jc.stringify();
     output_type = TEXT_JSON;
-
-    server.sendHeader("Access-Control-Allow-Origin", "*");
 
     // ===== these actions are only in non-save mode
   } else if (unSaveMode && (requestUri.startsWith(SVC_RESETALL))) {

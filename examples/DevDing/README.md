@@ -15,7 +15,8 @@ They may be removed when not required for implementation to syve some bytes.
 
 ## Diag Element
 
-This is an element that registers itself at system startup and sends some diagnostic output to the Serial Console:
+This is an element that registers itself at system startup
+and sends some diagnostic output to the Serial Console upon request:
 * Reset Reason
 * free heap memory
 * i2c bus configuration

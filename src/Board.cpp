@@ -16,6 +16,8 @@
  */
 
 #include <Arduino.h>
+#include <ESP8266mDNS.h>
+
 #include <Board.h>
 #include <Element.h>
 
@@ -102,18 +104,20 @@ void Board::init(ESP8266WebServer *serv)
   sysLED = -1; // configured by device-element
   sysButton = -1; // configured by device-element
   boardState = BOARDSTATE_NONE;
+  homepage = "/index.htm";
 
   WiFi.begin();
   deviceName = WiFi.hostname(); // use mac based default device name
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
       // https://tools.ietf.org/html/rfc1123 952
-
-  _resetCount = getResetCount();
-  LOGGER_INFO("RESET # %d", _resetCount);
-
-  // disable savemode when rebooting twice in a row
-  savemode = (!_resetCount);
 } // init()
+
+
+/** Return true when board is runing in captive mode. */
+bool Board::isCaptiveMode()
+{
+  return ((boardState == BOARDSTATE_STARTCAPTIVE) || (boardState == BOARDSTATE_RUNCAPTIVE));
+} // isCaptiveMode()
 
 
 void Board::_checkNetState()
@@ -135,7 +139,7 @@ void Board::_checkNetState()
  * @brief Add and config the Elements defined in the config files.
  *
  */
-void Board::addElements()
+void Board::_addElements()
 {
   TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
@@ -192,7 +196,7 @@ void Board::addElements()
   }
 
   delete mj;
-} // addElements()
+} // _addElements()
 
 
 void Board::start(Element_StartupMode startupMode)
@@ -232,7 +236,8 @@ void Board::loop()
   _checkNetState();
 
   if (boardState == BOARDSTATE_RUN) {
-    // Most common state.
+    // Most common state first.
+    MDNS.update();
 
     if (!startComplete) {
       if (!hasTimeElements) {
@@ -286,7 +291,14 @@ void Board::loop()
 
   } else if (boardState == BOARDSTATE_LOAD) {
     // load all config files and create+start elements
-    addElements();
+    _addElements();
+
+    _resetCount = getResetCount();
+    LOGGER_INFO("RESET # %d", _resetCount);
+
+    // enforce un-savemode on double reset
+    if (_resetCount > 0)
+      savemode = false;
 
     // search any time requesting elements
     Element *l = _elementList;
@@ -308,12 +320,15 @@ void Board::loop()
 
     netMode = NetMode_AUTO;
 
+    // Enable sysLED for blinking while waiting for network or config mode
+    if (sysLED >= 0) {
+      pinMode(sysLED, OUTPUT);
+      digitalWrite(sysLED, HIGH);
+    }
+
     // detect no configured network situation
-    if ((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) {
-      // LOGGER_INFO("ssid empty");
-      _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
-    } else if (_resetCount == 2) {
-      // LOGGER_INFO("resetcount 2");
+    if (((WiFi.SSID().length() == 0) && (strlen(ssid) == 0))
+        || (_resetCount == 2)) {
       _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
     } else {
       _newState(BOARDSTATE_CONNECT);
@@ -362,12 +377,6 @@ void Board::loop()
         return;
       }
     } // if
-
-    // Enable sysLED for blinking while waiting for network or config mode
-    if (sysLED >= 0) {
-      pinMode(sysLED, OUTPUT);
-      digitalWrite(sysLED, HIGH);
-    }
 
     // Enable sysButton for entering config mode
     if (sysButton >= 0) {
@@ -440,11 +449,21 @@ void Board::loop()
     }
 
     server->begin();
+    server->enableCORS(true);
     start(Element_StartupMode::Network);
     dispatch(sysStartAction); // dispatched when network is available
 
+    // ===== initialize network dependant services
+
     // start file server for static files in the file system.
     server->serveStatic("/", SPIFFS, "/", "NO-CACHE");
+
+    // start mDNS service discovery for "_homeding._tcp"
+    if (mDNS_sd) {
+      MDNS.begin(deviceName.c_str());
+      MDNSResponder::hMDNSService serv = MDNS.addService(0, "homeding", "tcp", 80);
+      MDNS.addServiceTxt(serv, "path", homepage.c_str());
+    } // if
 
     _newState(BOARDSTATE_RUN);
 
@@ -464,11 +483,6 @@ void Board::loop()
     delay(5);
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
-    if (sysLED >= 0) {
-      pinMode(sysLED, OUTPUT);
-      digitalWrite(sysLED, LOW);
-    }
-
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);
 
@@ -480,6 +494,11 @@ void Board::loop()
   } else if (boardState == BOARDSTATE_RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
     dnsServer.processNextRequest();
+
+    // make sysLED blink 3 sec with a short flash.
+    if (sysLED >= 0) {
+      digitalWrite(sysLED, ((now % 3000) > 120) ? HIGH : LOW);
+    } // if
 
     if (now > _captiveEnd)
       reboot(false);

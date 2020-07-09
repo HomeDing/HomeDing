@@ -95,6 +95,10 @@ bool DeviceElement::set(const char *name, const char *value)
     } else if (_stricmp(name, "onstart") == 0) {
       _board->startAction = value;
 
+      // ===== Service Discovery =====
+    } else if (_stricmp(name, "sd") == 0) {
+      _board->mDNS_sd = _atob(value);
+
       // ===== WiFi Manager =====
     } else if (_stricmp(name, "led") == 0) {
       _board->sysLED = _atopin(value);
@@ -114,7 +118,7 @@ bool DeviceElement::set(const char *name, const char *value)
       _board->I2cScl = _atopin(value);
 
     } // if
-  }   // if (! active)
+  } // if (! active)
 
   return (ret);
 } // set()
@@ -160,11 +164,12 @@ void DeviceElement::pushState(
   callback("title", _title.c_str());
   callback(PROP_DESCRIPTION, _description.c_str());
   callback("savemode", _board->savemode ? "true" : "false");
+  callback("sd", _board->mDNS_sd ? "true" : "false");
   callback("nextboot", String(_nextBoot - now).c_str());
 } // pushState()
 
 
-// Register the DeviceElement onto the ElementRegistry.
+// Always register the DeviceElement onto the ElementRegistry.
 bool DeviceElement::registered =
     ElementRegistry::registerElement("device", DeviceElement::create);
 

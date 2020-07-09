@@ -70,7 +70,7 @@ typedef enum {
 
   // ===== normal operation states
   BOARDSTATE_GREET = 10, // network established, start NET Elements
-  BOARDSTATE_RUN = 12, // in normal operation mode.  
+  BOARDSTATE_RUN = 12, // in normal operation mode.
   // start TIME Elements
   // restart on network lost > 30 secs.
 
@@ -107,7 +107,7 @@ public:
    * return the seconds since 1.1.1970 00:00:00
    * This method will return 0 when no real time is available.
    */
-  static time_t getTime() __attribute__((deprecated)); 
+  static time_t getTime() __attribute__((deprecated));
 
   /**
    * Return the seconds of today in localtime.
@@ -122,10 +122,11 @@ public:
    */
   void init(ESP8266WebServer *s);
 
-  /**
-   * Add and config the Elements defined in the config files.
-   */
-  void addElements();
+  // ===== Board state functionality =====
+
+  /** Return true when board is runing in captive mode. */
+  bool isCaptiveMode();
+
 
   /**
    * activate all the Elements by using start().
@@ -186,7 +187,7 @@ public:
    */
   int sysLED = -1;
 
-  
+
   /**
    * System Button pin, can be used to enter the config mode during startup.
    * Typical use is to use the GPIO0(D3) flash button.
@@ -198,11 +199,6 @@ public:
    * Save Mode flag
    */
   bool savemode;
-
-  /**
-   * Reset Count
-   */
-  int _resetCount;
 
   /**
    * Switch to next network connect mode in msec.
@@ -221,6 +217,10 @@ public:
   int I2cSda = PIN_WIRE_SDA;
   int I2cScl = PIN_WIRE_SCL;
 
+  /**
+   * Service disovery
+   */
+  bool mDNS_sd = true;
 
   // WebServer
   ESP8266WebServer *server;
@@ -263,7 +263,7 @@ public:
    * Start page of the device of no full UTL is given.
    * Can be configured using the device element `homepage` property.
    */
-  String homepage = "/index.htm";
+  String homepage;
 
   String sysStartAction;
   String startAction;
@@ -272,11 +272,21 @@ public:
 
 private:
   /**
+   * Reset Counter
+   */
+  int _resetCount;
+
+  /**
    * Add another element to the board into the list of created elements.
    * @param id id of element.
    * @param e reference to element.
    */
   void _add(const char *id, Element *e);
+
+  /**
+   * Add and config all Elements defined in the config files.
+   */
+  void _addElements();
 
   /**
    * Find an Element by the path.

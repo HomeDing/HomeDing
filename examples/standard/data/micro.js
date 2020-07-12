@@ -45,6 +45,151 @@ var MicroRegistry = (function () {
         window.addEventListener('load', this.init.bind(this));
         window.addEventListener('unload', this.onunload.bind(this));
     }
+    MicroRegistry.prototype.loadFile = function (fName) {
+        var scope = this;
+        var ret = fetch(fName)
+            .then(function (result) {
+            return result.text();
+        })
+            .then(function (html) {
+            var f = document.createRange().createContextualFragment(html);
+            if (scope._tco) {
+                scope._tco.appendChild(f);
+            }
+        });
+        return ret;
+    };
+    MicroRegistry.prototype.attach = function (elem) {
+        if (this._state === MicroState.LOADED) {
+            var cn = elem.getAttribute('u-is');
+            if (cn) {
+                var bc = this._registry[cn];
+                if (bc) {
+                    this.loadBehavior(elem, bc);
+                }
+            }
+        }
+        else {
+            this._unloadedList.push(elem);
+        }
+    };
+    MicroRegistry.prototype._setPlaceholders = function (obj, props) {
+        var _this = this;
+        function fill(val) {
+            for (var p in props) {
+                val = val.replace(new RegExp('\\$\\{' + p + '\\}', 'g'), props[p]);
+            }
+            return val;
+        }
+        if (obj.nodeType === Node.TEXT_NODE) {
+            if (obj.textContent) {
+                obj.textContent = fill(obj.textContent);
+            }
+        }
+        else if (obj.nodeType === Node.ELEMENT_NODE) {
+            var attr = obj.attributes;
+            for (var i = 0; i < attr.length; i++) {
+                var v = attr[i].value;
+                if (v.indexOf('${') >= 0) {
+                    obj[attr[i].name] = attr[i].value = fill(v);
+                }
+            }
+            obj.childNodes.forEach(function (c) {
+                _this._setPlaceholders(c, props);
+            });
+        }
+    };
+    MicroRegistry.prototype.isVisible = function (el) {
+        var vis = false;
+        if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+            var rect = el.getBoundingClientRect();
+            vis = (rect.top <= window.innerHeight && rect.bottom >= 0);
+        }
+        return (vis);
+    };
+    MicroRegistry.prototype.loadDataImage = function (imgElem) {
+        if ((imgElem.dataset.src) && (this.isVisible(imgElem))) {
+            imgElem.src = imgElem.dataset.src;
+        }
+    };
+    MicroRegistry.prototype.insertTemplate = function (root, controlName, props) {
+        var _this = this;
+        var e = null;
+        if (root && controlName && this._tco) {
+            var te = this._tco.querySelector('[u-control="' + controlName.toLowerCase() + '"]');
+            if (te) {
+                e = te.cloneNode(true);
+            }
+            if (e) {
+                e.params = props;
+                this._setPlaceholders(e, props);
+                root.appendChild(e);
+                root.querySelectorAll('[data-src]:not([src])').forEach(function (el) { return _this.loadDataImage(el); });
+            }
+        }
+        return e;
+    };
+    MicroRegistry.prototype.loadBehavior = function (obj, behavior) {
+        var b = behavior;
+        var oc = obj;
+        if (!obj) {
+            console.error('loadBehavior: obj argument is missing.');
+        }
+        else if (!behavior) {
+            console.error('loadBehavior: behavior argument is missing.');
+        }
+        else if (oc._attachedBehavior === behavior) {
+        }
+        else {
+            if (obj.attributes) {
+                for (var n = 0; n < obj.attributes.length; n++) {
+                    var a = obj.attributes[n];
+                    if (!obj[a.name]) {
+                        obj[a.name] = a.value;
+                    }
+                }
+            }
+            for (var p in b) {
+                if (p.substr(0, 3) === 'on_') {
+                    obj.addEventListener(p.substr(3), b[p].bind(obj), false);
+                }
+                else if (p.substr(0, 2) === 'on') {
+                    obj.addEventListener(p.substr(2), b[p].bind(obj), false);
+                }
+                else if (b[p] == null || b[p].constructor !== Function) {
+                    if (!obj[p]) {
+                        obj[p] = b[p];
+                    }
+                }
+                else {
+                    obj[p] = b[p];
+                }
+            }
+            oc._attachedBehavior = behavior;
+            if (obj.parentElement !== this._tco) {
+                oc.connectedCallback();
+                this.List.push(obj);
+            }
+        }
+    };
+    MicroRegistry.prototype.define = function (name, mixin) {
+        this._registry[name] = mixin;
+    };
+    MicroRegistry.prototype.onunload = function (_evt) {
+        for (var n in this.List) {
+            var obj = this.List[n];
+            if (obj && obj.term) {
+                obj.term();
+            }
+            for (var a = 0; a < obj.attributes.length; a++) {
+                obj[obj.attributes[a].name] = null;
+            }
+        }
+        for (var n in this.List) {
+            delete this.List[n];
+        }
+        this.List = [];
+    };
     MicroRegistry.prototype.init = function () {
         this._state = MicroState.INIT;
         this._tco = document.getElementById('u-templates');
@@ -77,145 +222,6 @@ var MicroRegistry = (function () {
             this._unloadedList = [];
         }
     };
-    MicroRegistry.prototype.loadFile = function (fName) {
-        var scope = this;
-        var ret = fetch(fName)
-            .then(function (result) {
-            return result.text();
-        })
-            .then(function (html) {
-            var f = document.createRange().createContextualFragment(html);
-            if (scope._tco) {
-                scope._tco.appendChild(f);
-            }
-        });
-        return ret;
-    };
-    MicroRegistry.prototype.attach = function (elem) {
-        if (this._state === MicroState.LOADED) {
-            var cn = elem.getAttribute('u-is');
-            if (cn) {
-                var bc = this._registry[cn];
-                if (bc) {
-                    this.loadBehavior(elem, bc);
-                }
-            }
-        }
-        else {
-            this._unloadedList.push(elem);
-        }
-    };
-    MicroRegistry.prototype._setPlaceholders = function (obj, props) {
-        var _this = this;
-        function fill(val, props) {
-            for (var p in props)
-                val = val.replace(new RegExp('\\$\\{' + p + '\\}', 'g'), props[p]);
-            return val;
-        }
-        if (obj.nodeType === Node.TEXT_NODE) {
-            if (obj.textContent) {
-                obj.textContent = fill(obj.textContent, props);
-            }
-        }
-        else if (obj.nodeType == Node.ELEMENT_NODE) {
-            var attr = obj.attributes;
-            for (var i = 0; i < attr.length; i++) {
-                var v = attr[i].value;
-                if (v.indexOf('${') >= 0) {
-                    obj[attr[i].name] = attr[i].value = fill(v, props);
-                }
-            }
-            obj.childNodes.forEach(function (c) {
-                _this._setPlaceholders(c, props);
-            });
-        }
-    };
-    MicroRegistry.prototype.isVisible = function (el) {
-        var vis = false;
-        if (el.offsetWidth > 0 && el.offsetHeight > 0) {
-            var rect = el.getBoundingClientRect();
-            vis = (rect.top <= window.innerHeight && rect.bottom >= 0);
-        }
-        return (vis);
-    };
-    MicroRegistry.prototype.loadDataImage = function (imgElem) {
-        if ((imgElem.dataset.src) && (this.isVisible(imgElem))) {
-            imgElem.src = imgElem.dataset.src;
-        }
-    };
-    MicroRegistry.prototype.insertTemplate = function (root, controlName, props) {
-        var _this = this;
-        var e = null;
-        if (root && controlName && this._tco) {
-            var te = this._tco.querySelector('[u-control="' + controlName.toLowerCase() + '"]');
-            if (te)
-                e = te.cloneNode(true);
-            if (e) {
-                e.params = props;
-                this._setPlaceholders(e, props);
-                root.appendChild(e);
-                root.querySelectorAll('[data-src]:not([src])').forEach(function (e) { return _this.loadDataImage(e); });
-            }
-        }
-        return e;
-    };
-    MicroRegistry.prototype.loadBehavior = function (obj, behavior) {
-        var b = behavior;
-        var oc = obj;
-        if (!obj) {
-            console.error('loadBehavior: obj argument is missing.');
-        }
-        else if (!behavior) {
-            console.error('loadBehavior: behavior argument is missing.');
-        }
-        else if (oc._attachedBehavior === behavior) {
-        }
-        else {
-            if (obj.attributes) {
-                for (var n = 0; n < obj.attributes.length; n++) {
-                    var a = obj.attributes[n];
-                    if (!obj[a.name])
-                        obj[a.name] = a.value;
-                }
-            }
-            for (var p in b) {
-                if (p.substr(0, 3) == 'on_') {
-                    obj.addEventListener(p.substr(3), b[p].bind(obj), false);
-                }
-                else if (p.substr(0, 2) == 'on') {
-                    obj.addEventListener(p.substr(2), b[p].bind(obj), false);
-                }
-                else if (b[p] == null || b[p].constructor != Function) {
-                    if (!obj[p])
-                        obj[p] = b[p];
-                }
-                else {
-                    obj[p] = b[p];
-                }
-            }
-            oc._attachedBehavior = behavior;
-            if (obj.parentElement !== this._tco) {
-                oc.connectedCallback();
-                this.List.push(obj);
-            }
-        }
-    };
-    MicroRegistry.prototype.define = function (name, mixin) {
-        this._registry[name] = mixin;
-    };
-    MicroRegistry.prototype.onunload = function (_evt) {
-        for (var n in this.List) {
-            var obj = this.List[n];
-            if (obj && obj.term)
-                obj.term();
-            for (var a = 0; a < obj.attributes.length; a++)
-                obj[obj.attributes[a].name] = null;
-        }
-        for (var n in this.List) {
-            delete this.List[n];
-        }
-        this.List = [];
-    };
     return MicroRegistry;
 }());
 var micro = new MicroRegistry();
@@ -223,13 +229,14 @@ var obs = new MutationObserver(function (mutationsList, _observer) {
     for (var _i = 0, mutationsList_1 = mutationsList; _i < mutationsList_1.length; _i++) {
         var mutation = mutationsList_1[_i];
         mutation.addedNodes.forEach(function (n) {
-            if (n.getAttribute && n.getAttribute('u-is'))
+            if (n.getAttribute && n.getAttribute('u-is')) {
                 micro.attach(n);
+            }
         });
     }
 });
 obs.observe(document, { childList: true, subtree: true });
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('scroll', function () {
         document.querySelectorAll('[data-src]:not([src])').forEach(function (e) { return micro.loadDataImage(e); });
     });
@@ -281,19 +288,21 @@ var GenericWidgetClass = (function (_super) {
             });
         }, this);
         ['h2', 'h4', 'span', 'button'].forEach(function (elType) {
-            this.querySelectorAll(elType + "[u-text='" + key + "']").forEach(function (elem) {
-                if (elem.textContent != value)
+            this.querySelectorAll(elType + '[u-text=\'' + key + '\']').forEach(function (elem) {
+                if (elem.textContent !== value) {
                     elem.textContent = value;
+                }
             });
         }, this);
         ['input', 'select'].forEach(function (elType) {
-            this.querySelectorAll(elType + "[u-value='" + key + "']").forEach(function (elem) {
-                if (elem.value != value)
-                    elem.value = value ? value : "";
+            this.querySelectorAll(elType + '[u-value=\'' + key + '\']').forEach(function (elem) {
+                if (elem.value !== value) {
+                    elem.value = value ? value : '';
+                }
             });
         }, this);
         ['button'].forEach(function (elType) {
-            this.querySelectorAll(elType + "[u-action='${" + key + "}']").forEach(function (elem) {
+            this.querySelectorAll(elType + '[u-action=\'${' + key + '}\']').forEach(function (elem) {
                 setAttr(elem, 'u-action', value ? value : '');
             });
         }, this);
@@ -308,8 +317,9 @@ var GenericWidgetClass = (function (_super) {
                         debounce(_this.dispatchNext.bind(_this))();
                     }
                     else {
-                        if (updateAsap)
+                        if (updateAsap) {
                             updateAsap();
+                        }
                     }
                 });
             }
@@ -339,12 +349,13 @@ var GenericWidgetClass = (function (_super) {
     GenericWidgetClass.prototype.on_click = function (e) {
         var src = e.target;
         var a = src.getAttribute('u-action');
-        if (src && a)
+        if (src && a) {
             this.dispatchAction(a, src['value']);
+        }
         if (src.classList.contains('setconfig')) {
             modal.open('configelementdlg', this.data);
         }
-        else if (src.tagName == 'H3') {
+        else if (src.tagName === 'H3') {
             modal.openFocus(this);
         }
     };
@@ -360,20 +371,20 @@ var ButtonWidgetClass = (function (_super) {
     }
     ButtonWidgetClass.prototype.on_pointerdown = function (e) {
         var src = e.target;
-        if ((src) && (src.classList.contains("u-button"))) {
-            src.classList.add("active");
-            this.dispatchAction("value", '1');
+        if ((src) && (src.classList.contains('u-button'))) {
+            src.classList.add('active');
+            this.dispatchAction('value', '1');
         }
     };
     ButtonWidgetClass.prototype.on_pointerup = function (e) {
         var src = e.target;
-        if (src.classList.contains("u-button")) {
-            src.classList.remove("active");
-            this.dispatchAction("value", '0');
+        if (src.classList.contains('u-button')) {
+            src.classList.remove('active');
+            this.dispatchAction('value', '0');
         }
     };
     ButtonWidgetClass = __decorate([
-        MicroControl("button")
+        MicroControl('button')
     ], ButtonWidgetClass);
     return ButtonWidgetClass;
 }(GenericWidgetClass));
@@ -386,7 +397,6 @@ var DSTimeWidgetClass = (function (_super) {
         function pad02(num) {
             return (((num < 10) ? '0' : '') + num);
         }
-        ;
         var d = new Date();
         var ds = d.getFullYear() + '-' + pad02(d.getMonth() + 1) + '-' + pad02(d.getDate()) +
             ' ' + pad02(d.getHours()) + ':' + pad02(d.getMinutes()) + ':' + pad02(d.getSeconds());
@@ -394,7 +404,7 @@ var DSTimeWidgetClass = (function (_super) {
     };
     DSTimeWidgetClass.prototype.connectedCallback = function () {
         _super.prototype.connectedCallback.call(this);
-        this._nowObj = this.querySelector(".setnow");
+        this._nowObj = this.querySelector('.setnow');
         window.setInterval(function () {
             if (this._nowObj) {
                 setTextContent(this._nowObj, this.isoDate());
@@ -403,15 +413,15 @@ var DSTimeWidgetClass = (function (_super) {
     };
     DSTimeWidgetClass.prototype.on_click = function (e) {
         var src = e.target;
-        if ((src) && (src.classList.contains("setnow"))) {
-            this.dispatchAction("time", this.isoDate());
+        if ((src) && (src.classList.contains('setnow'))) {
+            this.dispatchAction('time', this.isoDate());
         }
         else {
             _super.prototype.on_click.call(this, e);
         }
     };
     DSTimeWidgetClass = __decorate([
-        MicroControl("dstime")
+        MicroControl('dstime')
     ], DSTimeWidgetClass);
     return DSTimeWidgetClass;
 }(GenericWidgetClass));
@@ -429,49 +439,50 @@ var DisplayDotWidgetClass = (function (_super) {
     }
     DisplayDotWidgetClass.prototype.connectedCallback = function () {
         _super.prototype.connectedCallback.call(this);
-        this._dispElem = document.querySelector("#panel .display");
-        hub.subscribe(this.microid + "?*", this.newValue.bind(this), true);
-        if (!this.showSys())
-            this.style.display = "none";
+        this._dispElem = document.querySelector('#panel .display');
+        hub.subscribe(this.microid + '?*', this.newValue.bind(this), true);
+        if (!this.showSys()) {
+            this.style.display = 'none';
+        }
     };
     DisplayDotWidgetClass.prototype.updateDisp = function (create) {
         if (this._dispElem) {
             if (create && !this._elem) {
-                this._elem = document.createElement("span");
+                this._elem = document.createElement('span');
                 this._dispElem.appendChild(this._elem);
             }
             if (this._elem) {
-                this._elem.className = "dot";
-                this._elem.style.top = this._y + "px";
-                this._elem.style.left = this._x + "px";
-                this._elem.classList.toggle("active", this._value);
+                this._elem.className = 'dot';
+                this._elem.style.top = this._y + 'px';
+                this._elem.style.left = this._x + 'px';
+                this._elem.classList.toggle('active', this._value);
             }
         }
     };
     DisplayDotWidgetClass.prototype.newValue = function (_path, key, value) {
         if (key && value) {
-            if (key === "active" && !this._elem) {
+            if (key === 'active' && !this._elem) {
                 this.updateDisp(true);
             }
-            else if (key === "value") {
+            else if (key === 'value') {
                 this._value = toBool(value);
                 this.updateDisp(false);
             }
-            else if (key === "x") {
+            else if (key === 'x') {
                 this._x = Number(value);
                 this.updateDisp(false);
             }
-            else if (key === "y") {
+            else if (key === 'y') {
                 this._y = Number(value);
                 this.updateDisp(false);
             }
             else {
-                console.log("key", key, value);
+                console.log('key', key, value);
             }
         }
     };
     DisplayDotWidgetClass = __decorate([
-        MicroControl("displaydot")
+        MicroControl('displaydot')
     ], DisplayDotWidgetClass);
     return DisplayDotWidgetClass;
 }(GenericWidgetClass));
@@ -489,23 +500,24 @@ var DisplayLineWidgetClass = (function (_super) {
     }
     DisplayLineWidgetClass.prototype.connectedCallback = function () {
         _super.prototype.connectedCallback.call(this);
-        this._dispElem = document.querySelector("#panel .display");
-        hub.subscribe(this.microid + "?*", this.newValue.bind(this), true);
-        if (!this.showSys())
-            this.style.display = "none";
+        this._dispElem = document.querySelector('#panel .display');
+        hub.subscribe(this.microid + '?*', this.newValue.bind(this), true);
+        if (!this.showSys()) {
+            this.style.display = 'none';
+        }
     };
     DisplayLineWidgetClass.prototype.updateDisp = function () {
         if (this._dispElem) {
             if (!this._elem) {
-                this._elem = document.createElement("span");
+                this._elem = document.createElement('span');
                 this._dispElem.appendChild(this._elem);
             }
             if (this._elem) {
-                this._elem.className = "line";
-                this._elem.style.top = this._y0 + "px";
-                this._elem.style.left = this._x0 + "px";
-                this._elem.style.width = (this._x1 - this._x0) + "px";
-                this._elem.style.height = (this._y1 - this._y0) + "px";
+                this._elem.className = 'line';
+                this._elem.style.top = this._y0 + 'px';
+                this._elem.style.left = this._x0 + 'px';
+                this._elem.style.width = (this._x1 - this._x0) + 'px';
+                this._elem.style.height = (this._y1 - this._y0) + 'px';
             }
         }
     };
@@ -518,7 +530,7 @@ var DisplayLineWidgetClass = (function (_super) {
         }
     };
     DisplayLineWidgetClass = __decorate([
-        MicroControl("displayline")
+        MicroControl('displayline')
     ], DisplayLineWidgetClass);
     return DisplayLineWidgetClass;
 }(GenericWidgetClass));
@@ -528,7 +540,7 @@ var DisplayTextWidgetClass = (function (_super) {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.lastValue = null;
         _this._dispElem = null;
-        _this._dispGrid = 1;
+        _this._grid = 1;
         _this._elem = null;
         _this._prefix = '';
         _this._postfix = '';
@@ -536,19 +548,21 @@ var DisplayTextWidgetClass = (function (_super) {
     }
     DisplayTextWidgetClass.prototype.connectedCallback = function () {
         _super.prototype.connectedCallback.call(this);
-        this._dispElem = document.querySelector("#panel .display");
+        this._dispElem = document.querySelector('#panel .display');
         if (this._dispElem) {
-            if (this._dispElem.getAttribute('grid'))
-                this._dispGrid = Number(this._dispElem.getAttribute('grid'));
+            if (this._dispElem.getAttribute('grid')) {
+                this._grid = Number(this._dispElem.getAttribute('grid'));
+            }
             var e = this._elem = document.createElement('span');
             e.className = 'text';
             e.style.top = '0px';
             e.style.left = '0px';
             this._dispElem.appendChild(e);
         }
-        hub.subscribe(this.microid + "?*", this.newValue.bind(this), true);
-        if (!this.showSys())
-            this.style.display = "none";
+        hub.subscribe(this.microid + '?*', this.newValue.bind(this), true);
+        if (!this.showSys()) {
+            this.style.display = 'none';
+        }
     };
     DisplayTextWidgetClass.prototype.newValue = function (_path, key, value) {
         if (key && value && this._elem) {
@@ -557,10 +571,11 @@ var DisplayTextWidgetClass = (function (_super) {
                 this._elem.innerHTML = t.replace(/ /g, '&nbsp;');
             }
             else if (key === 'x') {
-                this._elem.style.left = (Number(value) * this._dispGrid * 7 / 10) + 'px';
+                var n = Number(value) * this._grid;
+                this._elem.style.left = (this._grid > 1 ? n : (n * 7 / 10)) + 'px';
             }
             else if (key === 'y') {
-                this._elem.style.top = (Number(value) * this._dispGrid) + 'px';
+                this._elem.style.top = (Number(value) * this._grid) + 'px';
             }
             else if (key === 'fontsize') {
                 this._elem.style.fontSize = value + 'px';
@@ -576,30 +591,30 @@ var DisplayTextWidgetClass = (function (_super) {
         }
     };
     DisplayTextWidgetClass = __decorate([
-        MicroControl("displaytext")
+        MicroControl('displaytext')
     ], DisplayTextWidgetClass);
     return DisplayTextWidgetClass;
 }(GenericWidgetClass));
 function jsonParse(obj, cbFunc) {
-    function _jsonParse(path, key, value, cbFunc) {
+    function _jsonParse(path, key, value) {
         var path2 = key ? path + '/' + key : path;
         path2 = path2.replace('/[', '[');
         if (Array.isArray(value)) {
             for (var n = 0; n < value.length; n++) {
-                _jsonParse(path2, '[' + n + ']', value[n], cbFunc);
+                _jsonParse(path2, '[' + n + ']', value[n]);
             }
         }
-        else if (typeof value == 'object') {
+        else if (typeof value === 'object') {
             cbFunc(path2, null, null);
             for (var k in value) {
-                _jsonParse(path2, k, value[k], cbFunc);
+                _jsonParse(path2, k, value[k]);
             }
         }
         else {
             cbFunc(path, key, String(value));
         }
     }
-    _jsonParse('', '', obj, cbFunc);
+    _jsonParse('', '', obj);
 }
 function jsonFind(obj, path) {
     if (path[0] === '/') {
@@ -695,8 +710,8 @@ var ModalDialogClass = (function () {
     ModalDialogClass.prototype.open = function (tmplName, data) {
         if ((this._mObj) && (this._cObj)) {
             this._cObj.innerHTML = '';
-            this._cObj.style.width = "";
-            this._cObj.style.height = "";
+            this._cObj.style.width = '';
+            this._cObj.style.height = '';
             micro.insertTemplate(this._cObj, tmplName, data);
             this._mObj.classList.remove('hidden');
             this._isOpen = true;
@@ -709,8 +724,8 @@ var ModalDialogClass = (function () {
             this._focusStyle = obj.getAttribute('style');
             var r = obj.getBoundingClientRect();
             p = obj.cloneNode(false);
-            p.style.width = r.width + "px";
-            p.style.height = r.height + "px";
+            p.style.width = r.width + 'px';
+            p.style.height = r.height + 'px';
             obj.parentElement.insertBefore(p, obj);
             this._placeholderObj = p;
             obj.classList.add('modalObject');
@@ -762,18 +777,19 @@ var NeoWidgetClass = (function (_super) {
     }
     NeoWidgetClass.prototype.x16 = function (d) {
         var x = Number(d).toString(16);
-        if (x.length === 1)
+        if (x.length === 1) {
             x = '0' + x;
+        }
         return (x);
     };
     NeoWidgetClass.prototype.on_click = function (e) {
         var src = e.srcElement;
-        if (src.className == "hueband") {
-            var color = "hsl(" + Math.round(e.offsetX) + ", 100%, 50%)";
+        if (src.className === 'hueband') {
+            var color = 'hsl(' + Math.round(e.offsetX) + ', 100%, 50%)';
             src.style.backgroundColor = color;
             if (document && document.defaultView) {
                 var ccol = document.defaultView.getComputedStyle(src, null).backgroundColor;
-                var l = String(ccol).replace(/[^0-9,]/g, "").split(',');
+                var l = String(ccol).replace(/[^0-9,]/g, '').split(',');
                 var col = 'x' + this.x16(l[0]) + this.x16(l[1]) + this.x16(l[2]);
                 this.dispatchAction('value', col);
             }
@@ -783,7 +799,7 @@ var NeoWidgetClass = (function (_super) {
         }
     };
     NeoWidgetClass = __decorate([
-        MicroControl("neo")
+        MicroControl('neo')
     ], NeoWidgetClass);
     return NeoWidgetClass;
 }(GenericWidgetClass));
@@ -797,28 +813,30 @@ var PWMOutWidgetClass = (function (_super) {
     }
     PWMOutWidgetClass.prototype.connectedCallback = function () {
         _super.prototype.connectedCallback.call(this);
-        hub.subscribe(this.microid + "?*", this.newValue.bind(this));
+        hub.subscribe(this.microid + '?*', this.newValue.bind(this));
     };
     PWMOutWidgetClass.prototype.newValue = function (_path, key, value) {
-        if (key == "range") {
+        if (key === 'range') {
             this._range = Number(value);
         }
-        else if (key == "value") {
+        else if (key === 'value') {
             if (this.lastValue !== value) {
-                var o = this.querySelector(".ux-levelbar");
+                var o = this.querySelector('.ux-levelbar');
                 var h = o.offsetHeight;
                 var bh = (h * Number(value)) / this._range;
-                if (bh > h - 1)
+                if (bh > h - 1) {
                     bh = h - 1;
-                if (bh < 1)
+                }
+                if (bh < 1) {
                     bh = 1;
-                o.style.borderBottomWidth = bh + "px";
+                }
+                o.style.borderBottomWidth = bh + 'px';
                 this.lastValue = value;
             }
         }
     };
     PWMOutWidgetClass = __decorate([
-        MicroControl("pwmout")
+        MicroControl('pwmout')
     ], PWMOutWidgetClass);
     return PWMOutWidgetClass;
 }(GenericWidgetClass));
@@ -837,7 +855,7 @@ var SliderWidgetClass = (function (_super) {
         return _this;
     }
     SliderWidgetClass.prototype.connectedCallback = function () {
-        this._handle = this.querySelector(".handle");
+        this._handle = this.querySelector('.handle');
         _super.prototype.connectedCallback.call(this);
         if (this._handle) {
             var p = this._handle.parentElement;
@@ -850,32 +868,33 @@ var SliderWidgetClass = (function (_super) {
             var left = val - this.minvalue;
             left = Math.round(left * this._maxright / (this.maxvalue - this.minvalue));
             left = Math.min(this._maxright, Math.max(0, left));
-            this._handle.style.left = left + "px";
+            this._handle.style.left = left + 'px';
         }
     };
     SliderWidgetClass.prototype.newData = function (path, key, value) {
         _super.prototype.newData.call(this, path, key, value);
-        if (key == 'value') {
+        if (key === 'value') {
             var v = Number(value);
-            if (v != this._lastValue) {
+            if (v !== this._lastValue) {
                 this._adjustHandle(v);
                 this._lastValue = v;
             }
         }
-        else if (key == 'min') {
+        else if (key === 'min') {
             this.minvalue = Number(value);
         }
-        else if (key == 'max') {
+        else if (key === 'max') {
             this.maxvalue = Number(value);
         }
-        else if (key == 'step') {
+        else if (key === 'step') {
             this.unit = Number(value);
         }
     };
     SliderWidgetClass.prototype.on_click = function (e) {
         var src = e.srcElement;
-        while (src != null && src.classList.length == 0)
+        while (src != null && src.classList.length === 0) {
             src = src.parentElement;
+        }
         if (src != null) {
             if (src.classList.contains('up')) {
                 this.dispatchAction('up', '1');
@@ -889,7 +908,7 @@ var SliderWidgetClass = (function (_super) {
         }
     };
     SliderWidgetClass.prototype.on_mousedown = function (evt) {
-        if (evt.target == this._handle) {
+        if (evt.target === this._handle) {
             this.MoveStart(evt);
         }
     };
@@ -914,24 +933,24 @@ var SliderWidgetClass = (function (_super) {
         var val = Math.round(left * (this.maxvalue - this.minvalue) / this._maxright + this.minvalue);
         val = Math.round(val / this.unit) * this.unit;
         this._adjustHandle(val);
-        if (val != this._lastValue) {
+        if (val !== this._lastValue) {
             this._lastValue = val;
             this.dispatchAction('value', String(val));
         }
     };
     SliderWidgetClass.prototype._onmouseup = function (evt) {
         evt = evt || window.event;
-        document.removeEventListener("mousemove", this._moveFunc);
-        document.removeEventListener("mouseup", this._upFunc);
+        document.removeEventListener('mousemove', this._moveFunc);
+        document.removeEventListener('mouseup', this._upFunc);
     };
     SliderWidgetClass.prototype.on_touchstart = function (evt) {
         var t = evt.targetTouches[0].target;
-        if (t == this._handle) {
+        if (t === this._handle) {
             console.log('TouchStart');
         }
     };
     SliderWidgetClass = __decorate([
-        MicroControl("slider")
+        MicroControl('slider')
     ], SliderWidgetClass);
     return SliderWidgetClass;
 }(GenericWidgetClass));
@@ -941,11 +960,12 @@ var SwitchWidgetClass = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     SwitchWidgetClass.prototype.on_click = function (e) {
-        var o = this.querySelector(".u-switch");
+        var o = this.querySelector('.u-switch');
         var src = e.srcElement;
-        while (src != null && src != this && src != o)
+        while (src !== null && src !== this && src !== o) {
             src = src.parentElement;
-        if (src == o) {
+        }
+        if (src === o) {
             this.dispatchAction('toggle', '1');
         }
         else {
@@ -953,13 +973,14 @@ var SwitchWidgetClass = (function (_super) {
         }
     };
     SwitchWidgetClass = __decorate([
-        MicroControl("switch")
+        MicroControl('switch')
     ], SwitchWidgetClass);
     return SwitchWidgetClass;
 }(GenericWidgetClass));
 function toBool(s) {
-    if (!s)
+    if (!s) {
         return false;
+    }
     switch (s.toLowerCase().trim()) {
         case 'true':
         case 'yes':
@@ -994,17 +1015,25 @@ function toSeconds(v) {
     return ret;
 }
 function setTextContent(el, txt) {
-    if (el.textContent !== txt)
+    if (el.textContent !== txt) {
         el.textContent = txt;
+    }
 }
 function setAttr(el, name, value) {
-    if (el.getAttribute(name) !== value)
+    if (el.getAttribute(name) !== value) {
         el.setAttribute(name, value);
+    }
 }
 function changeConfig(id, newConfig) {
-    var fName = '/config.json';
-    var c = JSON.parse(hub.read('config'));
-    var node = jsonFind(c, id);
+    var c, node, fName;
+    fName = '/env.json';
+    c = JSON.parse(hub.read('env'));
+    node = jsonFind(c, id);
+    if (Object.keys(node).length === 0) {
+        fName = '/config.json';
+        c = JSON.parse(hub.read('config'));
+        node = jsonFind(c, id);
+    }
     for (var n in newConfig) {
         if (newConfig[n]) {
             node[n] = newConfig[n];
@@ -1018,7 +1047,7 @@ function changeConfig(id, newConfig) {
     var objHTTP = new XMLHttpRequest();
     objHTTP.open('POST', '/');
     objHTTP.addEventListener('readystatechange', function () {
-        if (this.readyState == 4 && this.status >= 200 && this.status < 300) {
+        if (this.readyState === 4 && this.status >= 200 && this.status < 300) {
             alert('saved.');
         }
     });
@@ -1030,8 +1059,9 @@ function debounce(func, wait) {
     return function () {
         var scope = this;
         var args = arguments;
-        if (timer)
+        if (timer) {
             clearTimeout(timer);
+        }
         timer = setTimeout(function () {
             timer = 0;
             func.apply(scope, args);
@@ -1061,20 +1091,21 @@ var TimerWidgetClass = (function (_super) {
     }
     TimerWidgetClass.prototype.newData = function (path, key, value) {
         _super.prototype.newData.call(this, path, key, value);
-        if (key == 'waittime') {
+        if (key === 'waittime') {
             this.wt = toSeconds(value);
         }
-        else if (key == 'pulsetime') {
+        else if (key === 'pulsetime') {
             this.pt = toSeconds(value);
         }
-        else if (key == 'cycletime') {
+        else if (key === 'cycletime') {
             this.ct = toSeconds(value);
         }
-        else if (key == 'time') {
+        else if (key === 'time') {
             this.time = toSeconds(value);
         }
-        if (this.ct < this.wt + this.pt)
+        if (this.ct < this.wt + this.pt) {
             this.ct = this.wt + this.pt;
+        }
         if (this.ct > 0) {
             var el = this.querySelector('.u-bar');
             var f = el.clientWidth / this.ct;
@@ -1091,8 +1122,9 @@ var TimerWidgetClass = (function (_super) {
             var d_1 = {};
             this.querySelectorAll('[u-value]').forEach(function (elem) {
                 var n = elem.getAttribute('u-value');
-                if (n)
+                if (n) {
                     d_1[n] = elem.value;
+                }
             });
             changeConfig(this.microid, d_1);
         }
@@ -1109,35 +1141,6 @@ var MicroHub = (function () {
         this._registrationsId = 0;
         this._store = {};
     }
-    MicroHub.prototype._findStoreObject = function (path) {
-        var p = this._store;
-        if (path[0] === '/') {
-            path = path.substr(1);
-        }
-        var steps = path.split('/');
-        while (steps.length > 0 && p[steps[0]]) {
-            p = p[steps[0]];
-            steps.shift();
-        }
-        while (steps.length > 0 && steps[0]) {
-            p = p[steps[0]] = {};
-            steps.shift();
-        }
-        return p;
-    };
-    MicroHub.prototype.pPath = function (path) {
-        if (path[0] === '/') {
-            path = path.substr(1);
-        }
-        var steps = path.split('/');
-        var res = steps.slice(0, steps.length - 1).join('/');
-        return res;
-    };
-    MicroHub.prototype.pKey = function (path) {
-        var steps = path.split('/');
-        var res = steps[steps.length - 1];
-        return res;
-    };
     MicroHub.prototype.read = function (path) {
         var o = this._findStoreObject(this.pPath(path));
         return o[this.pKey(path)];
@@ -1168,8 +1171,9 @@ var MicroHub = (function () {
                 var fullPath = path + (key ? '?' + key : '');
                 if (fullPath) {
                     fullPath = fullPath.toLocaleLowerCase();
-                    if (fullPath.match(newEntry.match))
+                    if (fullPath.match(newEntry.match)) {
                         newEntry.callback(path, key ? key.toLowerCase() : null, value);
+                    }
                 }
             }.bind(this));
         }
@@ -1185,8 +1189,9 @@ var MicroHub = (function () {
                 var fullPath = path + (key ? '?' + key : '');
                 if (fullPath) {
                     fullPath = fullPath.toLocaleLowerCase();
-                    if (fullPath.match(e.match))
+                    if (fullPath.match(e.match)) {
                         e.callback(path, key ? key.toLowerCase() : null, value);
+                    }
                 }
             }.bind(this));
         }
@@ -1205,8 +1210,9 @@ var MicroHub = (function () {
             }
             fullPath = fullPath.toLocaleLowerCase();
             Object.values(this._registrations).forEach(function (r) {
-                if (fullPath.match(r.match))
+                if (fullPath.match(r.match)) {
                     r.callback(path, key, value);
+                }
             });
         }
     };
@@ -1214,6 +1220,35 @@ var MicroHub = (function () {
         for (var n in this._registrations) {
             delete this._registrations[n];
         }
+    };
+    MicroHub.prototype._findStoreObject = function (path) {
+        var p = this._store;
+        if (path[0] === '/') {
+            path = path.substr(1);
+        }
+        var steps = path.split('/');
+        while (steps.length > 0 && p[steps[0]]) {
+            p = p[steps[0]];
+            steps.shift();
+        }
+        while (steps.length > 0 && steps[0]) {
+            p = p[steps[0]] = {};
+            steps.shift();
+        }
+        return p;
+    };
+    MicroHub.prototype.pPath = function (path) {
+        if (path[0] === '/') {
+            path = path.substr(1);
+        }
+        var steps = path.split('/');
+        var res = steps.slice(0, steps.length - 1).join('/');
+        return res;
+    };
+    MicroHub.prototype.pKey = function (path) {
+        var steps = path.split('/');
+        var res = steps[steps.length - 1];
+        return res;
     };
     return MicroHub;
 }());

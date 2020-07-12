@@ -15,18 +15,14 @@
  */
 
 #include <Arduino.h>
+#include <ESP8266mDNS.h>
+
 #include <Board.h>
 #include <Element.h>
 
 #include <HomeDing.h>
 
 #include "DiagElement.h"
-
-
-/* ===== Define local constants and often used strings ===== */
-
-// like:
-// #define ANYCONSTANT 1000
 
 
 /* ===== Static factory function ===== */
@@ -48,14 +44,11 @@ DiagElement::DiagElement()
   startupMode = Element_StartupMode::System;
 }
 
-
-// maybe: overwrite the init() function.
-
 void DiagElement::init(Board *board)
 {
   Element::init(board);
 
-  // do something here like initialization
+  // startup before network
   startupMode = Element_StartupMode::System;
 } // init()
 
@@ -67,21 +60,53 @@ bool DiagElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
-    _value = _atoi(value);
-
-    // } else if (_stricmp(name, "onChange") == 0) {
-    // save the actions
-    // _changeAction = value;
-
-  } else if (_stricmp(name, "heap") == 0) {
+  if (_stricmp(name, "heap") == 0) {
     // log some heap information. using http://nodeding/$board/diag/0?heap=1
+    LOGGER_ETRACE("===== HEAP =====");
     uint32_t free;
     uint16_t max;
     uint8_t frag;
     ESP.getHeapStats(&free, &max, &frag);
     LOGGER_EINFO("heap free: %5d - max: %5d - frag: %3d%%", free, max, frag);
 
+
+  } else if (_stricmp(name, "rtcmem") == 0) {
+    // log some heap information. using http://nodeding/$board/diag/0?rtcmem=1
+    // dump rtc Memory
+    LOGGER_ETRACE("===== RTCMEM =====");
+    uint8_t rtcbuffer[16];
+    for (unsigned int adr = 0; adr < (512); adr += sizeof(rtcbuffer)) {
+      ESP.rtcUserMemoryRead(adr / 4, (uint32_t *)rtcbuffer, sizeof(rtcbuffer));
+      String bytes;
+      String chars;
+      for (unsigned int n = 0; n < sizeof(rtcbuffer); n++) {
+        char ch = rtcbuffer[n];
+        char buf[8];
+        sprintf(buf, "%02X ", ch);
+        bytes.concat(buf);
+
+        if ((ch >= 0x20) && (ch <= 0x7F)) {
+          chars.concat(ch);
+        } else {
+          chars.concat('.');
+        }
+      }
+      LOGGER_ETRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
+    } // for
+
+  } else if (_stricmp(name, "mdns") == 0) {
+    // log some heap information. using http://nodeding/$board/diag/0?mdns=1
+    LOGGER_ETRACE("===== mdns =====");
+    Serial.flush();
+
+    // add mDNS service discovery feature
+    // see http://www.dns-sd.org/
+    // https://tools.ietf.org/html/rfc6762
+    // https://tools.ietf.org/html/rfc6763
+    MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
+    MDNS.addServiceTxt(serv, "path", "/");
+
+    LOGGER_ETRACE("done.");
 
   } else {
     ret = Element::set(name, value);
@@ -128,49 +153,7 @@ void DiagElement::start()
   } // for
   LOGGER_ETRACE(" %2d devices found.", num);
 
-  // dump rtc Memory
-  LOGGER_ETRACE("RTC =====");
-  uint8_t rtcbuffer[16];
-  num = 0;
-  for (adr = 0; adr < (512); adr += sizeof(rtcbuffer)) {
-    ESP.rtcUserMemoryRead(adr / 4, (uint32_t *)rtcbuffer, sizeof(rtcbuffer));
-    String bytes;
-    String chars;
-    for (unsigned int n = 0; n < sizeof(rtcbuffer); n++) {
-      char ch = rtcbuffer[n];
-      char buf[8];
-      sprintf(buf, "%02X ", ch);
-      bytes.concat(buf);
-
-      if ((ch >= 0x20) && (ch <= 0x7F)) {
-        chars.concat(ch);
-      } else {
-        chars.concat('.');
-      }
-    }
-    LOGGER_ETRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
-  } // for
 } // start()
-
-
-/**
- * @brief Give some processing time to the Element to check for next actions.
- */
-void DiagElement::loop()
-{
-  // do something
-} // loop()
-
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DiagElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  Element::pushState(callback);
-  callback(PROP_VALUE, String(_value).c_str());
-} // pushState()
 
 
 /* ===== Register the Element ===== */

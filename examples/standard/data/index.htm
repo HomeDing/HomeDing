@@ -22,7 +22,6 @@
   <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
 
   <script src="/polyfill.js"></script>
-  <script src="/es6-promise.auto.js"></script>
   <script src="/micro.js"></script>
 </head>
 
@@ -190,11 +189,11 @@
       selObj.addEventListener('change', elemChange);
     });
 
-    if (window !== window.top) {
-      // disable header and navbar in portal mode.
-      document.querySelector('.u-header').style.display = 'none';
-      document.querySelector('.u-navbar').style.display = 'none';
-    } // if
+    // if (window !== window.top) {
+    //   // disable header and navbar in portal mode.
+    //   document.querySelector('.u-header').style.display = 'none';
+    //   document.querySelector('.u-navbar').style.display = 'none';
+    // } // if
   </script>
 </body>
 

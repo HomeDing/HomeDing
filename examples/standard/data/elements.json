@@ -1,7 +1,7 @@
 {
   "device": {
     "sys": "true",
-    "properties": ["loglevel", "description", "room", "name", "led", "button", "reboottime", "logfile"],
+    "properties": ["loglevel", "description", "room", "name", "led", "button", "i2c-sda", "i2c-scl", "savemode", "sd", "reboottime", "logfile", "onstart", "onsysstart"],
     "events": ["log"]
   },
 

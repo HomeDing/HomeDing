@@ -41,6 +41,7 @@
 
 #define HOMEDING_INCLUDE_PMS
 #define HOMEDING_INCLUDE_LIGHT
+#define HOMEDING_INCLUDE_NEOPIXEL
 
 #define HOMEDING_INCLUDE_WEATHERFEED
 
@@ -82,7 +83,7 @@ void handleRedirect()
   LOGGER_RAW("Redirect...");
 
   String url;
-  if (mainBoard.boardState < BOARDSTATE_STARTCAPTIVE) {
+  if (! mainBoard.isCaptiveMode()) {
     url = mainBoard.homepage;
   } else {
     url = "http://";
@@ -103,7 +104,7 @@ void setup(void)
   Serial.begin(115200);
 
   Serial.setDebugOutput(false);
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
+  // Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("Device starting...");
 

@@ -23,19 +23,22 @@ function handleLoadFile(e) {
     });
 } // handleLoadFile()
 
+// General Purpose Promise
+function DelayPromise(ms) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(resolve, ms);
+  });
+}
 
 // delete file on the server
 function handleDeleteFile(e) {
-  var xhr = new XMLHttpRequest();
   e.stopPropagation();
   e.preventDefault();
   var s = e.target.parentElement.firstElementChild.innerText;
   s = s.split(' ')[0];
   var yn = window.confirm("Delete " + s + " ?");
   if (yn) {
-    // sync call
-    xhr.open("DELETE", s, true);
-    xhr.send();
+    fetch(s, { method: 'DELETE' });
     window.setTimeout(handleReloadFS, 100);
   } // if
 } // handleDeleteFile()
@@ -147,11 +150,10 @@ function handleFmt() {
     var t = contentObj.innerText;
     var o = null;
 
-    // missing comma
-    t = t.replace(/\}\s*/g, "}");
-    t = t.replace(/\}([^,}])/g, "},$1");
-    // trailing comma
-    t = t.replace(/\}\s*,\s*\}/g, "}}");
+    // missing comma in '}{'
+    t = t.replace(/\}\s*\{/g, "},{");
+    // comma before close brackets
+    t = t.replace(/,\s*([\}\]])/g, "$1");
 
     try {
       o = JSON.parse(t);

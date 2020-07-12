@@ -58,7 +58,6 @@
     }
   </style>
   <script src="/polyfill.js"></script>
-  <script src="/es6-promise.auto.js"></script>
   <script src="/micro.js"></script>
 </head>
 
@@ -278,6 +277,11 @@
     } // createElement()
     hub.subscribe('/*/*', createElement);
 
+    hub.subscribe('/device/*?name', function (path, key, value) {
+      document.title = value;
+      document.querySelector("meta[name=application-name]").content = value;
+    });
+
     function updateAsap(ev) {
       if (updateTimer)
         window.clearTimeout(updateTimer);
@@ -320,6 +324,7 @@
           return result.json();
         })
         .then(function (json) {
+          hub.write('env', JSON.stringify(json));
           hub.publishObj(json);
 
           return fetch('/config.json');

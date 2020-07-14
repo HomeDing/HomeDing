@@ -6,34 +6,45 @@ All notable changes to this project will be documented in this file.
 
 RF Bridge example
 
+## [0.5.0] - 2020-07-16
+
+This release focuses on stability and better developer support. One new Element is present that added required some features and fixes in the JSON parser. 
+
+**Important**
+
+* Specify "savemode": "false" in the device configuration when you want unsecured access to your device.
+* Change "zone": "<your timezone>" in the NTPtime element using the ANSI TZ notation. Otherwise the device runs in "GMT0BST" timezone (London).
+
 ### Added
 
-* DevDing example folder for experimental and incubator implementations.
-* Reporting "savemode" in Serial output
-* Reporting "savemode" in /$sysinfo request
+* **DevDing example** The example can be used for for experimental and incubator implementations.<br />
+  In the folder you can find elements that should not be present in long-time running devices but can help wile developing.<br />
+  This sketch includes all common elements and those under development or of interest.
 
-### Changed Elements
-
-* **NTPTime** - using newer ANSI ntp time functions. See example `NTP-TZ-DST.ino`.<br/>
-  The zone parameter now can include summer time adjustments.<br/>
-  Changing `zone` parameter of ntptimeElement to use POSIX TZ conformant string.<br/> 
-  Examples can be found at https://sites.google.com/a/usapiens.com/opnode/time-zones
-
-
-### New Elements
+* **savemode** The savemode (see https://homeding.github.io/#page=/savemode.md) advanced in this release but still WIP.<br/>
+The `savemode` is reported in Serial output and in the response of the `/$sysinfo` request.<br/>
+Since this release the savemode is on by default.
 
 * **CORS** The CORS header is now set on all responses from the build-in web server to allow calling services from web pages located on other devices.
 
 * **mDNS Service Discovery** the HomeDing devices now publish into the local network the availability of a HomeDing device offering the typical HomeDing services. This is implemented using the mDNS-SD with the service signature `_homeding._tcp`. This is not (yet) registered as an official protocol.
 
-* **WeatherFeed** Element got finalized.<br />
-  See docu. at https://homeding.github.io/#page=/elements/weatherfeed.md.
+* **WeatherFeed Element** got finalized.<br />
+See docu. at https://homeding.github.io/#page=/elements/weatherfeed.md.
 
-* **Diag** Element is included in the DevDing Example to help analyzing the current I2C devices and memory.
+* **Diag Element** is included in the DevDing example to help analyzing the current I2C devices and memory.
 
 ### Fixed
 
-* JSONParser fixes.
+* **WebUI** There are some changes in the Web UI and the build-in web updater now polls new files from <https://homeding.github.io/v02/>. Old files can now be removed by the web updater.
+ 
+* **NTPTime** is now using newer the ANSI ntp time functions. See example `NTP-TZ-DST.ino`.<br/>
+  The zone parameter now can include summer time adjustments.<br/>
+  Changing `zone` parameter of ntptimeElement to use POSIX TZ conformant string.<br/> 
+  Examples can be found at https://sites.google.com/a/usapiens.com/opnode/time-zones
+
+* **JSONParser** fixes, now supporting arrays in parsing.
+
 
 ## [0.4.1] - 2020-04-16
 

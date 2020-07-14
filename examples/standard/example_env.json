@@ -1,0 +1,32 @@
+{
+  "device": {
+    "0": {
+      "name": "airding",
+      "reboottime": "24h",
+      "description": "Air Quality Sensor",
+      "logfile": 1,
+      "led": "D0",
+      "button": "D4",
+      "savemode": "false",
+      "i2c-scl": "D2",
+      "i2c-sda": "D1"
+    }
+  },
+  "ota": {
+    "0": {
+      "port": 8266,
+      "passwd": "123",
+      "description": "Listen for 'over the air' OTA Updates"
+    }
+  },
+  "ssdp": {
+    "0": {
+    }
+  },
+  "ntptime": {
+    "0": {
+      "readtime": "36h",
+      "zone": 2
+    }
+  }
+}

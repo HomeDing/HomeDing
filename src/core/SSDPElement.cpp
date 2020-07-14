@@ -12,11 +12,11 @@
 // -----
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
-#include <core/SSDPElement.h>
 #include <ElementRegistry.h>
+#include <core/SSDPElement.h>
 
 
 /* ===== Static factory function ===== */
@@ -40,21 +40,25 @@ void SSDPElement::init(Board *board)
 {
   Element::init(board);
 
-  // set default values
-  SSDP.setSchemaURL("ssdp.xml"); // url to get the SSDP detailed information
-  SSDP.setHTTPPort(80);
-  SSDP.setSerialNumber(ESP.getChipId());
-  SSDP.setURL("/");
-  SSDP.setModelNumber(__DATE__);
-  SSDP.setModelURL("https://homeding.github.io/");
-  SSDP.setManufacturer("Matthias Hertel");
-  SSDP.setManufacturerURL("https://www.mathertel.de");
-  SSDP.setDeviceType("upnp:rootdevice");
-
   Element *deviceElement = board->getElement("device");
+
   if ((deviceElement) && (board->server)) {
+    // part of the notification response
+    SSDP.setHTTPPort(80);
+    SSDP.setModelName(board->deviceName);
+    SSDP.setModelNumber("0.4.1"); // HomeDing Library Version
+    SSDP.setDeviceType("upnp:rootdevice");
+    SSDP.setUUID("upnp:rootdevice");
+    SSDP.setSchemaURL("ssdp.xml"); // url to get the SSDP detailed information
+
+    // set default values
+    SSDP.setSerialNumber(ESP.getChipId());
+    SSDP.setURL("/");
+    SSDP.setModelURL("https://homeding.github.io/");
+    SSDP.setManufacturer("Matthias Hertel");
+    SSDP.setManufacturerURL("https://www.mathertel.de");
+
     SSDP.setName(board->deviceName);
-    SSDP.setModelName(deviceElement->get(PROP_DESCRIPTION));
     SSDP.begin();
     ESP8266WebServer *server = board->server;
     server->on("/ssdp.xml", HTTP_GET, [server]() {

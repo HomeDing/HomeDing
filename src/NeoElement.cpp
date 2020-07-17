@@ -46,7 +46,7 @@ void NeoElement::_setColors(String colList)
   } // while
 
   // at the end of the defined colors.
-  // now repeat untill all PixelColors are set
+  // now repeat until all PixelColors are set
   def = n;
   while (n < pixels) {
     col = _strip->getPixelColor(n % def);
@@ -92,10 +92,10 @@ bool NeoElement::set(const char *name, const char *pValue)
   bool ret = LightElement::set(name, pValue);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
+    // saving to LightElement::value was handled in LightElement
     _mode = Mode::color;
     if (_strip)
-      _setColors(pValue);
-    // was handled in LightElement
+      _setColors(value);
 
   } else if (_stricmp(name, "mode") == 0) {
     if (_stricmp(pValue, "color") == 0)
@@ -113,15 +113,15 @@ bool NeoElement::set(const char *name, const char *pValue)
     ret = true; // not handled in LightElement
 
   } else if (_stricmp(name, "brightness") == 0) {
+    // saving to LightElement::brightness was handled in LightElement
     _brightness_255 = brightness * 255 / 100;
 
     if (_strip) {
       _strip->setBrightness(_brightness_255);
       if (_mode == Mode::color) {
-        _setColors(pValue);
+        _setColors(value);
       }
     }
-    // was handled in LightElement
 
   } else if (_stricmp(name, "count") == 0) {
     _count = _atoi(pValue);

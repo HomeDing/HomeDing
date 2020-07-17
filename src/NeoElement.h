@@ -102,6 +102,8 @@ private:
 
   /** data output pin is taken from _pins[0]*/
 
+  /** actual colors are stored in LightElement::value */
+
   /** Brightness level in 0..255 */
   int _brightness_255;
 

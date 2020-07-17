@@ -15,8 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <HomeDing.h>
 
@@ -43,7 +43,8 @@ Element *TemplateElement::create()
 
 /* ===== Element functions ===== */
 
-TemplateElement::TemplateElement() {
+TemplateElement::TemplateElement()
+{
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
 }
@@ -67,9 +68,9 @@ bool TemplateElement::set(const char *name, const char *value)
   if (_stricmp(name, PROP_VALUE) == 0) {
     _value = _atoi(value);
 
-    // } else if (_stricmp(name, "onChange") == 0) {
+    // } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     // save the actions
-    // _changeAction = value;
+    // _xAction = value;
 
     // } else if (_stricmp(name, "doAction") == 0) {
     // make something

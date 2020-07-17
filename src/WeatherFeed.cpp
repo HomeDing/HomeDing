@@ -63,7 +63,7 @@ bool WeatherFeedElement::set(const char *name, const char *value)
       // save all paths and actions in the vectors.
     } else if (_stricmp(name, "path") == 0) {
       _paths.push_back(value);
-    } else if (_stricmp(name, "action") == 0) {
+    } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
       _actions.push_back(value);
 
     } // if

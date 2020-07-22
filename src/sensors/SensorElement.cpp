@@ -26,6 +26,10 @@ SensorElement::SensorElement()
 {
   _readTime = 60; // read from sensor once a minute
   _resendTime = 0; // Not enabled resending probes.
+  _warmupTime = 3; // secs.
+  _restart = false;
+  _sensorWorkedOnce = false;
+  _isReading = false;
 } // SensorElement()
 
 
@@ -37,12 +41,17 @@ bool SensorElement::set(const char *name, const char *value)
   bool ret = Element::set(name, value);
 
   if (!ret) {
+    ret = true;
     if (_stricmp(name, "readtime") == 0) {
       _readTime = _atotime(value);
-      ret = true;
     } else if (_stricmp(name, "resendtime") == 0) {
       _resendTime = _atotime(value);
-      ret = true;
+    } else if (_stricmp(name, "warmuptime") == 0) {
+      _warmupTime = _atotime(value);
+    } else if (_stricmp(name, "restart") == 0) {
+      _restart = _atob(value);
+    } else {
+      ret = false;
     } // if
   } // if
   return (ret);
@@ -57,13 +66,33 @@ void SensorElement::start()
   unsigned int now = millis();
   Element::start();
 
-  _nextRead = now + 2 * 1000; // now + min. 2 sec., don't hurry
+  _nextRead = now + _warmupTime * 1000; // now + some seconds. allowing the sensor to get values.
+  _nextSend = 0;
+} // start()
+
+
+/**
+ * @brief Dectivate the SensorElement.
+ * This method is called when the sensor stopped working.
+ * It reactivates the element when specified by restart property. 
+ */
+void SensorElement::term()
+{
+  unsigned int now = millis();
+  Element::term();
+  if (_isReading && _sensorWorkedOnce && _restart) {
+    // term() was initiated by sensor element and retry is configured.
+    this->start();
+    _sensorWorkedOnce = false;
+  }
+  _nextRead = now + _warmupTime * 1000; // now + some seconds. allowing the sensor to get values.
   _nextSend = 0;
 } // start()
 
 
 /**
  * @brief read or send sensor data.
+ * This method will not be called when the element is not active.
  */
 void SensorElement::loop()
 {
@@ -74,9 +103,12 @@ void SensorElement::loop()
   if (_nextRead <= now) {
     // time to get sensor data, repeat until returning true
     // LOGGER_ETRACE("reading...");
+    _isReading = true;
     bool done = getProbe(value);
+    _isReading = false;
 
     if (done) {
+      _sensorWorkedOnce = true;
       _nextRead = now + _readTime * 1000;
       if (!value.equals(_lastValues)) {
         _nextSend = now; // enforce sending now

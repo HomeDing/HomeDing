@@ -40,6 +40,8 @@ bool DHTElement::set(const char *name, const char *value)
   bool ret = SensorElement::set(name, value);
 
   if (!ret) {
+    // Not handled by the SensorElement
+    ret = true; // assume
     if (_stricmp(name, "type") == 0) {
       if (_stricmp(value, "DHT11") == 0) {
         _type = DHTesp::DHT11;
@@ -48,19 +50,27 @@ bool DHTElement::set(const char *name, const char *value)
       } else if (_stricmp(value, "AUTO") == 0) {
         _type = DHTesp::AUTO_DETECT;
       }
-      ret = true;
 
     } else if (_stricmp(name, PROP_PIN) == 0) {
       _pin = _atopin(value);
+
+    } else if (_stricmp(name, "powerpin") == 0) {
+      // the ouput pin to control powering the component
+      _powerpin = _atopin(value);
+      ret = true;
+
+    } else if (_stricmp(name, "powerinverse") == 0) {
+      _powerinverse = _atob(value);
       ret = true;
 
     } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
       _tempAction = value;
-      ret = true;
 
     } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
       _humAction = value;
-      ret = true;
+
+    } else {
+      ret = false;
     } // if
   } // if
   return (ret);
@@ -72,14 +82,35 @@ bool DHTElement::set(const char *name, const char *value)
  */
 void DHTElement::start()
 {
-  // LOGGER_ETRACE("start()");
+  LOGGER_ETRACE("start()");
   if (_pin < 0) {
     LOGGER_EERR("no pin");
 
   } else {
     SensorElement::start();
+    if (_powerpin >= 0) {
+      pinMode(_powerpin, OUTPUT);
+      int physLevel = (_powerinverse ? LOW : HIGH);
+      digitalWrite(_powerpin, physLevel);
+    }
     _dht.setup(_pin, _type);
   } // if
+} // start()
+
+
+/**
+ * @brief Deactivate the DHTElement.
+ */
+void DHTElement::term()
+{
+  LOGGER_ETRACE("term()");
+  // no need to call _dht.anyfunc()
+  if (_powerpin >= 0) {
+    pinMode(_powerpin, OUTPUT);
+    int physLevel = (_powerinverse ? HIGH : LOW);
+    digitalWrite(_powerpin, physLevel);
+  }
+  SensorElement::term();
 } // start()
 
 
@@ -91,7 +122,7 @@ bool DHTElement::getProbe(String &values)
   TempAndHumidity dhtValues;
   int v;
 
-  // LOGGER_ETRACE("reading...");
+  LOGGER_ETRACE("getProbe()");
   dhtValues = _dht.getTempAndHumidity();
   DHTesp::DHT_ERROR_t dhterr = _dht.getStatus();
 

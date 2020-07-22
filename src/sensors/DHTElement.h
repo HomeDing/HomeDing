@@ -55,11 +55,16 @@ public:
   virtual bool set(const char *name, const char *value);
 
   /**
-   * @brief Activate the DHTElement.
+   * @brief Activate and power on the DHTElement.
    * @return true when activation was good.
    * @return false when activation failed.
    */
   virtual void start();
+
+  /**
+   * @brief Stop sensor and power off.
+   */
+  virtual void term();
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -74,10 +79,24 @@ protected:
 
 private:
   DHTesp::DHT_MODEL_t _type = DHTesp::AUTO_DETECT;
-  int _pin =-1;
 
   /**
-   * @brief The _tempAction is emitted when a new temp was read from the DHT
+   * @brief GPIO pin to be used for data transfer to sensor.
+   */
+  int _pin = -1;
+
+  /**
+   * @brief GPIO pin to be used for controlling the power of the sensor.
+   */
+  int _powerpin = -1;
+
+  /**
+   * @brief Control level logic for power ouput to _powerpin. When true: Enable sensor by creating a physical LOW level.
+   */
+  bool _powerinverse = false;
+
+  /**
+   * @brief The _tempAction is emitted when a new temperature value was read from the DHT
    * sensor.
    */
   String _tempAction;

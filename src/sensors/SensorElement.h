@@ -49,6 +49,11 @@ public:
   virtual void start();
 
   /**
+   * @brief Stop sensor and power off.
+   */
+  virtual void term();
+
+  /**
    * @brief check the state of the DHT values and eventually create actions.
    */
   virtual void loop();
@@ -76,6 +81,20 @@ private:
    * @brief The current values should be emitted again after some time even when not changing.
    */
   unsigned long _resendTime;
+
+  /**
+   * @brief The time to pass before reading a sensor value.
+   */
+  unsigned long _warmupTime;
+
+  bool _restart;
+
+  /**
+   * @brief is set to true while in the getProbe function to distinguish term() calls internally and externally.
+   */
+  bool _isReading;
+
+  bool _sensorWorkedOnce;
 
   unsigned long _nextRead;
   unsigned long _nextSend;

@@ -76,11 +76,22 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
+  /**
+   * @brief GPIO pin to be used for physical signal.
+   */
   int _pin = -1;
+
+  /**
+   * @brief Control level logic for input at _pin. When true: physical HIGH level will produce a logical LOW value.
+   */
   bool _inverse = false;
+
+  /**
+   * @brief Control internal pullup. When true the internal pullup is activated.
+   */
   bool _pullup = false;
 
-  int _lastOutLevel;
+  int _lastInLevel;
 
   /**
    * @brief The _highAction is emitted when the logical input level is going

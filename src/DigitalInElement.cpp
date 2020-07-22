@@ -15,8 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "DigitalInElement.h"
 
@@ -71,9 +71,9 @@ void DigitalInElement::start()
   // LOGGER_ETRACE("start (%d)", _pin);
   if (_pin >= 0) {
     pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
-    _lastOutLevel = digitalRead(_pin);
+    _lastInLevel = digitalRead(_pin);
     if (_inverse)
-      _lastOutLevel = !_lastOutLevel;
+      _lastInLevel = !_lastInLevel;
     Element::start();
   } // if
 } // start()
@@ -89,17 +89,11 @@ void DigitalInElement::loop()
     if (_inverse)
       lev = !lev;
 
-    if (lev != _lastOutLevel) {
-      // LOGGER_ETRACE("output %d->%d)", _lastOutLevel, lev);
-      if (lev) {
-        _board->dispatch(_highAction);
-        _board->dispatch(_valueAction, "1");
-
-      } else {
-        _board->dispatch(_lowAction);
-        _board->dispatch(_valueAction, "0");
-      } // if
-      _lastOutLevel = lev;
+    if (lev != _lastInLevel) {
+      // LOGGER_ETRACE("output %d->%d)", _lastInLevel, lev);
+      _board->dispatch(lev ? _highAction : _lowAction);
+      _board->dispatch(_valueAction, lev ? "1" : "0");
+      _lastInLevel = lev;
     } // if
   } // if
 } // loop()
@@ -109,7 +103,7 @@ void DigitalInElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_lastOutLevel).c_str());
+  callback(PROP_VALUE, String(_lastInLevel).c_str());
 } // pushState()
 
 // End

@@ -73,9 +73,6 @@ bool RotaryElement::set(const char *name, const char *value)
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
-  } else if (_stricmp(name, "onChange") == 0) { // deprecated: use onValue
-    _valueAction = value;
-
   } else {
     ret = Element::set(name, value);
   } // if

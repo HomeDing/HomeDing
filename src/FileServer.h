@@ -15,7 +15,7 @@
  * * 29.04.2018 created by Matthias Hertel
  * * 04.02.2019 simplifications, saving memory.
  * * 24.11.2019 simplifications, using serveStatic for delivering filesystem files.
- * * 13.12.2019 no upload and delete when running in savemode
+ * * 13.12.2019 no upload and delete when running in safemode
  */
 
 #ifndef FILESERVER_H
@@ -54,13 +54,13 @@ public:
   */
   bool canHandle(HTTPMethod requestMethod, UNUSED String requestUri) override
   {
-    return ((!_board->savemode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
+    return ((!_board->isSafeMode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
   } // canHandle()
 
 
   bool canUpload(String requestUri)
   {
-    return ((!_board->savemode) && (requestUri.startsWith("/")) && (!requestUri.startsWith("/$")));
+    return ((!_board->isSafeMode) && (requestUri.startsWith("/")) && (!requestUri.startsWith("/$")));
   } // canUpload()
 
 

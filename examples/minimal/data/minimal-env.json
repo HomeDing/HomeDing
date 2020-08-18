@@ -2,7 +2,7 @@
 "device": {
 "0": {
 "name": "minding",
-"savemode": "false",
+"safemode": "false",
 "homepage": "/ding.htm",
 "description": "minimal device",
 "led": "D4",

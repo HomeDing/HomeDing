@@ -12,7 +12,7 @@ This release focuses on stability and better developer support. One new Element 
 
 **Important**
 
-* Specify "savemode": "false" in the device configuration when you want unsecured access to your device.
+* Specify "safemode": "false" in the device configuration when you want unsecured access to your device.
 * Change "zone": "<your timezone>" in the NTPtime element using the ANSI TZ notation. Otherwise the device runs in "GMT0BST" timezone (London).
 
 ### Added
@@ -21,9 +21,9 @@ This release focuses on stability and better developer support. One new Element 
   In the folder you can find elements that should not be present in long-time running devices but can help wile developing.<br />
   This sketch includes all common elements and those under development or of interest.
 
-* **savemode** The savemode (see https://homeding.github.io/#page=/savemode.md) advanced in this release but still WIP.<br/>
-The `savemode` is reported in Serial output and in the response of the `/$sysinfo` request.<br/>
-Since this release the savemode is on by default.
+* **safemode** The safemode (see https://homeding.github.io/#page=/safemode.md) advanced in this release but still WIP.<br/>
+The `safemode` is reported in Serial output and in the response of the `/$sysinfo` request.<br/>
+Since this release the safemode is on by default.
 
 * **CORS** The CORS header is now set on all responses from the build-in web server to allow calling services from web pages located on other devices.
 

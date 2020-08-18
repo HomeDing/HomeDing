@@ -56,7 +56,7 @@ bool ButtonElement::set(const char *name, const char *value)
     _inputLevel = _atob(value);
 
   } else if (_stricmp(name, "action") == 0) {
-    // received an action that will be processedn
+    // received an action that will be processed
     if (_stricmp(value, "click") == 0) {
       _send(ACTION_CLICK);
     } else if (_stricmp(value, "doubleclick") == 0) {

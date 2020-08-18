@@ -271,7 +271,7 @@ bool MicroJson::parseChar(char ch)
       if (_path[0] != NUL)
         strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
-      (_callbackFn)(_level, _path, NULL); // array object ???
+      (_callbackFn)(_level, _path, NULL);
 
       _level++;
       _index[_level] = MJ_ARRAYLEVEL;

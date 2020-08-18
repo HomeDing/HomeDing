@@ -121,7 +121,7 @@ bool DiagElement::set(const char *name, const char *value)
  */
 void DiagElement::start()
 {
-  delay(2000);
+  delay(2000); // wait some time for Serial output sync
   LOGGER_ETRACE("start()");
   Element::start();
 
@@ -144,7 +144,14 @@ void DiagElement::start()
     error = Wire.endTransmission();
 
     if (error == 0) {
-      LOGGER_ETRACE(" 0x%02x found.", adr);
+      if (adr == 0x27) {
+        LOGGER_ETRACE(" 0x27 (LCD, PCF8574) found.");
+      } else if (adr == 0x40) {
+        LOGGER_ETRACE(" 0x27 (INA219) found.");
+
+      } else {
+        LOGGER_ETRACE(" 0x%02x (unknown) found.", adr);
+      }
       num++;
     } else if (error == 4) {
       LOGGER_ETRACE(" 0x%02x error.", adr);

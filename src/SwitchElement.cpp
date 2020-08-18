@@ -34,7 +34,7 @@ bool SwitchElement::_setValue(int val, bool forceAction)
   bool hasChanged = ValueElement::_setValue(val, forceAction);
 
  if (hasChanged) {
-    if (_value) {
+    if (val) {
       _board->dispatch(_highAction);
 
     } else {
@@ -65,7 +65,7 @@ bool SwitchElement::set(const char *name, const char *value)
     _setValue(_atob(value));
 
   } else if (_stricmp(name, "toggle") == 0) {
-    _setValue(!_value);
+    _setValue(!_getValueInt());
 
   } else if (_stricmp(name, "onhigh") == 0) {
     _highAction = value;

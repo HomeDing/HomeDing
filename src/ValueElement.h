@@ -73,10 +73,7 @@ public:
   const char *getLabel();
 
 protected:
-  /**
-   * @brief The actual value.
-   */
-  int _value = 0;
+  bool _isValid = false;
 
   int _minRange = -2147483648;
   int _maxRange = 2147483647;
@@ -88,9 +85,20 @@ protected:
   String _valueAction;
 
   virtual bool _setValue(int val, bool forceAction = false);
+  virtual bool _setValue(const char *val, bool forceAction = false);
+
+  virtual int _getValueInt();
 
 private:
+  /**
+   * @brief The actual value.
+   */
+  int _value = 0;
+  String _valueString;
+
   String _label;
+
+  bool _isStringType = false;
 
 };
 

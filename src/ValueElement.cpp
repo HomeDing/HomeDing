@@ -34,6 +34,7 @@ Element *ValueElement::create()
 bool ValueElement::_setValue(int newValue, bool forceAction)
 {
   bool ret = false;
+  _isValid = true;
 
   if (newValue < _minRange)
     newValue = _minRange;
@@ -50,6 +51,27 @@ bool ValueElement::_setValue(int newValue, bool forceAction)
 } // _setValue()
 
 
+// set a new value, maybe adjust to range
+bool ValueElement::_setValue(const char *newValue, bool forceAction)
+{
+  bool ret = false;
+  _isValid = true;
+
+  if (forceAction || ((active) && (_valueString != newValue))) {
+    _board->dispatch(_valueAction, newValue);
+    ret = true;
+  }
+  _valueString = newValue;
+  return (ret);
+} // _setValue()
+
+
+int ValueElement::_getValueInt()
+{
+  return (_value);
+}
+
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -58,7 +80,10 @@ bool ValueElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
-    _setValue(_atoi(value));
+    if (_isStringType)
+      _setValue(value);
+    else
+      _setValue(_atoi(value));
 
   } else if (_stricmp(name, "up") == 0) {
     _setValue(_value + _atoi(value) * _step);
@@ -78,6 +103,10 @@ bool ValueElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "label") == 0) {
     _label = value;
 
+  } else if (_stricmp(name, "type") == 0) {
+    if (_stricmp(value, "string") == 0)
+      _isStringType = true;
+
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
@@ -86,7 +115,7 @@ bool ValueElement::set(const char *name, const char *value)
   } // if
 
   return (ret);
-} // set()  
+} // set()
 
 
 void ValueElement::start()
@@ -99,7 +128,14 @@ void ValueElement::start()
   }
 
   // send out the actual defined value
-  _setValue(_value, true);
+  if (_isValid) {
+    if (_isStringType) {
+      _setValue(_valueString.c_str(), true);
+
+    } else {
+      _setValue(_value, true);
+    }
+  } // if
 } // start()
 
 

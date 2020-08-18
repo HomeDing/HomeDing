@@ -18,6 +18,10 @@
 #include <Arduino.h>
 #include <ESP8266mDNS.h>
 
+extern "C" {
+#include <user_interface.h> // https://github.com/esp8266/Arduino actually tools/sdk/include
+}
+
 #include <Board.h>
 #include <Element.h>
 
@@ -49,7 +53,7 @@ extern const char *ssid;
 extern const char *passPhrase;
 
 
-// ===== detect request for network config and non-save mode using 2 resets in less than 2 sec.
+// ===== detect request for network config and non-safemode using 2 resets in less than 2 sec.
 // this is implemented by using the RTC memory at offset with a special value flag
 
 /** The offset of the 4 byte signature, must be a multiple of 4 */
@@ -101,10 +105,23 @@ void clearResetCount()
 void Board::init(ESP8266WebServer *serv)
 {
   server = serv;
+
+  // board parameters overwritten by device element
   sysLED = -1; // configured by device-element
   sysButton = -1; // configured by device-element
   boardState = BOARDSTATE_NONE;
   homepage = "/index.htm";
+  deepSleepStart = 0; // no deep sleep to be started
+  deepSleepBlock = false; // no deep sleep is blocked
+  deepSleepTime = 60; // one minute
+
+  _cntDeepSleep = 0;
+
+  rst_info *ri = ESP.getResetInfoPtr();
+  isWakeupStart = (ri->reason == REASON_DEEP_SLEEP_AWAKE);
+  if (isWakeupStart) {
+    LOGGER_INFO("Reset from Deep Sleep mode.");
+  }
 
   WiFi.begin();
   deviceName = WiFi.hostname(); // use mac based default device name
@@ -139,7 +156,7 @@ void Board::_checkNetState()
  * @brief Add and config the Elements defined in the config files.
  *
  */
-void Board::_addElements()
+void Board::_addAllElements()
 {
   TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
@@ -170,7 +187,7 @@ void Board::_addElements()
 
           } else {
             // add to the list of elements
-            _add(path, _lastElem);
+            _addElement(path, _lastElem);
           } // if
 
         } else if ((level > 2) && (_lastElem != NULL)) {
@@ -192,11 +209,11 @@ void Board::_addElements()
 
   if (!_elementList) {
     // no elemenmt defined so allow configuration in any case.
-    savemode = false;
+    isSafeMode = false;
   }
 
   delete mj;
-} // _addElements()
+} // _addAllElements()
 
 
 void Board::start(Element_StartupMode startupMode)
@@ -237,7 +254,8 @@ void Board::loop()
 
   if (boardState == BOARDSTATE_RUN) {
     // Most common state first.
-    MDNS.update();
+    if (!isWakeupStart)
+      MDNS.update();
 
     if (!startComplete) {
       if (!hasTimeElements) {
@@ -260,6 +278,7 @@ void Board::loop()
 
     // dispatch next action from _actionList if any
     if (_actionList.length() > 0) {
+      _cntDeepSleep = 0;
       String _lastAction;
 
       // extract first action
@@ -286,19 +305,33 @@ void Board::loop()
       _nextElement = _nextElement->next;
     } // if
 
+    if ((!deepSleepBlock) && (deepSleepStart > 0)) {
+      _cntDeepSleep++;
+
+      // deep sleep specified time.
+      if ((now > deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
+        // all elements now had the chance to create and dispatch an event.
+        LOGGER_INFO("sleep %d...", deepSleepTime);
+        Serial.flush();
+        ESP.deepSleep(deepSleepTime * 1000 * 1000);
+        delay(1);
+        _newState(BOARDSTATE_SLEEP);
+      }
+    } // if
+
   } else if (boardState == BOARDSTATE_NONE) {
     _newState(BOARDSTATE_LOAD);
 
   } else if (boardState == BOARDSTATE_LOAD) {
     // load all config files and create+start elements
-    _addElements();
+    _addAllElements();
 
     _resetCount = getResetCount();
-    LOGGER_INFO("RESET # %d", _resetCount);
+    LOGGER_TRACE("RESET # %d", _resetCount);
 
-    // enforce un-savemode on double reset
+    // enforce un-safemode on double reset
     if (_resetCount > 0)
-      savemode = false;
+      isSafeMode = false;
 
     // search any time requesting elements
     Element *l = _elementList;
@@ -313,8 +346,6 @@ void Board::loop()
     WiFi.hostname(deviceName);
     Wire.begin(I2cSda, I2cScl);
 
-    // LOGGER_INFO("net-status: %d <%s>", WiFi.status(), WiFi.hostname().c_str());
-
     start(Element_StartupMode::System);
     displayInfo(HOMEDING_GREETING);
 
@@ -327,15 +358,15 @@ void Board::loop()
     }
 
     // detect no configured network situation
-    if (((WiFi.SSID().length() == 0) && (strlen(ssid) == 0))
-        || (_resetCount == 2)) {
+    if (((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) || (_resetCount == 2)) {
       _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
     } else {
       _newState(BOARDSTATE_CONNECT);
     }
 
     // wait at least some seconds for offering config mode
-    configPhaseEnd = now + nextModeTime;
+    configPhaseEnd = now + minConfigTime;
+
 
   } else if (boardState == BOARDSTATE_CONNECT) {
     bool autoCon = WiFi.getAutoConnect();
@@ -347,7 +378,7 @@ void Board::loop()
     // connect to a same network as before ?
     LOGGER_TRACE("wifi status=(%d)", _wifi_status);
     LOGGER_TRACE("wifi ssid=(%s)", WiFi.SSID().c_str());
-    _newState(BOARDSTATE_CONFWAIT);
+    _newState(BOARDSTATE_WAITNET);
 
     if (netMode == NetMode_AUTO) {
       // 1. priority:
@@ -383,57 +414,68 @@ void Board::loop()
       pinMode(sysButton, INPUT_PULLUP);
     }
 
-    // wait max 30 seconds for connecting to the network
-    connectPhaseEnd = now + maxConnectTime;
+    // wait max. 4 seconds for connecting to the network
+    connectPhaseEnd = now + maxNetConnextTime;
+    // LOGGER_TRACE("  set phase: %ld %ld %d", now, connectPhaseEnd, maxNetConnextTime);
 
-  } else if ((boardState == BOARDSTATE_CONFWAIT) || (boardState == BOARDSTATE_WAIT)) {
+
+  } else if ((boardState == BOARDSTATE_WAITNET) || (boardState == BOARDSTATE_WAIT)) {
     // make sysLED blink.
-    // short pulses for normal=save mode, long pulses for unsave mode.
+    // short pulses for normal=safemode, long pulses for unsafemode.
     if (sysLED >= 0) {
-      digitalWrite(sysLED, (now % 700) > (savemode ? 100 : 600) ? HIGH : LOW);
+      digitalWrite(sysLED, (now % 700) > (isSafeMode ? 100 : 600) ? HIGH : LOW);
     } // if
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
       // LOGGER_INFO("sysbutton pressed");
       _newState(BOARDSTATE_STARTCAPTIVE);
+    }
 
-    } else if (boardState == BOARDSTATE_CONFWAIT) {
-      if (now > configPhaseEnd) {
-        _newState(BOARDSTATE_WAIT);
-      }
-
-    } else {
+    if (boardState == BOARDSTATE_WAITNET) {
       if (_wifi_status == WL_CONNECTED) {
         LOGGER_TRACE("connected.");
         WiFi.setAutoReconnect(true);
         WiFi.setAutoConnect(true);
-        _newState(BOARDSTATE_GREET);
+        _newState(BOARDSTATE_WAIT);
+      } // if
 
-      } else if ((_wifi_status == WL_NO_SSID_AVAIL) ||
-                 (_wifi_status == WL_CONNECT_FAILED) ||
-                 (now >= connectPhaseEnd)) {
+      if ((_wifi_status == WL_NO_SSID_AVAIL) ||
+          (_wifi_status == WL_CONNECT_FAILED) ||
+          (now > connectPhaseEnd)) {
+
+        if (now > connectPhaseEnd) {
+          LOGGER_TRACE("timed out.");
+        } else {
+          LOGGER_TRACE("wifi status=(%d)", _wifi_status);
+        } // if
+
         netMode -= 1;
-        LOGGER_TRACE("wifi status=(%d)", _wifi_status);
-        LOGGER_TRACE("next connect method = %d\n", netMode);
+        // LOGGER_TRACE("next connect method = %d\n", netMode);
         if (netMode) {
-          _newState(BOARDSTATE_CONNECT);
+          _newState(BOARDSTATE_CONNECT); // try next mode
         } else {
           LOGGER_INFO("no-net restarting...\n");
           clearResetCount();
-          delay(1000);
+          delay(500);
           ESP.restart();
-        }
-      } else {
-        yield();
+        } // if
+      } // if
+    } // if
+
+    if (boardState == BOARDSTATE_WAIT) {
+      if (isWakeupStart || (now >= configPhaseEnd)) {
+        _newState(BOARDSTATE_GREET);
       }
     } // if
+    yield();
+
 
   } else if (boardState == BOARDSTATE_GREET) {
     clearResetCount();
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
-    LOGGER_INFO("Connected to: %s %s", WiFi.SSID().c_str(), (savemode ? "in savemode" : "unsecured"));
+    LOGGER_TRACE("Connected to: %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
     WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
 
     if (display) {
@@ -459,14 +501,18 @@ void Board::loop()
     server->serveStatic("/", SPIFFS, "/", "NO-CACHE");
 
     // start mDNS service discovery for "_homeding._tcp"
-    if (mDNS_sd) {
+    // but not when using deep sleep mode
+    if (!isWakeupStart && (mDNS_sd)) {
       MDNS.begin(deviceName.c_str());
       MDNSResponder::hMDNSService serv = MDNS.addService(0, "homeding", "tcp", 80);
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
     } // if
 
     _newState(BOARDSTATE_RUN);
-
+  } else if (boardState == BOARDSTATE_SLEEP) {
+    // just wait.
+    Serial.write('*');
+    Serial.flush();
   } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
     uint8_t mac[6];
     char ssid[64];
@@ -490,7 +536,6 @@ void Board::loop()
 
     _newState(BOARDSTATE_RUNCAPTIVE);
     _captiveEnd = now + (5 * 60 * 1000);
-
   } else if (boardState == BOARDSTATE_RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
     dnsServer.processNextRequest();
@@ -633,6 +678,16 @@ void Board::dispatchItem(String &action, String &values, int item)
     } // if
   } // if
 } // dispatchItem
+
+
+/**
+ * do not start sleep mode because element is active.
+ */
+void Board::deferSleepMode()
+{
+  // reset the counter to ensure looping all active elements
+  _cntDeepSleep = 0;
+} // deferSleepMode()
 
 
 void Board::getState(String &out, const String &path)
@@ -780,7 +835,7 @@ void Board::reboot(bool wipe)
 
 void Board::displayInfo(const char *text1, const char *text2)
 {
-  LOGGER_INFO("%s %s", text1, text2 ? text2 : "");
+  LOGGER_TRACE("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);
@@ -795,9 +850,10 @@ void Board::displayInfo(const char *text1, const char *text2)
 /**
  * @brief Add another element to the board into the list of created elements.
  */
-void Board::_add(const char *id, Element *e)
+void Board::_addElement(const char *id, Element *e)
 {
   // LOGGER_TRACE("_add(%s)", id);
+  _addedElements++;
 
   strcpy(e->id, id);
   Element::_strlower(e->id);
@@ -816,7 +872,7 @@ void Board::_add(const char *id, Element *e)
   } // if
   e->next = nullptr;
   e->init(this);
-} // _add()
+} // _addElement()
 
 
 // End

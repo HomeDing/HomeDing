@@ -21,7 +21,7 @@
  * * 26.08.2018 Later display initialization, enabling display configuration.
  * * 09.10.2018 Get time in time_t format.
  * * 11.10.2018 move network initialization into board loop.
- * * 10.12.2019 reset counter to enter unsave mode and config mode.
+ * * 10.12.2019 reset counter to enter unsafe mode and config mode.
  * * 25.01.2020 device startup actions added.
  */
 
@@ -64,15 +64,17 @@ typedef enum {
   // ===== startup operation states
   BOARDSTATE_NONE = 0, // unspecified
   BOARDSTATE_LOAD = 1, // load configurations and create elements. Start SYS
-  BOARDSTATE_CONNECT = 2, // try to reconnect to last known network.
-  BOARDSTATE_CONFWAIT = 3, // Wait for clicks.
-  BOARDSTATE_WAIT = 5, // Wait for network connectivity and clicks.
+  BOARDSTATE_CONNECT = 2, // define how to connect, AUTO, PSK or PASSWD
+  BOARDSTATE_WAITNET = 3, // Wait for network connectivity or configuration request.
+  BOARDSTATE_WAIT = 5, // network is connected but wait for configuration request.
 
   // ===== normal operation states
   BOARDSTATE_GREET = 10, // network established, start NET Elements
   BOARDSTATE_RUN = 12, // in normal operation mode.
   // start TIME Elements
   // restart on network lost > 30 secs.
+
+  BOARDSTATE_SLEEP = 18, // start sleep mode.
 
   // ===== config operation states
   BOARDSTATE_STARTCAPTIVE = 21, // Scan local available Networks
@@ -127,7 +129,6 @@ public:
   /** Return true when board is runing in captive mode. */
   bool isCaptiveMode();
 
-
   /**
    * activate all the Elements by using start().
    */
@@ -155,8 +156,24 @@ public:
    */
   void dispatch(String &action, const char *value = NULL);
 
+  /**
+   * send all the actions to the right elements.
+   * @param action list of actions.
+   * @param value the value for $v placeholder.
+   */
   void dispatch(String &action, int value);
+
+  /**
+   * send all the actions to the right elements.
+   * @param action list of actions.
+   * @param value the value for $v placeholder.
+   */
   void dispatch(String &action, String &value);
+
+  /**
+   * do not start sleep mode because element is active.
+   */
+  void deferSleepMode();
 
 
   /**
@@ -196,19 +213,22 @@ public:
 
 
   /**
-   * Save Mode flag
+   * Safe Mode flag
    */
-  bool savemode;
+  bool isSafeMode;
+
+  /** This flag is set to true when restarting after a deep sleep. This allows shortening wait times */
+  bool isWakeupStart;
 
   /**
    * Switch to next network connect mode in msec.
    */
-  int nextModeTime = 4 * 1000;
+  int maxNetConnextTime = 6 * 1000;
 
   /**
-   * Max. time to wait for a network connection during startup.
+   * Min. time to wait for a configuration mode request.
    */
-  int maxConnectTime = 10 * 1000;
+  int minConfigTime = 10 * 1000;
 
 
   /**
@@ -270,6 +290,15 @@ public:
 
   BoardState boardState;
 
+  /** if true, no deep sleep will be performed. This allows using the Web UI until next reboot. */
+  bool deepSleepBlock;
+
+  /** if > 0; system goes to deep sleep at this millis() */
+  unsigned long deepSleepStart;
+
+  /** time for deep sleep */
+  unsigned long deepSleepTime;
+
 private:
   /**
    * Reset Counter
@@ -281,12 +310,12 @@ private:
    * @param id id of element.
    * @param e reference to element.
    */
-  void _add(const char *id, Element *e);
+  void _addElement(const char *id, Element *e);
 
   /**
    * Add and config all Elements defined in the config files.
    */
-  void _addElements();
+  void _addAllElements();
 
   /**
    * Find an Element by the path.
@@ -303,6 +332,8 @@ private:
   Element *findById(String &id);
 
   void _dispatchSingle(String evt);
+
+  int _addedElements = 0;
 
   // state and timing
 
@@ -325,6 +356,9 @@ private:
 
   /** net connection mode */
   int netMode;
+
+  /** counts loops without messages beeing passed to gracefully shut down */
+  int _cntDeepSleep;
 
   /** list of active elements */
   Element *_elementList;

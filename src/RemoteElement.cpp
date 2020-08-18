@@ -84,12 +84,14 @@ void RemoteElement::start()
  */
 void RemoteElement::loop()
 {
-  if ((!_action.isEmpty()) && (!HttpClientElement::isActive())) {
-    // LOGGER_ETRACE("loop-action(%s)", _action.c_str());
+  if (!_action.isEmpty()) {
+    _board->deferSleepMode();
 
-    // start the next action.
-    HttpClientElement::set("url", _action.c_str());
-    _action = "";
+    if (!HttpClientElement::isActive()) {
+      // start the next action.
+      HttpClientElement::set("url", _action.c_str());
+      _action = "";
+    } // if
   } // if
 
   // process the HttpClientElement current request.

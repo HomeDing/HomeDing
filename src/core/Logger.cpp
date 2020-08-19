@@ -51,8 +51,12 @@ void Logger::_print(const char *module, int level, const char *fmt,
     now = Board::getSeconds();
   p += strftime(p, sizeof(buffer), "%H:%M:%S ", localtime(&now)); // %T
 
-  // add module and loglevel
-  p += sprintf(p, "%s:%c ", module ? module : "root", *(LOGGER_LEVELS + level));
+  if (module) {
+    // add module and loglevel
+    p += sprintf(p, "%s:%c ", module, *(LOGGER_LEVELS + level));
+  } else {
+    p += sprintf(p, ">");
+  }
 
   // message into buffer
   vsnprintf(p, sizeof(buffer) - 40, fmt, args);
@@ -61,10 +65,12 @@ void Logger::_print(const char *module, int level, const char *fmt,
   DEBUG_ESP_PORT.println(buffer);
 #endif
 
-  if ((logger_file) && (level < LOGGER_LEVEL_TRACE)) {
+  delay(0);
+
+  if ((module) && (logger_file) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
-  }
-  yield();
+    delay(0);
+  } // if
 } // _print
 
 /**

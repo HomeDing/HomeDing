@@ -64,6 +64,7 @@ typedef enum {
   // ===== startup operation states
   BOARDSTATE_NONE = 0, // unspecified
   BOARDSTATE_LOAD = 1, // load configurations and create elements. Start SYS
+
   BOARDSTATE_CONNECT = 2, // define how to connect, AUTO, PSK or PASSWD
   BOARDSTATE_WAITNET = 3, // Wait for network connectivity or configuration request.
   BOARDSTATE_WAIT = 5, // network is connected but wait for configuration request.

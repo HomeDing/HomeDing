@@ -99,6 +99,24 @@ void clearResetCount()
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
 }
 
+bool strStartsWithIgnore(const char *s, const char *prefix)
+{
+  bool ret = true; // until we find a difference
+  if (s && prefix) {
+    while (ret && *s && *prefix) {
+      if (tolower(*s) != tolower(*prefix))
+        ret = false;
+      s++;
+      prefix++;
+    } // while
+    if (*prefix)
+      ret = false;
+  } else {
+    ret = false;
+  }
+  return (ret);
+} // strStartsWithIgnore
+
 /**
  * @brief Initialize a blank board.
  */
@@ -170,6 +188,7 @@ void Board::_addAllElements()
         if (level == 1) {
 
         } else if (level == 2) {
+          // create new element
           LOGGER_TRACE("new %s", path);
           // extract type name
           char typeName[32];
@@ -181,16 +200,21 @@ void Board::_addAllElements()
           } // while
           *t = '\0';
 
-          _lastElem = ElementRegistry::createElement(typeName);
-          if (_lastElem == NULL) {
-            LOGGER_ERR("Cannot create Element type %s", typeName);
-
+          // typeName starts with "web" ?
+          if (strStartsWithIgnore(typeName, "web")) {
+            // don't try to create web elements
+            _lastElem = nullptr;
           } else {
-            // add to the list of elements
-            _addElement(path, _lastElem);
+            _lastElem = ElementRegistry::createElement(typeName);
+            if (!_lastElem) {
+              LOGGER_ERR("Cannot create Element type %s", typeName);
+            } else {
+              // add to the list of elements
+              _addElement(path, _lastElem);
+            }
           } // if
 
-        } else if ((level > 2) && (_lastElem != NULL)) {
+        } else if ((level > 2) && (_lastElem)) {
           char *name = strrchr(path, MICROJSON_PATH_SEPARATOR) + 1;
           LOGGER_TRACE(" %s=%s", name, value ? value : "-");
           // add a parameter to the last Element
@@ -273,6 +297,7 @@ void Board::loop()
 
       if (startComplete) {
         dispatch(startAction); // dispatched when all elements are active.
+        LOGGER_INFO("Connected to %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
       }
     } // if ! startComplete
 
@@ -327,11 +352,12 @@ void Board::loop()
     _addAllElements();
 
     _resetCount = getResetCount();
-    LOGGER_TRACE("RESET # %d", _resetCount);
 
-    // enforce un-safemode on double reset
-    if (_resetCount > 0)
+    if (_resetCount > 0) {
+      // enforce un-safemode on double reset
+      LOGGER_TRACE("RESET # %d", _resetCount);
       isSafeMode = false;
+    } // if
 
     // search any time requesting elements
     Element *l = _elementList;
@@ -475,7 +501,7 @@ void Board::loop()
     clearResetCount();
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
-    LOGGER_TRACE("Connected to: %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
+    LOGGER_TRACE("Connected to %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
     WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
 
     if (display) {

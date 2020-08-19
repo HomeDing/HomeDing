@@ -145,7 +145,7 @@ void NeoElement::start()
     _setColors(value);
     _strip->setBrightness(_brightness_255);
   } // if
-  LOGGER_EINFO("start %d,%d", (_strip != nullptr), brightness);
+  LOGGER_ETRACE("start %d,%d", (_strip != nullptr), brightness);
 } // start()
 
 

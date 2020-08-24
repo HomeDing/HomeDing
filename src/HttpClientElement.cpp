@@ -96,6 +96,10 @@ void HttpClientElement::processBody(char *value)
  */
 void HttpClientElement::loop()
 {
+  if ((_state != STATE::IDLE) || (!_url.isEmpty())) {
+    _board->deferSleepMode();
+  } // if
+
   if (_state == STATE::IDLE) {
     if (!_url.isEmpty()) {
       // TRACE("new URL: %s", _url.c_str());

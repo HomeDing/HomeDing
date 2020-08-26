@@ -33,7 +33,7 @@ Element *DisplayTextElement::create()
 /**
  * @brief send current text to display
  */
-void DisplayTextElement::_drawText()
+void DisplayTextElement::_draw()
 {
   // LOGGER_EINFO("draw %d (%s)", active, _value.c_str());
   if (active) {
@@ -44,7 +44,7 @@ void DisplayTextElement::_drawText()
     _w = _display->drawText(_x, _y, _h, msg);
     _display->flush();
   }
-}
+} // _draw
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -55,7 +55,7 @@ bool DisplayTextElement::set(const char *name, const char *value)
 
   if (_stricmp(name, PROP_VALUE) == 0) {
     _value = value;
-    _drawText();
+    _draw();
 
   } else if (_stricmp(name, "prefix") == 0) {
     if (strlen(value) < sizeof(_prefix))
@@ -78,10 +78,11 @@ bool DisplayTextElement::set(const char *name, const char *value)
     } // if
 
   } else if (_stricmp(name, "clear") == 0) {
-    if (active) {
-      _display->clear();
-      _display->flush();
-    }
+    _value.clear();
+    _draw();
+
+  } else if (_stricmp(name, "redraw") == 0) {
+    _draw();
 
   } else {
     ret = Element::set(name, value);
@@ -104,7 +105,7 @@ void DisplayTextElement::start()
   } else {
     _display = d;
     Element::start();
-    _drawText();
+    _draw();
   } // if
 } // start()
 

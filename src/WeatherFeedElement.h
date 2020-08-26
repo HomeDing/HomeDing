@@ -1,5 +1,5 @@
 /**
- * @file WeatherFeed.h
+ * @file WeatherFeedElement.h
  * 
  * @brief Element for looking up weather conditions or forecasts from the openweathermap.org web site.
  * The service is polled from time to time and the actual value from the returned data is send as an action

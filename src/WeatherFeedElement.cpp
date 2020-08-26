@@ -14,14 +14,14 @@
  *
  * More information on https://www.mathertel.de/Arduino.
  *
- * Changelog: see WeatherFeed.h
+ * Changelog: see WeatherFeedElement.h
  */
 
 #include <Arduino.h>
 #include <Board.h>
 #include <Element.h>
 
-#include <WeatherFeed.h>
+#include <WeatherFeedElement.h>
 
 #include "MicroJsonParser.h"
 

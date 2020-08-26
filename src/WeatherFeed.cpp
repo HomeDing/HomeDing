@@ -28,8 +28,8 @@
 #include <ESP8266WiFi.h>
 
 /** The TRACE Macro is used for trace output for development/debugging purpose. */
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-// #define TRACE(...)
+// #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)
 
 MicroJson *mj = nullptr;
 
@@ -92,7 +92,7 @@ void WeatherFeedElement::start()
 
 void WeatherFeedElement::processHeader(String &key, String &value)
 {
-  // TRACE("Header: <%s>:<%s>", key.c_str(), value.c_str());
+  TRACE("Header: <%s>:<%s>", key.c_str(), value.c_str());
   HttpClientElement::processHeader(key, value);
 };
 
@@ -101,10 +101,11 @@ void WeatherFeedElement::processBody(char *value)
   HttpClientElement::processBody(value);
   if (!value) {
     delete mj;
-    // TRACE("parser deleted");
+    mj = nullptr;
+    TRACE("parser deleted");
 
   } else {
-    // TRACE("body(%d)", strlen(value));
+    TRACE("body(%d)", strlen(value));
     if (!mj) {
       mj = new MicroJson(
           [this](int level, char *path, char *value) {

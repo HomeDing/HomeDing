@@ -29,8 +29,8 @@
 #define DNS_TIMEOUT (uint32_t)4
 
 /** The TRACE Macro is used for trace output for development/debugging purpose. */
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-// #define TRACE(...)
+// #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)
 
 #define NEWSTATE(n) _state = n;
 
@@ -120,7 +120,7 @@ void HttpClientElement::loop()
     _contentLength = 0;
 
     // ask for IP address
-    // TRACE("start DNS...");
+    TRACE("start DNS...");
     int b = WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
     if (_IPaddr) {
       TRACE(".got %d %s", b, _IPaddr.toString().c_str());

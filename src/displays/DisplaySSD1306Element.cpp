@@ -15,8 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <HomeDing.h>
 #include <Board.h>
+#include <HomeDing.h>
 
 #include "DisplaySSD1306Element.h"
 
@@ -37,32 +37,32 @@ Element *DisplaySSD1306Element::create()
 /* ===== Element functions ===== */
 
 /**
- * @brief Constructor of a new DisplaySSD1306Element.
- */
-DisplaySSD1306Element::DisplaySSD1306Element()
-{
-  startupMode = Element_StartupMode::System;
-}
-
-
-/**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DisplaySSD1306Element::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, PROP_ADDRESS) == 0) {
-    _address = _atoi(value);
+  if (_stricmp(name, "enable") == 0) {
+    if (_resetpin >= 0) {
+      pinMode(_resetpin, OUTPUT);
+      digitalWrite(_resetpin, LOW); // turn low to reset OLED
+      delay(50);
+      digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
+    } // if
+    DisplayAdapter *d = _board->display;
+    d->init(_board);
+    d->drawText(0, 0, 10, "enabled...");
+    d->flush();
 
-  } else if (_stricmp(name, "resetpin") == 0) {
-    _resetpin = _atopin(value);
-
-  } else if (_stricmp(name, "height") == 0) {
-    _height = _atoi(value);
+  } else if (_stricmp(name, "enable2") == 0) {
+    DisplayAdapter *d = _board->display;
+    d->init(_board);
+    d->drawText(0, 0, 10, "enabled...");
+    d->flush();
 
   } else {
-    ret = Element::set(name, value);
+    ret = DisplayElement::set(name, value);
   } // if
 
   return (ret);
@@ -75,27 +75,17 @@ bool DisplaySSD1306Element::set(const char *name, const char *value)
  */
 void DisplaySSD1306Element::start()
 {
+  DisplayElement::start();
   LOGGER_ETRACE("start()");
-  DisplayAdapter *d;
 
-  // reset of the display is available on GPIO
-  if (_resetpin >= 0) {
-    pinMode(_resetpin, OUTPUT);
-    digitalWrite(_resetpin, LOW); // turn low to reset OLED
-    delay(50);
-    digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
-  } // if
-
-  d = (DisplayAdapter *)(new DisplayAdapterSSD1306(_address, _height));
-
-  bool success = d->init(_board);
-  if (success) {
+  DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterSSD1306(_address, _height));
+  if (d->init(_board)) {
     _board->display = d;
-    Element::start();
 
   } else {
     LOGGER_EERR("no display found.");
     delete d;
+    active = false;
   } // if
 } // start()
 

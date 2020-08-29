@@ -15,8 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <HomeDing.h>
 #include <Board.h>
+#include <HomeDing.h>
 
 #include <displays/DisplayLCDElement.h>
 
@@ -39,6 +39,10 @@ Element *DisplayLCDElement::create()
 DisplayLCDElement::DisplayLCDElement()
 {
   startupMode = Element_StartupMode::System;
+  // standards for LCD on I2C
+  _address = 0x27;
+  _height = 2;
+  _width = 16;
 }
 
 /**
@@ -47,19 +51,7 @@ DisplayLCDElement::DisplayLCDElement()
 bool DisplayLCDElement::set(const char *name, const char *value)
 {
   bool ret = true;
-
-  if (_stricmp(name, PROP_ADDRESS) == 0) {
-    _address = _atoi(value);
-
-  } else if (_stricmp(name, "lines") == 0) {
-    _lines = _atoi(value);
-
-  } else if (_stricmp(name, "columns") == 0) {
-    _cols = _atoi(value);
-
-  } else {
-    ret = Element::set(name, value);
-  } // if
+  ret = Element::set(name, value);
 
   return (ret);
 } // set()
@@ -72,7 +64,7 @@ bool DisplayLCDElement::set(const char *name, const char *value)
 void DisplayLCDElement::start()
 {
   LOGGER_ETRACE("start()");
-  DisplayAdapter *d  = (DisplayAdapter *)(new DisplayAdapterLCD(_address, _lines, _cols));
+  DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterLCD(_address, _height, _width));
 
   bool success = d->init(_board);
   if (success) {

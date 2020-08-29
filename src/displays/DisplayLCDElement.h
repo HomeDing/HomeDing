@@ -18,6 +18,8 @@
 #ifndef DisplayLCDElement_H
 #define DisplayLCDElement_H
 
+#include "DisplayElement.h"
+
 /**
  * @brief DisplayLCDElement implements creating an Display Adapter for a LCD
  * attached to the I2C bus.
@@ -25,7 +27,7 @@
  * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplayLCDElement : public Element
+class DisplayLCDElement : public DisplayElement
 {
 public:
   /**
@@ -59,11 +61,6 @@ public:
    * @return false when parameters are not usable.
    */
   virtual void start();
-
-private:
-  int _address = 0x27;
-  int _lines = 2;
-  int _cols = 16;
 };
 
 #ifdef HOMEDING_REGISTER

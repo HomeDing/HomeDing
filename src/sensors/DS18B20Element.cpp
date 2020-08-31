@@ -22,7 +22,6 @@
 #include <sensors/DS18B20Element.h>
 
 
-
 /**
  * @brief static factory function to create a new DS18B20Element
  * @return DS18B20Element* created element
@@ -67,15 +66,16 @@ void DS18B20Element::start()
     term();
 
   } else {
-    _oneWire = new OneWire(_pin);
+    _oneWire = new (std::nothrow) OneWire(_pin);
 
-    // search first device
-    _oneWire->reset_search();
-    if (_oneWire->search(_addr)) {
-      // addr[0] should be 0x28 on a DS18B20 sensor.
-      // LOGGER_ETRACE("Address: %02x%02x.%02x%02x.%02x%02x.%02x%02x", _addr[0], _addr[1], _addr[2], _addr[3], _addr[4], _addr[5], _addr[6], _addr[7]);
-      SensorElement::start();
-
+    if (_oneWire) {
+      // search first device
+      _oneWire->reset_search();
+      if (_oneWire->search(_addr)) {
+        // addr[0] should be 0x28 on a DS18B20 sensor.
+        // LOGGER_ETRACE("Address: %02x%02x.%02x%02x.%02x%02x.%02x%02x", _addr[0], _addr[1], _addr[2], _addr[3], _addr[4], _addr[5], _addr[6], _addr[7]);
+        SensorElement::start();
+      }
     } else {
       LOGGER_ETRACE("no address.");
       term();

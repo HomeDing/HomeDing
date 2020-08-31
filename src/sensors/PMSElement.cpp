@@ -78,12 +78,13 @@ void PMSElement::start()
 {
   LOGGER_ETRACE("start(%d, %d)", _pinrx, _pintx);
 
-  Element::start();
-
-  _pmsSerial = new SoftwareSerial();
-  _pmsSerial->begin(9600, SWSERIAL_8N1, _pinrx, _pintx, false, 128);
-  _pmsSerial->enableRx(false);
-  _datapos = -1; // means input is not open
+  _pmsSerial = new (std::nothrow) SoftwareSerial();
+  if (_pmsSerial) {
+    Element::start();
+    _pmsSerial->begin(9600, SWSERIAL_8N1, _pinrx, _pintx, false, 128);
+    _pmsSerial->enableRx(false);
+    _datapos = -1; // means input is not open
+  } // if
 } // start()
 
 

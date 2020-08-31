@@ -41,12 +41,15 @@ public:
     } else {
       OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
 
-      // LOGGER_TRACE("setupDisplay...");
-      SSD1306Wire *d = new SSD1306Wire(_address, board->I2cSda, board->I2cScl, res);
-      d->init();
-      d->connect();
-
-      DisplayAdapterOLED::init(board, d);
+      SSD1306Wire *d = new (std::nothrow) SSD1306Wire(_address, board->I2cSda, board->I2cScl, res);
+      if (!d) {
+        return (false);
+      } else {
+        // LOGGER_TRACE("setupDisplay...");
+        d->init();
+        d->connect();
+        DisplayAdapterOLED::init(board, d);
+      }
     } // if
     return (true);
   }; // init()

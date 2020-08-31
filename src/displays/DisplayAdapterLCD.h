@@ -46,29 +46,36 @@ public:
 
   bool init(Board *board)
   {
-
     // test if a device is attached
     if (!WireUtils::exists(_address)) {
       LOGGER_ERR("not found");
       return (false);
 
     } else {
-      DisplayAdapter::init(board);
+      display = new (std::nothrow) LiquidCrystal_PCF8574(_address);
 
-      // LOGGER_TRACE("setupDisplay...");
-      display = new LiquidCrystal_PCF8574(_address);
-      display->begin(_cols, _lines);
+      if (!display) {
+        LOGGER_ERR("not found");
+        return (false);
 
-      int dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
-                       0b10001, 0b01110, 0b00000, 0b00000};
-      int dotOn[8] = {0b00000, 0b01110, 0b11111, 0b11111,
-                      0b11111, 0b01110, 0b00000, 0b00000};
+      } else {
+        DisplayAdapter::init(board);
 
-      display->createChar(1, dotOff);
-      display->createChar(2, dotOn);
+        // LOGGER_TRACE("setupDisplay...");
+        display->begin(_cols, _lines);
 
-      display->clear();
-      display->setBacklight(1);
+        int dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
+                         0b10001, 0b01110, 0b00000, 0b00000};
+        int dotOn[8] = {0b00000, 0b01110, 0b11111, 0b11111,
+                        0b11111, 0b01110, 0b00000, 0b00000};
+
+        display->createChar(1, dotOff);
+        display->createChar(2, dotOn);
+
+        display->clear();
+        display->setBacklight(1);
+      }
+
     } // if
     return (true);
   }; // init()

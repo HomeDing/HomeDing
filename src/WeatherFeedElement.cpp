@@ -107,7 +107,7 @@ void WeatherFeedElement::processBody(char *value)
   } else {
     TRACE("body(%d)", strlen(value));
     if (!mj) {
-      mj = new MicroJson(
+      mj = new (std::nothrow) MicroJson(
           [this](int level, char *path, char *value) {
             if (path && value) {
               // LOGGER_INFO("<%s>=%s", path, value);
@@ -120,7 +120,9 @@ void WeatherFeedElement::processBody(char *value)
             } // if
           });
     }
-    mj->parse(value);
+    if (mj) {
+      mj->parse(value);
+    }
   }
 };
 

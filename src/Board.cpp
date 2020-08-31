@@ -178,9 +178,8 @@ void Board::_addAllElements()
 {
   TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
-  MicroJson *mj;
 
-  mj = new MicroJson(
+  MicroJson *mj = new (std::nothrow) MicroJson(
       [this, &_lastElem](int level, char *path, char *value) {
         TRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
@@ -223,18 +222,20 @@ void Board::_addAllElements()
         } // if
       });
 
-  // config the thing to the local network
-  mj->parseFile(ENV_FILENAME);
-  _checkNetState();
+  if (mj) {
+    // config the thing to the local network
+    mj->parseFile(ENV_FILENAME);
+    _checkNetState();
 
-  // config the Elements of the thing
-  mj->parseFile(CONF_FILENAME);
-  _checkNetState();
+    // config the Elements of the device
+    mj->parseFile(CONF_FILENAME);
+    _checkNetState();
 
-  if (!_elementList) {
-    // no elemenmt defined so allow configuration in any case.
-    isSafeMode = false;
-  }
+    if (!_elementList) {
+      // no element defined, so allow configuration in any case.
+      isSafeMode = false;
+    }
+  } // if
 
   delete mj;
 } // _addAllElements()

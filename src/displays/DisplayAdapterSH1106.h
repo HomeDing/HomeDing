@@ -41,11 +41,14 @@ public:
     } else {
       OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
 
-      SH1106Wire *d = new SH1106Wire(_address, board->I2cSda, board->I2cScl, res);
-      d->init();
-      d->connect();
-
-      DisplayAdapterOLED::init(board, d);
+      SH1106Wire *d = new (std::nothrow) SH1106Wire(_address, board->I2cSda, board->I2cScl, res);
+      if (!d) {
+        return (false);
+      } else {
+        d->init();
+        d->connect();
+        DisplayAdapterOLED::init(board, d);
+      }
     } // if
     return (true);
   }; // init()

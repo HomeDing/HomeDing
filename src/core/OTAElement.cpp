@@ -64,7 +64,7 @@ bool OTAElement::set(const char *name, const char *value)
  */
 void OTAElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   ArduinoOTA.setHostname(_board->deviceName.c_str());
 

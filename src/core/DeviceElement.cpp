@@ -58,7 +58,7 @@ bool DeviceElement::set(const char *name, const char *value)
 
     if (_atob(value)) {
       // start deep sleep
-      LOGGER_ETRACE("start sleep");
+      TRACE("start sleep");
       _board->deepSleepStart = millis();
       if (!_board->isWakeupStart) {
         // give a minute time to block deep sleep mode 
@@ -66,7 +66,7 @@ bool DeviceElement::set(const char *name, const char *value)
       }
     } else {
       // block any deep sleep until next reset.
-      LOGGER_ETRACE("block sleep");
+      TRACE("block sleep");
       _board->deepSleepBlock = true;
     }
 

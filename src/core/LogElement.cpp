@@ -49,7 +49,7 @@ LogElement::LogElement()
 
 void LogElement::_logToFile()
 {
-  LOGGER_ETRACE("log(%d,%s)", _timestamp, _value.c_str());
+  // TRACE("log(%d,%s)", _timestamp, _value.c_str());
 
   File f = SPIFFS.open(_logfileName, "a");
 
@@ -111,7 +111,7 @@ bool LogElement::set(const char *name, const char *value)
  */
 void LogElement::start()
 {
-  LOGGER_ETRACE("start(%s)", _logfileName.c_str());
+  // TRACE("start(%s)", _logfileName.c_str());
 
   // Verify parameters
   if (_logfileName.length() > 0) {

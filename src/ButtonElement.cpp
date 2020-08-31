@@ -27,11 +27,6 @@
 #define STATE_HIGH2 3 // went up a second time shortly after the first
 #define STATE_PRESSHIGH 6 // is high since a long time.
 
-/** The TRACE Macro is used for trace output for development/debugging purpose. */
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-// #define TRACE(...)
-
-
 /**
  * @brief static factory function to create a new ButtonElement.
  * @return ButtonElement* as Element* created element
@@ -50,7 +45,7 @@ Element *ButtonElement::create()
 bool ButtonElement::set(const char *name, const char *value)
 {
   bool ret = true;
-  TRACE("set %s=%s", name, value);
+  // TRACE("set %s=%s", name, value);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
     _inputLevel = _atob(value);
@@ -107,7 +102,7 @@ void ButtonElement::loop()
   unsigned long now = millis(); // current (relative) time in msecs.
 
   // if (_state != STATE_INIT)
-  //   LOGGER_ETRACE("loop-%d)", _state);
+  //   TRACE("loop-%d)", _state);
 
   // state machine
   if (_state == STATE_INIT) { // waiting for menu pin being pressed.

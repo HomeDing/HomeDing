@@ -23,6 +23,7 @@
  * * 11.10.2018 move network initialization into board loop.
  * * 10.12.2019 reset counter to enter unsafe mode and config mode.
  * * 25.01.2020 device startup actions added.
+ * * 31.08.2020 enable TRACE ouput using Macros to reduce production code size. 
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -43,6 +44,27 @@ class Board;
 
 #define HOMEDING_GREETING "HomeDing"
 
+// ===== TIMING DEBUG OUTPUT HELPERs =====
+// can be controlled using the "Debug port" configuration setting. Set to none to remove TRACE calls.
+
+#ifdef DEBUG_ESP_PORT
+
+/** The TRACE Macro is used for trace output for development/debugging purpose. */
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+
+/** The TRACE Macros for creating output with timing hints: */
+#define TRACE_START unsigned long __TRACE_START_TIME = millis();
+#define TRACE_END   unsigned long __TRACE_END_TIME = millis();
+#define TRACE_TIME  (__TRACE_END_TIME - __TRACE_START_TIME)
+#define TRACE_TIMEPRINT(topic, id, min) if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)",id, TRACE_TIME);
+
+#else
+#define TRACE(...)
+#define TRACE_START
+#define TRACE_END
+#define TRACE_TIME
+#define TRACE_TIMEPRINT(topic, id, min)
+#endif
 
 /**
  * The env.json file contains all the settings for registering the device

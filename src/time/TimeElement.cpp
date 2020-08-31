@@ -83,7 +83,7 @@ bool TimeElement::set(const char *name, const char *value)
  */
 void TimeElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   // set some defaults
   _lastTimestamp = 0;

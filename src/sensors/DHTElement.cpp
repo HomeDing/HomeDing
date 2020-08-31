@@ -82,7 +82,7 @@ bool DHTElement::set(const char *name, const char *value)
  */
 void DHTElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
   if (_pin < 0) {
     LOGGER_EERR("no pin");
 
@@ -103,7 +103,7 @@ void DHTElement::start()
  */
 void DHTElement::term()
 {
-  LOGGER_ETRACE("term()");
+  // TRACE("term()");
   // no need to call _dht.anyfunc()
   if (_powerpin >= 0) {
     pinMode(_powerpin, OUTPUT);
@@ -122,7 +122,7 @@ bool DHTElement::getProbe(String &values)
   TempAndHumidity dhtValues;
   int v;
 
-  LOGGER_ETRACE("getProbe()");
+  // TRACE("getProbe()");
   dhtValues = _dht.getTempAndHumidity();
   DHTesp::DHT_ERROR_t dhterr = _dht.getStatus();
 
@@ -135,7 +135,7 @@ bool DHTElement::getProbe(String &values)
     term();
 
   } else {
-    // LOGGER_ETRACE("t=%f h=%f", dhtValues.temperature, dhtValues.humidity);
+    // TRACE("t=%f h=%f", dhtValues.temperature, dhtValues.humidity);
     newData = true;
     snprintf(buffer, sizeof(buffer), "%.2f,%.2f", dhtValues.temperature, dhtValues.humidity);
     values = buffer;

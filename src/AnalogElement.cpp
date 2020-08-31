@@ -95,7 +95,7 @@ void AnalogElement::loop()
 
   if (_nextRead <= now) {
     int v = analogRead(_pin);
-    // LOGGER_ETRACE("read(%d)", v);
+    // TRACE("read(%d)", v);
 
     if ((v >= _value + _hysteresis) || (v <= _value - _hysteresis)) {
       _value = v;

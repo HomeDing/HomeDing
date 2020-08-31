@@ -68,7 +68,7 @@ bool DigitalInElement::set(const char *name, const char *value)
 void DigitalInElement::start()
 {
   // only start with valid pin as input.
-  // LOGGER_ETRACE("start (%d)", _pin);
+  // TRACE("start (%d)", _pin);
   if (_pin >= 0) {
     pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
     _lastInLevel = digitalRead(_pin);
@@ -90,7 +90,7 @@ void DigitalInElement::loop()
       lev = !lev;
 
     if (lev != _lastInLevel) {
-      // LOGGER_ETRACE("output %d->%d)", _lastInLevel, lev);
+      // TRACE("output %d->%d)", _lastInLevel, lev);
       _board->dispatch(lev ? _highAction : _lowAction);
       _board->dispatch(_valueAction, lev ? "1" : "0");
       _lastInLevel = lev;

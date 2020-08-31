@@ -88,7 +88,7 @@ void NeoElement::init(Board *board)
  */
 bool NeoElement::set(const char *name, const char *pValue)
 {
-  // LOGGER_ETRACE("set %s=%s", name, value);
+  // TRACE("set %s=%s", name, value);
   bool ret = LightElement::set(name, pValue);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
@@ -139,13 +139,13 @@ void NeoElement::start()
 {
   LightElement::start();
 
-  _strip = new Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
+  _strip = new (std::nothrow) Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
   if (_strip) {
     _strip->begin();
     _setColors(value);
     _strip->setBrightness(_brightness_255);
   } // if
-  LOGGER_ETRACE("start %d,%d", (_strip != nullptr), brightness);
+  // TRACE("start %d,%d", (_strip != nullptr), brightness);
 } // start()
 
 

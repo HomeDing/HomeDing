@@ -184,7 +184,7 @@ bool DSTimeElement::set(const char *name, const char *value)
  */
 void DSTimeElement::start()
 {
-  // LOGGER_ETRACE("start()");
+  // TRACE("start()");
   Wire.begin(_board->I2cSda, _board->I2cScl);
 
   unsigned long now = _board->getSeconds();

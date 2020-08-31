@@ -28,10 +28,6 @@
 #define MAX_WAIT_FOR_RESPONSE 20
 #define DNS_TIMEOUT (uint32_t)4
 
-/** The TRACE Macro is used for trace output for development/debugging purpose. */
-// #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-#define TRACE(...)
-
 #define NEWSTATE(n) _state = n;
 
 
@@ -84,11 +80,6 @@ void HttpClientElement::processHeader(String &key, String &value)
 
 void HttpClientElement::processBody(char *value)
 {
-  if (value) {
-    TRACE("body:%s", value);
-  } else {
-    TRACE("body:done.");
-  }
 };
 
 /**

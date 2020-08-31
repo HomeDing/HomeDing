@@ -16,10 +16,6 @@
 
 #include <ElementRegistry.h>
 
-/** The TRACE Macro is used for trace output for development/debugging purpose. */
-#define TRACE(...) LOGGER_TRACE(__VA_ARGS__)
-// #define TRACE(...)
-
 /* ===== Element functions ===== */
 
 /**
@@ -95,7 +91,7 @@ void Element::pushState(
  */
 const char *Element::get(const char *propName)
 {
-  LOGGER_ETRACE("get(%s)", propName);
+  TRACE("get(%s)", propName);
   String ret;
 
   pushState([this, propName, &ret](const char *name, const char *value) {

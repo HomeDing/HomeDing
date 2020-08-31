@@ -104,7 +104,7 @@ void setup(void)
   Serial.begin(115200);
 
   Serial.setDebugOutput(false);
-  // Logger::logger_level = LOGGER_LEVEL_TRACE;
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("Device starting...");
 

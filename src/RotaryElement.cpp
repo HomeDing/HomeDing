@@ -86,14 +86,14 @@ bool RotaryElement::set(const char *name, const char *value)
  */
 void RotaryElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   // Verify parameters
   if ((_pin1 < 0) || (_pin2 < 0)) {
     LOGGER_EERR("pin values are required.");
 
   } else {
-    // LOGGER_ETRACE("connect %d %d\n", _pin1, _pin2);
+    // TRACE("connect %d %d\n", _pin1, _pin2);
     __encoder = new (std::nothrow) RotaryEncoder(_pin1, _pin2);
     if (__encoder) {
       pinMode(_pin1, INPUT_PULLUP);

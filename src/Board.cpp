@@ -33,9 +33,6 @@ extern "C" {
 
 #include <DNSServer.h>
 
-#define TRACE(...)
-// #define TRACE(...) LOGGER_INFO(__VA_ARGS__)
-
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
@@ -176,12 +173,12 @@ void Board::_checkNetState()
  */
 void Board::_addAllElements()
 {
-  TRACE("addElements()");
+  LOGGER_TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
 
   MicroJson *mj = new (std::nothrow) MicroJson(
       [this, &_lastElem](int level, char *path, char *value) {
-        TRACE("callback %d %s =%s", level, path, value ? value : "-");
+        LOGGER_TRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
 
         if (level == 1) {

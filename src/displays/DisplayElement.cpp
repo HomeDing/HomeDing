@@ -63,7 +63,7 @@ bool DisplayElement::set(const char *name, const char *value)
  */
 void DisplayElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   // reset of the display is available on GPIO
   if (_resetpin >= 0) {

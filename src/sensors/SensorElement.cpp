@@ -102,7 +102,7 @@ void SensorElement::loop()
 
   if (_nextRead <= now) {
     // time to get sensor data, repeat until returning true
-    // LOGGER_ETRACE("reading...");
+    // TRACE("reading...");
     _isReading = true;
     bool done = getProbe(value);
     _isReading = false;
@@ -117,7 +117,7 @@ void SensorElement::loop()
     } // if
 
   } else if (_nextSend && (_nextSend < now)) {
-    // LOGGER_ETRACE("sending...");
+    // TRACE("sending...");
     if (!_lastValues.isEmpty())
       sendData(_lastValues);
     _nextSend = _resendTime ? now + _resendTime * 1000 : 0;

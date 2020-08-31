@@ -76,7 +76,7 @@ bool DisplaySSD1306Element::set(const char *name, const char *value)
 void DisplaySSD1306Element::start()
 {
   DisplayElement::start();
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterSSD1306(_address, _height));
   if (d->init(_board)) {

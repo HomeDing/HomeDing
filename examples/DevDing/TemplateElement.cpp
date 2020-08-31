@@ -52,7 +52,7 @@ TemplateElement::TemplateElement()
 
 void TemplateElement::init(Board *board)
 {
-  LOGGER_ETRACE("init()");
+  TRACE("init()");
   Element::init(board);
   // do something here like initialization
 } // init()
@@ -88,7 +88,7 @@ bool TemplateElement::set(const char *name, const char *value)
  */
 void TemplateElement::start()
 {
-  LOGGER_ETRACE("start()");
+  TRACE("start()");
 
   // Verify parameters
 
@@ -121,7 +121,7 @@ void TemplateElement::pushState(
 
 void TemplateElement::term()
 {
-  LOGGER_ETRACE("term()");
+  TRACE("term()");
   active = false;
 } // term()
 

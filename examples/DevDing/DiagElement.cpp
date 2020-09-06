@@ -62,7 +62,7 @@ bool DiagElement::set(const char *name, const char *value)
 
   if (_stricmp(name, "heap") == 0) {
     // log some heap information. using http://nodeding/$board/diag/0?heap=1
-    LOGGER_ETRACE("===== HEAP =====");
+    TRACE("===== HEAP =====");
     uint32_t free;
     uint16_t max;
     uint8_t frag;
@@ -73,7 +73,7 @@ bool DiagElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "rtcmem") == 0) {
     // log some heap information. using http://nodeding/$board/diag/0?rtcmem=1
     // dump rtc Memory
-    LOGGER_ETRACE("===== RTCMEM =====");
+    TRACE("===== RTCMEM =====");
     uint8_t rtcbuffer[16];
     for (unsigned int adr = 0; adr < (512); adr += sizeof(rtcbuffer)) {
       ESP.rtcUserMemoryRead(adr / 4, (uint32_t *)rtcbuffer, sizeof(rtcbuffer));
@@ -91,12 +91,12 @@ bool DiagElement::set(const char *name, const char *value)
           chars.concat('.');
         }
       }
-      LOGGER_ETRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
+      TRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
     } // for
 
   } else if (_stricmp(name, "mdns") == 0) {
     // log some heap information. using http://nodeding/$board/diag/0?mdns=1
-    LOGGER_ETRACE("===== mdns =====");
+    TRACE("===== mdns =====");
     Serial.flush();
 
     // add mDNS service discovery feature
@@ -106,7 +106,7 @@ bool DiagElement::set(const char *name, const char *value)
     MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
     MDNS.addServiceTxt(serv, "path", "/");
 
-    LOGGER_ETRACE("done.");
+    TRACE("done.");
 
   } else {
     ret = Element::set(name, value);
@@ -122,16 +122,16 @@ bool DiagElement::set(const char *name, const char *value)
 void DiagElement::start()
 {
   delay(2000); // wait some time for Serial output sync
-  LOGGER_ETRACE("start()");
+  TRACE("start()");
   Element::start();
 
-  LOGGER_ETRACE("Reset Reason: %s", ESP.getResetReason().c_str());
-  LOGGER_ETRACE(" Free Memory: %d", ESP.getFreeHeap());
-  LOGGER_ETRACE("     Chip-Id: 0x%08X", ESP.getChipId());
-  LOGGER_ETRACE(" Mac-address: %s", WiFi.macAddress().c_str());
+  TRACE("Reset Reason: %s", ESP.getResetReason().c_str());
+  TRACE(" Free Memory: %d", ESP.getFreeHeap());
+  TRACE("     Chip-Id: 0x%08X", ESP.getChipId());
+  TRACE(" Mac-address: %s", WiFi.macAddress().c_str());
 
   // ===== scan the the I2C bus and report found devices =====
-  LOGGER_ETRACE("Scan i2c (sda=%d, scl=%d)...", _board->I2cSda, _board->I2cScl);
+  TRACE("Scan i2c (sda=%d, scl=%d)...", _board->I2cSda, _board->I2cScl);
 
   int error, adr;
   int num;
@@ -145,20 +145,22 @@ void DiagElement::start()
 
     if (error == 0) {
       if (adr == 0x27) {
-        LOGGER_ETRACE(" 0x27 (LCD, PCF8574) found.");
+        TRACE(" 0x27 (LCD, PCF8574) found.");
+      } else if (adr == 0x3C) {
+        TRACE(" 0x03C (SSD1306, SSD1309) found.");
       } else if (adr == 0x40) {
-        LOGGER_ETRACE(" 0x27 (INA219) found.");
+        TRACE(" 0x27 (INA219) found.");
 
       } else {
-        LOGGER_ETRACE(" 0x%02x (unknown) found.", adr);
+        TRACE(" 0X%02x (unknown) found.", adr);
       }
       num++;
     } else if (error == 4) {
-      LOGGER_ETRACE(" 0x%02x error.", adr);
+      TRACE(" 0x%02x error.", adr);
     } // if
     yield();
   } // for
-  LOGGER_ETRACE(" %2d devices found.", num);
+  TRACE(" %2d devices found.", num);
 
 } // start()
 

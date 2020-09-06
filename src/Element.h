@@ -18,10 +18,10 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
 
-#include <string.h>
+#include <cstdarg>
 #include <functional>
 #include <memory>
-#include <cstdarg> 
+#include <string.h>
 
 // forward class declarations
 class Board;
@@ -39,7 +39,7 @@ class Element;
 #define D4 2
 #endif
 
-#define UNUSED __attribute__ ((unused)) 
+#define UNUSED __attribute__((unused))
 
 // ===== Helping classes =====
 #include <core/Logger.h>
@@ -222,14 +222,21 @@ public:
    */
   static int _stricmp(const char *str1, const char *str2);
 
+
+  /**
+   * @brief String start with prefix, case insensitive.
+   */
+  static bool _stristartswith(const char *s, const char *prefix);
+
+
   /**
    * @brief to lowercase a c string.
    */
   static void _strlower(char *str);
 
 
-/** Get item[index] from string */
-static String getItemValue(String data, int index);
+  /** Get item[index] from string */
+  static String getItemValue(String data, int index);
 
 
 protected:

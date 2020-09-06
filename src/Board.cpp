@@ -96,23 +96,6 @@ void clearResetCount()
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
 }
 
-bool strStartsWithIgnore(const char *s, const char *prefix)
-{
-  bool ret = true; // until we find a difference
-  if (s && prefix) {
-    while (ret && *s && *prefix) {
-      if (tolower(*s) != tolower(*prefix))
-        ret = false;
-      s++;
-      prefix++;
-    } // while
-    if (*prefix)
-      ret = false;
-  } else {
-    ret = false;
-  }
-  return (ret);
-} // strStartsWithIgnore
 
 /**
  * @brief Initialize a blank board.
@@ -178,14 +161,14 @@ void Board::_addAllElements()
 
   MicroJson *mj = new (std::nothrow) MicroJson(
       [this, &_lastElem](int level, char *path, char *value) {
-        LOGGER_TRACE("callback %d %s =%s", level, path, value ? value : "-");
+        // LOGGER_TRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
 
         if (level == 1) {
 
         } else if (level == 2) {
           // create new element
-          LOGGER_TRACE("new %s", path);
+          // LOGGER_TRACE("new %s", path);
           // extract type name
           char typeName[32];
 
@@ -197,7 +180,7 @@ void Board::_addAllElements()
           *t = '\0';
 
           // typeName starts with "web" ?
-          if (strStartsWithIgnore(typeName, "web")) {
+          if (Element::_stristartswith(typeName, "web")) {
             // don't try to create web elements
             _lastElem = nullptr;
           } else {
@@ -323,7 +306,10 @@ void Board::loop()
     } // if
     if (_nextElement) {
       if (_nextElement->active) {
+        TRACE_START;
         _nextElement->loop();
+        TRACE_END;
+        TRACE_TIMEPRINT("loop", _nextElement->id, 5);
       }
       _nextElement = _nextElement->next;
     } // if
@@ -600,6 +586,7 @@ Element *Board::findById(const char *id)
 void Board::_dispatchSingle(String evt)
 {
   // LOGGER_TRACE("dispatch %s", evt.c_str());
+  TRACE_START;
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);
   int pos2 = evt.indexOf(ELEM_VALUE);
@@ -635,6 +622,8 @@ void Board::_dispatchSingle(String evt)
         LOGGER_ERR("Event '%s' was not handled", evt.c_str());
     }
   }
+  TRACE_END;
+  TRACE_TIMEPRINT("dispatch", evt.c_str(), 0);
 } // _dispatchSingle()
 
 
@@ -803,6 +792,7 @@ time_t Board::getTimeOfDay()
   }
 } // getTimeOfDay()
 
+
 /**
  * @brief Get a Element by typename. Returns the first found element.
  */
@@ -845,6 +835,21 @@ Element *Board::getElement(const char *elementType, const char *elementName)
   return (l);
 
 } // getElement()
+
+
+/**
+ * @brief Iterate though all Elements.
+ */
+void Board::forEach(const char *s, ElementCallbackFn fCallback)
+{
+  LOGGER_TRACE("forEach()");
+
+  Element *l = _elementList;
+  while (l != NULL) {
+    (fCallback)(l);
+    l = l->next;
+  } // while
+} // forEach()
 
 
 void Board::reboot(bool wipe)

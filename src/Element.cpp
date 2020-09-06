@@ -238,6 +238,26 @@ int Element::_stricmp(const char *str1, const char *str2)
 } // _stricmp
 
 
+// String start with prefix, case insensitive.
+bool Element::_stristartswith(const char *s, const char *prefix)
+{
+  bool ret = true; // until we find a difference
+  if (s && prefix) {
+    while (ret && *s && *prefix) {
+      if (tolower(*s) != tolower(*prefix))
+        ret = false;
+      s++;
+      prefix++;
+    } // while
+    if (*prefix)
+      ret = false;
+  } else {
+    ret = false;
+  }
+  return (ret);
+} // _stristartswith()
+
+
 void Element::_strlower(char *str)
 {
   if (str) {
@@ -248,7 +268,6 @@ void Element::_strlower(char *str)
     } // while
   } // if
 } // _strlower
-
 
 
 // https://stackoverflow.com/questions/9072320/split-string-into-string-array

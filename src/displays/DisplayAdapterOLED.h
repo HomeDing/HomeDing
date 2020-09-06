@@ -33,7 +33,6 @@ public:
 
   virtual bool init(Board *board, OLEDDisplay *d)
   {
-
     display = d;
     display->flipScreenVertically();
     display->setTextAlignment(TEXT_ALIGN_LEFT);

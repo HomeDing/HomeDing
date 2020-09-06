@@ -24,6 +24,7 @@
  * * 10.12.2019 reset counter to enter unsafe mode and config mode.
  * * 25.01.2020 device startup actions added.
  * * 31.08.2020 enable TRACE ouput using Macros to reduce production code size. 
+ * * 03.09.2020 forEach iterator over all elements added. 
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -54,9 +55,9 @@ class Board;
 
 /** The TRACE Macros for creating output with timing hints: */
 #define TRACE_START unsigned long __TRACE_START_TIME = millis();
-#define TRACE_END   unsigned long __TRACE_END_TIME = millis();
-#define TRACE_TIME  (__TRACE_END_TIME - __TRACE_START_TIME)
-#define TRACE_TIMEPRINT(topic, id, min) if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)",id, TRACE_TIME);
+#define TRACE_END unsigned long __TRACE_END_TIME = millis();
+#define TRACE_TIME (__TRACE_END_TIME - __TRACE_START_TIME)
+#define TRACE_TIMEPRINT(topic, id, min) if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
 
 #else
 #define TRACE(...)
@@ -104,6 +105,12 @@ typedef enum {
   BOARDSTATE_RUNCAPTIVE = 22 // Enable Network Configuration UI
 
 } BoardState;
+
+/**
+ * @brief iterator callback function.
+ */
+typedef std::function<void(Element *e)>
+    ElementCallbackFn;
 
 
 /**
@@ -267,6 +274,11 @@ public:
 
   // WebServer
   ESP8266WebServer *server;
+
+  /**
+   * Iterator through all Elements.
+   */
+  void forEach(const char *s, ElementCallbackFn fCallback);
 
   /**
    * Get a Element by typename. Returns the first found element.

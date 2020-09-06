@@ -20,6 +20,9 @@
 
 #include "DisplayElement.h"
 
+// #define LOG_TRACE(...) LOGGER_TRACE(__VA_ARGS__)
+#define LOG_TRACE(...)
+
 /* ===== Element functions ===== */
 
 /**
@@ -50,6 +53,30 @@ bool DisplayElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "width") == 0) {
     _width = _atoi(value);
 
+  } else if (_stricmp(name, "show") == 0) {
+    int page = _atoi(value); // not used yet
+
+    // reset
+    if (_resetpin >= 0) {
+      pinMode(_resetpin, OUTPUT);
+      digitalWrite(_resetpin, LOW); // turn low to reset OLED
+      delay(50);
+      digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
+    } // if
+    DisplayAdapter *d = _board->display;
+    d->init(_board);
+
+    // redraw all display elements
+    _board->forEach("", [this](Element *e) {
+      LOG_TRACE("forEach %s", e->id);
+      if (_stristartswith(e->id, "display"))
+        e->set("redraw", "1");
+    });
+
+  } else if (_stricmp(name, "clear") == 0) {
+    DisplayAdapter *d = _board->display;
+    d->init(_board);
+
   } else {
     ret = Element::set(name, value);
   } // if
@@ -64,6 +91,7 @@ bool DisplayElement::set(const char *name, const char *value)
 void DisplayElement::start()
 {
   // TRACE("start()");
+  Element::start();
 
   // reset of the display is available on GPIO
   if (_resetpin >= 0) {

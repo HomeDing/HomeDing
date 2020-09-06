@@ -43,27 +43,7 @@ bool DisplaySSD1306Element::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "enable") == 0) {
-    if (_resetpin >= 0) {
-      pinMode(_resetpin, OUTPUT);
-      digitalWrite(_resetpin, LOW); // turn low to reset OLED
-      delay(50);
-      digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
-    } // if
-    DisplayAdapter *d = _board->display;
-    d->init(_board);
-    d->drawText(0, 0, 10, "enabled...");
-    d->flush();
-
-  } else if (_stricmp(name, "enable2") == 0) {
-    DisplayAdapter *d = _board->display;
-    d->init(_board);
-    d->drawText(0, 0, 10, "enabled...");
-    d->flush();
-
-  } else {
-    ret = DisplayElement::set(name, value);
-  } // if
+  ret = DisplayElement::set(name, value);
 
   return (ret);
 } // set()

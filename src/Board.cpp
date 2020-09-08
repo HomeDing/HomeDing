@@ -109,6 +109,7 @@ void Board::init(ESP8266WebServer *serv)
   sysButton = -1; // configured by device-element
   boardState = BOARDSTATE_NONE;
   homepage = "/index.htm";
+  cacheHeader = "no-cache";
   deepSleepStart = 0; // no deep sleep to be started
   deepSleepBlock = false; // no deep sleep is blocked
   deepSleepTime = 60; // one minute
@@ -508,7 +509,7 @@ void Board::loop()
     // ===== initialize network dependant services
 
     // start file server for static files in the file system.
-    server->serveStatic("/", SPIFFS, "/", "NO-CACHE");
+    server->serveStatic("/", SPIFFS, "/", cacheHeader.c_str()); // "no-cache");
 
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode

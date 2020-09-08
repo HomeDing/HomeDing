@@ -117,6 +117,9 @@ bool DeviceElement::set(const char *name, const char *value)
     } else if (_stricmp(name, "onstart") == 0) {
       _board->startAction = value;
 
+    } else if (_stricmp(name, "cache") == 0) {
+      _board->cacheHeader = value;
+
       // ===== Service Discovery =====
     } else if (_stricmp(name, "sd") == 0) {
       _board->mDNS_sd = _atob(value);

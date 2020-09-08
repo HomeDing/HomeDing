@@ -322,6 +322,7 @@ public:
 
   String sysStartAction;
   String startAction;
+  String cacheHeader;
 
   BoardState boardState;
 

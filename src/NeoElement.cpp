@@ -46,7 +46,7 @@ void NeoElement::_setColors(String colList)
   } // while
 
   // at the end of the defined colors.
-  // now repeat untill all PixelColors are set
+  // now repeat until all PixelColors are set
   def = n;
   while (n < pixels) {
     col = _strip->getPixelColor(n % def);
@@ -88,14 +88,14 @@ void NeoElement::init(Board *board)
  */
 bool NeoElement::set(const char *name, const char *pValue)
 {
-  // LOGGER_ETRACE("set %s=%s", name, value);
+  // TRACE("set %s=%s", name, value);
   bool ret = LightElement::set(name, pValue);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
+    // saving to LightElement::value was handled in LightElement
     _mode = Mode::color;
     if (_strip)
-      _setColors(pValue);
-    // was handled in LightElement
+      _setColors(value);
 
   } else if (_stricmp(name, "mode") == 0) {
     if (_stricmp(pValue, "color") == 0)
@@ -113,15 +113,15 @@ bool NeoElement::set(const char *name, const char *pValue)
     ret = true; // not handled in LightElement
 
   } else if (_stricmp(name, "brightness") == 0) {
+    // saving to LightElement::brightness was handled in LightElement
     _brightness_255 = brightness * 255 / 100;
 
     if (_strip) {
       _strip->setBrightness(_brightness_255);
       if (_mode == Mode::color) {
-        _setColors(pValue);
+        _setColors(value);
       }
     }
-    // was handled in LightElement
 
   } else if (_stricmp(name, "count") == 0) {
     _count = _atoi(pValue);
@@ -139,13 +139,13 @@ void NeoElement::start()
 {
   LightElement::start();
 
-  _strip = new Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
+  _strip = new (std::nothrow) Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
   if (_strip) {
     _strip->begin();
     _setColors(value);
     _strip->setBrightness(_brightness_255);
   } // if
-  LOGGER_EINFO("start %d,%d", (_strip != nullptr), brightness);
+  // TRACE("start %d,%d", (_strip != nullptr), brightness);
 } // start()
 
 

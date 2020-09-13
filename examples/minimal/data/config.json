@@ -1,0 +1,22 @@
+{
+"digitalin": {
+"d3": {
+"pin": "D3",  
+"inverse": 1,
+"pullup": 1,
+"onLow": "switch/relais?toggle=1"
+}
+},
+"switch": {
+"relais": {
+"value": 0,
+"onValue": "digitalout/d4?value=$v"
+}
+},
+"digitalout": {
+"d4": {
+"pin": "D4",
+"inverse": "false"
+}
+}
+}

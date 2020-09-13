@@ -81,7 +81,7 @@ unsigned long BME680Element::beginReading(void)
 
   /* Get the total measurement duration so as to sleep or wait till the measurement is complete */
   bme680_get_profile_dur(&meas_period, &gas_sensor);
-  // LOGGER_ETRACE("meas_period=%d", meas_period);
+  // TRACE("meas_period=%d", meas_period);
 
   return (millis() + meas_period);
 } // beginReading()
@@ -140,7 +140,7 @@ bool BME680Element::set(const char *name, const char *value)
  */
 void BME680Element::start()
 {
-  // LOGGER_ETRACE("start()");
+  // TRACE("start()");
   // Setup sensor connectivity and check if sensor is present.
   gas_sensor.dev_id = _address;
   gas_sensor.intf = BME680_I2C_INTF;

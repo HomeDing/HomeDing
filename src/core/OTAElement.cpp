@@ -64,11 +64,11 @@ bool OTAElement::set(const char *name, const char *value)
  */
 void OTAElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   ArduinoOTA.setHostname(_board->deviceName.c_str());
 
-  if (!_board->savemode) {
+  if (!_board->isSafeMode) {
     ArduinoOTA.setPort(_port); // defaults = 8266
     if (_passwd.length() > 0)
       ArduinoOTA.setPassword((const char *)_passwd.c_str());

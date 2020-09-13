@@ -7,9 +7,6 @@
   <title>Element Panel</title>
   <link href="/iotstyle.css" rel="stylesheet" type="text/css">
 
-  <script src="es6-promise.auto.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script> -->
-  <script src="polyfill.js"></script>
   <script src="micro.js"></script>
   <script src="panel.js"></script>
 
@@ -147,24 +144,25 @@
       jsonParse(conf, function (path, key, val) {
         if ((path.length > 1) && (path[0] === '/'))
           path = path.substr(1);
-        if (path.split('/').length == 2) {
-          var t = path.split('/')[0].toLowerCase();
-          var i = path.split('/')[1].toLowerCase();
-          var s = JSON.stringify(conf[t][i], null, 2)
+        var p = path.split('/');
+        if (p.length >= 2) {
+          var s = JSON.stringify(conf[p[0]][p[1]], null, 2)
+          var t = p[0].toLowerCase();
+          var id = t + '/' + p[1].toLowerCase();
 
           if (toBool(params.sys) || (!elementDef[t]) || (toBool(elementDef[t].sys) == false)) {
-            var n = nodes[path];
+            var n = nodes[id];
             if (!n) {
-              n = nodes[path] = {
-                id: path
+              n = nodes[id] = {
+                id: id
               }; // create a new node
               n.icon = t;
               n.conf = s;
             } // if
             if (key) {
-              n[key] = val;
+              // n[key] = val;
               if (key.substr(0, 2) == 'on') {
-                createEdges(path, val);
+                createEdges(id, val);
               }
             } // if
           } // if
@@ -198,7 +196,8 @@
           nodes[n].yPos = 0;
         } else {
           // nodes with edges vertically;
-          nodes[n].xPos = 5 + nodes[n]._in - nodes[n]._out;
+          nodes[n].xPos = 6 + nodes[n]._in - nodes[n]._out;
+          nodes[n].xPos = Math.max(nodes[n].xPos, 0);
           nodes[n].yPos = py++;
         }
       };
@@ -266,6 +265,46 @@
       return (moved);
     } // moveNodes()
 
+    function handleNode(id) {
+      var moved = false;
+      var n = nodes[id];
+      var px = n.xPos;
+      var py = n.yPos;
+      var fx = 0;
+      var fy = 0;
+
+      // calculate force.
+      edges.forEach(function (l) {
+        if (l.src == id) {
+          var tar = nodes[l.tar];
+          if (tar.xPos - px < 2) fx -= 1; // keep min x distance
+          if (tar.xPos - px > 2) fx += 1;
+          if (tar.yPos < py) fy -= 1;
+          if (tar.yPos > py) fy += 1;
+        }
+        if (l.tar == id) {
+          var src = nodes[l.src];
+          if (px - src.xPos < 2) fx += 1; // keep min x distance
+          if (px - src.xPos > 2) fx -= 1;
+          if (py < src.yPos) fy += 1;
+          if (py > src.yPos) fy -= 1;
+        }
+      });
+      console.log(fx, fy);
+      if (fx > 0) px++;
+      if (fx < 0) px--;
+      if (fy > 0) py++;
+      if (fy < 0) py--;
+      if (!posInUse(px, py)) {
+        n.xPos = px;
+        n.yPos = py;
+        updateNodes();
+        updateEdges();
+        moved = true;
+      }
+      return (moved);
+    } // handleNode
+
 
     // create / update svg objects for all nodes
     function updateNodes() {
@@ -280,6 +319,7 @@
           var nodesObj = document.getElementById('nodes');
           obj = e.obj = document.querySelector('#templates .node').cloneNode(true);
           nodesObj.appendChild(obj);
+          obj.id = nodeId;
           // disable outgoing pin ?
           if (ed) {
             if ((ed.events) && (ed.events.length == 0)) {
@@ -291,12 +331,12 @@
               if (pin) pin.style.display = "none";
             }
           }
+
           obj.querySelector('.config').addEventListener('click', function (e) {
             var t = e.target;
-            var d = t.parentNode.getAttribute('data');
-            console.log(d);
+            while (t && !t.classList.contains('node')) t = t.parentElement;
+            console.log(t.getAttribute('data'));
           });
-
         }
 
         // update svg object by node properties
@@ -367,6 +407,18 @@
       createNodes(configDef);
       placeNodes();
       while (moveNodes()) { };
+
+      var moveCnt = Object.keys(nodes).length * 2;
+      var moved;
+      do { 
+        moved = false;
+        for (var nodeId in nodes) {
+          moved = moved || handleNode(nodeId);
+        } // for
+        moveCnt--;
+      } while (moved && moveCnt > 0);
+
+
       updateNodes();
       updateEdges();
     });

@@ -76,14 +76,15 @@ bool PMSElement::set(const char *name, const char *value)
  */
 void PMSElement::start()
 {
-  LOGGER_ETRACE("start(%d, %d)", _pinrx, _pintx);
+  // TRACE("start(%d, %d)", _pinrx, _pintx);
 
-  Element::start();
-
-  _pmsSerial = new SoftwareSerial();
-  _pmsSerial->begin(9600, SWSERIAL_8N1, _pinrx, _pintx, false, 128);
-  _pmsSerial->enableRx(false);
-  _datapos = -1; // means input is not open
+  _pmsSerial = new (std::nothrow) SoftwareSerial();
+  if (_pmsSerial) {
+    Element::start();
+    _pmsSerial->begin(9600, SWSERIAL_8N1, _pinrx, _pintx, false, 128);
+    _pmsSerial->enableRx(false);
+    _datapos = -1; // means input is not open
+  } // if
 } // start()
 
 
@@ -143,7 +144,7 @@ bool PMSElement::getProbe(String &values)
           checksum += _data[n];
 
         if (checksum != PWSDATA(14)) {
-          LOGGER_ETRACE("bad checksum.");
+          // TRACE("bad checksum.");
 
         } else {
           // valid data
@@ -151,7 +152,7 @@ bool PMSElement::getProbe(String &values)
 
           // values = PM1.0,PM2.5,PM10
           snprintf(buffer, sizeof(buffer), "%d,%d,%d", PWSDATA(1), PWSDATA(2), PWSDATA(3));
-          LOGGER_ETRACE("values: %s", buffer);
+          // TRACE("values: %s", buffer);
 
           newData = true;
           values = buffer;

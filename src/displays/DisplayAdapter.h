@@ -39,7 +39,10 @@ public:
    * @return true when display is ready for operation.
    * @return false otherwise.
    */
-  virtual bool init(Board *board){};
+  virtual bool init(UNUSED Board *board)
+  {
+    return (true);
+  };
 
   /**
    * @brief Clear the complete display
@@ -74,7 +77,7 @@ public:
    * @param w
    * @param h
    */
-  virtual void clear(int16_t x, int16_t y, int16_t w, int16_t h){};
+  virtual void clear(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h){};
 
   // virtual void setColor(int col) {};
 
@@ -83,11 +86,17 @@ public:
     return (drawText(x, y, h, text.c_str()));
   };
 
-  virtual int drawText(int16_t x, int16_t y, int16_t h, const char *text){};
+  virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text)
+  {
+    return (_charWidth * strlen(text));
+  };
 
-  virtual int drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1){};
+  virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1){};
 
-  virtual int drawDot(int16_t x, int16_t y, int16_t h, bool fill){};
+  virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill)
+  {
+    return (h);
+  };
 
   /**
    * @brief The flush method must be called after every output sequence to allow

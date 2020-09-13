@@ -49,6 +49,9 @@ bool DisplayLineElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "y1") == 0) {
     _y1 = _atoi(value);
 
+  } else if (_stricmp(name, "redraw") == 0) {
+    _neededraw = true;
+
   } else {
     ret = Element::set(name, value);
   } // if

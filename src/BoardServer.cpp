@@ -162,7 +162,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
   const char *output_type = nullptr; // when output_type is set then send output as response.
 
   bool ret = true;
-  bool unSaveMode = !_board->savemode;
+  bool unSafeMode = !_board->isSafeMode;
 
   requestUri.toLowerCase();
   output.reserve(512);
@@ -170,7 +170,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
   if (requestUri.startsWith(SVC_BOARD)) {
     // most common request
     // everything behind  "/$board/" is used to address a specific element
-    // LOGGER_RAW("handle(%s)", requestUri.c_str());
+    // LOGGER_JUSTINFO("handle(%s)", requestUri.c_str());
 
     String eId(requestUri.substring(8));
 
@@ -179,12 +179,18 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
       _board->getState(output, eId);
 
       server.sendHeader("Cache-control", "NO-CACHE");
-      server.sendHeader("Access-Control-Allow-Origin", "*");
-      // DEBUG_LOG("  ret:%s\n", output.c_str());
+      // LOGGER_JUSTINFO("  ret:%s\n", output.c_str());
 
     } else {
       // send action to the specified element
-      _board->setState(eId, server.argName(0), server.arg(0));
+      String action(eId);
+      action.concat('?');
+      action.concat(server.argName(0));
+      action.concat('=');
+      action.concat(server.arg(0));
+      // LOGGER_JUSTINFO(" net-action: %s", action.c_str());
+      _board->dispatch(action.c_str(), nullptr);
+      // _board->setState(eId, server.argName(0), server.arg(0));
     } // if
     output_type = TEXT_JSON;
 
@@ -204,6 +210,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     SPIFFS.info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
+    jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);
 
     // WIFI info
@@ -213,34 +220,32 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     output = jc.stringify();
     output_type = TEXT_JSON;
 
-    server.sendHeader("Access-Control-Allow-Origin", "*");
-
-    // ===== these actions are only in non-save mode
-  } else if (unSaveMode && (requestUri.startsWith(SVC_RESETALL))) {
+    // ===== these actions are only in non-safemode
+  } else if (unSafeMode && (requestUri.startsWith(SVC_RESETALL))) {
     // Reset SPIFFS, network parameters and reboot
     SPIFFS.format();
     handleReboot(server, true);
 
-  } else if (unSaveMode && (requestUri.startsWith(SVC_RESET))) {
+  } else if (unSafeMode && (requestUri.startsWith(SVC_RESET))) {
     // Reset network parameters and reboot
     handleReboot(server, true);
 
-  } else if (unSaveMode && (requestUri.startsWith(PAGE_SETUP))) {
+  } else if (unSafeMode && (requestUri.startsWith(PAGE_SETUP))) {
     // Network Config Page
     output = FPSTR(setupContent);
     output_type = TEXT_HTML;
 
-  } else if (unSaveMode && (requestUri.startsWith(PAGE_BOOT))) {
+  } else if (unSafeMode && (requestUri.startsWith(PAGE_BOOT))) {
     // Bootstrap page
     output = FPSTR(bootContent);
     output_type = TEXT_HTML;
 
-  } else if (unSaveMode && (requestUri.startsWith(SVC_UPLOAD))) {
+  } else if (unSafeMode && (requestUri.startsWith(SVC_UPLOAD))) {
     // Bulk File Upload UI.
     output = FPSTR(uploadContent);
     output_type = TEXT_HTML;
 
-  } else if (unSaveMode && (requestUri.startsWith(SVC_LISTFILES))) {
+  } else if (unSafeMode && (requestUri.startsWith(SVC_LISTFILES))) {
     // List files in filesystem
     MicroJsonComposer jc;
     Dir dir = SPIFFS.openDir("/");
@@ -257,17 +262,17 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     output = jc.stringify();
     output_type = TEXT_JSON;
 
-  } else if (unSaveMode && (requestUri == "/$scan")) {
+  } else if (unSafeMode && (requestUri == "/$scan")) {
     handleScan(server);
 
-  } else if (unSaveMode && (requestUri == "/$connect")) {
+  } else if (unSafeMode && (requestUri == "/$connect")) {
     handleConnect(server);
 
   } else if (requestUri == SVC_REBOOT) {
     // Reboot device
     handleReboot(server);
 
-  } else if (unSaveMode && (requestUri.startsWith(SVC_ELEMENTS))) {
+  } else if (unSafeMode && (requestUri.startsWith(SVC_ELEMENTS))) {
     // List all registered Elements
     ElementRegistry::list(output);
     output_type = TEXT_JSON;

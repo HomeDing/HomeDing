@@ -32,39 +32,28 @@
       background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
     }
   </style>
-  <script src="/polyfill.js"></script>
-  <script src="/es6-promise.auto.js"></script>
   <script src="/micro.js"></script>
 </head>
 
 <body>
   <div class="container-fluid">
-
     <div id="panel" class="row wrap"></div>
 
     <div id="u-templates" style="display:none">
-
-      <div class="col-6" u-control="device" u-is="generic" microID="${id}">
-        <h1><span u-text="description"></span></h1>
-        <h4><span u-text="room"></span> - <span u-text="name"></span></h4>
-      </div>
-
-      <div class="col card" u-control="dht" id="${id}" microID="${id}" u-is="generic">
+      <div class="col card" u-control="generic" u-is="generic" microID="${id}">
         <div class="block">
           <h4>${id} - <span u-text="description"></span></h4>
-          <table>
-            <tr>
-              <td style="font-size: 2rem"><span u-text="temperature">__.__</span>&deg;C</td>
-              <td style="width:1rem"></td>
-              <td style="font-size: 2rem"><span u-text="humidity">__.__</span>%</td>
-            </tr>
-            <tr>
-              <td>Temperature</td>
-              <td></td>
-              <td>Humidity</td>
-            </tr>
-          </table>
+          <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
         </div>
+      </div>
+
+      <div class="col-6" u-control="device" u-is="generic" microID="${id}">
+        <div class="u-header">
+          <a href="/" title="Start-Page"><img class="icon" src="/favicon.svg" /></a>
+          <h1><span u-text="name"> </span></h1>
+        </div>
+
+        <h4><span u-text="description"></span> (<span u-text="room"></span>)</h4>
       </div>
 
       <div class="col card" u-control="switch" id="${id}" u-is="switch" microID="${id}">
@@ -78,14 +67,6 @@
             </div>
             <label value="1">on</label>
           </div>
-        </div>
-      </div>
-
-      <div class="col card" u-control="rfsend" microID="${id}" u-is="generic">
-        <div class="block">
-          <h4>${id} - <span u-text="description"></span></h4>
-          <button u-action="value" value="1">On</button>
-          <button u-action="value" value="0">Off</button>
         </div>
       </div>
 
@@ -146,14 +127,8 @@
       </div>
 
       <div class="col card" u-control="neo" id="${id}" u-is="neo" microID="${id}">
-        <div class="block header">
-          <img src="/i/neo.svg" class="icon" />
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
         <div class="block">
+          <h4>${id} - <span u-text="description"></span></h4>
           <div class="form-group"><label>value:</label><span u-text="value"></span><span class="color"
               style="width:6rem;"></span></div>
           <div class="hueband" style="height:1.4rem;width:100%;margin-bottom: 0.4rem;"></div>
@@ -171,7 +146,7 @@
     </div>
 
     <hr />
-    <a href="/">Home</a><a href="/microide.htm">IDE</a>
+    <a href="/microide.htm">IDE</a>
   </div>
 
   <div id="modal" class="hidden">
@@ -195,7 +170,7 @@
           };
 
           var e = micro.insertTemplate(panelObj, t, p);
-          if (!e) { micro.insertTemplate(panelObj, 'generic', p); }
+          // if (!e) { micro.insertTemplate(panelObj, 'generic', p); }
         } // if
       } // if
     } // createElement()
@@ -245,7 +220,6 @@
           return result.json();
         })
         .then(function (json) {
-          hub.write('config', JSON.stringify(json));
           hub.publishObj(json);
         })
         .then(function () {
@@ -254,12 +228,6 @@
     } // init()
 
     window.addEventListener('load', init);
-
-    window.addEventListener('error', function (err) {
-      alert(JSON.stringify(err, null, 1));
-    })
-
-
   </script>
 </body>
 

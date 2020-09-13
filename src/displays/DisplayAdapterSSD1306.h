@@ -17,6 +17,9 @@
 #include <SSD1306Wire.h>
 #include <displays/DisplayAdapterOLED.h>
 
+// #define LOG_TRACE(...) LOGGER_TRACE(__VA_ARGS__)
+#define LOG_TRACE(...)
+
 class DisplayAdapterSSD1306 : DisplayAdapterOLED
 {
 public:
@@ -33,20 +36,28 @@ public:
 
   bool init(Board *board)
   {
-    // test if a device is attached
-    if (!WireUtils::exists(_address)) {
-      LOGGER_ERR("not found %d", _address);
+    LOG_TRACE("init SSD1306...");
+    if (!disp) {
+      // allocate a new class for this display
+
+      if (!WireUtils::exists(_address)) {
+        LOGGER_ERR("not found %d", _address);
+        return (false);
+
+      } else {
+        LOG_TRACE("create SSD1306...");
+        OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
+        disp = new (std::nothrow) SSD1306Wire(_address, board->I2cSda, board->I2cScl, res);
+      }
+    } // if
+
+    if (!disp) {
       return (false);
 
     } else {
-      OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
-
-      // LOGGER_TRACE("setupDisplay...");
-      SSD1306Wire *d = new SSD1306Wire(_address, board->I2cSda, board->I2cScl, res);
-      d->init();
-      d->connect();
-
-      DisplayAdapterOLED::init(board, d);
+      LOG_TRACE("setup SSD1306...");
+      disp->init();
+      DisplayAdapterOLED::init(board, disp);
     } // if
     return (true);
   }; // init()
@@ -59,6 +70,7 @@ private:
 
   int _h;
 
+  SSD1306Wire *disp = nullptr;
 }; // class
 
 #endif // DisplayAdapterSSD1306_H

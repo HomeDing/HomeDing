@@ -109,7 +109,7 @@ float BMP280Element::BMP280CompensatePressure(int32_t adc_P)
 
   var1 = ((int64_t)t_fine) - 128000;
   var2 = var1 * var1 * (int64_t)dig_P6;
-  // LOGGER_ETRACE("v2:%" PRId64, var2);
+  // TRACE("v2:%" PRId64, var2);
   var2 = var2 + ((var1 * (int64_t)dig_P5) << 17);
   var2 = var2 + (((int64_t)dig_P4) << 35);
   var1 = ((var1 * var1 * (int64_t)dig_P3) >> 8) + ((var1 * (int64_t)dig_P2) << 12);
@@ -200,13 +200,13 @@ void BMP280Element::start()
   * return any existing value or empty for no data could be read. */
 bool BMP280Element::getProbe(String &values)
 {
-  // LOGGER_ETRACE("getProbe()");
+  // TRACE("getProbe()");
   bool newData = false;
 
 #if defined(FORCED)
   if (_state == 0) {
     // start new sampling
-    // LOGGER_ETRACE("start sampling...");
+    // TRACE("start sampling...");
     WireUtils::write(_address, BMP280_REG_CONTROL, BMP280_MODE_FORCED | BMP280_OSP_16 | BMP280_OST_16);
     _state = 1;
     return (newData); // no data available now
@@ -216,7 +216,7 @@ bool BMP280Element::getProbe(String &values)
 
   uint8_t busy = WireUtils::read(_address, BMP280_REG_CONFIG);
   if (busy != 0) {
-    LOGGER_ETRACE("wait...");
+    // TRACE("wait...");
     return (newData); // not ready yet
   }
   _state = 0; // can read now
@@ -225,15 +225,15 @@ bool BMP280Element::getProbe(String &values)
   // read out data
   uint8_t data[6];
   WireUtils::read(_address, BMP280_REG_DATA, data, 6);
-  // LOGGER_ETRACE("data %02x %02x %02x %02x %02x %02x", data[0], data[1], data[2], data[3], data[4], data[5]);
+  // TRACE("data %02x %02x %02x %02x %02x %02x", data[0], data[1], data[2], data[3], data[4], data[5]);
 
   int32_t adc_T = data[3] << 12 | data[4] << 4 | data[5] >> 4;
   float T = BMP280CompensateTemperature(adc_T);
-  // LOGGER_ETRACE("raw_T %d => %.2f", adc_T, T);
+  // TRACE("raw_T %d => %.2f", adc_T, T);
 
   int32_t adc_P = data[0] << 12 | data[1] << 4 | data[2] >> 4;
   float P = BMP280CompensatePressure(adc_P);
-  // LOGGER_ETRACE("raw_P %d => %.2f", adc_P, P);
+  // TRACE("raw_P %d => %.2f", adc_P, P);
 
   newData = true;
   char buffer[32];

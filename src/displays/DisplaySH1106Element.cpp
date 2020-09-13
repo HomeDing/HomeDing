@@ -15,8 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <HomeDing.h>
 #include <Board.h>
+#include <HomeDing.h>
 
 #include "DisplaySH1106Element.h"
 
@@ -37,34 +37,11 @@ Element *DisplaySH1106Element::create()
 /* ===== Element functions ===== */
 
 /**
- * @brief Constructor of a new DisplaySH1106Element.
- */
-DisplaySH1106Element::DisplaySH1106Element()
-{
-  startupMode = Element_StartupMode::System;
-}
-
-
-/**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DisplaySH1106Element::set(const char *name, const char *value)
 {
-  bool ret = true;
-
-  if (_stricmp(name, PROP_ADDRESS) == 0) {
-    _address = _atoi(value);
-
-  } else if (_stricmp(name, "resetpin") == 0) {
-    _resetpin = _atopin(value);
-
-  } else if (_stricmp(name, "height") == 0) {
-    _height = _atoi(value);
-
-  } else {
-    ret = Element::set(name, value);
-  } // if
-
+  bool ret = DisplayElement::set(name, value);
   return (ret);
 } // set()
 
@@ -75,27 +52,18 @@ bool DisplaySH1106Element::set(const char *name, const char *value)
  */
 void DisplaySH1106Element::start()
 {
-  LOGGER_ETRACE("start()");
-  DisplayAdapter *d;
+  DisplayElement::start();
 
-  // reset of the display is available on GPIO
-  if (_resetpin >= 0) {
-    pinMode(_resetpin, OUTPUT);
-    digitalWrite(_resetpin, LOW); // turn low to reset OLED
-    delay(50);
-    digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
-  } // if
+  // TRACE("start()");
+  DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterSH1106(_address, _height));
 
-  d = (DisplayAdapter *)(new DisplayAdapterSH1106(_address, _height));
-
-  bool success = d->init(_board);
-  if (success) {
+  if (d->init(_board)) {
     _board->display = d;
-    Element::start();
 
   } else {
     LOGGER_EERR("no display found.");
     delete d;
+    active = false;
   } // if
 } // start()
 

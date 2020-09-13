@@ -25,10 +25,6 @@
 
 #include <ESP8266WiFi.h>
 
-/** The TRACE Macro is used for trace output for development/debugging purpose. */
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-// #define TRACE(...)
-
 /**
  * @brief static factory function to create a new RemoteElement.
  * @return RemoteElement* as Element* created element
@@ -84,12 +80,14 @@ void RemoteElement::start()
  */
 void RemoteElement::loop()
 {
-  if ((!_action.isEmpty()) && (!HttpClientElement::isActive())) {
-    // LOGGER_ETRACE("loop-action(%s)", _action.c_str());
+  if (!_action.isEmpty()) {
+    _board->deferSleepMode();
 
-    // start the next action.
-    HttpClientElement::set("url", _action.c_str());
-    _action = "";
+    if (!HttpClientElement::isActive()) {
+      // start the next action.
+      HttpClientElement::set("url", _action.c_str());
+      _action = "";
+    } // if
   } // if
 
   // process the HttpClientElement current request.

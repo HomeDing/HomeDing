@@ -28,7 +28,7 @@ void LightElement::setOutput(String value)
     int c = col & 0x00FF;
     col = col >> 8;
     analogWrite(_pins[n], c * brightness / 100);
-    LOGGER_ETRACE("val[%d]=%d", n, c);
+    // TRACE("val[%d]=%d", n, c);
   } // for
 } // setOutput()
 
@@ -53,7 +53,7 @@ Element *LightElement::create()
 bool LightElement::set(const char *name, const char *pValue)
 {
   bool ret = true;
-  LOGGER_ETRACE("set %s=%s", name, pValue);
+  // TRACE("set %s=%s", name, pValue);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
     this->value = pValue;
@@ -75,7 +75,7 @@ bool LightElement::set(const char *name, const char *pValue)
         break;
       } // if
       _pins[n] = _atopin(p.c_str());
-      LOGGER_ETRACE("pin[%d]=%d", n, _pins[n]);
+      // TRACE("pin[%d]=%d", n, _pins[n]);
     }
 
   } else if (_stricmp(name, "duration") == 0) {

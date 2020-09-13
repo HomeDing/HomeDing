@@ -16,8 +16,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <ElementRegistry.h>
 #include <time/TimeElement.h>
@@ -46,7 +46,8 @@ Element *TimeElement::create()
 
 /* ===== Element functions ===== */
 
-TimeElement::TimeElement() {
+TimeElement::TimeElement()
+{
   startupMode = Element_StartupMode::Time;
 }
 
@@ -82,7 +83,7 @@ bool TimeElement::set(const char *name, const char *value)
  */
 void TimeElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   // set some defaults
   _lastTimestamp = 0;
@@ -98,29 +99,30 @@ void TimeElement::start()
  */
 void TimeElement::loop()
 {
-  time_t ct = _board->getTime();
+  time_t ct = time(nullptr); // will not return 0, as a TIME element is started after localtime is available.
 
-  if (ct > 0) {
-    // check for time actions...
-    if (_lastTimestamp != ct) {
-      _sendAction(_timeAction, TIME_timeFmt, ct);
-      _sendAction(_timestampAction, TIME_timestampFmt, ct);
-      _lastTimestamp = ct;
-    } // if
+  struct tm lt;
+  localtime_r(&ct, &lt);
 
-    // ignore seconds
-    ct -= (ct % 60);
-    if (_lastMinute != ct) {
-      _sendAction(_minuteAction, TIME_minuteFmt, ct);
-      _lastMinute = ct;
-    } // if
+  // check for time actions...
+  if (_lastTimestamp != ct) {
+    _sendAction(_timeAction, TIME_timeFmt, &lt);
+    _sendAction(_timestampAction, TIME_timestampFmt, &lt);
+    _lastTimestamp = ct;
+  } // if
 
-    // ignore time
-    ct -= (ct % (24 * 60 * 60));
-    if (_lastDate != ct) {
-      _sendAction(_dateAction, TIME_dateFmt, ct);
-      _lastDate = ct;
-    } // if
+  // ignore seconds
+  ct -= (ct % 60);
+  if (_lastMinute != ct) {
+    _sendAction(_minuteAction, TIME_minuteFmt, &lt);
+    _lastMinute = ct;
+  } // if
+
+  // ignore time
+  ct -= (ct % (24 * 60 * 60));
+  if (_lastDate != ct) {
+    _sendAction(_dateAction, TIME_dateFmt, &lt);
+    _lastDate = ct;
   } // if
 } // loop()
 
@@ -131,13 +133,12 @@ void TimeElement::loop()
  * @brief Send out the action after adding the formatted value.
  * @param action Action template.
  * @param fmt Format for the value.
- * @param tStamp the time
+ * @param tmp the local time
  */
-void TimeElement::_sendAction(String &action, const char *fmt, time_t tStamp)
+void TimeElement::_sendAction(String &action, const char *fmt, struct tm *tmp)
 {
   if (action.length()) {
     char b[32];
-    struct tm *tmp = localtime(&tStamp);
     strftime(b, sizeof(b), fmt, tmp);
     _board->dispatch(action, b);
   } // if

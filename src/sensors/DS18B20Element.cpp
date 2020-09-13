@@ -22,7 +22,6 @@
 #include <sensors/DS18B20Element.h>
 
 
-
 /**
  * @brief static factory function to create a new DS18B20Element
  * @return DS18B20Element* created element
@@ -59,29 +58,22 @@ bool DS18B20Element::set(const char *name, const char *value)
  */
 void DS18B20Element::start()
 {
-  // LOGGER_ETRACE("start()");
+  // TRACE("start()");
+  if (_pin >= 0) {
+    _oneWire = new (std::nothrow) OneWire(_pin);
 
-  // unsigned int now = _board->getSeconds();
-  if (_pin < 0) {
-    LOGGER_ETRACE("no pin");
-    term();
-
-  } else {
-    _oneWire = new OneWire(_pin);
-
-    // search first device
-    _oneWire->reset_search();
-    if (_oneWire->search(_addr)) {
-      // addr[0] should be 0x28 on a DS18B20 sensor.
-      // LOGGER_ETRACE("Address: %02x%02x.%02x%02x.%02x%02x.%02x%02x", _addr[0], _addr[1], _addr[2], _addr[3], _addr[4], _addr[5], _addr[6], _addr[7]);
-      SensorElement::start();
-
+    if (_oneWire) {
+      // search first device
+      _oneWire->reset_search();
+      if (_oneWire->search(_addr)) {
+        // addr[0] should be 0x28 on a DS18B20 sensor.
+        // TRACE("Address: %02x%02x.%02x%02x.%02x%02x.%02x%02x", _addr[0], _addr[1], _addr[2], _addr[3], _addr[4], _addr[5], _addr[6], _addr[7]);
+        SensorElement::start();
+      }
     } else {
-      LOGGER_ETRACE("no address.");
-      term();
+      // TRACE("no address.");
     }
   } // if
-
 } // start()
 
 
@@ -119,12 +111,12 @@ bool DS18B20Element::getProbe(String &values)
     for (int i = 0; i < 9; i++) {
       data[i] = _oneWire->read();
     }
-    // LOGGER_ETRACE("Data: %02x %02x %02x %02x", data[0], data[1], data[2], data[3]);
+    // TRACE("Data: %02x %02x %02x %02x", data[0], data[1], data[2], data[3]);
 
     // no checksum verified
     int temp = (data[1] << 8) | data[0];
 
-    // LOGGER_ETRACE("raw temperature: %d", temp);
+    // TRACE("raw temperature: %d", temp);
     values = String((float)temp / 16, 2);
 
     _isReady = 0;
@@ -138,7 +130,7 @@ bool DS18B20Element::getProbe(String &values)
 void DS18B20Element::sendData(String &values)
 {
   // dispatch value.
-  // LOGGER_ETRACE("sending %s", values.c_str());
+  // TRACE("sending %s", values.c_str());
   _board->dispatch(_tempAction, values);
 } // sendData()
 

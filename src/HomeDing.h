@@ -156,7 +156,7 @@ extern const char *ACTION_ONPRESSURE;
 #endif
 
 #ifdef HOMEDING_INCLUDE_WEATHERFEED
-#include <WeatherFeed.h>
+#include <WeatherFeedElement.h>
 #endif
 
 // ===== OPTIONAL DISPLAY ELEMENTS =====

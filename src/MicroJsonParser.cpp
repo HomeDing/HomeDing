@@ -20,8 +20,8 @@
 
 #include <FS.h>
 
-// enable MJ_TRACE to get some very detailled output on parsing
-// #define MJ_TRACE
+// enable MJ_TRACEDETAILS to get some very detailled output on parsing
+// #define MJ_TRACEDETAILS
 
 // Remarks:
 // * no unquoted names
@@ -57,13 +57,13 @@
 #define MJ_OBJECTLEVEL (-1)
 #define MJ_ARRAYLEVEL (0)
 
-#if defined(MJ_TRACE)
+#if defined(MJ_TRACEDETAILS)
 // DEBUG State transitions
 #define MJ_NEWSTATE(newState) (LOGGER_INFO("state %x %d:<%s>:", newState & 0xFF, _level, _path), delay(1), newState)
-#define TRACE(...) LOGGER_INFO(__VA_ARGS__)
+#define MJ_TRACE(...) LOGGER_RAW(__VA_ARGS__)
 #else
 #define MJ_NEWSTATE(newState) (newState)
-#define TRACE(...)
+#define MJ_TRACE(...)
 #endif
 
 #define MJ_ERROR(reason) (LOGGER_ERR(reason), MJ_STATE_ERROR)
@@ -76,15 +76,21 @@ MicroJson::MicroJson(MicroJsonCallbackFn callback)
   _name[0] = NUL;
   _value[0] = NUL;
   _esc[0] = NUL;
+  init();
 };
+
+
+void MicroJson::init()
+{
+  _state = MJ_STATE_INIT;
+  __level = 0;
+  _index[0] = MJ_OBJECTLEVEL;
+}
 
 
 void MicroJson::parse(const char *s)
 {
   if (_callbackFn) {
-    _state = MJ_STATE_INIT;
-    __level = 0;
-    _index[0] = MJ_OBJECTLEVEL;
     parseChar(s);
   } // if
 };
@@ -95,11 +101,11 @@ void MicroJson::parseFile(const char *fName)
   char buffer[128 + 1]; // one extra char for enforced NUL char.
   size_t len;
 
-  parse(""); // init
+  init();
 
   if (_callbackFn) {
     if (SPIFFS.exists(fName)) {
-      TRACE("parsing file %s", fName);
+      MJ_TRACE("parsing file %s", fName);
 
       File file = SPIFFS.open(fName, "r");
       while (file.available()) {
@@ -150,14 +156,14 @@ bool MicroJson::parseChar(char ch)
   bool ret = true; // in most cases
   int _level = __level;
 
-  // // create some debug output on relevant input characters
+  // create some debug output on relevant input characters
   // if (!(_state & MJ_IGNOREBLANCS) || !isspace(ch)) {
-  //   TRACE("> (%c)", ch);
+  //   MJ_TRACE("%02x> (%c)", _state, ch);
   // }
 
   if ((_state & MJ_IGNOREBLANCS) && isspace(ch)) {
     // ignore white space here.
-    // TRACE(" ignored");
+    // MJ_TRACE(" ignored");
 
   } else if (_state == MJ_STATE_ERROR) {
     // stay in error status
@@ -208,7 +214,7 @@ bool MicroJson::parseChar(char ch)
     strncat(_path, '[', sizeof(_path));
     strncat(_path, tmp, sizeof(_path));
     strncat(_path, ']', sizeof(_path));
-    TRACE("array item: %s", _path);
+    MJ_TRACE("array item: %s", _path);
 
     if (ch == '{') {
       // open object level
@@ -261,11 +267,11 @@ bool MicroJson::parseChar(char ch)
 
     } else if (ch == '[') {
       // open array
-      TRACE("array open level %d", _level + 1);
+      MJ_TRACE("array open level %d", _level + 1);
       if (_path[0] != NUL)
         strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
-      (_callbackFn)(_level, _path, NULL); // array object ???
+      (_callbackFn)(_level, _path, NULL);
 
       _level++;
       _index[_level] = MJ_ARRAYLEVEL;
@@ -274,8 +280,8 @@ bool MicroJson::parseChar(char ch)
 
 
     } else if (isdigit(ch)) {
-      strncat(_value, ch, sizeof(_value));
       _state = MJ_NEWSTATE(MJ_STATE_NUM_VALUE);
+      ret = false; // parse this character again.
     }
 
   } else if (_state == MJ_STATE_NUM_VALUE) {
@@ -352,7 +358,7 @@ bool MicroJson::parseChar(char ch)
 
       } else {
         // next array item: remove last [x] from path
-        TRACE("array next item");
+        MJ_TRACE("array next item");
         *strrchr(_path, '[') = NUL;
         _index[_level]++;
         _state = MJ_NEWSTATE(MJ_STATE_PRE_ITEM);
@@ -360,19 +366,19 @@ bool MicroJson::parseChar(char ch)
 
     } else if (ch == ']') {
       // close array
-      TRACE("array close.");
+      MJ_TRACE("array close.");
       _level--;
       // remove last path element
       *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
       // _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE); // stay in the same state
 
     } else if (ch == '}') {
-      TRACE("object close. %d", _level);
+      MJ_TRACE("object close. %d", _level);
       // close the object
       _level--;
       if (_index[_level] != MJ_OBJECTLEVEL) {
         // array item was closed: remove last [x] from path
-        TRACE("array next item");
+        MJ_TRACE("array next item");
         *strrchr(_path, '[') = NUL;
         _state = MJ_NEWSTATE(MJ_STATE_POST_ITEM);
 
@@ -393,7 +399,7 @@ bool MicroJson::parseChar(char ch)
     } // if
   }
   __level = _level;
-  return(ret);
+  return (ret);
 } // parseChar()
 
 // end.

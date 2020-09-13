@@ -1,7 +1,7 @@
 <div class="col card" u-control="dht" id="${id}" microID="${id}" u-is="generic">
   <div class="block">
     <img data-src="/i/dht.svg" class="icon" />
-    <span class="activeState" u-active="active"></span>
+    <span class="activeState setactive" u-active="active"></span>
     <span class="setconfig"></span>
     <table>
       <tr>
@@ -111,8 +111,14 @@
     <span class="setconfig"></span>
   </div>
   <div class="block">
-    <span><img data-src="/i/button.svg" class="u-button"
-        style="border-radius:3rem; float: left;height:5rem;margin-right:1rem" /></span>
+    <button u-text="description"></button>
+  </div>
+</div>
+
+
+<div class="col card" u-control="webbutton" microID="${id}" u-is="button">
+  <div class="block">
+    <button u-text="description"></button>
   </div>
 </div>
 
@@ -169,7 +175,7 @@
     <span class="setconfig"></span>
   </div>
   <div class="block">
-    <div class="display" style="font-family: sans-serif">
+    <div class="display">
     </div>
   </div>
 </div>
@@ -183,7 +189,7 @@
     <span class="setconfig"></span>
   </div>
   <div class="block">
-    <div class="display" style="font-family: sans-serif">
+    <div class="display">
     </div>
   </div>
 </div>

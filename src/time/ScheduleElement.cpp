@@ -93,7 +93,7 @@ bool ScheduleElement::set(const char *name, const char *value)
  */
 void ScheduleElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   // Verify parameters
   _init = false;

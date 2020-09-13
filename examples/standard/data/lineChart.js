@@ -1,5 +1,12 @@
-// lineChart.js
+// Line-Chart micro charts implementation.
+//
+// Copyright (c) by Matthias Hertel, http://www.mathertel.de
+// This work is licensed under a BSD 3-Clause license.
+//
 // * 25.04.2020 improved vertical scaling 
+// * 07.08.2020 show values optional. 
+
+// SVG file must include microsvg.js
 /// <reference path="microsvg.js" />
 
 var panelObj = document.getElementById('panel');
@@ -8,31 +15,33 @@ var indObj = document.getElementById('ind');
 
 var redrawTimer = null;
 
+// Region of data drawing
 var REGION_WIDTH = 128;
 var REGION_HEIGHT = 36;
 
-// local timezone offset for correct time conversion
-var tzOffset = new Date().getTimezoneOffset() * 60;
+/**
+ * @typedef {Object} Point
+ * @property {number} x - x pos of the point, may also be a date.valueOf
+ * @property {number} y - y pos of the point
+ */
 
+/**
+ * @typedef {Object} Box
+ * @property {number} left
+ * @property {number} right
+ * @property {number} minY
+ * @property {number} maxY
+ */
+/// left, top, right, bottom, x, y, width, height
 
-// point = [x,y], x may be date as seconds
-/* 
-interface Point {
-  x: integer;
-  y: integer;
-}
-
-interface Box {
-  minX: number, maxX: number,
-  minY: number, maxY: number;
-}
-
+/**
 interface GraphsData {
-  id: number,
   type: "line", "vAxis", "hLine"
-  data: Point[];
+  format: "..."
+  data: Point[], number[], number;
   box: Box; // only if relevant data 
   redraw: boolean; // needs a redraw
+
   svgObj: SVGElement;
   fBox: function(box) { return(box) };
   fDraw: function(g){}
@@ -67,20 +76,20 @@ function _calcSteps(l, h) {
 // list of the graphical elements in the chart.
 // real data based charts must come before hLines and axis.
 var graphs = [];
-var graph_cnt = 0;
+// var options = {};
 
-var minBox = { minX: Infinity, maxX: -Infinity, minY: 0, maxY: 1 };
+var minBox = { left: Infinity, right: -Infinity, minY: 0, maxY: 1 };
 var displayBox = minBox;
 
-// Date and Time formatting
+// Date formatting
 function fmtDate(t) {
-  var d = new Date((Number(t) + tzOffset) * 1000);
+  var d = new Date(Number(t) * 1000);
   return d.toLocaleDateString();
 } // fmtDate
 
-// Date and Time formatting
+// Time formatting
 function fmtTime(t) {
-  var d = new Date((Number(t) + tzOffset) * 1000);
+  var d = new Date(Number(t) * 1000);
   return d.toLocaleTimeString();
 } // fmtTime
 
@@ -92,8 +101,8 @@ function outerBox(box1, box2) {
     b = box2;
   } else if (box2) {
     b = {
-      minX: Math.min(box1.minX, box2.minX),
-      maxX: Math.max(box1.maxX, box2.maxX),
+      left: Math.min(box1.left, box2.left),
+      right: Math.max(box1.right, box2.right),
       minY: Math.min(box1.minY, box2.minY),
       maxY: Math.max(box1.maxY, box2.maxY)
     }
@@ -101,6 +110,21 @@ function outerBox(box1, box2) {
   return (b);
 } // outerBox()
 
+
+/**
+ * see if box1 and box2 are equal.
+ * @param {Box} box1 
+ * @param {Box} box2 
+ * @returns {boolean} true when both boxes are equal.
+ */
+function boxEqual(box1, box2) {
+  var result =
+    (box1.minY === box2.minY)
+    && (box1.maxY === box2.maxY)
+    && (box1.left === box2.left)
+    && (box1.right === box2.right);
+  return (result);
+} // boxEqual()
 
 
 /** reduce-function: combine to boxes to a new box covering both. */
@@ -113,39 +137,57 @@ function calcOuterBox(box, graph) {
 } // calcOuterBox()
 
 
-
-/** calculate the box of a graph from the data */
-function calcGraphBox(graph) {
-  if (!graph.data) {
-    graph.box = null;
-
-  } else {
-    var xValues = graph.data.map(function (p) {
-      return p.x;
-    });
-    var yValues = graph.data.map(function (p) {
-      return p.y;
-    });
-
-    graph.box = {
-      minX: Math.min.apply(null, xValues),
-      maxX: Math.max.apply(null, xValues),
-      minY: Math.min.apply(null, yValues),
-      maxY: Math.max.apply(null, yValues)
-    };
-  }
-} // calcGraphBox
-
-
 // ====== Line Charts
 
-LineChartClass = function (values) {
+LineChartClass = function (options) {
+  options = Object.assign({ linetype: "line", color: "black" }, options);
   return {
-    id: ++graph_cnt,
-    type: "lineChart",
-    data: values,
+    type: 'line',
+    data: null,
+    linetype: options.linetype,
+    color: options.color,
     redraw: false,
     svgObj: null,
+
+    /**
+     * Calculate outer box of a array of points.
+     * @param {Point[]} points 
+     */
+    _calcBox: function (points) {
+      /** @type Box */
+      var box = null;
+
+      if (points) {
+        var xValues = points.map(function (p) { return p.x; });
+        var yValues = points.map(function (p) { return p.y; });
+        box = {
+          left: Math.min(...xValues),
+          right: Math.max(...xValues),
+          minY: Math.min(...yValues),
+          maxY: Math.max(...yValues)
+        };
+      }
+      return (box);
+    }, // _calcBox()
+
+    /**
+     * use the new values for drawing.
+     * The real drawing is deferred and done in fDraw
+     * @param {*} values values as an array of points.
+     */
+    draw: function (values) {
+      this.data = values;
+      this.box = this._calcBox(values);
+      this.redraw = true;
+      _startRedraw();
+    }, // draw
+
+    clear: function () {
+      if (this.svgObj) this.svgObj.remove();
+    },
+
+    fBox: null,
+
     XfBox: function (box, g) {
       if (box) {
         box.minY = Math.min(y, box.minY);
@@ -159,17 +201,27 @@ LineChartClass = function (values) {
 
       var values = this.data;
       if (values) {
-        var scaleX = 128 / (box.maxX - box.minX);
+        var scaleX = 128 / (box.right - box.left);
         var scaleY = REGION_HEIGHT / (box.maxY - box.minY);
+        var points;
 
-        var points = values.map(function (p) {
-          return [(p.x - box.minX) * scaleX, (p.y - box.minY) * scaleY].join(',');
-        });
+        if (this.linetype == 'steps') {
+          points = values.map(function (p, n) {
+            return 'H' + (p.x - box.left) * scaleX + ' V' + (p.y - box.minY) * scaleY;
+          });
+          // starting point
+          points[0] = "M" + (values[0].x - box.left) * scaleX + ',' + (values[0].y - box.minY) * scaleY;
 
-        this.svgObj = createSVGNode(panelObj, 'polyline', {
-          // id: 'line-' + lineID,
+        } else if (this.linetype == 'line') {
+          points = values.map(function (p, n) {
+            return (n > 0 ? 'L' : 'M') + (p.x - box.left) * scaleX + ',' + (p.y - box.minY) * scaleY;
+          });
+        }
+
+        this.svgObj = createSVGNode(panelObj, 'path', {
           class: 'linechart',
-          points: points.join(' ')
+          style: 'stroke:' + this.color,
+          d: points.join(' ')
         });
       }
     } // fDraw()
@@ -177,58 +229,21 @@ LineChartClass = function (values) {
 };
 
 
-function addLineChart(values) {
-  var obj = new LineChartClass(values);
-
-  calcGraphBox(obj);
-  graphs.unshift(obj); // put data driven graphs in the fist place
-  if (values)
-    setRedraw();
-  return obj.id;
-} // addLineChart()
-
-
-// add a new data to the data of a line
-function addLineChartData(gID, values) {
-  var g = graphs.find(function (e) {
-    return e.id === gID;
-  });
-  if (g) {
-    g.data.push(values);
-    calcGraphBox(g);
-    g.redraw = true;
-    setRedraw();
-  }
-} // addLineChartData()
-
-
-// Update the values for a line and defer redrawing
-function updateLineChartData(gID, values) {
-  var g = graphs.find(function (e) {
-    return e.id === gID;
-  });
-  if (g) {
-    g.data = values;
-    calcGraphBox(g);
-    g.redraw = true;
-    setRedraw();
-  }
-} // updateLineChartData
-
-
 // ===== HLine horizontal lines =====
 
-HLineClass = function (y) {
+HLineClass = function (options) {
+  options = Object.assign({ data: 0, color: 'black' }, options);
   return {
-    id: ++graph_cnt,
     type: "hLine",
-    data: y,
+    data: options.data,
+    color: options.color,
     redraw: false,
     svgObj: null,
+
     fBox: function (box, g) {
       if (box) {
-        box.minY = Math.min(y, box.minY);
-        box.maxY = Math.max(y, box.maxY);
+        box.minY = Math.min(this.data, box.minY);
+        box.maxY = Math.max(this.data, box.maxY);
       }
       return (box);
     },
@@ -240,28 +255,20 @@ HLineClass = function (y) {
       var y = (this.data - box.minY) * scaleY;
 
       this.svgObj = createSVGNode(panelObj, 'line', {
-        x1: 0,
-        y1: y,
-        x2: 128,
-        y2: y,
-        class: 'hline'
+        class: 'hline',
+        style: 'stroke:' + this.color,
+        x1: 0, y1: y,
+        x2: 128, y2: y
       });
     } // fDraw()
   }
 };
 
 
-function addHLine(y) {
-  var obj = new HLineClass(y);
-  graphs.push(obj);
-  return obj.id;
-}
-
 // ===== Vertical Axis =====
 
 VAxisClass = function () {
   return {
-    id: ++graph_cnt,
     type: "vAxis",
     data: null,
     redraw: false, // needs a redraw
@@ -277,9 +284,7 @@ VAxisClass = function () {
     fDraw: function (box) {
       // clear existing y-Axis
       var YAxisGroup = document.getElementById('v-labels');
-      Array.from(YAxisGroup.childNodes).forEach(function (c) {
-        c.remove();
-      });
+      _removeChilds(YAxisGroup);
 
       var high = box.maxY;
       var low = box.minY;
@@ -289,11 +294,9 @@ VAxisClass = function () {
       var scaleY = REGION_HEIGHT / (high - low);
 
       for (var n = low; n <= high; n += step) {
-        var txtObj = createSVGNode(YAxisGroup, 'text', {
-          x: 11,
-          y: -1 * (n - low) * scaleY
-        });
-        txtObj.textContent = String(n.toFixed(prec));
+        createSVGNode(YAxisGroup, 'text', {
+          x: 11, y: -1 * (n - low) * scaleY
+        }, String(n.toFixed(prec)));
       }
     } // fDraw()
   }
@@ -302,8 +305,8 @@ VAxisClass = function () {
 
 function addVAxis() {
   var g = new VAxisClass();
-  graphs.push(g);
-  return g.id;
+  var n = graphs.push(g); // append at end
+  return (n - 1);
 } // addVAxis()
 
 
@@ -311,7 +314,6 @@ function addVAxis() {
 
 HAxisClass = function () {
   return {
-    id: ++graph_cnt,
     type: "hAxis",
     data: null,
     redraw: false, // needs a redraw
@@ -320,52 +322,45 @@ HAxisClass = function () {
     fDraw: function (box) {
       // clear existing x-Axis labels
       var XAxisGroup = document.getElementById('h-labels');
-      Array.from(XAxisGroup.childNodes).forEach(function (c) {
-        c.remove();
-      });
+      _removeChilds(XAxisGroup);
 
-      var high = box.maxX;
-      var low = box.minX;
+      var high = box.right;
+      var low = box.left;
 
       if (isFinite(low) && isFinite(high)) {
         var scaleX = REGION_WIDTH / (high - low);
 
         var n = low + Math.floor((high - low) / 2);
         // for (n = low; n <= high; n += g.step) {
-        var txtObj = createSVGNode(XAxisGroup, 'text', {
+        createSVGNode(XAxisGroup, 'text', {
           x: REGION_WIDTH / 2,
           y: 0
-        });
-        txtObj.textContent = fmtTime(n);
+        }, fmtTime(n));
       } // if
     } // fDraw()
   }
 };
 
 
-function addHAxis() {
+function _addHAxis() {
   var g = new HAxisClass();
-  graphs.push(g);
-  return g.id;
-} // addHAxis()
-
+  var n = graphs.push(g);
+  return (n - 1);
+} // _addHAxis()
 
 // ===== Redraw =====
 
-/** redraw lines when required. */
+/** redraw graphs when required. */
 function redraw() {
   // find out if dataBox has changed
   var bx = graphs.reduce(calcOuterBox, null);
 
-  var doAll =
-    bx.minY != displayBox.minY || bx.maxY != displayBox.maxY || bx.minX != displayBox.minX || bx.maxX != displayBox.maxX;
+  // has the displaybox changed because of new data ? 
+  var doAll = (!boxEqual(bx, displayBox));
   displayBox = bx;
 
-  if (doAll)
-    graphs.forEach(function (g) { g.redraw = true; });
-
   graphs.forEach(function (g) {
-    if (g.redraw) {
+    if ((doAll) || (g.redraw)) {
       g.fDraw(displayBox);
       g.redraw = false;
     } // if
@@ -374,41 +369,43 @@ function redraw() {
   redrawTimer = null;
 } // redraw()
 
-function setRedraw() {
+function _startRedraw() {
   if (!redrawTimer) redrawTimer = window.setTimeout(redraw, 20);
-}
+} // _startRedraw()
 
-// === to:microsvg.js
 
-/// calculate a event position using the document units.
-function eventPoint(evt) {
-  var svg = document.documentElement;
-  var pt = svg.createSVGPoint();
-  pt.x = evt.clientX;
-  pt.y = evt.clientY;
-  return pt.matrixTransform(svg.getScreenCTM().inverse());
-} // eventPoint
+// remove all data and data bound graphs. 
+function _clear() {
+  graphs.forEach(function (g) {
+    if (g.clear)
+      g.clear();
+  });
+  graphs = [];
+} // _clear()
+
 
 function setIndicator(box, data) {
   if (box && data) {
     indObj.style.display = '';
 
-    var indLine = indObj.querySelector('line');
-    var indcircle = indObj.querySelector('circle');
+    var oLine = indObj.querySelector('line');
+    var oCircle = indObj.querySelector('circle');
+    var oInfo = indObj.querySelector('.info');
 
-    var xPos = ((data.x - box.minX) * REGION_WIDTH) / (box.maxX - box.minX);
+    var xPos = ((data.x - box.left) * REGION_WIDTH) / (box.right - box.left);
     var yPos = (data.y - box.minY) * (REGION_HEIGHT / (box.maxY - box.minY));
 
-    indLine.x1.baseVal.value = indLine.x2.baseVal.value = xPos;
-    indcircle.cx.baseVal.value = xPos;
-    indcircle.cy.baseVal.value = yPos;
+    oLine.x1.baseVal.value = oLine.x2.baseVal.value = xPos;
+    oCircle.cx.baseVal.value = xPos;
+    oCircle.cy.baseVal.value = yPos;
 
-    var infoObj = indObj.querySelector('.info');
     // calc infobox position
     xPos += xPos < REGION_WIDTH / 2 ? 2 : -20;
     yPos += yPos < REGION_HEIGHT / 2 ? 2 : -12;
-    infoObj.setAttribute('transform', 'translate(' + xPos + ',' + yPos + ')');
-    var txtObjs = infoObj.querySelectorAll('text');
+    oInfo.setAttribute('transform', 'translate(' + xPos + ',' + yPos + ')');
+
+    // add textual information
+    var txtObjs = oInfo.querySelectorAll('text');
     txtObjs[0].textContent = data.y;
     txtObjs[1].textContent = fmtDate(data.x);
     txtObjs[2].textContent = fmtTime(data.x);
@@ -428,7 +425,7 @@ panelObj.addEventListener('mousemove', function (evt) {
     var data = g.data;
     if (data && data.length) {
       var box = g.box;
-      var xData = box.minX + ((p.x - 12) * (box.maxX - box.minX)) / REGION_WIDTH;
+      var xData = box.left + ((p.x - 12) * (box.right - box.left)) / REGION_WIDTH;
 
       // find nearest data by x
       var n = data.findIndex(function (e) {
@@ -443,14 +440,62 @@ panelObj.addEventListener('mousemove', function (evt) {
   }
 });
 
-document['api'] = {
-  addLineChart: addLineChart,
-  addLineChartData: addLineChartData,
-  updateLineChartData: updateLineChartData,
+/**
+ * 
+ * @param {string} type 
+ * @param {Object} options 
+ */
+function _addChart(type, options) {
+  var newClass;
+  var n = -1;
+  var isData = false;
 
-  addHLine: addHLine,
+  type = type.toLowerCase();
+  options = Object.assign({}, options);
+
+  if (type === 'line') {
+    newClass = new LineChartClass(options);
+    isData = true;
+
+  } else if (type == 'hline') {
+    newClass = new HLineClass(options);
+
+  } else {
+    debugger; // not implemented  
+
+  }
+
+  if (newClass) {
+    if (isData) {
+      n = Math.max(0, graphs.findIndex(function (g) { return g.type == 'line' }));
+      graphs.splice(n, 0, newClass);
+    } else {
+      n = graphs.push(newClass) - 1;
+    }
+  } // if
+  return (n);
+} // _addChart
+
+
+function _add(config) {
+}
+
+document['api'] = {
+  clear: _clear,
+  add: _add,
+  addChart: _addChart,
+  draw: function (gID, values) {
+    var g = graphs[gID] || graphs[0];
+    if ((g) && (g.type === 'line')) {
+      g.draw(values);
+    }
+  }, // draw()
+
   addVAxis: addVAxis,
-  addHAxis: addHAxis
+  addHAxis: _addHAxis,
+  options: {
+
+  }
 };
 
 // End.

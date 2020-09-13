@@ -18,6 +18,8 @@
 #ifndef DisplaySH1106Element_H
 #define DisplaySH1106Element_H
 
+#include "DisplayElement.h"
+
 /**
  * @brief DisplaySH1106Element implements creating an Display Adapter for a LCD
  * attached to the I2C bus.
@@ -25,7 +27,7 @@
  * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplaySH1106Element : public Element
+class DisplaySH1106Element : public DisplayElement
 {
 public:
   /* ===== Static factory function ===== */
@@ -44,11 +46,6 @@ public:
   /* ===== Element functions ===== */
 
   /**
-   * @brief Constructor of a new DisplaySH1106Element.
-   */
-  DisplaySH1106Element();
-
-  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.
@@ -64,10 +61,6 @@ public:
    */
   virtual void start();
 
-private:
-  int _address = 0x3c;
-  int _height = 64;
-  int _resetpin = -1;
 };
 
 #ifdef HOMEDING_REGISTER

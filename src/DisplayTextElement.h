@@ -102,9 +102,9 @@ private:
   DisplayAdapter *_display = NULL;
 
   /**
-   * @brief  send current text to display
+   * @brief send current text to display
    */
-  void _drawText();
+  void _draw();
 };
 
 #ifdef HOMEDING_REGISTER

@@ -58,9 +58,14 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback);
 
 private:
+  /**
+   * @brief GPIO pin to be used for physical signal.
+   */
   int _pin = -1;
 
-  // when _inverse == true: logical HIGH will produce a physical LOW level.
+  /**
+   * @brief Control level logic for ouput to _pin. When true: logical HIGH value will produce a physical LOW level.
+   */
   bool _inverse = false;
 
   // The last logical value LOW or HIGH

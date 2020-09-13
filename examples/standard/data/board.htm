@@ -57,8 +57,6 @@
       background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
     }
   </style>
-  <script src="/polyfill.js"></script>
-  <script src="/es6-promise.auto.js"></script>
   <script src="/micro.js"></script>
 </head>
 
@@ -210,24 +208,6 @@
           <button u-action="mode" value="pulse">pulse</button>
         </div>
       </div>
-
-      <div class="col card" u-control="time" id="${id}" u-is="generic" microID="${id}" style="height:200px;">
-        <div class="block">
-          <object id="meminfo" data="/clock.svg" type="image/svg+xml"
-            style="float:left;min-width:100px;min-height:100px;height:100%" class="icon"></object>
-
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
-      </div>
-
-      <div class="col card" u-control="webbutton" id="${id}" u-is="generic" microID="${id}">
-        <div class="block">
-          <button u-action="${onclick}" u-text="description"></button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -240,8 +220,11 @@
     var panelObj = document.getElementById('panel');
     var addObj = document.getElementById('addButton');
     var sysObj = document.getElementById('sysButton');
+    var refreshState = ''; // nothing in progress
+    var updateTime;
     var updateTimer;
     var elementDef;
+
     var params = getHashParams({
       sys: false
     });
@@ -278,70 +261,104 @@
     } // createElement()
     hub.subscribe('/*/*', createElement);
 
-    function updateAsap(ev) {
-      if (updateTimer)
-        window.clearTimeout(updateTimer);
-      updateTimer = null;
-      updateTimer = window.setTimeout(updateState, 20);
-    }
+    hub.subscribe('/device/*?name', function (path, key, value) {
+      document.title = value;
+      document.querySelector("meta[name=application-name]").content = value;
+    });
 
-    function updateState(ev) {
-      if (updateTimer)
-        window.clearTimeout(updateTimer);
-      updateTimer = null;
 
-      fetch('/$board')
+    // '' no request on the way
+    // 'f' fetch started
+    // 'w' timer started
+
+    /** 
+     * @param {number} timeout time to next fetch in msecs.
+     */
+    function updateAsap(timeout) {
+      if (!timeout) timeout = 20;
+      var now = new Date();
+      var next = now + timeout;
+
+      if (refreshState == 'f') {
+        // request already running, no action required
+
+      } else if (refreshState == 'w') {
+        // cancel longer running request
+        if (next < updateTime) {
+          window.clearTimeout(updateTimer);
+          refreshState = '';
+        }
+      }
+
+      if (refreshState == '') {
+        refreshState = 'f';
+        updateTime = next;
+        updateTimer = window.setTimeout(
+          function () {
+            fetch('/$board')
+              .then(function (result) {
+                return result.json();
+              })
+              .then(function (json) {
+                hub.publishObj(json);
+              })
+              .finally(function (json) {
+                refreshState = '';
+                updateAsap(4000);
+              });
+          }, timeout);
+      }
+    } // updateAsap()
+
+
+    // initiate a fetch with JSON response expected.
+    async function fetchJSON(url, options) {
+      var p = fetch(url, options)
         .then(function (result) {
-          return result.json();
-        })
-        .then(function (json) {
-          hub.publishObj(json);
-        })
-        .then(function (json) {
-          updateTimer = window.setTimeout(updateState, 4000);
+          return (result.json());
         });
-    } // updateState()
+      return (p)
+    }
 
     function init() {
       // load templates from other file.
-      var p0 = Promise.all([micro.loadFile('/board-templates.htm'), micro.loadFile('/board-new.htm')]);
+      var p0 = Promise.allSettled([micro.loadFile('/board-templates.htm'), micro.loadFile('/board-new.htm')]);
 
       // element definitions -> env.json -> config.json
-      var p1 = fetch('/elements.json')
-        .then(function (result) {
-          return result.json();
-        })
+      var p1 = fetchJSON('/elements.json')
         .then(function (json) {
           elementDef = json;
-
-          return fetch('/env.json');
-        })
-        .then(function (result) {
-          return result.json();
-        })
-        .then(function (json) {
-          hub.publishObj(json);
-
-          return fetch('/config.json');
-        })
-        .then(function (result) {
-          return result.json();
-        })
-        .then(function (json) {
-          hub.write('config', JSON.stringify(json));
-          hub.publishObj(json);
         });
 
-      Promise.all([p0, p1]).then(function () {
-        updateState();
+      var envData;
+      // element definitions -> env.json -> config.json
+      var p2 = fetchJSON('/env.json')
+        .then(function (json) {
+          envData = json;
+        });
+
+      var configData;
+      // element definitions -> env.json -> config.json
+      var p3 = fetchJSON('/config.json')
+        .then(function (json) {
+          configData = json;
+        });
+
+      Promise.allSettled([p0, p1, p2, p3]).then(function () {
+        // env data should be published before config data
+        if (envData) {
+          hub.write('env', JSON.stringify(envData));
+          hub.publishObj(envData);
+        }
+        if (configData) {
+          hub.write('config', JSON.stringify(configData));
+          hub.publishObj(configData);
+        }
+        updateAsap();
       });
     } // init()
 
     window.addEventListener('load', init);
-
-    window.addEventListener('error', function (err) {
-      alert(JSON.stringify(err, null, 1));
-    })
 
     if (window !== window.top) {
       // disable header and navbar in portal mode.

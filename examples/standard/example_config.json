@@ -1,0 +1,36 @@
+{
+  "pms": {
+    "pm25": {
+      "description": "Air particle sensor",
+      "pinrx": "D6",
+      "pintx": "D5",
+      "readtime": 300,
+      "onvalue": "log/pm?value=$v"
+    }
+  },
+  "bme680": {
+    "bd": {
+      "description": "Environmental sensor",
+      "readtime": "300",
+      "onpressure": "log/p?value=$v",
+      "ongas": "log/aq?value=$v"
+    }
+  },
+  "log": {
+    "pm": {
+      "description": "Log of pm25",
+      "filename": "/pmlog.txt",
+      "filesize": "10000"
+    },
+    "aq": {
+      "description": "Log of gas quality",
+      "filename": "/aqlog.txt",
+      "filesize": "10000"
+    },
+    "p": {
+      "description": "Log of pressure",
+      "filename": "/plog.txt",
+      "filesize": "10000"
+    }
+  }
+}

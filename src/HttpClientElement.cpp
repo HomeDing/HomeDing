@@ -28,10 +28,6 @@
 #define MAX_WAIT_FOR_RESPONSE 20
 #define DNS_TIMEOUT (uint32_t)4
 
-/** The TRACE Macro is used for trace output for development/debugging purpose. */
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-// #define TRACE(...)
-
 #define NEWSTATE(n) _state = n;
 
 
@@ -84,7 +80,6 @@ void HttpClientElement::processHeader(String &key, String &value)
 
 void HttpClientElement::processBody(char *value)
 {
-  TRACE("xbody:%s", value);
 };
 
 /**
@@ -92,9 +87,9 @@ void HttpClientElement::processBody(char *value)
  */
 void HttpClientElement::loop()
 {
-  // if (_state != STATE::IDLE) {
-  //   TRACE("loop(%d)", _state);
-  // } // if
+  if ((_state != STATE::IDLE) || (!_url.isEmpty())) {
+    _board->deferSleepMode();
+  } // if
 
   if (_state == STATE::IDLE) {
     if (!_url.isEmpty()) {
@@ -116,10 +111,10 @@ void HttpClientElement::loop()
     _contentLength = 0;
 
     // ask for IP address
-    // TRACE("start DNS...");
+    TRACE("start DNS...");
     int b = WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
-    // TRACE(".got %d %s", b, _IPaddr.toString().c_str());
     if (_IPaddr) {
+      TRACE(".got %d %s", b, _IPaddr.toString().c_str());
       NEWSTATE(STATE::SENDING);
     } else {
       if (!_errNoHostSent) {
@@ -140,7 +135,7 @@ void HttpClientElement::loop()
       request.replace("$1", _url);
       request.replace("$2", _host);
 
-      // TRACE("request:\n%s", request.c_str());
+      TRACE("request:\n%s", request.c_str());
       _httpClient.write(request.c_str());
       _startTime = _board->getSeconds();
       NEWSTATE(STATE::CHECK);
@@ -148,36 +143,15 @@ void HttpClientElement::loop()
 
   } else if (_state == STATE::CHECK) {
     // see if an answer has come back
-
     if (_httpClient.available() > 0) {
       NEWSTATE(STATE::HEADERS);
 
     } else if (!_httpClient.connected()) {
       LOGGER_EERR("nocon");
       NEWSTATE(STATE::ABORT);
-
-      // while (_httpClient.available()) {
-      //   char c = _httpClient.read();
-      //   Serial.write(c);
-      // }
-      // Serial.println();
-
-      // Response is available.
-
-      // } else {
-      //   // wait or drop.
-      //   if (_board->getSeconds() - _startTime > MAX_WAIT_FOR_RESPONSE) {
-      //     LOGGER_EERR("timed out");
-      //     NEWSTATE(STATE::ABORT);
-      //   } // if
-
-      // } else {
-      //   TRACE("w");
-
     } // if
 
   } else if (_state == STATE::HEADERS) {
-
     // Read the header lines of the reply from server
     while (_httpClient.available()) {
       String line = _httpClient.readStringUntil('\n');
@@ -231,67 +205,8 @@ void HttpClientElement::loop()
     }
   } // if
 
-
-  // NEWSTATE(STATE::ABORT);
-
-  // } else if (_state == STATE::HEADERS) {
-  //   // process response header
-
-  //   // Read the header lines of the reply from server
-  //   while (_httpClient.available() && (_state == STATE::HEADERS)) {
-  //     String line = _httpClient.readStringUntil('\n');
-  //     TRACE("raw: %s", line.c_str());
-  //     yield();
-
-  //     if (!line.endsWith("\r")) {
-  //       TRACE(" line false.");
-  //       NEWSTATE(STATE::ABORT);
-  //       break;
-  //     }
-
-  //     // isolate header key and value
-  //     int sepPos = line.indexOf(':');
-  //     if (sepPos > 0) {
-  //       String key = line.substring(0, sepPos);
-  //       String val = line.substring(sepPos + 1);
-  //       if (val.startsWith(" ")) {
-  //         val.remove(0, 1);
-  //       }
-  //       processHeader(key, val);
-  //     }
-
-  //     if (line.isEmpty()) {
-  //       // header end reached.
-  //       _state = (_contentLength == 0 ? STATE::ABORT : STATE::BODY);
-  //       NEWSTATE(_state);
-  //     } // if
-  //     yield();
-  //   } // while
-  //   TRACE("while end.");
-
-  //   if (!_httpClient.connected()) {
-  //     TRACE("connection dropped.");
-  //     // NEWSTATE(STATE::ABORT);
-  //   }
-
-  // } else if (_state == STATE::BODY) {
-  //   TRACE("body-remaining: %d", _contentLength);
-  //   size_t bufLen = (_contentLength > 1024 ? 1024 : _contentLength);
-
-  //   if (bufLen) {
-  //     char *buffer = (char *)malloc(bufLen + 1);
-  //     memset(buffer, 0, bufLen + 1);
-  //     size_t r = _httpClient.readBytes(buffer, bufLen);
-  //     TRACE("  body read %d from %d", r, bufLen);
-  //     _contentLength -= r;
-  //     processBody(buffer);
-  //     free(buffer);
-  //   }
-  //   if (_contentLength == 0) {
-  //     NEWSTATE(STATE::ABORT); // all done.
-  //   }
-
   if (_state == STATE::ABORT) {
+    processBody(nullptr); // body passed completely
     _httpClient.stop();
     _url = "";
     _startTime = 0;

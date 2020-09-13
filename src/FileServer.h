@@ -15,7 +15,7 @@
  * * 29.04.2018 created by Matthias Hertel
  * * 04.02.2019 simplifications, saving memory.
  * * 24.11.2019 simplifications, using serveStatic for delivering filesystem files.
- * * 13.12.2019 no upload and delete when running in savemode
+ * * 13.12.2019 no upload and delete when running in safemode
  */
 
 #ifndef FILESERVER_H
@@ -41,7 +41,7 @@ public:
    * @param cache_header Cache Header to be used in replies.
    */
   FileServerHandler(FS &fs, const char *cache_header, Board *board)
-      : _fs(fs), _cache_header(cache_header), _board(board)
+      : _fs(fs), _board(board), _cache_header(cache_header)
   {
   }
 
@@ -52,15 +52,15 @@ public:
     @param requestUri request ressource from the http request line.
     @return true when method can be handled.
   */
-  bool canHandle(HTTPMethod requestMethod, String requestUri) override
+  bool canHandle(HTTPMethod requestMethod, UNUSED String requestUri) override
   {
-    return ((!_board->savemode) && (requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE));
+    return ((!_board->isSafeMode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
   } // canHandle()
 
 
   bool canUpload(String requestUri)
   {
-    return ((!_board->savemode) && (requestUri.startsWith("/")) && (!requestUri.startsWith("/$")));
+    return ((!_board->isSafeMode) && (requestUri.startsWith("/")) && (!requestUri.startsWith("/$")));
   } // canUpload()
 
 
@@ -81,7 +81,7 @@ public:
   } // handle()
 
 
-  void upload(ESP8266WebServer &server, String requestUri, HTTPUpload &upload)
+  void upload(UNUSED ESP8266WebServer &server, String requestUri, HTTPUpload &upload)
   {
     if (upload.status == UPLOAD_FILE_START) {
       if (_fs.exists(upload.filename)) {

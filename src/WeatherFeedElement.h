@@ -1,5 +1,5 @@
 /**
- * @file WeatherFeed.h
+ * @file WeatherFeedElement.h
  * 
  * @brief Element for looking up weather conditions or forecasts from the openweathermap.org web site.
  * The service is polled from time to time and the actual value from the returned data is send as an action
@@ -24,6 +24,8 @@
 #include <HomeDing.h>
 #include <HttpClientElement.h>
 #include <WiFiClient.h>
+
+#include <vector>
 
 /**
  * @brief The WeatherFeed is an special Element that creates actions based on
@@ -78,11 +80,16 @@ private:
   String _location;
   String _apikey;
 
-  unsigned long _readTime = 24 * 60 * 60;
+  unsigned long _readTime = 8 * 60 * 60;
   unsigned long _nextRead;
 
-  String _pattern;
+  String _path;
   String _valueAction; // next action to be sent
+
+  int _count; // correct configures paths and actions.
+
+  std::vector<String> _paths;
+  std::vector<String> _actions;
 };
 
 #ifdef HOMEDING_REGISTER

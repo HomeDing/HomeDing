@@ -54,8 +54,10 @@ bool DisplayDotElement::set(const char *name, const char *value)
     }
 
   } else if (_stricmp(name, "clear") == 0) {
-    _display->clear();
-    _display->flush();
+    _value = false;
+
+  } else if (_stricmp(name, "redraw") == 0) {
+    _displayValue = !_value; // enforce drawing it again
 
   } else {
     ret = Element::set(name, value);

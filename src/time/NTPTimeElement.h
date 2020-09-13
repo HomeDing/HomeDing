@@ -15,6 +15,7 @@
  *
  * Changelog:
  * * 21.05.2018 created by Matthias Hertel
+ * * 05.07.2020 SNTP API adjusted to new standard, see https://github.com/esp8266/Arduino/issues/7392
  */
 
 #ifndef NTPTIMEELEMENT_H
@@ -60,11 +61,6 @@ public:
   virtual void start();
 
   /**
-   * @brief check the state of the DHT values and eventually create actions.
-   */
-  virtual void loop();
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
@@ -75,20 +71,8 @@ private:
   // host name of ntp server
   String _ntpServer;
 
-  // Time Zone
-  int _zone;
-
-  // time between 2 time syncronizations
-  int _readTime;
-
-  // 0: no time: 1 receiving time, 2: time ok.
-  int _state;
-
-  // millis, when a packet was sent out. 0 means no packet was sent.
-  unsigned long _sendTime;
-
-  // when to request a new ntp time from the server
-  unsigned long _nextRead;
+  // local time zone
+  String _timezone;
 };
 
 #ifdef HOMEDING_REGISTER

@@ -98,7 +98,7 @@ bool TimerElement::set(const char *name, const char *value)
  */
 void TimerElement::start()
 {
-  // LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   if (_cycleTime < _waitTime + _pulseTime) {
     _cycleTime = _waitTime + _pulseTime;

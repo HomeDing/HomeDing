@@ -68,7 +68,7 @@ bool AlarmElement::set(const char *name, const char *value)
  */
 void AlarmElement::start()
 {
-  LOGGER_ETRACE("start()");
+  // TRACE("start()");
 
   // Verify parameters
 

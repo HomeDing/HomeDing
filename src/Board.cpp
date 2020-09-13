@@ -16,6 +16,12 @@
  */
 
 #include <Arduino.h>
+#include <ESP8266mDNS.h>
+
+extern "C" {
+#include <user_interface.h> // https://github.com/esp8266/Arduino actually tools/sdk/include
+}
+
 #include <Board.h>
 #include <Element.h>
 
@@ -26,9 +32,6 @@
 #include "sntp.h"
 
 #include <DNSServer.h>
-
-#define TRACE(...)
-// #define TRACE(...) LOGGER_INFO(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -47,19 +50,17 @@ extern const char *ssid;
 extern const char *passPhrase;
 
 
-// ===== detect request for network config and non-save mode using 2 resets in less than 2 sec.
+// ===== detect request for network config and non-safemode using 2 resets in less than 2 sec.
 // this is implemented by using the RTC memory at offset with a special value flag
 
 /** The offset of the 4 byte signature, must be a multiple of 4 */
-#define NETRESET_OFFSET 32
+#define NETRESET_OFFSET 3
 
 /** The magic 4-byte number indicating that a reset has happened before, "RST". Byte 4 is the counter */
 #define NETRESET_FLAG ((uint32)0x52535400)
 #define NETRESET_MASK ((uint32)0xFFFFFF00)
 #define NETRESET_VALUEMASK ((uint32)0x00000000FF)
 
-/** The time when board was initialized + time for double reset. */
-static unsigned long bootMillis;
 
 // get the number of resets in the last seconds using rtc memory for counting.
 int getResetCount()
@@ -95,26 +96,44 @@ void clearResetCount()
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
 }
 
+
 /**
  * @brief Initialize a blank board.
  */
 void Board::init(ESP8266WebServer *serv)
 {
-  bootMillis = millis() + 2000;
-
   server = serv;
+
+  // board parameters overwritten by device element
   sysLED = -1; // configured by device-element
   sysButton = -1; // configured by device-element
   boardState = BOARDSTATE_NONE;
+  homepage = "/index.htm";
+  cacheHeader = "no-cache";
+  deepSleepStart = 0; // no deep sleep to be started
+  deepSleepBlock = false; // no deep sleep is blocked
+  deepSleepTime = 60; // one minute
+
+  _cntDeepSleep = 0;
+
+  rst_info *ri = ESP.getResetInfoPtr();
+  isWakeupStart = (ri->reason == REASON_DEEP_SLEEP_AWAKE);
+  if (isWakeupStart) {
+    LOGGER_INFO("Reset from Deep Sleep mode.");
+  }
 
   WiFi.begin();
   deviceName = WiFi.hostname(); // use mac based default device name
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
       // https://tools.ietf.org/html/rfc1123 952
-
-  _resetCount = getResetCount();
-  LOGGER_INFO("RESET # %d", _resetCount);
 } // init()
+
+
+/** Return true when board is runing in captive mode. */
+bool Board::isCaptiveMode()
+{
+  return ((boardState == BOARDSTATE_STARTCAPTIVE) || (boardState == BOARDSTATE_RUNCAPTIVE));
+} // isCaptiveMode()
 
 
 void Board::_checkNetState()
@@ -136,21 +155,21 @@ void Board::_checkNetState()
  * @brief Add and config the Elements defined in the config files.
  *
  */
-void Board::addElements()
+void Board::_addAllElements()
 {
-  TRACE("addElements()");
+  LOGGER_TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
-  MicroJson *mj;
 
-  mj = new MicroJson(
+  MicroJson *mj = new (std::nothrow) MicroJson(
       [this, &_lastElem](int level, char *path, char *value) {
-        TRACE("callback %d %s =%s", level, path, value ? value : "-");
+        // LOGGER_TRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
 
         if (level == 1) {
 
         } else if (level == 2) {
-          LOGGER_TRACE("new %s", path);
+          // create new element
+          // LOGGER_TRACE("new %s", path);
           // extract type name
           char typeName[32];
 
@@ -161,16 +180,21 @@ void Board::addElements()
           } // while
           *t = '\0';
 
-          _lastElem = ElementRegistry::createElement(typeName);
-          if (_lastElem == NULL) {
-            LOGGER_ERR("Cannot create Element type %s", typeName);
-
+          // typeName starts with "web" ?
+          if (Element::_stristartswith(typeName, "web")) {
+            // don't try to create web elements
+            _lastElem = nullptr;
           } else {
-            // add to the list of elements
-            _add(path, _lastElem);
+            _lastElem = ElementRegistry::createElement(typeName);
+            if (!_lastElem) {
+              LOGGER_ERR("Cannot create Element type %s", typeName);
+            } else {
+              // add to the list of elements
+              _addElement(path, _lastElem);
+            }
           } // if
 
-        } else if ((level > 2) && (_lastElem != NULL)) {
+        } else if ((level > 2) && (_lastElem)) {
           char *name = strrchr(path, MICROJSON_PATH_SEPARATOR) + 1;
           LOGGER_TRACE(" %s=%s", name, value ? value : "-");
           // add a parameter to the last Element
@@ -179,90 +203,23 @@ void Board::addElements()
         } // if
       });
 
-  // config the thing to the local network
-  mj->parseFile(ENV_FILENAME);
-  _checkNetState();
+  if (mj) {
+    // config the thing to the local network
+    mj->parseFile(ENV_FILENAME);
+    _checkNetState();
 
-  // config the Elements of the thing
-  mj->parseFile(CONF_FILENAME);
-  _checkNetState();
+    // config the Elements of the device
+    mj->parseFile(CONF_FILENAME);
+    _checkNetState();
 
-  // mj->parse(R"==({
-  //   "sli": { "0": {
-  //     "description" : "Listen for commands on the Serial in line"
-  //   }}})==");
+    if (!_elementList) {
+      // no element defined, so allow configuration in any case.
+      isSafeMode = false;
+    }
+  } // if
 
-#if 0
-
-  LOGGER_INFO("[[START...");
-mj = new MicroJson(
-    [this](int level, char *path, char *name, char *value) {
-      if (name && value) {
-        // LOGGER_INFO("[[ <%s/%s>=\"%s\"", path, name, value);
-
-        String p(path);
-        p.concat('/');
-        p.concat(name);
-        if (p.equalsIgnoreCase("list[1]/main/temp")) {
-          LOGGER_INFO("next temp=%s", value);
-        }
-      }
-    });
-
-  mj->parse(R"==({
-"cod" : "200","message" : 0,"cnt" : 40,
-"list" : [
-  {"dt" : 1578679200,"main" : {"temp" : 277.96,"feels_like" : 274.42,"temp_min" : 277.96,"temp_max" : 280.11,"pressure" : 1025,"sea_level" : 1025,"grnd_level" : 1010,"humidity" : 75,"temp_kf" : -2.15},"weather" : [{"id" : 500,"main" : "Rain","description" : "light rain","icon" : "10n"}],"clouds" : {"all" : 64},"wind" : {"speed" : 2.38,"deg" : 287},"rain" : {"3h" : 0.06},"sys" : {"pod" : "n"},"dt_txt" : "2020-01-10 18:00:00"},
-  {"dt" : 1578690000,
-"main" : {
-"temp" : 277.66,
-"feels_like" : 273.73,
-"temp_min" : 277.66,
-"temp_max" : 279.27,
-"pressure" : 1028,
-"sea_level" : 1028,
-"grnd_level" : 1012,
-"humidity" : 80,
-"temp_kf" : -1.61},
-"weather" : [
-{
-"id" : 801,
-"main" : "Clouds",
-"description" : "few clouds",
-"icon" : "02n"}
-],
-"clouds" : {
-"all" : 20},
-"wind" : {
-"speed" : 3.07,
-"deg" : 290},
-"sys" : {
-"pod" : "n"},
-"dt_txt" : "2020-01-10 21:00:00"},
-{"dt" : 1579100400,"main" : {"temp" : 282.61,"feels_like" : 279.44,"temp_min" : 282.61,"temp_max" : 282.61,"pressure" : 1019,"sea_level" : 1019,"grnd_level" : 1003,"humidity" : 78,"temp_kf" : 0},"weather" : [{"id" : 804,"main" : "Clouds","description" : "overcast clouds","icon" : "04d"
-}
-],
-"clouds" : {"all" : 100},
-"wind" : {"speed" : 3.16,"deg" : 226},
-"sys" : {"pod" : "d"},
-"dt_txt" : "2020-01-15 15:00:00"
-}
-],
-"city" : {
-  "id" : 2924625,
-  "name" : "Friedrichsdorf",
-  "coord" : {"lat" : 50.2496,"lon" : 8.6428 },
-  "country" : "DE",
-  "timezone" : 3600,
-  "sunrise" : 1578640956,
-  "sunset" : 1578670940
-}
-  })==");
-
-      LOGGER_INFO("[[Done.");
-#endif
-
-} // addElements()
+  delete mj;
+} // _addAllElements()
 
 
 void Board::start(Element_StartupMode startupMode)
@@ -291,7 +248,7 @@ void Board::start(Element_StartupMode startupMode)
 // switch to a new state
 void Board::_newState(BoardState newState)
 {
-  LOGGER_TRACE("BoardState = %d", newState);
+  LOGGER_TRACE("Set state=%d", newState);
   boardState = newState;
 }
 
@@ -302,16 +259,19 @@ void Board::loop()
   _checkNetState();
 
   if (boardState == BOARDSTATE_RUN) {
-    // Most common state.
+    // Most common state first.
+    if (!isWakeupStart)
+      MDNS.update();
 
     if (!startComplete) {
       if (!hasTimeElements) {
         startComplete = true;
       } else {
+
         // starting time depending elements
         // check if time is valid now -> start all elements with
-        time_t current_stamp = getTime();
-        if (current_stamp) {
+        time_t ct = time(nullptr);
+        if (ct) {
           start(Element_StartupMode::Time);
           startComplete = true;
         } // if
@@ -319,11 +279,13 @@ void Board::loop()
 
       if (startComplete) {
         dispatch(startAction); // dispatched when all elements are active.
+        LOGGER_INFO("Connected to %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
       }
     } // if ! startComplete
 
     // dispatch next action from _actionList if any
     if (_actionList.length() > 0) {
+      _cntDeepSleep = 0;
       String _lastAction;
 
       // extract first action
@@ -345,9 +307,26 @@ void Board::loop()
     } // if
     if (_nextElement) {
       if (_nextElement->active) {
+        TRACE_START;
         _nextElement->loop();
+        TRACE_END;
+        TRACE_TIMEPRINT("loop", _nextElement->id, 5);
       }
       _nextElement = _nextElement->next;
+    } // if
+
+    if ((!deepSleepBlock) && (deepSleepStart > 0)) {
+      _cntDeepSleep++;
+
+      // deep sleep specified time.
+      if ((now > deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
+        // all elements now had the chance to create and dispatch an event.
+        LOGGER_INFO("sleep %d...", deepSleepTime);
+        Serial.flush();
+        ESP.deepSleep(deepSleepTime * 1000 * 1000);
+        delay(1);
+        _newState(BOARDSTATE_SLEEP);
+      }
     } // if
 
   } else if (boardState == BOARDSTATE_NONE) {
@@ -355,7 +334,15 @@ void Board::loop()
 
   } else if (boardState == BOARDSTATE_LOAD) {
     // load all config files and create+start elements
-    addElements();
+    _addAllElements();
+
+    _resetCount = getResetCount();
+
+    if (_resetCount > 0) {
+      // enforce un-safemode on double reset
+      LOGGER_TRACE("RESET # %d", _resetCount);
+      isSafeMode = false;
+    } // if
 
     // search any time requesting elements
     Element *l = _elementList;
@@ -366,36 +353,31 @@ void Board::loop()
       l = l->next;
     } // while
 
-    // disable savemode when rebooting twice in a row
-    if (_resetCount >= 1) {
-      LOGGER_INFO("unsave mode");
-      savemode = false;
-    } // if
-
     // setup system wide stuff
     WiFi.hostname(deviceName);
     Wire.begin(I2cSda, I2cScl);
-
-    // LOGGER_INFO("net-status: %d <%s>", WiFi.status(), WiFi.hostname().c_str());
 
     start(Element_StartupMode::System);
     displayInfo(HOMEDING_GREETING);
 
     netMode = NetMode_AUTO;
 
+    // Enable sysLED for blinking while waiting for network or config mode
+    if (sysLED >= 0) {
+      pinMode(sysLED, OUTPUT);
+      digitalWrite(sysLED, HIGH);
+    }
+
     // detect no configured network situation
-    if ((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) {
-      // LOGGER_INFO("ssid empty");
-      _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
-    } else if (_resetCount == 2) {
-      // LOGGER_INFO("resetcount 2");
+    if (((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) || (_resetCount == 2)) {
       _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
     } else {
       _newState(BOARDSTATE_CONNECT);
     }
 
     // wait at least some seconds for offering config mode
-    configPhaseEnd = now + nextModeTime;
+    configPhaseEnd = now + minConfigTime;
+
 
   } else if (boardState == BOARDSTATE_CONNECT) {
     bool autoCon = WiFi.getAutoConnect();
@@ -407,7 +389,7 @@ void Board::loop()
     // connect to a same network as before ?
     LOGGER_TRACE("wifi status=(%d)", _wifi_status);
     LOGGER_TRACE("wifi ssid=(%s)", WiFi.SSID().c_str());
-    _newState(BOARDSTATE_CONFWAIT);
+    _newState(BOARDSTATE_WAITNET);
 
     if (netMode == NetMode_AUTO) {
       // 1. priority:
@@ -438,68 +420,73 @@ void Board::loop()
       }
     } // if
 
-    // Enable sysLED for blinking while waiting for network or config mode
-    if (sysLED >= 0) {
-      pinMode(sysLED, OUTPUT);
-      digitalWrite(sysLED, HIGH);
-    }
-
     // Enable sysButton for entering config mode
     if (sysButton >= 0) {
       pinMode(sysButton, INPUT_PULLUP);
     }
 
-    // wait max 30 seconds for connecting to the network
-    connectPhaseEnd = now + maxConnectTime;
+    // wait max. 4 seconds for connecting to the network
+    connectPhaseEnd = now + maxNetConnextTime;
+    // LOGGER_TRACE("  set phase: %ld %ld %d", now, connectPhaseEnd, maxNetConnextTime);
 
-  } else if ((boardState == BOARDSTATE_CONFWAIT) || (boardState == BOARDSTATE_WAIT)) {
-    // make sysLED blink
+
+  } else if ((boardState == BOARDSTATE_WAITNET) || (boardState == BOARDSTATE_WAIT)) {
+    // make sysLED blink.
+    // short pulses for normal=safemode, long pulses for unsafemode.
     if (sysLED >= 0) {
-      digitalWrite(sysLED, ((configPhaseEnd - now) % 700) > 350 ? HIGH : LOW);
+      digitalWrite(sysLED, (now % 700) > (isSafeMode ? 100 : 600) ? HIGH : LOW);
     } // if
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
       // LOGGER_INFO("sysbutton pressed");
       _newState(BOARDSTATE_STARTCAPTIVE);
+    }
 
-    } else if (boardState == BOARDSTATE_CONFWAIT) {
-      if (now > configPhaseEnd) {
-        _newState(BOARDSTATE_WAIT);
-      }
-
-    } else {
+    if (boardState == BOARDSTATE_WAITNET) {
       if (_wifi_status == WL_CONNECTED) {
         LOGGER_TRACE("connected.");
         WiFi.setAutoReconnect(true);
         WiFi.setAutoConnect(true);
-        _newState(BOARDSTATE_GREET);
+        _newState(BOARDSTATE_WAIT);
+      } // if
 
-      } else if ((_wifi_status == WL_NO_SSID_AVAIL) ||
-                 (_wifi_status == WL_CONNECT_FAILED) ||
-                 (now >= connectPhaseEnd)) {
+      if ((_wifi_status == WL_NO_SSID_AVAIL) ||
+          (_wifi_status == WL_CONNECT_FAILED) ||
+          (now > connectPhaseEnd)) {
+
+        if (now > connectPhaseEnd) {
+          LOGGER_TRACE("timed out.");
+        } else {
+          LOGGER_TRACE("wifi status=(%d)", _wifi_status);
+        } // if
+
         netMode -= 1;
-        LOGGER_TRACE("wifi status=(%d)", _wifi_status);
-        LOGGER_TRACE("next connect method = %d\n", netMode);
+        // LOGGER_TRACE("next connect method = %d\n", netMode);
         if (netMode) {
-          _newState(BOARDSTATE_CONNECT);
+          _newState(BOARDSTATE_CONNECT); // try next mode
         } else {
           LOGGER_INFO("no-net restarting...\n");
           clearResetCount();
-          delay(1000);
+          delay(500);
           ESP.restart();
-        }
-      } else {
-        yield();
+        } // if
+      } // if
+    } // if
+
+    if (boardState == BOARDSTATE_WAIT) {
+      if (isWakeupStart || (now >= configPhaseEnd)) {
+        _newState(BOARDSTATE_GREET);
       }
     } // if
+    yield();
+
 
   } else if (boardState == BOARDSTATE_GREET) {
     clearResetCount();
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
-    LOGGER_TRACE("Connected to: %s", WiFi.SSID().c_str());
-    // LOGGER_TRACE(" MAC: %s", WiFi.macAddress().c_str());
+    LOGGER_TRACE("Connected to %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
     WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
 
     if (display) {
@@ -515,14 +502,28 @@ void Board::loop()
     }
 
     server->begin();
+    server->enableCORS(true);
     start(Element_StartupMode::Network);
     dispatch(sysStartAction); // dispatched when network is available
 
+    // ===== initialize network dependant services
+
     // start file server for static files in the file system.
-    server->serveStatic("/", SPIFFS, "/", "NO-CACHE");
+    server->serveStatic("/", SPIFFS, "/", cacheHeader.c_str()); // "no-cache");
+
+    // start mDNS service discovery for "_homeding._tcp"
+    // but not when using deep sleep mode
+    if (!isWakeupStart && (mDNS_sd)) {
+      MDNS.begin(deviceName.c_str());
+      MDNSResponder::hMDNSService serv = MDNS.addService(0, "homeding", "tcp", 80);
+      MDNS.addServiceTxt(serv, "path", homepage.c_str());
+    } // if
 
     _newState(BOARDSTATE_RUN);
-
+  } else if (boardState == BOARDSTATE_SLEEP) {
+    // just wait.
+    Serial.write('*');
+    Serial.flush();
   } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
     uint8_t mac[6];
     char ssid[64];
@@ -539,11 +540,6 @@ void Board::loop()
     delay(5);
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
-    if (sysLED >= 0) {
-      pinMode(sysLED, OUTPUT);
-      digitalWrite(sysLED, LOW);
-    }
-
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);
 
@@ -551,10 +547,14 @@ void Board::loop()
 
     _newState(BOARDSTATE_RUNCAPTIVE);
     _captiveEnd = now + (5 * 60 * 1000);
-
   } else if (boardState == BOARDSTATE_RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
     dnsServer.processNextRequest();
+
+    // make sysLED blink 3 sec with a short flash.
+    if (sysLED >= 0) {
+      digitalWrite(sysLED, ((now % 3000) > 120) ? HIGH : LOW);
+    } // if
 
     if (now > _captiveEnd)
       reboot(false);
@@ -586,7 +586,8 @@ Element *Board::findById(const char *id)
 // send a event out to the defined target.
 void Board::_dispatchSingle(String evt)
 {
-  LOGGER_TRACE("dispatch %s", evt.c_str());
+  // LOGGER_TRACE("dispatch %s", evt.c_str());
+  TRACE_START;
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);
   int pos2 = evt.indexOf(ELEM_VALUE);
@@ -622,6 +623,8 @@ void Board::_dispatchSingle(String evt)
         LOGGER_ERR("Event '%s' was not handled", evt.c_str());
     }
   }
+  TRACE_END;
+  TRACE_TIMEPRINT("dispatch", evt.c_str(), 0);
 } // _dispatchSingle()
 
 
@@ -689,6 +692,16 @@ void Board::dispatchItem(String &action, String &values, int item)
     } // if
   } // if
 } // dispatchItem
+
+
+/**
+ * do not start sleep mode because element is active.
+ */
+void Board::deferSleepMode()
+{
+  // reset the counter to ensure looping all active elements
+  _cntDeepSleep = 0;
+} // deferSleepMode()
 
 
 void Board::getState(String &out, const String &path)
@@ -759,25 +772,27 @@ unsigned long Board::getSeconds()
 // return the seconds since 1.1.1970 00:00:00
 time_t Board::getTime()
 {
-  uint32 current_stamp = sntp_get_current_timestamp();
+  time_t current_stamp = time(nullptr);
   if (current_stamp <= MIN_VALID_TIME) {
     current_stamp = 0;
   } // if
-  return ((time_t)(current_stamp));
+  return (current_stamp);
 } // getTime()
 
 
-// return the seconds of today.
+// return the seconds of today in localtime.
 time_t Board::getTimeOfDay()
 {
-  uint32 current_stamp = sntp_get_current_timestamp();
-  if (current_stamp > MIN_VALID_TIME) {
-    current_stamp = current_stamp % (24 * 60 * 60);
+  time_t ct = time(nullptr);
+  tm lt;
+  if (ct) {
+    localtime_r(&ct, &lt);
+    return ((lt.tm_hour * 60 * 60) + (lt.tm_min * 60) + lt.tm_sec);
   } else {
-    current_stamp = 0;
+    return (0);
   }
-  return ((time_t)(current_stamp));
 } // getTimeOfDay()
+
 
 /**
  * @brief Get a Element by typename. Returns the first found element.
@@ -823,6 +838,21 @@ Element *Board::getElement(const char *elementType, const char *elementName)
 } // getElement()
 
 
+/**
+ * @brief Iterate though all Elements.
+ */
+void Board::forEach(const char *s, ElementCallbackFn fCallback)
+{
+  LOGGER_TRACE("forEach()");
+
+  Element *l = _elementList;
+  while (l != NULL) {
+    (fCallback)(l);
+    l = l->next;
+  } // while
+} // forEach()
+
+
 void Board::reboot(bool wipe)
 {
   LOGGER_INFO("reboot...");
@@ -835,7 +865,7 @@ void Board::reboot(bool wipe)
 
 void Board::displayInfo(const char *text1, const char *text2)
 {
-  LOGGER_INFO("%s %s", text1, text2 ? text2 : "");
+  LOGGER_TRACE("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);
@@ -850,27 +880,29 @@ void Board::displayInfo(const char *text1, const char *text2)
 /**
  * @brief Add another element to the board into the list of created elements.
  */
-void Board::_add(const char *id, Element *e)
+void Board::_addElement(const char *id, Element *e)
 {
   // LOGGER_TRACE("_add(%s)", id);
+  _addedElements++;
 
   strcpy(e->id, id);
   Element::_strlower(e->id);
-  e->next = NULL;
   Element *l = _elementList;
 
   // append to end of list.
-  if (l == NULL) {
+  if (!l) {
     // first Element.
     _elementList = e;
   } else {
     // search last Element.
-    while (l->next != NULL)
+    while (l->next)
       l = l->next;
+    // append.
     l->next = e;
   } // if
+  e->next = nullptr;
   e->init(this);
-} // _add()
+} // _addElement()
 
 
 // End

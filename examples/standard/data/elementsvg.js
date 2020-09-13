@@ -31,7 +31,9 @@ function create(def) {
 
   if (def.properties)
     def.properties.forEach(function (e) {
-      createBox("property", e);
+      if (def.events && (!def.events.includes(e))) {
+         createBox("property", e); 
+        }
     });
   if (def.events)
     def.events.forEach(function (e) {

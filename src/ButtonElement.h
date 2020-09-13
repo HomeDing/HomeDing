@@ -94,12 +94,12 @@ private:
   /**
    * Number of ticks that have to pass by before a long button press is detected
    */
-  unsigned long _pressTicks = 1000;
+  unsigned long _pressTicks = 800;
 
   /**
    * Number of milliseconds that have to pass by before a click is detected.
    */
-  unsigned long _clickTicks = 600;
+  unsigned long _clickTicks = 250;
 
 
   /**

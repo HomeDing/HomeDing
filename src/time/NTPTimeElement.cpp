@@ -28,20 +28,22 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <ElementRegistry.h>
 #include <time/NTPTimeElement.h>
 
+#include <TZ.h>
+#include <coredecls.h> // settimeofday_cb()
 #include <sntp.h>
+#include <sys/time.h>
 #include <time.h>
 
 // String constants, only once in Memory
 static const char *NTPE_ntpserver = "ntpserver";
-
 static const char *NTPE_zone = "zone";
-static const char *NTPE_readtime = "readtime";
+
 
 /**
  * @brief static factory function to create a new NTPTimeElement
@@ -57,9 +59,7 @@ NTPTimeElement::NTPTimeElement()
 {
   // set some defaults
   _ntpServer = "pool.ntp.org";
-  _zone = 1; // Central Europe
-  _nextRead = 0;
-  _readTime = 24 * 60 * 60; // once a day
+  _timezone = TZ_Europe_London; // e.g. "CET-1CEST,M3.5.0,M10.5.0/3"
 } // NTPTimeElement()
 
 
@@ -73,11 +73,8 @@ bool NTPTimeElement::set(const char *name, const char *value)
   if (_stricmp(name, NTPE_ntpserver) == 0) {
     _ntpServer = value;
 
-  } else if (_stricmp(name, NTPE_readtime) == 0) {
-    _readTime = _atotime(value);
-
   } else if (_stricmp(name, NTPE_zone) == 0) {
-    _zone = _atoi(value);
+    _timezone = value;
 
   } else {
     ret = Element::set(name, value);
@@ -93,61 +90,14 @@ void NTPTimeElement::start()
 {
   unsigned long now = _board->getSeconds();
 
-  _nextRead = now + 4; // now + min. 2 sec., don't hurry
-  _sendTime = 0;
-  _state = 0;
   Element::start();
-
-  sntp_stop();
-  sntp_set_timezone(_zone);
-  // sntp_set_daylight(3600);
-  sntp_setservername(0, (char *)_ntpServer.c_str());
+  configTime(_timezone.c_str(), _ntpServer.c_str());
 } // start()
-
-
-/**
- * @brief check the state of the local time DHT and eventually request a new ntp
- * time.
- */
-void NTPTimeElement::loop()
-{
-  unsigned int now = _board->getSeconds();
-
-  if ((_state == 0) && (_nextRead < now)) {
-    LOGGER_ETRACE("request sync");
-    sntp_init();
-    _state = 1;
-    _sendTime = now;
-
-  } else if (_state == 1) {
-    if (now - _sendTime < 4) {
-      // wait for response
-      uint32 current_stamp = sntp_get_current_timestamp();
-      if (current_stamp < (24 * 60 * 60)) {
-        // not synced yet => wait.
-      } else {
-        LOGGER_EINFO("got: %d", current_stamp);
-        _state = 0;
-        _nextRead = now + _readTime;
-        sntp_stop();
-
-      } // if
-
-    } else {
-      // no response within 4 seconds.
-      LOGGER_EERR("no response");
-      _state = 0;
-      _nextRead = now + 4; // try in some seconds again
-      sntp_stop();
-    } // if
-  } // if
-} // loop()
-
 
 void NTPTimeElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  time_t tStamp = sntp_get_current_timestamp();
+  time_t tStamp = time(nullptr);
   char tmp[32];
 
   Element::pushState(callback);

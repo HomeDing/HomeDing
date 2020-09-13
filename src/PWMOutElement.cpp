@@ -81,7 +81,7 @@ void PWMOutElement::pushState(
  */
 void PWMOutElement::_setValue(int newValue)
 {
-  LOGGER_ETRACE("setValue(%d)", newValue);
+  // TRACE("setValue(%d)", newValue);
   _value = newValue;
 
   if (active) {

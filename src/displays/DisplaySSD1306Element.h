@@ -1,6 +1,6 @@
 /**
  * @file DisplaySSD1306Element.h
- * @brief Element Template class.
+ * @brief Display Element for SSD1306 based OLED displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -13,10 +13,13 @@
  *
  * Changelog:
  * * 18.09.2018 created by Matthias Hertel
+ * * 29.08.2020 based on DisplayElement
  */
 
 #ifndef DisplaySSD1306Element_H
 #define DisplaySSD1306Element_H
+
+#include "DisplayElement.h"
 
 /**
  * @brief DisplaySSD1306Element implements creating an Display Adapter for a LCD
@@ -25,7 +28,7 @@
  * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplaySSD1306Element : public Element
+class DisplaySSD1306Element : public DisplayElement
 {
 public:
   /* ===== Static factory function ===== */
@@ -44,11 +47,6 @@ public:
   /* ===== Element functions ===== */
 
   /**
-   * @brief Constructor of a new DisplaySSD1306Element.
-   */
-  DisplaySSD1306Element();
-
-  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.
@@ -64,10 +62,6 @@ public:
    */
   virtual void start();
 
-private:
-  int _address = 0x3c;
-  int _height = 64;
-  int _resetpin = -1;
 };
 
 #ifdef HOMEDING_REGISTER

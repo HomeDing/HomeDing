@@ -10,8 +10,8 @@ See the short documentation in the *.h file for hints and purpose.
 ## Template Element 
 
 This is an empty element that can be used as a template for implementing new elements.
-All the vitruals and overwritten methods that may be implemented are present in this implementation.
-They may be removed when not required for implementation to syve some bytes.
+All the virtual and overwritten methods that may be implemented are present in this implementation.
+They may be removed in Element implementations when not required to reduce program size.
 
 ## Diag Element
 
@@ -23,4 +23,14 @@ and sends some diagnostic output to the Serial Console upon request:
 * scan i2c bus for devices
 * dump content of RTC memory
 
+## RFSend Element
 
+A experimental Element for sending rf433 signals
+
+## SerialCmd Element
+
+Use the Serial input to create actions
+
+## INA219Element.h
+
+A experimental Element to control a INA219 power consumption chip.

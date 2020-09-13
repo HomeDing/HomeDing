@@ -46,7 +46,7 @@ void SSDPElement::init(Board *board)
     // part of the notification response
     SSDP.setHTTPPort(80);
     SSDP.setModelName(board->deviceName);
-    SSDP.setModelNumber("0.4.1"); // HomeDing Library Version
+    SSDP.setModelNumber("0.5.0"); // HomeDing Library Version
     SSDP.setDeviceType("upnp:rootdevice");
     SSDP.setUUID("upnp:rootdevice");
     SSDP.setSchemaURL("ssdp.xml"); // url to get the SSDP detailed information

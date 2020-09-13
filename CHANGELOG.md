@@ -2,10 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
-RF Bridge example
-
 ## [0.5.0] - 2020-09-13 
 
 This release focuses on stability and better developer support. New Elements is present that added required some features and fixes in the JSON parser. 

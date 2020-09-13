@@ -76,9 +76,7 @@ var MicroRegistry = (function () {
     MicroRegistry.prototype._setPlaceholders = function (obj, props) {
         var _this = this;
         function fill(val) {
-            for (var p in props) {
-                val = val.replace(new RegExp('\\$\\{' + p + '\\}', 'g'), props[p]);
-            }
+            Object.getOwnPropertyNames(props).forEach(function (p) { return val = val.replace(new RegExp('\\$\\{' + p + '\\}', 'g'), props[p]); });
             return val;
         }
         if (obj.nodeType === Node.TEXT_NODE) {
@@ -176,16 +174,15 @@ var MicroRegistry = (function () {
         this._registry[name] = mixin;
     };
     MicroRegistry.prototype.onunload = function (_evt) {
-        for (var n in this.List) {
-            var obj = this.List[n];
+        this.List.forEach(function (obj) {
             if (obj && obj.term) {
                 obj.term();
             }
             for (var a = 0; a < obj.attributes.length; a++) {
                 obj[obj.attributes[a].name] = null;
             }
-        }
-        for (var n in this.List) {
+        });
+        for (var n = 0; n < this.List.length; n++) {
             delete this.List[n];
         }
         this.List = [];
@@ -237,9 +234,9 @@ var obs = new MutationObserver(function (mutationsList, _observer) {
 });
 obs.observe(document, { childList: true, subtree: true });
 document.addEventListener('DOMContentLoaded', function () {
-    window.addEventListener('scroll', function () {
-        document.querySelectorAll('[data-src]:not([src])').forEach(function (e) { return micro.loadDataImage(e); });
-    });
+    function f() { document.querySelectorAll('[data-src]:not([src])').forEach(function (e) { return micro.loadDataImage(e); }); }
+    window.addEventListener('scroll', f);
+    window.setTimeout(f, 40);
 });
 var MicroControlClass = (function () {
     function MicroControlClass() {
@@ -355,6 +352,9 @@ var GenericWidgetClass = (function (_super) {
         if (src.classList.contains('setconfig')) {
             modal.open('configelementdlg', this.data);
         }
+        else if (src.classList.contains('setactive')) {
+            this.dispatchAction(toBool(this.data.active) ? 'stop' : 'start', '1');
+        }
         else if (src.tagName === 'H3') {
             modal.openFocus(this);
         }
@@ -367,21 +367,54 @@ var GenericWidgetClass = (function (_super) {
 var ButtonWidgetClass = (function (_super) {
     __extends(ButtonWidgetClass, _super);
     function ButtonWidgetClass() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._onclick = '';
+        _this._ondoubleclick = '';
+        _this._onpress = '';
+        _this._timer = 0;
+        _this._start = 0;
+        _this._duration = 0;
+        return _this;
     }
-    ButtonWidgetClass.prototype.on_pointerdown = function (e) {
-        var src = e.target;
-        if ((src) && (src.classList.contains('u-button'))) {
-            src.classList.add('active');
-            this.dispatchAction('value', '1');
+    ButtonWidgetClass.prototype.newData = function (path, key, value) {
+        _super.prototype.newData.call(this, path, key, value);
+        if (key === 'onclick') {
+            this._onclick = value;
+        }
+        else if (key === 'ondoubleclick') {
+            this._ondoubleclick = value;
+        }
+        else if (key === 'onpress') {
+            this._onpress = value;
         }
     };
-    ButtonWidgetClass.prototype.on_pointerup = function (e) {
-        var src = e.target;
-        if (src.classList.contains('u-button')) {
-            src.classList.remove('active');
-            this.dispatchAction('value', '0');
+    ButtonWidgetClass.prototype.on_click = function () {
+        if (this._duration > 800) {
+            if (this._onpress) {
+                this.dispatchAction(this._onpress, '1');
+            }
         }
+        else {
+            var scope_1 = this;
+            if (this._timer) {
+                clearTimeout(this._timer);
+            }
+            this._timer = setTimeout(function () {
+                scope_1.dispatchAction(scope_1._onclick, '1');
+            }, 250);
+        }
+    };
+    ButtonWidgetClass.prototype.on_dblclick = function () {
+        if (this._timer) {
+            clearTimeout(this._timer);
+        }
+        this.dispatchAction(this._ondoubleclick, '1');
+    };
+    ButtonWidgetClass.prototype.on_pointerdown = function () {
+        this._start = new Date().valueOf();
+    };
+    ButtonWidgetClass.prototype.on_pointerup = function () {
+        this._duration = new Date().valueOf() - this._start;
     };
     ButtonWidgetClass = __decorate([
         MicroControl('button')
@@ -476,9 +509,6 @@ var DisplayDotWidgetClass = (function (_super) {
                 this._y = Number(value);
                 this.updateDisp(false);
             }
-            else {
-                console.log('key', key, value);
-            }
         }
     };
     DisplayDotWidgetClass = __decorate([
@@ -572,7 +602,7 @@ var DisplayTextWidgetClass = (function (_super) {
             }
             else if (key === 'x') {
                 var n = Number(value) * this._grid;
-                this._elem.style.left = (this._grid > 1 ? n : (n * 7 / 10)) + 'px';
+                this._elem.style.left = (this._grid > 1 ? (n * 7 / 10) : n) + 'px';
             }
             else if (key === 'y') {
                 this._elem.style.top = (Number(value) * this._grid) + 'px';
@@ -606,9 +636,7 @@ function jsonParse(obj, cbFunc) {
         }
         else if (typeof value === 'object') {
             cbFunc(path2, null, null);
-            for (var k in value) {
-                _jsonParse(path2, k, value[k]);
-            }
+            Object.getOwnPropertyNames(value).forEach(function (k) { return _jsonParse(path2, k, value[k]); });
         }
         else {
             cbFunc(path, key, String(value));
@@ -645,16 +673,30 @@ var LogWidgetClass = (function (_super) {
         hub.subscribe(this.microid + '?*', this.newValue.bind(this), true);
     };
     LogWidgetClass.prototype.loadData = function () {
-        fetch(this.filename)
+        var fName = this.filename;
+        var allData = '';
+        var p1 = fetch(fName, { cache: 'no-store' })
             .then(function (result) {
             return result.text();
         })
-            .then(function (pmValues) {
-            var re = /^\d{2,},\d+/;
-            var pmArray = pmValues.split('\n').filter(function (e) {
+            .then(function (txt) {
+            allData = allData + '\n' + txt;
+        });
+        var p2 = fetch(fName.replace('.txt', '_old.txt'), { cache: 'no-store' })
+            .then(function (result) {
+            return result.text();
+        })
+            .then(function (txt) {
+            allData = txt + '\n' + allData;
+        })
+            .catch(function () {
+        });
+        Promise.allSettled([p1, p2]).then(function () {
+            var re = /^\d{4,},\d+/;
+            var pmArray = allData.split('\n').filter(function (e) {
                 return e.match(re);
             });
-            this.api.updateLineChartData(this.lChart, pmArray.map(function (v) {
+            this.api.draw(this.lChart, pmArray.map(function (v) {
                 var p = v.split(',');
                 return { x: p[0], y: p[1] };
             }));
@@ -670,7 +712,7 @@ var LogWidgetClass = (function (_super) {
             catch (err) { }
             if ((svgObj) && (svgObj.api)) {
                 this.api = this.lineSVGObj.getSVGDocument().api;
-                this.lChart = this.api.addLineChart();
+                this.lChart = this.api.addChart('line', { linetype: 'line' });
                 this.api.addVAxis();
                 this.api.addHAxis();
                 this.loadData();
@@ -844,17 +886,20 @@ var SliderWidgetClass = (function (_super) {
     __extends(SliderWidgetClass, _super);
     function SliderWidgetClass() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._slider = null;
         _this._handle = null;
         _this._lastValue = -1;
         _this._maxright = 100;
         _this._x = 0;
         _this._xOffset = 0;
         _this.unit = 1;
+        _this._type = 'int';
         _this.minvalue = 0;
         _this.maxvalue = 255;
         return _this;
     }
     SliderWidgetClass.prototype.connectedCallback = function () {
+        this._slider = this.querySelector('.u-slider');
         this._handle = this.querySelector('.handle');
         _super.prototype.connectedCallback.call(this);
         if (this._handle) {
@@ -888,6 +933,14 @@ var SliderWidgetClass = (function (_super) {
         }
         else if (key === 'step') {
             this.unit = Number(value);
+        }
+        else if (key === 'type') {
+            this._type = value;
+            if (this._slider) {
+                if (value === 'string') {
+                    this._slider.style.display = 'none';
+                }
+            }
         }
     };
     SliderWidgetClass.prototype.on_click = function (e) {
@@ -1044,14 +1097,9 @@ function changeConfig(id, newConfig) {
     }
     var formData = new FormData();
     formData.append(fName, new Blob([JSON.stringify(c)], { type: 'text/html' }), fName);
-    var objHTTP = new XMLHttpRequest();
-    objHTTP.open('POST', '/');
-    objHTTP.addEventListener('readystatechange', function () {
-        if (this.readyState === 4 && this.status >= 200 && this.status < 300) {
-            alert('saved.');
-        }
+    fetch('/', { method: 'POST', body: formData }).then(function () {
+        window.alert('saved.');
     });
-    objHTTP.send(formData);
 }
 function debounce(func, wait) {
     if (wait === void 0) { wait = 20; }
@@ -1216,10 +1264,9 @@ var MicroHub = (function () {
             });
         }
     };
-    MicroHub.prototype.onunload = function (_evt) {
-        for (var n in this._registrations) {
-            delete this._registrations[n];
-        }
+    MicroHub.prototype.onunload = function () {
+        var _this = this;
+        Object.getOwnPropertyNames(this._registrations).forEach(function (n) { return delete _this._registrations[n]; });
     };
     MicroHub.prototype._findStoreObject = function (path) {
         var p = this._store;

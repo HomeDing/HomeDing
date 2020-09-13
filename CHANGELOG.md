@@ -11,7 +11,7 @@ This release focuses on stability and better developer support. New Elements is 
 > * Specify "safemode": "false" in the device configuration when you want unsecured access to your device during setup and configuration.
 > * Change "zone": "<your timezone>" in the NTPtime element using the ANSI TZ notation. Otherwise the device runs in "GMT0BST" timezone (London).
 > * Support for IE11 was dropped in favor for smaller code size. Edge is supported. 
-
+> * Build and test using the ESP8266 Community board version 2.7.4.
 
 ### Added Examples
 

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="400" >
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="600" >
     <style>
         #panel { font: 9px sans-serif } #templates { display:none} rect.block {stroke:black; stroke-width:1px} .header { fill:white} .prop { fill:#eeeeee }
         .event { fill:#eeeeee } .action { fill:#ddFFdd } .in, .out {fill:rgb(0,128,0);stroke:none}

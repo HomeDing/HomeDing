@@ -21,7 +21,6 @@
 
   <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
 
-  <script src="/polyfill.js"></script>
   <script src="/micro.js"></script>
 </head>
 
@@ -101,7 +100,7 @@
           </div>
         </div>
         <div class="block">
-          <object id="elemsvg" data="element.svg" type="image/svg+xml" style="height:320px; width:800px"></object>
+          <object id="elemsvg" data="element.svg" type="image/svg+xml" style="height:560px; width:300px"></object>
         </div>
       </div>
     </div>
@@ -131,11 +130,13 @@
 
   <script>
     var memObj = document.getElementById('meminfo');
+    var memAPI;
     var elementsData;
     var selObj = document.getElementById('elemsel');
     var elemsvgObj = document.getElementById('elemsvg');
 
     window.addEventListener('load', function () {
+      memAPI = memObj.getSVGDocument().api;
       fetch('/$sysinfo')
         .then(function (result) {
           return result.json();
@@ -149,17 +150,19 @@
 
           document.getElementById('memTotal').textContent = d.fsTotalBytes;
           document.getElementById('memUsed').textContent = d.fsUsedBytes;
-          document.getElementById('memPart').textContent = Math.floor((Number(d.fsUsedBytes) * 100) / Number(d.fsTotalBytes));
+          document.getElementById('memPart').textContent = Math.round((Number(d.fsUsedBytes) * 100) / Number(d.fsTotalBytes));
 
-          var memAPI = memObj.getSVGDocument().api;
-          memAPI.setRange([
+          memAPI.options.includePercentage = true;
+          memAPI.draw([
             {
               color: '#304878',
-              part: Number(d['fsUsedBytes'])
+              title: "Used",
+              value: Number(d['fsUsedBytes'])
             },
             {
               color: '#aaaaaa',
-              part: Number(d.fsTotalBytes) - Number(d.fsUsedBytes)
+              title: "Available",
+              value: Number(d.fsTotalBytes) - Number(d.fsUsedBytes)
             }
           ]);
         });
@@ -188,12 +191,6 @@
 
       selObj.addEventListener('change', elemChange);
     });
-
-    // if (window !== window.top) {
-    //   // disable header and navbar in portal mode.
-    //   document.querySelector('.u-header').style.display = 'none';
-    //   document.querySelector('.u-navbar').style.display = 'none';
-    // } // if
   </script>
 </body>
 

@@ -102,6 +102,17 @@ function dragHelper(e) {
   e.preventDefault();
 } // dragHelper()
 
+// only paste plain text at cursor position.
+contentObj.addEventListener("paste", function (e) {
+  var sel = window.getSelection();
+  if (sel.rangeCount) {
+    var txt = e.clipboardData.getData('text/plain');
+    sel.deleteFromDocument();
+    sel.getRangeAt(0).insertNode(document.createTextNode(txt));
+    sel.collapseToEnd();
+    e.preventDefault();
+  }
+})
 
 // start uploading file content
 function startUpload(filename, contentType, content) {

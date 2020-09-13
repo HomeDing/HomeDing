@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="360" height="120" viewBox="0 0 144 48">
   <style>
+  text {font-family: sans-serif;}
     #axis line {stroke:#008800;stroke-width:.2;}
     #panel path, #panel line, #panel polyline {stroke:black;stroke-width:0.2;fill:none;}
     #panel line.hline {stroke:#808080;}
     .panel-back {fill:#f8f8f8}
-    #h-labels text {transform:scale(1, -1);text-anchor:middle;font-size:4px;}
-    #v-labels text {transform:scale(1, -1);text-anchor:end;font-size:4px;}
+    #h-labels text {transform:scale(1, -1);text-anchor:middle;font-size:3px;}
+    #v-labels text {transform:scale(1, -1);text-anchor:end;font-size:3px;}
     #v-labels line {stroke:#008800;stroke-width:.2;}
     #ind {pointer-events: none;}
     #ind line {stroke:darkgreen;stroke-width:0.2}
     #ind circle {fill:none; stroke:darkgreen;stroke-width:0.2}
     #ind .info .back {fill:white}
-    #ind text {transform:scale(1, -1);text-anchor:start;font-size:4px;}
+    #ind text {transform:scale(1, -1);text-anchor:start;font-size:3.6px;}
   </style>
 
   <defs>

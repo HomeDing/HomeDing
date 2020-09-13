@@ -1,7 +1,7 @@
 {
   "device": {
     "sys": "true",
-    "properties": ["loglevel", "description", "room", "name", "led", "button", "i2c-sda", "i2c-scl", "savemode", "sd", "reboottime", "logfile", "onstart", "onsysstart"],
+    "properties": ["loglevel", "description", "room", "name", "led", "button", "i2c-sda", "i2c-scl", "savemode", "sd", "reboottime", "logfile", "onstart", "onsysstart", "cache"],
     "events": ["log"]
   },
 
@@ -23,7 +23,7 @@
   },
 
   "button": {
-    "properties": ["loglevel", "description"],
+    "properties": ["loglevel", "description", "value"],
     "events": ["value"],
     "actions": ["onclick", "ondoubleclick", "onpress"]
   },
@@ -34,25 +34,26 @@
   },
 
   "digitalout": {
-    "properties": ["loglevel", "description", "pin", "inverse"],
+    "properties": ["loglevel", "description", "pin", "inverse", "value"],
     "events": ["on", "off", "value"]
   },
 
   "displaydot": {
     "sys": "false",
-    "properties": ["loglevel", "description", "x", "y"],
-    "events": ["value", "clear"]
+    "properties": ["loglevel", "description", "x", "y", "value"],
+    "events": ["value", "clear", "redraw"]
   },
 
   "displaytext": {
     "sys": "false",
-    "properties": ["loglevel", "description", "x", "y", "fontsize", "prefix", "postfix"],
-    "events": ["value", "clear"]
+    "properties": ["loglevel", "description", "x", "y", "fontsize", "value", "prefix", "postfix"],
+    "events": ["value", "clear", "redraw"]
   },
 
   "displayline": {
     "sys": "false",
-    "properties": ["loglevel", "description", "x0", "y0", "x1", "y1"]
+    "properties": ["loglevel", "description", "x0", "y0", "x1", "y1"],
+    "events": ["redraw"]
   },
 
   "pwmout": {
@@ -77,13 +78,13 @@
   },
 
   "switch": {
-    "properties": ["loglevel", "description"],
+    "properties": ["loglevel", "description", "value"],
     "events": ["value", "toggle"],
     "actions": ["onValue", "onHigh", "onLow"]
   },
 
   "value": {
-    "properties": ["loglevel", "description", "min", "max"],
+    "properties": ["loglevel", "description", "min", "max", "value"],
     "events": ["value", "up", "down"],
     "actions": ["onValue"]
   },
@@ -136,7 +137,7 @@
   },
 
   "neo": {
-    "properties": ["loglevel", "description", "pin", "duration", "count"],
+    "properties": ["loglevel", "description", "pin", "duration", "count", "value", "mode", "brightness"],
     "events": ["value", "mode", "brightness"],
     "actions": []
   },
@@ -144,6 +145,10 @@
   "alarm": {
     "properties": ["loglevel", "description", "time"],
     "actions": ["onTime"]
+  },
+
+  "diag": {
+    "sys": "true"
   },
 
   "dstime": {
@@ -162,6 +167,7 @@
   },
 
   "time": {
+    "sys": "true",
     "properties": ["loglevel", "description"],
     "actions": ["onminute", "ontimestamp", "ontime", "ondate"]
   },

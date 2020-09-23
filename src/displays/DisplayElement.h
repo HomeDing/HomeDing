@@ -44,6 +44,13 @@ public:
    */
   virtual void start();
 
+  /**
+   * @brief push the current value of all properties to the callback.
+   * @param callback callback function that is used for every property.
+   */
+  virtual void pushState(
+      std::function<void(const char *pName, const char *eValue)> callback) override;
+
 protected:
   // common properties for display elements
 
@@ -58,6 +65,13 @@ protected:
 
   /** height of display */
   int _height = 64;
+
+  /** current displayed page */
+  int _page = 1;
+
+  /** brightness of display */
+  int _brightness = 128;
+
 };
 
 // This is a base class that will not be registered

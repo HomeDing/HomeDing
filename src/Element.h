@@ -144,7 +144,7 @@ public:
   /**
    * @brief stop all activities and go inactive.
    */
-  virtual void term();
+  virtual void term() override;
 
 
   /**

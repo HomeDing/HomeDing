@@ -1,6 +1,6 @@
 /**
- * @file AndElement.h
- * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
+ * @file RadioElement.h
+ * @brief Element Template class.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -12,21 +12,29 @@
  * More information on https://www.mathertel.de/Arduino
  * 
  * Changelog:
- * * 17.07.2019 created by Matthias Hertel
+ * * 30.07.2018 created by Matthias Hertel
  */
 
-#ifndef ANDELEMENT_H
-#define ANDELEMENT_H
+#ifndef RADIOELEMENT_H
+#define RADIOELEMENT_H
 
 #include <HomeDing.h>
 
-#define AndElementInputs 2
+/**
+ * @brief RadioElement implements...
+ * @details
+@verbatim
 
-class AndElement : public Element
+The RadioElement can ...
+
+@endverbatim
+ */
+
+class RadioElement : public Element
 {
 public:
   /**
-   * @brief Factory function to create a AndElement.
+   * @brief Factory function to create a RadioElement.
    * @return Element*
    */
   static Element *create();
@@ -37,6 +45,11 @@ public:
   static bool registered;
 
   /**
+   * @brief Construct a new RadioElement
+   */
+  RadioElement();
+
+  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.
@@ -44,6 +57,13 @@ public:
    * could be executed.
    */
   virtual bool set(const char *name, const char *value) override;
+
+  /**
+   * @brief Activate the Element.
+   * @return true when the Element could be activated.
+   * @return false when parameters are not usable.
+   */
+  virtual void start() override;
 
   /**
    * @brief Give some processing time to the timer to check for next action.
@@ -59,31 +79,28 @@ public:
 
 private:
   /**
-   * @brief The actual input values.
+   * @brief The actual volumne.
    */
-  bool _value[AndElementInputs];
-  bool _outValue;
-  bool _invert = false;
+  int _volume = 0;
 
   /**
-   * @brief The _valueAction holds the actions that is submitted when ...
+   * @brief The actual frequency.
    */
-  String _valueAction;
+  int _freq = 0;
+
+  bool _mute = false;
+  
+  /**
+   * @brief The actions that are submitted when a station name is recognized through RDS...
+   */
+  String _volumeAction;
+  String _frequencyAction;
+  String _stationAction;
+  String _rdsTextAction;
+  String _rssiAction;
+
+  int _checkInfo = 3;
+
 };
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_My should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to AndElement.h:
-
-#ifdef HOMEDING_REGISTER
-// Register the AndElement onto the ElementRegistry.
-bool AndElement::registered =
-    ElementRegistry::registerElement("and", AndElement::create);
-#endif
 
 #endif

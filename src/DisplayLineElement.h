@@ -52,19 +52,19 @@ public:
    * @return true when property could be changed and the corresponding action
    * could be executed.
    */
-  virtual bool set(const char *name, const char *value);
+  virtual bool set(const char *name, const char *value) override;
 
   /**
    * @brief Activate the DisplayLineElement.
    * @return true when activation was good.
    * @return false when activation failed.
    */
-  virtual void start();
+  virtual void start() override;
 
   /**
    * @brief Give some processing time to the timer to check for next action.
    */
-  virtual void loop();
+  virtual void loop() override;
 
 private:
   /**

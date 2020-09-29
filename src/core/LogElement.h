@@ -55,7 +55,7 @@ public:
    * @brief initialize a new Element.
    * @param board The board reference.
    */
-  virtual void init(Board *board);
+  virtual void init(Board *board) override;
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -64,26 +64,26 @@ public:
    * @return true when property could be changed and the corresponding action
    * could be executed.
    */
-  virtual bool set(const char *name, const char *value);
+  virtual bool set(const char *name, const char *value) override;
 
   /**
    * @brief Activate the Element.
    * @return true when the Element could be activated.
    * @return false when parameters are not usable.
    */
-  virtual void start();
+  virtual void start() override;
 
   /**
    * @brief Give some processing time to the timer to check for next action.
    */
-  virtual void loop();
+  virtual void loop() override;
 
   /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback);
+      std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
   void _logToFile();

@@ -51,19 +51,19 @@ public:
    * @return true when property could be changed and the corresponding action
    * could be executed.
    */
-  virtual bool set(const char *name, const char *value);
+  virtual bool set(const char *name, const char *value) override;
 
   /**
    * @brief Activate the TimeElement.
    * @return true when activation was good.
    * @return false when activation failed.
    */
-  virtual void start();
+  virtual void start() override;
 
   /**
    * @brief check the state of the DHT values and eventually create actions.
    */
-  virtual void loop();
+  virtual void loop() override;
 
 private:
   /**

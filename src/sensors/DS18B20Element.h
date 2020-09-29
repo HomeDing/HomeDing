@@ -50,21 +50,21 @@ public:
    * @return true when property could be changed and the corresponding action
    * could be executed.
    */
-  virtual bool set(const char *name, const char *value);
+  virtual bool set(const char *name, const char *value) override;
 
   /**
    * @brief Activate the DS18B20Element .
    * @return true when activation was good.
    * @return false when activation failed.
    */
-  virtual void start();
+  virtual void start() override;
 
   /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback);
+      std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
   virtual bool getProbe(String &values);

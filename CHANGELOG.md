@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+### Enhancements
+
+* **[Display Elements](https://homeding.github.io/#page=/displays.md)**
+
+* The override keyword was added to many virtual functions to express the intention and avoid type related bugs.
+* Code cleanup.
 ## [0.5.0] - 2020-09-13 
 
 This release focuses on stability and better developer support. New Elements is present that added required some features and fixes in the JSON parser. 

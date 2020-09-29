@@ -35,14 +35,14 @@ public:
    * @return true when property could be changed and the corresponding action
    * could be executed.
    */
-  virtual bool set(const char *name, const char *value);
+  virtual bool set(const char *name, const char *value) override;
 
   /**
    * @brief Activate the Element.
    * @return true when the Element could be activated.
    * @return false when parameters are not usable.
    */
-  virtual void start();
+  virtual void start() override;
 
   /**
    * @brief push the current value of all properties to the callback.

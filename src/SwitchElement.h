@@ -47,7 +47,7 @@ public:
    * @brief initialize a new Element.
    * @param board The board reference.
    */
-  virtual void init(Board *board);
+  virtual void init(Board *board) override;
 
 
   /**
@@ -57,7 +57,7 @@ public:
    * @return true when property could be changed and the corresponding action
    * could be executed.
    */
-  virtual bool set(const char *name, const char *value);
+  virtual bool set(const char *name, const char *value) override;
 
 protected:
   virtual bool _setValue(int val, bool forceAction = false);

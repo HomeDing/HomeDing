@@ -194,9 +194,11 @@ void Board::_addAllElements()
             }
           } // if
 
-        } else if ((level > 2) && (_lastElem)) {
-          char *name = strrchr(path, MICROJSON_PATH_SEPARATOR) + 1;
-          LOGGER_TRACE(" %s=%s", name, value ? value : "-");
+        } else if ((level > 2) && (_lastElem) && (value)) {
+          // Search 2. slash as starting point for name to include 3. level
+          char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
+          name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
+          LOGGER_TRACE(" (%s) %s=%s", path, name, value ? value : "-");
           // add a parameter to the last Element
           // LOGGER_TRACE(" %s:%s", name, value);
           _lastElem->set(name, value);
@@ -586,7 +588,7 @@ Element *Board::findById(const char *id)
 // send a event out to the defined target.
 void Board::_dispatchSingle(String evt)
 {
-  // LOGGER_TRACE("dispatch %s", evt.c_str());
+  LOGGER_TRACE("dispatch %s", evt.c_str());
   TRACE_START;
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);
@@ -624,7 +626,7 @@ void Board::_dispatchSingle(String evt)
     }
   }
   TRACE_END;
-  TRACE_TIMEPRINT("dispatch", evt.c_str(), 0);
+  TRACE_TIMEPRINT("used time:", "", 25);
 } // _dispatchSingle()
 
 

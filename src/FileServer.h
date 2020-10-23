@@ -58,9 +58,10 @@ public:
   } // canHandle()
 
 
-  bool canUpload(String requestUri)
+  bool canUpload(String requestUri) override
   {
-    return ((!_board->isSafeMode) && (requestUri.startsWith("/")) && (!requestUri.startsWith("/$")));
+    // only allow upload on root fs level.
+    return ((!_board->isSafeMode) && (requestUri == "/"));
   } // canUpload()
 
 
@@ -73,6 +74,8 @@ public:
     } else if (requestMethod == HTTP_DELETE) {
       if (_fs.exists(requestUri)) {
         _fs.remove(requestUri);
+      } else {
+        LOGGER_ERR("File <%s> doesn't exist.", requestUri.c_str());
       }
 
     } // if
@@ -81,9 +84,17 @@ public:
   } // handle()
 
 
-  void upload(UNUSED ESP8266WebServer &server, String requestUri, HTTPUpload &upload)
+  void upload(UNUSED ESP8266WebServer &server, String requestUri, HTTPUpload &upload) override
   {
-    if (upload.status == UPLOAD_FILE_START) {
+    // LOGGER_TRACE("upload...<%s>", upload.filename.c_str());
+    if (!upload.filename.startsWith("/")) {
+      // LOGGER_TRACE("no /...");
+    } else if (upload.filename.indexOf('#') > 0) {
+      // LOGGER_TRACE("no #...");
+    } else if (upload.filename.indexOf('$') > 0) {
+      // LOGGER_TRACE("no $...");
+
+    } else if (upload.status == UPLOAD_FILE_START) {
       if (_fs.exists(upload.filename)) {
         _fs.remove(upload.filename);
       } // if
@@ -98,7 +109,7 @@ public:
     } else if (upload.status == UPLOAD_FILE_END) {
       if (_fsUploadFile)
         _fsUploadFile.close();
-    }
+    } // if
   } // upload()
 
 protected:

@@ -56,13 +56,28 @@ bool WeatherFeedElement::set(const char *name, const char *value)
     } else if (_stricmp(name, "readtime") == 0) {
       _readTime = _atotime(value);
 
-      // save all paths and actions in the vectors.
-    } else if (_stricmp(name, "path") == 0) {
-      _paths.push_back(value);
-    } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-      _actions.push_back(value);
+    } else if (_stristartswith(name, "actions[")) {
+      int index = _atoi(name + 8); // number starts after "actions["
+      char *aName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;
 
+      if (index >= _paths.size()) {
+        _paths.resize(index + 1);
+        _paths[index] = "";
+        _actions.resize(index + 1);
+        _actions[index] = "";
+      }
+
+      // save all paths and actions in the vectors.
+      if (_stricmp(aName, "path") == 0) {
+        _paths[index] = value;
+      } else if (_stricmp(aName, ACTION_ONVALUE) == 0) {
+        _actions[index] = value;
+      } // if
+
+    } else {
+      LOGGER_EERR("unknon: %s", name);
     } // if
+
   } // if
   return (true);
 } // set()

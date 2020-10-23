@@ -100,7 +100,7 @@ bool MapElement::set(const char *name, const char *value)
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
-  } else if (_stristartswith(name, "maps")) {
+  } else if (_stristartswith(name, "maps[")) {
     // save all values and actions in the vectors.
     int mapIndex = _atoi(name + 5); // number starts after "maps["
     char *mapName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;

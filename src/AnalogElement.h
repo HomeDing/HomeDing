@@ -73,8 +73,11 @@ public:
 private:
   int _pin = A0;
 
-  unsigned long _readTime;
-  unsigned long _nextRead;
+  // configuration of analog input sampling time in ms.
+  unsigned long _readTimeMS;
+
+  // next read if analog input value in ms.
+  unsigned long _nextReadMS;
 
   int _value;
   int _hysteresis;
@@ -84,6 +87,8 @@ private:
 
   String _valueAction;
   String _referenceAction;
+  String _highAction;
+  String _lowAction;
 };
 
 #ifdef HOMEDING_REGISTER

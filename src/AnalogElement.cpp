@@ -5,7 +5,7 @@
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
- * This work is licensed under a BSD style license,
+ * This work is licensed under a BSD 3-Clause style license,
  * https://www.mathertel.de/License.aspx.
  *
  * More information on https://www.mathertel.de/Arduino.
@@ -14,8 +14,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "AnalogElement.h"
 
@@ -34,7 +34,7 @@ AnalogElement::AnalogElement()
   // default values;
   _pin = A0; // always.
 
-  _readTime = 1; // read from sensor once every second
+  _readTimeMS = 100; // read from sensor 10 times a second.
   _reference = 500;
   _hysteresis = 10;
 
@@ -49,8 +49,8 @@ bool AnalogElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "readtime") == 0) {
-    _readTime = _atotime(value);
+  if (_stricmp(name, "readtimems") == 0) {
+    _readTimeMS = _atoi(value);
 
   } else if (_stricmp(name, "hysteresis") == 0) {
     _hysteresis = _atoi(value);
@@ -63,6 +63,12 @@ bool AnalogElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "onreference") == 0) {
     _referenceAction = value;
+
+  } else if (_stricmp(name, "onhigh") == 0) {
+    _highAction = value;
+
+  } else if (_stricmp(name, "onlow") == 0) {
+    _lowAction = value;
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
@@ -79,7 +85,7 @@ bool AnalogElement::set(const char *name, const char *value)
  */
 void AnalogElement::start()
 {
-  _nextRead = _board->getSeconds() + 2;
+  _nextReadMS = millis() + _readTimeMS;
   _lastReference = -1;
 
   Element::start();
@@ -91,9 +97,9 @@ void AnalogElement::start()
  */
 void AnalogElement::loop()
 {
-  unsigned int now = _board->getSeconds();
+  unsigned int now = millis();
 
-  if (_nextRead <= now) {
+  if (_nextReadMS <= now) {
     int v = analogRead(_pin);
     // TRACE("read(%d)", v);
 
@@ -102,17 +108,22 @@ void AnalogElement::loop()
       if (_valueAction.length() > 0)
         _board->dispatch(_valueAction, v);
 
-      if (_referenceAction.length() > 0) {
-      // compare against reference and send reference action
-        int r = (v < _reference ? 0 : 1);
-        if (r != _lastReference) {
-          _board->dispatch(_referenceAction, (v < _reference ? "0" : "1"));
-          _lastReference = r;
+      // compare against reference and send reference actions
+      int r = (v < _reference ? 0 : 1);
+      if (r != _lastReference) {
+        _board->dispatch(_referenceAction, r);
+
+        if (r) {
+          _board->dispatch(_highAction);
+        } else {
+          _board->dispatch(_lowAction);
         } // if
+
+        _lastReference = r;
       } // if
     } // if
 
-    _nextRead = now + _readTime;
+    _nextReadMS = millis() + _readTimeMS;
   }
 } // loop()
 

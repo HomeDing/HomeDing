@@ -29,17 +29,6 @@
 class HttpClientElement : public Element
 {
 public:
-  // /**
-  //  * @brief Factory function to create a RemoteElement.
-  //  * @return Element*
-  //  */
-  // static Element *create();
-
-  // /**
-  //  * @brief static variable to ensure registering in static init phase.
-  //  */
-  // static bool registered;
-
   /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.

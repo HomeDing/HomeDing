@@ -55,8 +55,10 @@ bool DisplayElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "brightness") == 0) {
     _brightness = _atoi(value);
-    DisplayAdapter *d = _board->display;
-    d->setBrightness(_brightness);
+    if (active) {
+      DisplayAdapter *d = _board->display;
+      d->setBrightness(_brightness);
+    }
 
   } else if (_stricmp(name, "show") == 0) {
     _page = _atoi(value); // not used yet

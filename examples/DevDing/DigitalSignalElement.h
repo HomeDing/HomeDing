@@ -1,22 +1,21 @@
 /**
  * @file DigitalSignalElement.h
  *
- * @brief Core Input Element for the HomeDing Library typically used with
- * momentary buttons or switches.
+ * @brief Core Input Element for the HomeDing Library typically used for short pulse signals.
+ * This element uses an interrupt driven approach to capture signal changes.
+ * An output signal is generated with a given minimal duration as ong as the input changes.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
- * This work is licensed under a BSD style license,
+ * This work is licensed under a BSD 3-Clause style license,
  * https://www.mathertel.de/License.aspx.
  *
  * More information on https://www.mathertel.de/Arduino.
  *
  * Changelog:
- * * 29.04.2018 created by Matthias Hertel
- * * 16.09.2018 pullup config added.
- * * 02.02.2018 refactored to digitalIn and switch.
+ * * 30.10.2020 created by Matthias Hertel
  */
 
 #ifndef DIGITALIN_H

@@ -64,9 +64,9 @@ public:
         // LOGGER_TRACE("setupDisplay...");
         display->begin(_cols, _lines);
 
-        int dotOff[8] = {0b00000, 0b01110, 0b10001, 0b10001,
+        byte dotOff[] = {0b00000, 0b01110, 0b10001, 0b10001,
                          0b10001, 0b01110, 0b00000, 0b00000};
-        int dotOn[8] = {0b00000, 0b01110, 0b11111, 0b11111,
+        byte dotOn[] = {0b00000, 0b01110, 0b11111, 0b11111,
                         0b11111, 0b01110, 0b00000, 0b00000};
 
         display->createChar(1, dotOff);

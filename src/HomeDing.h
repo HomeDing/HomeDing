@@ -16,8 +16,12 @@ extern const char *PROP_PIN;
 extern const char *PROP_ADDRESS;
 
 extern const char *PROP_INVERSE;
+extern const char *PROP_PULLUP;
+extern const char *PROP_DURATION;
 
 extern const char *ACTION_ONVALUE;
+extern const char *ACTION_ONHIGH;
+extern const char *ACTION_ONLOW;
 extern const char *ACTION_ONTEMPERATURE;
 extern const char *ACTION_ONHUMIDITY;
 extern const char *ACTION_ONPRESSURE;

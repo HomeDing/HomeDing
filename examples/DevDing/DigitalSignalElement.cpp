@@ -1,12 +1,12 @@
 /**
  * @file DigitalSignalElement.cpp
- * @brief Input Element for the IoT Board Library typically used for digital short spike signals
+ * @brief Input Element for the IoT Board Library typically used for digital short spike signals 
  * and frequency inputs.
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
- * This work is licensed under a BSD-3 style license,
+ * This work is licensed under a BSD 3-Clause style license,
  * https://www.mathertel.de/License.aspx.
  *
  * More information on https://www.mathertel.de/Arduino.
@@ -40,9 +40,6 @@ bool DigitalSignalElement::set(const char *name, const char *value)
   if (_stricmp(name, PROP_PIN) == 0) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, PROP_INVERSE) == 0) {
-    _inverse = _atob(value);
-
   } else if (_stricmp(name, PROP_PULLUP) == 0) {
     _pullup = _atob(value);
 
@@ -53,6 +50,9 @@ bool DigitalSignalElement::set(const char *name, const char *value)
     _lowAction = value;
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+    _valueAction = value;
+
+  } else if (_stricmp(name, PROP_DURATION) == 0) {
     _valueAction = value;
 
   } else {
@@ -68,12 +68,11 @@ bool DigitalSignalElement::set(const char *name, const char *value)
 void DigitalSignalElement::start()
 {
   // only start with valid pin as input.
-  TRACE("start (%d)", _pin);
+  TRACE("start pin=%d", _pin);
   if ((_pin >= 0) && (_usedSignals < 8)) {
     _signalOff = DigitalSignalElement::_usedSignals++;
     pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
-
-    TRACE("offset (%d)", _signalOff);
+    // TRACE("offset (%d)", _signalOff);
 
     if (_signalOff == 0) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal0, CHANGE);
@@ -108,7 +107,7 @@ void DigitalSignalElement::loop()
 
   // generate _pulse value and actions
   if (cnt != _lastSignalCount) {
-    TRACE("# %ld", cnt);
+    // TRACE("# %ld", cnt);
 
     // _board->dispatch(_valueAction, cnt);
 
@@ -130,13 +129,6 @@ void DigitalSignalElement::loop()
       _pulseValue = false;
     } // if
   } // if
-
-  // generate frequency value
-  //     // TRACE("output %d->%d)", _lastInLevel, lev);
-  //     _board->dispatch(lev ? _highAction : _lowAction);
-  //     _board->dispatch(_valueAction, lev ? "1" : "0");
-  //     _lastInLevel = lev;
-  //   } // if
 } // loop()
 
 
@@ -144,8 +136,7 @@ void DigitalSignalElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("cnt", String(DigitalSignalElement::_signalCount[_signalOff]).c_str());
-  // callback(PROP_VALUE, String(_lastInLevel).c_str());
+  callback(PROP_VALUE, _pulseValue ? "true" : "false");
 } // pushState()
 
 // ----- static interrupt stuff here -----

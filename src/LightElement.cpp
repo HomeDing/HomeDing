@@ -78,7 +78,7 @@ bool LightElement::set(const char *name, const char *pValue)
       // TRACE("pin[%d]=%d", n, _pins[n]);
     }
 
-  } else if (_stricmp(name, "duration") == 0) {
+  } else if (_stricmp(name, PROP_DURATION) == 0) {
     duration = _atotime(pValue) * 1000; // in msecs.
 
   } else {

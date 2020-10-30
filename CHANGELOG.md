@@ -5,9 +5,17 @@ All notable changes to this project will be documented in this file.
 ### Enhancements
 
 * **[Display Elements](https://homeding.github.io/#page=/displays.md)**
+    * **brightness** - The brightness of the display can be controlled with this action and is reported in the element state. Default is 128 of 255. 
 
 * The override keyword was added to many virtual functions to express the intention and avoid type related bugs.
 * Code cleanup.
+
+### Added Elements
+
+* **[Digital Signal Element](https://homeding.github.io/#page=/elements/digitalsignal.md)**
+    A new element that uses an interrupt driven approach to capture digital input signal changes.
+
+
 ## [0.5.0] - 2020-09-13 
 
 This release focuses on stability and better developer support. New Elements is present that added required some features and fixes in the JSON parser. 

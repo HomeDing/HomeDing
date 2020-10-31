@@ -146,8 +146,8 @@ private:
 
 #ifdef HOMEDING_REGISTER
 // Register the DigitalSignalElement onto the ElementRegistry.
-// bool DigitalSignalElement::registered =
-//     ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
+bool DigitalSignalElement::registered =
+    ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
 #endif
 
 #endif // DIGITALIN_H

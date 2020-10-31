@@ -56,6 +56,7 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_Switch
 #define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_DigitalIn
+#define HOMEDING_INCLUDE_DigitalSignal
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
 
@@ -137,6 +138,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_DigitalIn
 #include <DigitalInElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DigitalSignal
+#include <DigitalSignalElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DigitalOut

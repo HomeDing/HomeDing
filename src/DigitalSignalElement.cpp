@@ -178,9 +178,4 @@ ICACHE_RAM_ATTR void DigitalSignalElement::onSignal7()
   DigitalSignalElement::_signalCount[7]++;
 }
 
-
-bool DigitalSignalElement::registered =
-    ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
-
-
 // End

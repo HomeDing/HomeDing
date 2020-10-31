@@ -103,7 +103,7 @@ void DigitalInElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_lastInLevel).c_str());
+  callback(PROP_VALUE, _lastInLevel ? "1" : "0");
 } // pushState()
 
 // End

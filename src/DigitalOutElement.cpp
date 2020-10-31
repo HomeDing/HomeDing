@@ -73,7 +73,7 @@ void DigitalOutElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_lastValue).c_str());
+  callback(PROP_VALUE, _lastValue ? "1" : "0");
 } // pushState()
 
 

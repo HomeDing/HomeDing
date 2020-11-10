@@ -91,14 +91,30 @@ private:
   unsigned long _currentValue = 0; // last calculated current value
   unsigned long _voltageValue = 0; // last calculated voltage value
 
-  unsigned long cycleTime = 2 * 1000; // define how long signals will be watched to calculate the sensor values
-  unsigned long cycleStart; // start of current cycle
-  int voltageMode = LOW; // voltage (HIGH) or current (LOW) mode
+  // ===== default factors taken from a random plug
+
+  float _powerFactor = 1346829.0; // pulse density to power in W
+  float _currentFactor = 11177185.0; // pulse density to current in mA
+  float _voltageFactor = 129059.0; // pulse density to voltage in V
+
+  unsigned long _cycleTime = 2 * 1000; // define how long signals will be watched to calculate the sensor values
+  unsigned long _cycleStart; // start of current cycle
+  int _voltageMode = LOW; // voltage (HIGH) or current (LOW) mode
 
   /* Actions */
   String _powerAction; // Actions with power consumption
   String _currentAction; // Actions with current value
   String _voltageAction; // Actions with voltage value
 };
+
+
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+// Register the BL0937Element onto the ElementRegistry.
+bool BL0937Element::registered =
+    ElementRegistry::registerElement("bl0937", BL0937Element::create);
+#endif
+
 
 #endif

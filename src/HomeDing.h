@@ -168,6 +168,7 @@ extern const char *ACTION_ONPRESSURE;
 #include <WeatherFeedElement.h>
 #endif
 
+
 // ===== OPTIONAL DISPLAY ELEMENTS =====
 
 #ifdef HOMEDING_INCLUDE_DISPLAYLCD
@@ -226,6 +227,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_BME680
 #include <sensors/BME680Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_BL0937
+#include <BL0937Element.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_MENU

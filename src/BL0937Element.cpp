@@ -92,6 +92,10 @@ bool BL0937Element::set(const char *name, const char *value)
     } else if (_stricmp(value, "voltage") == 0) {
       _voltageMode = HIGH;
     }
+    if (active) {
+      digitalWrite(_pinSel, _voltageMode);
+      powSigStart = 0; // start new cycle.
+    }
 
   } else if (_stricmp(name, "selpin") == 0) {
     _pinSel = _atopin(value);

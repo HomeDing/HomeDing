@@ -73,6 +73,13 @@ public:
 private:
   int _pin = A0;
 
+  // map() function just like the standard arduino map() function but with float and boundaries from configuration.
+  float mapFloat(int value);
+
+  // map factors
+  bool _useMap = false; // use map function when all 4 factors are given.
+  int _inMin = 0, _inMax = 0, _outMin = 0, _outMax = 0;
+
   // configuration of analog input sampling time in ms.
   unsigned long _readTimeMS;
 

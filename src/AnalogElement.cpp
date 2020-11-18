@@ -41,6 +41,11 @@ AnalogElement::AnalogElement()
   // _resendTime = 0; // Not enabled resending probes.
 }
 
+float AnalogElement::mapFloat(int value)
+{
+  return (value - _inMin) * (_outMax - _outMin) / (_inMax - _inMin) + _outMin;
+}
+
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -55,8 +60,24 @@ bool AnalogElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "hysteresis") == 0) {
     _hysteresis = _atoi(value);
 
-  } else if (_stricmp(name, PROP_PIN) == 0) {
-    _pin = _atopin(value);
+    // } else if (_stricmp(name, PROP_PIN) == 0) {
+    //   _pin = _atopin(value);
+    // pin is always A0
+
+  // } else if (_stricmp(name, "resolution") == 0) {
+    // _resolution = _atoi(value); ???
+
+  } else if (_stricmp(name, "mapInMin") == 0) {
+    _inMin = _atoi(value);
+
+  } else if (_stricmp(name, "mapInMax") == 0) {
+    _inMax = _atoi(value);
+
+  } else if (_stricmp(name, "mapOutMin") == 0) {
+    _outMin = _atoi(value);
+
+  } else if (_stricmp(name, "mapOutMax") == 0) {
+    _outMax = _atoi(value);
 
   } else if (_stricmp(name, "reference") == 0) {
     _reference = _atoi(value);
@@ -88,9 +109,13 @@ void AnalogElement::start()
   _nextReadMS = millis() + _readTimeMS;
   _lastReference = -1;
 
+  // use mapping when reasonable factors are given
+  _useMap = ((_inMin != _inMax) && (_outMin != _outMax));
+
   Element::start();
 } // start()
 
+int rawValue;
 
 /**
  * @brief check the state of the input.
@@ -101,9 +126,14 @@ void AnalogElement::loop()
 
   if (_nextReadMS <= now) {
     int v = analogRead(_pin);
-    // TRACE("read(%d)", v);
+    rawValue = v;
+    if (_useMap) {
+      v = mapFloat(v);
+    }
+    TRACE("read(%d=>%d)", rawValue, v);
 
     if ((v >= _value + _hysteresis) || (v <= _value - _hysteresis)) {
+
       _value = v;
       if (_valueAction.length() > 0)
         _board->dispatch(_valueAction, v);
@@ -133,6 +163,7 @@ void AnalogElement::pushState(
 {
   Element::pushState(callback);
   callback(PROP_VALUE, String(_value).c_str());
+  callback("rawvalue", String(rawValue).c_str());
   callback("reference", String(_lastReference).c_str());
 } // pushState()
 

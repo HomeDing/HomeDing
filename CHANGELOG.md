@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 * **[Display Elements](https://homeding.github.io/#page=/displays.md)**
     * **brightness** - The brightness of the display can be controlled with this action and is reported in the element state. Default is 128 of 255. 
 
+* **[Analog Element](https://homeding.github.io/#page=/elements/analog.md)**
+    * **mapIn___** and **mapOut___** properties can be used to calculate
+    a meaningful range of values from the analog raw value.
+
+    * **readtimems** - The time between capturing input values can be given in milliseconds.
+
+
 * The override keyword was added to many virtual functions to express the intention and avoid type related bugs.
 * Code cleanup.
 

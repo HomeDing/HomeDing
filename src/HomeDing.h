@@ -233,6 +233,10 @@ extern const char *ACTION_ONPRESSURE;
 #include <BL0937Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_MAX7219
+#include <MAX7219Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_MENU
 #include <MenuElement.h>
 #endif

@@ -1,6 +1,6 @@
 /**
  * @file MAX7219Element.h
- * @brief Element Template class.
+ * @brief Element for driving a MAX7219 chip using SPI.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *

@@ -25,6 +25,8 @@ All notable changes to this project will be documented in this file.
 * **[BL0937 Element](https://homeding.github.io/#page=/elements/bl0937.md)**
     A new element to support single phase energy monitoring using BL0937, HLW8012 or HJL-01 chips.
 
+* **[MAX7219 Element]()**
+    A new Element for driving a MAX7219 chip 8x8 matrix or 8x7-segment number driver using SPI.
 
 ## [0.5.0] - 2020-09-13 
 

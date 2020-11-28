@@ -229,6 +229,10 @@ extern const char *ACTION_ONPRESSURE;
 #include <sensors/BME680Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_SHT20
+#include <sensors/SHT20Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_BL0937
 #include <BL0937Element.h>
 #endif

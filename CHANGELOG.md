@@ -28,6 +28,9 @@ All notable changes to this project will be documented in this file.
 * **[MAX7219 Element]()**
     A new Element for driving a MAX7219 chip 8x8 matrix or 8x7-segment number driver using SPI.
 
+* **[SHT20 Element]()**
+    A new Element for driving the SHT20 temperature and humidity sensor using i2c bus.
+
 ## [0.5.0] - 2020-09-13 
 
 This release focuses on stability and better developer support. New Elements is present that added required some features and fixes in the JSON parser. 

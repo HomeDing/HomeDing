@@ -82,6 +82,9 @@ bool AnalogElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "reference") == 0) {
     _reference = _atoi(value);
 
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+    _valueAction = value;
+
   } else if (_stricmp(name, "onreference") == 0) {
     _referenceAction = value;
 
@@ -90,9 +93,6 @@ bool AnalogElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "onlow") == 0) {
     _lowAction = value;
-
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-    _valueAction = value;
 
   } else {
     ret = Element::set(name, value);

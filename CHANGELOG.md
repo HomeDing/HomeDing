@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2020-12-01 
+
 ### Enhancements
 
 * **[Display Elements](https://homeding.github.io/#page=/displays.md)**

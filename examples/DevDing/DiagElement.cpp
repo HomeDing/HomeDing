@@ -144,7 +144,9 @@ void DiagElement::start()
     error = Wire.endTransmission();
 
     if (error == 0) {
-      if (adr == 0x27) {
+      if (adr == 0x11) {
+        TRACE(" 0x11 (SI4721) found.");
+      } else if (adr == 0x27) {
         TRACE(" 0x27 (LCD, PCF8574) found.");
       } else if (adr == 0x3C) {
         TRACE(" 0x03C (SSD1306, SSD1309) found.");
@@ -155,8 +157,9 @@ void DiagElement::start()
         TRACE(" 0X%02x (unknown) found.", adr);
       }
       num++;
+
     } else if (error == 4) {
-      TRACE(" 0x%02x error.", adr);
+      // TRACE(" 0x%02x error.", adr);
     } // if
     yield();
   } // for

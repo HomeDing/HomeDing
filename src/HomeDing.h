@@ -16,8 +16,12 @@ extern const char *PROP_PIN;
 extern const char *PROP_ADDRESS;
 
 extern const char *PROP_INVERSE;
+extern const char *PROP_PULLUP;
+extern const char *PROP_DURATION;
 
 extern const char *ACTION_ONVALUE;
+extern const char *ACTION_ONHIGH;
+extern const char *ACTION_ONLOW;
 extern const char *ACTION_ONTEMPERATURE;
 extern const char *ACTION_ONHUMIDITY;
 extern const char *ACTION_ONPRESSURE;
@@ -52,6 +56,7 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_Switch
 #define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_DigitalIn
+#define HOMEDING_INCLUDE_DigitalSignal
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
 
@@ -135,6 +140,10 @@ extern const char *ACTION_ONPRESSURE;
 #include <DigitalInElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DigitalSignal
+#include <DigitalSignalElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DigitalOut
 #include <DigitalOutElement.h>
 #endif
@@ -158,6 +167,7 @@ extern const char *ACTION_ONPRESSURE;
 #ifdef HOMEDING_INCLUDE_WEATHERFEED
 #include <WeatherFeedElement.h>
 #endif
+
 
 // ===== OPTIONAL DISPLAY ELEMENTS =====
 
@@ -217,6 +227,18 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_BME680
 #include <sensors/BME680Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_SHT20
+#include <sensors/SHT20Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_BL0937
+#include <BL0937Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_MAX7219
+#include <MAX7219Element.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_MENU

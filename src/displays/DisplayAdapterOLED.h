@@ -46,6 +46,11 @@ public:
   }; // init()
 
 
+  virtual void setBrightness(uint8_t bright) override
+  {
+    display->setBrightness(bright);
+  };
+
   /**
    * @brief Clear all displayed information from the display.
    */

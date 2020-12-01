@@ -70,6 +70,8 @@ public:
     return (_charWidth);
   };
 
+  virtual void setBrightness(uint8_t bright){};
+
   /**
    * @brief Clear a position or region.
    * @param x

@@ -80,9 +80,6 @@ bool INA219Element::set(const char *name, const char *value)
     } else if (_stricmp(name, "onPower") == 0) {
       _powerAction = value;
 
-    } else if (_stricmp(name, "onPower") == 0) {
-      _powerAction = value;
-
     } else if (_stricmp(name, "gain") == 0) {
       if (_stricmp(value, "40") == 0)
         _gain = INA219_PGAIN::PG_40;

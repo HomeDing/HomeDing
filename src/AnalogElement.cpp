@@ -5,7 +5,7 @@
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
- * This work is licensed under a BSD style license,
+ * This work is licensed under a BSD 3-Clause style license,
  * https://www.mathertel.de/License.aspx.
  *
  * More information on https://www.mathertel.de/Arduino.
@@ -14,8 +14,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "AnalogElement.h"
 
@@ -34,11 +34,16 @@ AnalogElement::AnalogElement()
   // default values;
   _pin = A0; // always.
 
-  _readTime = 1; // read from sensor once every second
+  _readTimeMS = 100; // read from sensor 10 times a second.
   _reference = 500;
   _hysteresis = 10;
 
   // _resendTime = 0; // Not enabled resending probes.
+}
+
+float AnalogElement::mapFloat(int value)
+{
+  return (value - _inMin) * (_outMax - _outMin) / (_inMax - _inMin) + _outMin;
 }
 
 
@@ -49,23 +54,45 @@ bool AnalogElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, "readtime") == 0) {
-    _readTime = _atotime(value);
+  if (_stricmp(name, "readtimems") == 0) {
+    _readTimeMS = _atoi(value);
 
   } else if (_stricmp(name, "hysteresis") == 0) {
     _hysteresis = _atoi(value);
 
-  } else if (_stricmp(name, PROP_PIN) == 0) {
-    _pin = _atopin(value);
+    // } else if (_stricmp(name, PROP_PIN) == 0) {
+    //   _pin = _atopin(value);
+    // pin is always A0
+
+  // } else if (_stricmp(name, "resolution") == 0) {
+    // _resolution = _atoi(value); ???
+
+  } else if (_stricmp(name, "mapInMin") == 0) {
+    _inMin = _atoi(value);
+
+  } else if (_stricmp(name, "mapInMax") == 0) {
+    _inMax = _atoi(value);
+
+  } else if (_stricmp(name, "mapOutMin") == 0) {
+    _outMin = _atoi(value);
+
+  } else if (_stricmp(name, "mapOutMax") == 0) {
+    _outMax = _atoi(value);
 
   } else if (_stricmp(name, "reference") == 0) {
     _reference = _atoi(value);
 
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+    _valueAction = value;
+
   } else if (_stricmp(name, "onreference") == 0) {
     _referenceAction = value;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-    _valueAction = value;
+  } else if (_stricmp(name, "onhigh") == 0) {
+    _highAction = value;
+
+  } else if (_stricmp(name, "onlow") == 0) {
+    _lowAction = value;
 
   } else {
     ret = Element::set(name, value);
@@ -79,40 +106,54 @@ bool AnalogElement::set(const char *name, const char *value)
  */
 void AnalogElement::start()
 {
-  _nextRead = _board->getSeconds() + 2;
+  _nextReadMS = millis() + _readTimeMS;
   _lastReference = -1;
+
+  // use mapping when reasonable factors are given
+  _useMap = ((_inMin != _inMax) && (_outMin != _outMax));
 
   Element::start();
 } // start()
 
+int rawValue;
 
 /**
  * @brief check the state of the input.
  */
 void AnalogElement::loop()
 {
-  unsigned int now = _board->getSeconds();
+  unsigned int now = millis();
 
-  if (_nextRead <= now) {
+  if (_nextReadMS <= now) {
     int v = analogRead(_pin);
-    // TRACE("read(%d)", v);
+    rawValue = v;
+    if (_useMap) {
+      v = mapFloat(v);
+    }
+    TRACE("read(%d=>%d)", rawValue, v);
 
     if ((v >= _value + _hysteresis) || (v <= _value - _hysteresis)) {
+
       _value = v;
       if (_valueAction.length() > 0)
         _board->dispatch(_valueAction, v);
 
-      if (_referenceAction.length() > 0) {
-      // compare against reference and send reference action
-        int r = (v < _reference ? 0 : 1);
-        if (r != _lastReference) {
-          _board->dispatch(_referenceAction, (v < _reference ? "0" : "1"));
-          _lastReference = r;
+      // compare against reference and send reference actions
+      int r = (v < _reference ? 0 : 1);
+      if (r != _lastReference) {
+        _board->dispatch(_referenceAction, r);
+
+        if (r) {
+          _board->dispatch(_highAction);
+        } else {
+          _board->dispatch(_lowAction);
         } // if
+
+        _lastReference = r;
       } // if
     } // if
 
-    _nextRead = now + _readTime;
+    _nextReadMS = millis() + _readTimeMS;
   }
 } // loop()
 
@@ -122,6 +163,7 @@ void AnalogElement::pushState(
 {
   Element::pushState(callback);
   callback(PROP_VALUE, String(_value).c_str());
+  callback("rawvalue", String(rawValue).c_str());
   callback("reference", String(_lastReference).c_str());
 } // pushState()
 

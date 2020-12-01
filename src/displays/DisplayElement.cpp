@@ -53,8 +53,15 @@ bool DisplayElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "width") == 0) {
     _width = _atoi(value);
 
+  } else if (_stricmp(name, "brightness") == 0) {
+    _brightness = _atoi(value);
+    if (active) {
+      DisplayAdapter *d = _board->display;
+      d->setBrightness(_brightness);
+    }
+
   } else if (_stricmp(name, "show") == 0) {
-    int page = _atoi(value); // not used yet
+    _page = _atoi(value); // not used yet
 
     // reset
     if (_resetpin >= 0) {
@@ -76,6 +83,7 @@ bool DisplayElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "clear") == 0) {
     DisplayAdapter *d = _board->display;
     d->init(_board);
+    _page = 0; // always empty
 
   } else {
     ret = Element::set(name, value);
@@ -101,5 +109,16 @@ void DisplayElement::start()
     digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
   } // if
 } // start()
+
+/**
+ * @brief push the current value of all properties to the callback.
+ */
+void DisplayElement::pushState(
+    std::function<void(const char *pName, const char *eValue)> callback)
+{
+  Element::pushState(callback);
+  callback("brightness", String(_brightness).c_str());
+  callback("page", String(_page).c_str());
+} // pushState()
 
 // End

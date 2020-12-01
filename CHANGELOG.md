@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2020-12-01 
+
+### Enhancements
+
+* **[Display Elements](https://homeding.github.io/#page=/displays.md)**
+    * **brightness** - The brightness of the display can be controlled with this action and is reported in the element state. Default is 128 of 255. 
+
+* **[Analog Element](https://homeding.github.io/#page=/elements/analog.md)**
+    * **mapIn___** and **mapOut___** properties can be used to calculate
+    a meaningful range of values from the analog raw value.
+
+    * **readtimems** - The time between capturing input values can be given in milliseconds.
+
+
+* The override keyword was added to many virtual functions to express the intention and avoid type related bugs.
+* Code cleanup.
+
+### Added Elements
+
+* **[Digital Signal Element](https://homeding.github.io/#page=/elements/digitalsignal.md)**
+    A new element that uses an interrupt driven approach to capture digital input signal changes.
+
+* **[BL0937 Element](https://homeding.github.io/#page=/elements/bl0937.md)**
+    A new element to support single phase energy monitoring using BL0937, HLW8012 or HJL-01 chips.
+
+* **[MAX7219 Element]()**
+    A new Element for driving a MAX7219 chip 8x8 matrix or 8x7-segment number driver using SPI.
+
+* **[SHT20 Element]()**
+    A new Element for driving the SHT20 temperature and humidity sensor using i2c bus.
+
 ## [0.5.0] - 2020-09-13 
 
 This release focuses on stability and better developer support. New Elements is present that added required some features and fixes in the JSON parser. 

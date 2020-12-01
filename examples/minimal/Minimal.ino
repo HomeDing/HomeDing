@@ -26,9 +26,12 @@
 
 #define HOMEDING_REGISTER 1
 
+
+// Use explicit Elements of the HomeDing Library for small devices
+// This collection may be used in e.g. remote controllable plugs.
+
 #define HOMEDING_INCLUDE_SYSTEM
 
-// Use explicit Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Switch
@@ -40,11 +43,9 @@
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
 
-// #define HOMEDING_INCLUDE_REMOTE
+#define HOMEDING_INCLUDE_BL0937
 
-// #define HOMEDING_INCLUDE_PMS
-// #define HOMEDING_INCLUDE_LIGHT
-// #define HOMEDING_INCLUDE_NEOPIXEL
+#define HOMEDING_INCLUDE_REMOTE
 
 
 #include <Arduino.h>
@@ -106,6 +107,7 @@ void setup(void)
   Serial.begin(115200);
 
   Serial.setDebugOutput(false);
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
 
   LOGGER_INFO("Device starting...");
 

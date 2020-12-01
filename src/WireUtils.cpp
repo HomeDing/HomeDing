@@ -61,7 +61,7 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg)
 /** read a sequence of register values into a buffer.
  * @return number of register values read.
  */
-uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
+uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len, int wait)
 {
   uint8_t *d = data;
   uint8_t done = 0;
@@ -70,6 +70,8 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len
   Wire.write(reg);
   Wire.endTransmission();
 
+  delay(wait);
+
   Wire.requestFrom(address, len);
   while (Wire.available() && (done < len)) {
     *d = Wire.read();
@@ -77,7 +79,7 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len
     d++;
   }
 
-#ifdef WIREDUMP  
+#ifdef WIREDUMP
   Serial.printf("i2c read 0x%02x:", reg);
   dumpBuffer(data, len);
 #endif
@@ -86,12 +88,14 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len
 } // read()
 
 
+uint8_t WireUtils::write(uint8_t address, uint8_t reg) {
+  return (write(address, reg, nullptr, 0));
+}
+
+
 uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t data)
 {
-  Wire.beginTransmission(address); // start transmission to device
-  Wire.write(reg); // send register address
-  Wire.write(data); // send value to write
-  return (Wire.endTransmission()); // end transmission
+  return (write(address, reg, &data, 1));
 } // write()
 
 
@@ -100,7 +104,7 @@ uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t le
 {
   uint8_t done = 0;
 
-#ifdef WIREDUMP  
+#ifdef WIREDUMP
   Serial.printf("i2c writ 0x%02x:", reg);
   dumpBuffer(data, len);
 #endif
@@ -114,6 +118,26 @@ uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t le
   }
   return (Wire.endTransmission());
 } // write()
+
+
+/** read a sequence of values from i2c device into a buffer.
+ * @return number of register values read.
+ */
+uint8_t WireUtils::request(uint8_t address, uint8_t *data, uint8_t len)
+{
+  uint8_t *d = data;
+  uint8_t done = Wire.requestFrom(address, len);
+  for (int n= 0; n < done; n++) {
+    *d++ = Wire.read();
+  }  
+
+#ifdef WIREDUMP
+  Serial.printf("i2c request:");
+  dumpBuffer(data, done);
+#endif
+
+  return (done);
+} // read()
 
 
 // End.

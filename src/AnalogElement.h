@@ -49,32 +49,42 @@ public:
    * @return true when property could be changed and the corresponding action
    * could be executed.
    */
-  virtual bool set(const char *name, const char *value);
+  virtual bool set(const char *name, const char *value) override;
 
   /**
    * @brief Activate the Element.
    * @return true when activation was good.
    * @return false when activation failed.
    */
-  virtual void start();
+  virtual void start() override;
 
   /**
    * @brief check the state of the input signal and eventually emit actions.
    */
-  virtual void loop();
+  virtual void loop() override;
 
   /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback);
+      std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
   int _pin = A0;
 
-  unsigned long _readTime;
-  unsigned long _nextRead;
+  // map() function just like the standard arduino map() function but with float and boundaries from configuration.
+  float mapFloat(int value);
+
+  // map factors
+  bool _useMap = false; // use map function when all 4 factors are given.
+  int _inMin = 0, _inMax = 0, _outMin = 0, _outMax = 0;
+
+  // configuration of analog input sampling time in ms.
+  unsigned long _readTimeMS;
+
+  // next read if analog input value in ms.
+  unsigned long _nextReadMS;
 
   int _value;
   int _hysteresis;
@@ -84,6 +94,8 @@ private:
 
   String _valueAction;
   String _referenceAction;
+  String _highAction;
+  String _lowAction;
 };
 
 #ifdef HOMEDING_REGISTER

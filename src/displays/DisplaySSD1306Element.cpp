@@ -61,6 +61,7 @@ void DisplaySSD1306Element::start()
   DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterSSD1306(_address, _height));
   if (d->init(_board)) {
     _board->display = d;
+    d->setBrightness(_brightness);
 
   } else {
     LOGGER_EERR("no display found.");

@@ -29,17 +29,6 @@
 class HttpClientElement : public Element
 {
 public:
-  // /**
-  //  * @brief Factory function to create a RemoteElement.
-  //  * @return Element*
-  //  */
-  // static Element *create();
-
-  // /**
-  //  * @brief static variable to ensure registering in static init phase.
-  //  */
-  // static bool registered;
-
   /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
@@ -47,19 +36,19 @@ public:
    * @return true when property could be changed and the corresponding action
    * could be executed.
    */
-  virtual bool set(const char *name, const char *value);
+  virtual bool set(const char *name, const char *value) override;
 
   /**
    * @brief Activate the RemoteElement.
    * @return true when activation was good.
    * @return false when activation failed.
    */
-  virtual void start();
+  virtual void start() override;
 
   /**
    * @brief check for completed remote actions.
    */
-  virtual void loop();
+  virtual void loop() override;
 
 
   virtual void processHeader(String &key, String &value);

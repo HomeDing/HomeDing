@@ -7,7 +7,7 @@
       "logfile": 1,
       "led": "D0",
       "button": "D4",
-      "savemode": "false",
+      "safemode": "false",
       "i2c-scl": "D2",
       "i2c-sda": "D1"
     }

@@ -9,6 +9,7 @@
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * -----
  * * 25.07.2018 created by Matthias Hertel
+ * * 07.12.2020 no write text beyond textline end.
  */
 
 #ifndef DisplayAdapterLCD_H
@@ -119,13 +120,15 @@ public:
    */
   int drawText(int16_t x, int16_t y, int16_t h, const char *text)
   {
-    int w = 0;
+    int w = strlen(text);
+    char buffer[80+4]; // 8 chars character buffer max.
     if ((x > 20) || (y > 4)) {
       Serial.printf("outside\n");
     } else {
+      strncpy(buffer, text, 80);
+      buffer[_cols-x] = '\0';
       display->setCursor(x, y);
       display->print(text);
-      w = strlen(text);
     }
     return (w);
   } // drawText

@@ -144,6 +144,9 @@ void DiagElement::start()
     error = Wire.endTransmission();
 
     if (error == 0) {
+      _i2cAddresses += adr;
+      _i2cAddresses += ',';
+
       if (adr == 0x11) {
         TRACE(" 0x11 (SI4721) found.");
       } else if (adr == 0x27) {
@@ -152,6 +155,8 @@ void DiagElement::start()
         TRACE(" 0x03C (SSD1306, SSD1309) found.");
       } else if (adr == 0x40) {
         TRACE(" 0x27 (INA219) found.");
+      } else if (adr == 0x63) {
+        TRACE(" 0x63 (SI4730 radio) found.");
 
       } else {
         TRACE(" 0X%02x (unknown) found.", adr);
@@ -164,8 +169,19 @@ void DiagElement::start()
     yield();
   } // for
   TRACE(" %2d devices found.", num);
-
 } // start()
+
+
+/**
+ * @brief push the current value of all properties to the callback.
+ */
+void DiagElement::pushState(
+    std::function<void(const char *pName, const char *eValue)> callback)
+{
+  Element::pushState(callback);
+  callback("i2cAddresses", _i2cAddresses.c_str());
+} // pushState()
+
 
 
 /* ===== Register the Element ===== */

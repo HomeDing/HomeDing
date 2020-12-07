@@ -50,9 +50,7 @@ DisplayLCDElement::DisplayLCDElement()
  */
 bool DisplayLCDElement::set(const char *name, const char *value)
 {
-  bool ret = true;
-  ret = Element::set(name, value);
-
+  bool ret = DisplayElement::set(name, value);
   return (ret);
 } // set()
 
@@ -69,7 +67,7 @@ void DisplayLCDElement::start()
   bool success = d->init(_board);
   if (success) {
     _board->display = d;
-    Element::start();
+    DisplayElement::start();
 
   } else {
     LOGGER_EERR("no display found.");

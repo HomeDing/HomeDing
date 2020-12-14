@@ -96,8 +96,9 @@ private:
    */
   int _y = 0;
 
+  int _fontsize = 10; // fontsize in use 
   int _w = 100;
-  int _h = 10; // also used as _fontsize
+  int _h = 10; // height of text area (more than fontsize when font-pixels are used)
 
   DisplayAdapter *_display = NULL;
 

@@ -91,6 +91,10 @@ public:
   }; // clear()
 
 
+  int getFontHeight(int fontsize) override {
+    return(1);
+  };
+
   /**
    * @brief Clear information from the display in this area.
    * @param x x-position or offset of the text.
@@ -101,8 +105,8 @@ public:
   void clear(int16_t x, int16_t y, int16_t w, int16_t h)
   {
     display->setCursor(x, y);
-    if (y < 4) {
-      while ((x < 20) && (w > 0)) {
+    if (y < _lines) {
+      while ((x < _cols) && (w > 0)) {
         display->write(' ');
         w--;
         x++;
@@ -128,7 +132,7 @@ public:
       strncpy(buffer, text, 80);
       buffer[_cols-x] = '\0';
       display->setCursor(x, y);
-      display->print(text);
+      display->print(buffer);
     }
     return (w);
   } // drawText

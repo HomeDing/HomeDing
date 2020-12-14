@@ -23,7 +23,6 @@
 #include <WireUtils.h>
 
 #include <Board.h>
-#include <core/Logger.h>
 
 class DisplayAdapter
 {
@@ -52,6 +51,10 @@ public:
   virtual void setLineHeight(int16_t lh)
   {
     _lineHeight = lh;
+  };
+
+  virtual int getFontHeight(int fontsize){
+    return(fontsize);
   };
 
   virtual int16_t getLineHeight()

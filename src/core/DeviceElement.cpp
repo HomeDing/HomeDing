@@ -75,7 +75,7 @@ bool DeviceElement::set(const char *name, const char *value)
     _board->homepage = value;
 
   } else if (_stricmp(name, "title") == 0) {
-    _title = value;
+    _board->title = value;
 
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
@@ -189,7 +189,7 @@ void DeviceElement::pushState(
 
   Element::pushState(callback);
   callback("name", _board->deviceName.c_str());
-  callback("title", _title.c_str());
+  callback("title", _board->title.c_str());
   callback(PROP_DESCRIPTION, _description.c_str());
   callback("safemode", _board->isSafeMode ? "true" : "false");
   callback("sd", _board->mDNS_sd ? "true" : "false");

@@ -36,6 +36,8 @@
 #include <ESP8266WebServer.h>
 #include <time.h>
 
+#define UNUSED __attribute__((unused))
+
 // forward class declarations
 class Board;
 
@@ -57,7 +59,9 @@ class Board;
 #define TRACE_START unsigned long __TRACE_START_TIME = millis();
 #define TRACE_END unsigned long __TRACE_END_TIME = millis();
 #define TRACE_TIME (__TRACE_END_TIME - __TRACE_START_TIME)
-#define TRACE_TIMEPRINT(topic, id, min) if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
+#define TRACE_TIMEPRINT(topic, id, min) \
+  if (TRACE_TIME >= min)                \
+    LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
 
 #else
 #define TRACE(...)
@@ -90,11 +94,11 @@ typedef enum {
 
   BOARDSTATE_CONNECT = 2, // define how to connect, AUTO, PSK or PASSWD
   BOARDSTATE_WAITNET = 3, // Wait for network connectivity or configuration request.
-  BOARDSTATE_WAIT = 5, // network is connected but wait for configuration request.
+  BOARDSTATE_WAIT = 5,    // network is connected but wait for configuration request.
 
   // ===== normal operation states
   BOARDSTATE_GREET = 10, // network established, start NET Elements
-  BOARDSTATE_RUN = 12, // in normal operation mode.
+  BOARDSTATE_RUN = 12,   // in normal operation mode.
   // start TIME Elements
   // restart on network lost > 30 secs.
 
@@ -102,7 +106,7 @@ typedef enum {
 
   // ===== config operation states
   BOARDSTATE_STARTCAPTIVE = 21, // Scan local available Networks
-  BOARDSTATE_RUNCAPTIVE = 22 // Enable Network Configuration UI
+  BOARDSTATE_RUNCAPTIVE = 22    // Enable Network Configuration UI
 
 } BoardState;
 
@@ -320,9 +324,15 @@ public:
    */
   String homepage;
 
+  // system start actions
   String sysStartAction;
   String startAction;
+
+  // how to cache static files
   String cacheHeader;
+
+  // short readable name of the device used for discovery and web gui
+  String title;
 
   BoardState boardState;
 
@@ -373,9 +383,9 @@ private:
 
   // state and timing
 
-  unsigned long configPhaseEnd; // millis when current config mode (boardstate) is over, next mode
+  unsigned long configPhaseEnd;  // millis when current config mode (boardstate) is over, next mode
   unsigned long connectPhaseEnd; // for waiting on net connection
-  unsigned long _captiveEnd; // terminate/reset captive portal mode after 5 minutes.
+  unsigned long _captiveEnd;     // terminate/reset captive portal mode after 5 minutes.
   void _newState(BoardState newState);
 
   bool active = false;

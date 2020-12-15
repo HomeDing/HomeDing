@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 
 * The override keyword was added to many virtual functions to express the intention and avoid type related bugs.
 * Code cleanup.
+* mDNS is now also broadcasting the `title` property of the device 
 
 ### Added Elements
 

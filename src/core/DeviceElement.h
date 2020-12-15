@@ -82,11 +82,6 @@ public:
 
 private:
   /**
-   * @brief Title of the device for usage in Web UI.
-   */
-  String _title;
-
-  /**
    * @brief Description of the device for usage in Web UI.
    */
   String _description;

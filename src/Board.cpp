@@ -519,6 +519,7 @@ void Board::loop()
       MDNS.begin(deviceName.c_str());
       MDNSResponder::hMDNSService serv = MDNS.addService(0, "homeding", "tcp", 80);
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
+      MDNS.addServiceTxt(serv, "title", title.c_str());
     } // if
 
     _newState(BOARDSTATE_RUN);

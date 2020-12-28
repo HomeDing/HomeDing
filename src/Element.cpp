@@ -48,9 +48,10 @@ bool Element::set(const char *name, const char *value)
   } else if (_stricmp(name, "loglevel") == 0) {
     loglevel = _atoi(value);
 
-    // do not report an error for the following properties, as they are used in
-    // the web ui but only stored in the config files.
+    // do not report an error for the following properties,
+    // as they are used by the web ui and stored in the config files only.
   } else if (_stricmp(name, "description") == 0) {
+  } else if (_stricmp(name, "title") == 0) {
   } else if (_stricmp(name, "room") == 0) {
 
   } else {

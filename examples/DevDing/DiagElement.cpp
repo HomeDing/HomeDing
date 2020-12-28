@@ -144,7 +144,8 @@ void DiagElement::start()
     error = Wire.endTransmission();
 
     if (error == 0) {
-      _i2cAddresses += adr;
+      _i2cAddresses += "0x";
+      _i2cAddresses += String(adr, 16); //  adr;
       _i2cAddresses += ',';
 
       if (adr == 0x11) {
@@ -152,7 +153,7 @@ void DiagElement::start()
       } else if (adr == 0x27) {
         TRACE(" 0x27 (LCD, PCF8574) found.");
       } else if (adr == 0x3C) {
-        TRACE(" 0x03C (SSD1306, SSD1309) found.");
+        TRACE(" 0x03C (SH1106, SSD1306, SSD1309) found.");
       } else if (adr == 0x40) {
         TRACE(" 0x27 (INA219) found.");
       } else if (adr == 0x63) {

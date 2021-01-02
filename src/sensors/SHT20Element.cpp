@@ -213,8 +213,8 @@ void SHT20Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  callback("temperature", Element::Element::getItemValue(_lastValues, 0).c_str());
-  callback("humidity", Element::Element::getItemValue(_lastValues, 1).c_str());
+  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
+  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
 } // pushState()
 
 // End

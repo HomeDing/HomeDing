@@ -273,7 +273,7 @@ void Element::_strlower(char *str)
 
 // https://stackoverflow.com/questions/9072320/split-string-into-string-array
 /** Get item[index] from string */
-String Element::Element::getItemValue(String data, int index)
+String Element::getItemValue(String data, int index)
 {
   String ret;
   int found = 0;

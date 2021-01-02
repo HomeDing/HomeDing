@@ -218,10 +218,10 @@ void BME680Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  callback("temperature", Element::Element::getItemValue(_lastValues, 0).c_str());
-  callback("humidity", Element::Element::getItemValue(_lastValues, 1).c_str());
-  callback("pressure", Element::Element::getItemValue(_lastValues, 2).c_str());
-  callback("gas", Element::Element::getItemValue(_lastValues, 3).c_str());
+  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
+  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
+  callback("pressure", Element::getItemValue(_lastValues, 2).c_str());
+  callback("gas", Element::getItemValue(_lastValues, 3).c_str());
 } // pushState()
 
 // End

@@ -1,6 +1,6 @@
 /**
  * @file DisplayLCDElement.cpp
- * @brief Element Template class.
+ * @brief Display Element for HD44780 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

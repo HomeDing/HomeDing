@@ -1,6 +1,6 @@
 /**
  * @file AndElement.cpp
- * @brief Element Template class.
+ * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

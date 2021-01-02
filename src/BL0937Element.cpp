@@ -1,6 +1,6 @@
 /**
  * @file BL0937Element.cpp
- * @brief Element Template class.
+ * @brief Element to calculate voltage, current and power consumption using the BL0937 chip.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

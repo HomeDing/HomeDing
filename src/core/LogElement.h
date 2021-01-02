@@ -1,6 +1,6 @@
 /**
  * @file LogElement.h
- * @brief Element Template class.
+ * @brief The Log Element implements saving sensor data to the local file system.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

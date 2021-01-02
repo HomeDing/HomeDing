@@ -1,6 +1,6 @@
 /**
  * @file LogElement.cpp
- * @brief The Log Element implements saving sensor data to the local filöe system.
+ * @brief The Log Element implements saving sensor data to the local file system.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

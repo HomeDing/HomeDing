@@ -1,6 +1,6 @@
 /**
  * @file PMSElement.h
- * @brief Element Template class.
+ * @brief Sensor Element to read data from a Plantower PMS5003 sensors and create actions.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *

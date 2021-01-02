@@ -92,9 +92,16 @@ private:
   int _reference;
   int _lastReference;
 
+  /** These actions are sent with the current value. */
   String _valueAction;
+
+  /** These actions are sent with value=1 when the current value is above the reference value otherwise value=0. */
   String _referenceAction;
+
+  /** These actions are sent when the current value is above the reference value. */
   String _highAction;
+
+  /** These actions are sent when the current value is below or equal the reference value. */
   String _lowAction;
 };
 

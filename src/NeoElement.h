@@ -1,6 +1,6 @@
 /**
  * @file NeoElement.h
- * @brief Element Template class.
+ * @brief Output Element to control neopixel / WS2812 based LED stripes on a GPIO pin.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *

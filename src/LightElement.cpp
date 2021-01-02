@@ -1,6 +1,6 @@
 /**
  * @file LightElement.cpp
- * @brief Element Template class.
+ * @brief Output Element to drive LEDs on GPIO pins.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

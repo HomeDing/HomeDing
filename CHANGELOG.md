@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.6.0] - 2020-12-01 
+## [0.6.0] - 2021-01-03 
 
 ### Enhancements
 
@@ -33,6 +33,10 @@ All notable changes to this project will be documented in this file.
 
 * **[SHT20 Element]()**
     A new Element for driving the SHT20 temperature and humidity sensor using i2c bus.
+
+* **[Reference Element](https://homeding.github.io/#page=/elements/reference.md)**
+    A new Element for calculating a boolean from comparing a value against a reference value.
+
 
 ## [0.5.0] - 2020-09-13 
 

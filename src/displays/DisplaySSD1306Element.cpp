@@ -1,6 +1,6 @@
 /**
  * @file DisplaySSD1306Element.cpp
- * @brief Element Template class.
+ * @brief Display Element for SSD1306 based OLED displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

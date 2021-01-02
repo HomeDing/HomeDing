@@ -114,6 +114,7 @@ void ReferenceElement::pushState(
 {
   Element::pushState(callback);
   callback(PROP_VALUE, (_value ? "1" : "0"));
+  callback("reference", String(_refValue).c_str());
 } // pushState()
 
 

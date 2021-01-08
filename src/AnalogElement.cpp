@@ -30,15 +30,11 @@ Element *AnalogElement::create()
 
 
 AnalogElement::AnalogElement()
+    : _pin(A0),         // always.
+      _readTimeMS(100), // read from sensor 10 times a second.
+      _reference(500),
+      _hysteresis(10)
 {
-  // default values;
-  _pin = A0; // always.
-
-  _readTimeMS = 100; // read from sensor 10 times a second.
-  _reference = 500;
-  _hysteresis = 10;
-
-  // _resendTime = 0; // Not enabled resending probes.
 }
 
 float AnalogElement::mapFloat(int value)
@@ -64,7 +60,7 @@ bool AnalogElement::set(const char *name, const char *value)
     //   _pin = _atopin(value);
     // pin is always A0
 
-  // } else if (_stricmp(name, "resolution") == 0) {
+    // } else if (_stricmp(name, "resolution") == 0) {
     // _resolution = _atoi(value); ???
 
   } else if (_stricmp(name, "mapInMin") == 0) {
@@ -151,7 +147,7 @@ void AnalogElement::loop()
 
         _lastReference = r;
       } // if
-    } // if
+    }   // if
 
     _nextReadMS = millis() + _readTimeMS;
   }

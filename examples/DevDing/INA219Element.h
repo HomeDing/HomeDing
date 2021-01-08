@@ -93,11 +93,11 @@ private:
   /**
    * Sensor specific data, declared in *.cpp 
    */
-  INA219_WE *_sensor = nullptr;
-  INA219_PGAIN _gain = INA219_PGAIN::PG_320;
-  INA219_MEASURE_MODE _mode = INA219_MEASURE_MODE::CONTINUOUS;
-  INA219_BUS_RANGE _range = INA219_BUS_RANGE::BRNG_32;
-  INA219_ADC_MODE _samples = INA219_ADC_MODE::BIT_MODE_12;
+  INA219_WE *_sensor;
+  INA219_PGAIN _gain;
+  INA219_MEASURE_MODE _mode;
+  INA219_BUS_RANGE _range;
+  INA219_ADC_MODE _samples;
 
   /**
    * @brief The actual value.

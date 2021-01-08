@@ -40,10 +40,9 @@ Element *LogElement::create()
 
 /* ===== Element functions ===== */
 
-LogElement::LogElement()
+LogElement::LogElement() : _filesize(LOGFILE_DEFAULTSIZE), _timestamp(0)
 {
   startupMode = Element_StartupMode::Time;
-  _filesize = LOGFILE_DEFAULTSIZE;
 }
 
 

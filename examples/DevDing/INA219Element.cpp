@@ -19,8 +19,8 @@
 
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include <HomeDing.h>
 
@@ -48,9 +48,12 @@ Element *INA219Element::create()
 /* ===== Element functions ===== */
 
 INA219Element::INA219Element()
+    : _sensor(nullptr),
+      _gain(INA219_PGAIN::PG_320),
+      _mode(INA219_MEASURE_MODE::CONTINUOUS),
+      _range(INA219_BUS_RANGE::BRNG_32),
+      _samples(INA219_ADC_MODE::BIT_MODE_12)
 {
-  // adjust startupMode when Network (default) is not applicable.
-  // startupMode = Element_StartupMode::System;
 }
 
 

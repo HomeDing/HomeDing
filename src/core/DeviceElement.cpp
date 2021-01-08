@@ -38,8 +38,8 @@ Element *DeviceElement::create()
 /* ===== Element functions ===== */
 
 DeviceElement::DeviceElement()
+    : _rebootTime(0), _nextBoot(0) // default with no automatic reboot
 {
-  _rebootTime = 0; // no automatic reboot
   startupMode = Element_StartupMode::System;
 }
 
@@ -61,7 +61,7 @@ bool DeviceElement::set(const char *name, const char *value)
       TRACE("start sleep");
       _board->deepSleepStart = millis();
       if (!_board->isWakeupStart) {
-        // give a minute time to block deep sleep mode 
+        // give a minute time to block deep sleep mode
         _board->deepSleepStart += 60 * 1000;
       }
     } else {
@@ -146,7 +146,7 @@ bool DeviceElement::set(const char *name, const char *value)
       _board->I2cScl = _atopin(value);
 
     } // if
-  } // if (! active)
+  }   // if (! active)
 
   return (ret);
 } // set()

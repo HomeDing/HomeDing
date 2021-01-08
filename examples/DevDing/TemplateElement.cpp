@@ -47,6 +47,7 @@ TemplateElement::TemplateElement()
 {
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
+  _value = 0;
 }
 
 

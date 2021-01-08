@@ -18,7 +18,7 @@
 #include <LiquidCrystal_PCF8574.h>
 #include <displays/DisplayAdapter.h>
 
-class DisplayAdapterLCD : DisplayAdapter
+class DisplayAdapterLCD : public DisplayAdapter
 {
 public:
   /**

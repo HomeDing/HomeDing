@@ -187,11 +187,11 @@ void BL0937Element::loop()
 {
   // do something
   unsigned long now = millis();
-  unsigned long newValue = 0;
   unsigned long newCurrentValue = 0;
   unsigned long newVoltageValue = 0;
 
   if (now - _cycleStart > _cycleTime) {
+    unsigned long newValue = 0;
     // report new power value:
     if (powSigCnt > 2) {
       _powerCount = powSigCnt;

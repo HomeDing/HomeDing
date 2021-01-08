@@ -62,7 +62,7 @@ bool DisplayLCDElement::set(const char *name, const char *value)
 void DisplayLCDElement::start()
 {
   // TRACE("start()");
-  DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterLCD(_address, _height, _width));
+  DisplayAdapter *d = new DisplayAdapterLCD(_address, _height, _width);
 
   bool success = d->init(_board);
   if (success) {

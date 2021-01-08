@@ -72,7 +72,7 @@ bool DisplayDotElement::set(const char *name, const char *value)
  */
 void DisplayDotElement::start()
 {
-  DisplayAdapter *d = (DisplayAdapter *)(_board->display);
+  DisplayAdapter *d = _board->display;
 
   if (d == NULL) {
     LOGGER_EERR("no display defined");

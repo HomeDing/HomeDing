@@ -90,7 +90,7 @@ private:
   /**
    * @brief The actual value.
    */
-  int _value;
+  int _value = 0;
 
 
   /**

@@ -55,7 +55,7 @@ void DisplaySH1106Element::start()
   DisplayElement::start();
 
   // TRACE("start()");
-  DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterSH1106(_address, _height));
+  DisplayAdapter *d = new DisplayAdapterSH1106(_address, _height);
 
   if (d->init(_board)) {
     _board->display = d;

@@ -20,7 +20,7 @@
 // #define LOG_TRACE(...) LOGGER_TRACE(__VA_ARGS__)
 #define LOG_TRACE(...)
 
-class DisplayAdapterSSD1306 : DisplayAdapterOLED
+class DisplayAdapterSSD1306 : public DisplayAdapterOLED
 {
 public:
   /**

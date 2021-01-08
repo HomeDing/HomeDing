@@ -36,7 +36,7 @@ static void delay_msec(uint32_t ms)
 
 static int8_t i2c_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
 {
-  int8_t readLen = WireUtils::read(dev_id, reg_addr, reg_data, len);
+  int8_t readLen = WireUtils::readBuffer(dev_id, reg_addr, reg_data, len);
   return (readLen != len);
 }
 

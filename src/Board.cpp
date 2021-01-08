@@ -689,7 +689,7 @@ void Board::dispatch(const char *action, const char *value)
 void Board::dispatchItem(String &action, String &values, int item)
 {
   if (action && values) {
-    String v = Element::Element::getItemValue(values, item);
+    String v = Element::getItemValue(values, item);
     if (v) {
       dispatch(action.c_str(), v.c_str());
     } // if

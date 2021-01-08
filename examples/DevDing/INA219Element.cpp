@@ -174,31 +174,34 @@ void INA219Element::start()
  */
 bool INA219Element::getProbe(String &values)
 {
-  bool newData = false;
-  char buffer[12 * 3];
+  if (_sensor) {
 
-  if (_mode == INA219_MEASURE_MODE::TRIGGERED) {
-    _sensor->startSingleMeasurement();
-  }
+    bool newData = false;
+    char buffer[12 * 3];
 
-  if (_sensor->getOverflow()) {
-    LOGGER_EERR("overflow");
-    term();
-  } else {
+    if (_mode == INA219_MEASURE_MODE::TRIGGERED) {
+      _sensor->startSingleMeasurement();
+    }
 
-    // read and debug output
-    float busVoltage_V = _sensor->getBusVoltage_V();
-    float current_mA = _sensor->getCurrent_mA();
-    float power_mW = _sensor->getBusPower();
+    if (_sensor->getOverflow()) {
+      LOGGER_EERR("overflow");
+      term();
+    } else {
 
-    // LOGGER_EINFO("Voltage %5.2f V", busVoltage_V);
-    // LOGGER_EINFO("Current %5.2f mA", current_mA);
-    // LOGGER_EINFO("Power   %5.2f mW", power_mW);
+      // read and debug output
+      float busVoltage_V = _sensor->getBusVoltage_V();
+      float current_mA = _sensor->getCurrent_mA();
+      float power_mW = _sensor->getBusPower();
 
-    snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
-    values = buffer;
-    bool newData = true;
-  } // if
+      // LOGGER_EINFO("Voltage %5.2f V", busVoltage_V);
+      // LOGGER_EINFO("Current %5.2f mA", current_mA);
+      // LOGGER_EINFO("Power   %5.2f mW", power_mW);
+
+      snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
+      values = buffer;
+      bool newData = true;
+    } // if
+  }   // if (_sensor)
   return (true);
 } // loop()
 

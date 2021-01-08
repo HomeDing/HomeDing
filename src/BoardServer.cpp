@@ -30,9 +30,9 @@
 #define SVC_ANY "/$"
 
 // integrated htm files
-#define PAGE_SETUP "/$setup.htm"
-#define PAGE_BOOT "/$boot.htm"
-#define SVC_UPLOAD "/$upload.htm"
+#define PAGE_SETUP "/$setup"
+#define PAGE_UPDATE "/$update"
+#define SVC_UPLOAD "/$upload"
 
 // services
 #define SVC_REBOOT "/$reboot"
@@ -234,10 +234,10 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     // Network Config Page
     output = FPSTR(setupContent);
     output_type = TEXT_HTML;
-
-  } else if (unSafeMode && (requestUri.startsWith(PAGE_BOOT))) {
+             
+  } else if (unSafeMode && (requestUri.startsWith(PAGE_UPDATE) || requestUri.startsWith("/$boot"))) {
     // Bootstrap page
-    output = FPSTR(bootContent);
+    output = FPSTR(updateContent);
     output_type = TEXT_HTML;
 
   } else if (unSafeMode && (requestUri.startsWith(SVC_UPLOAD))) {

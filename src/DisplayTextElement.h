@@ -74,12 +74,12 @@ private:
   /**
    * @brief When using the TEXT type this text is shown before the value text.
    */
-  char _prefix[MAX_ID_LENGTH]; // static text before the value
+  String _prefix; // static text before the value
 
   /**
    * @brief When using the TEXT type this text is shown after the value text.
    */
-  char _postfix[MAX_ID_LENGTH]; //  after the value
+  String _postfix; //  after the value
 
   /**
    * @brief displayed value

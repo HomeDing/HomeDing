@@ -371,7 +371,7 @@ void Board::loop()
     }
 
     // detect no configured network situation
-    if (((WiFi.SSID().length() == 0) && (strlen(ssid) == 0)) || (_resetCount == 2)) {
+    if (((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0)) || (_resetCount == 2)) {
       _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
     } else {
       _newState(BOARDSTATE_CONNECT);

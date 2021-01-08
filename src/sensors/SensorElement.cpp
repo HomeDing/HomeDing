@@ -97,7 +97,6 @@ void SensorElement::term()
 void SensorElement::loop()
 {
   unsigned long now = millis();
-  bool newData = false;
   String value;
 
   if (_nextRead <= now) {

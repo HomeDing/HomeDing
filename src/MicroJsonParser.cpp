@@ -134,7 +134,7 @@ void appendchar(char *s, char ch, int len)
     *s++ = ch;
     *s = NUL;
   }
-} // strncat()
+} // appendchar()
 
 
 void MicroJson::parseChar(const char *s)
@@ -212,7 +212,7 @@ bool MicroJson::parseChar(char ch)
     char tmp[16];
     itoa(_index[_level], tmp, 10);
     appendchar(_path, '[', sizeof(_path));
-    strncat(_path, tmp, sizeof(_path));
+    strlcat(_path, tmp, sizeof(_path));
     appendchar(_path, ']', sizeof(_path));
     MJ_TRACE("array item: %s", _path);
 
@@ -256,7 +256,7 @@ bool MicroJson::parseChar(char ch)
     } else if (ch == '{') {
       if (_path[0] != NUL)
         appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
-      strncat(_path, _name, sizeof(_path));
+      strlcat(_path, _name, sizeof(_path));
       (_callbackFn)(_level, _path, NULL);
 
       // nested object
@@ -339,9 +339,10 @@ bool MicroJson::parseChar(char ch)
       appendchar(_value, ch, sizeof(_value));
       _state = MJ_STATE_Q_VALUE;
     } // if
+
   } else if (_state == MJ_STATE_Q_VALUE_ESCU) {
     appendchar(_esc, ch, sizeof(_esc));
-    if (strlen(_esc) == 4) {
+    if (strnlen(_esc, sizeof(_esc)) == 4) {
       long l = strtol(_esc, nullptr, 16);
       ch = (char)(l % 0x00FF);
       appendchar(_value, ch, sizeof(_value));

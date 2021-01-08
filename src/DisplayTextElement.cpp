@@ -57,12 +57,10 @@ bool DisplayTextElement::set(const char *name, const char *value)
     _draw();
 
   } else if (_stricmp(name, "prefix") == 0) {
-    if (strlen(value) < sizeof(_prefix))
-      strcpy(_prefix, value);
+    _prefix = value;
 
   } else if (_stricmp(name, "postfix") == 0) {
-    if (strlen(value) < sizeof(_postfix))
-      strcpy(_postfix, value);
+    _postfix = value;
 
   } else if (_stricmp(name, "x") == 0) {
     _x = _atoi(value);

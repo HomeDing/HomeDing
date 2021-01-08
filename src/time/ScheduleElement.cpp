@@ -16,8 +16,8 @@
 
 
 #include <Arduino.h>
-#include <Element.h>
 #include <Board.h>
+#include <Element.h>
 
 #include "time/ScheduleElement.h"
 
@@ -113,30 +113,30 @@ void ScheduleElement::start()
 void ScheduleElement::loop()
 {
   time_t ct = _board->getTimeOfDay();
-  bool val;
 
   if (ct > 0) {
     // There is a local time available.
+    bool newValue;
 
     // find the current value
     if (_startTime < _endTime) {
       // during the day.
-      val = ((ct >= _startTime) && (ct < _endTime));
+      newValue = ((ct >= _startTime) && (ct < _endTime));
     } else {
       // overnight.
-      val = ((ct >= _startTime) || (ct < _endTime));
+      newValue = ((ct >= _startTime) || (ct < _endTime));
     }
 
-    if ((val == _value) && (_init)) {
+    if ((newValue == _value) && (_init)) {
       // no need to send an action.
-    } else if (val) {
+    } else if (newValue) {
       _board->dispatch(_onAction);
       _board->dispatch(_valueAction, "1");
     } else {
       _board->dispatch(_offAction);
       _board->dispatch(_valueAction, "0");
     }
-    _value = val;
+    _value = newValue;
     _init = true;
   } // if
 } // loop()

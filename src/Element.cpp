@@ -128,7 +128,7 @@ bool Element::_atob(const char *value)
 {
   bool ret = false;
 
-  if ((!value) || (strlen(value) > 5)) {
+  if ((!value) || (strnlen(value, 6) > 5)) {
     // ret = false;
   } else if (_stricmp(value, "1") == 0) {
     ret = true;

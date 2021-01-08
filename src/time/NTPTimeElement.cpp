@@ -88,8 +88,6 @@ bool NTPTimeElement::set(const char *name, const char *value)
  */
 void NTPTimeElement::start()
 {
-  unsigned long now = _board->getSeconds();
-
   Element::start();
   configTime(_timezone.c_str(), _ntpServer.c_str());
 } // start()

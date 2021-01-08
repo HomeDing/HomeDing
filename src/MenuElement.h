@@ -13,6 +13,7 @@
  * 
  * Changelog:
  * * 30.05.2019 created by Matthias Hertel
+ * * 06.12.2020 some rework and doku.
  */
 
 #ifndef MENUELEMENT_H

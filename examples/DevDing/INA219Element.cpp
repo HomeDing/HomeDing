@@ -174,9 +174,8 @@ void INA219Element::start()
  */
 bool INA219Element::getProbe(String &values)
 {
+  bool newData = false;
   if (_sensor) {
-
-    bool newData = false;
     char buffer[12 * 3];
 
     if (_mode == INA219_MEASURE_MODE::TRIGGERED) {
@@ -199,10 +198,10 @@ bool INA219Element::getProbe(String &values)
 
       snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
       values = buffer;
-      bool newData = true;
+      newData = true;
     } // if
   }   // if (_sensor)
-  return (true);
+  return (newData);
 } // loop()
 
 

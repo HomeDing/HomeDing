@@ -17,7 +17,7 @@
 #include <OLEDDisplay.h>
 #include <displays/DisplayAdapter.h>
 
-class DisplayAdapterOLED : DisplayAdapter
+class DisplayAdapterOLED : public DisplayAdapter
 {
 public:
   /**
@@ -34,12 +34,15 @@ public:
   virtual bool init(Board *board, OLEDDisplay *d)
   {
     display = d;
-    display->flipScreenVertically();
-    display->setTextAlignment(TEXT_ALIGN_LEFT);
-    display->setFont(ArialMT_Plain_10);
+    d->init();
+    delay(1);
+    d->flipScreenVertically();
+    d->setTextAlignment(TEXT_ALIGN_LEFT);
+    d->setFont(ArialMT_Plain_10);
+    delay(1);
 
-    display->clear();
-    display->display();
+    d->clear();
+    d->display();
     delay(1);
 
     return (true);

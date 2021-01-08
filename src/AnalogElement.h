@@ -84,7 +84,7 @@ private:
   unsigned long _readTimeMS;
 
   // next read if analog input value in ms.
-  unsigned long _nextReadMS;
+  unsigned long _nextReadMS = 0;
 
   int _value;
   int _hysteresis;

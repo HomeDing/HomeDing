@@ -70,8 +70,9 @@
 
 
 MicroJson::MicroJson(MicroJsonCallbackFn callback)
+    : _callbackFn(callback)
 {
-  _callbackFn = callback;
+  // _callbackFn = callback;
   _path[0] = NUL;
   _name[0] = NUL;
   _value[0] = NUL;
@@ -98,18 +99,17 @@ void MicroJson::parse(const char *s)
 
 void MicroJson::parseFile(const char *fName)
 {
-  char buffer[128 + 1]; // one extra char for enforced NUL char.
-  size_t len;
-
   init();
 
   if (_callbackFn) {
+
     if (SPIFFS.exists(fName)) {
       MJ_TRACE("parsing file %s", fName);
 
       File file = SPIFFS.open(fName, "r");
       while (file.available()) {
-        len = file.readBytes(buffer, sizeof(buffer) - 1);
+        char buffer[128 + 1]; // one extra char for enforced NUL char.
+        size_t len = file.readBytes(buffer, sizeof(buffer) - 1);
         if (len) {
           buffer[len] = NUL;
           parseChar(buffer);
@@ -117,12 +117,12 @@ void MicroJson::parseFile(const char *fName)
       }
       file.close();
     } // if
-  } // if
+  }   // if
 };
 
 
 // append a single character and the NUL byte.
-void strncat(char *s, char ch, int len)
+void appendchar(char *s, char ch, int len)
 {
   // Search terminating NUL
   while ((len > 0) && (*s != NUL)) {
@@ -194,7 +194,7 @@ bool MicroJson::parseChar(char ch)
 
   } else if (_state == MJ_STATE_Q_NAME) {
     if (ch != '"') {
-      strncat(_name, ch, sizeof(_name));
+      appendchar(_name, ch, sizeof(_name));
     } else {
       _state = MJ_NEWSTATE(MJ_STATE_ASSIGN);
     } // if
@@ -211,9 +211,9 @@ bool MicroJson::parseChar(char ch)
     // new item in array: add [x] to path
     char tmp[16];
     itoa(_index[_level], tmp, 10);
-    strncat(_path, '[', sizeof(_path));
+    appendchar(_path, '[', sizeof(_path));
     strncat(_path, tmp, sizeof(_path));
-    strncat(_path, ']', sizeof(_path));
+    appendchar(_path, ']', sizeof(_path));
     MJ_TRACE("array item: %s", _path);
 
     if (ch == '{') {
@@ -255,7 +255,7 @@ bool MicroJson::parseChar(char ch)
 
     } else if (ch == '{') {
       if (_path[0] != NUL)
-        strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
+        appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
       (_callbackFn)(_level, _path, NULL);
 
@@ -269,7 +269,7 @@ bool MicroJson::parseChar(char ch)
       // open array
       MJ_TRACE("array open level %d", _level + 1);
       if (_path[0] != NUL)
-        strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
+        appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
       (_callbackFn)(_level, _path, NULL);
 
@@ -286,12 +286,12 @@ bool MicroJson::parseChar(char ch)
 
   } else if (_state == MJ_STATE_NUM_VALUE) {
     if (isdigit(ch) || (ch == '.')) {
-      strncat(_value, ch, sizeof(_value));
+      appendchar(_value, ch, sizeof(_value));
 
     } else {
       // this character doesn't belong to the value any more.
       // LOGGER_RAW(" value=%s", _value);
-      strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
+      appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
       (_callbackFn)(_level, _path, _value);
       *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
@@ -304,11 +304,11 @@ bool MicroJson::parseChar(char ch)
       _esc[0] = NUL;
 
     } else if (ch != '"') {
-      strncat(_value, ch, sizeof(_value));
+      appendchar(_value, ch, sizeof(_value));
 
     } else {
       // quoted value completed
-      strncat(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
+      appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strncat(_path, _name, sizeof(_path));
       (_callbackFn)(_level, _path, _value);
       *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
@@ -336,15 +336,15 @@ bool MicroJson::parseChar(char ch)
     } // if
 
     if (_state != MJ_STATE_Q_VALUE_ESCU) {
-      strncat(_value, ch, sizeof(_value));
+      appendchar(_value, ch, sizeof(_value));
       _state = MJ_STATE_Q_VALUE;
     } // if
   } else if (_state == MJ_STATE_Q_VALUE_ESCU) {
-    strncat(_esc, ch, sizeof(_esc));
+    appendchar(_esc, ch, sizeof(_esc));
     if (strlen(_esc) == 4) {
       long l = strtol(_esc, nullptr, 16);
       ch = (char)(l % 0x00FF);
-      strncat(_value, ch, sizeof(_value));
+      appendchar(_value, ch, sizeof(_value));
       _state = MJ_NEWSTATE(MJ_STATE_Q_VALUE);
     } // if
 

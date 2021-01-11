@@ -24,14 +24,17 @@
  * * 07.04.2019 updated from DevDing example, no sensor elements, no elements that need libraries.
  */
 
+
+// ===== Enable Elements for the firmware
+#pragma region Enable Elements for the firmware
+
 #define HOMEDING_REGISTER 1
 
-
-// Use explicit Elements of the HomeDing Library for small devices
-// This collection may be used in e.g. remote controllable plugs.
-
+// Enable the SYSTEM Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
 
+// Enable some Core Elements for small devices
+// This collection may be used in e.g. remote controllable plugs.
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Switch
@@ -39,13 +42,22 @@
 #define HOMEDING_INCLUDE_DigitalOut
 
 #define HOMEDING_INCLUDE_AND
+#define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
+#define HOMEDING_INCLUDE_REMOTE
 
+
+// Enable some Sensor Elements
+#define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BL0937
 
-#define HOMEDING_INCLUDE_REMOTE
+// Enable Elements for LIGHT control
+#define HOMEDING_INCLUDE_LIGHT
+
+
+
 
 
 #include <Arduino.h>
@@ -63,10 +75,21 @@
 #include <BoardServer.h>
 #include <FileServer.h>
 
-// ===== include project specific elements =====
+
+// ===== define minimal functional Web UI with 1MByte Flash devices
+
+#define SETUP_URL "/$setup#v02m"
+
+
+// ===== forward declarations
+
+void handleRedirect();
+void setup(void);
+void loop(void);
 
 static const char respond404[] PROGMEM =
     R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
+
 
 // ===== WLAN credentials =====
 
@@ -91,7 +114,7 @@ void handleRedirect()
   } else {
     url = "http://";
     url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
-    url.concat("/$setup.htm");
+    url.concat(SETUP_URL);
   }
   server.sendHeader("Location", url, true);
   server.send(302);

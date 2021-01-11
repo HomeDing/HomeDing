@@ -18,34 +18,42 @@
  * * 15.04.2020 fixed library dependencies.
  */
 
+
+// ===== Enable Elements for the firmware
+#pragma region Enable Elements for the firmware
+
 #define HOMEDING_REGISTER 1
 
-// Use the Core Elements of the HomeDing Library
+// Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
 
-// Use some more Elements that need additional libraries
+// Enable some Sensor Elements
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
 #define HOMEDING_INCLUDE_SHT20 // + 1176 bytes
+#define HOMEDING_INCLUDE_PMS
 
+// Enable some INPUT Elements
 #define HOMEDING_INCLUDE_ROTARY
 #define HOMEDING_INCLUDE_MENU
 
-#define HOMEDING_INCLUDE_NTPTIME
+// Enable some TIME Elements
 #define HOMEDING_INCLUDE_DSTIME
 
-// Use some more Elements for Displays
+// Enable Elements for Displays
 #define HOMEDING_INCLUDE_DISPLAY
 #define HOMEDING_INCLUDE_DISPLAYLCD
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
 
-#define HOMEDING_INCLUDE_PMS
+// Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_LIGHT
 #define HOMEDING_INCLUDE_NEOPIXEL
 
 #define HOMEDING_INCLUDE_WEATHERFEED
+#pragma endregion
+
 
 #include <Arduino.h>
 
@@ -62,10 +70,21 @@
 #include <BoardServer.h>
 #include <FileServer.h>
 
-// ===== include project specific elements =====
+
+// ===== define full functional Web UI with 4MByte Flash devices
+
+#define SETUP_URL "/$setup#v02"
+
+
+// ===== forward declarations
+
+void handleRedirect();
+void setup(void);
+void loop(void);
 
 static const char respond404[] PROGMEM =
     R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
+
 
 // ===== WLAN credentials =====
 
@@ -90,7 +109,7 @@ void handleRedirect()
   } else {
     url = "http://";
     url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
-    url.concat("/$setup.htm");
+    url.concat(SETUP_URL);
   }
   server.sendHeader("Location", url, true);
   server.send(302);

@@ -33,6 +33,8 @@ extern "C" {
 
 #include <DNSServer.h>
 
+#define DOUBLEQUOTE '\"'
+
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 

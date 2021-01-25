@@ -62,7 +62,6 @@ public:
       } else {
         DisplayAdapter::init(board);
 
-        // LOGGER_TRACE("setupDisplay...");
         display->begin(_cols, _lines);
 
         byte dotOff[] = {0b00000, 0b01110, 0b10001, 0b10001,

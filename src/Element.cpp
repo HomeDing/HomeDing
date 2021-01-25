@@ -214,7 +214,7 @@ uint32_t Element::_atoColor(const char *value)
     } else if (_stricmp(value, "blue") == 0) {
       ret = 0x000000FF;
     } else if (_stricmp(value, "white") == 0) {
-      ret = 0x00FFFFFF;
+      ret = 0xFFFFFFFF;
     }
   } // if
   return ret;

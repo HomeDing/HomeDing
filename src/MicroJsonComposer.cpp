@@ -14,7 +14,7 @@ MicroJsonComposer::MicroJsonComposer()
 
 void MicroJsonComposer::openObject()
 {
-  if (!_fresh) _out.concat(',');;
+  if (!_fresh) _out.concat(',');
   _out += "{";
   _fresh = true;
 }

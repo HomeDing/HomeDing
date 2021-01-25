@@ -20,10 +20,8 @@
 
 #include "DisplayElement.h"
 
-// #define LOG_TRACE(...) LOGGER_TRACE(__VA_ARGS__)
-#define LOG_TRACE(...)
+/* ===== Private functions ===== */
 
-/* ===== Provate functions ===== */
 void DisplayElement::_reset()
 {
   // reset
@@ -82,7 +80,6 @@ bool DisplayElement::set(const char *name, const char *value)
 
     // redraw all display elements
     _board->forEach("", [this](Element *e) {
-      LOG_TRACE("forEach %s", e->id);
       if (_stristartswith(e->id, "display"))
         e->set("redraw", "1");
     });

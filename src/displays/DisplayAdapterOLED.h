@@ -99,7 +99,6 @@ public:
    */
   int drawText(int16_t x, int16_t y, int16_t h, const char *text)
   {
-    // LOGGER_TRACE("drawText %d %d %d (%s)", x, y, h, text);
     String tmp(text);
     const uint8_t *fontData = _getFontData(h);
     int w = 0;

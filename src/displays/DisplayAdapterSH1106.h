@@ -17,8 +17,6 @@
 #include <SH1106Wire.h>
 #include <displays/DisplayAdapterOLED.h>
 
-// #define LOG_TRACE(...) LOGGER_TRACE(__VA_ARGS__)
-#define LOG_TRACE(...)
 
 class DisplayAdapterSH1106 : public DisplayAdapterOLED
 {
@@ -36,8 +34,6 @@ public:
 
   bool init(Board *board)
   {
-    LOG_TRACE("init SH1106...");
-
     if (!disp) {
       // allocate a new class for this display
 
@@ -46,7 +42,6 @@ public:
         return (false);
 
       } else {
-        LOG_TRACE("create SH1106...");
         OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
         disp = new (std::nothrow) SH1106Wire(_address, board->I2cSda, board->I2cScl, res);
       }
@@ -56,7 +51,6 @@ public:
       return (false);
 
     } else {
-      LOG_TRACE("setup SH1106...");
       disp->init();
       DisplayAdapterOLED::init(board, disp);
     } // if

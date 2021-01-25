@@ -56,8 +56,12 @@ bool LightElement::set(const char *name, const char *pValue)
   // TRACE("set %s=%s", name, pValue);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
-    this->value = pValue;
-    this->needUpdate = true;
+    value = pValue;
+    needUpdate = true;
+
+  } else if (_stricmp(name, "enable") == 0) {
+    enabled = _atob(pValue);
+    needUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
     brightness = _atoi(pValue);
@@ -112,7 +116,7 @@ void LightElement::loop()
 {
   if (needUpdate) {
     // send value to setOutput
-    setOutput(value);
+    setOutput(enabled ? value : "x00000000");
     needUpdate = false;
   } // if
 } // loop()
@@ -126,6 +130,7 @@ void LightElement::pushState(
 {
   Element::pushState(callback);
   callback("value", value.c_str());
+  callback("enable", enabled ? "1" : "0");
   callback("brightness", String(brightness).c_str());
 } // pushState()
 

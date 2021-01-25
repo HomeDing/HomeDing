@@ -85,6 +85,11 @@ protected:
   /** @brief Brightness level in percent. */
   int brightness = 50; // percent
 
+  /**
+   * @brief The actual / new value of the output value.
+   */
+  bool enabled = true;
+
   /** duration of animation / transition in msecs */
   unsigned long duration = 4000;
 

@@ -23,10 +23,8 @@
 #include "P9813Element.h"
 
 
-/* ===== Define local constants and often used strings ===== */
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
-// like:
-// #define ANYCONSTANT 1000
 // from: https://github.com/pjpmarques/ChainableLED/blob/master/ChainableLED.cpp
 
 /* ===== Static factory function ===== */

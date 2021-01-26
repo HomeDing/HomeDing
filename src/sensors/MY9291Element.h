@@ -40,10 +40,6 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Construct a new MY9291Element
-   */
-  MY9291Element();
 
   /**
    * @brief initialize a new Element.
@@ -78,4 +74,14 @@ private:
 
 };
 
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+// Register the MY9291Element onto the ElementRegistry.
+bool MY9291Element::registered =
+    ElementRegistry::registerElement("my9291", MY9291Element::create);
+#endif
+
 #endif // MY9291ELEMENT_H
+
+// End

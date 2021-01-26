@@ -23,6 +23,8 @@
 #include "DeviceElement.h"
 #include <ElementRegistry.h>
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
 /* ===== Static factory function ===== */
 
 /**

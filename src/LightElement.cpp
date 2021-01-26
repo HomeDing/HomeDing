@@ -30,6 +30,7 @@ LightElement::LightElement()
   startupMode = Element_StartupMode::System;
 }
 
+
 void LightElement::setOutput(String value)
 {
   TRACE("setOutput(%s)", value.c_str());
@@ -37,7 +38,7 @@ void LightElement::setOutput(String value)
 
   for (int n = _count - 1; n >= 0; n--) {
     int c = col & 0x00FF;
-    analogWrite(_pins[n], c * brightness / 100);
+    analogWrite(_pins[n], c * brightness / 255);
     TRACE("%d pin=%d value=%02x", n, _pins[n], c);
     col = col >> 8;
   } // for
@@ -76,10 +77,7 @@ bool LightElement::set(const char *name, const char *pValue)
 
   } else if (_stricmp(name, "brightness") == 0) {
     brightness = _atoi(pValue);
-    if (brightness < 0)
-      brightness = 0;
-    if (brightness > 100)
-      brightness = 100;
+    brightness = constrain(brightness, 0, 255);
     needUpdate = true;
 
   } else if (_stricmp(name, PROP_PIN) == 0) {
@@ -93,9 +91,6 @@ bool LightElement::set(const char *name, const char *pValue)
       TRACE("pin[%d]=%d", _count, _pins[_count]);
       _count++;
     } // while
-
-  } else if (_stricmp(name, PROP_DURATION) == 0) {
-    duration = _atotime(pValue) * 1000; // in msecs.
 
   } else {
     ret = Element::set(name, pValue);

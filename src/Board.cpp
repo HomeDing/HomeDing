@@ -35,6 +35,9 @@ extern "C" {
 
 #define DOUBLEQUOTE '\"'
 
+// use JSONTRACE for tracing parsing the configuration files.
+#define JSONTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
+
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
@@ -73,11 +76,9 @@ int getResetCount()
 
   // check NETRESET_FLAG
   ESP.rtcUserMemoryRead(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
-  // LOGGER_TRACE("RESET read %08x", netResetValue);
 
   if ((netResetValue & NETRESET_MASK) == NETRESET_FLAG) {
     // reset was pressed twice.
-    // LOGGER_TRACE("RESET detected.");
     netResetValue++;
     res = (netResetValue & 0x000000FF);
   } else {
@@ -93,7 +94,6 @@ int getResetCount()
 // get the number of resets in the last seconds using rtc memory for counting.
 void clearResetCount()
 {
-  LOGGER_TRACE("clearResetCount");
   uint32 netResetValue = 0;
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
 }
@@ -106,15 +106,16 @@ void Board::init(ESP8266WebServer *serv)
 {
   server = serv;
 
-  // board parameters overwritten by device element
-  sysLED = -1; // configured by device-element
-  sysButton = -1; // configured by device-element
-  boardState = BOARDSTATE_NONE;
+  // board parameters configured / overwritten by device element
+  sysLED = -1;
+  sysButton = -1;
   homepage = "/index.htm";
   cacheHeader = "no-cache";
-  deepSleepStart = 0; // no deep sleep to be started
+
+  boardState = BOARDSTATE_NONE;
+  deepSleepStart = 0;     // no deep sleep to be started
   deepSleepBlock = false; // no deep sleep is blocked
-  deepSleepTime = 60; // one minute
+  deepSleepTime = 60;     // one minute
 
   _cntDeepSleep = 0;
 
@@ -126,8 +127,8 @@ void Board::init(ESP8266WebServer *serv)
 
   WiFi.begin();
   deviceName = WiFi.hostname(); // use mac based default device name
-  deviceName.replace("_", ""); // Underline in hostname is not conformant, see
-      // https://tools.ietf.org/html/rfc1123 952
+  deviceName.replace("_", "");  // Underline in hostname is not conformant, see
+                                // https://tools.ietf.org/html/rfc1123 952
 } // init()
 
 
@@ -159,19 +160,19 @@ void Board::_checkNetState()
  */
 void Board::_addAllElements()
 {
-  LOGGER_TRACE("addElements()");
+  // JSONTRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
 
   MicroJson *mj = new (std::nothrow) MicroJson(
       [this, &_lastElem](int level, char *path, char *value) {
-        // LOGGER_TRACE("callback %d %s =%s", level, path, value ? value : "-");
+        // JSONTRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
 
         if (level == 1) {
 
         } else if (level == 2) {
           // create new element
-          // LOGGER_TRACE("new %s", path);
+          JSONTRACE("new %s", path);
           // extract type name
           char typeName[32];
 
@@ -200,9 +201,8 @@ void Board::_addAllElements()
           // Search 2. slash as starting point for name to include 3. level
           char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
           name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
-          LOGGER_TRACE(" (%s) %s=%s", path, name, value ? value : "-");
+          JSONTRACE(" (%s) %s=%s", path, name, value ? value : "-");
           // add a parameter to the last Element
-          // LOGGER_TRACE(" %s:%s", name, value);
           _lastElem->set(name, value);
         } // if
       });
@@ -228,7 +228,7 @@ void Board::_addAllElements()
 
 void Board::start(Element_StartupMode startupMode)
 {
-  LOGGER_TRACE("start(%d)", startupMode);
+  // LOGGER_TRACE("start(%d)", startupMode);
 
   // make elements active that match
   Element *l = _elementList;
@@ -252,7 +252,8 @@ void Board::start(Element_StartupMode startupMode)
 // switch to a new state
 void Board::_newState(BoardState newState)
 {
-  LOGGER_TRACE("Set state=%d", newState);
+  yield();
+  LOGGER_TRACE("State=%d", newState);
   boardState = newState;
 }
 
@@ -279,7 +280,7 @@ void Board::loop()
           start(Element_StartupMode::Time);
           startComplete = true;
         } // if
-      } // if
+      }   // if
 
       if (startComplete) {
         dispatch(startAction); // dispatched when all elements are active.
@@ -311,10 +312,10 @@ void Board::loop()
     } // if
     if (_nextElement) {
       if (_nextElement->active) {
-        TRACE_START;
+        // TRACE_START;
         _nextElement->loop();
-        TRACE_END;
-        TRACE_TIMEPRINT("loop", _nextElement->id, 5);
+        // TRACE_END;
+        // TRACE_TIMEPRINT("loop", _nextElement->id, 5);
       }
       _nextElement = _nextElement->next;
     } // if
@@ -328,7 +329,6 @@ void Board::loop()
         LOGGER_INFO("sleep %d...", deepSleepTime);
         Serial.flush();
         ESP.deepSleep(deepSleepTime * 1000 * 1000);
-        delay(1);
         _newState(BOARDSTATE_SLEEP);
       }
     } // if
@@ -344,7 +344,7 @@ void Board::loop()
 
     if (_resetCount > 0) {
       // enforce un-safemode on double reset
-      LOGGER_TRACE("RESET # %d", _resetCount);
+      LOGGER_TRACE("RESET #%d", _resetCount);
       isSafeMode = false;
     } // if
 
@@ -475,8 +475,8 @@ void Board::loop()
           delay(500);
           ESP.restart();
         } // if
-      } // if
-    } // if
+      }   // if
+    }     // if
 
     if (boardState == BOARDSTATE_WAIT) {
       if (isWakeupStart || (now >= configPhaseEnd)) {
@@ -490,7 +490,7 @@ void Board::loop()
     clearResetCount();
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
-    LOGGER_TRACE("Connected to %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
+    LOGGER_JUSTINFO("Connected to %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
     WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
 
     if (display) {
@@ -542,7 +542,7 @@ void Board::loop()
     displayInfo("config..", ssid);
 
     WiFi.softAP(ssid);
-    delay(5);
+    yield();
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
@@ -581,7 +581,7 @@ Element *Board::findById(const char *id)
     if (strcmp(l->id, id) == 0) {
       // LOGGER_TRACE(" found:%s", l->id);
       break; // while
-    } // if
+    }        // if
     l = l->next;
   } // while
   return (l);
@@ -591,8 +591,8 @@ Element *Board::findById(const char *id)
 // send a event out to the defined target.
 void Board::_dispatchSingle(String evt)
 {
-  LOGGER_TRACE("dispatch %s", evt.c_str());
-  TRACE_START;
+  // LOGGER_TRACE("dispatch %s", evt.c_str());
+  // TRACE_START;
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);
   int pos2 = evt.indexOf(ELEM_VALUE);
@@ -628,8 +628,8 @@ void Board::_dispatchSingle(String evt)
         LOGGER_ERR("Event '%s' was not handled", evt.c_str());
     }
   }
-  TRACE_END;
-  TRACE_TIMEPRINT("used time:", "", 25);
+  // TRACE_END;
+  // TRACE_TIMEPRINT("used time:", "", 25);
 } // _dispatchSingle()
 
 
@@ -695,7 +695,7 @@ void Board::dispatchItem(String &action, String &values, int item)
     if (v) {
       dispatch(action.c_str(), v.c_str());
     } // if
-  } // if
+  }   // if
 } // dispatchItem
 
 
@@ -719,38 +719,32 @@ void Board::getState(String &out, const String &path)
   while (l != NULL) {
     // LOGGER_TRACE("  ->%s", l->id);
     if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
-      ret += "\"";
+      ret += DOUBLEQUOTE;
       ret += l->id;
-      ret += "\": {";
+      ret += "\":{";
       l->pushState([&ret](const char *name, const char *value) {
         // LOGGER_TRACE("->%s=%s", name, value);
-        ret.concat('\"');
+        ret.concat(DOUBLEQUOTE);
         ret.concat(name);
         ret.concat("\":\"");
         ret.concat(value);
         ret.concat("\",");
       });
-
-      // remove last comma
-      if (ret.charAt(ret.length() - 1) == ',') {
-        ret.remove(ret.length() - 1);
-      }
       ret += "},";
     } // if
 
     l = l->next;
   } // while
 
-  // remove last comma
-  if (ret.charAt(ret.length() - 1) == ',') {
-    ret.remove(ret.length() - 1);
-  }
 
   // close root object
   ret += "}";
 
+  // remove last comma before close.
+  ret.replace(",}", "}");
+
   // prettify somehow
-  ret.replace("},", "},\n");
+  // ret.replace("},", "},\n");
 
   out = ret;
 } // getState
@@ -814,7 +808,7 @@ Element *Board::getElement(const char *elementType)
   while (l != NULL) {
     if (String(l->id).substring(0, tnLength).equalsIgnoreCase(tn)) {
       break; // while
-    } // if
+    }        // if
     l = l->next;
   } // while
   // LOGGER_TRACE("found: %d", l);
@@ -824,8 +818,6 @@ Element *Board::getElement(const char *elementType)
 
 Element *Board::getElement(const char *elementType, const char *elementName)
 {
-  // LOGGER_TRACE("getElement(%s/%s)", elementType, elementName);
-
   String tn = elementType;
   tn.concat('/');
   tn.concat(elementName);
@@ -833,11 +825,10 @@ Element *Board::getElement(const char *elementType, const char *elementName)
   Element *l = _elementList;
   while (l != NULL) {
     if (String(l->id).equalsIgnoreCase(tn)) {
-      break; // while
+      break;
     } // if
     l = l->next;
   } // while
-  // LOGGER_TRACE("found: %d", l);
   return (l);
 
 } // getElement()
@@ -848,8 +839,6 @@ Element *Board::getElement(const char *elementType, const char *elementName)
  */
 void Board::forEach(const char *s, ElementCallbackFn fCallback)
 {
-  LOGGER_TRACE("forEach()");
-
   Element *l = _elementList;
   while (l != NULL) {
     (fCallback)(l);
@@ -870,7 +859,7 @@ void Board::reboot(bool wipe)
 
 void Board::displayInfo(const char *text1, const char *text2)
 {
-  LOGGER_TRACE("%s %s", text1, text2 ? text2 : "");
+  LOGGER_INFO("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

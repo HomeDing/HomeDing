@@ -25,6 +25,8 @@
 
 #include <ESP8266WiFi.h>
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
 #define MAX_WAIT_FOR_RESPONSE 20
 #define DNS_TIMEOUT (uint32_t)4
 

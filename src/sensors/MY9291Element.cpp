@@ -20,7 +20,7 @@
 
 #include <HomeDing.h>
 
-#include "xMY9291Element.h"
+#include "sensors/MY9291Element.h"
 
 #include "my92xx.h"
 
@@ -48,16 +48,9 @@ Element *MY9291Element::create()
 
 /* ===== Element functions ===== */
 
-MY9291Element::MY9291Element()
-{
-  // adjust startupMode when Network (default) is not applicable.
-  // startupMode = Element_StartupMode::System;
-}
-
 
 void MY9291Element::init(Board *board)
 {
-  TRACE("init()");
   LightElement::init(board);
   DI_PIN = 4;
   DCKI_PIN = 5;
@@ -91,10 +84,7 @@ bool MY9291Element::set(const char *name, const char *value)
  */
 void MY9291Element::start()
 {
-  TRACE("start()");
-
   // Verify parameters
-
   if ((DI_PIN >= 0) && (DCKI_PIN >= 0)) {
     Element::start();
     if (!_my92xx) {
@@ -124,20 +114,3 @@ void MY9291Element::setOutput(String value)
   _my92xx->update();
 } // setOutput()
 
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to MY9291Element.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the MY9291Element onto the ElementRegistry.
-bool MY9291Element::registered =
-    ElementRegistry::registerElement("my9291", MY9291Element::create);
-// #endif
-
-// End

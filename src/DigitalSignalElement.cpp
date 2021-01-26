@@ -20,6 +20,8 @@
 
 #include "DigitalSignalElement.h"
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
 /**
  * @brief static factory function to create a new DigitalSignalElement.
  * @return DigitalSignalElement* as Element* created element

@@ -170,7 +170,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
   if (requestUri.startsWith(SVC_BOARD)) {
     // most common request
     // everything behind  "/$board/" is used to address a specific element
-    // LOGGER_JUSTINFO("handle(%s)", requestUri.c_str());
+    // LOGGER_TRACE("handle(%s)", requestUri.c_str());
 
     String eId(requestUri.substring(8));
 

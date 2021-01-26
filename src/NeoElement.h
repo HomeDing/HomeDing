@@ -99,8 +99,8 @@ private:
 
   /** actual colors are stored in LightElement::value */
 
-  /** Brightness level in 0..255 */
-  int _brightness_255;
+  /** duration of animation / transition in msecs */
+  unsigned long duration = 4000;
 
   /** set color pattern */
   void _setColors(String colList);

@@ -246,6 +246,10 @@ extern const char *ACTION_ONPRESSURE;
 #include <MAX7219Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_MY9291
+#include "sensors/MY9291Element.h"
+#endif
+
 #ifdef HOMEDING_INCLUDE_MENU
 #include <MenuElement.h>
 #endif

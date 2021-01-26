@@ -52,9 +52,6 @@ class Board;
 
 #ifdef DEBUG_ESP_PORT
 
-/** The TRACE Macro is used for trace output for development/debugging purpose. */
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-
 /** The TRACE Macros for creating output with timing hints: */
 #define TRACE_START unsigned long __TRACE_START_TIME = millis();
 #define TRACE_END unsigned long __TRACE_END_TIME = millis();

@@ -89,17 +89,14 @@ protected:
   String oldValue;
 
   /** @brief Brightness level in percent. 
-   * The Light element uses this property as a factor for PWM output.
+   * The Light element uses this property as a factor for all PWM output.
   */
-  int brightness = 50; // percent
+  int brightness = 128; // percent
 
   /**
    * @brief The actual / new value of the output value.
    */
   bool enabled = true;
-
-  /** duration of animation / transition in msecs */
-  unsigned long duration = 4000;
 
   /** data output pins (W,R,G,B) or pins[0] only. */
   int _pins[MAXPINS]; //  = {D8, D6, D7, 0};

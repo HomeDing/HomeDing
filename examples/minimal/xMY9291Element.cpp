@@ -26,6 +26,8 @@
 
 my92xx *_my92xx;
 
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+
 /* ===== Define local constants and often used strings ===== */
 
 #define DI_PIN _pins[0]

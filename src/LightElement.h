@@ -13,6 +13,7 @@
  * 
  * Changelog:
  * * 10.03.2020 created by Matthias Hertel
+ * * 26.01.2021 support WRGB mode (4 LEDs)
  */
 
 #ifndef LIGHTELEMENT_H
@@ -41,6 +42,11 @@ public:
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
+
+  /**
+   * @brief Construct a new LightElement.
+   */
+  LightElement();
 
 
   /**
@@ -82,7 +88,9 @@ protected:
    */
   String oldValue;
 
-  /** @brief Brightness level in percent. */
+  /** @brief Brightness level in percent. 
+   * The Light element uses this property as a factor for PWM output.
+  */
   int brightness = 50; // percent
 
   /**
@@ -93,8 +101,8 @@ protected:
   /** duration of animation / transition in msecs */
   unsigned long duration = 4000;
 
-  /** data output pins (R,G,B) or pins[0] only. */
-  int _pins[4]; //  = {D8, D6, D7, 0};
+  /** data output pins (W,R,G,B) or pins[0] only. */
+  int _pins[MAXPINS]; //  = {D8, D6, D7, 0};
 
   /** set color pattern */
   virtual void setOutput(String value);
@@ -108,7 +116,6 @@ protected:
 private:
   /** Number of pixels in the stripe, set by the number of GPIO pins in then pin property. */
   int _count = 0;
-
 };
 
 /* ===== Register the Element ===== */

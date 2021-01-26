@@ -16,6 +16,8 @@
 
 #include <ElementRegistry.h>
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
 /* ===== Element functions ===== */
 
 /**
@@ -202,7 +204,7 @@ uint32_t Element::_atoColor(const char *value)
     char ch0 = value[0];
 
     if ((ch0 == '#') || (ch0 == 'x')) {
-      ret = strtol(value + 1, nullptr, 16);
+      ret = strtoul(value + 1, nullptr, 16);
     } else if ((ch0 >= '0') && (ch0 <= '9')) {
       ret = _atoi(value);
     } else if (_stricmp(value, "black") == 0) {

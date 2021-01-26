@@ -25,6 +25,8 @@
 #include "SPI.h"
 
 
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+
 /* ===== Define local constants and often used strings ===== */
 
 #define REG_DECODEMODE 0x09

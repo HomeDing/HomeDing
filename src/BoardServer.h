@@ -41,7 +41,7 @@ To send an action to a element a parameter can be added like:
 
 // Content types for http results
 
-static const char *TEXT_JSON = "application/json"; // Content type for JSON.
+static const char *TEXT_JSON = "text/javascript; charset=utf-8"; // Content type for JSON.
 static const char *TEXT_HTML = "text/html"; // Content type for HTML.
 
 /**
@@ -79,7 +79,7 @@ public:
    * @param server reference to the server.
    * @param requestMethod current http request method.
    * @param requestUri current url of the request.
-   * @return true When the state cound be retrieved.
+   * @return true When the state could be retrieved.
    * @return false
    */
   bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,

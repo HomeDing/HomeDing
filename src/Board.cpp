@@ -38,6 +38,9 @@ extern "C" {
 // use JSONTRACE for tracing parsing the configuration files.
 #define JSONTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
 
+// use JSONTRACE for tracing parsing the configuration files.
+#define TRACE(...) LOGGER_TRACE(__VA_ARGS__)
+
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
@@ -588,6 +591,18 @@ Element *Board::findById(const char *id)
 } // findById
 
 
+/** Queue an action for later dispatching. */
+void Board::_queueAction(const String &action, const String &v)
+{
+  String tmp = action;
+  tmp.replace("$v", v);
+
+  if (_actionList.length() > 0)
+    _actionList.concat(ACTION_SEPARATOR);
+  _actionList.concat(tmp);
+} // _queueAction
+
+
 // send a event out to the defined target.
 void Board::_dispatchSingle(String evt)
 {
@@ -638,12 +653,8 @@ void Board::_dispatchSingle(String evt)
  */
 void Board::dispatch(String &action, int value)
 {
-  if (action.length() > 0) {
-    char tmp[16];
-    itoa(value, tmp, 10);
-    dispatch(action.c_str(), tmp);
-  } // if
-
+  if (action.length() > 0)
+    _queueAction(action, String(value));
 } // dispatch
 
 
@@ -653,7 +664,7 @@ void Board::dispatch(String &action, int value)
 void Board::dispatch(String &action, const char *value)
 {
   if (action.length() > 0)
-    dispatch(action.c_str(), value);
+    _queueAction(action, String(value));
 } // dispatch
 
 
@@ -663,25 +674,7 @@ void Board::dispatch(String &action, const char *value)
 void Board::dispatch(String &action, String &value)
 {
   if (action.length() > 0)
-    dispatch(action.c_str(), value.c_str());
-} // dispatch
-
-
-/**
- * @brief Save an action to the _actionList.
- */
-void Board::dispatch(const char *action, const char *value)
-{
-  if ((action != NULL) && (*action)) {
-    String tmp = action;
-    if (value != NULL)
-      tmp.replace("$v", value);
-
-    // append to existing _actionList
-    if (_actionList.length() > 0)
-      _actionList.concat(ACTION_SEPARATOR);
-    _actionList.concat(tmp);
-  } // if
+    _queueAction(action, value);
 } // dispatch
 
 
@@ -692,11 +685,25 @@ void Board::dispatchItem(String &action, String &values, int item)
 {
   if (action && values) {
     String v = Element::getItemValue(values, item);
-    if (v) {
-      dispatch(action.c_str(), v.c_str());
-    } // if
+    if (v) _queueAction(action, v);
   }   // if
 } // dispatchItem
+
+
+/**
+   * Send a actions to a give element.
+   * @param typeId type/id of the element.
+   * @param action action or property.
+   * @param value the value
+   */
+void Board::queueActionTo(const String &typeId, const String &action, const String &value)
+{
+  String tmp = typeId + '?' + action + '=' + value;
+  // TRACE("queue(%s)", tmp.c_str());
+  if (_actionList.length() > 0)
+    _actionList.concat(ACTION_SEPARATOR);
+  _actionList.concat(tmp);
+} // queueActionTo
 
 
 /**
@@ -711,7 +718,7 @@ void Board::deferSleepMode()
 
 void Board::getState(String &out, const String &path)
 {
-  // LOGGER_TRACE("getState(%s)", path.c_str());
+  // TRACE("getState(%s)", path.c_str());
   String ret = "{";
   const char *cPath = path.c_str();
 
@@ -748,17 +755,6 @@ void Board::getState(String &out, const String &path)
 
   out = ret;
 } // getState
-
-
-void Board::setState(String &path, const String &property, const String &value)
-{
-  // LOGGER_TRACE("setState(%s, %s, %s)", path.c_str(), property.c_str(),
-  // value.c_str());
-  Element *e = findById(path);
-  if (e) {
-    e->set(property.c_str(), value.c_str());
-  }
-}
 
 // ===== Time functionality =====
 

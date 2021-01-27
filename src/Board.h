@@ -178,13 +178,6 @@ public:
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(const char *action, const char *value = NULL);
-
-  /**
-   * send all the actions to the right elements.
-   * @param action list of actions.
-   * @param value the value for $v placeholder.
-   */
   void dispatch(String &action, const char *value = NULL);
 
   /**
@@ -202,6 +195,14 @@ public:
   void dispatch(String &action, String &value);
 
   /**
+   * Send a actions to a give element.
+   * @param typeId type/id of the element.
+   * @param action action or property.
+   * @param value the value
+   */
+  void queueActionTo(const String &typeId, const String &action, const String &value);
+
+  /**
    * do not start sleep mode because element is active.
    */
   void deferSleepMode();
@@ -214,14 +215,6 @@ public:
    */
   void getState(String &out, const String &path);
 
-
-  /*
-   * Set a single property to a specific value or start an action.
-   * @param path Path of an Element.
-   * @param property Name of the property
-   * @param value New value of the property.
-   */
-  void setState(String &path, const String &property, const String &value);
 
   /**
    * Display Adapter when a display is configured.
@@ -373,6 +366,13 @@ private:
    * @return Element*
    */
   Element *findById(String &id);
+
+  /**
+   * Queue an action for later dispatching.
+   * @param action action or property.
+   * @param value the value
+   */
+  void _queueAction(const String &action, const String &v);
 
   void _dispatchSingle(String evt);
 

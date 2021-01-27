@@ -92,7 +92,7 @@ void BoardHandler::handleConnect(ESP8266WebServer &server)
       break;
     } // if
   } // while
-  delay(800);
+  delay(400);
   _board->reboot(false);
 } // handleConnect()
 
@@ -173,24 +173,17 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     // LOGGER_TRACE("handle(%s)", requestUri.c_str());
 
     String eId(requestUri.substring(8));
+    int argCount = server.args();
 
-    if (server.args() == 0) {
+    if (argCount == 0) {
       // get status of all or the specified element
       _board->getState(output, eId);
 
-      server.sendHeader("Cache-control", "NO-CACHE");
-      // LOGGER_JUSTINFO("  ret:%s\n", output.c_str());
-
     } else {
-      // send action to the specified element
-      String action(eId);
-      action.concat('?');
-      action.concat(server.argName(0));
-      action.concat('=');
-      action.concat(server.arg(0));
-      // LOGGER_JUSTINFO(" net-action: %s", action.c_str());
-      _board->dispatch(action.c_str(), nullptr);
-      // _board->setState(eId, server.argName(0), server.arg(0));
+      // send all actions to the specified element per given argument
+      for (int a = 0; a < argCount; a++) {
+        _board->queueActionTo(eId, server.argName(a), server.arg(a));
+      }
     } // if
     output_type = TEXT_JSON;
 
@@ -234,7 +227,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     // Network Config Page
     output = FPSTR(setupContent);
     output_type = TEXT_HTML;
-             
+
   } else if (unSafeMode && (requestUri.startsWith(PAGE_UPDATE) || requestUri.startsWith("/$boot"))) {
     // Bootstrap page
     output = FPSTR(updateContent);
@@ -281,8 +274,11 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     ret = false;
   }
 
-  if (output_type)
+  if (output_type) {
+    server.sendHeader("Cache-control", "no-cache");
+    server.sendHeader("X-Content-Type-Options", "no-sniff");
     server.send(200, output_type, output);
+  }
 
   return (ret);
 } // handle()

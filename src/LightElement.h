@@ -99,7 +99,7 @@ protected:
   bool enabled = true;
 
   /** data output pins (W,R,G,B) or pins[0] only. */
-  int _pins[MAXPINS]; //  = {D8, D6, D7, 0};
+  int _pins[MAXPINS] = {0, 0, 0, 0}; //  = {D8, D6, D7, 0};
 
   /** set color pattern */
   virtual void setOutput(String value);

@@ -20,7 +20,7 @@
 
 #include "LightElement.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief Construct a new LightElement.

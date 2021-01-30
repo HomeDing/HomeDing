@@ -1,6 +1,6 @@
 /**
  * @file P9813Element.h
- * @brief The P8913Element implements communication with P9813 LED driver Elements.
+ * @brief The P8913Element implements communication with P9813 LED driver chips to implement RGB lights.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -23,7 +23,7 @@
 #include <LightElement.h>
 
 /**
- * @brief The P8913Element implements communication with P9813 LED driver Elements.
+ * @brief The P8913Element implements communication with P9813 LED driver chips to implement RGB lights.
  */
 
 class P9813Element : public LightElement

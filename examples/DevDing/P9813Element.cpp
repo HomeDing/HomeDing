@@ -1,6 +1,6 @@
 /**
  * @file P9813Element.cpp
- * @brief Element Template class.
+ * @brief The P8913Element implements communication with P9813 LED driver chips to implement RGB lights.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

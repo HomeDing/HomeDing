@@ -20,7 +20,6 @@
 
 
 // ===== Enable Elements for the firmware
-#pragma region Enable Elements for the firmware
 
 #define HOMEDING_REGISTER 1
 

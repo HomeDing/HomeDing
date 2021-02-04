@@ -72,7 +72,7 @@ bool ColorElement::set(const char *name, const char *value)
       _startTime = now;
 
     } else if ((_mode == Mode::fix) || (_mode == Mode::pulse)) {
-      _value = colorValue;
+      _toValue = colorValue;
     }
 
   } else if (_stricmp(name, "mode") == 0) {
@@ -85,10 +85,12 @@ bool ColorElement::set(const char *name, const char *value)
 
     } else if (_stricmp(value, "pulse") == 0) {
       _mode = Mode::pulse;
+      _toValue = _value;
       _startTime = now;
 
     } else {
       _mode = Mode::fix;
+      _toValue = _value;
     } // if
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
@@ -96,7 +98,7 @@ bool ColorElement::set(const char *name, const char *value)
     _valueAction = value;
 
   } else if (_stricmp(name, "duration") == 0) {
-    _duration = _atoi(value);
+    _duration = _atotime(value) * 1000;
 
   } else if (_stricmp(name, "brightness") == 0) {
     _brightness = _atoi(value);
@@ -111,7 +113,6 @@ bool ColorElement::set(const char *name, const char *value)
 
   return (ret);
 } // set()
-
 
 
 #define MAX_HUE 1536
@@ -234,13 +235,16 @@ void ColorElement::loop()
   uint32_t nextValue = _value;
 
   if ((_mode == Mode::fade) && (_value != _toValue)) {
-    int d = now - _startTime; // duration up to now
+    unsigned long d = now - _startTime; // duration up to now
     if (d >= _duration) {
       nextValue = _toValue;
     } else {
       int p = (d * 255) / _duration; // percentage of fade transition in / 0..255
       nextValue = fadeColor(_fromValue, _toValue, p);
     }
+
+  } else if ((_mode == Mode::fix) && (_value != _toValue)) {
+    nextValue = _toValue;
 
   } else if (_mode == Mode::pulse) {
     // brightness 0...255...1 = 256+254 = 510 steps
@@ -257,7 +261,7 @@ void ColorElement::loop()
 
   if (nextValue != _value) {
     char sColor[38];
-    sprintf(sColor, "x%06lx", nextValue);
+    sprintf(sColor, "x%08x", nextValue);
     _board->dispatch(_valueAction, sColor);
     _value = nextValue;
   }
@@ -292,7 +296,7 @@ void ColorElement::pushState(
 // #ifdef HOMEDING_REGISTER
 // Register the ColorElement onto the ElementRegistry.
 bool ColorElement::registered =
-    ElementRegistry::registerElement("coloranimation", ColorElement::create);
+    ElementRegistry::registerElement("color", ColorElement::create);
 // #endif
 
 // End

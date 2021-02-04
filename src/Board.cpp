@@ -606,7 +606,7 @@ void Board::_queueAction(const String &action, const String &v)
 // send a event out to the defined target.
 void Board::_dispatchSingle(String evt)
 {
-  // LOGGER_TRACE("dispatch %s", evt.c_str());
+  TRACE("dispatch %s", evt.c_str());
   // TRACE_START;
 
   int pos1 = evt.indexOf(ELEM_PARAMETER);

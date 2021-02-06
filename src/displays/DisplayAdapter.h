@@ -53,8 +53,9 @@ public:
     _lineHeight = lh;
   };
 
-  virtual int getFontHeight(int fontsize){
-    return(fontsize);
+  virtual int getFontHeight(int fontsize)
+  {
+    return (fontsize);
   };
 
   virtual int16_t getLineHeight()
@@ -73,7 +74,7 @@ public:
     return (_charWidth);
   };
 
-  virtual void setBrightness(uint8_t bright){};
+  virtual void setBrightness(UNUSED uint8_t bright) {};
 
   /**
    * @brief Clear a position or region.

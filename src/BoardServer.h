@@ -41,8 +41,8 @@ To send an action to a element a parameter can be added like:
 
 // Content types for http results
 
-static const char *TEXT_JSON = "text/javascript; charset=utf-8"; // Content type for JSON.
-static const char *TEXT_HTML = "text/html"; // Content type for HTML.
+#define TEXT_JSON "text/javascript; charset=utf-8" // Content type for JSON.
+#define TEXT_HTML "text/html" // Content type for HTML.
 
 /**
  * @brief The BoardHandler is a local class of the main sketch that implements a

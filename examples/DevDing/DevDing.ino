@@ -18,6 +18,15 @@
  * * 15.04.2020 fixed library dependencies.
  */
 
+// ----- activatable debug options
+
+// #define DBG_GDB // start with debugger
+#define DBG_TRACE // trace level for all elements
+// #define NET_DEBUG // show network event in output
+
+#ifdef DBG_GDB
+#include <GDBStub.h>
+#endif
 
 // ===== Enable Elements for the firmware
 
@@ -53,14 +62,13 @@
 #define HOMEDING_INCLUDE_MY9291
 
 #define HOMEDING_INCLUDE_WEATHERFEED
-#pragma endregion
 
 
 #include <Arduino.h>
 
 #if defined(ESP32)
-#include <WiFi.h>
 #include <WebServer.h>
+#include <WiFi.h>
 #elif defined(ESP8266)
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
@@ -111,7 +119,7 @@ void handleRedirect()
   LOGGER_RAW("Redirect...");
 
   String url;
-  if (! mainBoard.isCaptiveMode()) {
+  if (!mainBoard.isCaptiveMode()) {
     url = mainBoard.homepage;
   } else {
     url = "http://";
@@ -130,9 +138,21 @@ void handleRedirect()
 void setup(void)
 {
   Serial.begin(115200);
+#ifdef DBG_GDB
+  gdbstub_init();
+#endif
 
+#ifdef NET_DEBUG
+  Serial.setDebugOutput(true);
+#else
   Serial.setDebugOutput(false);
+#endif
+
+#ifdef DBG_TRACE
+  delay(3000);
+  // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
+#endif
 
   LOGGER_INFO("Device starting...");
 

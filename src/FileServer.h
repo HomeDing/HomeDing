@@ -84,7 +84,7 @@ public:
   } // handle()
 
 
-  void upload(UNUSED ESP8266WebServer &server, String requestUri, HTTPUpload &upload) override
+  void upload(UNUSED ESP8266WebServer &server, UNUSED String requestUri, HTTPUpload &upload) override
   {
     // LOGGER_TRACE("upload...<%s>", upload.filename.c_str());
     if (!upload.filename.startsWith("/")) {

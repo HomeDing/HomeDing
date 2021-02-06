@@ -130,4 +130,11 @@ private:
   String _brightAction;
 };
 
+#ifdef HOMEDING_REGISTER
+// Register the ColorElement in the ElementRegistry.
+bool ColorElement::registered =
+    ElementRegistry::registerElement("color", ColorElement::create);
+ #endif
+
+
 #endif

@@ -20,7 +20,7 @@
 
 #include <HomeDing.h>
 
-#include "TheColorElement.h"
+#include <ColorElement.h>
 
 
 /* ===== Define local constants and often used strings ===== */
@@ -283,20 +283,5 @@ void ColorElement::pushState(
   callback("brightness", String(_brightness).c_str());
 } // pushState()
 
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to ColorElement.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the ColorElement onto the ElementRegistry.
-bool ColorElement::registered =
-    ElementRegistry::registerElement("color", ColorElement::create);
-// #endif
 
 // End

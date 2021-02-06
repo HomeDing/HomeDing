@@ -53,8 +53,10 @@
 #define HOMEDING_INCLUDE_BL0937
 
 // Enable Elements for LIGHT control
+#define HOMEDING_INCLUDE_COLOR
 #define HOMEDING_INCLUDE_LIGHT
 #define HOMEDING_INCLUDE_MY9291
+#define HOMEDING_INCLUDE_NEOPIXEL
 
 #include <Arduino.h>
 

@@ -40,8 +40,6 @@ public:
    */
   static bool registered;
 
-  AnalogElement();
-
   /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
@@ -81,15 +79,15 @@ private:
   int _inMin = 0, _inMax = 0, _outMin = 0, _outMax = 0;
 
   // configuration of analog input sampling time in ms.
-  unsigned long _readTimeMS;
+  unsigned long _readTimeMS = 100;
 
   // next read if analog input value in ms.
   unsigned long _nextReadMS = 0;
 
   int _value;
-  int _hysteresis;
+  int _hysteresis = 10;
 
-  int _reference;
+  int _reference = 500;
   int _lastReference;
 
   /** These actions are sent with the current value. */

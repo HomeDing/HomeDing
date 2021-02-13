@@ -102,8 +102,6 @@ uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t data)
 // read sequence of bytes to buffer
 uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
 {
-  uint8_t done = 0;
-
 #ifdef WIREDUMP
   Serial.printf("i2c writ 0x%02x:", reg);
   dumpBuffer(data, len);

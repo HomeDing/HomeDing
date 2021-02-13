@@ -91,6 +91,7 @@ void BoardHandler::handleConnect(ESP8266WebServer &server)
       WiFi.disconnect(true);
       break;
     } // if
+
   } // while
   delay(400);
   _board->reboot(false);
@@ -140,7 +141,7 @@ void BoardHandler::handleReboot(ESP8266WebServer &server, bool wipe)
  * @param requestUri current url of the request.
  * @return true When the method and requestUri match a state request.
  */
-bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
+bool BoardHandler::canHandle(UNUSED HTTPMethod requestMethod, String requestUri)
 {
   return (requestUri.startsWith(SVC_ANY));
 } // canHandle
@@ -154,7 +155,8 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
  * @return true When the state could be retrieved.
  * @return false
  */
-bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
+bool BoardHandler::handle(ESP8266WebServer &server,
+                          UNUSED HTTPMethod requestMethod,
                           String requestUri)
 {
   // LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());

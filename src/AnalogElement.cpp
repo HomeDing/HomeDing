@@ -31,15 +31,6 @@ Element *AnalogElement::create()
 } // create()
 
 
-AnalogElement::AnalogElement()
-    : _pin(A0),         // always.
-      _readTimeMS(100), // read from sensor 10 times a second.
-      _nextReadMS(0),
-      _reference(500),
-      _hysteresis(10)
-{
-}
-
 float AnalogElement::mapFloat(int value)
 {
   return (value - _inMin) * (_outMax - _outMin) / (_inMax - _inMin) + _outMin;

@@ -57,7 +57,7 @@ bool WeatherFeedElement::set(const char *name, const char *value)
       _readTime = _atotime(value);
 
     } else if (_stristartswith(name, "actions[")) {
-      int index = _atoi(name + 8); // number starts after "actions["
+      size_t index = _atoi(name + 8); // number starts after "actions["
       char *aName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;
 
       if (index >= _paths.size()) {
@@ -119,7 +119,7 @@ void WeatherFeedElement::processBody(char *value)
     // TRACE("body(%d)", strlen(value));
     if (!mj) {
       mj = new (std::nothrow) MicroJson(
-          [this](int level, char *path, char *value) {
+          [this](UNUSED int level, char *path, char *value) {
             if (path && value) {
               // LOGGER_INFO("<%s>=%s", path, value);
               // test all defined paths

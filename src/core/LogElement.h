@@ -31,6 +31,10 @@ The LogElement can ...
 @endverbatim
  */
 
+/* ===== Define local constants and often used strings ===== */
+
+#define LOGFILE_DEFAULTSIZE (4 * 1024 - 200)
+
 class LogElement : public Element
 {
 public:
@@ -96,15 +100,14 @@ private:
   /**
    * @brief The actual timestamp of the last value.
    */
-  time_t _timestamp;
+  time_t _timestamp = 0;
 
   /**
    * @brief Flag when value has been changed since last logging.
    */
-  bool _changed;
+  bool _changed = false;
 
-
-  uint16_t _filesize;
+  uint16_t _filesize = LOGFILE_DEFAULTSIZE;
 
   String _logfileName;
   String _logfileOldName;

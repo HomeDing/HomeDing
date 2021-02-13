@@ -22,10 +22,6 @@
 
 #include <FS.h>
 
-/* ===== Define local constants and often used strings ===== */
-
-#define LOGFILE_DEFAULTSIZE (4 * 1024 - 200)
-
 /* ===== Static factory function ===== */
 
 /**
@@ -41,9 +37,6 @@ Element *LogElement::create()
 /* ===== Element functions ===== */
 
 LogElement::LogElement()
-    : _filesize(LOGFILE_DEFAULTSIZE),
-      _timestamp(0),
-      _changed(false)
 {
   startupMode = Element_StartupMode::Time;
 }

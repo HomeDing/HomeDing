@@ -23,9 +23,6 @@
 
 #include <HomeDing.h>
 
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-
 /**
  * @brief Request Handler implementation for static files in file system.
  * Implements delivering static files and uploading files.

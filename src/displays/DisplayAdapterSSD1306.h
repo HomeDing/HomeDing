@@ -32,6 +32,9 @@ public:
   } // DisplayAdapterSSD1306()
 
 
+  virtual ~DisplayAdapterSSD1306() = default;
+
+
   bool init(Board *board)
   {
     if (!disp) {

@@ -272,7 +272,7 @@ public:
   /**
    * Iterator through all Elements.
    */
-  void forEach(const char *s, ElementCallbackFn fCallback);
+  void forEach(const char *prefix, ElementCallbackFn fCallback);
 
   /**
    * Get a Element by typename. Returns the first found element.

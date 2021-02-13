@@ -686,7 +686,7 @@ void Board::dispatchItem(String &action, String &values, int item)
   if (action && values) {
     String v = Element::getItemValue(values, item);
     if (v) _queueAction(action, v);
-  }   // if
+  } // if
 } // dispatchItem
 
 
@@ -833,11 +833,13 @@ Element *Board::getElement(const char *elementType, const char *elementName)
 /**
  * @brief Iterate though all Elements.
  */
-void Board::forEach(const char *s, ElementCallbackFn fCallback)
+void Board::forEach(const char *prefix, ElementCallbackFn fCallback)
 {
   Element *l = _elementList;
   while (l != NULL) {
-    (fCallback)(l);
+    if (Element::_stristartswith(l->id, prefix)) {
+      (fCallback)(l);
+    }
     l = l->next;
   } // while
 } // forEach()

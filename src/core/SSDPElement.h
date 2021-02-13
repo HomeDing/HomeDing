@@ -20,8 +20,6 @@
 /// enable the SSDP Protocol to find the device in the network
 
 #include <ESP8266SSDP.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
 
 /**
  * @brief Element for enabling Element discovery using the SSDP protocol.

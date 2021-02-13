@@ -20,13 +20,9 @@
 #include <Element.h>
 
 #include <stdio.h>
-
-#include <sntp.h>
 #include <time.h>
-
 #include <FS.h>
 
-#include <Board.h>
 #include <core/Logger.h>
 
 #define LOGFILE_MAXSIZE (4 * 1024 - 200)

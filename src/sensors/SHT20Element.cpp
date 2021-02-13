@@ -75,7 +75,6 @@ bool SHT20Element::set(const char *name, const char *value)
 byte crc8(byte *data, int length)
 {
   byte crc = 0;
-  int byteCtr;
 
   //calculates 8-Bit checksum with given polynomial
 

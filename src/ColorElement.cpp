@@ -276,7 +276,7 @@ void ColorElement::pushState(
 {
   char sColor[38];
   Element::pushState(callback);
-  sprintf(sColor, "x%06lx", _value);
+  sprintf(sColor, "x%08x", _value);
   callback(PROP_VALUE, sColor);
   callback("mode", String((int)_mode).c_str());
   callback("duration", String(_duration).c_str());

@@ -79,9 +79,8 @@ bool DisplayElement::set(const char *name, const char *value)
     d->init(_board);
 
     // redraw all display elements
-    _board->forEach("", [this](Element *e) {
-      if (_stristartswith(e->id, "display"))
-        e->set("redraw", "1");
+    _board->forEach("display", [this](Element *e) {
+      e->set("redraw", "1");
     });
 
   } else if (_stricmp(name, "clear") == 0) {

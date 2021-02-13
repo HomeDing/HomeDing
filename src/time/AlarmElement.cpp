@@ -85,7 +85,6 @@ void AlarmElement::start()
 void AlarmElement::loop()
 {
   time_t ct = _board->getTimeOfDay();
-  bool val;
 
   if (ct > 0) {
     if ((_lastTime < _time) && (ct >= _time)) {

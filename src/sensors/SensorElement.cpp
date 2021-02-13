@@ -133,13 +133,13 @@ void SensorElement::pushState(
 
 // ===== private functions =====
 
-bool SensorElement::getProbe(String &values)
+bool SensorElement::getProbe(UNUSED String &values)
 {
   return (true); // always simulate data is fine
 } // getProbe()
 
 
-void SensorElement::sendData(String &values)
+void SensorElement::sendData(UNUSED String &values)
 {
 } // sendData()
 

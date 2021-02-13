@@ -23,8 +23,6 @@
 
 #include <RemoteElement.h>
 
-#include <ESP8266WiFi.h>
-
 /**
  * @brief static factory function to create a new RemoteElement.
  * @return RemoteElement* as Element* created element

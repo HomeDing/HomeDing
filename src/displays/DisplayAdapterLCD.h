@@ -32,6 +32,9 @@ public:
   } // DisplayAdapterLCD()
 
 
+  virtual ~DisplayAdapterLCD() = default;
+
+
   /**
    * @brief Construct a new Display Adapter for a SSD1306 display
    * using specific parameters.
@@ -90,7 +93,7 @@ public:
   }; // clear()
 
 
-  int getFontHeight(int fontsize) override {
+  int getFontHeight(UNUSED int fontsize) override {
     return(1);
   };
 
@@ -101,7 +104,7 @@ public:
    * @param w width of the area.
    * @param h height of the area, assumed always 1.
    */
-  void clear(int16_t x, int16_t y, int16_t w, int16_t h)
+  void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h)
   {
     display->setCursor(x, y);
     if (y < _lines) {
@@ -121,7 +124,7 @@ public:
    * @param h height of the characters, ignored for this display.
    * @param text the text.
    */
-  int drawText(int16_t x, int16_t y, int16_t h, const char *text)
+  int drawText(int16_t x, int16_t y, UNUSED int16_t h, const char *text)
   {
     int w = strlen(text);
     char buffer[80+4]; // 8 chars character buffer max.
@@ -137,7 +140,7 @@ public:
   } // drawText
 
 
-  int drawDot(int16_t x, int16_t y, int16_t h, bool fill)
+  int drawDot(int16_t x, int16_t y, UNUSED int16_t h, bool fill)
   {
     drawText(x, y, 1, fill ? "\02" : "\01");
     return (1);

@@ -33,6 +33,8 @@ public:
     _charWidth = 1;
   } // DisplayAdapter()
 
+  virtual ~DisplayAdapter() = default;
+
   /**
    * @brief start the display.
    * @return true when display is ready for operation.
@@ -74,7 +76,7 @@ public:
     return (_charWidth);
   };
 
-  virtual void setBrightness(UNUSED uint8_t bright) {};
+  virtual void setBrightness(UNUSED uint8_t bright){};
 
   /**
    * @brief Clear a position or region.

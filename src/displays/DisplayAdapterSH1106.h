@@ -32,6 +32,9 @@ public:
   } // DisplayAdapterSH1106()
 
 
+  virtual ~DisplayAdapterSH1106() = default;
+
+
   bool init(Board *board)
   {
     if (!disp) {

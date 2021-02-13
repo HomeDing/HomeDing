@@ -25,8 +25,6 @@
 
 #include "MicroJsonParser.h"
 
-#include <ESP8266WiFi.h>
-
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 MicroJson *mj = nullptr;

@@ -31,6 +31,9 @@ public:
   } // DisplayAdapterSH1106()
 
 
+  virtual ~DisplayAdapterOLED() = default;
+
+
   virtual bool init(Board *board, OLEDDisplay *d)
   {
     display = d;

@@ -36,9 +36,6 @@ To send an action to a element a parameter can be added like:
 #ifndef BOARDSERVER_H
 #define BOARDSERVER_H
 
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-
 // Content types for http results
 
 #define TEXT_JSON "text/javascript; charset=utf-8" // Content type for JSON.

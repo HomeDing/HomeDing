@@ -16,20 +16,21 @@
  */
 
 #include <Arduino.h>
-#include <ESP8266mDNS.h>
+#include <Board.h>
+#include <Element.h>
 
+#if defined(ESP8266)
+#include <ESP8266mDNS.h>
 extern "C" {
 #include <user_interface.h> // https://github.com/esp8266/Arduino actually tools/sdk/include
 }
+#include "sntp.h"
+#endif
 
-#include <Board.h>
-#include <Element.h>
 
 #include <ElementRegistry.h>
 
 #include "MicroJsonParser.h"
-
-#include "sntp.h"
 
 #include <DNSServer.h>
 
@@ -105,9 +106,12 @@ void clearResetCount()
 /**
  * @brief Initialize a blank board.
  */
-void Board::init(ESP8266WebServer *serv)
+void Board::init(ESP8266WebServer *serv, FS *fs)
 {
   server = serv;
+
+  fileSystem = fs;
+  fileSystem->begin();
 
   // board parameters configured / overwritten by device element
   sysLED = -1;
@@ -516,7 +520,7 @@ void Board::loop()
     // ===== initialize network dependant services
 
     // start file server for static files in the file system.
-    server->serveStatic("/", SPIFFS, "/", cacheHeader.c_str()); // "no-cache");
+    server->serveStatic("/", *fileSystem, "/", cacheHeader.c_str()); // "no-cache");
 
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode

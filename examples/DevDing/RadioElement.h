@@ -89,7 +89,7 @@ private:
   int _freq = 0;
 
   bool _mute = false;
-  
+
   /**
    * @brief The actions that are submitted when a station name is recognized through RDS...
    */
@@ -99,8 +99,9 @@ private:
   String _rdsTextAction;
   String _rssiAction;
 
-  int _checkInfo = 3;
-
+  int _resetpin = -1;
+  int _checkInfo = 5;
+  int _antenna = 0;
 };
 
 #endif

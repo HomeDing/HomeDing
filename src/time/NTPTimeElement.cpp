@@ -28,21 +28,18 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include <ElementRegistry.h>
 #include <time/NTPTimeElement.h>
 
+#if defined (ESP8266)
 #include <TZ.h>
-#include <coredecls.h> // settimeofday_cb()
-#include <sntp.h>
-#include <sys/time.h>
-#include <time.h>
 
-// String constants, only once in Memory
-static const char *NTPE_ntpserver = "ntpserver";
-static const char *NTPE_zone = "zone";
+#elif defined (ESP32)
+// There is no TZ definition in ESP32 SDK so include LONDON timezone here as an example.
+#define TZ_Europe_London	PSTR("GMT0BST,M3.5.0/1,M10.5.0")
+
+#endif
 
 
 /**
@@ -70,10 +67,10 @@ bool NTPTimeElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, NTPE_ntpserver) == 0) {
+  if (_stricmp(name, "ntpserver") == 0) {
     _ntpServer = value;
 
-  } else if (_stricmp(name, NTPE_zone) == 0) {
+  } else if (_stricmp(name, "zone") == 0) {
     _timezone = value;
 
   } else {

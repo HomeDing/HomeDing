@@ -28,7 +28,7 @@
 #include <GDBStub.h>
 #endif
 
-// ===== Enable Elements for the firmware
+// ===== HomeDing Configuration : Enable Elements for the firmware
 
 #define HOMEDING_REGISTER 1
 
@@ -63,27 +63,16 @@
 
 #define HOMEDING_INCLUDE_WEATHERFEED
 
+// ===== Start Arduino Sketch
 
 #include <Arduino.h>
 
-#if defined(ESP32)
-#include <WebServer.h>
-#include <WiFi.h>
-#elif defined(ESP8266)
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-#endif
+#include <FS.h> // File System for Web Server Files
 
-#include <WiFiClient.h>
-
-#include <FS.h>
-
-#include <Board.h>
-#include <Element.h>
 #include <HomeDing.h>
 
-#include <BoardServer.h>
-#include <FileServer.h>
+#include <BoardServer.h> // Web Server Middleware for Elements
+#include <FileServer.h> // Web Server Middleware for UI 
 
 
 // ===== define full functional Web UI with 4MByte Flash devices
@@ -106,7 +95,7 @@ static const char respond404[] PROGMEM =
 #include "secrets.h"
 
 // need a WebServer
-ESP8266WebServer server(80);
+WebServer server(80);
 
 // ===== application state variables =====
 
@@ -157,8 +146,7 @@ void setup(void)
   LOGGER_INFO("Device starting...");
 
   // ----- setup the file system and load configuration -----
-  SPIFFS.begin();
-  mainBoard.init(&server);
+  mainBoard.init(&server, &SPIFFS);
   yield();
 
   // ----- adding web server handlers -----
@@ -169,7 +157,7 @@ void setup(void)
   server.addHandler(new BoardHandler(&mainBoard));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(SPIFFS, "no-cache", &mainBoard));
+  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, "no-cache", &mainBoard));
   // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {

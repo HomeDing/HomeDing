@@ -15,7 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <ESP8266mDNS.h>
+#include <HomeDing.h>
+
+// #include <ESP8266mDNS.h>
 
 #include <Board.h>
 #include <Element.h>
@@ -95,19 +97,19 @@ bool DiagElement::set(const char *name, const char *value)
       TRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
     } // for
 
-  } else if (_stricmp(name, "mdns") == 0) {
-    // log some heap information. using http://nodeding/$board/diag/0?mdns=1
-    TRACE("===== mdns =====");
-    Serial.flush();
+  // } else if (_stricmp(name, "mdns") == 0) {
+  //   // log some heap information. using http://nodeding/$board/diag/0?mdns=1
+  //   TRACE("===== mdns =====");
+  //   Serial.flush();
 
-    // add mDNS service discovery feature
-    // see http://www.dns-sd.org/
-    // https://tools.ietf.org/html/rfc6762
-    // https://tools.ietf.org/html/rfc6763
-    MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
-    MDNS.addServiceTxt(serv, "path", "/");
+  //   // add mDNS service discovery feature
+  //   // see http://www.dns-sd.org/
+  //   // https://tools.ietf.org/html/rfc6762
+  //   // https://tools.ietf.org/html/rfc6763
+  //   MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
+  //   MDNS.addServiceTxt(serv, "path", "/");
 
-    TRACE("done.");
+  //   TRACE("done.");
 
   } else {
     ret = Element::set(name, value);

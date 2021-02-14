@@ -28,12 +28,28 @@
  */
 
 // The Board.h file also works as the base import file that contains some
-// general definitions.
+// general definitions and SDK/processor specific includes.
 
 #ifndef BOARD_H
 #define BOARD_H
 
+#if defined(ESP32)
+#include <WebServer.h>
+#include <WiFi.h>
+
+#define ESP8266WebServer WebServer
+
+#elif defined(ESP8266)
 #include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
+
+#define WebServer ESP8266WebServer
+
+#endif
+
+#include <WiFiClient.h>
+
+
 #include <time.h>
 
 #define UNUSED __attribute__((unused))
@@ -61,7 +77,7 @@ class Board;
     LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
 
 #else
-#define TRACE(...)
+// #define TRACE(...)
 #define TRACE_START
 #define TRACE_END
 #define TRACE_TIME
@@ -153,7 +169,7 @@ public:
    * Initialize a blank board.
    * @param s The WebServer is always required.
    */
-  void init(ESP8266WebServer *s);
+  void init(WebServer *s, FS *fs);
 
   // ===== Board state functionality =====
 
@@ -266,8 +282,11 @@ public:
    */
   bool mDNS_sd = true;
 
-  // WebServer
-  ESP8266WebServer *server;
+  // WebServer instance
+  WebServer *server;
+
+  // FileSystem instance
+  FS *fileSystem;
 
   /**
    * Iterator through all Elements.

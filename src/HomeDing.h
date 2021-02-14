@@ -5,8 +5,9 @@
 #ifndef HOMEDING_H
 #define HOMEDING_H
 
-#include <Element.h>
-#include <ElementRegistry.h>
+#include <Board.h> // Platform
+#include <Element.h> // Abstract Elements
+#include <ElementRegistry.h> // Element Registry
 
 // some common property names
 
@@ -161,7 +162,7 @@ extern const char *ACTION_ONPRESSURE;
 #include <core/LogElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_PMS
+#if defined(HOMEDING_INCLUDE_PMS) && defined(ESP8266)
 #include <sensors/PMSElement.h>
 #endif
 
@@ -258,7 +259,7 @@ extern const char *ACTION_ONPRESSURE;
 #include <MenuElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_SSDP
+#if defined(HOMEDING_INCLUDE_SSDP) && defined(ESP8266)
 #include <core/SSDPElement.h>
 #endif
 

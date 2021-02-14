@@ -202,7 +202,7 @@ bool BoardHandler::handle(ESP8266WebServer &server,
     // jc.addProperty("flash-real-size", ESP.getFlashChipRealSize());
 
     FSInfo fs_info;
-    SPIFFS.info(fs_info);
+    _board->fileSystem->info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
@@ -217,8 +217,8 @@ bool BoardHandler::handle(ESP8266WebServer &server,
 
     // ===== these actions are only in non-safemode
   } else if (unSafeMode && (requestUri.startsWith(SVC_RESETALL))) {
-    // Reset SPIFFS, network parameters and reboot
-    SPIFFS.format();
+    // Reset file system, network parameters and reboot
+    _board->fileSystem->format();
     handleReboot(server, true);
 
   } else if (unSafeMode && (requestUri.startsWith(SVC_RESET))) {
@@ -243,7 +243,7 @@ bool BoardHandler::handle(ESP8266WebServer &server,
   } else if (unSafeMode && (requestUri.startsWith(SVC_LISTFILES))) {
     // List files in filesystem
     MicroJsonComposer jc;
-    Dir dir = SPIFFS.openDir("/");
+    Dir dir = _board->fileSystem->openDir("/");
 
     jc.openArray();
     while (dir.next()) {

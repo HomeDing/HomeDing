@@ -20,20 +20,10 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
-#include <Board.h>
 
 #include <time/DSTimeElement.h>
 
-#include <Wire.h>
 #include <WireUtils.h>
-
-#include <sntp.h>
-#include <sys/time.h>
-#include <time.h>
-
-extern "C" {
-#include "user_interface.h"
-}
 
 #define DS3231_ADDRESS 0x68
 #define DS3231_REGSTATUS (0x0F)

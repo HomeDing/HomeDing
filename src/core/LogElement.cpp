@@ -15,10 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "LogElement.h"
+#include <LogElement.h>
 
 #include <FS.h>
 
@@ -46,14 +45,14 @@ void LogElement::_logToFile()
 {
   // TRACE("log(%d,%s)", _timestamp, _value.c_str());
 
-  File f = SPIFFS.open(_logfileName, "a");
+  File f = _board->fileSystem->open(_logfileName, "a");
 
   if (f.size() > _filesize) {
     // rename to LOGFILE_OLD_NAME
     f.close();
-    SPIFFS.remove(_logfileOldName);
-    SPIFFS.rename(_logfileName, _logfileOldName);
-    f = SPIFFS.open(_logfileName, "a");
+    _board->fileSystem->remove(_logfileOldName);
+    _board->fileSystem->rename(_logfileName, _logfileOldName);
+    f = _board->fileSystem->open(_logfileName, "a");
   } // if
   f.print(_timestamp);
   f.print(',');

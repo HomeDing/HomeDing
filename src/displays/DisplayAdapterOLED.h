@@ -34,7 +34,7 @@ public:
   virtual ~DisplayAdapterOLED() = default;
 
 
-  virtual bool init(Board *board, OLEDDisplay *d)
+  virtual bool init(UNUSED Board *board, OLEDDisplay *d)
   {
     display = d;
     d->init();

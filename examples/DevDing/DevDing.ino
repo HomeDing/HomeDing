@@ -88,7 +88,6 @@ void loop(void);
 static const char respond404[] PROGMEM =
     R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
 
-
 // ===== WLAN credentials =====
 
 #include "secrets.h"

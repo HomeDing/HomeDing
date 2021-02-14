@@ -15,9 +15,13 @@
  * * 21.11.2020 Example created.
  */
 
+// ----- activatable debug options
+
+#define DBG_TRACE // trace level for all elements
+// #define NET_DEBUG // show network event in output
 #define HOMEDING_REGISTER 1
 
-// Use the Core Elements of the HomeDing Library
+// Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
 
 // The Elements required from the standard set can be minimal:
@@ -31,21 +35,23 @@
 // The WordClock Element in WordClock.cpp is included automatically, because it is in the sketch folder.
 
 #include <Arduino.h>
-
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-
-#include <FS.h>
-
-#include <Board.h>
-#include <Element.h>
 #include <HomeDing.h>
 
-#include <BoardServer.h>
-#include <FileServer.h>
+#include <FS.h> // File System for Web Server Files
 
-// ===== include project specific elements =====
+#include <BoardServer.h> // Web Server Middleware for Elements
+#include <FileServer.h>  // Web Server Middleware for UI
+
+// ===== define full functional Web UI with 4MByte Flash devices
+
+#define SETUP_URL "/$setup#v02"
+
+
+// ===== forward declarations
+
+void handleRedirect();
+void setup(void);
+void loop(void);
 
 static const char respond404[] PROGMEM =
     R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
@@ -55,7 +61,7 @@ static const char respond404[] PROGMEM =
 #include "secrets.h"
 
 // need a WebServer
-ESP8266WebServer server(80);
+WebServer server(80);
 
 // ===== application state variables =====
 
@@ -68,12 +74,12 @@ void handleRedirect()
   LOGGER_RAW("Redirect...");
 
   String url;
-  if (! mainBoard.isCaptiveMode()) {
+  if (!mainBoard.isCaptiveMode()) {
     url = mainBoard.homepage;
   } else {
     url = "http://";
     url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
-    url.concat("/$setup.htm");
+    url.concat(SETUP_URL);
   }
   server.sendHeader("Location", url, true);
   server.send(302);
@@ -88,14 +94,21 @@ void setup(void)
 {
   Serial.begin(115200);
 
+#ifdef NET_DEBUG
+  Serial.setDebugOutput(true);
+#else
   Serial.setDebugOutput(false);
+#endif
+#ifdef DBG_TRACE
+  delay(3000);
+  // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
+#endif
 
   LOGGER_INFO("Device starting...");
 
   // ----- setup the file system and load configuration -----
-  SPIFFS.begin();
-  mainBoard.init(&server);
+  mainBoard.init(&server, &SPIFFS);
   yield();
 
   // ----- adding web server handlers -----
@@ -106,7 +119,7 @@ void setup(void)
   server.addHandler(new BoardHandler(&mainBoard));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(SPIFFS, "no-cache", &mainBoard));
+  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, "no-cache", &mainBoard));
   // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {

@@ -24,12 +24,16 @@
  * * 07.04.2019 updated from DevDing example, no sensor elements, no elements that need libraries.
  */
 
+// ----- activatable debug options
 
-// ===== Enable Elements for the firmware
+#define DBG_TRACE // trace level for all elements
+// #define NET_DEBUG // show network event in output
+
+// ===== HomeDing Configuration : Enable Elements for the firmware
 
 #define HOMEDING_REGISTER 1
 
-// Enable the SYSTEM Elements of the HomeDing Library
+// Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
 
 // Enable some Core Elements for small devices
@@ -55,29 +59,16 @@
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR
 #define HOMEDING_INCLUDE_LIGHT
-#define HOMEDING_INCLUDE_MY9291
 #define HOMEDING_INCLUDE_NEOPIXEL
+#define HOMEDING_INCLUDE_MY9291
 
 #include <Arduino.h>
-
-#if defined(ESP32)
-#include <WiFi.h>
-#include <WebServer.h>
-#elif defined(ESP8266)
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-#endif
-
-#include <WiFiClient.h>
-
-#include <FS.h>
-
-#include <Board.h>
-#include <Element.h>
 #include <HomeDing.h>
 
-#include <BoardServer.h>
-#include <FileServer.h>
+#include <FS.h> // File System for Web Server Files
+
+#include <BoardServer.h> // Web Server Middleware for Elements
+#include <FileServer.h> // Web Server Middleware for UI 
 
 
 // ===== define minimal functional Web UI with 1MByte Flash devices
@@ -100,7 +91,7 @@ static const char respond404[] PROGMEM =
 #include "secrets.h"
 
 // need a WebServer
-ESP8266WebServer server(80);
+WebServer server(80);
 
 // ===== application state variables =====
 
@@ -113,7 +104,7 @@ void handleRedirect()
   LOGGER_RAW("Redirect...");
 
   String url;
-  if (! mainBoard.isCaptiveMode()) {
+  if (!mainBoard.isCaptiveMode()) {
     url = mainBoard.homepage;
   } else {
     url = "http://";
@@ -133,14 +124,21 @@ void setup(void)
 {
   Serial.begin(115200);
 
+#ifdef NET_DEBUG
+  Serial.setDebugOutput(true);
+#else
   Serial.setDebugOutput(false);
+#endif
+#ifdef DBG_TRACE
+  delay(3000);
+  // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
+#endif
 
   LOGGER_INFO("Device starting...");
 
   // ----- setup the file system and load configuration -----
-  SPIFFS.begin();
-  mainBoard.init(&server);
+  mainBoard.init(&server, &SPIFFS);
   yield();
 
   // ----- adding web server handlers -----
@@ -151,7 +149,7 @@ void setup(void)
   server.addHandler(new BoardHandler(&mainBoard));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(SPIFFS, "no-cache", &mainBoard));
+  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, "no-cache", &mainBoard));
   // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {

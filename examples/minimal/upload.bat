@@ -1,4 +1,4 @@
-@echo on
+@echo off
 
 if [%1]==[] (
   echo missing device name as parameter
@@ -6,8 +6,8 @@ if [%1]==[] (
 )
 set devicename=%1
 
-if EXIST ".\_temp\minimal.ino.bin"     ( set binfile=".\_temp\minimal.ino.bin" )
 if EXIST "..\..\_temp\minimal.ino.bin" ( set binfile="..\..\_temp\minimal.ino.bin" )
+if EXIST ".\_temp\minimal.ino.bin"     ( set binfile=".\_temp\minimal.ino.bin" )
 
 echo uploading: %binfile% to device %devicename% ...
 

@@ -16,10 +16,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "BMP280Element.h"
+#include <sensors/BMP280Element.h>
 
 #include <WireUtils.h>
 

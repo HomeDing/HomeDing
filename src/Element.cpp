@@ -11,10 +11,7 @@
 // -----
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
-#include <ElementRegistry.h>
+#include <HomeDing.h>
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 

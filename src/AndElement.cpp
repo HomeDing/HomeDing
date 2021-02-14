@@ -15,10 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
-#include <Board.h>
+#include <HomeDing.h>
 
-#include "AndElement.h"
+#include <AndElement.h>
 
 /* ===== Define local constants and often used strings ===== */
 

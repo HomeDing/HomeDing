@@ -66,10 +66,9 @@
 // ===== Start Arduino Sketch
 
 #include <Arduino.h>
+#include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
-
-#include <HomeDing.h>
 
 #include <BoardServer.h> // Web Server Middleware for Elements
 #include <FileServer.h> // Web Server Middleware for UI 

@@ -18,12 +18,11 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <WeatherFeedElement.h>
 
-#include "MicroJsonParser.h"
+#include <MicroJsonParser.h>
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 

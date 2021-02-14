@@ -11,10 +11,8 @@
 // -----
 
 #include <Arduino.h>
-#include <Element.h>
-#include <Board.h>
+#include <HomeDing.h>
 
-#include <ElementRegistry.h>
 #include <core/logger.h>
 
 // allocate static variables

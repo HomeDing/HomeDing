@@ -16,10 +16,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "sensors/SHT20Element.h"
+#include <sensors/SHT20Element.h>
 
 #include <WireUtils.h>
 

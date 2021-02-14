@@ -16,10 +16,8 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include <ElementRegistry.h>
 #include <time/TimeElement.h>
 
 #include "time.h"

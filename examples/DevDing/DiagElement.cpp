@@ -19,11 +19,6 @@
 
 // #include <ESP8266mDNS.h>
 
-#include <Board.h>
-#include <Element.h>
-
-#include <HomeDing.h>
-
 #include "DiagElement.h"
 
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)

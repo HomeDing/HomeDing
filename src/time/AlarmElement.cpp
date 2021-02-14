@@ -15,10 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
-#include <Board.h>
+#include <HomeDing.h>
 
-#include <ElementRegistry.h>
 #include <time/AlarmElement.h>
 
 /* ===== Define local constants and often used strings ===== */

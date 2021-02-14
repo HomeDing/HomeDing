@@ -15,10 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "NeoElement.h"
+#include <NeoElement.h>
 
 
 void NeoElement::_setColors(String colList)

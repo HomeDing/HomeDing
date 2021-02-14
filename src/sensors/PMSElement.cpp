@@ -18,7 +18,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <PMSElement.h>
+#include <sensors/PMSElement.h>
 
 #include <cstring>
 

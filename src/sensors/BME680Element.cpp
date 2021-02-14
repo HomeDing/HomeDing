@@ -15,12 +15,10 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include <ElementRegistry.h>
-#include <WireUtils.h>
 #include <sensors/BME680Element.h>
+#include <WireUtils.h>
 
 /* ===== Define local constants and often used strings ===== */
 

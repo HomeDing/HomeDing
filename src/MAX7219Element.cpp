@@ -15,12 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
 #include <HomeDing.h>
 
-#include "MAX7219Element.h"
+#include <MAX7219Element.h>
 
 #include "SPI.h"
 

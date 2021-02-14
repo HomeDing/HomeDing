@@ -17,7 +17,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <LogElement.h>
+#include <core/LogElement.h>
 
 #include <FS.h>
 

@@ -16,10 +16,9 @@
 
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "time/ScheduleElement.h"
+#include <time/ScheduleElement.h>
 
 /* ===== Define local constants and often used strings ===== */
 

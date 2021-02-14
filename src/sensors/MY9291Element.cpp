@@ -15,12 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
 #include <HomeDing.h>
 
-#include "sensors/MY9291Element.h"
+#include <sensors/MY9291Element.h>
 
 #include "my92xx.h"
 

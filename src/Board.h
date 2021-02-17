@@ -37,7 +37,11 @@
 #include <WebServer.h>
 #include <WiFi.h>
 
-#define ESP8266WebServer WebServer
+// #define ESP8266WebServer WebServer
+
+#include <FS.h>
+#define PIN_WIRE_SDA 21
+#define PIN_WIRE_SCL 22
 
 #elif defined(ESP8266)
 #include <ESP8266WebServer.h>

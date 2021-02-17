@@ -60,7 +60,7 @@ BoardHandler::BoardHandler(Board *board)
 
 // void handleStatus() {}
 
-void BoardHandler::handleConnect(ESP8266WebServer &server)
+void BoardHandler::handleConnect(WebServer &server)
 {
   unsigned long connectTimeout =
       millis() + (60 * 1000); // TODO: make configurable
@@ -99,7 +99,7 @@ void BoardHandler::handleConnect(ESP8266WebServer &server)
 
 
 // Return list of local networks.
-void BoardHandler::handleScan(ESP8266WebServer &server)
+void BoardHandler::handleScan(WebServer &server)
 {
   int8_t scanState = WiFi.scanComplete();
   if (scanState == WIFI_SCAN_FAILED) {
@@ -127,7 +127,7 @@ void BoardHandler::handleScan(ESP8266WebServer &server)
 } // handleScan()
 
 // reset or reboot the device
-void BoardHandler::handleReboot(ESP8266WebServer &server, bool wipe)
+void BoardHandler::handleReboot(WebServer &server, bool wipe)
 {
   server.send(200);
   server.client().stop();
@@ -155,7 +155,7 @@ bool BoardHandler::canHandle(UNUSED HTTPMethod requestMethod, String requestUri)
  * @return true When the state could be retrieved.
  * @return false
  */
-bool BoardHandler::handle(ESP8266WebServer &server,
+bool BoardHandler::handle(WebServer &server,
                           UNUSED HTTPMethod requestMethod,
                           String requestUri)
 {
@@ -243,6 +243,7 @@ bool BoardHandler::handle(ESP8266WebServer &server,
   } else if (unSafeMode && (requestUri.startsWith(SVC_LISTFILES))) {
     // List files in filesystem
     MicroJsonComposer jc;
+#if defined(ESP8266)
     Dir dir = _board->fileSystem->openDir("/");
 
     jc.openArray();
@@ -253,6 +254,9 @@ bool BoardHandler::handle(ESP8266WebServer &server,
       jc.addProperty("size", dir.fileSize());
       jc.closeObject();
     } // while
+#elif defined(ESP32)
+// TODO:ESP32 ???
+#endif
     jc.closeArray();
     output = jc.stringify();
     output_type = TEXT_JSON;

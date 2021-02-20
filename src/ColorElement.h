@@ -105,9 +105,9 @@ private:
   unsigned long _startTime;
 
   /**
-   * @brief The duration of one animation cycle or transition in milliSeconds.
+   * @brief The lightness of a color given by hsl.
    */
-  int _brightness = 255;
+  int _lightness = 127;
 
   /**
    * @brief The saturation of the colors in the animation.

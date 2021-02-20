@@ -42,11 +42,113 @@ Element *ColorElement::create()
 
 /* ===== Element functions ===== */
 
+#define MAX_HUE 1536
+#define MAX_SATURATION 255
+#define MAX_BRIGHTNESS 255
+
+/*
+ * Convert hue, saturation and lightness into a color value 0x00RRGGBB
+ * using interger based calculations. The input values must be  in range.
+ * @brief
+ * There are 6 segments in the hue wheel based on range 0 to 1535
+ * red, yellow, green, cyan, blue, magenta, (red)
+ *   0     256,   512,  768, 1024,    1280, 1536
+ * @param  hue 0...1535 (6 * 256).
+ * @param  saturation 0...255
+ * @param  lightness 0...255
+*/
+uint32_t hslColor(int hue, int saturation, int lightness)
+{
+  hue = hue % MAX_HUE;
+
+  // resulting colors
+  int r = 0, g = 0, b = 0;
+
+  // A certain part of the full color is used for resulting color,
+  // with maximum at lightness = 50 and is used as a factor to scale full color.
+  // chroma = 0...255;
+  int chroma;
+
+  // There is a minimum for all base colors to match the lightness
+  int minimum;
+
+  // calc full color by hue in range 0-255 on rgb.
+  int offset = (hue % 256); // 0...255 in every segment
+  if (hue < 256) {
+    // red to yellow
+    r = 255;
+    g = offset;
+
+  } else if (hue < 512) {
+    // yellow to green
+    r = 255 - offset;
+    g = 255;
+
+  } else if (hue < 768) {
+    // green to cyan
+    g = 255;
+    b = offset;
+
+  } else if (hue < 1024) {
+    // cyan to blue
+    g = 255 - offset;
+    b = 255;
+
+  } else if (hue < 1280) {
+    // blue to magenta
+    r = offset;
+    b = 255;
+
+  } else {
+    // magenta to red
+    b = 255 - offset;
+    r = 255;
+  } // if
+
+  if (lightness == 0) {
+    chroma = 0;
+    minimum = 0;
+
+  } else if (lightness <= 127) {
+    chroma = (2 * (lightness) * (saturation)) / 255 + 1;
+    minimum = 0;
+
+  } else {
+    chroma = (2 * (255 - lightness) * (saturation)) / 255;
+    minimum = lightness - chroma / 2;
+  }
+
+  // Serial.printf(" chroma =%3d\n", chroma);
+  // Serial.printf(" minimum=%3d\n", minimum);
+
+  r = minimum + (r * chroma) / 255;
+  g = minimum + (g * chroma) / 255;
+  b = minimum + (b * chroma) / 255;
+
+  return ((r << 16) + (g << 8) + b);
+} // hslColor()
+
+
+#define DBG(h, s, l)                                          \
+  {                                                           \
+    uint32_t c = hslColor(h, s, l);                           \
+    Serial.printf("hsl(%3d, %3d, %3d)=%06x\n\n", h, s, l, c); \
+  }
+
 void ColorElement::init(Board *board)
 {
   TRACE("init()");
   Element::init(board);
   // do something here like initialization
+
+  DBG(0, 0, 0);
+  DBG(0, 0, 128);
+  DBG(0, 0, 255);
+  DBG(0, 255, 0);
+  DBG(0, 255, 127);
+  DBG(0, 255, 128);
+  DBG(0, 255, 255);
+
 } // init()
 
 
@@ -95,14 +197,17 @@ bool ColorElement::set(const char *name, const char *value)
     _valueAction = value;
 
   } else if (_stricmp(name, "duration") == 0) {
+    // duration for wheel, pulse and fade effect
     _duration = _atotime(value) * 1000;
 
-  } else if (_stricmp(name, "brightness") == 0) {
-    _brightness = _atoi(value);
-    _brightness = constrain(_brightness, 0, 255);
-
   } else if (_stricmp(name, "saturation") == 0) {
+    // lightness for wheel effect
     _saturation = constrain(_atoi(value), 0, 255);
+
+  } else if (_stricmp(name, "lightness") == 0) {
+    // lightness for wheel effect
+    _lightness = _atoi(value);
+    _lightness = constrain(_lightness, 0, 255);
 
   } else {
     ret = Element::set(name, value);
@@ -110,72 +215,6 @@ bool ColorElement::set(const char *name, const char *value)
 
   return (ret);
 } // set()
-
-
-#define MAX_HUE 1536
-#define MAX_SATURATION 255
-#define MAX_BRIGHTNESS 255
-
-/*
- * Convert hue, saturation and value into a color value 0x00RRGGBB.
- * @param  hue 0 to 1536 (6 * 256).
- * @param   saturation 0...255
- * @param  value (brightness) 0...255
- * 
- * There are 6 segments in the hue wheel based on range 0...3600
- * red, yellow, green, cyan, blue, magenta, (red)
- *   0     256,   512,  768, 1024,    1280, 1536
-*/
-uint32_t hsvColor(int hue, int saturation, int value)
-{
-  hue = hue % MAX_HUE;
-  int r = 0, g = 0, b = 0;
-
-  int lift = (hue % 256); // 0...255 in every segment
-
-  // calc color by hue in range 0-255 on rgb.
-  if (hue < 256) {
-    // red to yellow
-    r = 255;
-    g = lift;
-
-  } else if (hue < 512) {
-    // yellow to green
-    r = 255 - lift;
-    g = 255;
-
-  } else if (hue < 768) {
-    // green to cyan
-    g = 255;
-    b = lift;
-
-  } else if (hue < 1024) {
-    // cyan to blue
-    g = 255 - lift;
-    b = 255;
-
-  } else if (hue < 1280) {
-    // blue to magenta
-    r = lift;
-    b = 255;
-
-  } else {
-    // magenta to red
-    b = 255 - lift;
-    r = 255;
-  } // if
-
-  // now map rgb (0..255) to range (lo...hi)
-  int hi = value;
-  int lo = ((255 - saturation) * value) / 255;
-  int delta = hi - lo;
-
-  r = lo + (r * delta) / 255;
-  g = lo + (g * delta) / 255;
-  b = lo + (b * delta) / 255;
-
-  return ((r << 16) + (g << 8) + b);
-}
 
 
 /*
@@ -227,11 +266,19 @@ uint32_t fadeColor(uint32_t startColor, uint32_t endColor, int factor)
  */
 void ColorElement::loop()
 {
+  static unsigned long lastTime = 0;
   // dynamic color patterns
   unsigned long now = millis(); // current (relative) time in msecs.
   uint32_t nextValue = _value;
 
-  if ((_mode == Mode::fade) && (_value != _toValue)) {
+  if ((_mode == Mode::fix) && (_value != _toValue)) {
+    nextValue = _toValue;
+
+  } else if (now < lastTime + 100) {
+    // no new automation step more often than 10 times per second.
+    return;
+
+  } else if ((_mode == Mode::fade) && (_value != _toValue)) {
     unsigned long d = now - _startTime; // duration up to now
     if (d >= _duration) {
       nextValue = _toValue;
@@ -240,20 +287,17 @@ void ColorElement::loop()
       nextValue = fadeColor(_fromValue, _toValue, p);
     }
 
-  } else if ((_mode == Mode::fix) && (_value != _toValue)) {
-    nextValue = _toValue;
-
   } else if (_mode == Mode::pulse) {
-    // brightness 0...255...1 = 256+254 = 510 steps
-    int p = (now % _duration) * 510 / _duration;
-    if (p > 255) {
-      p = 510 - p;
+    // pulse brightness 0...255...1 = 256+254 = 510 steps
+    int bright = (now % _duration) * 510 / _duration;
+    if (bright > 255) {
+      bright = 510 - bright;
     }
-    nextValue = fadeColor(0x00000000, _value, p);
+    nextValue = fadeColor(0x00000000, _toValue, bright);
 
   } else if (_mode == Mode::wheel) {
     int hue = (now % _duration) * MAX_HUE / _duration;
-    nextValue = hsvColor(hue, _saturation, _brightness);
+    nextValue = hslColor(hue, _saturation, _lightness);
   }
 
   if (nextValue != _value) {
@@ -262,6 +306,7 @@ void ColorElement::loop()
     _board->dispatch(_valueAction, sColor);
     _value = nextValue;
   }
+  lastTime = now;
 } // loop()
 
 
@@ -273,11 +318,17 @@ void ColorElement::pushState(
 {
   char sColor[38];
   Element::pushState(callback);
-  sprintf(sColor, "x%08x", _value);
-  callback(PROP_VALUE, sColor);
   callback("mode", String((int)_mode).c_str());
+
+  if (_mode != Mode::wheel) {
+    sprintf(sColor, "x%08x", _toValue); // do not report fading and interim colors
+    callback(PROP_VALUE, sColor);
+  }
+
   callback("duration", String(_duration).c_str());
-  callback("brightness", String(_brightness).c_str());
+  callback("saturation", String(_saturation).c_str());
+  callback("lightness", String(_lightness).c_str());
+  // callback("brightness", String(_brightness).c_str());
 } // pushState()
 
 

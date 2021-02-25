@@ -62,13 +62,19 @@ extern const char *passPhrase;
 // ===== detect request for network config and non-safemode using 2 resets in less than 2 sec.
 // this is implemented by using the RTC memory at offset with a special value flag
 
-/** The offset of the 4 byte signature, must be a multiple of 4 */
+#if defined(ESP8266)
+/** We use the third 4-byte block here to store a 32 bit value. */
 #define NETRESET_OFFSET 3
 
+#elif defined(ESP32)
+RTC_DATA_ATTR uint32_t rtcNetResetValue;
+
+#endif
+
 /** The magic 4-byte number indicating that a reset has happened before, "RST". Byte 4 is the counter */
-#define NETRESET_FLAG ((uint32)0x52535400)
-#define NETRESET_MASK ((uint32)0xFFFFFF00)
-#define NETRESET_VALUEMASK ((uint32)0x00000000FF)
+#define NETRESET_FLAG ((uint32_t)0x52535400)
+#define NETRESET_MASK ((uint32_t)0xFFFFFF00)
+#define NETRESET_VALUEMASK ((uint32_t)0x00000000FF)
 
 
 // get the number of resets in the last seconds using rtc memory for counting.
@@ -76,10 +82,14 @@ int getResetCount()
 {
   // LOGGER_TRACE("getResetCount()");
   int res = 0;
-  uint32 netResetValue;
+  uint32_t netResetValue;
 
   // check NETRESET_FLAG
+#if defined(ESP8266)
   ESP.rtcUserMemoryRead(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
+#elif defined(ESP32)
+  netResetValue = rtcNetResetValue;
+#endif
 
   if ((netResetValue & NETRESET_MASK) == NETRESET_FLAG) {
     // reset was pressed twice.
@@ -90,7 +100,11 @@ int getResetCount()
   }
 
   // store NETRESET_FLAG and counter to rtc memory
+#if defined(ESP8266)
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
+#elif defined(ESP32)
+  rtcNetResetValue = netResetValue;
+#endif
   return (res);
 } // getResetCount()
 
@@ -98,15 +112,19 @@ int getResetCount()
 // get the number of resets in the last seconds using rtc memory for counting.
 void clearResetCount()
 {
-  uint32 netResetValue = 0;
+  uint32_t netResetValue = 0;
+#if defined(ESP8266)
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
+#elif defined(ESP32)
+  rtcNetResetValue = netResetValue;
+#endif
 }
 
 
 /**
  * @brief Initialize a blank board.
  */
-void Board::init(ESP8266WebServer *serv, FS *fs)
+void Board::init(WebServer *serv, FS *fs)
 {
   server = serv;
 
@@ -126,14 +144,20 @@ void Board::init(ESP8266WebServer *serv, FS *fs)
 
   _cntDeepSleep = 0;
 
+#if defined(ESP8266)
   rst_info *ri = ESP.getResetInfoPtr();
   isWakeupStart = (ri->reason == REASON_DEEP_SLEEP_AWAKE);
   if (isWakeupStart) {
     LOGGER_INFO("Reset from Deep Sleep mode.");
   }
+  deviceName = WiFi.hostname(); // use mac based default device name
+
+#elif defined(ESP32)
+  isWakeupStart = false; // TODO:ESP32 ???
+  deviceName = WiFi.getHostname(); // use mac based default device name
+#endif
 
   WiFi.begin();
-  deviceName = WiFi.hostname(); // use mac based default device name
   deviceName.replace("_", "");  // Underline in hostname is not conformant, see
                                 // https://tools.ietf.org/html/rfc1123 952
 } // init()
@@ -148,7 +172,7 @@ bool Board::isCaptiveMode()
 
 void Board::_checkNetState()
 {
-  delay(0);
+  delay(1);
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
     LOGGER_RAW("new netstate: %d", newState);

@@ -129,29 +129,6 @@ uint32_t hslColor(int hue, int saturation, int lightness)
 } // hslColor()
 
 
-#define DBG(h, s, l)                                          \
-  {                                                           \
-    uint32_t c = hslColor(h, s, l);                           \
-    Serial.printf("hsl(%3d, %3d, %3d)=%06x\n\n", h, s, l, c); \
-  }
-
-void ColorElement::init(Board *board)
-{
-  TRACE("init()");
-  Element::init(board);
-  // do something here like initialization
-
-  DBG(0, 0, 0);
-  DBG(0, 0, 128);
-  DBG(0, 0, 255);
-  DBG(0, 255, 0);
-  DBG(0, 255, 127);
-  DBG(0, 255, 128);
-  DBG(0, 255, 255);
-
-} // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -166,6 +143,7 @@ bool ColorElement::set(const char *name, const char *value)
     uint32_t colorValue = _atoColor(value);
 
     if (_mode == Mode::fade) {
+      // setup fading range and time
       _fromValue = _value;
       _toValue = colorValue;
       _startTime = now;
@@ -235,7 +213,13 @@ uint32_t fadeColor(uint32_t startColor, uint32_t endColor, int factor)
 
   } else {
     int v0, v1;
-    int r, g, b;
+    int w, r, g, b;
+
+    // white
+    v0 = (startColor & 0xFF000000) >> 24;
+    v1 = (endColor & 0xFF000000) >> 24;
+    w = v0 + (v1 - v0) * factor / 255;
+    w = constrain(w, 0, 255);
 
     // red
     v0 = (startColor & 0x00FF0000) >> 16;
@@ -255,7 +239,7 @@ uint32_t fadeColor(uint32_t startColor, uint32_t endColor, int factor)
     b = v0 + (v1 - v0) * factor / 255;
     b = constrain(b, 0, 255);
 
-    nextColor = ((r << 16) + (g << 8) + b);
+    nextColor = ((w << 24) + (r << 16) + (g << 8) + b);
   } // if
   return (nextColor);
 }

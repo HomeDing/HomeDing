@@ -22,7 +22,7 @@
 
 // #define DBG_GDB // start with debugger
 #define DBG_TRACE // trace level for all elements
-// #define NET_DEBUG // show network event in output
+#define NET_DEBUG // show network event in output
 
 #ifdef DBG_GDB
 #include <GDBStub.h>
@@ -69,7 +69,9 @@
 #include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
+#if defined(ESP32)
 #include <SPIFFS.h> // File System for Web Server Files
+#endif
 
 #include <BoardServer.h> // Web Server Middleware for Elements
 #include <FileServer.h> // Web Server Middleware for UI 

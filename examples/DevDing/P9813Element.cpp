@@ -102,9 +102,9 @@ void P9813Element::setOutput(String value)
   // Start frame
   sendPixelData(0x00000000);
 
-  uint8 blue =  (((col & 0x000000FF)) * brightness) / 100;
-  uint8 green = (((col & 0x0000FF00) >> 8) * brightness) / 100;
-  uint8 red =   (((col & 0x00FF0000) >> 16) * brightness) / 100;
+  uint8_t blue =  (((col & 0x000000FF)) * brightness) / 100;
+  uint8_t green = (((col & 0x0000FF00) >> 8) * brightness) / 100;
+  uint8_t red =   (((col & 0x00FF0000) >> 16) * brightness) / 100;
 
   // send prefix
   uint32_t data = 0xC0000000; // first 2 bits (flag bits) set

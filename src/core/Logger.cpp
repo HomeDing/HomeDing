@@ -60,11 +60,11 @@ void Logger::_print(const char *module, int level, const char *fmt,
   DEBUG_ESP_PORT.println(buffer);
 #endif
 
-  delay(0);
+  delay(1);
 
   if ((module) && (logger_file) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
-    delay(0);
+    delay(1);
   } // if
 } // _print
 

@@ -2,7 +2,7 @@
  * @file DevDing.ino
  * @brief Experimental sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
- * This sketch is also used as an incubaror project.
+ * This sketch is also used as an incubator project for new and unfinished elements.
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.

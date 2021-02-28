@@ -26,6 +26,8 @@
 #ifndef MICROJSON_H
 #define MICROJSON_H
 
+#include <FS.h>
+
 #define MICROJSON_PATH_SEPARATOR '/'
 #define MICROJSON_PATH_SEPARATOR_S "/"
 
@@ -61,7 +63,7 @@ public:
    * @brief Parse JSON from a file.
    * @param s The File Name.
    */
-  void parseFile(const char *fName);
+  void parseFile(FS *fs, const char *fName);
 
 protected:
   /**

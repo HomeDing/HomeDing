@@ -27,7 +27,7 @@
 #define LOGFILE_MAXSIZE (4 * 1024 - 200)
 
 // String constants, only once in Memory
-static const char *LOGGER_LEVELS = "iet"; // info, error, trace
+static const char *LOGGER_LEVELS = "eit"; // info, error, trace
 static const char *LOGFILE_NAME = "/log.txt";
 static const char *LOGFILE_OLD_NAME = "/log_old.txt";
 
@@ -116,7 +116,7 @@ void Logger::_printToFile(char *buffer)
 };
 
 // Default: Log INFO and ERROR
-int Logger::logger_level = LOGGER_LEVEL_ERR;
+int Logger::logger_level = LOGGER_LEVEL_INFO;
 
 bool Logger::logger_file = false;
 

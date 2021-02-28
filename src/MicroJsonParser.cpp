@@ -97,16 +97,15 @@ void MicroJson::parse(const char *s)
 };
 
 
-void MicroJson::parseFile(const char *fName)
+void MicroJson::parseFile(FS *fs, const char *fName)
 {
   init();
 
-  if (_callbackFn) {
-
-    if (SPIFFS.exists(fName)) {
+  if (fs && _callbackFn) {
+    if (fs->exists(fName)) {
       MJ_TRACE("parsing file %s", fName);
 
-      File file = SPIFFS.open(fName, "r");
+      File file = fs->open(fName, "r");
       while (file.available()) {
         char buffer[128 + 1]; // one extra char for enforced NUL char.
         size_t len = file.readBytes(buffer, sizeof(buffer) - 1);
@@ -114,6 +113,7 @@ void MicroJson::parseFile(const char *fName)
           buffer[len] = NUL;
           parseChar(buffer);
         }
+        delay(1);
       }
       file.close();
     } // if

@@ -240,11 +240,11 @@ void Board::_addAllElements()
 
   if (mj) {
     // config the thing to the local network
-    mj->parseFile(ENV_FILENAME);
+    mj->parseFile(fileSystem, ENV_FILENAME);
     _checkNetState();
 
     // config the Elements of the device
-    mj->parseFile(CONF_FILENAME);
+    mj->parseFile(fileSystem, CONF_FILENAME);
     _checkNetState();
 
     if (!_elementList) {

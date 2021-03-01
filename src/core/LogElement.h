@@ -107,6 +107,11 @@ private:
    */
   bool _changed = false;
 
+  unsigned long _avgTime = 0; // averagetime setting 
+  unsigned long _avgEnd = 0; // end time of the avg collection
+  double _avgSum = 0;
+  unsigned int _avgCount = 0;
+  
   uint16_t _filesize = LOGFILE_DEFAULTSIZE;
 
   String _logfileName;

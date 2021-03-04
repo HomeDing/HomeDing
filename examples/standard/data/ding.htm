@@ -2,10 +2,8 @@
 <html lang="en">
 
 <head>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>Board</title>
 
   <link rel="icon" type="image/png" href="/favicon48.png" sizes="48x48">
@@ -15,24 +13,19 @@
   <meta name="msapplication-TileImage" content="/favicon144.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/favicon180.png" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#ffffff" />
   <link rel="icon" type="image/png" href="/favicon48.png" sizes="48x48">
-
   <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
+  <script src="/micro.js"></script>
 
   <style>
     img,
     #panel {
-      user-select: none;
       -ms-user-select: none;
-    }
-
-    .hueband {
-      background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+      user-select: none;
     }
   </style>
-  <script src="/micro.js"></script>
 </head>
 
 <body>
@@ -118,6 +111,32 @@
         </div>
       </div>
 
+      <div class="col card" u-control="dht" microID="${id}" u-is="generic">
+        <div class="block">
+          <h4>${id} - <span u-text="description"></span></h4>
+          <table>
+            <tr>
+              <td colspan="3">
+                <h4 u-text="title"></h4>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3"><span u-text="description"></span></td>
+            </tr>
+            <tr>
+              <td style="font-size: 2rem"><span u-text="temperature">__.__</span>&deg;C</td>
+              <td style="width:1rem"></td>
+              <td style="font-size: 2rem"><span u-text="humidity">__.__</span>%</td>
+            </tr>
+            <tr>
+              <td>Temperature</td>
+              <td></td>
+              <td>Humidity</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
       <div class="col card" u-control="and" id="${id}" u-is="generic" microID="${id}">
         <div class="block">
           <h4>${id} - <span u-text="description"></span></h4>
@@ -126,15 +145,38 @@
         </div>
       </div>
 
-      <div class="col card" u-control="neo" id="${id}" u-is="neo" microID="${id}">
+      <div class="col card" u-control="bl0937" id="${id}" u-is="bl0937" microID="${id}">
+        <div class="block">
+          <h4>${id} - <span u-text="description"></span></h4>
+          <table style="width:100%;font-size:2rem">
+            <tr>
+              <td>
+                <span u-text="power"></span> W
+              </td>
+              <td style="display:none">
+                <span u-text="current"></span> mA
+              </td>
+              <td style="display:none">
+                <span u-text="voltage"></span> V
+              </td>
+            </tr>
+          </table>
+          mode: <button u-action="mode" value="current">current</button>
+          <button u-action="mode" value="voltage">voltage</button>
+        </div>
+      </div>
+
+      <div class="col card" u-control="color" id="${id}" u-is="color" microID="${id}">
         <div class="block">
           <h4>${id} - <span u-text="description"></span></h4>
           <div class="form-group"><label>value:</label><span u-text="value"></span><span class="color"
               style="width:6rem;"></span></div>
-          <div class="hueband" style="height:1.4rem;width:100%;margin-bottom: 0.4rem;"></div>
-          <button u-action="mode" value="flow">flow</button>
-          <button u-action="mode" value="wheel">wheel</button>
-          <button u-action="mode" value="pulse">pulse</button>
+          <input type="range" max="359" class="band hue">
+          <input type="range" max="255" class="band saturation" u-value="saturation">
+          <input type="range" max="255" class="band lightness" u-value="lightness">
+          <input type="range" max="255" class="band white">
+          <button u-action="mode" value="fade">fade</button><button u-action="mode" value="fix">fix</button><button
+            u-action="mode" value="pulse">pulse</button><button u-action="mode" value="wheel">wheel</button>
         </div>
       </div>
 
@@ -150,15 +192,22 @@
   </div>
 
   <div id="modal" class="hidden">
-    <div id="modalBack" onclick="modal.close()"></div>
-    <div id="modalContainer" style="width:260px;height:260px">Hello, this is modal</div>
+    <div id="back" onclick="modal.close()"></div>
+    <div id="container" style="width:260px;height:260px">Hello, this is modal</div>
   </div>
 
   <script>
     var panelObj = document.getElementById('panel');
-    var updateTimer;
+    var timer;
 
-    function createElement(path, key, value) {
+    // Element type reuse
+    var alias = {
+      "sht20": "dht",
+      "displaysh1106": "displayssd1306",
+      "p9813": "neo"
+    };
+
+    hub.subscribe('/*/*', function (path, key, value) {
       if (path) {
         path = path.toLowerCase();
         var hElem = document.querySelector("[microID='" + path + "']");
@@ -170,11 +219,13 @@
           };
 
           var e = micro.insertTemplate(panelObj, t, p);
-          // if (!e) { micro.insertTemplate(panelObj, 'generic', p); }
+          if (!e) {
+            t = alias[t]; // || 'generic';
+            e = micro.insertTemplate(panelObj, t, p);
+          }
         } // if
       } // if
-    } // createElement()
-    hub.subscribe('/*/*', createElement);
+    });
 
     hub.subscribe('/device/*?name', function (path, key, value) {
       document.title = value;
@@ -182,16 +233,15 @@
     });
 
     function updateAsap(ev) {
-      if (updateTimer)
-        window.clearTimeout(updateTimer);
-      updateTimer = null;
-      updateTimer = window.setTimeout(updateState, 20);
+      if (timer)
+        window.clearTimeout(timer);
+      timer = window.setTimeout(updateState, 20);
     }
 
     function updateState(ev) {
-      if (updateTimer)
-        window.clearTimeout(updateTimer);
-      updateTimer = null;
+      if (timer)
+        window.clearTimeout(timer);
+      timer = null;
 
       fetch('/$board')
         .then(function (result) {
@@ -201,7 +251,7 @@
           hub.publishObj(json);
         })
         .then(function (json) {
-          updateTimer = window.setTimeout(updateState, 4000);
+          timer = window.setTimeout(updateState, 4000);
         });
     } // updateState()
 

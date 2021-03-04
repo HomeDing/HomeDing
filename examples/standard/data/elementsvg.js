@@ -27,13 +27,12 @@ function create(def) {
 
   // header
   pObj.querySelector('text').textContent = def.name;
-  pObj.querySelector('image').setAttribute("xlink:href", "i/" + def.name + ".svg");
+  var iconName = def.icon || def.name;
+  pObj.querySelector('image').setAttribute("xlink:href", "i/" + iconName + ".svg");
 
   if (def.properties)
     def.properties.forEach(function (e) {
-      if (def.events && (!def.events.includes(e))) {
-         createBox("property", e); 
-        }
+      createBox("property", e);
     });
   if (def.events)
     def.events.forEach(function (e) {

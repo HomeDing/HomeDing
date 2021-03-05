@@ -282,7 +282,7 @@ public:
   int I2cScl = PIN_WIRE_SCL;
 
   /**
-   * Service disovery
+   * Service discovery
    */
   bool mDNS_sd = true;
 

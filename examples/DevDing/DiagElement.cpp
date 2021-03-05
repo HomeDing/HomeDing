@@ -21,6 +21,10 @@
 
 #include "DiagElement.h"
 
+#if defined(ESP32)
+#include <rom/rtc.h>
+#endif
+
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
@@ -59,6 +63,7 @@ bool DiagElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "heap") == 0) {
+#if defined(ESP8266)
     // log some heap information. using http://nodeding/$board/diag/0?heap=1
     TRACE("===== HEAP =====");
     uint32_t free;
@@ -67,9 +72,14 @@ bool DiagElement::set(const char *name, const char *value)
     ESP.getHeapStats(&free, &max, &frag);
     LOGGER_EINFO("heap free: %5d - max: %5d - frag: %3d%%", free, max, frag);
 
+#elif defined(ESP32)
+    LOGGER_EINFO("heap: %5d / %5d", ESP.getFreeHeap(), ESP.getHeapSize());
+
+#endif
 
   } else if (_stricmp(name, "rtcmem") == 0) {
     // log some heap information. using http://nodeding/$board/diag/0?rtcmem=1
+#if defined(ESP8266)
     // dump rtc Memory
     TRACE("===== RTCMEM =====");
     uint8_t rtcbuffer[16];
@@ -91,6 +101,7 @@ bool DiagElement::set(const char *name, const char *value)
       }
       TRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
     } // for
+#endif
 
   // } else if (_stricmp(name, "mdns") == 0) {
   //   // log some heap information. using http://nodeding/$board/diag/0?mdns=1
@@ -123,9 +134,15 @@ void DiagElement::start()
   TRACE("start()");
   Element::start();
 
+#if defined(ESP8266)
   TRACE("Reset Reason: %s", ESP.getResetReason().c_str());
-  TRACE(" Free Memory: %d", ESP.getFreeHeap());
   TRACE("     Chip-Id: 0x%08X", ESP.getChipId());
+#elif defined(ESP32)
+  // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
+  TRACE("Reset Reason: %d", rtc_get_reset_reason(0));
+#endif
+
+  TRACE(" Free Memory: %d", ESP.getFreeHeap());
   TRACE(" Mac-address: %s", WiFi.macAddress().c_str());
 
   // ===== scan the the I2C bus and report found devices =====

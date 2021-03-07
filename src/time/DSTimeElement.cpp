@@ -20,20 +20,10 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
-#include <Board.h>
 
 #include <time/DSTimeElement.h>
 
-#include <Wire.h>
 #include <WireUtils.h>
-
-#include <sntp.h>
-#include <sys/time.h>
-#include <time.h>
-
-extern "C" {
-#include "user_interface.h"
-}
 
 #define DS3231_ADDRESS 0x68
 #define DS3231_REGSTATUS (0x0F)
@@ -67,7 +57,7 @@ void DSTimeElement::_getDSTime(int adr, struct tm *t)
   memset(t, 0, sizeof(struct tm));
   uint8_t data[8];
 
-  WireUtils::read(adr, 0, data, 7);
+  WireUtils::readBuffer(adr, 0, data, 7);
 
   t->tm_sec = bcd2Dec(data[0]);
   t->tm_min = bcd2Dec(data[1]);
@@ -106,7 +96,7 @@ void DSTimeElement::_setTime(const char *value)
 
   LOGGER_INFO("setTime(%s)", value);
 
-  if (strlen(value) == 19) {
+  if (strnlen(value, 21) == 19) {
     memset(&t, 0, sizeof(struct tm));
     t.tm_year = strtol(pEnd, &pEnd, 10) - 1900;
     if (*pEnd == '-')
@@ -130,7 +120,7 @@ void DSTimeElement::_setTime(const char *value)
 
     // update chip and reset OSF flag.
     _setDSTime(_address, &t);
-    int status = WireUtils::read(_address, DS3231_REGSTATUS);
+    int status = WireUtils::readRegister(_address, DS3231_REGSTATUS);
     WireUtils::write(_address, DS3231_REGSTATUS, status & (~DS3231_REGSTATUS_OSF));
   }
 } // _setTime()
@@ -205,7 +195,7 @@ void DSTimeElement::loop()
   struct tm t;
 
   if ((_state != 1) && (_nextRead < now)) {
-    int status = WireUtils::read(DS3231_ADDRESS, DS3231_REGSTATUS);
+    int status = WireUtils::readRegister(DS3231_ADDRESS, DS3231_REGSTATUS);
 
     // The OSF flag shows if the time is valid / no power lost since last
     // adjustment.

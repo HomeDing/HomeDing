@@ -1,6 +1,6 @@
 /**
  * @file AndElement.cpp
- * @brief Element Template class.
+ * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,10 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
-#include <Board.h>
+#include <HomeDing.h>
 
-#include "AndElement.h"
+#include <AndElement.h>
 
 /* ===== Define local constants and often used strings ===== */
 

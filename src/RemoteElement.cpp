@@ -18,12 +18,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <RemoteElement.h>
-
-#include <ESP8266WiFi.h>
 
 /**
  * @brief static factory function to create a new RemoteElement.

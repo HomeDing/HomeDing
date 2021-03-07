@@ -1,6 +1,6 @@
 /**
  * @file time/ScheduleElement.h
- * @brief Element Template class.
+ * @brief The ScheduleElement creates actions based on the time of day.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

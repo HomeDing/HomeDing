@@ -15,10 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "ButtonElement.h"
+#include <ButtonElement.h>
 
 
 #define STATE_INIT 0 // waiting for input

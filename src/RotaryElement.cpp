@@ -1,6 +1,6 @@
 /**
  * @file RotaryElement.cpp
- * @brief Element Template class.
+ * @brief Element to capture increments and decrements for values using a rotary encoder.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,11 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <RotaryElement.h>
-
 #include <RotaryEncoder.h>
 
 

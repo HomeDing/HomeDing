@@ -17,8 +17,7 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <sensors/DHTElement.h>
 
@@ -120,7 +119,6 @@ bool DHTElement::getProbe(String &values)
   char buffer[16];
 
   TempAndHumidity dhtValues;
-  int v;
 
   // TRACE("getProbe()");
   dhtValues = _dht.getTempAndHumidity();

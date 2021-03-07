@@ -1,6 +1,6 @@
 /**
  * @file LogElement.h
- * @brief Element Template class.
+ * @brief The Log Element implements saving sensor data to the local file system.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -30,6 +30,10 @@ The LogElement can ...
 
 @endverbatim
  */
+
+/* ===== Define local constants and often used strings ===== */
+
+#define LOGFILE_DEFAULTSIZE (4 * 1024 - 200)
 
 class LogElement : public Element
 {
@@ -96,15 +100,19 @@ private:
   /**
    * @brief The actual timestamp of the last value.
    */
-  time_t _timestamp;
+  time_t _timestamp = 0;
 
   /**
    * @brief Flag when value has been changed since last logging.
    */
-  bool _changed;
+  bool _changed = false;
 
-
-  uint16_t _filesize;
+  unsigned long _avgTime = 0; // averagetime setting 
+  unsigned long _avgEnd = 0; // end time of the avg collection
+  double _avgSum = 0;
+  unsigned int _avgCount = 0;
+  
+  uint16_t _filesize = LOGFILE_DEFAULTSIZE;
 
   String _logfileName;
   String _logfileOldName;

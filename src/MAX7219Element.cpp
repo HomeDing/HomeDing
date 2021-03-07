@@ -15,15 +15,14 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
 #include <HomeDing.h>
 
-#include "MAX7219Element.h"
+#include <MAX7219Element.h>
 
 #include "SPI.h"
 
+
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -47,13 +46,6 @@ Element *MAX7219Element::create()
 
 
 /* ===== Element functions ===== */
-
-MAX7219Element::MAX7219Element()
-{
-  // adjust startupMode when Network (default) is not applicable.
-  // startupMode = Element_StartupMode::System;
-}
-
 
 void MAX7219Element::_write(byte address, byte data)
 {
@@ -114,13 +106,13 @@ void MAX7219Element::_writeNumber(String number)
 
   // fill data array with digits and decimal point
 
-  for (int i = number.length() - 1; i >= 0; i--) {
+  for (int i = len - 1; i >= 0; i--) {
     char ch = number[i];
 
     if ((ch == '.') || (ch == ',')) {
       data[digits] = 0x80; //  set decimal point
 
-    } else if ((ch >= '0') || (ch <= '9')) {
+    } else if (isdigit(ch)) {
       data[digits] += (ch - '0');
       m |= 1 << digits; // set this digit in decode mode
       digits++;
@@ -136,7 +128,8 @@ void MAX7219Element::_writeNumber(String number)
   for (int row = 0; row < 8; row++) {
     _write(row + 1, data[row]);
   }
-}
+} // _writeNumber()
+
 
 /** 
  * write a bit pattern

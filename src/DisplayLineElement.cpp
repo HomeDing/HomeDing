@@ -15,8 +15,7 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <DisplayLineElement.h>
 
@@ -65,7 +64,7 @@ bool DisplayLineElement::set(const char *name, const char *value)
  */
 void DisplayLineElement::start()
 {
-  DisplayAdapter *d = (DisplayAdapter *)(_board->display);
+  DisplayAdapter *d = _board->display;
 
   if (d == NULL) {
     LOGGER_EERR("no display defined");

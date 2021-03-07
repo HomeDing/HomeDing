@@ -16,23 +16,18 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <stdio.h>
-
-#include <sntp.h>
 #include <time.h>
-
 #include <FS.h>
 
-#include <Board.h>
 #include <core/Logger.h>
 
 #define LOGFILE_MAXSIZE (4 * 1024 - 200)
 
 // String constants, only once in Memory
-static const char *LOGGER_LEVELS = "iet"; // info, error, trace
+static const char *LOGGER_LEVELS = "eit"; // info, error, trace
 static const char *LOGFILE_NAME = "/log.txt";
 static const char *LOGFILE_OLD_NAME = "/log_old.txt";
 
@@ -65,11 +60,11 @@ void Logger::_print(const char *module, int level, const char *fmt,
   DEBUG_ESP_PORT.println(buffer);
 #endif
 
-  delay(0);
+  delay(1);
 
   if ((module) && (logger_file) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
-    delay(0);
+    delay(1);
   } // if
 } // _print
 
@@ -121,7 +116,7 @@ void Logger::_printToFile(char *buffer)
 };
 
 // Default: Log INFO and ERROR
-int Logger::logger_level = LOGGER_LEVEL_ERR;
+int Logger::logger_level = LOGGER_LEVEL_INFO;
 
 bool Logger::logger_file = false;
 

@@ -15,15 +15,17 @@
  */
 
 #include <Arduino.h>
-#include <ESP8266mDNS.h>
-
-#include <Board.h>
-#include <Element.h>
-
 #include <HomeDing.h>
+
+// #include <ESP8266mDNS.h>
 
 #include "DiagElement.h"
 
+#if defined(ESP32)
+#include <rom/rtc.h>
+#endif
+
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -61,6 +63,7 @@ bool DiagElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, "heap") == 0) {
+#if defined(ESP8266)
     // log some heap information. using http://nodeding/$board/diag/0?heap=1
     TRACE("===== HEAP =====");
     uint32_t free;
@@ -69,9 +72,14 @@ bool DiagElement::set(const char *name, const char *value)
     ESP.getHeapStats(&free, &max, &frag);
     LOGGER_EINFO("heap free: %5d - max: %5d - frag: %3d%%", free, max, frag);
 
+#elif defined(ESP32)
+    LOGGER_EINFO("heap: %5d / %5d", ESP.getFreeHeap(), ESP.getHeapSize());
+
+#endif
 
   } else if (_stricmp(name, "rtcmem") == 0) {
     // log some heap information. using http://nodeding/$board/diag/0?rtcmem=1
+#if defined(ESP8266)
     // dump rtc Memory
     TRACE("===== RTCMEM =====");
     uint8_t rtcbuffer[16];
@@ -93,20 +101,21 @@ bool DiagElement::set(const char *name, const char *value)
       }
       TRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
     } // for
+#endif
 
-  } else if (_stricmp(name, "mdns") == 0) {
-    // log some heap information. using http://nodeding/$board/diag/0?mdns=1
-    TRACE("===== mdns =====");
-    Serial.flush();
+  // } else if (_stricmp(name, "mdns") == 0) {
+  //   // log some heap information. using http://nodeding/$board/diag/0?mdns=1
+  //   TRACE("===== mdns =====");
+  //   Serial.flush();
 
-    // add mDNS service discovery feature
-    // see http://www.dns-sd.org/
-    // https://tools.ietf.org/html/rfc6762
-    // https://tools.ietf.org/html/rfc6763
-    MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
-    MDNS.addServiceTxt(serv, "path", "/");
+  //   // add mDNS service discovery feature
+  //   // see http://www.dns-sd.org/
+  //   // https://tools.ietf.org/html/rfc6762
+  //   // https://tools.ietf.org/html/rfc6763
+  //   MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
+  //   MDNS.addServiceTxt(serv, "path", "/");
 
-    TRACE("done.");
+  //   TRACE("done.");
 
   } else {
     ret = Element::set(name, value);
@@ -125,9 +134,15 @@ void DiagElement::start()
   TRACE("start()");
   Element::start();
 
+#if defined(ESP8266)
   TRACE("Reset Reason: %s", ESP.getResetReason().c_str());
-  TRACE(" Free Memory: %d", ESP.getFreeHeap());
   TRACE("     Chip-Id: 0x%08X", ESP.getChipId());
+#elif defined(ESP32)
+  // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
+  TRACE("Reset Reason: %d", rtc_get_reset_reason(0));
+#endif
+
+  TRACE(" Free Memory: %d", ESP.getFreeHeap());
   TRACE(" Mac-address: %s", WiFi.macAddress().c_str());
 
   // ===== scan the the I2C bus and report found devices =====
@@ -144,14 +159,20 @@ void DiagElement::start()
     error = Wire.endTransmission();
 
     if (error == 0) {
+      _i2cAddresses += "0x";
+      _i2cAddresses += String(adr, 16); //  adr;
+      _i2cAddresses += ',';
+
       if (adr == 0x11) {
         TRACE(" 0x11 (SI4721) found.");
       } else if (adr == 0x27) {
         TRACE(" 0x27 (LCD, PCF8574) found.");
       } else if (adr == 0x3C) {
-        TRACE(" 0x03C (SSD1306, SSD1309) found.");
+        TRACE(" 0x03C (SH1106, SSD1306, SSD1309) found.");
       } else if (adr == 0x40) {
         TRACE(" 0x27 (INA219) found.");
+      } else if (adr == 0x63) {
+        TRACE(" 0x63 (SI4730 radio) found.");
 
       } else {
         TRACE(" 0X%02x (unknown) found.", adr);
@@ -164,8 +185,19 @@ void DiagElement::start()
     yield();
   } // for
   TRACE(" %2d devices found.", num);
-
 } // start()
+
+
+/**
+ * @brief push the current value of all properties to the callback.
+ */
+void DiagElement::pushState(
+    std::function<void(const char *pName, const char *eValue)> callback)
+{
+  Element::pushState(callback);
+  callback("i2cAddresses", _i2cAddresses.c_str());
+} // pushState()
+
 
 
 /* ===== Register the Element ===== */

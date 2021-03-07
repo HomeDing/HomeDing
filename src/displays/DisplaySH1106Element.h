@@ -1,6 +1,6 @@
 /**
  * @file DisplaySH1106Element.h
- * @brief Element Template class.
+ * @brief Display Element for SH1106 based OLED displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

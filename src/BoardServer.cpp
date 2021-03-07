@@ -30,9 +30,9 @@
 #define SVC_ANY "/$"
 
 // integrated htm files
-#define PAGE_SETUP "/$setup.htm"
-#define PAGE_BOOT "/$boot.htm"
-#define SVC_UPLOAD "/$upload.htm"
+#define PAGE_SETUP "/$setup"
+#define PAGE_UPDATE "/$update"
+#define SVC_UPLOAD "/$upload"
 
 // services
 #define SVC_REBOOT "/$reboot"
@@ -60,7 +60,7 @@ BoardHandler::BoardHandler(Board *board)
 
 // void handleStatus() {}
 
-void BoardHandler::handleConnect(ESP8266WebServer &server)
+void BoardHandler::handleConnect(WebServer &server)
 {
   unsigned long connectTimeout =
       millis() + (60 * 1000); // TODO: make configurable
@@ -91,14 +91,15 @@ void BoardHandler::handleConnect(ESP8266WebServer &server)
       WiFi.disconnect(true);
       break;
     } // if
+
   } // while
-  delay(800);
+  delay(400);
   _board->reboot(false);
 } // handleConnect()
 
 
 // Return list of local networks.
-void BoardHandler::handleScan(ESP8266WebServer &server)
+void BoardHandler::handleScan(WebServer &server)
 {
   int8_t scanState = WiFi.scanComplete();
   if (scanState == WIFI_SCAN_FAILED) {
@@ -126,7 +127,7 @@ void BoardHandler::handleScan(ESP8266WebServer &server)
 } // handleScan()
 
 // reset or reboot the device
-void BoardHandler::handleReboot(ESP8266WebServer &server, bool wipe)
+void BoardHandler::handleReboot(WebServer &server, bool wipe)
 {
   server.send(200);
   server.client().stop();
@@ -140,7 +141,7 @@ void BoardHandler::handleReboot(ESP8266WebServer &server, bool wipe)
  * @param requestUri current url of the request.
  * @return true When the method and requestUri match a state request.
  */
-bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
+bool BoardHandler::canHandle(UNUSED HTTPMethod requestMethod, String requestUri)
 {
   return (requestUri.startsWith(SVC_ANY));
 } // canHandle
@@ -154,7 +155,8 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
  * @return true When the state could be retrieved.
  * @return false
  */
-bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
+bool BoardHandler::handle(WebServer &server,
+                          UNUSED HTTPMethod requestMethod,
                           String requestUri)
 {
   // LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
@@ -170,27 +172,20 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
   if (requestUri.startsWith(SVC_BOARD)) {
     // most common request
     // everything behind  "/$board/" is used to address a specific element
-    // LOGGER_JUSTINFO("handle(%s)", requestUri.c_str());
+    // LOGGER_TRACE("handle(%s)", requestUri.c_str());
 
     String eId(requestUri.substring(8));
+    int argCount = server.args();
 
-    if (server.args() == 0) {
+    if (argCount == 0) {
       // get status of all or the specified element
       _board->getState(output, eId);
 
-      server.sendHeader("Cache-control", "NO-CACHE");
-      // LOGGER_JUSTINFO("  ret:%s\n", output.c_str());
-
     } else {
-      // send action to the specified element
-      String action(eId);
-      action.concat('?');
-      action.concat(server.argName(0));
-      action.concat('=');
-      action.concat(server.arg(0));
-      // LOGGER_JUSTINFO(" net-action: %s", action.c_str());
-      _board->dispatch(action.c_str(), nullptr);
-      // _board->setState(eId, server.argName(0), server.arg(0));
+      // send all actions to the specified element per given argument
+      for (int a = 0; a < argCount; a++) {
+        _board->queueActionTo(eId, server.argName(a), server.arg(a));
+      }
     } // if
     output_type = TEXT_JSON;
 
@@ -207,7 +202,7 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     // jc.addProperty("flash-real-size", ESP.getFlashChipRealSize());
 
     FSInfo fs_info;
-    SPIFFS.info(fs_info);
+    _board->fileSystem->info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
@@ -222,8 +217,8 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
 
     // ===== these actions are only in non-safemode
   } else if (unSafeMode && (requestUri.startsWith(SVC_RESETALL))) {
-    // Reset SPIFFS, network parameters and reboot
-    SPIFFS.format();
+    // Reset file system, network parameters and reboot
+    _board->fileSystem->format();
     handleReboot(server, true);
 
   } else if (unSafeMode && (requestUri.startsWith(SVC_RESET))) {
@@ -235,9 +230,9 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     output = FPSTR(setupContent);
     output_type = TEXT_HTML;
 
-  } else if (unSafeMode && (requestUri.startsWith(PAGE_BOOT))) {
+  } else if (unSafeMode && (requestUri.startsWith(PAGE_UPDATE) || requestUri.startsWith("/$boot"))) {
     // Bootstrap page
-    output = FPSTR(bootContent);
+    output = FPSTR(updateContent);
     output_type = TEXT_HTML;
 
   } else if (unSafeMode && (requestUri.startsWith(SVC_UPLOAD))) {
@@ -248,7 +243,8 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
   } else if (unSafeMode && (requestUri.startsWith(SVC_LISTFILES))) {
     // List files in filesystem
     MicroJsonComposer jc;
-    Dir dir = SPIFFS.openDir("/");
+#if defined(ESP8266)
+    Dir dir = _board->fileSystem->openDir("/");
 
     jc.openArray();
     while (dir.next()) {
@@ -258,6 +254,9 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
       jc.addProperty("size", dir.fileSize());
       jc.closeObject();
     } // while
+#elif defined(ESP32)
+// TODO:ESP32 ???
+#endif
     jc.closeArray();
     output = jc.stringify();
     output_type = TEXT_JSON;
@@ -281,8 +280,11 @@ bool BoardHandler::handle(ESP8266WebServer &server, HTTPMethod requestMethod,
     ret = false;
   }
 
-  if (output_type)
+  if (output_type) {
+    server.sendHeader("Cache-control", "no-cache");
+    server.sendHeader("X-Content-Type-Options", "no-sniff");
     server.send(200, output_type, output);
+  }
 
   return (ret);
 } // handle()

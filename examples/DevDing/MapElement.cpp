@@ -15,9 +15,6 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
 #include <HomeDing.h>
 
 #include "MapElement.h"
@@ -102,7 +99,7 @@ bool MapElement::set(const char *name, const char *value)
 
   } else if (_stristartswith(name, "maps[")) {
     // save all values and actions in the vectors.
-    int mapIndex = _atoi(name + 5); // number starts after "maps["
+    size_t mapIndex = _atoi(name + 5); // number starts after "maps["
     char *mapName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;
 
     // LOGGER_EINFO("map[%d] '%s'='%s'", mapIndex, mapName, value);

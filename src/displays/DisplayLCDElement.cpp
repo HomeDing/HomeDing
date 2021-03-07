@@ -1,6 +1,6 @@
 /**
  * @file DisplayLCDElement.cpp
- * @brief Element Template class.
+ * @brief Display Element for HD44780 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -50,9 +50,7 @@ DisplayLCDElement::DisplayLCDElement()
  */
 bool DisplayLCDElement::set(const char *name, const char *value)
 {
-  bool ret = true;
-  ret = Element::set(name, value);
-
+  bool ret = DisplayElement::set(name, value);
   return (ret);
 } // set()
 
@@ -64,12 +62,12 @@ bool DisplayLCDElement::set(const char *name, const char *value)
 void DisplayLCDElement::start()
 {
   // TRACE("start()");
-  DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterLCD(_address, _height, _width));
+  DisplayAdapter *d = new DisplayAdapterLCD(_address, _height, _width);
 
   bool success = d->init(_board);
   if (success) {
     _board->display = d;
-    Element::start();
+    DisplayElement::start();
 
   } else {
     LOGGER_EERR("no display found.");

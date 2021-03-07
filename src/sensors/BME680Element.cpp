@@ -15,12 +15,10 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include <ElementRegistry.h>
-#include <WireUtils.h>
 #include <sensors/BME680Element.h>
+#include <WireUtils.h>
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -36,7 +34,7 @@ static void delay_msec(uint32_t ms)
 
 static int8_t i2c_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
 {
-  int8_t readLen = WireUtils::read(dev_id, reg_addr, reg_data, len);
+  int8_t readLen = WireUtils::readBuffer(dev_id, reg_addr, reg_data, len);
   return (readLen != len);
 }
 
@@ -47,7 +45,7 @@ static int8_t i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uin
 }
 
 
-// ===== provate methods
+// ===== private methods
 
 unsigned long BME680Element::beginReading(void)
 {
@@ -218,10 +216,10 @@ void BME680Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  callback("temperature", Element::Element::getItemValue(_lastValues, 0).c_str());
-  callback("humidity", Element::Element::getItemValue(_lastValues, 1).c_str());
-  callback("pressure", Element::Element::getItemValue(_lastValues, 2).c_str());
-  callback("gas", Element::Element::getItemValue(_lastValues, 3).c_str());
+  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
+  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
+  callback("pressure", Element::getItemValue(_lastValues, 2).c_str());
+  callback("gas", Element::getItemValue(_lastValues, 3).c_str());
 } // pushState()
 
 // End

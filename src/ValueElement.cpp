@@ -1,6 +1,6 @@
 /**
  * @file ValueElement.cpp
- * @brief Element Template class.
+ * @brief The ValueElement combines receiving modifying actions for an value and sending actions on changing the value.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,8 +15,7 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <ValueElement.h>
 

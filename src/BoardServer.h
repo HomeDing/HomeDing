@@ -36,13 +36,10 @@ To send an action to a element a parameter can be added like:
 #ifndef BOARDSERVER_H
 #define BOARDSERVER_H
 
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-
 // Content types for http results
 
-static const char *TEXT_JSON = "application/json"; // Content type for JSON.
-static const char *TEXT_HTML = "text/html"; // Content type for HTML.
+#define TEXT_JSON "text/javascript; charset=utf-8" // Content type for JSON.
+#define TEXT_HTML "text/html" // Content type for HTML.
 
 /**
  * @brief The BoardHandler is a local class of the main sketch that implements a
@@ -79,10 +76,10 @@ public:
    * @param server reference to the server.
    * @param requestMethod current http request method.
    * @param requestUri current url of the request.
-   * @return true When the state cound be retrieved.
+   * @return true When the state could be retrieved.
    * @return false
    */
-  bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
+  bool handle(WebServer &server, HTTPMethod requestMethod,
               String requestUri);
 
 
@@ -96,15 +93,15 @@ protected:
    * @brief execute a restart or reboot 
    * @param wipe if true unregister from the network.
   */
-  void handleReboot(ESP8266WebServer &server, bool wipe = false);
+  void handleReboot(WebServer &server, bool wipe = false);
 
   /** @brief Return list of available elements. */
-  void handleElements(ESP8266WebServer &server);
+  void handleElements(WebServer &server);
 
   /** @brief Return list of local networks. */
-  void handleScan(ESP8266WebServer &server);
+  void handleScan(WebServer &server);
 
-  void handleConnect(ESP8266WebServer &server);
+  void handleConnect(WebServer &server);
 };
 
 #endif

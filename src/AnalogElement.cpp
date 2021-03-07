@@ -14,10 +14,11 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "AnalogElement.h"
+#include <AnalogElement.h>
+
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new AnalogElement.
@@ -28,18 +29,6 @@ Element *AnalogElement::create()
   return (new AnalogElement());
 } // create()
 
-
-AnalogElement::AnalogElement()
-{
-  // default values;
-  _pin = A0; // always.
-
-  _readTimeMS = 100; // read from sensor 10 times a second.
-  _reference = 500;
-  _hysteresis = 10;
-
-  // _resendTime = 0; // Not enabled resending probes.
-}
 
 float AnalogElement::mapFloat(int value)
 {
@@ -64,7 +53,7 @@ bool AnalogElement::set(const char *name, const char *value)
     //   _pin = _atopin(value);
     // pin is always A0
 
-  // } else if (_stricmp(name, "resolution") == 0) {
+    // } else if (_stricmp(name, "resolution") == 0) {
     // _resolution = _atoi(value); ???
 
   } else if (_stricmp(name, "mapInMin") == 0) {
@@ -151,7 +140,7 @@ void AnalogElement::loop()
 
         _lastReference = r;
       } // if
-    } // if
+    }   // if
 
     _nextReadMS = millis() + _readTimeMS;
   }

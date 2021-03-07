@@ -15,10 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "MenuElement.h"
+#include <MenuElement.h>
 
 
 /* ===== Static factory function ===== */
@@ -52,35 +51,32 @@ bool MenuElement::set(const char *name, const char *value)
     // switch to next value in list..
     if (_count > 0) {
       _active = (_active + 1) % _count; // 2 value elements in list
-      _updateM = true;
-      _updateV = true;
+      _updateM = _updateV = true;
     }
 
   } else if (_stricmp(name, "valueElements") == 0) {
-    String s = value;
-    s.concat(',');
-
-    while (s.length() > 0) {
-      // extract first name
-      int pos = s.indexOf(',');
-      String n = s.substring(0, pos);
-      ValueElement *v = (ValueElement *)_board->getElement("value", n.c_str());
-      if ((v) && _count < MAXMENUVALUES) {
-        valueList[_count++] = v;
+    int n = 0;
+    while (1) {
+      String name = getItemValue(value, n++);
+      if (name.length() > 0) {
+        ValueElement *v = static_cast<ValueElement *>(_board->getElement("value", name.c_str()));
+        if (!v)
+          v = static_cast<ValueElement *>(_board->getElement("switch", name.c_str()));
+        if ((v) && _count < MAXMENUVALUES) {
+          valueList[_count++] = v;
+        }
+      } else {
+        break;
       }
-      s.remove(0, pos+1);
     }
 
   } else if (_stricmp(name, "onDisplay") == 0) {
-    // save the actions
     _displayAction = value;
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-    // save the actions
     _valueAction = value;
 
   } else if (_stricmp(name, "onMenu") == 0) {
-    // save the actions
     _menuAction = value;
 
   } else {
@@ -96,23 +92,22 @@ bool MenuElement::set(const char *name, const char *value)
  */
 void MenuElement::loop()
 {
-  if ((_updateV) && _valueAction.length() > 0) {
+  if (_updateM) {
+    _board->dispatch(_menuAction, valueList[_active]->getLabel());
+  }
+
+  if (_updateV) {
     _board->dispatch(_valueAction, valueList[_active]->getValue());
   }
 
-  if ((_updateM) && _menuAction.length() > 0) {
-    _board->dispatch(_menuAction, valueList[_active]->getValue());
-  }
-
-  if ((_updateM || _updateV) && _displayAction.length() > 0) {
+  if (_updateM || _updateV) {
     String v = valueList[_active]->getLabel();
     v.concat(":");
     v.concat(valueList[_active]->getValue());
     _board->dispatch(_displayAction, v);
   }
 
-  _updateV = false;
-  _updateM = false;
+  _updateM =_updateV = false;
 } // loop()
 
 // End

@@ -23,9 +23,6 @@
 
 #include <HomeDing.h>
 
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-
 /**
  * @brief Request Handler implementation for static files in file system.
  * Implements delivering static files and uploading files.
@@ -65,7 +62,7 @@ public:
   } // canUpload()
 
 
-  bool handle(ESP8266WebServer &server, HTTPMethod requestMethod,
+  bool handle(WebServer &server, HTTPMethod requestMethod,
               String requestUri) override
   {
     if (requestMethod == HTTP_POST) {
@@ -84,7 +81,7 @@ public:
   } // handle()
 
 
-  void upload(UNUSED ESP8266WebServer &server, String requestUri, HTTPUpload &upload) override
+  void upload(UNUSED WebServer &server, UNUSED String requestUri, HTTPUpload &upload) override
   {
     // LOGGER_TRACE("upload...<%s>", upload.filename.c_str());
     if (!upload.filename.startsWith("/")) {

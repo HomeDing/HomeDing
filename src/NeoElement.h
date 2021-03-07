@@ -1,6 +1,6 @@
 /**
  * @file NeoElement.h
- * @brief Element Template class.
+ * @brief Output Element to control neopixel / WS2812 based LED stripes on a GPIO pin.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -99,8 +99,8 @@ private:
 
   /** actual colors are stored in LightElement::value */
 
-  /** Brightness level in 0..255 */
-  int _brightness_255;
+  /** duration of animation / transition in msecs */
+  unsigned long duration = 4000;
 
   /** set color pattern */
   void _setColors(String colList);

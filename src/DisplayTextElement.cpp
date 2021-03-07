@@ -15,8 +15,7 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <DisplayTextElement.h>
 
@@ -35,13 +34,12 @@ Element *DisplayTextElement::create()
  */
 void DisplayTextElement::_draw()
 {
-  // LOGGER_EINFO("draw %d (%s)", active, _value.c_str());
   if (active) {
     _display->clear(_x, _y, _w, _h);
     String msg(_prefix);
     msg.concat(_value);
     msg.concat(_postfix);
-    _w = _display->drawText(_x, _y, _h, msg);
+    _w = _display->drawText(_x, _y, _fontsize, msg);
     _display->flush();
   }
 } // _draw
@@ -58,12 +56,10 @@ bool DisplayTextElement::set(const char *name, const char *value)
     _draw();
 
   } else if (_stricmp(name, "prefix") == 0) {
-    if (strlen(value) < sizeof(_prefix))
-      strcpy(_prefix, value);
+    _prefix = value;
 
   } else if (_stricmp(name, "postfix") == 0) {
-    if (strlen(value) < sizeof(_postfix))
-      strcpy(_postfix, value);
+    _postfix = value;
 
   } else if (_stricmp(name, "x") == 0) {
     _x = _atoi(value);
@@ -74,7 +70,7 @@ bool DisplayTextElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "fontsize") == 0) {
     int s = _atoi(value);
     if ((s == 10) || (s == 16) || (s == 24)) {
-      _h = s;
+      _fontsize = s;
     } // if
 
   } else if (_stricmp(name, "clear") == 0) {
@@ -97,7 +93,7 @@ bool DisplayTextElement::set(const char *name, const char *value)
  */
 void DisplayTextElement::start()
 {
-  DisplayAdapter *d = (DisplayAdapter *)(_board->display);
+  DisplayAdapter *d = _board->display;
 
   if (d == NULL) {
     LOGGER_EERR("no display defined");
@@ -105,6 +101,7 @@ void DisplayTextElement::start()
   } else {
     _display = d;
     Element::start();
+    _h = d->getFontHeight(_fontsize);
     _draw();
   } // if
 } // start()

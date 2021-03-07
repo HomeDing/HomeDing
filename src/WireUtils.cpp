@@ -45,7 +45,7 @@ bool WireUtils::exists(uint8_t address)
 
 
 /** read one register value */
-uint8_t WireUtils::read(uint8_t address, uint8_t reg)
+uint8_t WireUtils::readRegister(uint8_t address, uint8_t reg)
 {
   uint8_t data;
   Wire.beginTransmission(address);
@@ -61,7 +61,7 @@ uint8_t WireUtils::read(uint8_t address, uint8_t reg)
 /** read a sequence of register values into a buffer.
  * @return number of register values read.
  */
-uint8_t WireUtils::read(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len, int wait)
+uint8_t WireUtils::readBuffer(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len, int wait)
 {
   uint8_t *d = data;
   uint8_t done = 0;
@@ -102,8 +102,6 @@ uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t data)
 // read sequence of bytes to buffer
 uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
 {
-  uint8_t done = 0;
-
 #ifdef WIREDUMP
   Serial.printf("i2c writ 0x%02x:", reg);
   dumpBuffer(data, len);

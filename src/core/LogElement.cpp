@@ -1,6 +1,6 @@
 /**
  * @file LogElement.cpp
- * @brief The Log Element implements saving sensor data to the local filöe system.
+ * @brief The Log Element implements saving sensor data to the local file system.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,16 +15,13 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "LogElement.h"
+#include <core/LogElement.h>
 
 #include <FS.h>
 
-/* ===== Define local constants and often used strings ===== */
-
-#define LOGFILE_DEFAULTSIZE (4 * 1024 - 200)
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -43,22 +40,21 @@ Element *LogElement::create()
 LogElement::LogElement()
 {
   startupMode = Element_StartupMode::Time;
-  _filesize = LOGFILE_DEFAULTSIZE;
 }
 
 
 void LogElement::_logToFile()
 {
-  // TRACE("log(%d,%s)", _timestamp, _value.c_str());
+  TRACE("log(%d,%s)", _timestamp, _value.c_str());
 
-  File f = SPIFFS.open(_logfileName, "a");
+  File f = _board->fileSystem->open(_logfileName, "a");
 
   if (f.size() > _filesize) {
     // rename to LOGFILE_OLD_NAME
     f.close();
-    SPIFFS.remove(_logfileOldName);
-    SPIFFS.rename(_logfileName, _logfileOldName);
-    f = SPIFFS.open(_logfileName, "a");
+    _board->fileSystem->remove(_logfileOldName);
+    _board->fileSystem->rename(_logfileName, _logfileOldName);
+    f = _board->fileSystem->open(_logfileName, "a");
   } // if
   f.print(_timestamp);
   f.print(',');
@@ -80,14 +76,40 @@ void LogElement::init(Board *board)
  */
 bool LogElement::set(const char *name, const char *value)
 {
+  TRACE("set %s = %s", name, value);
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
     if (active) {
-      _value = value;
-      _timestamp = time(nullptr);
-      _changed = true;
+      loop(); // be sure the current average time-span is saved.
+
+      if (_avgTime > 0) {
+        if (!_avgEnd) {
+          TRACE("start avg");
+
+          unsigned long now = millis();
+          // start a new build average values
+          _timestamp = time(nullptr) + _avgTime / 2 / 1000; // timestamp to record the average
+          _avgEnd = now + _avgTime;
+TRACE("_avgEnd=%d", _avgEnd);
+          _avgCount = 0;
+          _avgSum = 0;
+        }
+          TRACE("add avg");
+        _avgCount++;
+        _avgSum += atof(value);
+
+      } else {
+          TRACE("direct value");
+        _value = value;
+        _timestamp = time(nullptr);
+        _changed = true;
+      }
     }
+
+  } else if (_stricmp(name, "averagetime") == 0) {
+    _avgTime = _atotime(value) * 1000;
+TRACE("_avgTime=%d", _avgTime);
 
   } else if (_stricmp(name, "filesize") == 0) {
     _filesize = _atoi(value);
@@ -125,7 +147,18 @@ void LogElement::start()
  */
 void LogElement::loop()
 {
-  // do something
+  unsigned long now = millis();
+
+  // check for average calculation end
+  if ((_avgTime) && (_avgEnd) && (now > _avgEnd)) {
+TRACE("now=%d", now);
+    _value = String(_avgSum / _avgCount, 2);
+    TRACE("calc(%s)", _value.c_str());
+    _changed = true;
+    _avgEnd = 0;
+  }
+
+  // save to file
   if (_changed)
     _logToFile();
   _changed = false;

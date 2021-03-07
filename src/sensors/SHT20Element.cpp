@@ -16,10 +16,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "sensors/SHT20Element.h"
+#include <sensors/SHT20Element.h>
 
 #include <WireUtils.h>
 
@@ -75,7 +74,6 @@ bool SHT20Element::set(const char *name, const char *value)
 byte crc8(byte *data, int length)
 {
   byte crc = 0;
-  int byteCtr;
 
   //calculates 8-Bit checksum with given polynomial
 
@@ -213,8 +211,8 @@ void SHT20Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  callback("temperature", Element::Element::getItemValue(_lastValues, 0).c_str());
-  callback("humidity", Element::Element::getItemValue(_lastValues, 1).c_str());
+  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
+  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
 } // pushState()
 
 // End

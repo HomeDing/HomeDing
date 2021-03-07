@@ -1,6 +1,6 @@
 /**
  * @file PMSElement.h
- * @brief Element Template class.
+ * @brief Sensor Element to read data from a Plantower PMS5003 sensors and create actions.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -23,7 +23,13 @@
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
+#if defined(ESP32)
+#define SoftwareSerial Serial
+
+#elif defined(ESP8266)
 #include <SoftwareSerial.h>
+
+#endif
 
 /**
  * @brief PMSElement implements...

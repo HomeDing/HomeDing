@@ -72,6 +72,9 @@ protected:
   /** brightness of display */
   int _brightness = 128;
 
+private:
+  void _reset();
+
 };
 
 // This is a base class that will not be registered

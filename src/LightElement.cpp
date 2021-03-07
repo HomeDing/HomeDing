@@ -1,6 +1,6 @@
 /**
  * @file LightElement.cpp
- * @brief Element Template class.
+ * @brief Output Element to drive LEDs on GPIO pins.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,20 +15,31 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "LightElement.h"
+#include <LightElement.h>
+
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
+/**
+ * @brief Construct a new LightElement.
+ */
+LightElement::LightElement()
+{
+  startupMode = Element_StartupMode::System;
+}
 
 
 void LightElement::setOutput(String value)
 {
+  TRACE("setOutput(%s)", value.c_str());
   uint32_t col = _atoColor(value.c_str());
+
   for (int n = _count - 1; n >= 0; n--) {
     int c = col & 0x00FF;
+    analogWrite(_pins[n], c * brightness / 255);
+    TRACE("%d pin=%d value=%02x", n, _pins[n], c);
     col = col >> 8;
-    analogWrite(_pins[n], c * brightness / 100);
-    // TRACE("val[%d]=%d", n, c);
   } // for
 } // setOutput()
 
@@ -53,33 +64,32 @@ Element *LightElement::create()
 bool LightElement::set(const char *name, const char *pValue)
 {
   bool ret = true;
-  // TRACE("set %s=%s", name, pValue);
+  TRACE("set %s=%s", name, pValue);
 
   if (_stricmp(name, PROP_VALUE) == 0) {
-    this->value = pValue;
-    this->needUpdate = true;
+    value = pValue;
+    needUpdate = true;
+
+  } else if (_stricmp(name, "enable") == 0) {
+    enabled = _atob(pValue);
+    needUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
     brightness = _atoi(pValue);
-    if (brightness < 0)
-      brightness = 0;
-    if (brightness > 100)
-      brightness = 100;
+    brightness = constrain(brightness, 0, 255);
     needUpdate = true;
 
   } else if (_stricmp(name, PROP_PIN) == 0) {
-    for (int n = 0; n < LightElement::MAXPINS; n++) {
-      _count = n;
-      String p = getItemValue(pValue, n);
+    _count = 0;
+    while (_count < LightElement::MAXPINS) {
+      String p = getItemValue(pValue, _count);
       if (p.isEmpty()) {
         break;
-      } // if
-      _pins[n] = _atopin(p.c_str());
-      // TRACE("pin[%d]=%d", n, _pins[n]);
-    }
-
-  } else if (_stricmp(name, PROP_DURATION) == 0) {
-    duration = _atotime(pValue) * 1000; // in msecs.
+      } // while
+      _pins[_count] = _atopin(p.c_str());
+      TRACE("pin[%d]=%d", _count, _pins[_count]);
+      _count++;
+    } // while
 
   } else {
     ret = Element::set(name, pValue);
@@ -102,6 +112,7 @@ void LightElement::start()
   } // for
 
   needUpdate = true;
+  loop();
 } // start()
 
 
@@ -112,7 +123,7 @@ void LightElement::loop()
 {
   if (needUpdate) {
     // send value to setOutput
-    setOutput(value);
+    setOutput(enabled ? value : "x00000000");
     needUpdate = false;
   } // if
 } // loop()
@@ -126,6 +137,7 @@ void LightElement::pushState(
 {
   Element::pushState(callback);
   callback("value", value.c_str());
+  callback("enable", enabled ? "1" : "0");
   callback("brightness", String(brightness).c_str());
 } // pushState()
 

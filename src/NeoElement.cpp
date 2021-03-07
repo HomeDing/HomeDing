@@ -1,6 +1,6 @@
 /**
  * @file NeoElement.cpp
- * @brief Element Template class.
+ * @brief Output Element to control neopixel / WS2812 based LED stripes on a GPIO pin.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,10 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "NeoElement.h"
+#include <NeoElement.h>
 
 
 void NeoElement::_setColors(String colList)
@@ -79,7 +78,6 @@ void NeoElement::init(Board *board)
   _mode = Mode::color;
   value = "0";
   _count = 8;
-  _brightness_255 = (255 / 2); // 50%
 } // init()
 
 
@@ -107,21 +105,22 @@ bool NeoElement::set(const char *name, const char *pValue)
     else if (_stricmp(pValue, "pulse") == 0)
       _mode = Mode::pulse;
     if (_strip) {
-      _strip->setBrightness(_brightness_255);
+      _strip->setBrightness(brightness);
       needUpdate = true;
     }
     ret = true; // not handled in LightElement
 
   } else if (_stricmp(name, "brightness") == 0) {
     // saving to LightElement::brightness was handled in LightElement
-    _brightness_255 = brightness * 255 / 100;
-
     if (_strip) {
-      _strip->setBrightness(_brightness_255);
+      _strip->setBrightness(brightness);
       if (_mode == Mode::color) {
         _setColors(value);
       }
     }
+
+  } else if (_stricmp(name, PROP_DURATION) == 0) {
+    duration = _atotime(pValue) * 1000; // in msecs.
 
   } else if (_stricmp(name, "count") == 0) {
     _count = _atoi(pValue);
@@ -143,7 +142,7 @@ void NeoElement::start()
   if (_strip) {
     _strip->begin();
     _setColors(value);
-    _strip->setBrightness(_brightness_255);
+    _strip->setBrightness(brightness);
   } // if
   // TRACE("start %d,%d", (_strip != nullptr), brightness);
 } // start()

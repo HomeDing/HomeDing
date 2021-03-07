@@ -70,12 +70,21 @@ public:
    */
   virtual void start() override;
 
+  /**
+   * @brief push the current value of all properties to the callback.
+   * @param callback callback function that is used for every property.
+   */
+  virtual void pushState(
+      std::function<void(const char *pName, const char *eValue)> callback) override;
+
 private:
 
   /**
    * @brief The _xAction holds the actions that is submitted when ...
    */
   String _xAction;
+
+  String _i2cAddresses;
 };
 
 #endif

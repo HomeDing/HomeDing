@@ -18,12 +18,11 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <HttpClientElement.h>
 
-#include <ESP8266WiFi.h>
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 #define MAX_WAIT_FOR_RESPONSE 20
 #define DNS_TIMEOUT (uint32_t)4
@@ -78,7 +77,7 @@ void HttpClientElement::processHeader(String &key, String &value)
   }
 };
 
-void HttpClientElement::processBody(char *value)
+void HttpClientElement::processBody(UNUSED char *value)
 {
 };
 
@@ -112,7 +111,7 @@ void HttpClientElement::loop()
 
     // ask for IP address
     TRACE("start DNS...");
-    int b = WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
+    WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
     if (_IPaddr) {
       TRACE(".got %d %s", b, _IPaddr.toString().c_str());
       NEWSTATE(STATE::SENDING);

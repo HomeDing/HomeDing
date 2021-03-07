@@ -23,7 +23,6 @@
 #include <WireUtils.h>
 
 #include <Board.h>
-#include <core/Logger.h>
 
 class DisplayAdapter
 {
@@ -33,6 +32,8 @@ public:
     _lineHeight = 1;
     _charWidth = 1;
   } // DisplayAdapter()
+
+  virtual ~DisplayAdapter() = default;
 
   /**
    * @brief start the display.
@@ -54,6 +55,11 @@ public:
     _lineHeight = lh;
   };
 
+  virtual int getFontHeight(int fontsize)
+  {
+    return (fontsize);
+  };
+
   virtual int16_t getLineHeight()
   {
     return (_lineHeight);
@@ -70,7 +76,7 @@ public:
     return (_charWidth);
   };
 
-  virtual void setBrightness(uint8_t bright){};
+  virtual void setBrightness(UNUSED uint8_t bright){};
 
   /**
    * @brief Clear a position or region.

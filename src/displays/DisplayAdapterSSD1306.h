@@ -17,10 +17,8 @@
 #include <SSD1306Wire.h>
 #include <displays/DisplayAdapterOLED.h>
 
-// #define LOG_TRACE(...) LOGGER_TRACE(__VA_ARGS__)
-#define LOG_TRACE(...)
 
-class DisplayAdapterSSD1306 : DisplayAdapterOLED
+class DisplayAdapterSSD1306 : public DisplayAdapterOLED
 {
 public:
   /**
@@ -34,9 +32,11 @@ public:
   } // DisplayAdapterSSD1306()
 
 
+  virtual ~DisplayAdapterSSD1306() = default;
+
+
   bool init(Board *board)
   {
-    LOG_TRACE("init SSD1306...");
     if (!disp) {
       // allocate a new class for this display
 
@@ -45,7 +45,6 @@ public:
         return (false);
 
       } else {
-        LOG_TRACE("create SSD1306...");
         OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
         disp = new (std::nothrow) SSD1306Wire(_address, board->I2cSda, board->I2cScl, res);
       }
@@ -55,7 +54,6 @@ public:
       return (false);
 
     } else {
-      LOG_TRACE("setup SSD1306...");
       disp->init();
       DisplayAdapterOLED::init(board, disp);
     } // if

@@ -11,10 +11,9 @@
 // -----
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include <ElementRegistry.h>
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Element functions ===== */
 
@@ -48,9 +47,10 @@ bool Element::set(const char *name, const char *value)
   } else if (_stricmp(name, "loglevel") == 0) {
     loglevel = _atoi(value);
 
-    // do not report an error for the following properties, as they are used in
-    // the web ui but only stored in the config files.
+    // do not report an error for the following properties,
+    // as they are used by the web ui and stored in the config files only.
   } else if (_stricmp(name, "description") == 0) {
+  } else if (_stricmp(name, "title") == 0) {
   } else if (_stricmp(name, "room") == 0) {
 
   } else {
@@ -127,7 +127,7 @@ bool Element::_atob(const char *value)
 {
   bool ret = false;
 
-  if ((!value) || (strlen(value) > 5)) {
+  if ((!value) || (strnlen(value, 6) > 5)) {
     // ret = false;
   } else if (_stricmp(value, "1") == 0) {
     ret = true;
@@ -201,7 +201,7 @@ uint32_t Element::_atoColor(const char *value)
     char ch0 = value[0];
 
     if ((ch0 == '#') || (ch0 == 'x')) {
-      ret = strtol(value + 1, nullptr, 16);
+      ret = strtoul(value + 1, nullptr, 16);
     } else if ((ch0 >= '0') && (ch0 <= '9')) {
       ret = _atoi(value);
     } else if (_stricmp(value, "black") == 0) {
@@ -213,7 +213,7 @@ uint32_t Element::_atoColor(const char *value)
     } else if (_stricmp(value, "blue") == 0) {
       ret = 0x000000FF;
     } else if (_stricmp(value, "white") == 0) {
-      ret = 0x00FFFFFF;
+      ret = 0xFFFFFFFF;
     }
   } // if
   return ret;
@@ -272,7 +272,7 @@ void Element::_strlower(char *str)
 
 // https://stackoverflow.com/questions/9072320/split-string-into-string-array
 /** Get item[index] from string */
-String Element::Element::getItemValue(String data, int index)
+String Element::getItemValue(String data, int index)
 {
   String ret;
   int found = 0;

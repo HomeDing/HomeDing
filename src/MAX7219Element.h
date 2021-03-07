@@ -39,10 +39,6 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Construct a new MAX7219Element
-   */
-  MAX7219Element();
 
   /**
    * @brief initialize a new Element.

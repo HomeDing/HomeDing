@@ -15,10 +15,11 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "DigitalSignalElement.h"
+#include <DigitalSignalElement.h>
+
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new DigitalSignalElement.

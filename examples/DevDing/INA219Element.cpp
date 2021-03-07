@@ -19,19 +19,12 @@
 
 
 #include <Arduino.h>
-#include <Element.h>
-#include <Board.h>
-
 #include <HomeDing.h>
 
 #include "INA219Element.h"
 
 
-/* ===== Define local constants and often used strings ===== */
-
-// like:
-// #define ANYCONSTANT 1000
-
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -48,9 +41,12 @@ Element *INA219Element::create()
 /* ===== Element functions ===== */
 
 INA219Element::INA219Element()
+    : _sensor(nullptr),
+      _gain(INA219_PGAIN::PG_320),
+      _mode(INA219_MEASURE_MODE::CONTINUOUS),
+      _range(INA219_BUS_RANGE::BRNG_32),
+      _samples(INA219_ADC_MODE::BIT_MODE_12)
 {
-  // adjust startupMode when Network (default) is not applicable.
-  // startupMode = Element_StartupMode::System;
 }
 
 
@@ -172,31 +168,33 @@ void INA219Element::start()
 bool INA219Element::getProbe(String &values)
 {
   bool newData = false;
-  char buffer[12 * 3];
+  if (_sensor) {
+    char buffer[12 * 3];
 
-  if (_mode == INA219_MEASURE_MODE::TRIGGERED) {
-    _sensor->startSingleMeasurement();
-  }
+    if (_mode == INA219_MEASURE_MODE::TRIGGERED) {
+      _sensor->startSingleMeasurement();
+    }
 
-  if (_sensor->getOverflow()) {
-    LOGGER_EERR("overflow");
-    term();
-  } else {
+    if (_sensor->getOverflow()) {
+      LOGGER_EERR("overflow");
+      term();
+    } else {
 
-    // read and debug output
-    float busVoltage_V = _sensor->getBusVoltage_V();
-    float current_mA = _sensor->getCurrent_mA();
-    float power_mW = _sensor->getBusPower();
+      // read and debug output
+      float busVoltage_V = _sensor->getBusVoltage_V();
+      float current_mA = _sensor->getCurrent_mA();
+      float power_mW = _sensor->getBusPower();
 
-    // LOGGER_EINFO("Voltage %5.2f V", busVoltage_V);
-    // LOGGER_EINFO("Current %5.2f mA", current_mA);
-    // LOGGER_EINFO("Power   %5.2f mW", power_mW);
+      // LOGGER_EINFO("Voltage %5.2f V", busVoltage_V);
+      // LOGGER_EINFO("Current %5.2f mA", current_mA);
+      // LOGGER_EINFO("Power   %5.2f mW", power_mW);
 
-    snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
-    values = buffer;
-    bool newData = true;
-  } // if
-  return (true);
+      snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
+      values = buffer;
+      newData = true;
+    } // if
+  }   // if (_sensor)
+  return (newData);
 } // loop()
 
 

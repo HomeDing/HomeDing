@@ -1,6 +1,6 @@
 /**
  * @file BL0937Element.cpp
- * @brief Element Template class.
+ * @brief Element to calculate voltage, current and power consumption using the BL0937 chip.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,13 +15,11 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
 #include <HomeDing.h>
 
-#include "BL0937Element.h"
+#include <BL0937Element.h>
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 // ===== meassuring power consumption (CF pin) =====
 
@@ -187,11 +185,12 @@ void BL0937Element::loop()
 {
   // do something
   unsigned long now = millis();
-  unsigned long newValue = 0;
-  unsigned long newCurrentValue = 0;
-  unsigned long newVoltageValue = 0;
 
   if (now - _cycleStart > _cycleTime) {
+    unsigned long newValue = 0;
+    unsigned long newCurrentValue = 0;
+    unsigned long newVoltageValue = 0;
+
     // report new power value:
     if (powSigCnt > 2) {
       _powerCount = powSigCnt;

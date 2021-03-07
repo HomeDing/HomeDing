@@ -1,6 +1,6 @@
 /**
  * @file DisplaySSD1306Element.cpp
- * @brief Element Template class.
+ * @brief Display Element for SSD1306 based OLED displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -58,7 +58,7 @@ void DisplaySSD1306Element::start()
   DisplayElement::start();
   // TRACE("start()");
 
-  DisplayAdapter *d = (DisplayAdapter *)(new DisplayAdapterSSD1306(_address, _height));
+  DisplayAdapter *d = new DisplayAdapterSSD1306(_address, _height);
   if (d->init(_board)) {
     _board->display = d;
     d->setBrightness(_brightness);

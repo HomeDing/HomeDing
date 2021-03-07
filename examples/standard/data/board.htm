@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -15,7 +14,7 @@
   <meta name="msapplication-TileImage" content="/favicon144.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/favicon180.png" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#ffffff" />
   <link rel="icon" type="image/png" href="/favicon48.png" sizes="48x48">
 
@@ -49,12 +48,8 @@
 
     img,
     #panel {
-      user-select: none;
       -ms-user-select: none;
-    }
-
-    .hueband {
-      background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+      user-select: none;
     }
   </style>
   <script src="/micro.js"></script>
@@ -78,73 +73,44 @@
     <div id="panel" class="row wrap"></div>
 
     <div id="u-templates" style="display:none">
+      <div class="cardheader block header">
+        <svg class="icon">
+          <use xlink:href="./icons.svg#${type}" />
+        </svg>
+        <h3 u-text="title"></h3>
+        <h4 u-text="description"></h4>
+        <span class="activeState" u-active="active"></span>
+        <span class="setconfig"></span>
+      </div>
+
       <div class="col card" u-control="generic" u-is="generic" microID="${id}">
-        <div class="block header">
-          <img data-src="/i/${type}.svg" class="icon" />
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
           <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
         </div>
       </div>
 
       <div class="col card" u-control="schedule" id="${id}" u-is="generic" microID="${id}">
-        <div class="block header">
-          <img src="/i/schedule.svg" class="icon" />
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
-          <div class="form-group">
-            <label>Start:</label>
-            <span u-text="ontime"></span>
-          </div>
-          <div class="form-group">
-            <label>End:</label>
-            <span u-text="offtime"></span>
-          </div>
           <span class="u-bool ux-value" u-active="value"></span>
+          <div class="form-group"><label>Start:</label><span u-text="ontime"></span></div>
+          <div class="form-group"><label>End:</label><span u-text="offtime"></span></div>
         </div>
       </div>
 
       <div class="col card" u-control="dstime" id="${id}" u-is="dstime" microID="${id}">
-        <div class="block header">
-          <img src="/i/time.svg" class="icon" />
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
-          <div class="form-group">
-            <label>ReadTime:</label>
-            <input u-value="readtime" type="time" step="1" />
-          </div>
-          <div class="form-group">
-            <label>Now:</label>
-            <span u-text="now"></span>
-          </div>
-          <div class="form-group">
-            <label>set Time:</label>
-            <span class="now"></span>
-          </div>
-          <button class=" " style="float:right">set</button>
+          <div class="form-group"><label>ReadTime:</label><input u-value="readtime" type="time" step="1" /></div>
+          <div class="form-group"><label>Now:</label><span u-text="now"></span></div>
+          <div class="form-group"><label>set Time:</label><span class="now"></span></div>
+          <button style="float:right">set</button>
         </div>
       </div>
 
       <div class="col card" u-control="switch" id="${id}" u-is="switch" microID="${id}">
-        <div class="block header">
-          <img src="/i/switch.svg" class="icon" />
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
           <span class="u-bool ux-value" u-active="value"></span>
           <div class="u-slider u-switch" u-active="value">
@@ -158,62 +124,82 @@
       </div>
 
       <div class="col card" u-control="value" u-is="slider" microID="${id}">
-        <div class="block header">
-          <img src="/i/value.svg" class="icon" />
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
           <div class="form-group"><label>value:</label><span u-text="value"></span></div>
           <div class="u-slider">
-            <label class="down"><img src="/i/minus.svg"></label>
+            <label class="down"><svg class="icon">
+                <use xlink:href="./icons.svg#minus" />
+              </svg></label>
             <div class="box" style="width:240px">
               <div class="handle"></div>
             </div>
-            <label class="up"><img src="/i/plus.svg"></label>
+            <label class="up"><svg class="icon">
+                <use xlink:href="./icons.svg#plus" />
+              </svg></label>
           </div>
         </div>
       </div>
 
       <div class="col card" u-control="and" id="${id}" u-is="generic" microID="${id}">
-        <div class="block header">
-          <img src="/i/and.svg" class="icon" />
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
           <span class="u-bool ux-value" u-active="value"></span>
           <div class="form-group"><label>value:</label><span u-text="value"></span></div>
         </div>
       </div>
 
-      <div class="col card" u-control="neo" id="${id}" u-is="neo" microID="${id}">
-        <div class="block header">
-          <img src="/i/neo.svg" class="icon" />
-          <h3>${id}</h3>
-          <h4 u-text="description"></h4>
-          <span class="activeState" u-active="active"></span>
-          <span class="setconfig"></span>
-        </div>
+      <div class="col card" u-control="color" id="${id}" u-is="color" microID="${id}">
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
           <div class="form-group"><label>value:</label><span u-text="value"></span><span class="color"
               style="width:6rem;"></span></div>
-          <div class="hueband" style="height:1.4rem;width:100%;margin-bottom: 0.4rem;"></div>
-          <button u-action="mode" value="flow">flow</button>
-          <button u-action="mode" value="wheel">wheel</button>
-          <button u-action="mode" value="pulse">pulse</button>
+          <input type="range" max="359" class="band hue">
+          <input type="range" max="255" class="band saturation" u-value="saturation">
+          <input type="range" max="255" class="band lightness" u-value="lightness">
+          <input type="range" max="255" class="band white">
+          <button u-action="mode" value="fade">fade</button><button u-action="mode" value="fix">fix</button><button
+            u-action="mode" value="pulse">pulse</button><button u-action="mode" value="wheel">wheel</button>
         </div>
       </div>
+
+      <div class="col card" u-control="light" id="${id}" u-is="generic" microID="${id}">
+        <div u-is="include" ref=".cardheader"></div>
+        <div class="block">
+          <span u-color="value"
+            style="width:4rem;height:4rem;float:right;border:1px solid black;border-radius:50%;"></span>
+          <div class="form-group"><label>value:</label><span u-text="value"></span></div>
+          <div class="form-group"><label>brightness:</label><span u-text="brightness"></span></div>
+        </div>
+      </div>
+
+      <div class="col card" u-control="bl0937" id="${id}" u-is="bl0937" microID="${id}">
+        <div u-is="include" ref=".cardheader"></div>
+        <div class="block">
+          <table style="width:100%;font-size:2rem">
+            <tr>
+              <td>
+                <span u-text="power"></span> W
+              </td>
+              <td style="display:none">
+                <span u-text="current"></span> mA
+              </td>
+              <td style="display:none">
+                <span u-text="voltage"></span> V
+              </td>
+            </tr>
+          </table>
+          mode: <button u-action="mode" value="current">current</button>
+          <button u-action="mode" value="voltage">voltage</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <div id="modal" class="hidden">
-    <div id="modalBack" onclick="modal.close()"></div>
-    <div id="modalContainer"></div>
+    <div id="back" onclick="modal.close()"></div>
+    <div id="container"></div>
   </div>
 
   <script>
@@ -221,9 +207,16 @@
     var addObj = document.getElementById('addButton');
     var sysObj = document.getElementById('sysButton');
     var refreshState = ''; // nothing in progress
-    var updateTime;
     var updateTimer;
-    var elementDef;
+    var DEBUG_STARTTIME = Date.now();
+
+    var REFRESH_IDLEINTERVALL = 4000;
+
+    // Element definitions and list of implemented elements
+    var uElements = {
+      defs: {},
+      impl: [],
+    }
 
     var params = getHashParams({
       sys: false
@@ -241,25 +234,42 @@
       modal.open('newelementdlg');
     });
 
-    function createElement(path, key, value) {
+    // Element type reuse
+    var alias = {
+      "sht20": "dht",
+      "displaysh1106": "displayssd1306"
+      ,"neo": "light",
+      // ,
+      // "my9291": "light"
+    };
+
+    hub.subscribe('/*/*', function (path, key, value) {
       if (path) {
         path = path.toLowerCase();
         var hElem = document.querySelector("[microID='" + path + "']");
         if (!hElem) {
+          // create a new card
           var t = path.split('/')[1];
           var p = {
             id: path,
-            type: t
+            type: t,
+            icon: t
           };
 
-          if (toBool(params.sys) || !elementDef[t] || toBool(elementDef[t].sys) == false) {
+          var def = uElements.defs[t];
+          if (toBool(params.sys) || !def || toBool(def.sys) == false) {
+            if ((def) && (def.icon)) {
+              p.icon = def.icon;
+            }
             var e = micro.insertTemplate(panelObj, t, p);
-            if (!e) { micro.insertTemplate(panelObj, 'generic', p); }
+            if (!e) {
+              t = alias[t] || 'generic';
+              e = micro.insertTemplate(panelObj, t, p);
+            }
           } // if
         } // if
       } // if
-    } // createElement()
-    hub.subscribe('/*/*', createElement);
+    }); // create new card
 
     hub.subscribe('/device/*?name', function (path, key, value) {
       document.title = value;
@@ -267,44 +277,39 @@
     });
 
 
-    // '' no request on the way
-    // 'f' fetch started
-    // 'w' timer started
-
-    /** 
-     * @param {number} timeout time to next fetch in msecs.
-     */
+    /**
+    * @param {number} timeout time to next fetch in msecs.
+    */
     function updateAsap(timeout) {
-      if (!timeout) timeout = 20;
-      var now = new Date();
-      var next = now + timeout;
+      if (!timeout) timeout = 50;
 
-      if (refreshState == 'f') {
-        // request already running, no action required
-
-      } else if (refreshState == 'w') {
+      if (refreshState == 'w') {
+        console.log("updateAsap:", Date.now() - DEBUG_STARTTIME, "cancel timer");
         // cancel longer running request
-        if (next < updateTime) {
-          window.clearTimeout(updateTimer);
-          refreshState = '';
-        }
+        window.clearTimeout(updateTimer);
+        refreshState = '';
       }
 
       if (refreshState == '') {
-        refreshState = 'f';
-        updateTime = next;
+        refreshState = 'w';
         updateTimer = window.setTimeout(
           function () {
+            console.log("updateAsap:", Date.now() - DEBUG_STARTTIME, "start fetch");
+            refreshState = 'f';
             fetch('/$board')
               .then(function (result) {
                 return result.json();
               })
               .then(function (json) {
+                console.log("updateAsap:", Date.now() - DEBUG_STARTTIME, "got json");
                 hub.publishObj(json);
+              })
+              .catch(function (err) {
+                console.log("updateAsap:", Date.now() - DEBUG_STARTTIME, "err", err);
               })
               .finally(function (json) {
                 refreshState = '';
-                updateAsap(4000);
+                updateAsap(REFRESH_IDLEINTERVALL);
               });
           }, timeout);
       }
@@ -324,33 +329,41 @@
       // load templates from other file.
       var p0 = Promise.allSettled([micro.loadFile('/board-templates.htm'), micro.loadFile('/board-new.htm')]);
 
-      // element definitions -> env.json -> config.json
-      var p1 = fetchJSON('/elements.json')
+      // implemented elements -> element definitions -> env.json -> config.json
+      var p1 = fetchJSON('/$elements')
         .then(function (json) {
-          elementDef = json;
+          uElements.impl = json;
         });
 
+      var p2 = fetchJSON('/elements.json')
+        .then(function (json) {
+          uElements.defs = json;
+        });
+
+
       var envData;
-      // element definitions -> env.json -> config.json
-      var p2 = fetchJSON('/env.json')
+      var p3 = fetchJSON('/env.json')
         .then(function (json) {
           envData = json;
         });
 
       var configData;
-      // element definitions -> env.json -> config.json
-      var p3 = fetchJSON('/config.json')
+      var p4 = fetchJSON('/config.json')
         .then(function (json) {
           configData = json;
         });
 
-      Promise.allSettled([p0, p1, p2, p3]).then(function () {
+      Promise.allSettled([p0, p1, p2, p3, p4]).then(function () {
         // env data should be published before config data
         if (envData) {
           hub.write('env', JSON.stringify(envData));
           hub.publishObj(envData);
         }
         if (configData) {
+          // adjust title locally
+          for (var t in configData) for (var i in configData[t]) {
+            if (!configData[t][i].title) configData[t][i].title = t + '/' + i;
+          }
           hub.write('config', JSON.stringify(configData));
           hub.publishObj(configData);
         }

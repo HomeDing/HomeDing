@@ -15,13 +15,11 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
-
 #include <HomeDing.h>
 
 #include "TemplateElement.h"
 
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -47,6 +45,7 @@ TemplateElement::TemplateElement()
 {
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
+  _value = 0;
 }
 
 

@@ -1,7 +1,6 @@
 /**
  * @file PMSElement.cpp
- * 
- * @brief Sensor Element for the HomeDing Library to read data from a Plantower PMS5003 sensors and create actions.
+ * @brief Sensor Element to read data from a Plantower PMS5003 sensors and create actions.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -17,11 +16,9 @@
 
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "PMSElement.h"
-#include <ElementRegistry.h>
+#include <sensors/PMSElement.h>
 
 #include <cstring>
 

@@ -15,8 +15,7 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include "RadioElement.h"
 #include <ElementRegistry.h>
@@ -24,20 +23,21 @@
 #include <RDSParser.h>
 #include <Wire.h>
 #include <radio.h>
-#include <si4721.h>
+#include <si4703.h>
+#include <si47xx.h>
 // #include <RDA5807M.h>
 
 /* ===== Define local constants and often used strings ===== */
 
 #define FIX_BAND RADIO_BAND_FM ///< The band that will be tuned by this sketch is FM.
-#define FIX_STATION 8930 ///< The station that will be tuned by this sketch is 89.30 MHz.
-#define FIX_VOLUME 4 ///< The volume that will be set by this sketch is level 4.
+#define FIX_STATION 8930       ///< The station that will be tuned by this sketch is 89.30 MHz.
+#define FIX_VOLUME 4           ///< The volume that will be set by this sketch is level 4.
 
 // The radio library only supports one radio device so all references and data can be static.
 // That simplifies the callback rds functions.
 
-// SI4703 radio(D8);
-SI4721 radio;
+// SI4703 radio;
+SI47xx radio;
 
 RDSParser rds;
 
@@ -125,6 +125,10 @@ bool RadioElement::set(const char *name, const char *value)
       radio.setBassBoost(_atob(value));
     }
 
+  } else if (_stricmp(name, "antenna") == 0) {
+    _antenna = _atoi(value);
+    // set in start() only
+
   } else if (_stricmp(name, "onStationName") == 0) {
     _stationAction = value;
 
@@ -139,6 +143,12 @@ bool RadioElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "onRSSI") == 0) {
     _rssiAction = value;
+
+  } else if (_stricmp(name, "address") == 0) {
+    // _resetpin = _atopin(value);
+
+  } else if (_stricmp(name, "resetpin") == 0) {
+    _resetpin = _atopin(value);
 
   } else {
     ret = Element::set(name, value);
@@ -161,21 +171,22 @@ void RadioElement::start()
 
   // Enable information to the Serial port
   radio.debugEnable(true);
-  radio._wireDebug(false);
+  radio._wireDebug(loglevel == 2); // debug the wire protocol on loglevel 2
 
   // Initialize the Radio
-  LOGGER_RAW("init-1");
+  radio.setup(RADIO_RESETPIN, _resetpin);
+  radio.setup(RADIO_SDAPIN, _board->I2cSda); // SI4703 requires this, others ignore.
+  radio.setup(RADIO_I2CADDRESS, 0);          //  use default or check some addresses
+  if (_antenna)
+    radio.setup(RADIO_ANTENNA, _antenna);
 
-  bool found = radio.init();
-  LOGGER_RAW("init-2 %d", found);
+  bool found = radio.initWire(Wire);
 
   if (!found) {
     LOGGER_EERR("not found");
   } else {
     // Set all radio setting to the fixed values.
     radio.setBandFrequency(FIX_BAND, FIX_STATION);
-    LOGGER_RAW("init-3");
-
     radio.setVolume(_volume);
     radio.setMono(false);
     radio.setMute(_mute || (_volume == 0));
@@ -200,6 +211,8 @@ void RadioElement::start()
       _newR = true;
     });
   } // if
+
+  // radio._wireDebug(false);
 
 } // start()
 
@@ -243,6 +256,8 @@ void RadioElement::pushState(
   Element::pushState(callback);
   callback("frequency", String(_freq).c_str());
   callback("volume", String(_volume).c_str());
+  callback("rssi", String(_ri.rssi).c_str());
+  callback("snr", String(_ri.snr).c_str());
   callback("stationname", _stationName.c_str());
   callback("rdstext", _rdsText.c_str());
 } // pushState()

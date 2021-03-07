@@ -17,7 +17,7 @@
 #include <OLEDDisplay.h>
 #include <displays/DisplayAdapter.h>
 
-class DisplayAdapterOLED : DisplayAdapter
+class DisplayAdapterOLED : public DisplayAdapter
 {
 public:
   /**
@@ -31,15 +31,21 @@ public:
   } // DisplayAdapterSH1106()
 
 
-  virtual bool init(Board *board, OLEDDisplay *d)
+  virtual ~DisplayAdapterOLED() = default;
+
+
+  virtual bool init(UNUSED Board *board, OLEDDisplay *d)
   {
     display = d;
-    display->flipScreenVertically();
-    display->setTextAlignment(TEXT_ALIGN_LEFT);
-    display->setFont(ArialMT_Plain_10);
+    d->init();
+    delay(1);
+    d->flipScreenVertically();
+    d->setTextAlignment(TEXT_ALIGN_LEFT);
+    d->setFont(ArialMT_Plain_10);
+    delay(1);
 
-    display->clear();
-    display->display();
+    d->clear();
+    d->display();
     delay(1);
 
     return (true);
@@ -60,6 +66,16 @@ public:
     _dirty = true;
   }; // clear()
 
+
+  int getFontHeight(int fontsize) override
+  {
+    int h = 0;
+    const uint8_t *fontData = _getFontData(fontsize);
+    if (fontData) {
+      h = pgm_read_byte(fontData + HEIGHT_POS);
+    }
+    return (h);
+  };
 
   /**
    * @brief Clear information from the display in this area.
@@ -82,30 +98,32 @@ public:
    * @param y y-position of the text.
    * @param h height of the characters. Use 0 to use standard height;
    * @param text the text.
+   * @return width of drawn text.
    */
   int drawText(int16_t x, int16_t y, int16_t h, const char *text)
   {
     String tmp(text);
-    if ((h == 0) || (h == 10)) {
-      display->setFont(ArialMT_Plain_10);
-    } else if (h == 16) {
-      display->setFont(ArialMT_Plain_16);
-    } else if (h == 24) {
-      display->setFont(ArialMT_Plain_24);
-    } // if
+    const uint8_t *fontData = _getFontData(h);
+    int w = 0;
 
-    display->setColor(WHITE);
-    display->drawString(x, y, tmp);
-    _dirty = true;
-    return (display->getStringWidth(tmp));
-  }
+    if (fontData) {
+      display->setFont(fontData);
+      display->setColor(WHITE);
+      display->drawString(x, y, tmp);
+      w = display->getStringWidth(tmp);
+      _dirty = true;
+    }
+    return (w);
+  } // drawText()
+
 
   void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
   {
     display->setColor(WHITE);
     display->drawLine(x0, y0, x1, y1);
     _dirty = true;
-  };
+  } // drawLine()
+
 
   int drawDot(int16_t x, int16_t y, int16_t h, bool fill)
   {
@@ -142,6 +160,19 @@ private:
    * The chip supports 32 and 64 vertical pixels.
    */
   OLEDDISPLAY_GEOMETRY _resolution;
+
+  const uint8_t *_getFontData(int fontsize)
+  {
+    const uint8_t *data = nullptr;
+    if ((fontsize == 0) || (fontsize == 10)) {
+      data = ArialMT_Plain_10;
+    } else if (fontsize == 16) {
+      data = ArialMT_Plain_16;
+    } else if (fontsize == 24) {
+      data = ArialMT_Plain_24;
+    }
+    return (data);
+  };
 };
 
 #endif // DisplayAdapterSH1106_H

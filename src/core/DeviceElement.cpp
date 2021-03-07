@@ -17,11 +17,11 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "DeviceElement.h"
-#include <ElementRegistry.h>
+#include <core/DeviceElement.h>
+
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -38,8 +38,8 @@ Element *DeviceElement::create()
 /* ===== Element functions ===== */
 
 DeviceElement::DeviceElement()
+    : _rebootTime(0), _nextBoot(0) // default with no automatic reboot
 {
-  _rebootTime = 0; // no automatic reboot
   startupMode = Element_StartupMode::System;
 }
 
@@ -61,7 +61,7 @@ bool DeviceElement::set(const char *name, const char *value)
       TRACE("start sleep");
       _board->deepSleepStart = millis();
       if (!_board->isWakeupStart) {
-        // give a minute time to block deep sleep mode 
+        // give a minute time to block deep sleep mode
         _board->deepSleepStart += 60 * 1000;
       }
     } else {
@@ -75,7 +75,7 @@ bool DeviceElement::set(const char *name, const char *value)
     _board->homepage = value;
 
   } else if (_stricmp(name, "title") == 0) {
-    _title = value;
+    _board->title = value;
 
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
@@ -146,7 +146,7 @@ bool DeviceElement::set(const char *name, const char *value)
       _board->I2cScl = _atopin(value);
 
     } // if
-  } // if (! active)
+  }   // if (! active)
 
   return (ret);
 } // set()
@@ -189,7 +189,7 @@ void DeviceElement::pushState(
 
   Element::pushState(callback);
   callback("name", _board->deviceName.c_str());
-  callback("title", _title.c_str());
+  callback("title", _board->title.c_str());
   callback(PROP_DESCRIPTION, _description.c_str());
   callback("safemode", _board->isSafeMode ? "true" : "false");
   callback("sd", _board->mDNS_sd ? "true" : "false");

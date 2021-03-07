@@ -16,8 +16,7 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <sensors/SensorElement.h>
 
@@ -97,7 +96,6 @@ void SensorElement::term()
 void SensorElement::loop()
 {
   unsigned long now = millis();
-  bool newData = false;
   String value;
 
   if (_nextRead <= now) {
@@ -134,13 +132,13 @@ void SensorElement::pushState(
 
 // ===== private functions =====
 
-bool SensorElement::getProbe(String &values)
+bool SensorElement::getProbe(UNUSED String &values)
 {
   return (true); // always simulate data is fine
 } // getProbe()
 
 
-void SensorElement::sendData(String &values)
+void SensorElement::sendData(UNUSED String &values)
 {
 } // sendData()
 

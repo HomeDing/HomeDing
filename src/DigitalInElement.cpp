@@ -15,10 +15,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "DigitalInElement.h"
+#include <DigitalInElement.h>
 
 /**
  * @brief static factory function to create a new DigitalInElement.

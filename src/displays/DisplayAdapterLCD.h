@@ -9,6 +9,7 @@
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * -----
  * * 25.07.2018 created by Matthias Hertel
+ * * 07.12.2020 no write text beyond textline end.
  */
 
 #ifndef DisplayAdapterLCD_H
@@ -17,7 +18,7 @@
 #include <LiquidCrystal_PCF8574.h>
 #include <displays/DisplayAdapter.h>
 
-class DisplayAdapterLCD : DisplayAdapter
+class DisplayAdapterLCD : public DisplayAdapter
 {
 public:
   /**
@@ -29,6 +30,9 @@ public:
     // use parameters of a common display board.
     DisplayAdapterLCD(0x27, 2, 16);
   } // DisplayAdapterLCD()
+
+
+  virtual ~DisplayAdapterLCD() = default;
 
 
   /**
@@ -61,7 +65,6 @@ public:
       } else {
         DisplayAdapter::init(board);
 
-        // LOGGER_TRACE("setupDisplay...");
         display->begin(_cols, _lines);
 
         byte dotOff[] = {0b00000, 0b01110, 0b10001, 0b10001,
@@ -90,6 +93,10 @@ public:
   }; // clear()
 
 
+  int getFontHeight(UNUSED int fontsize) override {
+    return(1);
+  };
+
   /**
    * @brief Clear information from the display in this area.
    * @param x x-position or offset of the text.
@@ -97,11 +104,11 @@ public:
    * @param w width of the area.
    * @param h height of the area, assumed always 1.
    */
-  void clear(int16_t x, int16_t y, int16_t w, int16_t h)
+  void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h)
   {
     display->setCursor(x, y);
-    if (y < 4) {
-      while ((x < 20) && (w > 0)) {
+    if (y < _lines) {
+      while ((x < _cols) && (w > 0)) {
         display->write(' ');
         w--;
         x++;
@@ -117,21 +124,23 @@ public:
    * @param h height of the characters, ignored for this display.
    * @param text the text.
    */
-  int drawText(int16_t x, int16_t y, int16_t h, const char *text)
+  int drawText(int16_t x, int16_t y, UNUSED int16_t h, const char *text)
   {
-    int w = 0;
+    int w = strlen(text);
+    char buffer[80+4]; // 8 chars character buffer max.
     if ((x > 20) || (y > 4)) {
       Serial.printf("outside\n");
     } else {
+      strncpy(buffer, text, 80);
+      buffer[_cols-x] = '\0';
       display->setCursor(x, y);
-      display->print(text);
-      w = strlen(text);
+      display->print(buffer);
     }
     return (w);
   } // drawText
 
 
-  int drawDot(int16_t x, int16_t y, int16_t h, bool fill)
+  int drawDot(int16_t x, int16_t y, UNUSED int16_t h, bool fill)
   {
     drawText(x, y, 1, fill ? "\02" : "\01");
     return (1);

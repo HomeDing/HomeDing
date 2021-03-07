@@ -15,10 +15,8 @@
  */
 
 #include <Arduino.h>
-#include <Element.h>
-#include <Board.h>
+#include <HomeDing.h>
 
-#include <ElementRegistry.h>
 #include <time/AlarmElement.h>
 
 /* ===== Define local constants and often used strings ===== */
@@ -85,7 +83,6 @@ void AlarmElement::start()
 void AlarmElement::loop()
 {
   time_t ct = _board->getTimeOfDay();
-  bool val;
 
   if (ct > 0) {
     if ((_lastTime < _time) && (ct >= _time)) {

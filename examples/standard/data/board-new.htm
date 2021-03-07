@@ -8,7 +8,7 @@
     <div class="form-group">
       <label>Type:</label>
       <select class="typeSelect">
-        <option disabled selected="selected">Please select...</option>
+        <option disabled selected="selected" value="0">Select Element...</option>
       </select>
     </div>
     <div class="form-group">
@@ -40,32 +40,23 @@
 
 
 <script>
+  // uElements.xxx from main page loading...
+
   micro.define("createElementDlg", {
     objType: null,
     objID: null,
 
     connectedCallback: function () {
-      var scope = this;
+      this.objType = this.querySelector('.typeSelect');
+      this.objID = this.querySelector('.newID');
 
-      this.objType = scope.querySelector('.typeSelect');
-      this.objID = scope.querySelector('.newID');
-
-      // get implemented elements and populate the dropdown
-      fetch('/$elements')
-        .then(function (result) {
-          return (result.json())
-
-        }).then(function (elList) {
-          // fill options
-          var sel = scope.objType;
-          sel.innerHTML = '';
-          elList.forEach(function (e) {
-            var opt = document.createElement('option');
-            opt.value = e;
-            opt.textContent = e;
-            sel.appendChild(opt);
-          })
-        });
+      // populate the dropdown, unavailable elements disabled.
+      var sel = this.objType;
+      Object.keys(uElements.defs).forEach(function (e) {
+        var o = createHTMLElement(sel, 'option', { value: e });
+        o.textContent = e;
+        o.disabled = !uElements.impl.includes(e);
+      });
     }, // connectedCallback()
 
     onclick: function (evt /*:PointerEvent*/) {
@@ -76,7 +67,9 @@
         modal.close();
 
       } else if (ua === 'next') {
-        if (this.objID.value === "") {
+        if (this.objType.value === "0") {
+          alert('Please select an implemented element type');
+        } else if (this.objID.value === "") {
           alert('Please specify a name');
         } else {
           modal.open('configelementdlg', {
@@ -94,35 +87,28 @@
     _blk: null,
     _id: '',
 
-    _add: function (k) {
-      var g = this._blk.appendChild(document.createElement('div'));
-      g.className = 'form-group';
-      g.appendChild(document.createElement('label')).textContent = k + ':';
-      var i = g.appendChild(document.createElement('input'));
-      i.name = k;
+    _add: function (k, isEvent, isAction) {
+      var g = createHTMLElement(this._blk, 'div', { class: 'form-group' });
+      createHTMLElement(g, 'label').textContent = k + ':';
+      createHTMLElement(g, 'img', { src: (isEvent ? '/i/start.svg' : '/i/no.svg'), style:'height:1em;width:1em' });
+      var i = createHTMLElement(g, 'input', { name: k });
       if (this.params[k.toLowerCase()] !== undefined)
         i.value = this.params[k.toLowerCase()];
+      createHTMLElement(g, 'img', { src: (isAction ? '/i/start.svg' : '/i/no.svg'), style:'height:1em;width:1em' });
     }, // add()
 
     connectedCallback: function () {
-      var scope = this;
       this._blk = this.querySelector('.block:not(.header)');
       this._type = this.params.id.split('/')[1];
       this._id = this.params.id.split('/')[2];
 
       // get implemented elements and populate the dropdown
-      fetch('/elements.json')
-        .then(function (result) {
-          return (result.json())
-
-        }).then(function (elList) {
-          var d = elList[scope._type];
-          if (d) {
-            for (n in d.properties) scope._add(d.properties[n]);
-            for (n in d.events) scope._add(d.events[n]);
-            for (n in d.actions) scope._add(d.actions[n]);
-          }
-        });
+      var d = uElements.defs[this._type];
+      if (d) {
+        for (n in d.properties) this._add(d.properties[n], false, false);
+        for (n in d.events) this._add(d.events[n], true, false);
+        for (n in d.actions) this._add(d.actions[n], false, true);
+      }
     }, // connectedCallback()
 
     onclick: function (evt) {

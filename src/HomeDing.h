@@ -5,8 +5,9 @@
 #ifndef HOMEDING_H
 #define HOMEDING_H
 
-#include <Element.h>
-#include <ElementRegistry.h>
+#include <Board.h> // Platform
+#include <Element.h> // Abstract Elements
+#include <ElementRegistry.h> // Element Registry
 
 // some common property names
 
@@ -61,6 +62,7 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_PWMOut
 
 #define HOMEDING_INCLUDE_AND
+#define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
@@ -103,6 +105,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_AND
 #include <AndElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_REFERENCE
+#include <ReferenceElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_Analog
@@ -156,7 +162,7 @@ extern const char *ACTION_ONPRESSURE;
 #include <core/LogElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_PMS
+#if defined(HOMEDING_INCLUDE_PMS) && defined(ESP8266)
 #include <sensors/PMSElement.h>
 #endif
 
@@ -201,6 +207,10 @@ extern const char *ACTION_ONPRESSURE;
 #include <sensors/DHTElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_COLOR
+#include <ColorElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_LIGHT
 #include <LightElement.h>
 #endif
@@ -241,11 +251,15 @@ extern const char *ACTION_ONPRESSURE;
 #include <MAX7219Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_MY9291
+#include "sensors/MY9291Element.h"
+#endif
+
 #ifdef HOMEDING_INCLUDE_MENU
 #include <MenuElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_SSDP
+#if defined(HOMEDING_INCLUDE_SSDP) && defined(ESP8266)
 #include <core/SSDPElement.h>
 #endif
 

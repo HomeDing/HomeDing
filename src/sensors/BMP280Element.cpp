@@ -16,10 +16,9 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
-#include "BMP280Element.h"
+#include <sensors/BMP280Element.h>
 
 #include <WireUtils.h>
 
@@ -172,7 +171,7 @@ void BMP280Element::start()
 
       // read all raw calibration data, see table 17
       uint8_t data[24];
-      WireUtils::read(_address, BMP280_REG_CALIB, data, 24);
+      WireUtils::readBuffer(_address, BMP280_REG_CALIB, data, 24);
 
       dig_T1 = WU_U16(data, 0);
       dig_T2 = WU_S16(data, 2);
@@ -214,7 +213,7 @@ bool BMP280Element::getProbe(String &values)
 
   // WireUtils::dump(_address, BMP280_REG_CONFIG, 1);
 
-  uint8_t busy = WireUtils::read(_address, BMP280_REG_CONFIG);
+  uint8_t busy = WireUtils::readRegister(_address, BMP280_REG_CONFIG);
   if (busy != 0) {
     // TRACE("wait...");
     return (newData); // not ready yet
@@ -224,7 +223,7 @@ bool BMP280Element::getProbe(String &values)
 
   // read out data
   uint8_t data[6];
-  WireUtils::read(_address, BMP280_REG_DATA, data, 6);
+  WireUtils::readBuffer(_address, BMP280_REG_DATA, data, 6);
   // TRACE("data %02x %02x %02x %02x %02x %02x", data[0], data[1], data[2], data[3], data[4], data[5]);
 
   int32_t adc_T = data[3] << 12 | data[4] << 4 | data[5] >> 4;
@@ -257,8 +256,8 @@ void BMP280Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   SensorElement::pushState(callback);
-  callback("temperature", Element::Element::getItemValue(_lastValues, 0).c_str());
-  callback("pressure", Element::Element::getItemValue(_lastValues, 1).c_str());
+  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
+  callback("pressure", Element::getItemValue(_lastValues, 1).c_str());
 } // pushState()
 
 // End

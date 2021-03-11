@@ -18,9 +18,9 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#include <FS.h>
 #include <stdio.h>
 #include <time.h>
-#include <FS.h>
 
 #include <core/Logger.h>
 
@@ -30,6 +30,20 @@
 static const char *LOGGER_LEVELS = "eit"; // info, error, trace
 static const char *LOGFILE_NAME = "/log.txt";
 static const char *LOGFILE_OLD_NAME = "/log_old.txt";
+
+// initialize file system for log file
+void Logger::init(FS *fs)
+{
+  _fileSystem = fs;
+} // init()
+
+
+// enable/disable log file
+void Logger::setLogFile(bool enable)
+{
+  _logFileEnabled = enable;
+} // setLogFile()
+
 
 /**
  * @brief Print out logging information
@@ -62,7 +76,7 @@ void Logger::_print(const char *module, int level, const char *fmt,
 
   delay(1);
 
-  if ((module) && (logger_file) && (level < LOGGER_LEVEL_TRACE)) {
+  if ((module) && (_logFileEnabled) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
     delay(1);
   } // if
@@ -79,7 +93,7 @@ void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
     Logger::_print(module, level, fmt, args);
     va_end(args);
   } // if
-  yield();
+  delay(1);
 } // LoggerPrint
 
 
@@ -94,30 +108,35 @@ void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
     Logger::_print(elem->id, level, fmt, args);
     va_end(args);
   } // if
-  yield();
+  delay(1);
 } // LoggerEPrint
 
 
 void Logger::_printToFile(char *buffer)
 {
-  File f = SPIFFS.open(LOGFILE_NAME, "a");
+  if (_fileSystem) {
+    File f = _fileSystem->open(LOGFILE_NAME, "a");
 
-  if (f.size() > LOGFILE_MAXSIZE) {
-    // rename to LOGFILE_OLD_NAME
+    if (f.size() > LOGFILE_MAXSIZE) {
+      // rename to LOGFILE_OLD_NAME
+      f.close();
+      _fileSystem->remove(LOGFILE_OLD_NAME);
+      _fileSystem->rename(LOGFILE_NAME, LOGFILE_OLD_NAME);
+      delay(1);
+      f = _fileSystem->open(LOGFILE_NAME, "a");
+    } // if
+    f.println(buffer);
     f.close();
-    SPIFFS.remove(LOGFILE_OLD_NAME);
-    SPIFFS.rename(LOGFILE_NAME, LOGFILE_OLD_NAME);
-    yield();
-    f = SPIFFS.open(LOGFILE_NAME, "a");
-  } // if
-  f.println(buffer);
-  f.close();
-  yield();
+    delay(1);
+  }
 };
 
 // Default: Log INFO and ERROR
 int Logger::logger_level = LOGGER_LEVEL_INFO;
 
-bool Logger::logger_file = false;
+bool Logger::_logFileEnabled = false;
+
+FS *Logger::_fileSystem = nullptr;
+
 
 // end.

@@ -54,21 +54,13 @@ bool DeviceElement::set(const char *name, const char *value)
     // Log something
     LOGGER_JUSTINFO(value ? value : "NULL");
 
-  } else if (_stricmp(name, "sleep") == 0) {
+  // ===== sleep behavior =====
 
-    if (_atob(value)) {
-      // start deep sleep
-      TRACE("start sleep");
-      _board->deepSleepStart = millis();
-      if (!_board->isWakeupStart) {
-        // give a minute time to block deep sleep mode
-        _board->deepSleepStart += 60 * 1000;
-      }
-    } else {
-      // block any deep sleep until next reset.
-      TRACE("block sleep");
-      _board->deepSleepBlock = true;
-    }
+  } else if (_stricmp(name, "sleep") == 0) {
+    _board->startSleep();
+
+  } else if (_stricmp(name, "nosleep") == 0) {
+    _board->cancelSleep();
 
     // ===== Web UI =====
   } else if (_stricmp(name, "homepage") == 0) {
@@ -89,7 +81,7 @@ bool DeviceElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "logfile") == 0) {
     // enable/disable logfile feature
-    Logger::logger_file = _atob(value);
+    Logger::setLogFile(_atob(value));
 
   } else if (_stricmp(name, "reset") == 0) {
     // reboot is called reset in ESP
@@ -135,8 +127,7 @@ bool DeviceElement::set(const char *name, const char *value)
       _board->maxNetConnextTime = _atotime(value) * 1000;
 
     } else if (_stricmp(name, "sleeptime") == 0) {
-      _board->deepSleepTime = _atotime(value);
-
+      _board->setSleepTime(_atotime(value));
 
       // ===== I2C bus =====
     } else if (_stricmp(name, "i2c-sda") == 0) {

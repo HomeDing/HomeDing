@@ -101,7 +101,7 @@ public:
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       if (_fsUploadFile)
         _fsUploadFile.write(upload.buf, upload.currentSize);
-      yield();
+      delay(1);
 
     } else if (upload.status == UPLOAD_FILE_END) {
       if (_fsUploadFile)

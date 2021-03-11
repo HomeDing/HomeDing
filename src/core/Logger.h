@@ -18,7 +18,7 @@
  * *   log errors and info to file log.txt
  * * 27.10.2018 rolling logfiles and log_old.txt.
  * * 02.02.2019 reduce Flash memory, optimizing
- * * 27.04.2019 add some yield(), enabling network events.
+ * * 27.04.2019 add some delay(1) / yield(), enabling network events.
  */
 
 #ifndef LOGGER_H
@@ -78,8 +78,6 @@ class Logger
 public:
   static int logger_level; // initialized to 0 === LOGGER_LEVEL_ERR;
 
-  static bool logger_file; // initialized to false === no logging to file;
-
   /**
    * @brief Create Logger entry line from given format and args.
    *
@@ -89,10 +87,29 @@ public:
    * @param ... arguments
    */
 
+
+  /*
+   * initialize file system for log file
+   * @param fs file system to be used.
+   */
+  static void init(FS *fs);
+
+  /*
+   * enable/disable log file
+   * @param enable set true to enable file logging.
+   */
+  static void setLogFile(bool enable);
+
   static void LoggerPrint(const char *module, int level, const char *fmt, ...);
   static void LoggerEPrint(Element *module, int level, const char *fmt, ...);
 
 private:
+  // File System for logging file
+  static FS *_fileSystem;
+
+  // initialized to false === no logging to file;
+  static bool _logFileEnabled;
+
   // Print log message
   static void _print(const char *module, int level, const char *fmt, va_list args);
 

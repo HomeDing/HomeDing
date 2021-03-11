@@ -111,7 +111,7 @@ private:
   /**
    * @brief The duration of one animation cycle or transition in milliSeconds.
    */
-  Mode _mode = Mode::wheel;
+  Mode _mode = Mode::fix;
 
   /**
    * @brief The _valueAction holds the actions that is submitted when the color changes.

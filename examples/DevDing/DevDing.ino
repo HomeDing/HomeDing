@@ -139,6 +139,7 @@ void setup(void)
 #endif
 
 #ifdef DBG_TRACE
+  // wait so the serial monitor can capture all output.
   delay(3000);
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
@@ -148,7 +149,7 @@ void setup(void)
 
   // ----- setup the file system and load configuration -----
   mainBoard.init(&server, &SPIFFS);
-  yield();
+  delay(1);
 
   // ----- adding web server handlers -----
   // redirect to index.htm when only domain name is given.

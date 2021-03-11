@@ -23,8 +23,9 @@
  * * 11.10.2018 move network initialization into board loop.
  * * 10.12.2019 reset counter to enter unsafe mode and config mode.
  * * 25.01.2020 device startup actions added.
- * * 31.08.2020 enable TRACE ouput using Macros to reduce production code size. 
- * * 03.09.2020 forEach iterator over all elements added. 
+ * * 31.08.2020 enable TRACE ouput using Macros to reduce production code size.
+ * * 03.09.2020 forEach iterator over all elements added.
+ * * 09.03.2021 less sharing class members in favor to methods.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -191,7 +192,30 @@ public:
    */
   void loop();
 
-  void dispatchItem(String &action, String &values, int item);
+
+  // ===== set board behavior =====
+
+  // start deep sleep mode in some milliseconds
+  void startSleep();
+
+  // do not start deep sleep mode until reboot
+  void cancelSleep();
+
+  /**
+   * set the duration of a deep sleep.
+   * @param secs duration in seconds.
+   */
+  void setSleepTime(unsigned long secs);
+
+  // ===== queue / process / dispatch actions =====
+
+  /**
+   * send all the actions to the right elements.
+   * @param action list of actions.
+   * @param value the value for $v placeholder.
+   * @param item use the n-th item of the value.
+   */
+  void dispatchItem(String &action, String &values, int n);
 
   /**
    * send all the actions to the right elements.
@@ -260,9 +284,6 @@ public:
    * Safe Mode flag
    */
   bool isSafeMode;
-
-  /** This flag is set to true when restarting after a deep sleep. This allows shortening wait times */
-  bool isWakeupStart;
 
   /**
    * Switch to next network connect mode in msec.
@@ -349,20 +370,24 @@ public:
 
   BoardState boardState;
 
-  /** if true, no deep sleep will be performed. This allows using the Web UI until next reboot. */
-  bool deepSleepBlock;
-
-  /** if > 0; system goes to deep sleep at this millis() */
-  unsigned long deepSleepStart;
-
-  /** time for deep sleep */
-  unsigned long deepSleepTime;
-
 private:
   /**
    * Reset Counter
    */
   int _resetCount;
+
+  /** This flag is set to true when restarting after a deep sleep. This allows shortening wait times */
+  bool _isWakeupStart;
+
+  /** if > 0; system goes to deep sleep at this millis() */
+  unsigned long _deepSleepStart;
+
+  /** if true, no deep sleep will be performed. This allows using the Web UI until next reboot. */
+  bool _deepSleepBlock;
+
+  /** time for deep sleep */
+  unsigned long _deepSleepTime;
+
 
   /**
    * Add another element to the board into the list of created elements.

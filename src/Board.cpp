@@ -39,7 +39,7 @@ extern "C" {
 // use JSONTRACE for tracing parsing the configuration files.
 #define JSONTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
 
-// use JSONTRACE for tracing parsing the configuration files.
+// use TRACE for compiling with detailed TRACE output.
 #define TRACE(...) LOGGER_TRACE(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
@@ -131,6 +131,8 @@ void Board::init(WebServer *serv, FS *fs)
   fileSystem = fs;
   fileSystem->begin();
 
+  Logger::init(fs);
+
   // board parameters configured / overwritten by device element
   sysLED = -1;
   sysButton = -1;
@@ -138,28 +140,28 @@ void Board::init(WebServer *serv, FS *fs)
   cacheHeader = "no-cache";
 
   boardState = BOARDSTATE_NONE;
-  deepSleepStart = 0;     // no deep sleep to be started
-  deepSleepBlock = false; // no deep sleep is blocked
-  deepSleepTime = 60;     // one minute
+  _deepSleepStart = 0;     // no deep sleep to be started
+  _deepSleepBlock = false; // no deep sleep is blocked
+  _deepSleepTime = 60;     // one minute
 
   _cntDeepSleep = 0;
 
 #if defined(ESP8266)
   rst_info *ri = ESP.getResetInfoPtr();
-  isWakeupStart = (ri->reason == REASON_DEEP_SLEEP_AWAKE);
-  if (isWakeupStart) {
+  _isWakeupStart = (ri->reason == REASON_DEEP_SLEEP_AWAKE);
+  if (_isWakeupStart) {
     LOGGER_INFO("Reset from Deep Sleep mode.");
   }
   deviceName = WiFi.hostname(); // use mac based default device name
 
 #elif defined(ESP32)
-  isWakeupStart = false; // TODO:ESP32 ???
+  _isWakeupStart = false;           // TODO:ESP32 ???
   deviceName = WiFi.getHostname(); // use mac based default device name
 #endif
 
   WiFi.begin();
-  deviceName.replace("_", "");  // Underline in hostname is not conformant, see
-                                // https://tools.ietf.org/html/rfc1123 952
+  deviceName.replace("_", ""); // Underline in hostname is not conformant, see
+                               // https://tools.ietf.org/html/rfc1123 952
 } // init()
 
 
@@ -259,7 +261,7 @@ void Board::_addAllElements()
 
 void Board::start(Element_StartupMode startupMode)
 {
-  // LOGGER_TRACE("start(%d)", startupMode);
+  // TRACE("start(%d)", startupMode);
 
   // make elements active that match
   Element *l = _elementList;
@@ -267,9 +269,9 @@ void Board::start(Element_StartupMode startupMode)
 
     if ((!l->active) && (l->startupMode <= startupMode)) {
       // start element when not already active
-      LOGGER_TRACE("starting %s...", l->id);
+      TRACE("starting %s...", l->id);
       l->start();
-      yield();
+      delay(1);
     } // if
 
     l = l->next;
@@ -283,7 +285,7 @@ void Board::start(Element_StartupMode startupMode)
 // switch to a new state
 void Board::_newState(BoardState newState)
 {
-  yield();
+  delay(1);
   LOGGER_TRACE("State=%d", newState);
   boardState = newState;
 }
@@ -296,7 +298,7 @@ void Board::loop()
 
   if (boardState == BOARDSTATE_RUN) {
     // Most common state first.
-    if (!isWakeupStart)
+    if (!_isWakeupStart)
       MDNS.update();
 
     if (!startComplete) {
@@ -351,15 +353,15 @@ void Board::loop()
       _nextElement = _nextElement->next;
     } // if
 
-    if ((!deepSleepBlock) && (deepSleepStart > 0)) {
+    if ((!_deepSleepBlock) && (_deepSleepStart > 0)) {
       _cntDeepSleep++;
 
       // deep sleep specified time.
-      if ((now > deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
+      if ((now > _deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
         // all elements now had the chance to create and dispatch an event.
-        LOGGER_INFO("sleep %d...", deepSleepTime);
+        LOGGER_INFO("sleep %d...", _deepSleepTime);
         Serial.flush();
-        ESP.deepSleep(deepSleepTime * 1000 * 1000);
+        ESP.deepSleep(_deepSleepTime * 1000 * 1000);
         _newState(BOARDSTATE_SLEEP);
       }
     } // if
@@ -510,11 +512,11 @@ void Board::loop()
     }     // if
 
     if (boardState == BOARDSTATE_WAIT) {
-      if (isWakeupStart || (now >= configPhaseEnd)) {
+      if (_isWakeupStart || (now >= configPhaseEnd)) {
         _newState(BOARDSTATE_GREET);
       }
     } // if
-    yield();
+    delay(1);
 
 
   } else if (boardState == BOARDSTATE_GREET) {
@@ -548,7 +550,7 @@ void Board::loop()
 
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode
-    if (!isWakeupStart && (mDNS_sd)) {
+    if (!_isWakeupStart && (mDNS_sd)) {
       MDNS.begin(deviceName.c_str());
       MDNSResponder::hMDNSService serv = MDNS.addService(0, "homeding", "tcp", 80);
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
@@ -573,7 +575,7 @@ void Board::loop()
     displayInfo("config..", ssid);
 
     WiFi.softAP(ssid);
-    yield();
+    delay(1);
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
@@ -596,6 +598,36 @@ void Board::loop()
       reboot(false);
   } // if
 } // loop()
+
+
+// ===== set board behavior
+
+// start deep sleep mode when idle.
+void Board::setSleepTime(unsigned long secs)
+{
+  TRACE("setSleepTime(%d)", secs);
+  _deepSleepTime = secs;
+} // setSleepTime()
+
+
+// start deep sleep mode when idle.
+void Board::startSleep()
+{
+  TRACE("startSleep");
+  _deepSleepStart = millis();
+  if (!_isWakeupStart) {
+    // give a minute time to block deep sleep mode
+    _deepSleepStart += 60 * 1000;
+  }
+} // startSleep()
+
+
+  // block any deep sleep until next reset.
+void Board::cancelSleep()
+{
+  TRACE("cancelSleep");
+  _deepSleepBlock = true;
+} // cancelSleep()
 
 
 Element *Board::findById(String &id)
@@ -709,10 +741,10 @@ void Board::dispatch(String &action, String &value)
 /**
  * @brief Save an action to the _actionList using a item part of a value.
  */
-void Board::dispatchItem(String &action, String &values, int item)
+void Board::dispatchItem(String &action, String &values, int n)
 {
   if (action && values) {
-    String v = Element::getItemValue(values, item);
+    String v = Element::getItemValue(values, n);
     if (v) _queueAction(action, v);
   } // if
 } // dispatchItem

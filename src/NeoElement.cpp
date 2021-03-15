@@ -125,7 +125,7 @@ bool NeoElement::set(const char *name, const char *pValue)
   } else if (_stricmp(name, "count") == 0) {
     _count = _atoi(pValue);
     ret = true; // not handled in LightElement
-  } // if
+  }             // if
 
   return (ret);
 } // set()
@@ -155,11 +155,18 @@ void NeoElement::loop()
 {
   if (_strip) {
     if (needUpdate) {
-      // this time send to strip
+      // some settings have been changed
+      if (enabled) {
+        if (_mode == Mode::color) {
+          _setColors(value);
+        }
+      } else {
+        _strip->clear();
+      }
       _strip->show();
       needUpdate = false;
 
-    } else if ((_mode != Mode::color) && (duration != 0)) {
+    } else if (enabled && (_mode != Mode::color) && (duration != 0)) {
       // dynamic color patterns
       unsigned long now = millis(); // current (relative) time in msecs.
       unsigned int hue = (now % duration) * 65536L / duration;

@@ -54,7 +54,7 @@ bool DeviceElement::set(const char *name, const char *value)
     // Log something
     LOGGER_JUSTINFO(value ? value : "NULL");
 
-  // ===== sleep behavior =====
+    // ===== sleep behavior =====
 
   } else if (_stricmp(name, "sleep") == 0) {
     _board->startSleep();
@@ -106,6 +106,7 @@ bool DeviceElement::set(const char *name, const char *value)
 
     } else if (_stricmp(name, "onsysstart") == 0) {
       _board->sysStartAction = value;
+
     } else if (_stricmp(name, "onstart") == 0) {
       _board->startAction = value;
 

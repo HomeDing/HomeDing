@@ -1,12 +1,12 @@
 /**
- * @file RFSendElement.h
- * @brief Element Template class.
- * 
+ * @file RFCodesElement.h
+ * @brief The RFCodes Element implements receiving and sending sequences on the 433 MHz using a OOK/ASK transmitter.
+* 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
- * This work is licensed under a BSD style license.
+ * This work is licensed under a BSD 3-Clause style license,
  * https://www.mathertel.de/License.aspx.
  * 
  * More information on https://www.mathertel.de/Arduino
@@ -15,10 +15,12 @@
  * * 30.07.2018 created by Matthias Hertel
  * * 11.08.2018 using TabRF library
  * * 20.08.2018 TabRF referenced by the Element , no more initialization from external side required.
+ * * 20.08.2021 adjusted to updated version of rfcodes library.
+ * * 08.04.2021 include receiving RF codes.
  */
 
-#ifndef RFSendElement_H_
-#define RFSendElement_H_
+#ifndef RFCodesElement_H_
+#define RFCodesElement_H_
 
 #include <HomeDing.h>
 
@@ -27,16 +29,16 @@
  * @details
 @verbatim
 
-The RFSendElement can ...
+The RFCodesElement can ...
 
 @endverbatim
  */
 
-class RFSendElement : public Element
+class RFCodesElement : public Element
 {
 public:
   /**
-   * @brief Factory function to create a RFSendElement.
+   * @brief Factory function to create a RFCodesElement.
    * @return Element*
    */
   static Element *create();
@@ -47,10 +49,16 @@ public:
   static bool registered;
 
   /** 
-   * Any rfsend configuratoin nneds to set the "pin" to the sending module.
-   * It is shared among all rfsend commands.
+   * The GPIO pin used for the transmitter.
    */
-  static int _rfpin;
+  static int _pinTx;
+
+  /** 
+   * The GPIO pin used for the receiver.
+   */
+  static int _pinRx;
+
+  static void _receive(const char *newCode);
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -63,10 +71,13 @@ public:
 
   /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
+
+  /**
+   * @brief Give some processing time to the timer to check for next action.
+   */
+  virtual void loop() override;
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -76,6 +87,15 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
+  static bool _initialized;
+
+  static String _receivedCode; // code just received
+  static unsigned long _receivedTimeout; // ignore same code before timeout
+  static String _lastCode; // last processed code
+  static unsigned long _clearTime; // no process codes in this time
+
+ static String _valueAction;
+
   /**
    * @brief The actual value.
    */
@@ -86,10 +106,10 @@ private:
 
 
 // #ifdef HOMEDING_REGISTER
-// Register the RFSendElement onto the ElementRegistry.
-bool RFSendElement::registered =
-    ElementRegistry::registerElement("rfsend", RFSendElement::create);
+// Register the RFCodesElement onto the ElementRegistry.
+bool RFCodesElement::registered =
+    ElementRegistry::registerElement("rfcodes", RFCodesElement::create);
 // #endif
 
 
-#endif // RFSendElement_H_
+#endif // RFCodesElement_H_

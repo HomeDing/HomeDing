@@ -195,7 +195,7 @@ bool INA219Element::getProbe(String &values)
     } // if
   }   // if (_sensor)
   return (newData);
-} // loop()
+} // getProbe()
 
 
 void INA219Element::sendData(String &values)

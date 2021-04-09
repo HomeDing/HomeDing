@@ -37,3 +37,8 @@ If you like to contribute by additions or bug fixes you are welcome to open issu
 
 If you plan to use it in a commercial product you are welcome to contact me regarding working and planning the future.
 
+
+## Included Libraries / Components
+
+* The **BME680 sensor** Element uses the Arduino Library from Bosch Sensortec GmbH <https://github.com/BoschSensortec/BSEC-Arduino-library/tree/master/src/bme680> using a BSD 3-clause license
+

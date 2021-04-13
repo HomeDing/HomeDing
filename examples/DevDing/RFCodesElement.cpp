@@ -38,7 +38,8 @@ String RFCodesElement::_valueAction;
 bool RFCodesElement::_initialized = false;
 
 String RFCodesElement::_receivedCode;
-unsigned long RFCodesElement::_receivedTimeout = 0; // when code was received
+unsigned long RFCodesElement::_receivedMillis = 0; // when code was received
+time_t RFCodesElement::_receivedTime;
 
 String RFCodesElement::_lastCode;
 unsigned long RFCodesElement::_clearTime = 3 * 1000; // 3 seconds
@@ -70,17 +71,10 @@ bool RFCodesElement::set(const char *name, const char *value)
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
-    _lastValue = _atoi(value);
-
-    if (active) {
-      if (_lastValue) {
-        // TRACE("send(%s)", _codeOn.c_str());
-        col.send(_codeOn.c_str());
-      } else {
-        // TRACE("send(%s)", _codeOff.c_str());
-        col.send(_codeOff.c_str());
-      }
-    } // if
+    col.send(value);
+    LOGGER_INFO("sending: %s", value);
+     _lastCode = value;
+     _receivedTime = 0;
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
@@ -137,18 +131,19 @@ void RFCodesElement::loop()
 {
   Element::loop();
   col.loop(); // process received bytes
-
+  
   if (!_receivedCode.isEmpty()) {
     unsigned long now = millis();
     TRACE("receive: [%s]", _receivedCode.c_str());
 
-    if ((_receivedCode != _lastCode) || (now > _receivedTimeout)) {
+    if ((_receivedCode != _lastCode) || (now > _receivedMillis + _clearTime)) {
       // TRACE("process: [%s]", _receivedCode.c_str());
       _lastCode = _receivedCode;
-      _receivedTimeout = now + _clearTime;
+      _receivedMillis = now;
+      _receivedTime = time(nullptr);
       _board->dispatch(_valueAction, _receivedCode);
     }
-    _receivedCode.clear();
+    _receivedCode = "";
   }
 } // loop()
 
@@ -160,7 +155,9 @@ void RFCodesElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, (_lastValue == 1) ? "1" : "0");
+  callback("value", _lastCode.c_str());
+  callback("received", String(_receivedTime).c_str());
+  // callback("value", _receivedCode.c_str());
 } // pushState()
 
 

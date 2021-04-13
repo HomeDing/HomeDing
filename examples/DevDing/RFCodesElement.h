@@ -90,7 +90,11 @@ private:
   static bool _initialized;
 
   static String _receivedCode; // code just received
-  static unsigned long _receivedTimeout; // ignore same code before timeout
+  
+  /// time, when the lastCode was received
+  static unsigned long _receivedMillis;
+  static time_t _receivedTime;
+
   static String _lastCode; // last processed code
   static unsigned long _clearTime; // no process codes in this time
 

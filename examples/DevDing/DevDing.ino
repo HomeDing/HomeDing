@@ -74,7 +74,7 @@
 #endif
 
 #include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h> // Web Server Middleware for UI 
+#include <FileServer.h> // Web Server Middleware for UI
 
 
 // ===== define full functional Web UI with 4MByte Flash devices
@@ -140,16 +140,15 @@ void setup(void)
 
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
-  delay(3000);
+  // delay(3000);
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-  LOGGER_INFO("Device starting...");
-
-  // ----- setup the file system and load configuration -----
+  // ----- setup the platform with webserver and file system -----
   mainBoard.init(&server, &SPIFFS);
   delay(1);
+  LOGGER_INFO("Device starting...");
 
   // ----- adding web server handlers -----
   // redirect to index.htm when only domain name is given.

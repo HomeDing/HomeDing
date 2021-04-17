@@ -22,7 +22,6 @@
 
 /* ===== Define local constants and often used strings ===== */
 
-// #define SEALEVELPRESSURE_HPA (1013.25)
 struct bme680_dev gas_sensor;
 
 // ===== adapter functions for bme library
@@ -182,10 +181,10 @@ bool BME680Element::getProbe(String &values)
     } else {
       snprintf(buffer, sizeof(buffer),
                //  "%.2f,%.2f,%.0f,%.0f,%d",
-               "%d.%02d,%d.%03d,%d,%d",
+               "%d.%02d,%d.%03d,%d.%02d,%d",
                data.temperature / 100, data.temperature % 100,
                data.humidity / 1000, data.humidity % 1000,
-               data.pressure,
+               data.pressure / 100, data.pressure % 100,
                data.gas_resistance); // data.gas_index
       // LOGGER_EINFO("data=%s", buffer);
       // update ambient temperature for next read

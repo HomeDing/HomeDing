@@ -219,8 +219,8 @@ extern const char *ACTION_ONPRESSURE;
 #include <NeoElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_RFSend
-#include <RFSendElement.h>
+#ifdef HOMEDING_INCLUDE_RFCODES
+#include <RFCodesElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_ROTARY

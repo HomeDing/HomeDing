@@ -1,15 +1,12 @@
 /**
- * @file board.cpp
- *
+ * @file Board.cpp
+ * @author Matthias Hertel (https://www.mathertel.de)
+ * 
  * @brief Implementation of the Board class for the HomeDing Library
- *
- * @author Matthias Hertel, https://www.mathertel.de
- *
- * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
- *
- * This work is licensed under a BSD style license,
- * https://www.mathertel.de/License.aspx.
- *
+ * 
+ * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
+ * 
  * More information on https://www.mathertel.de/Arduino.
  *
  * Changelog: see Board.h
@@ -139,7 +136,7 @@ void Board::init(WebServer *serv, FS *fs)
   homepage = "/index.htm";
   cacheHeader = "no-cache";
 
-  boardState = BOARDSTATE_NONE;
+  boardState = BOARDSTATE::NONE;
   _deepSleepStart = 0;     // no deep sleep to be started
   _deepSleepBlock = false; // no deep sleep is blocked
   _deepSleepTime = 60;     // one minute
@@ -159,19 +156,27 @@ void Board::init(WebServer *serv, FS *fs)
   deviceName = WiFi.getHostname(); // use mac based default device name
 #endif
 
+      LOGGER_JUSTINFO("*0");
   WiFi.begin();
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
                                // https://tools.ietf.org/html/rfc1123 952
 } // init()
 
 
-/** Return true when board is runing in captive mode. */
+/**
+ * @brief Check the mode the device in running.
+ * @return true when board is runing in captive mode.
+ * @return false when board is runing in normal mode. 
+ */
 bool Board::isCaptiveMode()
 {
-  return ((boardState == BOARDSTATE_STARTCAPTIVE) || (boardState == BOARDSTATE_RUNCAPTIVE));
+  return ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE));
 } // isCaptiveMode()
 
 
+/**
+ * @brief 
+ */
 void Board::_checkNetState()
 {
   delay(1);
@@ -189,7 +194,6 @@ void Board::_checkNetState()
 
 /**
  * @brief Add and config the Elements defined in the config files.
- *
  */
 void Board::_addAllElements()
 {
@@ -283,7 +287,7 @@ void Board::start(Element_StartupMode startupMode)
 
 
 // switch to a new state
-void Board::_newState(BoardState newState)
+void Board::_newState(enum BOARDSTATE newState)
 {
   delay(1);
   LOGGER_TRACE("State=%d", newState);
@@ -296,7 +300,7 @@ void Board::loop()
   unsigned long now = millis();
   _checkNetState();
 
-  if (boardState == BOARDSTATE_RUN) {
+  if (boardState == BOARDSTATE::RUN) {
     // Most common state first.
     if (!_isWakeupStart)
       MDNS.update();
@@ -317,7 +321,6 @@ void Board::loop()
 
       if (startComplete) {
         dispatch(startAction); // dispatched when all elements are active.
-        LOGGER_INFO("Connected to %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
       }
     } // if ! startComplete
 
@@ -362,14 +365,15 @@ void Board::loop()
         LOGGER_INFO("sleep %d...", _deepSleepTime);
         Serial.flush();
         ESP.deepSleep(_deepSleepTime * 1000 * 1000);
-        _newState(BOARDSTATE_SLEEP);
+        _newState(BOARDSTATE::SLEEP);
       }
     } // if
 
-  } else if (boardState == BOARDSTATE_NONE) {
-    _newState(BOARDSTATE_LOAD);
+  } else if (boardState == BOARDSTATE::NONE) {
+    LOGGER_TRACE("WiFi-State: autoConnect=%d wifiMode=%d", WiFi.getAutoConnect(), WiFi.getMode());
+    _newState(BOARDSTATE::LOAD);
 
-  } else if (boardState == BOARDSTATE_LOAD) {
+  } else if (boardState == BOARDSTATE::LOAD) {
     // load all config files and create+start elements
     _addAllElements();
 
@@ -407,16 +411,16 @@ void Board::loop()
 
     // detect no configured network situation
     if (((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0)) || (_resetCount == 2)) {
-      _newState(BOARDSTATE_STARTCAPTIVE); // start hotspot right now.
+      _newState(BOARDSTATE::STARTCAPTIVE); // start hotspot right now.
     } else {
-      _newState(BOARDSTATE_CONNECT);
+      _newState(BOARDSTATE::CONNECT);
     }
 
     // wait at least some seconds for offering config mode
     configPhaseEnd = now + minConfigTime;
 
 
-  } else if (boardState == BOARDSTATE_CONNECT) {
+  } else if (boardState == BOARDSTATE::CONNECT) {
     bool autoCon = WiFi.getAutoConnect();
     LOGGER_TRACE("state: ac=%d mode=%d", autoCon, WiFi.getMode());
 
@@ -426,7 +430,7 @@ void Board::loop()
     // connect to a same network as before ?
     LOGGER_TRACE("wifi status=(%d)", _wifi_status);
     LOGGER_TRACE("wifi ssid=(%s)", WiFi.SSID().c_str());
-    _newState(BOARDSTATE_WAITNET);
+    _newState(BOARDSTATE::WAITNET);
 
     if (netMode == NetMode_AUTO) {
       // 1. priority:
@@ -467,7 +471,7 @@ void Board::loop()
     // LOGGER_TRACE("  set phase: %ld %ld %d", now, connectPhaseEnd, maxNetConnextTime);
 
 
-  } else if ((boardState == BOARDSTATE_WAITNET) || (boardState == BOARDSTATE_WAIT)) {
+  } else if ((boardState == BOARDSTATE::WAITNET) || (boardState == BOARDSTATE::WAIT)) {
     // make sysLED blink.
     // short pulses for normal=safemode, long pulses for unsafemode.
     if (sysLED >= 0) {
@@ -477,15 +481,15 @@ void Board::loop()
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
       // LOGGER_INFO("sysbutton pressed");
-      _newState(BOARDSTATE_STARTCAPTIVE);
+      _newState(BOARDSTATE::STARTCAPTIVE);
     }
 
-    if (boardState == BOARDSTATE_WAITNET) {
+    if (boardState == BOARDSTATE::WAITNET) {
       if (_wifi_status == WL_CONNECTED) {
         LOGGER_TRACE("connected.");
         WiFi.setAutoReconnect(true);
         WiFi.setAutoConnect(true);
-        _newState(BOARDSTATE_WAIT);
+        _newState(BOARDSTATE::WAIT);
       } // if
 
       if ((_wifi_status == WL_NO_SSID_AVAIL) ||
@@ -501,7 +505,7 @@ void Board::loop()
         netMode -= 1;
         // LOGGER_TRACE("next connect method = %d\n", netMode);
         if (netMode) {
-          _newState(BOARDSTATE_CONNECT); // try next mode
+          _newState(BOARDSTATE::CONNECT); // try next mode
         } else {
           LOGGER_INFO("no-net restarting...\n");
           clearResetCount();
@@ -511,20 +515,28 @@ void Board::loop()
       }   // if
     }     // if
 
-    if (boardState == BOARDSTATE_WAIT) {
+    if (boardState == BOARDSTATE::WAIT) {
       if (_isWakeupStart || (now >= configPhaseEnd)) {
-        _newState(BOARDSTATE_GREET);
+        _newState(BOARDSTATE::GREET);
       }
     } // if
     delay(1);
 
 
-  } else if (boardState == BOARDSTATE_GREET) {
+  } else if (boardState == BOARDSTATE::GREET) {
     clearResetCount();
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
-    LOGGER_JUSTINFO("Connected to %s %s", WiFi.SSID().c_str(), (isSafeMode ? "safemode" : "unsafe"));
-    WiFi.softAPdisconnect(); // after config mode, the AP needs to be closed down.
+    LOGGER_INFO(
+        "%s (%s) connected to %s (%s mode)",
+        WiFi.hostname().c_str(),
+        WiFi.localIP().toString().c_str(),
+        WiFi.SSID().c_str(),
+        (isSafeMode ? "safe" : "unsafe"));
+    if (WiFi.getMode() == WIFI_AP) {
+      LOGGER_JUSTINFO("*1");
+      WiFi.mode(WIFI_STA); // after config mode, the AP needs to be closed down and Station Mode can start.
+    }
 
     if (display) {
       delay(1600);
@@ -557,12 +569,12 @@ void Board::loop()
       MDNS.addServiceTxt(serv, "title", title.c_str());
     } // if
 
-    _newState(BOARDSTATE_RUN);
-  } else if (boardState == BOARDSTATE_SLEEP) {
+    _newState(BOARDSTATE::RUN);
+  } else if (boardState == BOARDSTATE::SLEEP) {
     // just wait.
     Serial.write('*');
     Serial.flush();
-  } else if (boardState == BOARDSTATE_STARTCAPTIVE) {
+  } else if (boardState == BOARDSTATE::STARTCAPTIVE) {
     uint8_t mac[6];
     char ssid[64];
 
@@ -574,6 +586,7 @@ void Board::loop()
 
     displayInfo("config..", ssid);
 
+    LOGGER_JUSTINFO("*2");
     WiFi.softAP(ssid);
     delay(1);
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
@@ -583,9 +596,9 @@ void Board::loop()
 
     server->begin();
 
-    _newState(BOARDSTATE_RUNCAPTIVE);
+    _newState(BOARDSTATE::RUNCAPTIVE);
     _captiveEnd = now + (5 * 60 * 1000);
-  } else if (boardState == BOARDSTATE_RUNCAPTIVE) {
+  } else if (boardState == BOARDSTATE::RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
     dnsServer.processNextRequest();
 
@@ -622,7 +635,7 @@ void Board::startSleep()
 } // startSleep()
 
 
-  // block any deep sleep until next reset.
+// block any deep sleep until next reset.
 void Board::cancelSleep()
 {
   TRACE("cancelSleep");
@@ -917,7 +930,7 @@ void Board::reboot(bool wipe)
 
 void Board::displayInfo(const char *text1, const char *text2)
 {
-  LOGGER_INFO("%s %s", text1, text2 ? text2 : "");
+  LOGGER_JUSTINFO("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

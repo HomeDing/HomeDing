@@ -103,32 +103,6 @@ class Board;
 
 
 /**
- * State of Board
- */
-typedef enum {
-  // ===== startup operation states
-  BOARDSTATE_NONE = 0, // unspecified
-  BOARDSTATE_LOAD = 1, // load configurations and create elements. Start SYS
-
-  BOARDSTATE_CONNECT = 2, // define how to connect, AUTO, PSK or PASSWD
-  BOARDSTATE_WAITNET = 3, // Wait for network connectivity or configuration request.
-  BOARDSTATE_WAIT = 5,    // network is connected but wait for configuration request.
-
-  // ===== normal operation states
-  BOARDSTATE_GREET = 10, // network established, start NET Elements
-  BOARDSTATE_RUN = 12,   // in normal operation mode.
-  // start TIME Elements
-  // restart on network lost > 30 secs.
-
-  BOARDSTATE_SLEEP = 18, // start sleep mode.
-
-  // ===== config operation states
-  BOARDSTATE_STARTCAPTIVE = 21, // Scan local available Networks
-  BOARDSTATE_RUNCAPTIVE = 22    // Enable Network Configuration UI
-
-} BoardState;
-
-/**
  * @brief iterator callback function.
  */
 typedef std::function<void(Element *e)>
@@ -148,6 +122,28 @@ typedef std::function<void(Element *e)>
  */
 class Board
 {
+
+  /** States of the board */
+  enum BOARDSTATE : int {
+    // ===== startup operation states
+    NONE = 0, // unspecified
+    LOAD = 1, // load configurations and create elements. Start SYS
+
+    CONNECT = 2, // define how to connect, AUTO, PSK or PASSWD
+    WAITNET = 3, // Wait for network connectivity or configuration request.
+    WAIT = 5,    // network is connected but wait for configuration request.
+
+    // ===== normal operation states
+    GREET = 10, // network established, start NET Elements
+    RUN = 12,   // in normal operation mode.
+
+    SLEEP = 18, // start sleep mode.
+
+    // ===== config operation states
+    STARTCAPTIVE = 21, // Scan local available Networks
+    RUNCAPTIVE = 22    // Enable Network Configuration UI
+  };
+
 
 public:
   // ----- Time functionality -----
@@ -368,7 +364,7 @@ public:
   // short readable name of the device used for discovery and web gui
   String title;
 
-  BoardState boardState;
+  enum BOARDSTATE boardState;
 
 private:
   /**
@@ -431,7 +427,7 @@ private:
   unsigned long configPhaseEnd;  // millis when current config mode (boardstate) is over, next mode
   unsigned long connectPhaseEnd; // for waiting on net connection
   unsigned long _captiveEnd;     // terminate/reset captive portal mode after 5 minutes.
-  void _newState(BoardState newState);
+  void _newState(enum BOARDSTATE newState);
 
   bool active = false;
 

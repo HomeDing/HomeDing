@@ -165,7 +165,7 @@ void setup(void)
     const char *uri = server.uri().c_str();
     LOGGER_RAW("notFound: %s", uri);
 
-    if ((mainBoard.boardState == BOARDSTATE_RUNCAPTIVE) &&
+    if (mainBoard.isCaptiveMode() &&
         ((strcmp(uri, "/connecttest.txt") == 0) ||
          (strcmp(uri, "/redirect") == 0) ||
          (strcmp(uri, "/generate_204") == 0) ||

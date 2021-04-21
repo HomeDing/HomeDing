@@ -1,11 +1,11 @@
 /**
- * @file TemplateElement.h
+ * @file RTCStateElement.h
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
  *
- * @brief Element Template class.
+ * @brief RTCStateElement
  * 
  * More information on https://www.mathertel.de/Arduino
  * 
@@ -13,24 +13,20 @@
  * * 30.07.2018 created by Matthias Hertel
  */
 
-#ifndef TEMPLATEELEMENT_H
-#define TEMPLATEELEMENT_H
+#ifndef RTCSTATEEELEMENT_H
+#define RTCSTATEEELEMENT_H
+
+#include "StateElement.h"
 
 /**
- * @brief TemplateElement implements...
+ * @brief RTCStateElement implements...
  * @details
-@verbatim
-
-The TemplateElement can ...
-
-@endverbatim
  */
-
-class TemplateElement : public Element
+class RTCStateElement : public StateElement
 {
 public:
   /**
-   * @brief Factory function to create a TemplateElement.
+   * @brief Factory function to create a RTCStateElement.
    * @return Element*
    */
   static Element *create();
@@ -40,10 +36,8 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Construct a new TemplateElement
-   */
-  TemplateElement();
+
+  /* ===== Element functions ===== */
 
   /**
    * @brief initialize a new Element.
@@ -61,40 +55,38 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
-   * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
-   */
-  virtual void start() override;
-
-  /**
    * @brief Give some processing time to the timer to check for next action.
    */
   virtual void loop() override;
 
-  /**
-   * @brief stop all activities and go inactive.
-   */
-  virtual void term() override;
+
+  /* ===== State Element functions ===== */
 
   /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
+   * @brief The save function allows saving state information specific for an Element.
+   * 
+   * @param element The Element that needs the state support.
+   * @param key Then key of a state variable of the element.
+   * @param value The value of a state variable of the element.
    */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+  virtual void save(Element *element, const char *key, const char *value) override;
+
+  /**
+ * @brief Load all state information from RTC memory and dispatch them as actions.
+   */
+  virtual void load() override;
 
 private:
   /**
-   * @brief The actual value.
+   * @brief Flag true when state was changed and must be saved soon.
    */
-  int _value = 0;
-
+  bool _hasChanged;
 
   /**
-   * @brief The _xAction holds the actions that is submitted when ...
+   * @brief The list of actual state actions.
    */
-  String _xAction;
+  String _stateList;
+
 };
 
 #endif

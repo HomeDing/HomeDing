@@ -52,7 +52,7 @@ bool DeviceElement::set(const char *name, const char *value)
   // ===== actions send to device =====
   if (_stricmp(name, "log") == 0) {
     // Log something
-    LOGGER_JUSTINFO(value ? value : "NULL");
+    LOGGER_INFO(value ? value : "NULL");
 
     // ===== sleep behavior =====
 

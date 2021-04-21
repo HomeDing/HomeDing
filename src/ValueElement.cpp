@@ -34,15 +34,15 @@ bool ValueElement::_setValue(int newValue, bool forceAction)
 {
   bool ret = false;
   _isValid = true;
-  
+
   newValue = constrain(newValue, _minRange, _maxRange);
 
   if (forceAction || ((active) && (_value != newValue))) {
     _board->dispatch(_valueAction, newValue);
     ret = true;
   } // if
-  
   _value = newValue;
+  saveState("value", String(_value).c_str());
   return (ret);
 } // _setValue()
 
@@ -58,6 +58,7 @@ bool ValueElement::_setValue(const char *newValue, bool forceAction)
     ret = true;
   }
   _valueString = newValue;
+  saveState("value", _valueString.c_str());
   return (ret);
 } // _setValue()
 

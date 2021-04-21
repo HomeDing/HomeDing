@@ -49,15 +49,16 @@ class Element;
  * starting/activating the element.
  */
 enum Element_StartupMode {
-  System = 1, // right after loading the configurations.
+  System = 1,  // right after loading the configurations.
   Network = 2, // after a network connectivity in AP Mode was established.
-  Time = 3, // after a valid local time was set.
-  Manual = 9 // manually started.
+  Time = 3,    // after a valid local time was set.
+  Manual = 9   // manually started.
 };
 
 #define ACTION_SEPARATOR ','
 
 #define VALUE_SEPARATOR ','
+#define LIST_SEPARATOR ','
 
 // id can be multi-level when using the slash as a separator.
 // like "device/name"
@@ -129,8 +130,6 @@ public:
 
   /**
    * @brief Activate the Element.
-   * @return true when activation was good.
-   * @return false when activation failed.
    */
   virtual void start();
 
@@ -153,6 +152,15 @@ public:
    */
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
+
+
+  /**
+   * @brief save a local state to a state element.
+   * @param key The key of state variable.
+   * @param value The value of state variable.
+   */
+  void saveState(const char *key, const char *value);
+
 
   /**
    * @brief Return an integer value from a string in various formats.
@@ -234,9 +242,15 @@ public:
    */
   static void _strlower(char *str);
 
+  /* ===== String as List functions =====*/
+  // These are useful function to use a String
+  // as a List of strings separated by LIST_SEPARATOR (',').
 
   /** Get item[index] from string */
   static String getItemValue(String data, int index);
+
+  /** Get first item from string and remove from string */
+  static String popItemValue(String &data);
 
 
 protected:
@@ -245,7 +259,11 @@ protected:
    */
   Board *_board;
 
-  // private:
+  /**
+   * @brief Flag to mark that the element should save the state.
+   */
+  bool _useState = false;
+
 };
 
 #endif

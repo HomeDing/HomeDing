@@ -5,6 +5,9 @@
 
 Documentation can be found in at [HomeDing documentation site](https://homeding.github.io)
 
+This Library is published using a [BSD 3-clause license](./LICENSE).
+
+
 ## Summary 
 
 The HomeDing library for Arduino enables building IoT devices using ESP8266 based boards.
@@ -40,5 +43,6 @@ If you plan to use it in a commercial product you are welcome to contact me rega
 
 ## Included Libraries / Components
 
-* The **BME680 sensor** Element uses the Arduino Library from Bosch Sensortec GmbH <https://github.com/BoschSensortec/BSEC-Arduino-library/tree/master/src/bme680> using a BSD 3-clause license
+* The **BME680 sensor** Element uses the Open Source from the Arduino Library published by Bosch Sensortec GmbH <https://github.com/BoschSensortec/BSEC-Arduino-library/tree/master/src/bme680> using a BSD 3-clause license.
+
 

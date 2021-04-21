@@ -44,8 +44,11 @@ bool Element::set(const char *name, const char *value)
   } else if (_stricmp(name, "stop") == 0) {
     term();
 
-  } else if (_stricmp(name, "loglevel") == 0) {
+  } else if (_stricmp(name, "logLevel") == 0) {
     loglevel = _atoi(value);
+
+  } else if (_stricmp(name, "useState") == 0) {
+    _useState = _atob(value);
 
     // do not report an error for the following properties,
     // as they are used by the web ui and stored in the config files only.
@@ -87,6 +90,20 @@ void Element::pushState(
 
 
 /**
+ * @brief save a local state to a state element.
+ * @param key The key of state variable.
+ * @param value The value of state variable.
+ */
+void Element::saveState(const char *key, const char *value)
+{
+  TRACE("saveState(%s=%s)", key, value);
+  if (active && _useState && _board->state) {
+    _board->state->save(this, key, value);
+  }
+} // saveState
+
+
+/**
  * @brief Get a property value.
  */
 const char *Element::get(const char *propName)
@@ -95,7 +112,6 @@ const char *Element::get(const char *propName)
   String ret;
 
   pushState([this, propName, &ret](const char *name, const char *value) {
-    // TRACE("-%s:%s", name, value);
     if (_stricmp(name, propName) == 0) {
       ret = value;
     }
@@ -283,7 +299,7 @@ String Element::getItemValue(String data, int index)
   const char *p = data.c_str();
 
   while (found <= index) {
-    if ((*p == VALUE_SEPARATOR) || (!*p)) {
+    if ((*p == LIST_SEPARATOR) || (!*p)) {
       found++;
       startIndex = endIndex + 1;
       endIndex = i;
@@ -301,6 +317,26 @@ String Element::getItemValue(String data, int index)
 
   return (ret);
 } // getItemValue()
+
+
+/** Get first item from string and remove from string */
+String Element::popItemValue(String &data)
+{
+  String item;
+
+  if (data.length() > 0) {
+    // extract first action
+    int pos = data.indexOf(LIST_SEPARATOR);
+    if (pos > 0) {
+      item = data.substring(0, pos);
+      data.remove(0, pos + 1);
+    } else {
+      item = data;
+      data = (const char *)nullptr;
+    }
+  } // if
+  return (item);
+} // popItemValue
 
 
 // End

@@ -64,7 +64,9 @@ class Board;
 
 #include <displays/DisplayAdapter.h>
 
-#include "core/Logger.h"
+#include <core/Logger.h>
+#include <core/RTCVariables.h>
+#include <StateElement.h>
 
 #define HOMEDING_GREETING "HomeDing"
 
@@ -218,7 +220,7 @@ public:
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(String &action, const char *value = NULL);
+  void dispatch(String &action, const char *value = nullptr);
 
   /**
    * send all the actions to the right elements.
@@ -243,6 +245,12 @@ public:
   void queueActionTo(const String &typeId, const String &action, const String &value);
 
   /**
+   * @brief Dispatch an action without queueing it. 
+   * @param action The action string.
+   */
+  void dispatchAction(String action);
+
+  /**
    * do not start sleep mode because element is active.
    */
   void deferSleepMode();
@@ -260,6 +268,12 @@ public:
    * Display Adapter when a display is configured.
    */
   DisplayAdapter *display = NULL;
+
+
+  /**
+   * State Element to save state data.
+   */
+  StateElement *state = NULL;
 
 
   /**
@@ -417,8 +431,6 @@ private:
    * @param value the value
    */
   void _queueAction(const String &action, const String &v);
-
-  void _dispatchSingle(String evt);
 
   int _addedElements = 0;
 

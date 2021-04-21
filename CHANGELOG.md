@@ -3,7 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-RF Bridge example
+
+* RFCodes example
+
+* [BME680 Element](https://homeding.github.io/#page=/elements/bme680.md) Bosch library updated to version 1.6.1480
+
+* [State implementation for Elements]()
+
+* [Color Element]
+
 
 ## [0.6.0] - 2021-01-03 
 

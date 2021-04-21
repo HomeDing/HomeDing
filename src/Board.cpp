@@ -55,69 +55,6 @@ const byte DNS_PORT = 53;
 extern const char *ssid;
 extern const char *passPhrase;
 
-
-// ===== detect request for network config and non-safemode using 2 resets in less than 2 sec.
-// this is implemented by using the RTC memory at offset with a special value flag
-
-#if defined(ESP8266)
-/** We use the third 4-byte block here to store a 32 bit value. */
-#define NETRESET_OFFSET 3
-
-#elif defined(ESP32)
-RTC_DATA_ATTR uint32_t rtcNetResetValue;
-
-#endif
-
-/** The magic 4-byte number indicating that a reset has happened before, "RST". Byte 4 is the counter */
-#define NETRESET_FLAG ((uint32_t)0x52535400)
-#define NETRESET_MASK ((uint32_t)0xFFFFFF00)
-#define NETRESET_VALUEMASK ((uint32_t)0x00000000FF)
-
-
-// get the number of resets in the last seconds using rtc memory for counting.
-int getResetCount()
-{
-  // LOGGER_TRACE("getResetCount()");
-  int res = 0;
-  uint32_t netResetValue;
-
-  // check NETRESET_FLAG
-#if defined(ESP8266)
-  ESP.rtcUserMemoryRead(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
-#elif defined(ESP32)
-  netResetValue = rtcNetResetValue;
-#endif
-
-  if ((netResetValue & NETRESET_MASK) == NETRESET_FLAG) {
-    // reset was pressed twice.
-    netResetValue++;
-    res = (netResetValue & 0x000000FF);
-  } else {
-    netResetValue = NETRESET_FLAG;
-  }
-
-  // store NETRESET_FLAG and counter to rtc memory
-#if defined(ESP8266)
-  ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
-#elif defined(ESP32)
-  rtcNetResetValue = netResetValue;
-#endif
-  return (res);
-} // getResetCount()
-
-
-// get the number of resets in the last seconds using rtc memory for counting.
-void clearResetCount()
-{
-  uint32_t netResetValue = 0;
-#if defined(ESP8266)
-  ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &netResetValue, sizeof(netResetValue));
-#elif defined(ESP32)
-  rtcNetResetValue = netResetValue;
-#endif
-}
-
-
 /**
  * @brief Initialize a blank board.
  */
@@ -152,11 +89,10 @@ void Board::init(WebServer *serv, FS *fs)
   deviceName = WiFi.hostname(); // use mac based default device name
 
 #elif defined(ESP32)
-  _isWakeupStart = false;           // TODO:ESP32 ???
+  _isWakeupStart = false;          // TODO:ESP32 ???
   deviceName = WiFi.getHostname(); // use mac based default device name
 #endif
 
-      LOGGER_JUSTINFO("*0");
   WiFi.begin();
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
                                // https://tools.ietf.org/html/rfc1123 952
@@ -338,7 +274,7 @@ void Board::loop()
         _lastAction = _actionList;
         _actionList = (const char *)NULL;
       } // if
-      _dispatchSingle(_lastAction);
+      dispatchAction(_lastAction);
       return;
     } // if
 
@@ -376,14 +312,18 @@ void Board::loop()
   } else if (boardState == BOARDSTATE::LOAD) {
     // load all config files and create+start elements
     _addAllElements();
+    if (state) {
+      state->load();
+    }
 
-    _resetCount = getResetCount();
+    _resetCount = RTCVariables::getResetCounter();
 
     if (_resetCount > 0) {
       // enforce un-safemode on double reset
-      LOGGER_TRACE("RESET #%d", _resetCount);
+      LOGGER_TRACE("Reset #%d", _resetCount);
       isSafeMode = false;
     } // if
+    _resetCount = RTCVariables::setResetCounter(_resetCount + 1);
 
     // search any time requesting elements
     Element *l = _elementList;
@@ -508,7 +448,8 @@ void Board::loop()
           _newState(BOARDSTATE::CONNECT); // try next mode
         } else {
           LOGGER_INFO("no-net restarting...\n");
-          clearResetCount();
+          _resetCount = RTCVariables::setResetCounter(0);
+
           delay(500);
           ESP.restart();
         } // if
@@ -524,7 +465,7 @@ void Board::loop()
 
 
   } else if (boardState == BOARDSTATE::GREET) {
-    clearResetCount();
+    _resetCount = RTCVariables::setResetCounter(0);
 
     displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
     LOGGER_INFO(
@@ -534,7 +475,6 @@ void Board::loop()
         WiFi.SSID().c_str(),
         (isSafeMode ? "safe" : "unsafe"));
     if (WiFi.getMode() == WIFI_AP) {
-      LOGGER_JUSTINFO("*1");
       WiFi.mode(WIFI_STA); // after config mode, the AP needs to be closed down and Station Mode can start.
     }
 
@@ -578,7 +518,7 @@ void Board::loop()
     uint8_t mac[6];
     char ssid[64];
 
-    clearResetCount();
+    _resetCount = RTCVariables::setResetCounter(0);
 
     WiFi.softAPConfig(apIP, apIP, netMsk);
     WiFi.macAddress(mac);
@@ -586,7 +526,6 @@ void Board::loop()
 
     displayInfo("config..", ssid);
 
-    LOGGER_JUSTINFO("*2");
     WiFi.softAP(ssid);
     delay(1);
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
@@ -677,21 +616,21 @@ void Board::_queueAction(const String &action, const String &v)
 
 
 // send a event out to the defined target.
-void Board::_dispatchSingle(String evt)
+void Board::dispatchAction(String action)
 {
-  TRACE("dispatch %s", evt.c_str());
+  TRACE("dispatch %s", action.c_str());
   // TRACE_START;
 
-  int pos1 = evt.indexOf(ELEM_PARAMETER);
-  int pos2 = evt.indexOf(ELEM_VALUE);
+  int pos1 = action.indexOf(ELEM_PARAMETER);
+  int pos2 = action.indexOf(ELEM_VALUE);
 
   if (pos1 <= 0) {
-    LOGGER_ERR("No action given: %s", evt.c_str());
+    LOGGER_ERR("No action given: %s", action.c_str());
 
   } else {
     String targetName, name, value;
 
-    targetName = evt.substring(0, pos1);
+    targetName = action.substring(0, pos1);
     targetName.toLowerCase();
 
     Element *target = findById(targetName);
@@ -701,24 +640,24 @@ void Board::_dispatchSingle(String evt)
 
     } else {
       if (pos2 > 0) {
-        name = evt.substring(pos1 + 1, pos2);
-        value = evt.substring(pos2 + 1);
+        name = action.substring(pos1 + 1, pos2);
+        value = action.substring(pos2 + 1);
       } else {
-        name = evt.substring(pos1 + 1);
+        name = action.substring(pos1 + 1);
         value = "";
       }
       bool ret = target->set(name.c_str(), value.c_str());
       // also show action in log when target has trace loglevel
       if ((Logger::logger_level < LOGGER_LEVEL_TRACE) && (target->loglevel >= LOGGER_LEVEL_TRACE))
-        Logger::LoggerPrint("sys", LOGGER_LEVEL_TRACE, "dispatch (%s)", evt.c_str());
+        Logger::LoggerPrint("sys", LOGGER_LEVEL_TRACE, "dispatch (%s)", action.c_str());
 
       if (!ret)
-        LOGGER_ERR("Event '%s' was not handled", evt.c_str());
+        LOGGER_ERR("Event '%s' was not handled", action.c_str());
     }
   }
   // TRACE_END;
   // TRACE_TIMEPRINT("used time:", "", 25);
-} // _dispatchSingle()
+} // dispatchAction()
 
 
 /**

@@ -12,6 +12,14 @@ All notable changes to this project will be documented in this file.
 
 * [Color Element]
 
+* [Timer Element](https://homeding.github.io/#page=/elements/timer.md)
+
+  **mode** - The Timer can be disabled by setting mode to "ON" or "OFF". To re-enable the timer set mode to "TIMER".
+
+  **reset** - The automatically (re-)start the timer set "restart" to true. The older "type":"loop" is removed.
+
+  The UI for the element has been enhanced.
+
 
 ## [0.6.0] - 2021-01-03 
 

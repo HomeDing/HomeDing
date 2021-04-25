@@ -33,15 +33,17 @@ bool TimerElement::set(const char *name, const char *value)
   unsigned long now = _board->getSeconds();
   bool ret = true;
 
-  if (_stricmp(name, "type") == 0) {
-    if (_stricmp(value, "loop") == 0) {
-      _type = TIMER_TYPE_LOOP;
-    } else if (_stricmp(value, "once") == 0) {
-      _type = TIMER_TYPE_ONCE; // wait for action to start, no auto re-starting
-    } else {
-      LOGGER_EERR("unknown type");
-      ret = false;
+  if (_stricmp(name, "mode") == 0) {
+    if (_stricmp(value, "off") == 0) {
+      _mode = Mode::OFF;
+    } else if (_stricmp(value, "on") == 0) {
+      _mode = Mode::ON;
+    } else if (_stricmp(value, "timer") == 0) {
+      _mode = Mode::TIMER;
     }
+
+  } else if (_stricmp(name, "restart") == 0) {
+    _restart = _atob(value);
 
   } else if (_stricmp(name, "cycletime") == 0) {
     _cycleTime = _atotime(value);
@@ -51,6 +53,35 @@ bool TimerElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "pulsetime") == 0) {
     _pulseTime = _atotime(value);
+
+  } else if (_stricmp(name, "start") == 0) {
+    _mode == Mode::TIMER;
+    _startTime = _board->getSeconds();
+
+  } else if (_stricmp(name, "stop") == 0) {
+    if (_mode == Mode::TIMER) {
+      _board->dispatch(_endAction);
+    }
+    _mode == Mode::OFF;
+
+  } else if (_stricmp(name, "next") == 0) {
+    if (_mode == Mode::TIMER) {
+      // time from start in seconds
+      unsigned long tfs = _board->getSeconds() - _startTime;
+
+      if (tfs < _waitTime) {
+        // skip wait phase
+        _startTime = now - _waitTime;
+
+      } else if (tfs < _waitTime + _pulseTime) {
+        // skip pulse phase
+        _startTime = now - (_waitTime + _pulseTime);
+
+      } else {
+        // restart
+        _startTime = now;
+      }
+    } // if TIMER
 
   } else if (_stricmp(name, "onon") == 0) {
     _onAction = value;
@@ -63,26 +94,6 @@ bool TimerElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
-
-  } else if (_stricmp(name, "next") == 0) {
-    if (_state == TIMERSTATE_WAIT) {
-      _startTime = now - _waitTime;
-    } else if (_state == TIMERSTATE_PULSE) {
-      _startTime = now - (_waitTime + _pulseTime);
-    } else if (_state == TIMERSTATE_CYCLE) {
-      _startTimer();
-    }
-
-  } else if (_stricmp(name, "start") == 0) {
-    // turn off and do a fresh start
-    if (_state == TIMERSTATE_PULSE) {
-      _board->dispatch(_offAction);
-    }
-    _startTimer();
-
-  } else if (_stricmp(name, "stop") == 0) {
-    // turn off 
-    _stopTimer();
 
   } else {
     ret = Element::set(name, value);
@@ -104,49 +115,53 @@ void TimerElement::start()
   } // if
 
   Element::start();
-
-  if (_type == TIMER_TYPE_LOOP) {
+  if ((_mode == Mode::TIMER) && (_restart)) {
     // start Timer automatically
-    _startTimer();
+    _startTime = _board->getSeconds();
   } // if
 } // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
+ * will never change the mode.
  */
 void TimerElement::loop()
 {
-  if (_state != TIMERSTATE_ENDED) {
+  bool newValue = _value;
+
+  if (_mode == Mode::ON) {
+    newValue = true;
+
+  } else if (_mode == Mode::OFF) {
+    newValue = false;
+
+  } else if (_mode == Mode::TIMER) {
+
     // time from start in seconds
-    uint16_t tfs = _board->getSeconds() - _startTime;
+    unsigned long tfs = _board->getSeconds() - _startTime;
 
-    if (_state == TIMERSTATE_WAIT) {
-      if (tfs >= _waitTime) {
-        // switch state to 1 and submit ON action
-        _state = TIMERSTATE_PULSE;
-        _board->dispatch(_onAction);
-        _board->dispatch(_valueAction, "1");
-      } // if
+    if (tfs < _waitTime) {
+      newValue = false;
 
-    } else if (_state == TIMERSTATE_PULSE) {
-      if (tfs >= _waitTime + _pulseTime) {
-        // switch state to 2 and submit OFF action
-        _state = TIMERSTATE_CYCLE;
-        _board->dispatch(_offAction);
-        _board->dispatch(_valueAction, "0");
-      } // if
+    } else if (tfs < _waitTime + _pulseTime) {
+      newValue = true;
 
-    } else if (_state == TIMERSTATE_CYCLE) {
-      if (tfs >= _cycleTime) {
-        _board->dispatch(_endAction);
-        if (_type == TIMER_TYPE_LOOP) {
-          _startTimer();
-        } else {
-          _stopTimer();
-        } // if
-      } // if
-    } // if
+    } else if (tfs > _cycleTime) {
+      if (_restart) {
+        _startTime = _board->getSeconds();
+        // and update in next loop()
+      }
+    }
+  } // if
+
+  if (newValue && !_value) {
+    _board->dispatch(_onAction);
+    _board->dispatch(_valueAction, "1");
+
+  } else if (!newValue && _value) {
+    _board->dispatch(_offAction);
+    _board->dispatch(_valueAction, "0");
   } // if
 } // loop()
 
@@ -160,12 +175,14 @@ void TimerElement::pushState(
   unsigned long now = _board->getSeconds();
 
   Element::pushState(callback);
-  callback("state", String(_state).c_str());
-  if (_state == TIMERSTATE_ENDED)
+  callback("mode", _mode == Mode::TIMER ? "timer" : _mode == Mode::ON ? "on"
+                                                                      : "off");
+  if (_mode != Mode::TIMER) {
     callback("time", "0");
-  else
+  } else {
     callback("time", String(now - _startTime).c_str());
-  callback(PROP_VALUE, (_state == TIMERSTATE_PULSE) ? "1" : "0");
+  }
+  callback(PROP_VALUE, _value ? "1" : "0");
 } // pushState()
 
 
@@ -174,29 +191,19 @@ void TimerElement::pushState(
  */
 void TimerElement::term()
 {
-  _stopTimer();
+  if (_mode == Mode::TIMER) {
+    _board->dispatch(_endAction);
+  }
+  _mode == Mode::OFF;
+
+  if (_value) {
+    _board->dispatch(_offAction);
+    _board->dispatch(_valueAction, "0");
+    _value = false;
+  }
+
   Element::term();
 } // term()
 
-
-/**
- * @brief Start / Restart timer
- */
-void TimerElement::_startTimer()
-{
-  _state = TIMERSTATE_WAIT;
-  _startTime = _board->getSeconds();
-}
-
-/**
- * @brief Stop the timer.
- */
-void TimerElement::_stopTimer()
-{
-  if (_state == TIMERSTATE_PULSE) {
-    _board->dispatch(_offAction);
-  } // if
-  _state = TIMERSTATE_ENDED;
-}
 
 // End

@@ -23,6 +23,7 @@
 
 #include <HomeDing.h>
 #include <displays/DisplayAdapter.h>
+#include <DisplayOutputElement.h>
 
 /**
  * @brief The DisplayDotElement is an Element that allows to create information
@@ -30,7 +31,7 @@
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayDotElement : public Element
+class DisplayDotElement : public DisplayOutputElement
 {
 public:
   /**
@@ -73,6 +74,10 @@ public:
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
+  /**
+   * @brief Draw this output element.
+   */
+  virtual void draw() override;
 
 private:
   /**
@@ -81,9 +86,9 @@ private:
   bool _value;
 
   /**
-   * @brief displayed value
+   * @brief Redraw needed flag;
    */
-  bool _displayValue;
+  bool _neededraw = false;
 
   /**
    * @brief This variable corresponds to the x parameter.
@@ -97,8 +102,6 @@ private:
 
   int _w = 11;
   int _h = 11;
-
-  DisplayAdapter *_display = NULL;
 };
 
 #ifdef HOMEDING_REGISTER

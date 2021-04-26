@@ -34,25 +34,26 @@ Element *DisplayLineElement::create()
  */
 bool DisplayLineElement::set(const char *name, const char *value)
 {
-  bool ret = true;
+  bool ret = DisplayOutputElement::set(name, value);
 
-  if (_stricmp(name, "x0") == 0) {
-    _x0 = _atoi(value);
+  if (!ret) {
+    ret = true;
 
-  } else if (_stricmp(name, "x1") == 0) {
-    _x1 = _atoi(value);
+    if (_stricmp(name, "x0") == 0) {
+      _x0 = _atoi(value);
 
-  } else if (_stricmp(name, "y0") == 0) {
-    _y0 = _atoi(value);
+    } else if (_stricmp(name, "x1") == 0) {
+      _x1 = _atoi(value);
 
-  } else if (_stricmp(name, "y1") == 0) {
-    _y1 = _atoi(value);
+    } else if (_stricmp(name, "y0") == 0) {
+      _y0 = _atoi(value);
 
-  } else if (_stricmp(name, "redraw") == 0) {
-    _neededraw = true;
+    } else if (_stricmp(name, "y1") == 0) {
+      _y1 = _atoi(value);
 
-  } else {
-    ret = Element::set(name, value);
+    } else {
+      ret = false;
+    }
   } // if
 
   return (ret);
@@ -64,15 +65,9 @@ bool DisplayLineElement::set(const char *name, const char *value)
  */
 void DisplayLineElement::start()
 {
-  DisplayAdapter *d = _board->display;
-
-  if (d == NULL) {
-    LOGGER_EERR("no display defined");
-
-  } else {
-    _display = d;
-    _neededraw = true;
-    Element::start();
+  DisplayOutputElement::start();
+  if (_display) {
+    draw();
   } // if
 } // start()
 
@@ -83,11 +78,23 @@ void DisplayLineElement::start()
 void DisplayLineElement::loop()
 {
   if (_neededraw) {
-    _display->drawLine(_x0, _y0, _x1, _y1);
-    _display->flush();
+    if (_display->page == _page) {
+      _display->drawLine(_x0, _y0, _x1, _y1);
+      _display->flush();
+    }
     _neededraw = false;
   } // if
 } // loop()
+
+
+/**
+ * @brief Draw this output element.
+ * 
+ */
+void DisplayLineElement::draw()
+{
+  _neededraw = true;
+}
 
 
 // End

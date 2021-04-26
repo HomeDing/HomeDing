@@ -18,6 +18,8 @@
 #ifndef DISPLAYELEMENT_H
 #define DISPLAYELEMENT_H
 
+#include <functional>
+
 class DisplayElement : public Element
 {
 public:
@@ -65,9 +67,6 @@ protected:
 
   /** height of display */
   int _height = 64;
-
-  /** current displayed page */
-  int _page = 1;
 
   /** brightness of display */
   int _brightness = 128;

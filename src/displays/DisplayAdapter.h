@@ -112,6 +112,16 @@ public:
    */
   virtual void flush(){};
 
+  /**
+   * @brief current displayed page
+   */
+  int page = 1;
+
+  /**
+   * @brief max used page
+   */
+  int maxpage = 1;
+
 private:
   // define the default line height
   int16_t _lineHeight;

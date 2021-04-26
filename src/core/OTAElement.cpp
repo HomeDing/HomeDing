@@ -72,8 +72,8 @@ void OTAElement::start()
     if (_passwd.length() > 0)
       ArduinoOTA.setPassword((const char *)_passwd.c_str());
 
-    ArduinoOTA.onStart([this]() { LOGGER_EINFO("Starting"); });
-    ArduinoOTA.onEnd([this]() { LOGGER_EINFO("End."); });
+    ArduinoOTA.onStart([this]() { LOGGER_JUSTINFO("OTA starting..."); });
+    ArduinoOTA.onEnd([this]() { LOGGER_EINFO("done"); });
 
     // The onProgress function is called very often. Only report progress on
     // full percentages.

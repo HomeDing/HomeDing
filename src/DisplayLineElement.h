@@ -23,6 +23,7 @@
 
 #include <HomeDing.h>
 #include <displays/DisplayAdapter.h>
+#include <DisplayOutputElement.h>
 
 /**
  * @brief The DisplayLineElement is an Element that allows to create information
@@ -30,7 +31,7 @@
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayLineElement : public Element
+class DisplayLineElement : public DisplayOutputElement
 {
 public:
   /**
@@ -66,6 +67,11 @@ public:
    */
   virtual void loop() override;
 
+  /**
+   * @brief Draw this output element.
+   */
+  virtual void draw() override;
+
 private:
   /**
    * @brief This variable corresponds to the x0 parameter.
@@ -75,9 +81,10 @@ private:
   uint8_t _x1 = 0;
   uint8_t _y1 = 0;
 
-  bool _neededraw;
-
-  DisplayAdapter *_display = NULL;
+  /**
+   * @brief Redraw needed flag;
+   */
+  bool _neededraw = false;
 };
 
 #ifdef HOMEDING_REGISTER

@@ -51,6 +51,7 @@ DisplayElement::DisplayElement()
 bool DisplayElement::set(const char *name, const char *value)
 {
   bool ret = true;
+  // TRACE("set %s=%s", name, value);
 
   if (_stricmp(name, PROP_ADDRESS) == 0) {
     _address = _atoi(value);
@@ -71,11 +72,22 @@ bool DisplayElement::set(const char *name, const char *value)
       d->setBrightness(_brightness);
     }
 
-  } else if (_stricmp(name, "show") == 0) {
-    _page = _atoi(value); // not used yet
-    _reset();
-
+  } else if (_stricmp(name, "page") == 0) {
     DisplayAdapter *d = _board->display;
+    d->page = _atoi(value);
+    _reset();
+    d->init(_board);
+
+    // redraw all display elements
+    _board->forEach("display", [this](Element *e) {
+      e->set("redraw", "1");
+    });
+
+  } else if (_stricmp(name, "addpage") == 0) {
+    DisplayAdapter *d = _board->display;
+    d->page += _atoi(value);
+    d->page = constrain(d->page, 0, d->maxpage);
+    _reset();
     d->init(_board);
 
     // redraw all display elements
@@ -86,7 +98,6 @@ bool DisplayElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "clear") == 0) {
     DisplayAdapter *d = _board->display;
     d->init(_board);
-    _page = 0; // always empty
 
   } else {
     ret = Element::set(name, value);
@@ -114,7 +125,7 @@ void DisplayElement::pushState(
 {
   Element::pushState(callback);
   callback("brightness", String(_brightness).c_str());
-  callback("page", String(_page).c_str());
+  callback("page", String(_board->display->page).c_str());
 } // pushState()
 
 // End

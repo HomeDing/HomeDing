@@ -24,6 +24,7 @@
 #include <HomeDing.h>
 
 #include <displays/DisplayAdapter.h>
+#include <DisplayOutputElement.h>
 
 /**
  * @brief The DisplayTextElement is an Element that allows to create information
@@ -31,7 +32,7 @@
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayTextElement : public Element
+class DisplayTextElement : public DisplayOutputElement
 {
 public:
   /**
@@ -69,6 +70,11 @@ public:
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
+protected:
+  /**
+   * @brief send current text to the display.
+   */
+  virtual void draw() override;
 
 private:
   /**
@@ -100,12 +106,6 @@ private:
   int _w = 100;
   int _h = 10; // height of text area (more than fontsize when font-pixels are used)
 
-  DisplayAdapter *_display = NULL;
-
-  /**
-   * @brief send current text to display
-   */
-  void _draw();
 };
 
 #ifdef HOMEDING_REGISTER

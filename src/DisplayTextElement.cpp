@@ -32,9 +32,10 @@ Element *DisplayTextElement::create()
 /**
  * @brief send current text to display
  */
-void DisplayTextElement::_draw()
+void DisplayTextElement::draw()
 {
-  if (active) {
+  if (active && (_display->page == _page)) {
+    DisplayOutputElement::draw();
     _display->clear(_x, _y, _w, _h);
     String msg(_prefix);
     msg.concat(_value);
@@ -42,7 +43,7 @@ void DisplayTextElement::_draw()
     _w = _display->drawText(_x, _y, _fontsize, msg);
     _display->flush();
   }
-} // _draw
+} // draw
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -53,7 +54,7 @@ bool DisplayTextElement::set(const char *name, const char *value)
 
   if (_stricmp(name, PROP_VALUE) == 0) {
     _value = value;
-    _draw();
+    draw();
 
   } else if (_stricmp(name, "prefix") == 0) {
     _prefix = value;
@@ -75,13 +76,10 @@ bool DisplayTextElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "clear") == 0) {
     _value.clear();
-    _draw();
-
-  } else if (_stricmp(name, "redraw") == 0) {
-    _draw();
+    draw();
 
   } else {
-    ret = Element::set(name, value);
+    ret = DisplayOutputElement::set(name, value);
   } // if
 
   return (ret);
@@ -93,16 +91,11 @@ bool DisplayTextElement::set(const char *name, const char *value)
  */
 void DisplayTextElement::start()
 {
-  DisplayAdapter *d = _board->display;
+  DisplayOutputElement::start();
 
-  if (d == NULL) {
-    LOGGER_EERR("no display defined");
-
-  } else {
-    _display = d;
-    Element::start();
-    _h = d->getFontHeight(_fontsize);
-    _draw();
+  if (_display) {
+    _h = _display->getFontHeight(_fontsize);
+    draw();
   } // if
 } // start()
 
@@ -113,7 +106,7 @@ void DisplayTextElement::start()
 void DisplayTextElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  Element::pushState(callback);
+  DisplayOutputElement::pushState(callback);
   callback(PROP_VALUE, _value.c_str());
 } // pushState()
 

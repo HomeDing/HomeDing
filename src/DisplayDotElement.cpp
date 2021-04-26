@@ -19,6 +19,8 @@
 
 #include <DisplayDotElement.h>
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
 /**
  * @brief static factory function to create a new DisplayDotElement.
  * @return DisplayDotElement* as Element* created element
@@ -34,32 +36,35 @@ Element *DisplayDotElement::create()
  */
 bool DisplayDotElement::set(const char *name, const char *value)
 {
-  bool ret = true;
+  TRACE("set %s=%s", name, value);
+  bool ret = DisplayOutputElement::set(name, value);
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
-    _value = _atob(value);
+  if (!ret) {
+    ret = true;
+    if (_stricmp(name, PROP_VALUE) == 0) {
+      _value = _atob(value);
+      _neededraw = true;
 
-  } else if (_stricmp(name, "x") == 0) {
-    _x = _atoi(value);
+    } else if (_stricmp(name, "x") == 0) {
+      _x = _atoi(value);
 
-  } else if (_stricmp(name, "y") == 0) {
-    _y = _atoi(value);
+    } else if (_stricmp(name, "y") == 0) {
+      _y = _atoi(value);
 
-  } else if (!active) {
-    // no actions.
-    ret = Element::set(name, value);
-    if (!ret) {
-      LOGGER_EERR("inactive");
+    } else if (!active) {
+      // no actions.
+      ret = Element::set(name, value);
+      if (!ret) {
+        LOGGER_EERR("inactive");
+      }
+
+    } else if (_stricmp(name, "clear") == 0) {
+      _value = false;
+      _neededraw = true;
+
+    } else {
+      ret = false;
     }
-
-  } else if (_stricmp(name, "clear") == 0) {
-    _value = false;
-
-  } else if (_stricmp(name, "redraw") == 0) {
-    _displayValue = !_value; // enforce drawing it again
-
-  } else {
-    ret = Element::set(name, value);
   } // if
 
   return (ret);
@@ -71,15 +76,9 @@ bool DisplayDotElement::set(const char *name, const char *value)
  */
 void DisplayDotElement::start()
 {
-  DisplayAdapter *d = _board->display;
-
-  if (d == NULL) {
-    LOGGER_EERR("no display defined");
-
-  } else {
-    _display = d;
-    _displayValue = !_value; // send to display next time
-    Element::start();
+  DisplayOutputElement::start();
+  if (_display) {
+    draw();
   } // if
 } // start()
 
@@ -89,14 +88,25 @@ void DisplayDotElement::start()
  */
 void DisplayDotElement::loop()
 {
-  if (_value != _displayValue) {
-    _display->clear(_x, _y, _w, _h);
-    _display->drawDot(_x, _y, _h, _value);
-    _display->flush();
-    _displayValue = _value;
+  if (_neededraw) {
+    if (_display->page == _page) {
+      _display->clear(_x, _y, _w, _h);
+      _display->drawDot(_x, _y, _h, _value);
+      _display->flush();
+    }
+    _neededraw = false;
   } // if
 } // loop()
 
+
+/**
+ * @brief Draw this output element.
+ * 
+ */
+void DisplayDotElement::draw()
+{
+  _neededraw = true;
+}
 
 /**
  * @brief push the current value of all properties to the callback.

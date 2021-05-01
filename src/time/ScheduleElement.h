@@ -27,6 +27,12 @@
 class ScheduleElement : public Element
 {
 public:
+  enum Mode {
+    OFF = 0,  // outbound value is OFF(0).
+    ON = 1,   // outbound value is ON(0).
+    TIMER = 2 // outbound value by timer.
+  };
+
   /**
    * @brief Factory function to create a ScheduleElement.
    * @return Element*
@@ -79,9 +85,14 @@ public:
 
 private:
   /**
+   * @brief Mode of operation.
+   */
+  Mode _mode = Mode::TIMER;
+
+  /**
    * @brief The actual value.
    */
-  int _value;
+  bool _value = false;
 
   /**
    * @brief remember that a first time was processed already.

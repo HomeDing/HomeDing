@@ -155,14 +155,17 @@ void TimerElement::loop()
     }
   } // if
 
-  if (newValue && !_value) {
+  if (newValue == _value) {
+    // no need to send an action.
+  } else if (newValue) {
     _board->dispatch(_onAction);
     _board->dispatch(_valueAction, "1");
 
-  } else if (!newValue && _value) {
+  } else {
     _board->dispatch(_offAction);
     _board->dispatch(_valueAction, "0");
   } // if
+  _value = newValue;
 } // loop()
 
 
@@ -175,8 +178,9 @@ void TimerElement::pushState(
   unsigned long now = _board->getSeconds();
 
   Element::pushState(callback);
-  callback("mode", _mode == Mode::TIMER ? "timer" : _mode == Mode::ON ? "on"
-                                                                      : "off");
+  callback("mode", _mode == Mode::TIMER ? "timer"
+                   : _mode == Mode::ON  ? "on"
+                                        : "off");
   if (_mode != Mode::TIMER) {
     callback("time", "0");
   } else {

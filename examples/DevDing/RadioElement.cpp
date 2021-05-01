@@ -254,8 +254,8 @@ void RadioElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback("frequency", String(_freq).c_str());
-  callback("volume", String(_volume).c_str());
+  callback("frequency", _printInteger(_freq));
+  callback("volume", _printInteger(_volume));
   callback("rssi", String(_ri.rssi).c_str());
   callback("snr", String(_ri.snr).c_str());
   callback("stationname", _stationName.c_str());

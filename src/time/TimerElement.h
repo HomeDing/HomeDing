@@ -133,21 +133,21 @@ private:
    * This variable corresponds to the "cycletime" parameter.
    * When not specified the _cycleTime is calculated by waittime + pulsetime.
    */
-  uint16_t _cycleTime = 0;
+  int _cycleTime = 0;
 
   /**
    * @brief time before "on" action.
    *
    * This variable corresponds to the "waittime" parameter.
    */
-  uint16_t _waitTime = 0; // minutes to wait until next water will be started
+  int _waitTime = 0; // minutes to wait until next water will be started
 
   /**
    * @brief time between "on" and "off" action.
    *
    * This variable corresponds to the "pulsetime" parameter.
    */
-  uint16_t _pulseTime = 0; // minutes when water will be served
+  int _pulseTime = 0; // minutes when water will be served
 
   /**
    * @brief The _onAction holds the actions that is submitted when the pulse

@@ -130,6 +130,7 @@ void Element::term()
   active = false;
 } // term()
 
+// ===== static string to value helper function ===== //
 
 /* Return am integer value from a string. */
 int Element::_atoi(const char *value)
@@ -176,9 +177,15 @@ unsigned long Element::_atotime(const char *value)
 
   } else {
     ret = strtol(value, &pEnd, 10);
-    if (*pEnd == 'd') { ret *= (24 * 60 * 60); }
-    if (*pEnd == 'h') { ret *=      (60 * 60); }
-    if (*pEnd == 'm') { ret *=           (60); }
+    if (*pEnd == 'd') {
+      ret *= (24 * 60 * 60);
+    }
+    if (*pEnd == 'h') {
+      ret *= (60 * 60);
+    }
+    if (*pEnd == 'm') {
+      ret *= (60);
+    }
     // if (*pEnd == 's') { ret *= 1 }
   } // if
   return (ret);
@@ -236,6 +243,29 @@ uint32_t Element::_atoColor(const char *value)
 } // _atoColor()
 
 
+// ===== static value to string helper function ===== //
+
+char Element::_convertBuffer[32];
+
+char *Element::_printBoolean(bool b)
+{
+  return (char *)(b ? "1" : "0");
+};
+
+char *Element::_printInteger(int v)
+{
+  itoa(v, _convertBuffer, 10);
+  return (_convertBuffer);
+};
+
+char *Element::_printInteger(unsigned long v)
+{
+  ultoa(v, _convertBuffer, 10);
+  return (_convertBuffer);
+};
+
+// ===== static general string helper function ===== //
+
 int Element::_stricmp(const char *str1, const char *str2)
 {
   char c1, c2;
@@ -282,7 +312,7 @@ void Element::_strlower(char *str)
         *str += 'a' - 'A';
       str++;
     } // while
-  } // if
+  }   // if
 } // _strlower
 
 

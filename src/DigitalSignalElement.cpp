@@ -137,7 +137,7 @@ void DigitalSignalElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, _pulseValue ? "1" : "0");
+  callback(PROP_VALUE, _printBoolean(_pulseValue));
 } // pushState()
 
 // ----- static interrupt stuff here -----

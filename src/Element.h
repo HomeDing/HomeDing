@@ -161,6 +161,7 @@ public:
    */
   void saveState(const char *key, const char *value);
 
+  // ===== static string to value helper function ===== //
 
   /**
    * @brief Return an integer value from a string in various formats.
@@ -225,6 +226,15 @@ public:
   uint32_t _atoColor(const char *value);
 
 
+  // ===== static value to string helper function ===== //
+
+  static char *_printBoolean(bool b);
+  static char *_printInteger(int v);
+  static char *_printInteger(unsigned long v);
+
+
+  // ===== static general string helper function ===== //
+
   /**
    * @brief replacement of the CPP stricmp function not available on Arduino.
    */
@@ -264,6 +274,8 @@ protected:
    */
   bool _useState = false;
 
+private:
+  static char _convertBuffer[32];
 };
 
 #endif

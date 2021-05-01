@@ -241,21 +241,21 @@ void BL0937Element::pushState(
   Element::pushState(callback);
 
   // report actual cycletime and mode
-  callback("cycletime", ultoa(_cycleTime, buf, 10));
+  callback("cycletime", _printInteger(_cycleTime));
   callback("mode", _voltageMode ? "voltage" : "current");
 
   // report actual power and factor in use.
-  callback("power", ultoa(_powerValue, buf, 10));
+  callback("power", _printInteger(_powerValue));
   callback("powerfactor", String(_powerFactor).c_str());
 
   if (_voltageMode == HIGH) {
     // report actual current and factor in use.
-    callback("voltage", ultoa(_voltageValue, buf, 10));
+    callback("voltage", _printInteger(_voltageValue));
     callback("voltagefactor", String(_voltageFactor).c_str());
 
   } else {
     // report actual current and factor in use.
-    callback("current", ultoa(_currentValue, buf, 10));
+    callback("current", _printInteger(_currentValue));
     callback("currentfactor", String(_currentFactor).c_str());
   }
 

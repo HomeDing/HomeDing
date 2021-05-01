@@ -138,7 +138,7 @@ void LightElement::pushState(
   Element::pushState(callback);
   callback("value", value.c_str());
   callback("enable", enabled ? "1" : "0");
-  callback("brightness", String(brightness).c_str());
+  callback("brightness", _printInteger(brightness));
 } // pushState()
 
 

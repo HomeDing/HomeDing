@@ -151,9 +151,9 @@ void AnalogElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_value).c_str());
-  callback("rawvalue", String(rawValue).c_str());
-  callback("reference", String(_lastReference).c_str());
+  callback(PROP_VALUE, _printInteger(_value));
+  callback("rawvalue", _printInteger(rawValue));
+  callback("reference", _printInteger(_lastReference));
 } // pushState()
 
 // End

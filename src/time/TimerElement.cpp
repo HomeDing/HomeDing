@@ -147,11 +147,12 @@ void TimerElement::loop()
     } else if (tfs < _waitTime + _pulseTime) {
       newValue = true;
 
-    } else if (tfs > _cycleTime) {
-      if (_restart) {
-        _startTime = _board->getSeconds();
-        // and update in next loop()
-      }
+    } else if (tfs < _cycleTime) {
+      newValue = false;
+
+    } else if (_restart) {
+      _startTime = _board->getSeconds();
+      // and update in next loop()
     }
   } // if
 

@@ -41,8 +41,6 @@ public:
 
   /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
 
@@ -71,9 +69,13 @@ protected:
   /** brightness of display */
   int _brightness = 128;
 
+  /** event when page changes */
+  String _onPage;
+
 private:
   void _reset();
 
+  void _newPage(int page);
 };
 
 // This is a base class that will not be registered

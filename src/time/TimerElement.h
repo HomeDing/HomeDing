@@ -89,8 +89,6 @@ public:
 
   /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
 

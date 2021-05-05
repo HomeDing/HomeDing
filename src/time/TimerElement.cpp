@@ -15,6 +15,8 @@
 
 #include <time/TimerElement.h>
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
 /**
  * @brief static factory function to create a new TimerElement
  * @return TimerElement* created element
@@ -32,6 +34,7 @@ bool TimerElement::set(const char *name, const char *value)
 {
   unsigned long now = _board->getSeconds();
   bool ret = true;
+  // TRACE("set %s=%s", name, value);
 
   if (_stricmp(name, "mode") == 0) {
     if (_stricmp(value, "off") == 0) {
@@ -40,6 +43,7 @@ bool TimerElement::set(const char *name, const char *value)
       _mode = Mode::ON;
     } else if (_stricmp(value, "timer") == 0) {
       _mode = Mode::TIMER;
+      _startTime = now;
     }
 
   } else if (_stricmp(name, "restart") == 0) {
@@ -55,14 +59,14 @@ bool TimerElement::set(const char *name, const char *value)
     _pulseTime = _atotime(value);
 
   } else if (_stricmp(name, "start") == 0) {
-    _mode == Mode::TIMER;
+    _mode = Mode::TIMER;
     _startTime = _board->getSeconds();
 
   } else if (_stricmp(name, "stop") == 0) {
     if (_mode == Mode::TIMER) {
       _board->dispatch(_endAction);
     }
-    _mode == Mode::OFF;
+    _mode = Mode::OFF;
 
   } else if (_stricmp(name, "next") == 0) {
     if (_mode == Mode::TIMER) {
@@ -118,6 +122,9 @@ void TimerElement::start()
   if ((_mode == Mode::TIMER) && (_restart)) {
     // start Timer automatically
     _startTime = _board->getSeconds();
+  } else {
+    _mode = Mode::OFF;
+  }
   } // if
 } // start()
 
@@ -150,9 +157,14 @@ void TimerElement::loop()
     } else if (tfs < _cycleTime) {
       newValue = false;
 
-    } else if (_restart) {
-      _startTime = _board->getSeconds();
-      // and update in next loop()
+    } else {
+      newValue = false;
+      if (_restart) {
+        // and update in next loop()
+        _startTime = _board->getSeconds();
+      } else {
+        _mode = Mode::OFF;
+      }
     }
   } // if
 
@@ -199,7 +211,7 @@ void TimerElement::term()
   if (_mode == Mode::TIMER) {
     _board->dispatch(_endAction);
   }
-  _mode == Mode::OFF;
+  _mode = Mode::OFF;
 
   if (_value) {
     _board->dispatch(_offAction);

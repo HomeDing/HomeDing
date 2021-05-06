@@ -124,7 +124,6 @@ void TimerElement::start()
     _startTime = _board->getSeconds();
   } else {
     _mode = Mode::OFF;
-  }
   } // if
 } // start()
 

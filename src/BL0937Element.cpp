@@ -36,7 +36,7 @@ volatile unsigned long cf1SigLast;
 volatile unsigned int cf1SigCnt = 0;
 
 // interrupt routine for power measurement. increment power counter and set exact cycle time.
-ICACHE_RAM_ATTR void onPowerSignal()
+IRAM_ATTR void onPowerSignal()
 {
   unsigned long now = micros();
   if (!powSigStart) {
@@ -50,7 +50,7 @@ ICACHE_RAM_ATTR void onPowerSignal()
 
 
 // interrupt routine for current measurement. increment counter and set exact cycle time.
-ICACHE_RAM_ATTR void onCF1Signal()
+IRAM_ATTR void onCF1Signal()
 {
   unsigned long now = micros();
   if (!cf1SigStart) {

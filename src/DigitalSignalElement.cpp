@@ -146,35 +146,35 @@ uint DigitalSignalElement::_usedSignals = 0;
 unsigned long DigitalSignalElement::_signalCount[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 // increment counter on interrupt
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal0()
+IRAM_ATTR void DigitalSignalElement::onSignal0()
 {
   DigitalSignalElement::_signalCount[0]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal1()
+IRAM_ATTR void DigitalSignalElement::onSignal1()
 {
   DigitalSignalElement::_signalCount[1]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal2()
+IRAM_ATTR void DigitalSignalElement::onSignal2()
 {
   DigitalSignalElement::_signalCount[2]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal3()
+IRAM_ATTR void DigitalSignalElement::onSignal3()
 {
   DigitalSignalElement::_signalCount[3]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal4()
+IRAM_ATTR void DigitalSignalElement::onSignal4()
 {
   DigitalSignalElement::_signalCount[4]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal5()
+IRAM_ATTR void DigitalSignalElement::onSignal5()
 {
   DigitalSignalElement::_signalCount[5]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal6()
+IRAM_ATTR void DigitalSignalElement::onSignal6()
 {
   DigitalSignalElement::_signalCount[6]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal7()
+IRAM_ATTR void DigitalSignalElement::onSignal7()
 {
   DigitalSignalElement::_signalCount[7]++;
 }

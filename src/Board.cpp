@@ -467,10 +467,16 @@ void Board::loop()
   } else if (boardState == BOARDSTATE::GREET) {
     _resetCount = RTCVariables::setResetCounter(0);
 
-    displayInfo(WiFi.hostname().c_str(), WiFi.localIP().toString().c_str());
+#if defined (ESP8266)
+    String name = WiFi.hostname();
+#elif defined(ESP32)
+    String name = WiFi.getHostname();
+#endif
+
+    displayInfo(name.c_str(), WiFi.localIP().toString().c_str());
     LOGGER_INFO(
         "%s (%s) connected to %s (%s mode)",
-        WiFi.hostname().c_str(),
+        name.c_str(),
         WiFi.localIP().toString().c_str(),
         WiFi.SSID().c_str(),
         (isSafeMode ? "safe" : "unsafe"));

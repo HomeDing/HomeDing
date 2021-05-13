@@ -306,6 +306,13 @@ public:
   int minConfigTime = 10 * 1000;
 
 
+#if defined(ESP32)
+  /**
+   * next freee ledc channel to be used on ESP32
+   */
+  int nextLedChannel = 0;
+#endif
+
   /**
    * Common I2C settings.
    */

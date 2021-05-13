@@ -121,14 +121,6 @@ public:
 
 
   /**
-   * @brief Get a property value.
-   * @param name Name of property.
-   * @return actual value of property.
-   */
-  virtual const char *get(const char *name);
-
-
-  /**
    * @brief Activate the Element.
    */
   virtual void start();

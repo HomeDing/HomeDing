@@ -117,7 +117,11 @@ void BoardHandler::handleScan(WebServer &server)
       jc.openObject();
       jc.addProperty("id", WiFi.SSID(i));
       jc.addProperty("rssi", WiFi.RSSI(i));
+#if defined(ESP8266)
       jc.addProperty("open", WiFi.encryptionType(i) == ENC_TYPE_NONE);
+#elif defined(ESP32)
+      jc.addProperty("open", WiFi.encryptionType(i) == WIFI_AUTH_OPEN);
+#endif
       jc.closeObject();
     }
     jc.closeArray();
@@ -201,10 +205,15 @@ bool BoardHandler::handle(WebServer &server,
     jc.addProperty("flashSize", ESP.getFlashChipSize());
     // jc.addProperty("flash-real-size", ESP.getFlashChipRealSize());
 
+#if defined(ESP8266)
     FSInfo fs_info;
     _board->fileSystem->info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
+#elif defined(ESP32)
+    jc.addProperty("fsTotalBytes", SPIFFS.totalBytes);
+    jc.addProperty("fsUsedBytes", SPIFFS.usedBytes);
+#endif
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);
 

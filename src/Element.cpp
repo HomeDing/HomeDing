@@ -104,24 +104,6 @@ void Element::saveState(const char *key, const char *value)
 
 
 /**
- * @brief Get a property value.
- */
-const char *Element::get(const char *propName)
-{
-  TRACE("get(%s)", propName);
-  String ret;
-
-  pushState([this, propName, &ret](const char *name, const char *value) {
-    if (_stricmp(name, propName) == 0) {
-      ret = value;
-    }
-  });
-
-  return (ret.c_str());
-};
-
-
-/**
  * @brief stop all activities and go inactive.
  */
 void Element::term()

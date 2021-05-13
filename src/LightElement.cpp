@@ -37,7 +37,13 @@ void LightElement::setOutput(String value)
 
   for (int n = _count - 1; n >= 0; n--) {
     int c = col & 0x00FF;
+
+#if defined(ESP8266)
     analogWrite(_pins[n], c * brightness / 255);
+#elif (defined(ESP32))
+    ledcWrite(_channels[n], c * brightness / 255);
+#endif
+
     TRACE("%d pin=%d value=%02x", n, _pins[n], c);
     col = col >> 8;
   } // for
@@ -106,9 +112,18 @@ void LightElement::start()
 {
   Element::start();
 
+#if defined(ESP8266)
   analogWriteRange(256);
+#endif
+
   for (int n = 0; n < 3; n++) {
+#if defined(ESP8266)
     pinMode(_pins[n], OUTPUT);
+#elif (defined(ESP32))
+    _channels[n] = _board->nextLedChannel++;
+    ledcSetup(_channels[n], 8000, 8);
+    ledcAttachPin(_pins[n], _channels[n]);
+#endif
   } // for
 
   needUpdate = true;

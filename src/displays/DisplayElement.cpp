@@ -20,6 +20,8 @@
 
 #include "DisplayElement.h"
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
 /* ===== Private functions ===== */
 
 void DisplayElement::_reset()
@@ -32,7 +34,28 @@ void DisplayElement::_reset()
     digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
     delay(250);
   } // if
-}
+} // _reset()
+
+
+void DisplayElement::_newPage(int page)
+{
+  TRACE("newPage %d", page);
+  DisplayAdapter *d = _board->display;
+  int oldPage = d->page;
+
+  d->page = constrain(page, 0, d->maxpage);
+  _reset();
+  d->init(_board);
+
+  // redraw all display elements
+  _board->forEach("display", [this](Element *e) {
+    e->set("redraw", "1");
+  });
+  if (d->page != oldPage) {
+    _board->dispatch(_onPage, d->page);
+  }
+} // _newPage()
+
 
 /* ===== Element functions ===== */
 
@@ -51,7 +74,7 @@ DisplayElement::DisplayElement()
 bool DisplayElement::set(const char *name, const char *value)
 {
   bool ret = true;
-  // TRACE("set %s=%s", name, value);
+  TRACE("set %s=%s", name, value);
 
   if (_stricmp(name, PROP_ADDRESS) == 0) {
     _address = _atoi(value);
@@ -74,26 +97,15 @@ bool DisplayElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "page") == 0) {
     DisplayAdapter *d = _board->display;
-    d->page = _atoi(value);
-    _reset();
-    d->init(_board);
+    _newPage(*value ? _atoi(value) : d->page);
 
-    // redraw all display elements
-    _board->forEach("display", [this](Element *e) {
-      e->set("redraw", "1");
-    });
+  } else if (_stricmp(name, "onpage") == 0) {
+    // action with current visible page
+    _onPage = value;
 
   } else if (_stricmp(name, "addpage") == 0) {
     DisplayAdapter *d = _board->display;
-    d->page += _atoi(value);
-    d->page = constrain(d->page, 0, d->maxpage);
-    _reset();
-    d->init(_board);
-
-    // redraw all display elements
-    _board->forEach("display", [this](Element *e) {
-      e->set("redraw", "1");
-    });
+    _newPage(d->page + _atoi(value));
 
   } else if (_stricmp(name, "clear") == 0) {
     DisplayAdapter *d = _board->display;

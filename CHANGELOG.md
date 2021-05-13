@@ -20,6 +20,22 @@ All notable changes to this project will be documented in this file.
 
   The UI for the element has been enhanced.
 
+* **Display Adapters** and **Display Elements**
+
+  **onPage** - These actions can be defined on the display elements and are triggered every time a new page is displayed.
+
+  **page** - This property can be set on the display elements to display a specific page like `displaysh1106/0?page=2`
+
+  **addpage** - This property can be set on the display elements to display the next or previous page `displaysh1106/0?addpage=-1`
+
+  The Web UI of the display elements now has 2 arrow buttons to flip through the used / defined pages.
+
+
+* **DisplayOutput Elements**
+
+  **page** - This property can be set on display the text, line or other visuals on a specific page.
+
+
 
 ## [0.6.0] - 2021-01-03 
 
@@ -34,7 +50,7 @@ All notable changes to this project will be documented in this file.
   **mapIn___** and **mapOut___** properties can be used to calculate
   a meaningful range of values from the analog raw value.
 
-  **readtimems** - The time between capturing input values can be given in milliseconds.
+  **readTimeMS** - The time between capturing input values can be given in milliseconds.
 
   The **override** keyword was added to many virtual functions to express the intention and avoid type related bugs.
 
@@ -66,8 +82,8 @@ This release focuses on stability and better developer support. New Elements is 
 
 
 > **Important changes**
-> * Specify "safemode": "false" in the device configuration when you want unsecured access to your device during setup and configuration.
-> * Change "zone": "<your timezone>" in the NTPtime element using the ANSI TZ notation. Otherwise the device runs in "GMT0BST" timezone (London).
+> * Specify "safeMode": "false" in the device configuration when you want unsecured access to your device during setup and configuration.
+> * Change "zone": "<your timezone>" in the ntpTime element using the ANSI TZ notation. Otherwise the device runs in "GMT0BST" timezone (London).
 > * Support for IE11 was dropped in favor for smaller code size. Edge is supported. 
 > * Build and test using the ESP8266 Community board version 2.7.4.
 
@@ -94,10 +110,10 @@ These Elements are added to the [Development example](https://homeding.github.io
 ### Enhancements
 
 * **[Device Element](https://homeding.github.io/#page=/elements/device.md)** - Serval improvements.
-    * **safemode** - The safemode (see <https://homeding.github.io/#page=/safemode.md>) advanced in this release but still WIP.<br/>
-    The `safemode` is reported in Serial output and in the response of the `/$sysinfo` request.<br/>
-    Since this release the safemode is on by default.
-    * **sleeptime** - The [deep sleep mode](https://homeding.github.io/#page=/boards/deepsleep.md)
+    * **safeMode** - The safeMode (see <https://homeding.github.io/#page=/safemode.md>) advanced in this release but still WIP.<br/>
+    The `safeMode` is reported in Serial output and in the response of the `/$sysinfo` request.<br/>
+    Since this release the safeMode is on by default.
+    * **sleepTime** - The [deep sleep mode](https://homeding.github.io/#page=/boards/deepsleep.md)
     is now supported for devices that will not be always available through the built-in web server. 
     * **cache** - The `cache` parameter can be used to switch on client side caching for the static files.
     * **sd** - The `sd` parameter can be used to switch off mDNS discovery for a device.
@@ -105,7 +121,7 @@ These Elements are added to the [Development example](https://homeding.github.io
 * **[NTPTime Element](https://homeding.github.io/#page=/elements/ntptime.md)**
     * **zone** - The NTPTime Element is now using newer the ANSI ntp time functions. See example `NTP-TZ-DST.ino`.<br/>
       The zone parameter now can include summer time adjustments.<br/>
-      Changing `zone` parameter of ntptimeElement to use the POSIX TZ format.<br/> 
+      Changing `zone` parameter of ntpTimeElement to use the POSIX TZ format.<br/> 
       Examples can be found at https://sites.google.com/a/usapiens.com/opnode/time-zones<br/>
       The system now handles refreshing the time from an NTP Server.
 
@@ -118,10 +134,10 @@ These Elements are added to the [Development example](https://homeding.github.io
     * See story [Build a Weather forecast display](https://homeding.github.io/#page=/stories/story-weatherdisplay.md).
 
 * **[DHT Element](https://homeding.github.io/#page=/elements/dht.md)**
-    * **powerpin** and **powerinverse** - The DHT Element has support for a power controlling GPIO pin to reset the sensor when required.
+    * **powerPin** and **powerInverse** - The DHT Element has support for a power controlling GPIO pin to reset the sensor when required.
 
 * **[Sensor Elements](https://homeding.github.io/#page=/elements/sensors.md)**
-    * **warmuptime** - the time a sensor required to be usable for first data acquiring.
+    * **warmupTime** - the time a sensor required to be usable for first data acquiring.
     * **restart** - This parameter can be set to true when the sensor can be restarted after failure.
 
 * **Display Elements**
@@ -136,7 +152,7 @@ These Elements are added to the [Development example](https://homeding.github.io
 
 * **mDNS Service Discovery** - The HomeDing devices now publish into the local network the availability of a HomeDing device offering the typical HomeDing services. This is implemented using the mDNS-SD with the service signature `_homeding._tcp`. This is not (yet) registered as an official protocol.
 
-* **Doku** - much source code inline doku and more documentation available on <https://homeding.github.io>.
+* **Documentation** - much source code inline annotations and more documentation available on <https://homeding.github.io>.
 
 
 ### Fixes
@@ -156,7 +172,7 @@ These Elements are added to the [Development example](https://homeding.github.io
 ## [0.4.1] - 2020-04-16
 
 * JSON Parser supporting arrays.
-* Avoid long procissing time without yiedl() calls on startup to get faster network connectivity. 
+* Avoid long processing time without yield()/delay(1) calls on startup to get faster network connectivity. 
 * Web UI updated
 * internal Web UI updated
 * ntp time fixed according ESP8266 board version 4.7.0

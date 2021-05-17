@@ -183,7 +183,7 @@ void HttpClientElement::loop()
           processHeader(key, val);
         }
       }
-      delay(1);
+      hd_yield();
     } // while available
 
   } else if (_state == STATE::BODY) {

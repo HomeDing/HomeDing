@@ -1,6 +1,6 @@
 /**
  * @file MicroJsonParser.cpp
- * @brief Streamin JSON Parser.
+ * @brief Streaming JSON Parser.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -270,7 +270,7 @@ bool MicroJson::parseChar(char ch)
       MJ_TRACE("array open level %d", _level + 1);
       if (_path[0] != NUL)
         appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
-      strncat(_path, _name, sizeof(_path));
+      strlcat(_path, _name, sizeof(_path));
       (_callbackFn)(_level, _path, NULL);
 
       _level++;
@@ -292,7 +292,7 @@ bool MicroJson::parseChar(char ch)
       // this character doesn't belong to the value any more.
       // LOGGER_RAW(" value=%s", _value);
       appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
-      strncat(_path, _name, sizeof(_path));
+      strlcat(_path, _name, sizeof(_path));
       (_callbackFn)(_level, _path, _value);
       *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
@@ -309,7 +309,7 @@ bool MicroJson::parseChar(char ch)
     } else {
       // quoted value completed
       appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
-      strncat(_path, _name, sizeof(_path));
+      strlcat(_path, _name, sizeof(_path));
       (_callbackFn)(_level, _path, _value);
       *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);

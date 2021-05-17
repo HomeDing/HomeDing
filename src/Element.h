@@ -188,6 +188,13 @@ public:
   static unsigned long _atotime(const char *value);
 
   /**
+   * @brief Return a duration value from a string as milliseconds.
+   * @param value Given value as string.
+   * @return time or duration as milliseconds.
+   */
+  static unsigned long _scanDuration(const char *value);
+
+  /**
    * @brief Return a pin value from a string.
    * @details pin values can be entered using the "D0" or "A0" syntax or by
    * specifying a GPIO number. Mappings are taken from NodeMCU.

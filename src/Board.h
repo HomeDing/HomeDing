@@ -111,6 +111,13 @@ typedef std::function<void(Element *e)>
     ElementCallbackFn;
 
 
+/** inline yield function for cooperative multitasking platforms. */
+inline __attribute__((always_inline)) void hd_yield() {
+  // delay(1);
+  optimistic_yield(100);
+}
+
+
 /**
  * The Board is the platform / functionality that manage all elements
  * required to build an IoT Thing.

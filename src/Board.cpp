@@ -86,13 +86,12 @@ void Board::init(WebServer *serv, FS *fs)
   if (_isWakeupStart) {
     LOGGER_INFO("Reset from Deep Sleep mode.");
   }
-  deviceName = WiFi.hostname(); // use mac based default device name
 
 #elif defined(ESP32)
   _isWakeupStart = false;          // TODO:ESP32 ???
-  deviceName = WiFi.getHostname(); // use mac based default device name
 #endif
 
+  deviceName = WiFi.getHostname(); // use mac based default device name
   WiFi.begin();
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
                                // https://tools.ietf.org/html/rfc1123 952
@@ -115,7 +114,7 @@ bool Board::isCaptiveMode()
  */
 void Board::_checkNetState()
 {
-  delay(1);
+  hd_yield();
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
     LOGGER_RAW("new netstate: %d", newState);
@@ -211,7 +210,7 @@ void Board::start(Element_StartupMode startupMode)
       // start element when not already active
       TRACE("starting %s...", l->id);
       l->start();
-      delay(1);
+      hd_yield();
     } // if
 
     l = l->next;
@@ -225,7 +224,7 @@ void Board::start(Element_StartupMode startupMode)
 // switch to a new state
 void Board::_newState(enum BOARDSTATE newState)
 {
-  delay(1);
+  hd_yield();
   LOGGER_TRACE("State=%d", newState);
   boardState = newState;
 }
@@ -335,7 +334,7 @@ void Board::loop()
     } // while
 
     // setup system wide stuff
-    WiFi.hostname(deviceName);
+    WiFi.setHostname(deviceName.c_str());
     Wire.begin(I2cSda, I2cScl);
 
     start(Element_StartupMode::System);
@@ -461,22 +460,18 @@ void Board::loop()
         _newState(BOARDSTATE::GREET);
       }
     } // if
-    delay(1);
+    hd_yield();
 
 
   } else if (boardState == BOARDSTATE::GREET) {
     _resetCount = RTCVariables::setResetCounter(0);
 
-#if defined (ESP8266)
-    String name = WiFi.hostname();
-#elif defined(ESP32)
-    String name = WiFi.getHostname();
-#endif
+    const char *name = WiFi.getHostname();
 
-    displayInfo(name.c_str(), WiFi.localIP().toString().c_str());
+    displayInfo(name, WiFi.localIP().toString().c_str());
     LOGGER_INFO(
         "%s (%s) connected to %s (%s mode)",
-        name.c_str(),
+        name,
         WiFi.localIP().toString().c_str(),
         WiFi.SSID().c_str(),
         (isSafeMode ? "safe" : "unsafe"));
@@ -533,7 +528,7 @@ void Board::loop()
     displayInfo("config..", ssid);
 
     WiFi.softAP(ssid);
-    delay(1);
+    hd_yield();
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);

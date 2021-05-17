@@ -38,15 +38,15 @@ public:
   {
     display = d;
     d->init();
-    delay(1);
+    hd_yield();
     d->flipScreenVertically();
     d->setTextAlignment(TEXT_ALIGN_LEFT);
     d->setFont(ArialMT_Plain_10);
-    delay(1);
+    hd_yield();
 
     d->clear();
     d->display();
-    delay(1);
+    hd_yield();
 
     return (true);
   }; // init()

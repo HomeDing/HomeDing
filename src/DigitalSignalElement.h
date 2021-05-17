@@ -81,14 +81,14 @@ private:
   static uint _usedSignals;
   static unsigned long _signalCount[8];
 
-  static IRAM_ATTR void onSignal0();
-  static IRAM_ATTR void onSignal1();
-  static IRAM_ATTR void onSignal2();
-  static IRAM_ATTR void onSignal3();
-  static IRAM_ATTR void onSignal4();
-  static IRAM_ATTR void onSignal5();
-  static IRAM_ATTR void onSignal6();
-  static IRAM_ATTR void onSignal7();
+  static void onSignal0();
+  static void onSignal1();
+  static void onSignal2();
+  static void onSignal3();
+  static void onSignal4();
+  static void onSignal5();
+  static void onSignal6();
+  static void onSignal7();
 
   // ----- private element members -----
 

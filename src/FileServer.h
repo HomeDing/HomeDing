@@ -16,6 +16,7 @@
  * * 04.02.2019 simplifications, saving memory.
  * * 24.11.2019 simplifications, using serveStatic for delivering filesystem files.
  * * 13.12.2019 no upload and delete when running in safemode
+ * * 16.5.2021 update to ESP8266 board version 3.0
  */
 
 #ifndef FILESERVER_H
@@ -49,22 +50,23 @@ public:
     @param requestUri request ressource from the http request line.
     @return true when method can be handled.
   */
-  bool canHandle(HTTPMethod requestMethod, UNUSED String requestUri) override
+  bool canHandle(HTTPMethod requestMethod, UNUSED const String &uri) override
   {
     return ((!_board->isSafeMode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
   } // canHandle()
 
 
-  bool canUpload(String requestUri) override
+  bool canUpload(const String &uri) override
   {
     // only allow upload on root fs level.
-    return ((!_board->isSafeMode) && (requestUri == "/"));
+    return ((!_board->isSafeMode) && (uri == "/"));
   } // canUpload()
 
 
   bool handle(WebServer &server, HTTPMethod requestMethod,
-              String requestUri) override
+              const String &requestUri) override
   {
+    // LOGGER_RAW("File:handle(%s)", requestUri.c_str());
     if (requestMethod == HTTP_POST) {
       server.send(200); // all done in upload. no other forms.
 
@@ -81,7 +83,7 @@ public:
   } // handle()
 
 
-  void upload(UNUSED WebServer &server, UNUSED String requestUri, HTTPUpload &upload) override
+  void upload(UNUSED WebServer &server, UNUSED const String &requestUri, HTTPUpload &upload) override
   {
     // LOGGER_TRACE("upload...<%s>", upload.filename.c_str());
     if (!upload.filename.startsWith("/")) {
@@ -101,7 +103,7 @@ public:
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       if (_fsUploadFile)
         _fsUploadFile.write(upload.buf, upload.currentSize);
-      delay(1);
+      hd_yield();
 
     } else if (upload.status == UPLOAD_FILE_END) {
       if (_fsUploadFile)

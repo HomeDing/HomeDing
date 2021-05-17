@@ -74,11 +74,11 @@ void Logger::_print(const char *module, int level, const char *fmt,
   DEBUG_ESP_PORT.println(buffer);
 #endif
 
-  delay(1);
+  hd_yield();
 
   if ((module) && (_logFileEnabled) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
-    delay(1);
+    hd_yield();
   } // if
 } // _print
 
@@ -93,7 +93,7 @@ void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
     Logger::_print(module, level, fmt, args);
     va_end(args);
   } // if
-  delay(1);
+  hd_yield();
 } // LoggerPrint
 
 
@@ -108,7 +108,7 @@ void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
     Logger::_print(elem->id, level, fmt, args);
     va_end(args);
   } // if
-  delay(1);
+  hd_yield();
 } // LoggerEPrint
 
 
@@ -122,12 +122,12 @@ void Logger::_printToFile(char *buffer)
       f.close();
       _fileSystem->remove(LOGFILE_OLD_NAME);
       _fileSystem->rename(LOGFILE_NAME, LOGFILE_OLD_NAME);
-      delay(1);
+      hd_yield();
       f = _fileSystem->open(LOGFILE_NAME, "a");
     } // if
     f.println(buffer);
     f.close();
-    delay(1);
+    hd_yield();
   }
 };
 

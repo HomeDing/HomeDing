@@ -40,7 +40,7 @@
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
 #define HOMEDING_INCLUDE_SHT20 // + 1176 bytes
-#define HOMEDING_INCLUDE_PMS
+// #define HOMEDING_INCLUDE_PMS
 
 // Enable some INPUT Elements
 #define HOMEDING_INCLUDE_ROTARY
@@ -147,7 +147,7 @@ void setup(void)
 
   // ----- setup the platform with webserver and file system -----
   mainBoard.init(&server, &SPIFFS);
-  delay(1);
+  hd_yield();
   LOGGER_INFO("Device starting...");
 
   // ----- adding web server handlers -----

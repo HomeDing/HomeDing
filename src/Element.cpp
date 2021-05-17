@@ -174,6 +174,51 @@ unsigned long Element::_atotime(const char *value)
 } // _atotime()
 
 
+/* Return a duration value from a string as milliseconds. */
+unsigned long Element::_scanDuration(const char *value)
+{
+  unsigned long ret = 0;
+  char *pEnd;
+
+  if (strchr(value, ':') != nullptr) {
+    // scan using format hh:mm[:ss[.mmm]]
+    ret += strtol(value, &pEnd, 10) * 60 * 60 * 1000;
+    if (*pEnd == ':')
+      ret += strtol(pEnd + 1, &pEnd, 10) * 60 * 1000;
+    if (*pEnd == ':') {
+      ret += strtol(pEnd + 1, &pEnd, 10) * 1000;
+      if (*pEnd == '.') {
+        char *pMS;
+        pEnd++;
+        unsigned long ms = strtol(pEnd, &pMS, 10);
+        while (pMS - pEnd < 3) {
+          ms = 10 * ms;
+          pMS++;
+        }
+        ret += ms;
+      }
+    }
+
+  } else if (strstr(value, "ms") != nullptr) {
+    // scan using format 000ms
+    ret = strtol(value, &pEnd, 10);
+
+  } else {
+    ret = strtol(value, &pEnd, 10);
+    if (*pEnd == 'd') {
+      ret *= (24 * 60 * 60 * 1000);
+    } else if (*pEnd == 'h') {
+      ret *= (60 * 60 * 1000);
+    } else if (*pEnd == 'm') {
+      ret *= (60 * 1000);
+    } else { // simple seconds
+      ret *= 1000;
+    }
+  } // if
+  return (ret);
+} // _scanDuration()
+
+
 /* Return a pin value from a string. */
 int Element::_atopin(const char *value)
 {

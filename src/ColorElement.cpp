@@ -176,7 +176,7 @@ bool ColorElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "duration") == 0) {
     // duration for wheel, pulse and fade effect
-    _duration = _atotime(value) * 1000;
+    _duration = _scanDuration(value);
 
   } else if (_stricmp(name, "saturation") == 0) {
     // lightness for wheel effect

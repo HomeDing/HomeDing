@@ -45,6 +45,9 @@
 
 #define SVC_BOARD "/$board"
 
+// use TRACE for compiling with detailed TRACE output.
+#define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
+
 /**
  * @brief Construct a new State Handler object
  * @param path The root path of the state ressources.
@@ -52,7 +55,7 @@
  */
 BoardHandler::BoardHandler(Board *board)
 {
-  // LOGGER_RAW("BoardHandler:init: %s", path);
+  // TRACE("BoardHandler:init: %s", path);
   _board = board;
 }
 
@@ -60,6 +63,7 @@ BoardHandler::BoardHandler(Board *board)
 
 // void handleStatus() {}
 
+/** Use url parameters to establish / verify a WiFi connection. */
 void BoardHandler::handleConnect(WebServer &server)
 {
   unsigned long connectTimeout =
@@ -145,8 +149,9 @@ void BoardHandler::handleReboot(WebServer &server, bool wipe)
  * @param requestUri current url of the request.
  * @return true When the method and requestUri match a state request.
  */
-bool BoardHandler::canHandle(UNUSED HTTPMethod requestMethod, String requestUri)
+bool BoardHandler::canHandle(UNUSED HTTPMethod requestMethod, const String &requestUri)
 {
+  TRACE("Board:can(%s)", requestUri.c_str());
   return (requestUri.startsWith(SVC_ANY));
 } // canHandle
 
@@ -161,24 +166,25 @@ bool BoardHandler::canHandle(UNUSED HTTPMethod requestMethod, String requestUri)
  */
 bool BoardHandler::handle(WebServer &server,
                           UNUSED HTTPMethod requestMethod,
-                          String requestUri)
+                          const String &requestUri2)
 {
-  // LOGGER_RAW("BoardHandler:handle(%s)", requestUri.c_str());
+  TRACE("handle(%s)", requestUri2.c_str());
   String output;
   const char *output_type = nullptr; // when output_type is set then send output as response.
 
   bool ret = true;
   bool unSafeMode = !_board->isSafeMode;
+  String uri = requestUri2;
 
-  requestUri.toLowerCase();
+  uri.toLowerCase();
   output.reserve(512);
 
-  if (requestUri.startsWith(SVC_BOARD)) {
+  if (uri.startsWith(SVC_BOARD)) {
     // most common request
     // everything behind  "/$board/" is used to address a specific element
-    // LOGGER_TRACE("handle(%s)", requestUri.c_str());
+    // TRACE("board/(%s)", uri.c_str());
 
-    String eId(requestUri.substring(8));
+    String eId(uri.substring(8));
     int argCount = server.args();
 
     if (argCount == 0) {
@@ -193,7 +199,7 @@ bool BoardHandler::handle(WebServer &server,
     } // if
     output_type = TEXT_JSON;
 
-  } else if (requestUri.startsWith(SVC_SYSINFO)) {
+  } else if (uri.startsWith(SVC_SYSINFO)) {
     unsigned long now = millis();
     MicroJsonComposer jc;
 
@@ -225,31 +231,31 @@ bool BoardHandler::handle(WebServer &server,
     output_type = TEXT_JSON;
 
     // ===== these actions are only in non-safemode
-  } else if (unSafeMode && (requestUri.startsWith(SVC_RESETALL))) {
+  } else if (unSafeMode && (uri.startsWith(SVC_RESETALL))) {
     // Reset file system, network parameters and reboot
     _board->fileSystem->format();
     handleReboot(server, true);
 
-  } else if (unSafeMode && (requestUri.startsWith(SVC_RESET))) {
+  } else if (unSafeMode && (uri.startsWith(SVC_RESET))) {
     // Reset network parameters and reboot
     handleReboot(server, true);
 
-  } else if (unSafeMode && (requestUri.startsWith(PAGE_SETUP))) {
+  } else if (unSafeMode && (uri.startsWith(PAGE_SETUP))) {
     // Network Config Page
     output = FPSTR(setupContent);
     output_type = TEXT_HTML;
 
-  } else if (unSafeMode && (requestUri.startsWith(PAGE_UPDATE) || requestUri.startsWith("/$boot"))) {
+  } else if (unSafeMode && (uri.startsWith(PAGE_UPDATE) || uri.startsWith("/$boot"))) {
     // Bootstrap page
     output = FPSTR(updateContent);
     output_type = TEXT_HTML;
 
-  } else if (unSafeMode && (requestUri.startsWith(SVC_UPLOAD))) {
+  } else if (unSafeMode && (uri.startsWith(SVC_UPLOAD))) {
     // Bulk File Upload UI.
     output = FPSTR(uploadContent);
     output_type = TEXT_HTML;
 
-  } else if (unSafeMode && (requestUri.startsWith(SVC_LISTFILES))) {
+  } else if (unSafeMode && (uri.startsWith(SVC_LISTFILES))) {
     // List files in filesystem
     MicroJsonComposer jc;
 #if defined(ESP8266)
@@ -270,17 +276,17 @@ bool BoardHandler::handle(WebServer &server,
     output = jc.stringify();
     output_type = TEXT_JSON;
 
-  } else if (unSafeMode && (requestUri == "/$scan")) {
+  } else if (unSafeMode && (uri == "/$scan")) {
     handleScan(server);
 
-  } else if (unSafeMode && (requestUri == "/$connect")) {
+  } else if (unSafeMode && (uri == "/$connect")) {
     handleConnect(server);
 
-  } else if (requestUri == SVC_REBOOT) {
+  } else if (uri == SVC_REBOOT) {
     // Reboot device
     handleReboot(server);
 
-  } else if (unSafeMode && (requestUri.startsWith(SVC_ELEMENTS))) {
+  } else if (unSafeMode && (uri.startsWith(SVC_ELEMENTS))) {
     // List all registered Elements
     ElementRegistry::list(output);
     output_type = TEXT_JSON;
@@ -290,7 +296,7 @@ bool BoardHandler::handle(WebServer &server,
   }
 
   if (output_type) {
-    server.sendHeader("Cache-control", "no-cache");
+    server.sendHeader("Cache-Control", "no-cache");
     server.sendHeader("X-Content-Type-Options", "no-sniff");
     server.send(200, output_type, output);
   }

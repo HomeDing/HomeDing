@@ -20,6 +20,7 @@
  * * 18.04.2020 correct handling empty obejcts a.k.a '{}'
  * * 18.04.2020 reduce memory footprint
  * * 27.06.2020 enable parsing partial JSON in junks
+ * * 16.05.2021 use strlcat.
  */
 
 

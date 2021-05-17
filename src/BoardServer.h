@@ -39,7 +39,7 @@ To send an action to a element a parameter can be added like:
 // Content types for http results
 
 #define TEXT_JSON "text/javascript; charset=utf-8" // Content type for JSON.
-#define TEXT_HTML "text/html" // Content type for HTML.
+#define TEXT_HTML "text/html"                      // Content type for HTML.
 
 /**
  * @brief The BoardHandler is a local class of the main sketch that implements a
@@ -69,7 +69,7 @@ public:
    * @param requestUri current url of the request.
    * @return true When the method and requestUri match a state request.
    */
-  bool canHandle(HTTPMethod requestMethod, String requestUri);
+  bool canHandle(HTTPMethod requestMethod, const String &requestUri) override;
 
   /**
    * @brief Handle the request of the state.
@@ -80,7 +80,7 @@ public:
    * @return false
    */
   bool handle(WebServer &server, HTTPMethod requestMethod,
-              String requestUri);
+              const String &requestUri) override;
 
 
 protected:
@@ -101,6 +101,10 @@ protected:
   /** @brief Return list of local networks. */
   void handleScan(WebServer &server);
 
+  /**
+   * @brief Use url parameters to establish / verify a WiFi connection.
+   * @param server The Web Server on the access point.
+   */
   void handleConnect(WebServer &server);
 };
 

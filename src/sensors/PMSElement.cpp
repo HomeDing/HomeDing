@@ -156,7 +156,7 @@ bool PMSElement::getProbe(String &values)
           _datapos = -1;
         } // if
       } // if
-      delay(1);
+      hd_yield();
     } // while
   } // if
 

@@ -131,7 +131,7 @@ public:
     if ((x > 20) || (y > 4)) {
       Serial.printf("outside\n");
     } else {
-      strncpy(buffer, text, 80);
+      strlcpy(buffer, text, 80);
       buffer[_cols-x] = '\0';
       display->setCursor(x, y);
       display->print(buffer);

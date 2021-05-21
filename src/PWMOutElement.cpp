@@ -59,9 +59,19 @@ void PWMOutElement::start()
   } else {
     // enable output and stay off
     Element::start();
+
+#if defined(ESP8266)
     pinMode(_pin, OUTPUT);
     analogWriteRange(_range);
+
+#elif (defined(ESP32))
+    _channel = _board->nextLedChannel++;
+    ledcSetup(_channel, 8000, 8);
+    ledcAttachPin(_pin, _channel);
+#endif
+
     _setValue(_value);
+
   } // if
 } // start()
 
@@ -84,7 +94,13 @@ void PWMOutElement::_setValue(int newValue)
   _value = newValue;
 
   if (active) {
-    analogWrite(_pin, (_inverse) ? _range - _value : _value);
+    int v  = (_inverse) ? _range - _value : _value;
+#if defined(ESP8266)
+    analogWrite(_pin, v);
+#elif (defined(ESP32))
+    ledcWrite(_channel, v);
+#endif
+
   } // if
 } // _setValue
 

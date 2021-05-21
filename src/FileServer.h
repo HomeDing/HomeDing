@@ -50,21 +50,32 @@ public:
     @param requestUri request ressource from the http request line.
     @return true when method can be handled.
   */
+#if defined(ESP8266)
   bool canHandle(HTTPMethod requestMethod, UNUSED const String &uri) override
+#elif defined(ESP32)
+  bool canHandle(HTTPMethod requestMethod, UNUSED String uri) override
+#endif
   {
     return ((!_board->isSafeMode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
   } // canHandle()
 
 
+#if defined(ESP8266)
   bool canUpload(const String &uri) override
+#elif defined(ESP32)
+  bool canUpload(String uri) override
+#endif
   {
     // only allow upload on root fs level.
     return ((!_board->isSafeMode) && (uri == "/"));
   } // canUpload()
 
 
-  bool handle(WebServer &server, HTTPMethod requestMethod,
-              const String &requestUri) override
+#if defined(ESP8266)
+  bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override
+#elif defined(ESP32)
+  bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override
+#endif
   {
     // LOGGER_RAW("File:handle(%s)", requestUri.c_str());
     if (requestMethod == HTTP_POST) {
@@ -77,13 +88,17 @@ public:
         LOGGER_ERR("File <%s> doesn't exist.", requestUri.c_str());
       }
 
-    } // if
+    }                 // if
     server.send(200); // all done.
     return (true);
   } // handle()
 
 
+#if defined(ESP8266)
   void upload(UNUSED WebServer &server, UNUSED const String &requestUri, HTTPUpload &upload) override
+#elif defined(ESP32)
+  void upload(UNUSED WebServer &server, UNUSED String requestUri, HTTPUpload &upload) override
+#endif
   {
     // LOGGER_TRACE("upload...<%s>", upload.filename.c_str());
     if (!upload.filename.startsWith("/")) {
@@ -109,7 +124,7 @@ public:
       if (_fsUploadFile)
         _fsUploadFile.close();
     } // if
-  } // upload()
+  }   // upload()
 
 protected:
   FS _fs;

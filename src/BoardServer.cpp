@@ -25,6 +25,10 @@
 #include "upload.h"
 #include <FS.h>
 
+#if defined(ESP32)
+#include <SPIFFS.h>
+#endif
+
 #include <MicroJsonComposer.h>
 
 #define SVC_ANY "/$"
@@ -149,7 +153,11 @@ void BoardHandler::handleReboot(WebServer &server, bool wipe)
  * @param requestUri current url of the request.
  * @return true When the method and requestUri match a state request.
  */
-bool BoardHandler::canHandle(UNUSED HTTPMethod requestMethod, const String &requestUri)
+#if defined(ESP8266)
+bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri) 
+#elif defined(ESP32)
+bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
+#endif
 {
   TRACE("Board:can(%s)", requestUri.c_str());
   return (requestUri.startsWith(SVC_ANY));
@@ -164,9 +172,11 @@ bool BoardHandler::canHandle(UNUSED HTTPMethod requestMethod, const String &requ
  * @return true When the state could be retrieved.
  * @return false
  */
-bool BoardHandler::handle(WebServer &server,
-                          UNUSED HTTPMethod requestMethod,
-                          const String &requestUri2)
+#if defined(ESP8266)
+bool BoardHandler::handle(WebServer &server, UNUSED HTTPMethod requestMethod, const String &requestUri2) 
+#elif defined(ESP32)
+bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String requestUri2) 
+#endif
 {
   TRACE("handle(%s)", requestUri2.c_str());
   String output;
@@ -217,8 +227,8 @@ bool BoardHandler::handle(WebServer &server,
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
 #elif defined(ESP32)
-    jc.addProperty("fsTotalBytes", SPIFFS.totalBytes);
-    jc.addProperty("fsUsedBytes", SPIFFS.usedBytes);
+    jc.addProperty("fsTotalBytes", SPIFFS.totalBytes());
+    jc.addProperty("fsUsedBytes", SPIFFS.usedBytes());
 #endif
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);
@@ -233,7 +243,11 @@ bool BoardHandler::handle(WebServer &server,
     // ===== these actions are only in non-safemode
   } else if (unSafeMode && (uri.startsWith(SVC_RESETALL))) {
     // Reset file system, network parameters and reboot
+#if defined(ESP8266)
     _board->fileSystem->format();
+#elif defined(ESP32)
+    SPIFFS.format();
+#endif
     handleReboot(server, true);
 
   } else if (unSafeMode && (uri.startsWith(SVC_RESET))) {

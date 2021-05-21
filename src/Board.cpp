@@ -22,8 +22,11 @@ extern "C" {
 #include <user_interface.h> // https://github.com/esp8266/Arduino actually tools/sdk/include
 }
 #include "sntp.h"
-#endif
 
+#elif defined(ESP32)
+#include <ESPmDNS.h>
+#include <SPIFFS.h>
+#endif
 
 #include <ElementRegistry.h>
 
@@ -63,7 +66,8 @@ void Board::init(WebServer *serv, FS *fs)
   server = serv;
 
   fileSystem = fs;
-  fileSystem->begin();
+  // fs->begin();
+  SPIFFS.begin();
 
   Logger::init(fs);
 
@@ -88,7 +92,7 @@ void Board::init(WebServer *serv, FS *fs)
   }
 
 #elif defined(ESP32)
-  _isWakeupStart = false;          // TODO:ESP32 ???
+  _isWakeupStart = false; // TODO:ESP32 ???
 #endif
 
   deviceName = WiFi.getHostname(); // use mac based default device name
@@ -237,8 +241,11 @@ void Board::loop()
 
   if (boardState == BOARDSTATE::RUN) {
     // Most common state first.
-    if (!_isWakeupStart)
+#if defined(ESP8266)
+    if (!_isWakeupStart) {
       MDNS.update();
+    }
+#endif
 
     if (!startComplete) {
       if (!hasTimeElements) {
@@ -505,9 +512,15 @@ void Board::loop()
     // but not when using deep sleep mode
     if (!_isWakeupStart && (mDNS_sd)) {
       MDNS.begin(deviceName.c_str());
+
+#if defined(ESP8266)
       MDNSResponder::hMDNSService serv = MDNS.addService(0, "homeding", "tcp", 80);
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
       MDNS.addServiceTxt(serv, "title", title.c_str());
+#elif defined(ESP32)
+      MDNS.addService("homeding", "tcp", 80);
+      // TODO: incomplete ! ???
+#endif
     } // if
 
     _newState(BOARDSTATE::RUN);
@@ -864,7 +877,11 @@ void Board::reboot(bool wipe)
   if (wipe)
     WiFi.disconnect(true);
   delay(1000);
+#if defined(ESP8266)
   ESP.reset();
+#elif defined(ESP32)
+  ESP.restart();
+#endif
 };
 
 

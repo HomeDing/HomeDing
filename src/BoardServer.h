@@ -69,7 +69,11 @@ public:
    * @param requestUri current url of the request.
    * @return true When the method and requestUri match a state request.
    */
+#if defined (ESP8266)
   bool canHandle(HTTPMethod requestMethod, const String &requestUri) override;
+#elif defined (ESP32)
+  bool canHandle(HTTPMethod requestMethod, String requestUri) override;
+#endif
 
   /**
    * @brief Handle the request of the state.
@@ -79,8 +83,11 @@ public:
    * @return true When the state could be retrieved.
    * @return false
    */
-  bool handle(WebServer &server, HTTPMethod requestMethod,
-              const String &requestUri) override;
+#if defined (ESP8266)
+  bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override;
+#elif defined (ESP32)
+  bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override;
+#endif
 
 
 protected:

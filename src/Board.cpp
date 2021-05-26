@@ -67,7 +67,12 @@ void Board::init(WebServer *serv, FS *fs)
 
   fileSystem = fs;
   // fs->begin();
-  SPIFFS.begin();
+
+  bool mounted = SPIFFS.begin();
+  if (!mounted) {
+    LOGGER_INFO("formatting...");
+    SPIFFS.format();
+  }
 
   Logger::init(fs);
 

@@ -13,6 +13,7 @@
  * 
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
+ * * 12.05.2021 exclude for ESP32
  * 
     // channel 0 is RED
     // channel 1 is GREEN
@@ -22,6 +23,8 @@
 
 #ifndef MY9291ELEMENT_H
 #define MY9291ELEMENT_H
+
+#if defined(ESP8266)
 
 #include <HomeDing.h>
 #include <LightElement.h>
@@ -80,6 +83,10 @@ private:
 // Register the MY9291Element onto the ElementRegistry.
 bool MY9291Element::registered =
     ElementRegistry::registerElement("my9291", MY9291Element::create);
+#endif
+
+#elif defined(ESP32)
+// TODO: ESP32 require implementation ?
 #endif
 
 #endif // MY9291ELEMENT_H

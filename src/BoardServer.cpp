@@ -285,6 +285,21 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     } // while
 #elif defined(ESP32)
 // TODO:ESP32 ???
+    File root = _board->fileSystem->open("/");
+
+    jc.openArray();
+
+    File file = root.openNextFile();
+
+    while (file) {
+      jc.openObject();
+      jc.addProperty("type", "file");
+      jc.addProperty("name", file.name());
+      jc.addProperty("size", file.size());
+      jc.closeObject();
+      file = root.openNextFile();
+    } // while
+
 #endif
     jc.closeArray();
     output = jc.stringify();

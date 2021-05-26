@@ -17,6 +17,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP8266)
+
 #include <sensors/MY9291Element.h>
 
 #include "my92xx.h"
@@ -111,3 +113,4 @@ void MY9291Element::setOutput(String value)
   _my92xx->update();
 } // setOutput()
 
+#endif

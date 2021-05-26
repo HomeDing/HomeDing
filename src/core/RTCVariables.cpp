@@ -13,18 +13,22 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-// RTC Memory is accessible using 32-bit values
 
+#if defined(ESP8266)
+// RTC Memory in ESP8266 is accessible using 32-bit values
 #define NETRESET_OFFSET 3 // Length of 1
+
+#define STATE_OFFSET 4
+#define STATE_DATA (STATE_OFFSET + 1)
+#define STATE_SIZE (200) // state max. length of 200 + 4 bytes of Magic
+
+#elif defined(ESP32)
+#endif
 
 /** The magic 4-byte number indicating that a reset has happened before, "RST". Byte 4 is the counter */
 #define NETRESET_MAGIC ((uint32_t)0x52535400)
 #define NETRESET_MASK ((uint32_t)0xFFFFFF00)
 #define NETRESET_VALUE ((uint32_t)0x000000FF)
-
-#define STATE_OFFSET 4
-#define STATE_DATA (STATE_OFFSET + 1)
-#define STATE_SIZE (200) // state max. length of 200 + 4 bytes of Magic
 
 /** The magic 4-char string "HDS," indicating that a valid state is saved to rtc memory. /reverse byte order */
 #define STATE_MAGIC ((uint32_t)0x2c534448)
@@ -39,7 +43,11 @@ int RTCVariables::setResetCounter(int cnt)
   // The higher 3 bytes are used to check for a valid entry.
   cnt = constrain(cnt, 0, 255);
   uint32_t memData = (NETRESET_MAGIC + cnt);
+#if defined(ESP8266)
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &memData, sizeof(memData));
+#elif defined(ESP32)
+  // TODO: ESP32 implementation
+#endif
   return (cnt);
 };
 
@@ -52,10 +60,14 @@ int RTCVariables::getResetCounter()
   int cnt = 0;
   uint32_t memData;
 
+#if defined(ESP8266)
   ESP.rtcUserMemoryRead(NETRESET_OFFSET, &memData, sizeof(memData));
   if ((memData & NETRESET_MASK) == NETRESET_MAGIC) {
     cnt = (memData & 0x000000FF);
   }
+#elif defined(ESP32)
+  // TODO: ESP32 implementation
+#endif
   return (cnt);
 };
 
@@ -68,9 +80,13 @@ void RTCVariables::setStateString(String &state)
 
   unsigned int len = state.length();
   if (len < 200) {
+#if defined(ESP8266)
     uint32_t memMagic = STATE_MAGIC;
     ESP.rtcUserMemoryWrite(STATE_OFFSET, &memMagic, sizeof(memMagic));
     ESP.rtcUserMemoryWrite(STATE_DATA, (uint32_t *)state.c_str(), len + 1);
+#elif defined(ESP32)
+  // TODO: ESP32 implementation
+#endif
   } // if
 }
 
@@ -83,6 +99,7 @@ String RTCVariables::getStateString()
   String state;
   uint32_t memMagic;
 
+#if defined(ESP8266)
   ESP.rtcUserMemoryRead(STATE_OFFSET, &memMagic, sizeof(memMagic));
   if (memMagic == STATE_MAGIC) {
     char mem[STATE_SIZE];
@@ -90,5 +107,8 @@ String RTCVariables::getStateString()
     state = mem;
   }
   LOGGER_INFO("readState=\"%s\"", state.c_str());
+#elif defined(ESP32)
+  // TODO: ESP32 implementation
+#endif
   return (state);
 };

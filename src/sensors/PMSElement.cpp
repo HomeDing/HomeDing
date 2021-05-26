@@ -22,6 +22,8 @@
 
 #include <cstring>
 
+#if defined(ESP8266)
+
 /* ===== Define local constants and often used strings ===== */
 
 /* ===== Define local MACROS ===== */
@@ -179,5 +181,7 @@ void PMSElement::pushState(
   Element::pushState(callback);
   callback(PROP_VALUE, Element::getItemValue(_lastValues, 1).c_str());
 } // pushState()
+
+#endif
 
 // End

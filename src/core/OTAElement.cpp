@@ -101,7 +101,7 @@ void OTAElement::start()
       // else if (error == OTA_END_ERROR)
       //   LOGGER_EERR("End Failed");
     });
-    ArduinoOTA.begin(true);
+    ArduinoOTA.begin(); // use mDNS is true by default.
     Element::start();
   } // if
 } // start()

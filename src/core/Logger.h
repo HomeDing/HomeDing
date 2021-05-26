@@ -55,6 +55,9 @@
 #define LOGGER_RAW(...)                     \
   DEBUG_ESP_PORT.printf("  >" __VA_ARGS__); \
   DEBUG_ESP_PORT.print("\n")
+#elif defined(ESP32)
+  log_printf("  >" __VA_ARGS__);
+  log_printf("\n");
 #else
 #define LOGGER_RAW(...)
 #endif

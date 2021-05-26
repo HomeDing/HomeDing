@@ -32,12 +32,14 @@
 
 #include <time/NTPTimeElement.h>
 
-#if defined (ESP8266)
+#if defined(ESP8266)
 #include <TZ.h>
 
-#elif defined (ESP32)
+#elif defined(ESP32)
 // There is no TZ definition in ESP32 SDK so include LONDON timezone here as an example.
-#define TZ_Europe_London	PSTR("GMT0BST,M3.5.0/1,M10.5.0")
+#define TZ_Europe_London PSTR("GMT0BST,M3.5.0/1,M10.5.0")
+
+#include "time.h"
 
 #endif
 
@@ -86,7 +88,12 @@ bool NTPTimeElement::set(const char *name, const char *value)
 void NTPTimeElement::start()
 {
   Element::start();
+#if defined(ESP8266)
   configTime(_timezone.c_str(), _ntpServer.c_str());
+#elif defined(ESP32)
+  // TODO: ESP32 implementation
+  configTime(3600, 3600, "pool.ntp.org");
+#endif
 } // start()
 
 void NTPTimeElement::pushState(

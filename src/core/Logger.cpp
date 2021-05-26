@@ -72,6 +72,9 @@ void Logger::_print(const char *module, int level, const char *fmt,
 
 #ifdef DEBUG_ESP_PORT
   DEBUG_ESP_PORT.println(buffer);
+#elif defined(ESP32)
+  log_printf(buffer);
+  log_printf("\n");
 #endif
 
   hd_yield();

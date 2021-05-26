@@ -50,7 +50,11 @@ void SSDPElement::init(Board *board)
     SSDP.setSchemaURL("ssdp.xml"); // url to get the SSDP detailed information
 
     // set default values
+#if defined(ESP8266)
     SSDP.setSerialNumber(ESP.getChipId());
+#elif defined(ESP32)
+  // TODO: ESP32 implementation
+#endif
     SSDP.setURL("/");
     SSDP.setModelURL("https://homeding.github.io/");
     SSDP.setManufacturer("Matthias Hertel");
@@ -58,10 +62,15 @@ void SSDPElement::init(Board *board)
 
     SSDP.setName(board->deviceName);
     SSDP.begin();
-    ESP8266WebServer *server = board->server;
+
+#if defined(ESP8266)
+    WebServer *server = board->server;
     server->on("/ssdp.xml", HTTP_GET, [server]() {
       SSDP.schema(server->client());
     });
+#elif defined(ESP32)
+  // TODO: ESP32 implementation
+#endif
   } // if
 
 } // init()

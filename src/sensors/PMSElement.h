@@ -23,13 +23,8 @@
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
-#if defined(ESP32)
-#define SoftwareSerial Serial
-
-#elif defined(ESP8266)
+#if defined(ESP8266)
 #include <SoftwareSerial.h>
-
-#endif
 
 /**
  * @brief PMSElement implements...
@@ -110,5 +105,12 @@ private:
 bool PMSElement::registered =
     ElementRegistry::registerElement("pms", PMSElement::create);
 #endif
+
+#elif defined(ESP32)
+// TODO: ESP32 implementation
+// #define SoftwareSerial Serial2
+
+#endif
+
 
 #endif

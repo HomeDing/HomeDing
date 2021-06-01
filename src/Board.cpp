@@ -12,6 +12,10 @@
  * Changelog: see Board.h
  */
 
+// WiFi: 1,7 tracing:
+//   (mode) 1: WIFI_STA, 2: WIFI_AP, 3: Both
+//   (status) 1: no SSID, 3: CONNECTED, 4: FAILED, 6: PASSWORD WRONG, 7: DISCONNECTED
+
 #include <Arduino.h>
 #include <Board.h>
 #include <Element.h>
@@ -64,6 +68,7 @@ extern const char *passPhrase;
 void Board::init(WebServer *serv, FS *fs)
 {
   server = serv;
+  // TRACE("Board Init");
 
   fileSystem = fs;
   // fs->begin();
@@ -82,7 +87,7 @@ void Board::init(WebServer *serv, FS *fs)
   homepage = "/index.htm";
   cacheHeader = "no-cache";
 
-  boardState = BOARDSTATE::NONE;
+  _newState(BOARDSTATE::NONE);
   _deepSleepStart = 0;     // no deep sleep to be started
   _deepSleepBlock = false; // no deep sleep is blocked
   _deepSleepTime = 60;     // one minute
@@ -100,8 +105,9 @@ void Board::init(WebServer *serv, FS *fs)
   _isWakeupStart = false; // TODO:ESP32 ???
 #endif
 
+  enableWiFiAtBootTime();
+
   deviceName = WiFi.getHostname(); // use mac based default device name
-  WiFi.begin();
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
                                // https://tools.ietf.org/html/rfc1123 952
 } // init()
@@ -234,7 +240,8 @@ void Board::start(Element_StartupMode startupMode)
 void Board::_newState(enum BOARDSTATE newState)
 {
   hd_yield();
-  LOGGER_TRACE("State=%d", newState);
+  // TRACE("WiFi: %d,%d", WiFi.getMode(), WiFi.status());
+  TRACE("State=%d", newState);
   boardState = newState;
 }
 
@@ -317,7 +324,7 @@ void Board::loop()
     } // if
 
   } else if (boardState == BOARDSTATE::NONE) {
-    LOGGER_TRACE("WiFi-State: autoConnect=%d wifiMode=%d", WiFi.getAutoConnect(), WiFi.getMode());
+    TRACE("AutoConnect=%d", WiFi.getAutoConnect());
     _newState(BOARDSTATE::LOAD);
 
   } else if (boardState == BOARDSTATE::LOAD) {
@@ -352,13 +359,20 @@ void Board::loop()
     start(Element_StartupMode::System);
     displayInfo(HOMEDING_GREETING);
 
-    netMode = NetMode_AUTO;
+    if (WiFi.SSID().length() > 0) {
+      netMode = NetMode_AUTO;
+    } else {
+      netMode = NetMode_PASS;
+    }
 
     // Enable sysLED for blinking while waiting for network or config mode
     if (sysLED >= 0) {
       pinMode(sysLED, OUTPUT);
       digitalWrite(sysLED, HIGH);
     }
+
+    // TRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
+    // TRACE("resetCount=%d", _resetCount);
 
     // detect no configured network situation
     if (((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0)) || (_resetCount == 2)) {
@@ -373,21 +387,15 @@ void Board::loop()
 
   } else if (boardState == BOARDSTATE::CONNECT) {
     bool autoCon = WiFi.getAutoConnect();
-    LOGGER_TRACE("state: ac=%d mode=%d", autoCon, WiFi.getMode());
+    // TRACE("autoconnect=%d", autoCon);
 
-    if ((!autoCon) && (netMode == NetMode_AUTO))
-      netMode = NetMode_PSK;
-
-    // connect to a same network as before ?
-    LOGGER_TRACE("wifi status=(%d)", _wifi_status);
-    LOGGER_TRACE("wifi ssid=(%s)", WiFi.SSID().c_str());
     _newState(BOARDSTATE::WAITNET);
 
     if (netMode == NetMode_AUTO) {
       // 1. priority:
       // give autoconnect the chance to do it.
       // works only after a successfull network connection in the past.
-      LOGGER_TRACE("NetMode_AUTO");
+      LOGGER_TRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
 
     } else if (netMode == NetMode_PSK) {
       // 2. priority:
@@ -401,14 +409,15 @@ void Board::loop()
       // 3. priority:
       // use fixed network and passPhrase known at compile time.
       // works only after a successfull network connection in the past.
-      if (*ssid) {
-        LOGGER_TRACE("NetMode_PASS: %s %s", ssid, passPhrase);
-        WiFi.mode(WIFI_STA);
-        WiFi.begin(ssid, passPhrase);
-      } else {
-        LOGGER_TRACE("NetMode_PASS SKIP");
+      TRACE("NetMode_PASS: %s", ssid);
+
+      if (!*ssid) {
+        LOGGER_TRACE("SKIP");
         connectPhaseEnd = now;
         return;
+      } else {
+        WiFi.mode(WIFI_STA);
+        WiFi.begin(ssid, passPhrase);
       }
     } // if
 
@@ -417,7 +426,7 @@ void Board::loop()
       pinMode(sysButton, INPUT_PULLUP);
     }
 
-    // wait max. 4 seconds for connecting to the network
+    // wait some(12) seconds for connecting to the network
     connectPhaseEnd = now + maxNetConnextTime;
     // LOGGER_TRACE("  set phase: %ld %ld %d", now, connectPhaseEnd, maxNetConnextTime);
 
@@ -431,7 +440,7 @@ void Board::loop()
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
-      // LOGGER_INFO("sysbutton pressed");
+      // TRACE("sysbutton pressed");
       _newState(BOARDSTATE::STARTCAPTIVE);
     }
 
@@ -539,13 +548,13 @@ void Board::loop()
 
     _resetCount = RTCVariables::setResetCounter(0);
 
-    WiFi.softAPConfig(apIP, apIP, netMsk);
     WiFi.macAddress(mac);
     snprintf(ssid, sizeof(ssid), "%s%02X%02X%02X", HOMEDING_GREETING, mac[3], mac[4], mac[5]);
 
     displayInfo("config..", ssid);
 
     WiFi.softAP(ssid);
+    WiFi.softAPConfig(apIP, apIP, netMsk);
     hd_yield();
     // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 

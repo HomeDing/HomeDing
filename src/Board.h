@@ -112,7 +112,8 @@ typedef std::function<void(Element *e)>
 
 
 /** inline yield function for cooperative multitasking platforms. */
-inline __attribute__((always_inline)) void hd_yield() {
+inline __attribute__((always_inline)) void hd_yield()
+{
   // delay(1);
   optimistic_yield(100);
 }
@@ -305,7 +306,7 @@ public:
   /**
    * Switch to next network connect mode in msec.
    */
-  int maxNetConnextTime = 6 * 1000;
+  int maxNetConnextTime = 12 * 1000;
 
   /**
    * Min. time to wait for a configuration mode request.
@@ -392,13 +393,13 @@ public:
   // short readable name of the device used for discovery and web gui
   String title;
 
-  enum BOARDSTATE boardState;
-
 private:
   /**
    * Reset Counter
    */
   int _resetCount;
+
+  enum BOARDSTATE boardState;
 
   /** This flag is set to true when restarting after a deep sleep. This allows shortening wait times */
   bool _isWakeupStart;

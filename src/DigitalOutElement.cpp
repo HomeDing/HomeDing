@@ -59,6 +59,9 @@ void DigitalOutElement::start()
   if (_pin < 0) {
     LOGGER_EERR("no pin");
 
+  } else if ((_pin >= 6) && (_pin <= 11)) {
+    LOGGER_EERR("no valid pin");
+    
   } else {
     Element::start();
     // enable output and stay off

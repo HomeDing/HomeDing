@@ -89,7 +89,8 @@ void setup(void);
 void loop(void);
 
 static const char respond404[] PROGMEM =
-    R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
+    "<html><head><title>File not found</title></head><body>File not found</body></html>";
+
 
 // ===== WLAN credentials =====
 
@@ -140,15 +141,16 @@ void setup(void)
 
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
-  // delay(3000);
+  delay(3000);
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
+  LOGGER_INFO("Device starting...");
+
   // ----- setup the platform with webserver and file system -----
   mainBoard.init(&server, &SPIFFS);
   hd_yield();
-  LOGGER_INFO("Device starting...");
 
   // ----- adding web server handlers -----
   // redirect to index.htm when only domain name is given.

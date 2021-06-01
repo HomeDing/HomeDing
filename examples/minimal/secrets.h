@@ -8,5 +8,5 @@
 
 // ssid and passPhrase can be used when compiling for a specific environment as a 2. option.
 
-const char *ssid = "";;
-const char *passPhrase = "";;
+const char *ssid = "";
+const char *passPhrase = "";

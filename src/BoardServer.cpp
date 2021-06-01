@@ -92,6 +92,8 @@ void BoardHandler::handleConnect(WebServer &server)
     wl_status_t wifi_status = WiFi.status();
 
     if (wifi_status == WL_CONNECTED) {
+      WiFi.persistent(true);
+      WiFi.setAutoConnect(true);
       _board->displayInfo("ok.");
       break;
     } else if ((wifi_status == WL_NO_SSID_AVAIL) || (wifi_status == WL_CONNECT_FAILED)) {
@@ -154,7 +156,7 @@ void BoardHandler::handleReboot(WebServer &server, bool wipe)
  * @return true When the method and requestUri match a state request.
  */
 #if defined(ESP8266)
-bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri) 
+bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
 #elif defined(ESP32)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 #endif
@@ -173,9 +175,9 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
  * @return false
  */
 #if defined(ESP8266)
-bool BoardHandler::handle(WebServer &server, UNUSED HTTPMethod requestMethod, const String &requestUri2) 
+bool BoardHandler::handle(WebServer &server, UNUSED HTTPMethod requestMethod, const String &requestUri2)
 #elif defined(ESP32)
-bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String requestUri2) 
+bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String requestUri2)
 #endif
 {
   TRACE("handle(%s)", requestUri2.c_str());
@@ -284,7 +286,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
       jc.closeObject();
     } // while
 #elif defined(ESP32)
-// TODO:ESP32 ???
+    // TODO:ESP32 ???
     File root = _board->fileSystem->open("/");
 
     jc.openArray();

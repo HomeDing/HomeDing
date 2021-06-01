@@ -26,7 +26,7 @@
 
 // ----- activatable debug options
 
-#define DBG_TRACE // trace level for all elements
+// #define DBG_TRACE // trace level for all elements
 // #define NET_DEBUG // show network event in output
 
 // ===== HomeDing Configuration : Enable Elements for the firmware
@@ -45,6 +45,7 @@
 #define HOMEDING_INCLUDE_DigitalOut
 
 #define HOMEDING_INCLUDE_AND
+#define HOMEDING_INCLUDE_Map
 #define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
@@ -68,7 +69,7 @@
 #include <FS.h> // File System for Web Server Files
 
 #include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h> // Web Server Middleware for UI 
+#include <FileServer.h>  // Web Server Middleware for UI
 
 
 // ===== define minimal functional Web UI with 1MByte Flash devices
@@ -83,7 +84,7 @@ void setup(void);
 void loop(void);
 
 static const char respond404[] PROGMEM =
-    R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
+    "<html><head><title>File not found</title></head><body>File not found</body></html>";
 
 
 // ===== WLAN credentials =====
@@ -139,7 +140,7 @@ void setup(void)
 
   // ----- setup the file system and load configuration -----
   mainBoard.init(&server, &SPIFFS);
-  yield();
+  hd_yield();
 
   // ----- adding web server handlers -----
   // redirect to index.htm when only domain name is given.

@@ -70,9 +70,9 @@ void MapElement::_mapValue(const char *value)
   if (cFound != _currentMapIndex) {
     // LOGGER_EINFO("cFound=%d", cFound);
     // LOGGER_EINFO("cValue=%s", _mValue[cFound].c_str());
-    _value = _mValue[cFound];
-    _board->dispatch(_mActions[cFound], _mValue[cFound]);
-    _board->dispatch(_valueAction, _mValue[cFound]);
+    _value = _mValue[cFound]; // new value,
+    _board->dispatch(_mActions[cFound], _value);
+    _board->dispatch(_valueAction, _value);
   }
   _currentMapIndex = cFound;
 } // _mapValue()
@@ -161,10 +161,5 @@ void MapElement::pushState(
   Element::pushState(callback);
   callback(PROP_VALUE, _value.c_str());
 } // pushState()
-
-
-bool MapElement::registered =
-    ElementRegistry::registerElement("map", MapElement::create);
-
 
 // End

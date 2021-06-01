@@ -66,6 +66,7 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
+#define HOMEDING_INCLUDE_Map
 
 #define HOMEDING_INCLUDE_LOG
 
@@ -113,6 +114,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_Analog
 #include <AnalogElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_Map
+#include <MapElement.h>
 #endif
 
 // ===== Time related Elements =====

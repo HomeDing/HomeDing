@@ -103,19 +103,19 @@ bool DiagElement::set(const char *name, const char *value)
     } // for
 #endif
 
-  // } else if (_stricmp(name, "mdns") == 0) {
-  //   // log some heap information. using http://nodeding/$board/diag/0?mdns=1
-  //   TRACE("===== mdns =====");
-  //   Serial.flush();
+    // } else if (_stricmp(name, "mdns") == 0) {
+    //   // log some heap information. using http://nodeding/$board/diag/0?mdns=1
+    //   TRACE("===== mdns =====");
+    //   Serial.flush();
 
-  //   // add mDNS service discovery feature
-  //   // see http://www.dns-sd.org/
-  //   // https://tools.ietf.org/html/rfc6762
-  //   // https://tools.ietf.org/html/rfc6763
-  //   MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
-  //   MDNS.addServiceTxt(serv, "path", "/");
+    //   // add mDNS service discovery feature
+    //   // see http://www.dns-sd.org/
+    //   // https://tools.ietf.org/html/rfc6762
+    //   // https://tools.ietf.org/html/rfc6763
+    //   MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
+    //   MDNS.addServiceTxt(serv, "path", "/");
 
-  //   TRACE("done.");
+    //   TRACE("done.");
 
   } else {
     ret = Element::set(name, value);
@@ -164,15 +164,19 @@ void DiagElement::start()
       _i2cAddresses += ',';
 
       if (adr == 0x11) {
-        TRACE(" 0x11 (SI4721) found.");
+        TRACE(" 0x11 (SI4721)");
       } else if (adr == 0x27) {
-        TRACE(" 0x27 (LCD, PCF8574) found.");
+        TRACE(" 0x27 (LCD, PCF8574)");
       } else if (adr == 0x3C) {
-        TRACE(" 0x03C (SH1106, SSD1306, SSD1309) found.");
+        TRACE(" 0x03C (SH1106, SSD1306, SSD1309)");
       } else if (adr == 0x40) {
         TRACE(" 0x27 (INA219) found.");
+      } else if (adr == (0x51)) {
+        TRACE(" 0x51 (RTC, PCF8563)");
       } else if (adr == 0x63) {
-        TRACE(" 0x63 (SI4730 radio) found.");
+        TRACE(" 0x63 (Radio, SI4730)");
+      } else if (adr == (0x68)) {
+        TRACE(" 0x68 (RTC, DS1307)");
 
       } else {
         TRACE(" 0X%02x (unknown) found.", adr);
@@ -197,7 +201,6 @@ void DiagElement::pushState(
   Element::pushState(callback);
   callback("i2cAddresses", _i2cAddresses.c_str());
 } // pushState()
-
 
 
 /* ===== Register the Element ===== */

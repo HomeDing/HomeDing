@@ -80,6 +80,9 @@ protected:
    */
   void parseChar(const char *s);
 
+  void _sendPath(int _level, char *path);
+  void _sendValue(int _level, char *path, char *name, char *value);
+
   int _state;
   int __level;
 

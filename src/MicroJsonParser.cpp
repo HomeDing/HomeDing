@@ -72,7 +72,6 @@
 MicroJson::MicroJson(MicroJsonCallbackFn callback)
     : _callbackFn(callback)
 {
-  // _callbackFn = callback;
   _path[0] = NUL;
   _name[0] = NUL;
   _value[0] = NUL;
@@ -137,6 +136,28 @@ void appendchar(char *s, char ch, int len)
 } // appendchar()
 
 
+// send a JSON value to the callback function.
+// send a path to the callback function.
+void MicroJson::_sendPath(int level, char *path)
+{
+  // LOGGER_RAW("sendPath (%d): %s", level, path);
+  (_callbackFn)(level, path, NULL);
+} // _sendPath()
+
+
+void MicroJson::_sendValue(int level, char *path, char *name, char *value)
+{
+  String fullPath = path;
+  if (name) {
+    // fullPath += (fullPath.endsWith("]") ? '.' : '/');
+    fullPath += MICROJSON_PATH_SEPARATOR;
+    fullPath += name;
+  }
+  // LOGGER_RAW("sendValue (%d): %s %s", level, (char *)(fullPath.c_str()), value);
+  (_callbackFn)(level, (char *)(fullPath.c_str()), value);
+} // _sendValue()
+
+
 void MicroJson::parseChar(const char *s)
 {
   if (s != NULL) {
@@ -180,7 +201,6 @@ bool MicroJson::parseChar(char ch)
       _level++;
       _index[_level] = MJ_OBJECTLEVEL;
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
-      // (_callbackFn)(_level, _path, NULL); // empty not required
     }
 
   } else if (_state == MJ_STATE_PRE_NAME) {
@@ -257,12 +277,11 @@ bool MicroJson::parseChar(char ch)
       if (_path[0] != NUL)
         appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strlcat(_path, _name, sizeof(_path));
-      (_callbackFn)(_level, _path, NULL);
+      _sendPath(_level, _path);
 
       // nested object
       _level++;
       _index[_level] = MJ_OBJECTLEVEL;
-
       _state = MJ_NEWSTATE(MJ_STATE_PRE_NAME);
 
     } else if (ch == '[') {
@@ -271,13 +290,10 @@ bool MicroJson::parseChar(char ch)
       if (_path[0] != NUL)
         appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
       strlcat(_path, _name, sizeof(_path));
-      (_callbackFn)(_level, _path, NULL);
-
+      _sendPath(_level, _path);
       _level++;
       _index[_level] = MJ_ARRAYLEVEL;
-
       _state = MJ_NEWSTATE(MJ_STATE_PRE_ITEM);
-
 
     } else if (isdigit(ch)) {
       _state = MJ_NEWSTATE(MJ_STATE_NUM_VALUE);
@@ -290,11 +306,7 @@ bool MicroJson::parseChar(char ch)
 
     } else {
       // this character doesn't belong to the value any more.
-      // LOGGER_RAW(" value=%s", _value);
-      appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
-      strlcat(_path, _name, sizeof(_path));
-      (_callbackFn)(_level, _path, _value);
-      *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
+      _sendValue(_level, _path, _name, _value);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
       ret = false; // parse this character again.
     }
@@ -308,10 +320,7 @@ bool MicroJson::parseChar(char ch)
 
     } else {
       // quoted value completed
-      appendchar(_path, MICROJSON_PATH_SEPARATOR, sizeof(_path));
-      strlcat(_path, _name, sizeof(_path));
-      (_callbackFn)(_level, _path, _value);
-      *strrchr(_path, MICROJSON_PATH_SEPARATOR) = NUL;
+      _sendValue(_level, _path, _name, _value);
       _state = MJ_NEWSTATE(MJ_STATE_PRE_DONE);
     }
   } else if (_state == MJ_STATE_Q_VALUE_ESC) {

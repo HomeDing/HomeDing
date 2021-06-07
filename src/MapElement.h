@@ -13,6 +13,7 @@
  * 
  * Changelog:
  * * 29.03.2020 created by Matthias Hertel
+ * * 06.06.2021 full implementation of rules.
  */
 
 #ifndef MAPELEMENT_H
@@ -60,9 +61,9 @@ public:
   virtual bool set(const char *name, const char *value);
 
   /**
-   * @brief Activate the Element.
+   * @brief Give some processing time to the timer to check for next action.
    */
-  virtual void start();
+  virtual void loop() override;
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -76,14 +77,17 @@ private:
    * @brief The actual outgoing(mapped) value.
    */
   String _value;
+
   int _currentMapIndex = -1;
+  bool _needUpdate = false;
 
   bool _isStringType;
 
-// map 
-  std::vector<String> _mMax;
-  std::vector<String> _mValue;
-  std::vector<String> _mActions;
+  // rules
+  std::vector<String> _mMin;     // lower bound of the range (inclusive)
+  std::vector<String> _mMax;     // higher bound of the range (inclusive)
+  std::vector<String> _mValue;   // new value when rule is choosen
+  std::vector<String> _mActions; // actions when rule is choosen
 
   void _mapValue(const char *value);
 

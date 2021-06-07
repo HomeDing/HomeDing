@@ -20,6 +20,7 @@
 #include "MapElement.h"
 #include "MicroJsonParser.h"
 
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -43,38 +44,64 @@ void MapElement::init(Board *board)
   Element::init(board);
 
   // create the map members with a reasonable size.
-  this->_mMax.reserve(4);
-  this->_mValue.reserve(4);
-  this->_mActions.reserve(4);
+  this->_mMin.reserve(2);
+  this->_mMax.reserve(2);
+  this->_mValue.reserve(2);
+  this->_mActions.reserve(2);
 } // init()
 
 
 void MapElement::_mapValue(const char *value)
 {
-  // LOGGER_ETRACE("map '%s'", value);
+  // TRACE("map '%s'", value);
   int mapSize = _mMax.size();
-  int cFound = 0;
+  int cFound = -1;
 
   // walk through the max values to find the last one that fits.
   for (int c = 0; c < mapSize; c++) {
-    if (_isStringType && (_stricmp(value, _mMax[c].c_str()) <= 0)) {
-      cFound = c;
-      break;
+    bool ruleFits = true; // until we find it is not
 
-    } else if (_atoi(value) <= _mMax[c].toInt()) {
+    // value lower than `min` ?
+    if (_mMin[c].isEmpty()) {
+      // value is always inside when no lower boundary is given
+    } else if ((_isStringType) && _stricmp(value, _mMin[c].c_str()) < 0) {
+      ruleFits = false; // no match, value is too low
+    } else if (_atoi(value) < _mMin[c].toInt()) {
+      ruleFits = false; // no match, value is too low
+    }
+
+    // value higher than `max` ?
+    if (_mMax[c].isEmpty()) {
+      // value is always inside when no upper boundary is given
+    } else if ((_isStringType) && _stricmp(value, _mMax[c].c_str()) > 0) {
+      ruleFits = false;
+    } else if (_atoi(value) > _mMax[c].toInt()) {
+      ruleFits = false;
+    }
+
+    if (ruleFits) {
       cFound = c;
       break;
-    } // if
+    }
   } // for
 
-  if (cFound != _currentMapIndex) {
-    // LOGGER_EINFO("cFound=%d", cFound);
-    // LOGGER_EINFO("cValue=%s", _mValue[cFound].c_str());
-    _value = _mValue[cFound]; // new value,
+  // TRACE("rule=%d", cFound);
+
+  if (cFound < 0) {
+    LOGGER_EERR("NO RULE FITS: %s", value);
+  } else if (cFound != _currentMapIndex) {
+    if (_mValue[cFound].isEmpty()) {
+      _value = value;
+    } else {
+      _value = _mValue[cFound];
+    }
+    // TRACE("new Value=%s", _value.c_str());
+    _currentMapIndex = cFound;
+    _needUpdate = true;
+
     _board->dispatch(_mActions[cFound], _value);
     _board->dispatch(_valueAction, _value);
   }
-  _currentMapIndex = cFound;
 } // _mapValue()
 
 
@@ -83,10 +110,10 @@ void MapElement::_mapValue(const char *value)
  */
 bool MapElement::set(const char *name, const char *value)
 {
-  // LOGGER_ETRACE("set '%s'='%s'", name, value);
+  TRACE("set '%s'='%s'", name, value);
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     // find the right map entry (first that matches)
     _mapValue(value);
 
@@ -97,30 +124,32 @@ bool MapElement::set(const char *name, const char *value)
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
-  } else if (_stristartswith(name, "maps[")) {
+  } else if (_stristartswith(name, "rules[")) {
     // save all values and actions in the vectors.
-    size_t mapIndex = _atoi(name + 5); // number starts after "maps["
+    size_t mapIndex = _atoi(name + 6); // number starts after "rules["
     char *mapName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;
 
     // LOGGER_EINFO("map[%d] '%s'='%s'", mapIndex, mapName, value);
 
     if (mapIndex >= _mMax.size()) {
-      // set default values for new index
-      _mMax.resize(mapIndex + 1);
-      _mMax[mapIndex] = "";
-      _mValue.resize(mapIndex + 1);
-      _mValue[mapIndex] = "";
-      _mActions.resize(mapIndex + 1);
-      _mActions[mapIndex] = "";
+      // request space for new index
+      _mMin.resize(mapIndex + 2);
+      _mMax.resize(mapIndex + 2);
+      TRACE("check1: %d", _mMin[mapIndex].isEmpty());
+      _mValue.resize(mapIndex + 2);
+      _mActions.resize(mapIndex + 2);
     } // if
 
-    if (_stricmp(mapName, "max") == 0) {
+    if (_stricmp(mapName, "min") == 0) {
+      _mMin[mapIndex] = value;
+
+    } else if (_stricmp(mapName, "max") == 0) {
       _mMax[mapIndex] = value;
 
-    } else if (_stricmp(mapName, PROP_VALUE) == 0) {
+    } else if (_stricmp(mapName, "value") == 0) {
       _mValue[mapIndex] = value;
 
-    } else if (_stricmp(mapName, "onmap") == 0) {
+    } else if (_stricmp(mapName, "onValue") == 0) {
       _mActions[mapIndex] = value;
     } // if
 
@@ -133,23 +162,16 @@ bool MapElement::set(const char *name, const char *value)
 
 
 /**
- * @brief Activate the MapElement.
+ * @brief Give some processing time to the Element to check for next actions.
  */
-void MapElement::start()
+void MapElement::loop()
 {
-  // LOGGER_ETRACE("start()");
-
-  // // Debug output of parameters
-  // int mapSize = _mMax.size();
-  // LOGGER_EINFO("mapMax.size()=%d", mapSize);
-
-  // for (int n = 0; n < mapSize; n++) {
-  //   LOGGER_EINFO("map[%d]: %s %s -> %s", n, _mMax[n].c_str(), _mValue[n].c_str(), _mActions[n].c_str());
-  // } // for
-
-  Element::start();
-
-} // start()
+  if (_needUpdate) {
+    _board->dispatch(_mActions[_currentMapIndex], _value);
+    _board->dispatch(_valueAction, _value);
+    _needUpdate = false;
+  }
+} // loop()
 
 
 /**
@@ -159,7 +181,7 @@ void MapElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, _value.c_str());
+  callback("value", _value.c_str());
 } // pushState()
 
 // End

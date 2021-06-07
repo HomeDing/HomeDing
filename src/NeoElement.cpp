@@ -119,7 +119,7 @@ bool NeoElement::set(const char *name, const char *pValue)
       }
     }
 
-  } else if (_stricmp(name, PROP_DURATION) == 0) {
+  } else if (_stricmp(name, "duration") == 0) {
     duration = _atotime(pValue) * 1000; // in msecs.
 
   } else if (_stricmp(name, "count") == 0) {

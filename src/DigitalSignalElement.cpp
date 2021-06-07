@@ -41,7 +41,7 @@ bool DigitalSignalElement::set(const char *name, const char *value)
   if (_stricmp(name, PROP_PIN) == 0) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, PROP_PULLUP) == 0) {
+  } else if (_stricmp(name, "pullup") == 0) {
     _pullup = _atob(value);
 
   } else if (_stricmp(name, ACTION_ONHIGH) == 0) {
@@ -53,7 +53,7 @@ bool DigitalSignalElement::set(const char *name, const char *value)
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
-  } else if (_stricmp(name, PROP_DURATION) == 0) {
+  } else if (_stricmp(name, "duration") == 0) {
     _valueAction = value;
 
   } else {

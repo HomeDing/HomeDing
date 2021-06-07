@@ -72,7 +72,7 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
 
-  } else if (_stricmp(name, PROP_DESCRIPTION) == 0) {
+  } else if (_stricmp(name, "description") == 0) {
     _description = value; // is used in SSDP
 
   } else if (_stricmp(name, "loglevel") == 0) {
@@ -182,7 +182,7 @@ void DeviceElement::pushState(
   Element::pushState(callback);
   callback("name", _board->deviceName.c_str());
   callback("title", _board->title.c_str());
-  callback(PROP_DESCRIPTION, _description.c_str());
+  callback("description", _description.c_str());
   callback("safemode", _board->isSafeMode ? "true" : "false");
   callback("sd", _printBoolean( _board->mDNS_sd));
   callback("nextboot", String(_nextBoot - now).c_str());

@@ -23,10 +23,6 @@ and sends some diagnostic output to the Serial Console upon request:
 * scan i2c bus for devices
 * dump content of RTC memory
 
-## RFSend Element
-
-A experimental Element for sending rf433 signals
-
 ## SerialCmd Element
 
 Use the Serial input to create actions

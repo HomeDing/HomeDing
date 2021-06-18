@@ -54,7 +54,6 @@ bool Element::set(const char *name, const char *value)
     // as they are used by the web ui and stored in the config files only.
   } else if (_stricmp(name, "description") == 0) {
   } else if (_stricmp(name, "title") == 0) {
-  } else if (_stricmp(name, "room") == 0) {
 
   } else {
     // LOGGER_EERR("cannot set property %s:", name, value); // not an error when used for testing common properties

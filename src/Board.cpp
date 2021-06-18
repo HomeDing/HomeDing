@@ -108,8 +108,8 @@ void Board::init(WebServer *serv, FS *fs)
   enableWiFiAtBootTime();
 
   deviceName = WiFi.getHostname(); // use mac based default device name
-  deviceName.replace("_", ""); // Underline in hostname is not conformant, see
-                               // https://tools.ietf.org/html/rfc1123 952
+  deviceName.replace("_", "");     // Underline in hostname is not conformant, see
+                                   // https://tools.ietf.org/html/rfc1123 952
 } // init()
 
 
@@ -528,9 +528,11 @@ void Board::loop()
       MDNS.begin(deviceName.c_str());
 
 #if defined(ESP8266)
+      // include the data required for the portal implementation: Overview of existing devices
       MDNSResponder::hMDNSService serv = MDNS.addService(0, "homeding", "tcp", 80);
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
       MDNS.addServiceTxt(serv, "title", title.c_str());
+      MDNS.addServiceTxt(serv, "room", room.c_str());
 #elif defined(ESP32)
       MDNS.addService("homeding", "tcp", 80);
       // TODO: incomplete ! ???
@@ -553,18 +555,21 @@ void Board::loop()
 
     displayInfo("config..", ssid);
 
-    WiFi.softAP(ssid);
+    WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, netMsk);
+    WiFi.softAP(ssid);
     hd_yield();
-    // LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
+    LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
-    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer.setTTL(300);
+    dnsServer.setErrorReplyCode(DNSReplyCode::ServerFailure);
     dnsServer.start(DNS_PORT, "*", apIP);
 
     server->begin();
 
     _newState(BOARDSTATE::RUNCAPTIVE);
     _captiveEnd = now + (5 * 60 * 1000);
+
   } else if (boardState == BOARDSTATE::RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
     dnsServer.processNextRequest();

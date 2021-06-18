@@ -61,7 +61,7 @@ bool SceneElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     // A new value action triggers the scene element
     _value = value;
     _newValue = true;

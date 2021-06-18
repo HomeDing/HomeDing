@@ -10,7 +10,7 @@ This Library is published using a [BSD 3-clause license](./LICENSE).
 
 ## Summary 
 
-The HomeDing library for Arduino enables building IoT devices using ESP8266 based boards.
+The HomeDing library for Arduino enables building IoT devices using ESP8266 and ESP32 based boards.
 It is a complete ecosystem of the required internal functionality based on elements that can be activated and integrated by configuration.
 It is extensible by adding specific elements.
 

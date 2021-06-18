@@ -113,7 +113,7 @@ void BoardHandler::handleScan(WebServer &server)
 {
   int8_t scanState = WiFi.scanComplete();
   if (scanState == WIFI_SCAN_FAILED) {
-    // restart a scan
+    // restart an async network scan
     WiFi.scanNetworks(true);
     server.send(200);
   } else if (scanState == WIFI_SCAN_RUNNING) {
@@ -316,6 +316,18 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   } else if (uri == SVC_REBOOT) {
     // Reboot device
     handleReboot(server);
+
+  } else if (unSafeMode && (uri.startsWith("/$cleanweb"))) {
+    // remove files but configuration
+    FS *fs = _board->fileSystem;
+    Dir dir = fs->openDir("/");
+
+    while (dir.next()) {
+      String fn = dir.fileName();
+      fn.toLowerCase();
+      if (! fn.endsWith(".json"))
+        fs->remove(dir.fileName());
+    } // while
 
   } else if (unSafeMode && (uri.startsWith(SVC_ELEMENTS))) {
     // List all registered Elements

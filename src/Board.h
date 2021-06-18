@@ -393,6 +393,9 @@ public:
   // short readable name of the device used for discovery and web gui
   String title;
 
+  // short readable name of the device used for discovery and web gui
+  String room;
+
 private:
   /**
    * Reset Counter

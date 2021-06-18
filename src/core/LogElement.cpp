@@ -58,7 +58,8 @@ void LogElement::_logToFile()
   } // if
   f.print(_timestamp);
   f.print(',');
-  f.println(_value);
+  f.print(_value);
+  f.print('\n');
   f.close();
 };
 

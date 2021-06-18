@@ -4,13 +4,38 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-* RFCodes example
+* saving state of elements to survive a boot / but no power down.
+
+
+
+## [0.7.0] - 2021-06-15
+
+The version 0.7.0 was created to support the version 3.x of ESP8266 community board support.
+
+The ESP32 boards are supported with some exceptions (e.g. MY9291Element)
+and is still more beta than ESP8266 board support.
+ 
+### Changes / Enhancements
+
+* RFBridge example
+
+  This example is "work in progress" (WIP).
+
+  It has created to separate the bridge supporting RFCodes Element out of the standard set of elements
+  to avoid that the RFCodes library is required all the time.
+
+  There will be a specific story in the HomeDing documentation at <https://homeding.github.io/#page=/stories.md>
+  on this example when work is done.
 
 * [BME680 Element](https://homeding.github.io/#page=/elements/bme680.md) Bosch library updated to version 1.6.1480
 
 * [State implementation for Elements]()
 
+  new, to be documented.
+
 * [Color Element]
+
+  new, to be documented.
 
 * [Timer Element](https://homeding.github.io/#page=/elements/timer.md)
 
@@ -34,7 +59,6 @@ All notable changes to this project will be documented in this file.
 * **DisplayOutput Elements**
 
   **page** - This property can be set on display the text, line or other visuals on a specific page.
-
 
 
 ## [0.6.0] - 2021-01-03 

@@ -1,7 +1,8 @@
 /**
- * @file Standard.ino
+ * @file RFBridge.ino
  * @brief Standard Sketch that uses the HomeDing Library to implement Things attached the
- * Internet.
+ * Internet. Special Element is included to implement a Bridge style device that can send RF433 codes.
+ * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -20,8 +21,6 @@
 
 // ----- activatable debug options
 
-// #define NET_DEBUG
-
 // ===== HomeDing Configuration : Enable Elements for the firmware
 
 #define HOMEDING_REGISTER 1
@@ -29,36 +28,8 @@
 // Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
 
-// Enable some Sensor Elements
-#define HOMEDING_INCLUDE_DHT
-#define HOMEDING_INCLUDE_BME680
-#define HOMEDING_INCLUDE_DS18B20
-#define HOMEDING_INCLUDE_SHT20 // + 1176 bytes
-
-// The PMS uses SoftwareSerial Library that requires more IRAM.
-// When using, please switch the MMU: Options to give more IRAM
-// #define HOMEDING_INCLUDE_PMS
-
-// Enable some INPUT Elements
-#define HOMEDING_INCLUDE_ROTARY
-#define HOMEDING_INCLUDE_MENU
-
 // Enable some TIME Elements
 #define HOMEDING_INCLUDE_DSTIME
-
-// Enable Elements for Displays
-#define HOMEDING_INCLUDE_DISPLAY
-#define HOMEDING_INCLUDE_DISPLAYLCD
-#define HOMEDING_INCLUDE_DISPLAYSSD1306
-#define HOMEDING_INCLUDE_DISPLAYSH1106
-
-// Enable Elements for LIGHT control
-#define HOMEDING_INCLUDE_COLOR
-#define HOMEDING_INCLUDE_LIGHT
-#define HOMEDING_INCLUDE_NEOPIXEL
-#define HOMEDING_INCLUDE_MY9291
-
-#define HOMEDING_INCLUDE_WEATHERFEED
 
 // ===== Start Arduino Sketch
 
@@ -69,7 +40,6 @@
 
 #include <BoardServer.h> // Web Server Middleware for Elements
 #include <FileServer.h> // Web Server Middleware for UI 
-
 
 // ===== define full functional Web UI with 4MByte Flash devices
 

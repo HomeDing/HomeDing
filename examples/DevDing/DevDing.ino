@@ -16,6 +16,7 @@
  * Changelog:
  * * 12.11.2019 Standard Example created from development sketch.
  * * 15.04.2020 fixed library dependencies.
+ * * 15.06.2021 usable with esp8266 board manager version >= 3.0.0
  */
 
 // ----- activatable debug options
@@ -40,6 +41,9 @@
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
 #define HOMEDING_INCLUDE_SHT20 // + 1176 bytes
+
+// The PMS uses SoftwareSerial Library that requires more IRAM.
+// When using, please switch the MMU: Options to give more IRAM
 // #define HOMEDING_INCLUDE_PMS
 
 // Enable some INPUT Elements
@@ -79,7 +83,7 @@
 
 // ===== define full functional Web UI with 4MByte Flash devices
 
-#define SETUP_URL "/$setup#v02"
+#define SETUP_URL "/$setup#v03"
 
 
 // ===== forward declarations

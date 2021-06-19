@@ -1,7 +1,7 @@
 <div class="col card" u-control="dht" id="${id}" microID="${id}" u-is="generic">
-  <div class="block">
-    <svg class="icon"><use xlink:href="./icons.svg#dht"/></svg>
-    <span class="activeState setactive" u-active="active"></span>
+  <div class="block"><svg class="icon">
+      <use href="./icons.svg#dht" />
+    </svg>
     <span class="setconfig"></span>
     <table>
       <tr>
@@ -25,9 +25,9 @@
 </div>
 
 <div class="col card" u-control="bme680" id="${id}" microID="${id}" u-is="generic">
-  <div class="block">
-    <svg class="icon"><use xlink:href="./icons.svg#bme680"/></svg>
-    <span class="activeState" u-active="active"></span>
+  <div class="block"><svg class="icon">
+      <use href="./icons.svg#bme680" />
+    </svg>
     <span class="setconfig"></span>
     <table>
       <tr>
@@ -58,67 +58,37 @@
 </div>
 
 <div class="col card" u-control="timer" microID="${id}" u-is="timer">
-  <div class="block header">
-    <svg class="icon"><use xlink:href="./icons.svg#timer"/></svg>
-    <h3 u-text="title"></h3>
-    <h4 u-text="description"></h4>
-    <span class="activeState" u-active="active"></span>
-    <span class="setconfig"></span>
-  </div>
-  <div class="block">
-    <span class="u-bool ux-value" u-active="value" style="position: absolute;top:0.5rem;right:0.5rem"></span>
-    <label>wait:</label><span u-text="waittime">.</span> <label>pulse:</label><span u-text="pulsetime">.</span>
-  </div>
+  <div u-is="include" ref=".cardheader"></div>
+  <span class="u-bool ux-value" u-active="value" style="top:2rem;"></span>
+  <fieldset class="block btn-group">
+    <legend>Mode</legend>
+    <label><input name="mode" u-value="mode" type="radio" value="off">Off</label>
+    <label><input name="mode" u-value="mode" type="radio" value="on">On</label>
+    <label><input name="mode" u-value="mode" type="radio" value="timer">Timer</label>
+  </fieldset>
   <div class="block">
     <div class="u-bar">
       <span class="pulse"></span>
       <span class="current"></span>
     </div>
   </div>
-  <hr />
-  <div class="block">
+  <div class="block footer">
     <button u-action="start" value="1">Start</button>
     <button u-action="next" value="1">Next</button>
     <button u-action="stop" value="1">Stop</button>
   </div>
 </div>
 
-<div class="col card" u-control="rfsend" microID="${id}" u-is="generic">
-  <div class="block header">
-    <svg class="icon"><use xlink:href="./icons.svg#rfsend"/></svg>
-    <h3 u-text="title"></h3>
-    <h4 u-text="description"></h4>
-    <span class="activeState" u-active="active"></span>
-    <span class="setconfig"></span>
-  </div>
-  <div class="block Element">
-    <span class="u-bool ux-value" u-active="value" style="position: absolute;top:0.5rem;right:0.5rem"></span>
-    <div class="form-group">
-      <button u-action="value" value="0">Off</button>
-      <button u-action="value" value="1">On</button>
-      <label>last:</label><span u-text="value"></span>
-    </div>
-  </div>
-</div>
-
 <div class="col card" u-control="button" microID="${id}" u-is="button">
-  <div class="block header">
-    <svg class="icon"><use xlink:href="./icons.svg#button"/></svg>
-    <h3 u-text="title"></h3>
-    <h4 u-text="description"></h4>
-    <span class="activeState" u-active="active"></span>
-    <span class="setconfig"></span>
-  </div>
-  <div class="block">
-    <button u-text="description"></button>
-  </div>
+  <div u-is="include" ref=".cardheader"></div>
+  <div class="block"><button u-text="description">.</button></div>
 </div>
 
+<div class="col card small" u-control="webbutton" microID="${id}" u-is="button">
+  <div class="block"><button u-text="description">.</button></div>
+</div>
 
-<div class="col card small" u-control="webbutton" microID="${id}" u-is="button" >
-  <div class="block">
-    <button u-text="description"></button>
-  </div>
+<div class="col card small" u-control="webbuttongroup" microID="${id}" u-is="buttongroup">
 </div>
 
 <div class="col card" u-control="digitalout" microID="${id}" u-is="generic">
@@ -148,24 +118,26 @@
 
 <div class="col card" u-control="log" u-is="log" microID="${id}">
   <div u-is="include" ref=".cardheader"></div>
-  <div class="block">
-    <object data="lineChart.svg" type="image/svg+xml" style="width:100%"></object>
-  </div>
+  <div class="block"><object data="chartline.svg" type="image/svg+xml" style="width:100%"></object></div>
 </div>
 
 <!-- Display -->
 
-<div class="col card" u-control="displayssd1306" u-is="generic" microID="${id}">
-  <div class="block">
-    <div class="display">
-    </div>
+<div class="col card" u-control="displayoled" u-is="display" microID="${id}">
+  <div class="block" style="display: flex;flex-direction: row;">
+    <label class="displayinc" u-action="addpage" value="-1"><svg class="icon">
+        <use href="./icons.svg#minus"></use>
+      </svg></label>
+    <div class="display"></div>
+    <label class="displayinc" u-action="addpage" value="1"><svg class="icon">
+        <use href="./icons.svg#plus"></use>
+      </svg></label>
   </div>
 </div>
 
 <div class="col card" u-control="displaylcd" u-is="generic" microID="${id}">
   <div class="block">
-    <div class="display" grid="10" style="height: 20px;width: 112px;font-family: monospace">
-    </div>
+    <div class="display" grid="10" style="height: 20px;width: 112px;font-family: monospace"></div>
   </div>
 </div>
 
@@ -185,8 +157,6 @@
 
 <div class="col card hidden" u-control="displayline" u-is="displayline" microID="${id}">
   <div u-is="include" ref=".cardheader"></div>
-  <div class="block">
-    (<span u-text="x0"></span>,<span u-text="y0"></span>) /
-    (<span u-text="x1"></span>,<span u-text="y1"></span>)
-  </div>
+  <div class="block">(<span u-text="x0"></span>,<span u-text="y0"></span>) /
+    (<span u-text="x1"></span>,<span u-text="y1"></span>)</div>
 </div>

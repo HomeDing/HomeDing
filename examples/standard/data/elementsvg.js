@@ -14,7 +14,7 @@ function createBox(tName, txt) {
   pObj.appendChild(cn);
 
   // document.documentElement.setAttribute('viewBox', '0 0 120 ' + (y + 20));
-  document.documentElement.setAttribute('height', (y + 28));
+  document.documentElement.setAttribute('height', (2*(y + 18)));
   y += 12;
 };
 
@@ -28,7 +28,7 @@ function create(def) {
   // header
   pObj.querySelector('text').textContent = def.name;
   var iconName = def.icon || def.name;
-  pObj.querySelector('image').setAttribute("xlink:href", "i/" + iconName + ".svg");
+  pObj.querySelector('use').setAttribute("href", "/icons.svg#" + iconName);
 
   if (def.properties)
     def.properties.forEach(function (e) {
@@ -47,3 +47,20 @@ function create(def) {
 document.api = {
   create: create
 };
+
+window.addEventListener("load", function () {
+  var s = document.location.search;
+  if (s.length > 1) {
+    var qElem = s.substr(1);
+    fetch('elements.json')
+      .then(function (result) { return result.json(); })
+      .then(function (e) {
+        var def = e[qElem];
+        if (def) {
+          def.name = qElem;
+          create(def);
+        }
+      });
+  }
+
+});

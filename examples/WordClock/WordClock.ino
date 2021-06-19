@@ -13,6 +13,7 @@
  *
  * Changelog:
  * * 21.11.2020 Example created.
+ * * 15.06.2021 usable with esp8266 board manager version >= 3.0.0
  */
 
 // ----- activatable debug options
@@ -24,7 +25,7 @@
 // Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
 
-// The Elements required from the standard set can be minimal:
+// The Elements required from the standard set can be reduced to the minimal set:
 
 // Network Time is the time source.
 #define HOMEDING_INCLUDE_NTPTIME
@@ -34,17 +35,23 @@
 
 // The WordClock Element in WordClock.cpp is included automatically, because it is in the sketch folder.
 
+// ===== Start Arduino Sketch
+
 #include <Arduino.h>
 #include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
+#if defined(ESP32)
+#include <SPIFFS.h> // File System for Web Server Files
+#endif
 
 #include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h>  // Web Server Middleware for UI
+#include <FileServer.h> // Web Server Middleware for UI
+
 
 // ===== define full functional Web UI with 4MByte Flash devices
 
-#define SETUP_URL "/$setup#v02"
+#define SETUP_URL "/$setup#v03"
 
 
 // ===== forward declarations
@@ -99,17 +106,18 @@ void setup(void)
 #else
   Serial.setDebugOutput(false);
 #endif
+
 #ifdef DBG_TRACE
-  delay(3000);
+  // wait so the serial monitor can capture all output.
+  // delay(3000);
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-  LOGGER_INFO("Device starting...");
-
-  // ----- setup the file system and load configuration -----
+  // ----- setup the platform with webserver and file system -----
   mainBoard.init(&server, &SPIFFS);
-  yield();
+  hd_yield();
+  LOGGER_INFO("Device starting...");
 
   // ----- adding web server handlers -----
   // redirect to index.htm when only domain name is given.

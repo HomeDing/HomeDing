@@ -21,30 +21,14 @@
   <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
 
   <style>
-    span.activeState,
-    span.setconfig {
+    svg.setconfig {
       position: absolute;
       top: 0.5rem;
+      right: 0.5rem;
       height: 1.4rem;
       width: 1.4rem;
       background-size: 1.4rem;
     }
-
-    span.activeState {
-      right: 0.5rem;
-      background-image: url(/i/stop.svg);
-    }
-
-    span.activeState.active {
-      background-image: url(/i/start.svg);
-    }
-
-    span.setconfig {
-      position: absolute;
-      right: 2.2rem;
-      background-image: url(/i/config.svg);
-    }
-
 
     img,
     #panel {
@@ -57,30 +41,38 @@
 
 <body>
   <div class="container-fluid">
-    <div class="u-header">
+    <div class="row u-header">
       <a href="/" title="Start-Page"><img class="icon" src="/favicon.svg" /></a>
       <h1>Board</h1>
     </div>
-    <div class="u-navbar">
+    <div class="row u-navbar">
       <a class="button" href="/">Home</a>
       <a class="button" href="/board.htm">Board</a>
       <a class="button" href="/microide.htm">IDE</a>
       <a class="button" href="/log.htm">Log</a>
-      <button id="sysButton" class="func">sys</button>
-      <button id="addButton" class="func">+</button>
+      <span class="gap"></span>
+      <button id="sysButton">sys</button>
+      <button id="addButton">+</button>
     </div>
 
     <div id="panel" class="row wrap"></div>
 
     <div id="u-templates" style="display:none">
+
+      <div u-control="modal" u-is="modal">
+        <div class="modalBack" u-action="close"></div>
+        <div class="modalFrame" class="modal-object"></div>
+      </div>
+
       <div class="cardheader block header">
         <svg class="icon">
-          <use xlink:href="./icons.svg#${type}" />
+          <use href="./icons.svg#${type}" />
         </svg>
         <h3 u-text="title"></h3>
         <h4 u-text="description"></h4>
-        <span class="activeState" u-active="active"></span>
-        <span class="setconfig"></span>
+        <svg class="setconfig">
+          <use href="./icons.svg#config" />
+        </svg>
       </div>
 
       <div class="col card" u-control="generic" u-is="generic" microID="${id}">
@@ -92,8 +84,14 @@
 
       <div class="col card" u-control="schedule" id="${id}" u-is="generic" microID="${id}">
         <div u-is="include" ref=".cardheader"></div>
+        <span class="u-bool ux-value" u-active="value" style="top:2rem;"></span>
+        <fieldset class="block btn-group">
+          <legend>Mode</legend>
+          <label><input name="mode" u-value="mode" type="radio" value="off">Off</label>
+          <label><input name="mode" u-value="mode" type="radio" value="on">On</label>
+          <label><input name="mode" u-value="mode" type="radio" value="timer">Timer</label>
+        </fieldset>
         <div class="block">
-          <span class="u-bool ux-value" u-active="value"></span>
           <div class="form-group"><label>Start:</label><span u-text="ontime"></span></div>
           <div class="form-group"><label>End:</label><span u-text="offtime"></span></div>
         </div>
@@ -112,7 +110,7 @@
       <div class="col card" u-control="switch" id="${id}" u-is="switch" microID="${id}">
         <div u-is="include" ref=".cardheader"></div>
         <div class="block">
-          <span class="u-bool ux-value" u-active="value"></span>
+          <span class="u-bool ux-value border" u-active="value"></span>
           <div class="u-slider u-switch" u-active="value">
             <label value="0">off</label>
             <div class="box">
@@ -129,13 +127,13 @@
           <div class="form-group"><label>value:</label><span u-text="value"></span></div>
           <div class="u-slider">
             <label class="down"><svg class="icon">
-                <use xlink:href="./icons.svg#minus" />
+                <use href="./icons.svg#minus" />
               </svg></label>
             <div class="box" style="width:240px">
               <div class="handle"></div>
             </div>
             <label class="up"><svg class="icon">
-                <use xlink:href="./icons.svg#plus" />
+                <use href="./icons.svg#plus" />
               </svg></label>
           </div>
         </div>
@@ -149,15 +147,25 @@
         </div>
       </div>
 
+      <div class="col card" u-control="rfcodes" microID="${id}" u-is="generic">
+        <div u-is="include" ref=".cardheader"></div>
+        <div class="block Element">
+          <div><label>Last Code:</label></div>
+          <pre>[<span u-text="value" style="user-select: text;"></span>]</pre>
+        </div>
+      </div>
+
       <div class="col card" u-control="color" id="${id}" u-is="color" microID="${id}">
         <div u-is="include" ref=".cardheader"></div>
         <div class="block">
-          <div class="form-group"><label>value:</label><span u-text="value"></span><span class="color"
+          <div class="form-group"><label>value:</label><span u-text="value"></span><span class="color border"
               style="width:6rem;"></span></div>
-          <input type="range" max="359" class="band hue">
-          <input type="range" max="255" class="band saturation" u-value="saturation">
-          <input type="range" max="255" class="band lightness" u-value="lightness">
-          <input type="range" max="255" class="band white">
+          <input type="range" max="359" class="band border hue">
+          <input type="range" max="255" class="band border saturation" u-value="saturation">
+          <input type="range" max="255" class="band border lightness" u-value="lightness">
+          <input type="range" max="255" class="band border white">
+        </div>
+        <div class="block footer">
           <button u-action="mode" value="fade">fade</button><button u-action="mode" value="fix">fix</button><button
             u-action="mode" value="pulse">pulse</button><button u-action="mode" value="wheel">wheel</button>
         </div>
@@ -166,8 +174,7 @@
       <div class="col card" u-control="light" id="${id}" u-is="generic" microID="${id}">
         <div u-is="include" ref=".cardheader"></div>
         <div class="block">
-          <span u-color="value"
-            style="width:4rem;height:4rem;float:right;border:1px solid black;border-radius:50%;"></span>
+          <span u-color="value" class="border" style="width:4rem;height:4rem;float:right;border-radius:50%;"></span>
           <div class="form-group"><label>value:</label><span u-text="value"></span></div>
           <div class="form-group"><label>brightness:</label><span u-text="brightness"></span></div>
         </div>
@@ -195,11 +202,6 @@
       </div>
 
     </div>
-  </div>
-
-  <div id="modal" class="hidden">
-    <div id="back" onclick="modal.close()"></div>
-    <div id="container"></div>
   </div>
 
   <script>
@@ -231,14 +233,15 @@
     });
 
     addObj.addEventListener('click', function (evt) {
-      modal.open('newelementdlg');
+      ModalDialogClass.open('newelementdlg');
     });
 
     // Element type reuse
     var alias = {
       "sht20": "dht",
-      "displaysh1106": "displayssd1306"
-      ,"neo": "light",
+      "displayssd1306": "displayoled",
+      "displaysh1106": "displayoled"
+      , "neo": "light",
       // ,
       // "my9291": "light"
     };
@@ -284,8 +287,6 @@
       if (!timeout) timeout = 50;
 
       if (refreshState == 'w') {
-        console.log("updateAsap:", Date.now() - DEBUG_STARTTIME, "cancel timer");
-        // cancel longer running request
         window.clearTimeout(updateTimer);
         refreshState = '';
       }
@@ -294,18 +295,13 @@
         refreshState = 'w';
         updateTimer = window.setTimeout(
           function () {
-            console.log("updateAsap:", Date.now() - DEBUG_STARTTIME, "start fetch");
             refreshState = 'f';
             fetch('/$board')
               .then(function (result) {
                 return result.json();
               })
               .then(function (json) {
-                console.log("updateAsap:", Date.now() - DEBUG_STARTTIME, "got json");
                 hub.publishObj(json);
-              })
-              .catch(function (err) {
-                console.log("updateAsap:", Date.now() - DEBUG_STARTTIME, "err", err);
               })
               .finally(function (json) {
                 refreshState = '';

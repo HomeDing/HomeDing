@@ -25,12 +25,12 @@
 
 <body>
   <div class="container-fluid">
-    <div class="u-header">
-      <a href="/" title="Startpage"><img class="icon" src="/i/device.svg" /></a>
+    <div class="row u-header">
+      <a href="/" title="Start-Page"><img class="icon" src="/i/device.svg" /></a>
       <h1>Device</h1>
     </div>
 
-    <div class="u-navbar">
+    <div class="row u-navbar">
       <a class="button" href="/">Home</a>
       <a class="button" href="/board.htm">Board</a>
       <a class="button" href="/microide.htm">IDE</a>
@@ -40,7 +40,7 @@
     <div class="row wrap">
       <div class="col card">
         <div class="block header">
-          <h2>Build-in Setup Pages</h2>
+          <h3>Build-in Setup Pages</h3>
         </div>
         <div class="block">
           <p><a href="$setup.htm">WiFi Setup</a></p>
@@ -53,7 +53,7 @@
 
       <div class="col card">
         <div class="block header">
-          <h2>Insights</h2>
+          <h3>Insights</h3>
         </div>
 
         <div class="block">
@@ -69,11 +69,11 @@
 
       <div class="col card">
         <div class="block header">
-          <h2>File System Memory</h2>
+          <h3>File System Memory</h3>
         </div>
 
         <div class="block">
-          <object id="meminfo" data="pieChart.svg" type="image/svg+xml"
+          <object id="meminfo" data="chartpie.svg" type="image/svg+xml"
             style="float:left;width:120px;height:120px;"></object>
           <p><span id="memTotal"></span> bytes available.</p>
           <p><span id="memUsed"></span> bytes (<span id="memPart"></span>%) in use</p>
@@ -82,7 +82,7 @@
 
       <div class="col card">
         <div class="block header">
-          <h2>SysInfo</h2>
+          <h3>SysInfo</h3>
         </div>
         <div class="block">
           <pre id="sysinfo"></pre>
@@ -99,17 +99,19 @@
           </div>
         </div>
         <div class="block">
-          <object id="elemsvg" data="element.svg" type="image/svg+xml" style="height:560px; width:300px"></object>
+          <object id="elemsvg" data="element.svg" type="image/svg+xml"></object>
         </div>
       </div>
 
       <div class="col card">
         <div class="block">
-          <h2>DEV</h2>
-          <p><a href="portal.htm">portal.htm</a> <a href="portalconfig.htm">portalconfig.htm</a></p>
-          <p><a href="linechart-test.htm">linechart-test</a></p>
-          <p><a href="piechart-test.htm">piechart-test</a></p>
-          <p><a href="gauge-test.htm">gauge-test</a></p>
+          <h3>Dev-Links</h3>
+          <p><a href="portal.htm">portal.htm</a></p>
+          <p><a href="portalconfig.htm">portalConfig.htm</a></p>
+          <p><a href="iotstylecheck.htm">iotStyleCheck</a></p>
+          <p><a href="chartline-test.htm">chartLine-test</a></p>
+          <p><a href="chartpie-test.htm">chartPie-test</a></p>
+          <p><a href="chartgauge-test.htm">gauge-test</a></p>
         </div>
       </div>
 
@@ -162,7 +164,6 @@
           document.getElementById('memUsed').textContent = d.fsUsedBytes;
           document.getElementById('memPart').textContent = Math.round((Number(d.fsUsedBytes) * 100) / Number(d.fsTotalBytes));
 
-          memAPI.options.includePercentage = true;
           memAPI.draw([
             {
               color: '#304878',

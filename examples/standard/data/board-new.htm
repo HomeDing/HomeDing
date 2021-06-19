@@ -1,6 +1,6 @@
 <!-- Dialogs for configuration -->
 <div u-control="newelementdlg" u-is="createElementDlg" class="card">
-  <div class="block header">
+  <div class="block header" style="height: 2em;">
     <h2>Add a new Element</h2>
     <div class="closedlg" u-action="close">&#x00D7;</div>
   </div>
@@ -17,23 +17,36 @@
     </div>
   </div>
 
-  <hr />
-  <div class="block">
+  <div class="block footer">
     <button u-action="next" style="float:right">Next</button>
   </div>
 </div>
 
 
 <div u-control="configelementdlg" u-is="configElementDlg" class="card">
-  <div class="block header">
+  <div class="block header" style="height: 2em;">
     <h2>Config ${id}</h2>
     <div class="closedlg" u-action="close">&#x00D7;</div>
   </div>
   <div class="block" style="font-size: 1.4">
   </div>
 
-  <hr />
-  <div class="block">
+  <div class="block footer">
+    <button u-action="save" style="float:right">Save</button>
+  </div>
+</div>
+
+
+<div u-control="actiondlg" u-is="actionDlg" class="card" ev="${ev}" val="${val}">
+  <div class="block header" style="height: 2em;">
+    <h2>Config ${ev}</h2>
+    <div class="closedlg" u-action="close">&#x00D7;</div>
+  </div>
+  <div class="block" style="font-size: 1.4">
+    ${ev} --- ${val}
+  </div>
+
+  <div class="block footer">
     <button u-action="save" style="float:right">Save</button>
   </div>
 </div>
@@ -59,20 +72,17 @@
       });
     }, // connectedCallback()
 
-    onclick: function (evt /*:PointerEvent*/) {
-      var src /*:HTMLElement */ = evt.srcElement;
+    onclick: function (/** @type PointerEvent */ evt) {
+      var /** @type HTMLElement */ src = evt.srcElement;
       var ua = src.getAttribute('u-action');
 
-      if (ua === 'close') {
-        modal.close();
-
-      } else if (ua === 'next') {
+      if (ua === 'next') {
         if (this.objType.value === "0") {
           alert('Please select an implemented element type');
         } else if (this.objID.value === "") {
           alert('Please specify a name');
         } else {
-          modal.open('configelementdlg', {
+          ModalDialogClass.next('configelementdlg', {
             id: '/' + this.objType.value + '/' + this.objID.value
           });
         }
@@ -83,6 +93,7 @@
 
   micro.define("configElementDlg", {
     config: {},
+    params: {},
     /** @type HTMLElement */
     _blk: null,
     _id: '',
@@ -90,12 +101,21 @@
     _add: function (k, isEvent, isAction) {
       var g = createHTMLElement(this._blk, 'div', { class: 'form-group' });
       createHTMLElement(g, 'label').textContent = k + ':';
-      createHTMLElement(g, 'img', { src: (isEvent ? '/i/start.svg' : '/i/no.svg'), style:'height:1em;width:1em' });
+      createHTMLElement(g, 'img', { src: (isEvent ? '/i/start.svg' : '/i/no.svg'), style: 'height:1em;width:1em' });
       var i = createHTMLElement(g, 'input', { name: k });
       if (this.params[k.toLowerCase()] !== undefined)
         i.value = this.params[k.toLowerCase()];
-      createHTMLElement(g, 'img', { src: (isAction ? '/i/start.svg' : '/i/no.svg'), style:'height:1em;width:1em' });
+      createHTMLElement(g, 'img', { src: (isAction ? '/i/start.svg' : '/i/no.svg'), style: 'height:1em;width:1em' });
     }, // add()
+
+    _addAction: function (k, isEvent, isAction) {
+      var g = createHTMLElement(this._blk, 'div', { class: 'form-group' });
+      createHTMLElement(g, 'label').textContent = k + ':';
+      var i = createHTMLElement(g, 'input', { name: k, style: 'border-color:red', "u-action": 'actions', ev: k });
+      if (this.params[k.toLowerCase()] !== undefined)
+        i.value = this.params[k.toLowerCase()];
+      createHTMLElement(g, 'img', { src: '/i/start.svg', style: 'height:1em;width:1em' });
+    }, // _addAction()
 
     connectedCallback: function () {
       this._blk = this.querySelector('.block:not(.header)');
@@ -103,21 +123,27 @@
       this._id = this.params.id.split('/')[2];
 
       // get implemented elements and populate the dropdown
+      var ps = [].concat([], uElements.defs["element"].properties, uElements.defs[this._type].properties);
+      for (n in ps) this._add(ps[n], false, false);
+
       var d = uElements.defs[this._type];
       if (d) {
-        for (n in d.properties) this._add(d.properties[n], false, false);
         for (n in d.events) this._add(d.events[n], true, false);
-        for (n in d.actions) this._add(d.actions[n], false, true);
+        for (n in d.actions) this._addAction(d.actions[n], false, true);
       }
     }, // connectedCallback()
+
+
+    save: function (data) {
+      var fld = this.querySelector('input[name="' + data.ev + '"]');
+      if (fld) fld.value = data.val;
+    },
+
 
     onclick: function (evt) {
       var ua = evt.srcElement.getAttribute('u-action');
 
-      if (ua === 'close') {
-        modal.close();
-
-      } else if (ua === 'save') {
+      if (ua === 'save') {
         // var b: HTMLElement;
         var c = {};
         var l = this._blk.querySelectorAll('input[name]');
@@ -126,9 +152,38 @@
           c[e.name] = e.value;
         });
         changeConfig(this._type + '/' + this._id, c);
-        modal.close();
+        ModalDialogClass.close();
+
+      } else if (ua === 'actions') {
+        var a = evt.srcElement.getAttribute('ev');
+        var v = evt.srcElement.value;
+        ModalDialogClass.open('actiondlg', { ev: a, val: v });
       }
     }
   }); // ConfigElementDlgBehavior
 
+  micro.define("actionDlg", {
+    config: {},
+    /** @type HTMLElement */
+    _blk: null,
+    _id: '',
+    params,
+
+    connectedCallback: function () {
+      this._blk = this.querySelector('.block:not(.header)');
+    }, // connectedCallback()
+
+    onclick: function (evt) {
+      var ua = evt.srcElement.getAttribute('u-action');
+      if (ua === 'save') {
+        debugger;
+
+        // simulate ???
+        this.params.val = 'switch/s?value=$v';
+
+        ModalDialogClass.save(this.params);
+        ModalDialogClass.close();
+      }
+    }
+  }); // actionDlgBehavior
 </script>

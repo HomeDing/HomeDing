@@ -108,7 +108,7 @@
   <div class="container-fluid" style="height:100%;display:flex;flex-direction: column;padding-bottom:0">
     <progress id="progress" class="fadeout" max="1" value="0"></progress>
 
-    <div class="u-header">
+    <div class="row u-header">
       <a href="/" title="Startpage"><img class="icon" src="/i/ide.svg"/></a>
       <h1>HomeDing IDE</h1>
 
@@ -116,12 +116,13 @@
       <div id="dropzone">Drop here.</div>
     </div>
 
-    <div class="u-navbar">
+    <div class="row u-navbar">
       <a class="button" href="/">Home</a>
       <a class="button" href="/board.htm">Board</a>
       <a class="button" href="/microide.htm">IDE</a>
       <a class="button" href="/log.htm">Log</a>
-      <button class="once" style="float:right" id="doReboot">reboot</button>
+      <span class="gap"></span>
+      <button class="once" id="doReboot">reboot</button>
     </div>
 
     <div class="row" style="flex:0 0 auto">

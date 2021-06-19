@@ -7,5 +7,5 @@
     <g id="panel"></g>
     <g id="values"></g>
     <script href="microsvg.js"/>
-    <script href="pieChart.js"/>
+    <script href="chartpie.js"/>
 </svg>

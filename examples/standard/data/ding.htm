@@ -33,15 +33,12 @@
     <div id="panel" class="row wrap"></div>
 
     <div id="u-templates" style="display:none">
-      <div class="col card" u-control="generic" u-is="generic" microID="${id}">
-        <div class="block">
-          <h4>${id} - <span u-text="description"></span></h4>
-          <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
-        </div>
+      <div class="cardheader block header">
+        <h3 u-text="title"></h3>
       </div>
 
       <div class="col-6" u-control="device" u-is="generic" microID="${id}">
-        <div class="u-header">
+        <div class="row u-header">
           <a href="/" title="Start-Page"><img class="icon" src="/favicon.svg" /></a>
           <h1><span u-text="name"> </span></h1>
         </div>
@@ -49,10 +46,17 @@
         <h4><span u-text="description"></span> (<span u-text="room"></span>)</h4>
       </div>
 
-      <div class="col card" u-control="switch" id="${id}" u-is="switch" microID="${id}">
+      <div class="col card" u-control="generic" u-is="generic" microID="${id}">
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
-          <h4>${id} - <span u-text="description"></span></h4>
-          <span class="u-bool ux-value" u-active="value"></span>
+          <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
+        </div>
+      </div>
+
+      <div class="col card" u-control="switch" id="${id}" u-is="switch" microID="${id}">
+        <div u-is="include" ref=".cardheader"></div>
+        <span class="u-bool ux-value" u-active="value"></span>
+        <div class="block">
           <div class="u-slider u-switch" u-active="value">
             <label value="0">off</label>
             <div class="box">
@@ -64,9 +68,9 @@
       </div>
 
       <div class="col card" u-control="schedule" microID="${id}" u-is="generic">
+        <div u-is="include" ref=".cardheader"></div>
+        <span class="u-bool ux-value" u-active="value"></span>
         <div class="block">
-          <h4>${id} - <span u-text="description"></span></h4>
-          <span class="u-bool ux-value" u-active="value"></span>
           <div class="form-group">
             <label>Start:</label>
             <span u-text="ontime"></span>
@@ -79,11 +83,14 @@
       </div>
 
       <div class="col card" u-control="timer" microID="${id}" u-is="timer">
-        <div class="block">
-          <h4>${id} - <span u-text="description"></span></h4>
-          <span class="u-bool ux-value" u-active="value"></span>
-          <label>wait:</label><span u-text="waittime">.</span> <label>pulse:</label><span u-text="pulsetime">.</span>
-        </div>
+        <div u-is="include" ref=".cardheader"></div>
+        <span class="u-bool ux-value" u-active="value"></span>
+        <fieldset class="block btn-group">
+          <legend>Mode</legend>
+          <label><input name="mode" u-value="mode" type="radio" value="off">Off</label>
+          <label><input name="mode" u-value="mode" type="radio" value="on">On</label>
+          <label><input name="mode" u-value="mode" type="radio" value="timer">Timer</label>
+        </fieldset>
         <div class="block">
           <div class="u-bar">
             <span class="pulse"></span>
@@ -98,8 +105,8 @@
       </div>
 
       <div class="col card" u-control="value" u-is="slider" microID="${id}">
+        <div u-is="include" ref=".cardheader"></div>
         <div class="block">
-          <h4>${id} - <span u-text="description"></span></h4>
           <div class="form-group"><label>value:</label><span u-text="value"></span></div>
           <div class="u-slider">
             <label class="down"><img src="/i/minus.svg"></label>
@@ -112,8 +119,8 @@
       </div>
 
       <div class="col card" u-control="dht" microID="${id}" u-is="generic">
+        <h4>${id} - <span u-text="description"></span></h4>
         <div class="block">
-          <h4>${id} - <span u-text="description"></span></h4>
           <table>
             <tr>
               <td colspan="3">
@@ -169,7 +176,7 @@
       <div class="col card" u-control="color" id="${id}" u-is="color" microID="${id}">
         <div class="block">
           <h4>${id} - <span u-text="description"></span></h4>
-          <div class="form-group"><label>value:</label><span u-text="value"></span><span class="color"
+          <div class="form-group"><label>value:</label><span u-text="value"></span><span class="color border"
               style="width:6rem;"></span></div>
           <input type="range" max="359" class="band hue">
           <input type="range" max="255" class="band saturation" u-value="saturation">
@@ -180,20 +187,17 @@
         </div>
       </div>
 
-      <div class="col card" u-control="webbutton" id="${id}" u-is="generic" microID="${id}">
-        <div class="block">
-          <button u-action="${onclick}" u-text="description"></button>
-        </div>
+      <div class="col card small" u-control="webbutton" microID="${id}" u-is="button">
+        <div class="block"><button u-text="description">.</button></div>
+      </div>
+
+      <div class="col card small" u-control="webbuttongroup" microID="${id}" u-is="buttongroup">
       </div>
     </div>
 
+
     <hr />
     <a href="/microide.htm">IDE</a>
-  </div>
-
-  <div id="modal" class="hidden">
-    <div id="back" onclick="modal.close()"></div>
-    <div id="container" style="width:260px;height:260px">Hello, this is modal</div>
   </div>
 
   <script>
@@ -203,7 +207,6 @@
     // Element type reuse
     var alias = {
       "sht20": "dht",
-      "displaysh1106": "displayssd1306",
       "p9813": "neo"
     };
 

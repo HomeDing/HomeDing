@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 * saving state of elements to survive a boot / but no power down.
-
+* arduino-lint github action
 
 
 ## [0.7.0] - 2021-06-15

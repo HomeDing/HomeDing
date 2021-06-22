@@ -18,8 +18,8 @@
  * * 30.10.2020 created by Matthias Hertel
  */
 
-#ifndef DIGITALIN_H
-#define DIGITALIN_H
+#ifndef DIGITALSIGNAL_H
+#define DIGITALSIGNAL_H
 
 #include <HomeDing.h>
 
@@ -150,4 +150,4 @@ bool DigitalSignalElement::registered =
     ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
 #endif
 
-#endif // DIGITALIN_H
+#endif // DIGITALSIGNAL_H

@@ -48,7 +48,7 @@ jobs:
               source-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
               version: 3.0.0
           fqbn: esp8266:esp8266:nodemcuv2
-          libraries:
+          libraries: |
             - source-path: ./src
             - name: OneWire
             - name: LiquidCrystal_PCF8574

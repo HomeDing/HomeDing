@@ -25,7 +25,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Arduino - lint
+      # Runs a single command using the runners shell
+      - name: report environment
+        run: export
+
+        # Arduino - lint
       - name: Arduino-lint
         uses: arduino/arduino-lint-action@v1
         with:

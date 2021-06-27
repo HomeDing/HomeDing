@@ -32,8 +32,19 @@ jobs:
           library-manager: update
           verbose: false
 
-      # Runs a set of commands using the runners shell
-      # - name: Run a multi-line script
-      #   run: |
-      #     echo Add other actions to build,
-      #     echo test, and deploy your project.
+      # Run Arduino Compiler
+      # see https://github.com/arduino/compile-sketches
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          verbose: true
+          platforms: |
+            # Install ESP8266 platform via Boards Manager
+            - name: esp8266:esp8266
+              source-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
+              version: 3.0.0
+          fqbn: esp8266:esp8266:nodemcuv2
+          libraries: ${{ env.LIBRARIES }}
+          # size-report-sketch: 'ConnectionHandlerDemo'
+          # enable-size-deltas-report: 'true'
+          # sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}

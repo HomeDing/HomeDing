@@ -84,7 +84,7 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_DisplayLine
 #endif
 
-#include <core/logger.h>
+#include "core/logger.h"
 
 // Register the Elements by including the definition with defined HOMEDING_REGISTER
 

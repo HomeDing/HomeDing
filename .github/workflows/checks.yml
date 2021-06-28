@@ -57,6 +57,7 @@ jobs:
             - name: RotaryEncoder
             - name: DHT sensor library for ESPx
             - name: my92xx
+            - name: INA219_WE
 
             #  ${{ env.LIBRARIES }}
           # size-report-sketch: 'ConnectionHandlerDemo'

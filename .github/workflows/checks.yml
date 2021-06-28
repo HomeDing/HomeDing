@@ -58,6 +58,8 @@ jobs:
             - name: DHT sensor library for ESPx
             - name: my92xx
             - name: INA219_WE
+            - name: Radio
+            - name: RFCodes
 
             #  ${{ env.LIBRARIES }}
           # size-report-sketch: 'ConnectionHandlerDemo'

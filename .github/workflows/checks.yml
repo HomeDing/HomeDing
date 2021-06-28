@@ -60,7 +60,7 @@ jobs:
             - name: INA219_WE
             - name: Radio
             # - name: RFCodes
-          sketches-exclude: DevDing,RFBridge
+          sketch-paths: ['examples/minimal', 'examples/standard']
 
           # size-report-sketch: 'ConnectionHandlerDemo'
           # enable-size-deltas-report: 'true'

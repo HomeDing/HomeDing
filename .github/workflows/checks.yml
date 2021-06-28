@@ -49,7 +49,7 @@ jobs:
               version: 3.0.0
           fqbn: esp8266:esp8266:nodemcuv2
           libraries: |
-            - source-path: ./src
+            - source-path: ./
             - name: OneWire
             - name: LiquidCrystal_PCF8574
             - name: ESP8266 and ESP32 OLED driver for SSD1306 displays

@@ -1,6 +1,6 @@
-# This is a basic workflow to help you get started with Actions
+# This is a basic workflow to help you get started with Actions for Arduino library projects
 
-name: Checks
+name: Arduino Library Checks
 
 # Controls when the action will run.
 on:
@@ -61,7 +61,8 @@ jobs:
             - name: Radio
             - name: RFCodes
 
-            #  ${{ env.LIBRARIES }}
+          sketches-exclude: DevDing,RFBridge
+
           # size-report-sketch: 'ConnectionHandlerDemo'
           # enable-size-deltas-report: 'true'
           # sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}

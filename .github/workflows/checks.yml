@@ -59,8 +59,7 @@ jobs:
             - name: my92xx
             - name: INA219_WE
             - name: Radio
-            - name: RFCodes
-
+            # - name: RFCodes
           sketches-exclude: DevDing,RFBridge
 
           # size-report-sketch: 'ConnectionHandlerDemo'

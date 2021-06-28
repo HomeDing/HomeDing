@@ -13,7 +13,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <core/logger.h>
+#include <core/Logger.h>
 
 // allocate static variables
 int ElementRegistry::_count;

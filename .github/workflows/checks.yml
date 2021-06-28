@@ -2,13 +2,13 @@
 
 name: Checks
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   push:
-    branches: [ develop ]
+    branches: [develop]
   pull_request:
-    branches: [ develop ]
+    branches: [develop]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,11 +25,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: report environment
-        run: export
+      # Log some information from the shell
+      # - name: report environment
+      #   run: export
 
-        # Arduino - lint
+      # Arduino - lint
       - name: Arduino-lint
         uses: arduino/arduino-lint-action@v1
         with:

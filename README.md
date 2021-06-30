@@ -4,19 +4,27 @@
 [![arduino-library-badge](https://www.ardu-badge.com/badge/HomeDing.svg?)](https://www.ardu-badge.com/HomeDing)
 [![GitLicense](https://gitlicense.com/badge/HomeDing/HomeDing)](https://gitlicense.com/license/HomeDing/HomeDing)
 
+The HomeDing library for Arduino is a low code solution and library to build small IoT devices
+without the need for cloud services or a local central device.
+It is a complete ecosystem of IoT specific elements that can be activated and configured on demand without compiling a new firmware.
+It is extensible by adding new specific elements.
+
+The devices run stand-alone only connected to the local WiFi and provide
+information and control of the device using a built-in web server.
+
 Documentation can be found in at [HomeDing documentation site](https://homeding.github.io)
 
 This Library is published using a [BSD 3-clause license](./LICENSE).
 
 
-## Summary 
+### support of many sensors, displays and other IO
 
-The HomeDing library for Arduino enables building IoT devices using ESP8266 and ESP32 based boards.
-It is a complete ecosystem of the required internal functionality based on elements that can be activated and integrated by configuration.
-It is extensible by adding specific elements.
+The Homeding library has implemented many [Elements](https://homeding.github.io/#page=/elements.md) for
+simple Input and Output of signals,
+[sensors](https://homeding.github.io/#page=/sensors/sensors.md),
+[displays](https://homeding.github.io/#page=/displays.md), lightning, logical processing, time support and many others.
 
-
-The embedded Web Server enables controlling the device and linking devices together.
+The embedded Web Server enables configuration and control of the device.
 
 It supports:
 

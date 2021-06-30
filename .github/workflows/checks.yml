@@ -15,19 +15,15 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "checks"
-  checks:
-    # The type of runner that the job will run on
+  # This defines a job for checking the Arduino library format specifications
+  # see <https://github.com/marketplace/actions/arduino-arduino-lint-action>
+  lint:
+    name: lint library format
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      # Log some information from the shell
-      # - name: report environment
-      #   run: export
 
       # Arduino - lint
       - name: Arduino-lint
@@ -35,6 +31,15 @@ jobs:
         with:
           library-manager: update
           verbose: false
+
+  checks:
+    name: compile examples on ESP8266
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
 
       # Run Arduino Compiler
       # see https://github.com/arduino/compile-sketches
@@ -59,10 +64,11 @@ jobs:
             - name: my92xx
             - name: INA219_WE
             - name: Radio
-            # - name: RFCodes
+            - name: RFCodes
           sketch-paths: |
             - 'examples/minimal'
             - 'examples/standard'
+            - 'examples/RFBridge'
 
           # size-report-sketch: 'ConnectionHandlerDemo'
           # enable-size-deltas-report: 'true'

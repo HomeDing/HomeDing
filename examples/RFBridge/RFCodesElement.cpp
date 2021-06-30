@@ -19,7 +19,7 @@
 
 #include "RFCodesElement.h"
 
-#include <rfcodes.h>
+#include <RFCodes.h>
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 

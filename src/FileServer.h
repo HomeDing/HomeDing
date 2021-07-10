@@ -1,13 +1,11 @@
 /**
  * @file fileserver.h
- * @brief Implementation of extended http based file server.
+ * @brief Implementation of the extended http based file server to upload and delete files.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
- * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
- *
- * This work is licensed under a BSD style license,
- * https://www.mathertel.de/License.aspx.
+ * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
  *
  * More information on https://www.mathertel.de/Arduino.
  *
@@ -16,7 +14,8 @@
  * * 04.02.2019 simplifications, saving memory.
  * * 24.11.2019 simplifications, using serveStatic for delivering filesystem files.
  * * 13.12.2019 no upload and delete when running in safemode
- * * 16.5.2021 update to ESP8266 board version 3.0
+ * * 16.05.2021 update to ESP8266 board version 3.0
+ * * 10.07.2021 add starting '/' to filenames if not present.
  */
 
 #ifndef FILESERVER_H
@@ -77,15 +76,21 @@ public:
   bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override
 #endif
   {
+    // ensure that filename starts with '/'
+    String fName = requestUri;
+    if (! fName.startsWith("/")) {
+      fName = "/" + fName;
+    }
+
     // LOGGER_RAW("File:handle(%s)", requestUri.c_str());
     if (requestMethod == HTTP_POST) {
       server.send(200); // all done in upload. no other forms.
 
     } else if (requestMethod == HTTP_DELETE) {
-      if (_fs.exists(requestUri)) {
-        _fs.remove(requestUri);
+      if (_fs.exists(fName)) {
+        _fs.remove(fName );
       } else {
-        LOGGER_ERR("File <%s> doesn't exist.", requestUri.c_str());
+        LOGGER_ERR("File <%s> doesn't exist.", fName.c_str());
       }
 
     }                 // if
@@ -100,20 +105,24 @@ public:
   void upload(UNUSED WebServer &server, UNUSED String requestUri, HTTPUpload &upload) override
 #endif
   {
-    // LOGGER_TRACE("upload...<%s>", upload.filename.c_str());
-    if (!upload.filename.startsWith("/")) {
-      // LOGGER_TRACE("no /...");
-    } else if (upload.filename.indexOf('#') > 0) {
+    // ensure that filename starts with '/'
+    String fName = upload.filename;
+    if (! fName.startsWith("/")) {
+      fName = "/" + fName;
+    }
+
+    // LOGGER_TRACE("upload...<%s>", fName.c_str());
+    if (fName.indexOf('#') > 0) {
       // LOGGER_TRACE("no #...");
-    } else if (upload.filename.indexOf('$') > 0) {
+    } else if (fName.indexOf('$') > 0) {
       // LOGGER_TRACE("no $...");
 
     } else if (upload.status == UPLOAD_FILE_START) {
-      if (_fs.exists(upload.filename)) {
-        _fs.remove(upload.filename);
+      if (_fs.exists(fName)) {
+        _fs.remove(fName);
       } // if
 
-      _fsUploadFile = _fs.open(upload.filename, "w");
+      _fsUploadFile = _fs.open(fName, "w");
 
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       if (_fsUploadFile)

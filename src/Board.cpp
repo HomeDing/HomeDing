@@ -38,7 +38,7 @@ extern "C" {
 
 #include <DNSServer.h>
 
-// #define ETAG_SUPPORT
+#define ETAG_SUPPORT
 
 // use JSONTRACE for tracing parsing the configuration files.
 #define JSONTRACE(...) // LOGGER_TRACE(__VA_ARGS__)

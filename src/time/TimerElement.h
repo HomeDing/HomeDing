@@ -131,21 +131,21 @@ private:
    * This variable corresponds to the "cycletime" parameter.
    * When not specified the _cycleTime is calculated by waittime + pulsetime.
    */
-  int _cycleTime = 0;
+  unsigned long _cycleTime = 0;
 
   /**
    * @brief time before "on" action.
    *
    * This variable corresponds to the "waittime" parameter.
    */
-  int _waitTime = 0; // minutes to wait until next water will be started
+  unsigned long _waitTime = 0; // seconds before the pulsetime begins
 
   /**
    * @brief time between "on" and "off" action.
    *
    * This variable corresponds to the "pulsetime" parameter.
    */
-  int _pulseTime = 0; // minutes when water will be served
+  unsigned long _pulseTime = 0; // seconds of the pulsetime
 
   /**
    * @brief The _onAction holds the actions that is submitted when the pulse

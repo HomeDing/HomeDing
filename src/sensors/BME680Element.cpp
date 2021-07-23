@@ -162,7 +162,7 @@ void BME680Element::start()
 bool BME680Element::getProbe(String &values)
 {
   bool newData = false;
-  char buffer[32];
+  char buffer[48];
 
   if (!_dataAvailable) {
     // start reading

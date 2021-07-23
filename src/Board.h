@@ -47,13 +47,11 @@
 #elif defined(ESP8266)
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
-
 #define WebServer ESP8266WebServer
 
 #endif
 
 #include <WiFiClient.h>
-
 
 #include <time.h>
 
@@ -64,6 +62,7 @@ class Board;
 
 #include <displays/DisplayAdapter.h>
 
+#include <Element.h>
 #include <StateElement.h>
 #include <core/Logger.h>
 #include <core/RTCVariables.h>

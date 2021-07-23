@@ -23,8 +23,7 @@
 /**
  * @brief The StateElement class defines the extra virtual functions for any State Element. 
  */
-class StateElement : public Element
-{
+class StateElement : public Element {
 public:
   /**
    * @brief The save function allows saving state information specific for an Element.

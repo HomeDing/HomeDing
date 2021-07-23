@@ -5,8 +5,6 @@
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
  *
- * @brief RTCStateElement
- * 
  * More information on https://www.mathertel.de/Arduino
  * 
  * Changelog:
@@ -19,11 +17,10 @@
 #include "StateElement.h"
 
 /**
- * @brief RTCStateElement implements...
- * @details
+ * The RTCStateElement implements saving the state of elements into the RTC memory
+ * to be picked up after a reset.
  */
-class RTCStateElement : public StateElement
-{
+class RTCStateElement : public StateElement {
 public:
   /**
    * @brief Factory function to create a RTCStateElement.
@@ -86,7 +83,6 @@ private:
    * @brief The list of actual state actions.
    */
   String _stateList;
-
 };
 
 #endif

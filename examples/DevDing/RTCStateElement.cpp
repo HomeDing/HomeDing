@@ -4,9 +4,6 @@
  *
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
- *
- * @brief Element Template class.
- *
  * More information on https://www.mathertel.de/Arduino
  *
  * Changelog:see RTCStateElement.h
@@ -26,19 +23,18 @@
  * @brief static factory function to create a new RTCStateElement
  * @return RTCStateElement* created element
  */
-Element *RTCStateElement::create()
-{
+Element *RTCStateElement::create() {
   return (new RTCStateElement());
 } // create()
 
 
 /* ===== Element functions ===== */
 
-void RTCStateElement::init(Board *board)
-{
+void RTCStateElement::init(Board *board) {
   TRACE("init()");
   Element::init(board);
   _hasChanged = false;
+  // Use this element for saving the state of elements.
   _board->state = this;
 } // init()
 
@@ -46,8 +42,7 @@ void RTCStateElement::init(Board *board)
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool RTCStateElement::set(const char *name, const char *value)
-{
+bool RTCStateElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, "anyconfigProp") == 0) {
@@ -66,8 +61,7 @@ bool RTCStateElement::set(const char *name, const char *value)
 /**
  * @brief The save function allows saving state information specific for an Element.
  */
-void RTCStateElement::save(Element *e, char const *key, char const *value)
-{
+void RTCStateElement::save(Element *e, char const *key, char const *value) {
   TRACE("save(%s=%s)", key, value);
 
   String entry = String(e->id) + "?" + key + "=";
@@ -102,8 +96,7 @@ void RTCStateElement::save(Element *e, char const *key, char const *value)
 /**
  * @brief Load all state information from RTC memory and dispatch them as actions.
  */
-void RTCStateElement::load()
-{
+void RTCStateElement::load() {
   TRACE("load()");
   String loadState;
 
@@ -118,8 +111,7 @@ void RTCStateElement::load()
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void RTCStateElement::loop()
-{
+void RTCStateElement::loop() {
   Element::loop();
   if (_hasChanged) {
     TRACE("save (%s)", _stateList.c_str());

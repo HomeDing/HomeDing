@@ -38,7 +38,7 @@ extern "C" {
 
 #include <DNSServer.h>
 
-#define DOUBLEQUOTE '\"'
+// #define ETAG_SUPPORT
 
 // use JSONTRACE for tracing parsing the configuration files.
 #define JSONTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
@@ -65,14 +65,12 @@ extern const char *passPhrase;
 /**
  * @brief Initialize a blank board.
  */
-void Board::init(WebServer *serv, FS *fs)
-{
+void Board::init(WebServer *serv, FS *fs) {
   server = serv;
   // TRACE("Board Init");
 
   fileSystem = fs;
   // fs->begin();
-
   bool mounted = SPIFFS.begin();
   if (!mounted) {
     LOGGER_INFO("formatting...");
@@ -88,9 +86,9 @@ void Board::init(WebServer *serv, FS *fs)
   cacheHeader = "no-cache";
 
   _newState(BOARDSTATE::NONE);
-  _deepSleepStart = 0;     // no deep sleep to be started
+  _deepSleepStart = 0; // no deep sleep to be started
   _deepSleepBlock = false; // no deep sleep is blocked
-  _deepSleepTime = 60;     // one minute
+  _deepSleepTime = 60; // one minute
 
   _cntDeepSleep = 0;
 
@@ -108,8 +106,8 @@ void Board::init(WebServer *serv, FS *fs)
   enableWiFiAtBootTime();
 
   deviceName = WiFi.getHostname(); // use mac based default device name
-  deviceName.replace("_", "");     // Underline in hostname is not conformant, see
-                                   // https://tools.ietf.org/html/rfc1123 952
+  deviceName.replace("_", ""); // Underline in hostname is not conformant, see
+      // https://tools.ietf.org/html/rfc1123 952
 } // init()
 
 
@@ -118,8 +116,7 @@ void Board::init(WebServer *serv, FS *fs)
  * @return true when board is runing in captive mode.
  * @return false when board is runing in normal mode. 
  */
-bool Board::isCaptiveMode()
-{
+bool Board::isCaptiveMode() {
   return ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE));
 } // isCaptiveMode()
 
@@ -127,8 +124,7 @@ bool Board::isCaptiveMode()
 /**
  * @brief 
  */
-void Board::_checkNetState()
-{
+void Board::_checkNetState() {
   hd_yield();
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
@@ -145,8 +141,7 @@ void Board::_checkNetState()
 /**
  * @brief Add and config the Elements defined in the config files.
  */
-void Board::_addAllElements()
-{
+void Board::_addAllElements() {
   // JSONTRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
 
@@ -213,8 +208,7 @@ void Board::_addAllElements()
 } // _addAllElements()
 
 
-void Board::start(Element_StartupMode startupMode)
-{
+void Board::start(Element_StartupMode startupMode) {
   // TRACE("start(%d)", startupMode);
 
   // make elements active that match
@@ -237,8 +231,7 @@ void Board::start(Element_StartupMode startupMode)
 
 
 // switch to a new state
-void Board::_newState(enum BOARDSTATE newState)
-{
+void Board::_newState(enum BOARDSTATE newState) {
   hd_yield();
   // TRACE("WiFi: %d,%d", WiFi.getMode(), WiFi.status());
   TRACE("State=%d", newState);
@@ -246,8 +239,7 @@ void Board::_newState(enum BOARDSTATE newState)
 }
 
 // loop next element, only one at a time!
-void Board::loop()
-{
+void Board::loop() {
   unsigned long now = millis();
   _checkNetState();
 
@@ -271,7 +263,7 @@ void Board::loop()
           start(Element_StartupMode::Time);
           startComplete = true;
         } // if
-      }   // if
+      } // if
 
       if (startComplete) {
         dispatch(startAction); // dispatched when all elements are active.
@@ -473,8 +465,8 @@ void Board::loop()
           delay(500);
           ESP.restart();
         } // if
-      }   // if
-    }     // if
+      } // if
+    } // if
 
     if (boardState == BOARDSTATE::WAIT) {
       if (_isWakeupStart || (now >= configPhaseEnd)) {
@@ -514,13 +506,39 @@ void Board::loop()
 
     server->begin();
     server->enableCORS(true);
+
+    randomSeed(millis()); // millis varies on every start, good enough
+    filesVersion = random(8000); // will incremented on every file upload by file server
+
+    // #ifdef ETAG_SUPPORT
+    // server->enableETag(true);
+    if (cacheHeader == "etag") {
+      // enable eTags in results for static files
+
+      // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
+      server->enableETag(true, [this](FS &fs, const String &path) -> String {
+        String eTag;
+        if (!path.endsWith(".txt")) {
+          eTag = esp8266webserver::calcETag(fs, path);
+          // File f = fs.open(path, "r");
+          // eTag = f.getLastWrite()
+          // f.close();
+          // use current counter
+          eTag = String(filesVersion, 16); // f.getLastWrite()
+        }
+        return (eTag);
+      });
+      cacheHeader = ""; // do not pass this cache header
+    }
+    // #endif
+
     start(Element_StartupMode::Network);
     dispatch(sysStartAction); // dispatched when network is available
 
     // ===== initialize network dependant services
 
     // start file server for static files in the file system.
-    server->serveStatic("/", *fileSystem, "/", cacheHeader.c_str()); // "no-cache");
+    server->serveStatic("/", *fileSystem, "/", cacheHeader.c_str());
 
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode
@@ -588,16 +606,14 @@ void Board::loop()
 // ===== set board behavior
 
 // start deep sleep mode when idle.
-void Board::setSleepTime(unsigned long secs)
-{
+void Board::setSleepTime(unsigned long secs) {
   TRACE("setSleepTime(%d)", secs);
   _deepSleepTime = secs;
 } // setSleepTime()
 
 
 // start deep sleep mode when idle.
-void Board::startSleep()
-{
+void Board::startSleep() {
   TRACE("startSleep");
   _deepSleepStart = millis();
   if (!_isWakeupStart) {
@@ -608,20 +624,17 @@ void Board::startSleep()
 
 
 // block any deep sleep until next reset.
-void Board::cancelSleep()
-{
+void Board::cancelSleep() {
   TRACE("cancelSleep");
   _deepSleepBlock = true;
 } // cancelSleep()
 
 
-Element *Board::findById(String &id)
-{
+Element *Board::findById(String &id) {
   return (findById(id.c_str()));
 }
 
-Element *Board::findById(const char *id)
-{
+Element *Board::findById(const char *id) {
   // LOGGER_TRACE("findById(%s)", id);
 
   Element *l = _elementList;
@@ -629,7 +642,7 @@ Element *Board::findById(const char *id)
     if (strcmp(l->id, id) == 0) {
       // LOGGER_TRACE(" found:%s", l->id);
       break; // while
-    }        // if
+    } // if
     l = l->next;
   } // while
   return (l);
@@ -637,8 +650,7 @@ Element *Board::findById(const char *id)
 
 
 /** Queue an action for later dispatching. */
-void Board::_queueAction(const String &action, const String &v)
-{
+void Board::_queueAction(const String &action, const String &v) {
   String tmp = action;
   tmp.replace("$v", v);
 
@@ -649,8 +661,7 @@ void Board::_queueAction(const String &action, const String &v)
 
 
 // send a event out to the defined target.
-void Board::dispatchAction(String action)
-{
+void Board::dispatchAction(String action) {
   TRACE("dispatch %s", action.c_str());
   // TRACE_START;
 
@@ -696,8 +707,7 @@ void Board::dispatchAction(String action)
 /**
  * @brief Save an action to the _actionList.
  */
-void Board::dispatch(String &action, int value)
-{
+void Board::dispatch(String &action, int value) {
   if (action.length() > 0)
     _queueAction(action, String(value));
 } // dispatch
@@ -706,8 +716,7 @@ void Board::dispatch(String &action, int value)
 /**
  * @brief Save an action to the _actionList.
  */
-void Board::dispatch(String &action, const char *value)
-{
+void Board::dispatch(String &action, const char *value) {
   if (action.length() > 0)
     _queueAction(action, String(value));
 } // dispatch
@@ -716,8 +725,7 @@ void Board::dispatch(String &action, const char *value)
 /**
  * @brief Save an action to the _actionList.
  */
-void Board::dispatch(String &action, String &value)
-{
+void Board::dispatch(String &action, String &value) {
   if (action.length() > 0)
     _queueAction(action, value);
 } // dispatch
@@ -726,8 +734,7 @@ void Board::dispatch(String &action, String &value)
 /**
  * @brief Save an action to the _actionList using a item part of a value.
  */
-void Board::dispatchItem(String &action, String &values, int n)
-{
+void Board::dispatchItem(String &action, String &values, int n) {
   if (action && values) {
     String v = Element::getItemValue(values, n);
     if (v) _queueAction(action, v);
@@ -741,8 +748,7 @@ void Board::dispatchItem(String &action, String &values, int n)
    * @param action action or property.
    * @param value the value
    */
-void Board::queueActionTo(const String &typeId, const String &action, const String &value)
-{
+void Board::queueActionTo(const String &typeId, const String &action, const String &value) {
   String tmp = typeId + '?' + action + '=' + value;
   // TRACE("queue(%s)", tmp.c_str());
   if (_actionList.length() > 0)
@@ -754,15 +760,13 @@ void Board::queueActionTo(const String &typeId, const String &action, const Stri
 /**
  * do not start sleep mode because element is active.
  */
-void Board::deferSleepMode()
-{
+void Board::deferSleepMode() {
   // reset the counter to ensure looping all active elements
   _cntDeepSleep = 0;
 } // deferSleepMode()
 
 
-void Board::getState(String &out, const String &path)
-{
+void Board::getState(String &out, const String &path) {
   // TRACE("getState(%s)", path.c_str());
   String ret = "{";
   const char *cPath = path.c_str();
@@ -771,12 +775,12 @@ void Board::getState(String &out, const String &path)
   while (l != NULL) {
     // LOGGER_TRACE("  ->%s", l->id);
     if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
-      ret += DOUBLEQUOTE;
+      ret += '\"';
       ret += l->id;
       ret += "\":{";
       l->pushState([&ret](const char *name, const char *value) {
         // LOGGER_TRACE("->%s=%s", name, value);
-        ret.concat(DOUBLEQUOTE);
+        ret.concat('\"');
         ret.concat(name);
         ret.concat("\":\"");
         ret.concat(value);
@@ -803,15 +807,13 @@ void Board::getState(String &out, const String &path)
 
 // ===== Time functionality =====
 
-unsigned long Board::getSeconds()
-{
+unsigned long Board::getSeconds() {
   return (millis() / 1000);
 }
 
 
 // return the seconds since 1.1.1970 00:00:00
-time_t Board::getTime()
-{
+time_t Board::getTime() {
   time_t current_stamp = time(nullptr);
   if (current_stamp <= MIN_VALID_TIME) {
     current_stamp = 0;
@@ -821,8 +823,7 @@ time_t Board::getTime()
 
 
 // return the seconds of today in localtime.
-time_t Board::getTimeOfDay()
-{
+time_t Board::getTimeOfDay() {
   time_t ct = time(nullptr);
   tm lt;
   if (ct) {
@@ -837,8 +838,7 @@ time_t Board::getTimeOfDay()
 /**
  * @brief Get a Element by typename. Returns the first found element.
  */
-Element *Board::getElement(const char *elementType)
-{
+Element *Board::getElement(const char *elementType) {
   // LOGGER_TRACE("getElement(%s)", elementType);
 
   String tn = elementType;
@@ -849,7 +849,7 @@ Element *Board::getElement(const char *elementType)
   while (l != NULL) {
     if (String(l->id).substring(0, tnLength).equalsIgnoreCase(tn)) {
       break; // while
-    }        // if
+    } // if
     l = l->next;
   } // while
   // LOGGER_TRACE("found: %d", l);
@@ -857,8 +857,7 @@ Element *Board::getElement(const char *elementType)
 } // getElement()
 
 
-Element *Board::getElement(const char *elementType, const char *elementName)
-{
+Element *Board::getElement(const char *elementType, const char *elementName) {
   String tn = elementType;
   tn.concat('/');
   tn.concat(elementName);
@@ -878,8 +877,7 @@ Element *Board::getElement(const char *elementType, const char *elementName)
 /**
  * @brief Iterate though all Elements.
  */
-void Board::forEach(const char *prefix, ElementCallbackFn fCallback)
-{
+void Board::forEach(const char *prefix, ElementCallbackFn fCallback) {
   Element *l = _elementList;
   while (l != NULL) {
     if (Element::_stristartswith(l->id, prefix)) {
@@ -890,8 +888,7 @@ void Board::forEach(const char *prefix, ElementCallbackFn fCallback)
 } // forEach()
 
 
-void Board::reboot(bool wipe)
-{
+void Board::reboot(bool wipe) {
   LOGGER_INFO("reboot...");
   if (wipe)
     WiFi.disconnect(true);
@@ -904,8 +901,7 @@ void Board::reboot(bool wipe)
 };
 
 
-void Board::displayInfo(const char *text1, const char *text2)
-{
+void Board::displayInfo(const char *text1, const char *text2) {
   LOGGER_JUSTINFO("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
@@ -921,8 +917,7 @@ void Board::displayInfo(const char *text1, const char *text2)
 /**
  * @brief Add another element to the board into the list of created elements.
  */
-void Board::_addElement(const char *id, Element *e)
-{
+void Board::_addElement(const char *id, Element *e) {
   // LOGGER_TRACE("_add(%s)", id);
   _addedElements++;
 

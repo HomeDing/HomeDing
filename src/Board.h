@@ -64,9 +64,9 @@ class Board;
 
 #include <displays/DisplayAdapter.h>
 
+#include <StateElement.h>
 #include <core/Logger.h>
 #include <core/RTCVariables.h>
-#include <StateElement.h>
 
 #define HOMEDING_GREETING "HomeDing"
 
@@ -112,8 +112,7 @@ typedef std::function<void(Element *e)>
 
 
 /** inline yield function for cooperative multitasking platforms. */
-inline __attribute__((always_inline)) void hd_yield()
-{
+inline __attribute__((always_inline)) void hd_yield() {
   // delay(1);
   optimistic_yield(100);
 }
@@ -130,8 +129,7 @@ inline __attribute__((always_inline)) void hd_yield()
  * The dispatch method can dispatch multiple actions separated by comma at once.
  * Example: display/active?show=1,digitalout/led?on,device/main?log=*on*
  */
-class Board
-{
+class Board {
 
   /** States of the board */
   enum BOARDSTATE : int {
@@ -141,17 +139,17 @@ class Board
 
     CONNECT = 2, // define how to connect, AUTO, PSK or PASSWD
     WAITNET = 3, // Wait for network connectivity or configuration request.
-    WAIT = 5,    // network is connected but wait for configuration request.
+    WAIT = 5, // network is connected but wait for configuration request.
 
     // ===== normal operation states
     GREET = 10, // network established, start NET Elements
-    RUN = 12,   // in normal operation mode.
+    RUN = 12, // in normal operation mode.
 
     SLEEP = 18, // start sleep mode.
 
     // ===== config operation states
     STARTCAPTIVE = 21, // Scan local available Networks
-    RUNCAPTIVE = 22    // Enable Network Configuration UI
+    RUNCAPTIVE = 22 // Enable Network Configuration UI
   };
 
 
@@ -338,6 +336,9 @@ public:
   // FileSystem instance
   FS *fileSystem;
 
+  // a counter used as eTag that gets incremented when any file is changed.
+  unsigned int filesVersion;
+
   /**
    * Iterator through all Elements.
    */
@@ -454,9 +455,9 @@ private:
 
   // state and timing
 
-  unsigned long configPhaseEnd;  // millis when current config mode (boardstate) is over, next mode
+  unsigned long configPhaseEnd; // millis when current config mode (boardstate) is over, next mode
   unsigned long connectPhaseEnd; // for waiting on net connection
-  unsigned long _captiveEnd;     // terminate/reset captive portal mode after 5 minutes.
+  unsigned long _captiveEnd; // terminate/reset captive portal mode after 5 minutes.
   void _newState(enum BOARDSTATE newState);
 
   bool active = false;

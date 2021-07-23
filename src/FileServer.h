@@ -27,8 +27,7 @@
  * @brief Request Handler implementation for static files in file system.
  * Implements delivering static files and uploading files.
  */
-class FileServerHandler : public RequestHandler
-{
+class FileServerHandler : public RequestHandler {
 public:
   /**
    * @brief Construct a new File Server Handler object
@@ -38,8 +37,7 @@ public:
    * @param cache_header Cache Header to be used in replies.
    */
   FileServerHandler(FS &fs, const char *cache_header, Board *board)
-      : _fs(fs), _board(board), _cache_header(cache_header)
-  {
+      : _fs(fs), _board(board), _cache_header(cache_header) {
   }
 
 
@@ -78,7 +76,7 @@ public:
   {
     // ensure that filename starts with '/'
     String fName = requestUri;
-    if (! fName.startsWith("/")) {
+    if (!fName.startsWith("/")) {
       fName = "/" + fName;
     }
 
@@ -88,12 +86,11 @@ public:
 
     } else if (requestMethod == HTTP_DELETE) {
       if (_fs.exists(fName)) {
-        _fs.remove(fName );
-      } else {
-        LOGGER_ERR("File <%s> doesn't exist.", fName.c_str());
+        _fs.remove(fName);
+        _board->filesVersion++;
       }
 
-    }                 // if
+    } // if
     server.send(200); // all done.
     return (true);
   } // handle()
@@ -107,7 +104,7 @@ public:
   {
     // ensure that filename starts with '/'
     String fName = upload.filename;
-    if (! fName.startsWith("/")) {
+    if (!fName.startsWith("/")) {
       fName = "/" + fName;
     }
 
@@ -123,6 +120,7 @@ public:
       } // if
 
       _fsUploadFile = _fs.open(fName, "w");
+      _board->filesVersion++;
 
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       if (_fsUploadFile)
@@ -130,10 +128,12 @@ public:
       hd_yield();
 
     } else if (upload.status == UPLOAD_FILE_END) {
-      if (_fsUploadFile)
+      if (_fsUploadFile) {
         _fsUploadFile.close();
+        _board->filesVersion++;
+      }
     } // if
-  }   // upload()
+  } // upload()
 
 protected:
   FS _fs;

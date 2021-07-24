@@ -293,10 +293,10 @@ void Board::loop() {
     } // if
     if (_nextElement) {
       if (_nextElement->active) {
-        // TRACE_START;
+        TRACE_START;
         _nextElement->loop();
-        // TRACE_END;
-        // TRACE_TIMEPRINT("loop", _nextElement->id, 5);
+        TRACE_END;
+        TRACE_TIMEPRINT("loop", _nextElement->id, 5);
       }
       _nextElement = _nextElement->next;
     } // if
@@ -509,8 +509,7 @@ void Board::loop() {
     randomSeed(millis()); // millis varies on every start, good enough
     filesVersion = random(8000); // will incremented on every file upload by file server
 
-    // #ifdef ETAG_SUPPORT
-    // server->enableETag(true);
+#ifdef ETAG_SUPPORT
     if (cacheHeader == "etag") {
       // enable eTags in results for static files
 
@@ -529,7 +528,7 @@ void Board::loop() {
       });
       cacheHeader = ""; // do not pass this cache header
     }
-    // #endif
+#endif
 
     start(Element_StartupMode::Network);
     dispatch(sysStartAction); // dispatched when network is available

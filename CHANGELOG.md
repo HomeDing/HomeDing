@@ -4,8 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-* saving state of elements to survive a boot / but no power down.
-* arduino-lint github action
+*   saving state of elements to survive a boot / but no power down.
+*   arduino-lint github action
 
 
 ## [0.7.0] - 2021-06-15
@@ -124,11 +124,11 @@ This release focuses on stability and better developer support. New Elements is 
 
 These Elements are added to the [Development example](https://homeding.github.io/#page=/examples/develop.md) and are in an early development state or for development purpose only. When finalized they will be moved into the core library.
 
-* **Diag Element** - is included in the DevDing example to help analyzing the current I2C devices and memory.
-* **RFSend Element** - An experimental Element for sending rf433 signals.
-* **SerialCmd Element** - Use the Serial input to create actions.
-* **INA219 Element** - An Element to control a INA219 power consumption chip.
-* **Template Element.h** - An Element that is used as a template for implementing new elements.
+*   **Diag Element** - is included in the DevDing example to help analyzing the current I2C devices and memory.
+*   **RFSend Element** - An experimental Element for sending rf433 signals.
+*   **SerialCmd Element** - Use the Serial input to create actions.
+*   **INA219 Element** - An Element to control a INA219 power consumption chip.
+*   **Template Element.h** - An Element that is used as a template for implementing new elements.
 
 
 ### Enhancements

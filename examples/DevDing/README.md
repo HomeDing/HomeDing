@@ -17,11 +17,11 @@ They may be removed in Element implementations when not required to reduce progr
 
 This is an element that registers itself at system startup
 and sends some diagnostic output to the Serial Console upon request:
-* Reset Reason
-* free heap memory
-* i2c bus configuration
-* scan i2c bus for devices
-* dump content of RTC memory
+*   Reset Reason
+*   free heap memory
+*   i2c bus configuration
+*   scan i2c bus for devices
+*   dump content of RTC memory
 
 ## SerialCmd Element
 

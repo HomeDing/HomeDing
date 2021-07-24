@@ -258,8 +258,7 @@ void Board::loop() {
 
         // starting time depending elements
         // check if time is valid now -> start all elements with
-        time_t ct = time(nullptr);
-        if (ct) {
+        if (time(nullptr)) {
           start(Element_StartupMode::Time);
           startComplete = true;
         } // if

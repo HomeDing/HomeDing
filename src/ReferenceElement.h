@@ -45,13 +45,6 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
-   * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
-   */
-  virtual void start() override;
-
-  /**
    * @brief Give some processing time to the timer to check for next action.
    */
   virtual void loop() override;
@@ -77,7 +70,7 @@ private:
   bool gotNewValue = false;
 
   /** The given reference value. */
-  float _refValue = FLT_MIN;
+  float _refValue = 0;
 
   /** These actions are sent with value=1 when the incoming value is above the reference value otherwise value=0. */
   String _referenceAction;

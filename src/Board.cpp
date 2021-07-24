@@ -38,7 +38,7 @@ extern "C" {
 
 #include <DNSServer.h>
 
-#define ETAG_SUPPORT
+// #define ETAG_SUPPORT
 
 // use JSONTRACE for tracing parsing the configuration files.
 #define JSONTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
@@ -145,7 +145,7 @@ void Board::_addAllElements() {
   // JSONTRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
 
-  MicroJson *mj = new (std::nothrow) MicroJson(
+  MicroJson *mj =  new MicroJson(
       [this, &_lastElem](int level, char *path, char *value) {
         // JSONTRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
@@ -748,7 +748,7 @@ void Board::dispatchItem(String &action, String &values, int n) {
    * @param value the value
    */
 void Board::queueActionTo(const String &typeId, const String &action, const String &value) {
-  String tmp = typeId + '?' + action + '=' + value;
+  String tmp = typeId + "?" + action + "=" + value;
   // TRACE("queue(%s)", tmp.c_str());
   if (_actionList.length() > 0)
     _actionList.concat(ACTION_SEPARATOR);

@@ -17,7 +17,7 @@
  * * created by Matthias Hertel
  * * 21.01.2020 supporting arrays
  * * 11.04.2020 better supporting arrays
- * * 18.04.2020 correct handling empty obejcts a.k.a '{}'
+ * * 18.04.2020 correct handling empty objects a.k.a '{}'
  * * 18.04.2020 reduce memory footprint
  * * 27.06.2020 enable parsing partial JSON in junks
  * * 16.05.2021 use strlcat.

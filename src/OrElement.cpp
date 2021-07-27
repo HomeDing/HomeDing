@@ -1,5 +1,5 @@
 /**
- * @file AndElement.cpp
+ * @file OrElement.cpp
  * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -11,22 +11,22 @@
  *
  * More information on https://www.mathertel.de/Arduino
  *
- * Changelog:see AndElement.h
+ * Changelog:see OrElement.h
  */
 
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <AndElement.h>
+#include <OrElement.h>
 
 /* ===== Static factory function ===== */
 
 /**
- * @brief static factory function to create a new AndElement
- * @return AndElement* created element
+ * @brief static factory function to create a new OrElement
+ * @return OrElement* created element
  */
-Element *AndElement::create() {
-  return (new AndElement());
+Element *OrElement::create() {
+  return (new OrElement());
 } // create()
 
 
@@ -35,12 +35,12 @@ Element *AndElement::create() {
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void AndElement::loop() {
+void OrElement::loop() {
   if (_needRecalc) {
-    bool newOut = (_inputs > 0); // out = false when no inbound value is given.
+    bool newOut = false; // out = false when no inbound value is given.
 
     for (int n = 0; n < _inputs; n++) {
-      newOut = (newOut && _value[n]);
+      newOut = (newOut || _value[n]);
     }
 
     if (_invert) {

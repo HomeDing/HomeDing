@@ -1,5 +1,5 @@
 /**
- * @file AndElement.h
+ * @file OrElement.h
  * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
@@ -12,22 +12,20 @@
  * More information on https://www.mathertel.de/Arduino
  * 
  * Changelog:
- * * 17.07.2019 created by Matthias Hertel
- * * 27.07.2021 derive from LogicElement
- * * 27.07.2021 allow up to 8 input values using array syntax: value[0..7] = 0/1
+ * * 27.07.2021 created by Matthias Hertel
  */
 
-#ifndef ANDELEMENT_H
-#define ANDELEMENT_H
+#ifndef ORELEMENT_H
+#define ORELEMENT_H
 
 #include <HomeDing.h>
 
 #include <LogicElement.h>
 
-class AndElement : public LogicElement {
+class OrElement : public LogicElement {
 public:
   /**
-   * @brief Factory function to create a AndElement.
+   * @brief Factory function to create a OrElement.
    * @return Element*
    */
   static Element *create();
@@ -46,9 +44,9 @@ public:
 /* ===== Register the Element ===== */
 
 #ifdef HOMEDING_REGISTER
-// Register the AndElement onto the ElementRegistry.
-bool AndElement::registered =
-    ElementRegistry::registerElement("and", AndElement::create);
+// Register the OrElement onto the ElementRegistry.
+bool OrElement::registered =
+    ElementRegistry::registerElement("or", OrElement::create);
 #endif
 
 #endif

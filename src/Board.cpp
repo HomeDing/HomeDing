@@ -509,15 +509,15 @@ void Board::loop() {
     randomSeed(millis()); // millis varies on every start, good enough
     filesVersion = random(8000); // will incremented on every file upload by file server
 
-#ifdef ETAG_SUPPORT
     if (cacheHeader == "etag") {
+#ifdef ETAG_SUPPORT
       // enable eTags in results for static files
 
       // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
       server->enableETag(true, [this](FS &fs, const String &path) -> String {
         String eTag;
         if (!path.endsWith(".txt")) {
-          eTag = esp8266webserver::calcETag(fs, path);
+          // eTag = esp8266webserver::calcETag(fs, path);
           // File f = fs.open(path, "r");
           // eTag = f.getLastWrite()
           // f.close();
@@ -526,9 +526,9 @@ void Board::loop() {
         }
         return (eTag);
       });
+#endif
       cacheHeader = ""; // do not pass this cache header
     }
-#endif
 
     start(Element_StartupMode::Network);
     dispatch(sysStartAction); // dispatched when network is available

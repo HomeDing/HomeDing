@@ -33,6 +33,18 @@ extern const char *ACTION_ONPRESSURE;
 // The only strictly required elements are: DeviceElement and OTAElement. They are included any time.
 // The other system level elements SSDPElement, TimeElement 
 
+#ifdef HOMEDING_INCLUDE_ALL
+
+#define HOMEDING_INCLUDE_SYSTEM // all system elements
+#define HOMEDING_INCLUDE_CORE
+#define HOMEDING_INCLUDE_TM1637
+#define HOMEDING_INCLUDE_PMS
+#define HOMEDING_INCLUDE_WEATHERFEED
+
+#endif
+
+
+
 // ===== CORE Elements =====
 
 // The Core Elements that are very common and add themselves to the ElementRegistry
@@ -205,6 +217,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_DisplayLine
 #include <DisplayLineElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_TM1637
+#include <TM1637Element.h>
 #endif
 
 // ===== OPTIONAL ELEMENTS =====

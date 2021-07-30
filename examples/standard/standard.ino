@@ -51,6 +51,7 @@
 #define HOMEDING_INCLUDE_DISPLAYLCD
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
+#define HOMEDING_INCLUDE_TM1637
 
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR
@@ -112,7 +113,6 @@ void handleRedirect()
   }
   server.sendHeader("Location", url, true);
   server.send(302);
-  server.client().stop();
 } // handleRedirect()
 
 

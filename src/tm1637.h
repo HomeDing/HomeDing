@@ -6,6 +6,10 @@
 
 // This class can display time strings and integers in range -999 to 9999.
 
+#pragma once
+
+#include <Arduino.h>
+
 #define TM1637_MAXDIGITS 6
 #define TM1637_DELAY 20
 
@@ -173,4 +177,3 @@ private:
   } // sendByte
 };
 
-const int TM1637::numSegments[10] = {0x3f, 0x06, 0x5B, 0x4F, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};

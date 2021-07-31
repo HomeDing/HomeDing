@@ -76,6 +76,7 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
 #define HOMEDING_INCLUDE_Map
+#define HOMEDING_INCLUDE_RTCSTATE
 
 #define HOMEDING_INCLUDE_LOG
 
@@ -131,6 +132,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_Map
 #include <MapElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_RTCSTATE
+#include <RTCStateElement.h>
 #endif
 
 // ===== Time related Elements =====

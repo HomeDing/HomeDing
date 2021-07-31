@@ -85,4 +85,10 @@ private:
   String _stateList;
 };
 
+#ifdef HOMEDING_REGISTER
+// Register the RTCStateElement onto the ElementRegistry.
+bool RTCStateElement::registered =
+    ElementRegistry::registerElement("rtcstate", RTCStateElement::create);
+#endif
+
 #endif

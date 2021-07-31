@@ -40,11 +40,8 @@ extern "C" {
 
 // #define ETAG_SUPPORT
 
-// use JSONTRACE for tracing parsing the configuration files.
-#define JSONTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
-
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -141,19 +138,19 @@ void Board::_checkNetState() {
  * @brief Add and config the Elements defined in the config files.
  */
 void Board::_addAllElements() {
-  // JSONTRACE("addElements()");
+  // TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
 
   MicroJson *mj =  new MicroJson(
       [this, &_lastElem](int level, char *path, char *value) {
-        // JSONTRACE("callback %d %s =%s", level, path, value ? value : "-");
+        // TRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
 
         if (level == 1) {
 
         } else if (level == 2) {
           // create new element
-          JSONTRACE("new %s", path);
+          TRACE("new %s", path);
           // extract type name
           char typeName[32];
 
@@ -182,7 +179,7 @@ void Board::_addAllElements() {
           // Search 2. slash as starting point for name to include 3. level
           char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
           name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
-          JSONTRACE(" (%s) %s=%s", path, name, value ? value : "-");
+          TRACE(" (%s) %s=%s", path, name, value ? value : "-");
           // add a parameter to the last Element
           _lastElem->set(name, value);
         } // if

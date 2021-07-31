@@ -35,6 +35,7 @@ void Element::init(Board *board)
  */
 bool Element::set(const char *name, const char *value)
 {
+  // TRACE("set %s=%s", name, value);
   bool ret = true;
 
   if (_stricmp(name, "start") == 0) {
@@ -342,7 +343,6 @@ void Element::_strlower(char *str)
 } // _strlower
 
 
-// https://stackoverflow.com/questions/9072320/split-string-into-string-array
 /** Get item[index] from string */
 String Element::getItemValue(String data, int index)
 {

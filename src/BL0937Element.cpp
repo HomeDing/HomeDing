@@ -236,8 +236,6 @@ void BL0937Element::loop()
 void BL0937Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  char buf[38];
-
   Element::pushState(callback);
 
   // report actual cycletime and mode
@@ -258,22 +256,6 @@ void BL0937Element::pushState(
     callback("current", _printInteger(_currentValue));
     callback("currentfactor", String(_currentFactor).c_str());
   }
-
-  // debug only
-  // callback("cnt1", String(cf1SigCnt).c_str());
-  // callback("cnt2", String(powSigCnt).c_str());
-
-  // callback("pc", String(_powerCount).c_str());
-  // callback("pd", String(_powerDuration).c_str());
-
 } // pushState()
-
-
-void BL0937Element::term()
-{
-  TRACE("term()");
-  active = false;
-} // term()
-
 
 // End

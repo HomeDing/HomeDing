@@ -68,8 +68,6 @@
 
 #define HOMEDING_INCLUDE_WEATHERFEED
 
-// ===== Start Arduino Sketch
-
 #include <Arduino.h>
 #include <HomeDing.h>
 
@@ -123,7 +121,7 @@ void setup(void) {
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-  LOGGER_INFO("Device starting...");
+  LOGGER_INFO("Device (" __FILE__ ") starting...");
 
   // ----- setup the platform with webserver and file system -----
   filesys = &SPIFFS;

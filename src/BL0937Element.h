@@ -64,11 +64,6 @@ public:
   virtual void loop() override;
 
   /**
-   * @brief stop all activities and go inactive.
-   */
-  virtual void term() override;
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */

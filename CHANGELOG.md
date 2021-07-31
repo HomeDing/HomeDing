@@ -7,6 +7,19 @@ All notable changes to this project will be documented in this file.
 *   saving state of elements to survive a boot / but no power down.
 *   arduino-lint github action
 
+### Changes / Enhancements
+
+* The redirection handler is moved into board server.
+
+* /$update.htm now served with version parameter based on flash disk size.
+
+* **[TM1637 Element](https://homeding.github.io/#page=/elements/tm1637.md)** -
+    new element supporting 4-digit time displays with the tm1637 chip.
+
+* **[State Element](https://homeding.github.io/#page=/elements/state.md)** -
+
+* **[RTCState Element](https://homeding.github.io/#page=/elements/rtcstate.md)** -
+
 
 ## [0.7.0] - 2021-06-15
 

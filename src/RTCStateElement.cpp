@@ -43,6 +43,7 @@ void RTCStateElement::init(Board *board) {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool RTCStateElement::set(const char *name, const char *value) {
+  TRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (_stricmp(name, "anyconfigProp") == 0) {
@@ -62,7 +63,7 @@ bool RTCStateElement::set(const char *name, const char *value) {
  * @brief The save function allows saving state information specific for an Element.
  */
 void RTCStateElement::save(Element *e, char const *key, char const *value) {
-  TRACE("save(%s=%s)", key, value);
+  TRACE("save(%s, %s)", key, value);
 
   String entry = String(e->id) + "?" + key + "=";
 
@@ -119,21 +120,5 @@ void RTCStateElement::loop() {
     _hasChanged = false;
   }
 } // loop()
-
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to RTCStateElement.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the RTCStateElement onto the ElementRegistry.
-bool RTCStateElement::registered =
-    ElementRegistry::registerElement("rtcstate", RTCStateElement::create);
-// #endif
 
 // End

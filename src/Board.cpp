@@ -38,7 +38,7 @@ extern "C" {
 
 #include <DNSServer.h>
 
-// #define ETAG_SUPPORT
+#define ETAG_SUPPORT
 
 // use JSONTRACE for tracing parsing the configuration files.
 #define JSONTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
@@ -66,18 +66,17 @@ extern const char *passPhrase;
  * @brief Initialize a blank board.
  */
 void Board::init(WebServer *serv, FS *fs) {
-  server = serv;
   // TRACE("Board Init");
-
+  server = serv;
   fileSystem = fs;
-  // fs->begin();
-  bool mounted = SPIFFS.begin();
+
+  bool mounted = fileSystem->begin();
   if (!mounted) {
     LOGGER_INFO("formatting...");
-    SPIFFS.format();
+    fileSystem->format();
   }
 
-  Logger::init(fs);
+  Logger::init(fileSystem);
 
   // board parameters configured / overwritten by device element
   sysLED = -1;
@@ -377,8 +376,7 @@ void Board::loop() {
 
 
   } else if (boardState == BOARDSTATE::CONNECT) {
-    bool autoCon = WiFi.getAutoConnect();
-    // TRACE("autoconnect=%d", autoCon);
+    // TRACE("autoconnect=%d", WiFi.getAutoConnect());
 
     _newState(BOARDSTATE::WAITNET);
 
@@ -514,7 +512,7 @@ void Board::loop() {
       // enable eTags in results for static files
 
       // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
-      server->enableETag(true, [this](FS &fs, const String &path) -> String {
+      server->enableETag(true, [this](FS &, const String &path) -> String {
         String eTag;
         if (!path.endsWith(".txt")) {
           // eTag = esp8266webserver::calcETag(fs, path);

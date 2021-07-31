@@ -39,21 +39,11 @@
 #include <FS.h> // File System for Web Server Files
 
 #include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h> // Web Server Middleware for UI 
+#include <FileServer.h> // Web Server Middleware for UI
 
-// ===== define full functional Web UI with 4MByte Flash devices
-
-#define SETUP_URL "/$setup#v03"
-
-
-// ===== forward declarations
-
-void handleRedirect();
-void setup(void);
-void loop(void);
 
 static const char respond404[] PROGMEM =
-  "<html><head><title>File not found</title></head><body>File not found</body></html>";
+    "<html><head><title>File not found</title></head><body>File not found</body></html>";
 
 // ===== WLAN credentials =====
 
@@ -62,35 +52,19 @@ static const char respond404[] PROGMEM =
 // need a WebServer
 WebServer server(80);
 
-// ===== application state variables =====
-
+// HomeDing core functionality
 Board mainBoard;
 
+// Filesystem to be used.
+FS *filesys;
+
+
 // ===== implement =====
-
-void handleRedirect()
-{
-  LOGGER_RAW("Redirect...");
-
-  String url;
-  if (!mainBoard.isCaptiveMode()) {
-    url = mainBoard.homepage;
-  } else {
-    url = "http://";
-    url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
-    url.concat(SETUP_URL);
-  }
-  server.sendHeader("Location", url, true);
-  server.send(302);
-  server.client().stop();
-} // handleRedirect()
-
 
 /**
  * Setup all components and Serial debugging helpers
  */
-void setup(void)
-{
+void setup(void) {
   Serial.begin(115200);
 
 #ifdef NET_DEBUG
@@ -101,13 +75,12 @@ void setup(void)
 
   LOGGER_INFO("Device starting...");
 
-  // ----- setup the file system and load configuration -----
-  mainBoard.init(&server, &SPIFFS);
-  yield();
+  // ----- setup the platform with webserver and file system -----
+  filesys = &SPIFFS;
+  mainBoard.init(&server, filesys);
+  hd_yield();
 
   // ----- adding web server handlers -----
-  // redirect to index.htm when only domain name is given.
-  server.on("/", HTTP_GET, handleRedirect);
 
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));
@@ -118,14 +91,13 @@ void setup(void)
 
   server.onNotFound([]() {
     const char *uri = server.uri().c_str();
-    LOGGER_RAW("notFound: %s", uri);
+    LOGGER_JUSTINFO("notFound: %s", uri);
 
-    if (mainBoard.isCaptiveMode() &&
-        ((strcmp(uri, "/connecttest.txt") == 0) ||
-         (strcmp(uri, "/redirect") == 0) ||
-         (strcmp(uri, "/generate_204") == 0) ||
-         (strcmp(uri, "/more.txt") == 0))) {
-      handleRedirect();
+    if (mainBoard.isCaptiveMode() && (!filesys->exists(uri))) {
+      String url = "http://192.168.4.1/$setup.htm";
+      server.sendHeader("Location", url, true);
+      server.send(302);
+
     } else {
       // standard not found in browser.
       server.send(404, TEXT_HTML, FPSTR(respond404));
@@ -137,8 +109,7 @@ void setup(void)
 
 
 // handle all give time to all Elements and active components.
-void loop(void)
-{
+void loop(void) {
   server.handleClient();
   mainBoard.loop();
 } // loop()

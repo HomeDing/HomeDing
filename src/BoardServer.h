@@ -16,6 +16,7 @@
  * Changelog:
  * * 30.05.2018 created by Matthias Hertel
  * * 21.12.2018 refactoring.
+ * * 31.07.2021 include handling redirect on "/" request.
  *
  * @details
 @verbatim

@@ -35,8 +35,10 @@
 
 // integrated htm files
 #define PAGE_SETUP "/$setup"
+#define PAGE_UPLOAD "/$upload"
+
 #define PAGE_UPDATE "/$update"
-#define SVC_UPLOAD "/$upload"
+#define PAGE_UPDATE_VERS "/$update.htm#v03"
 
 // services
 #define SVC_REBOOT "/$reboot"
@@ -50,15 +52,14 @@
 #define SVC_BOARD "/$board"
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Construct a new State Handler object
  * @param path The root path of the state ressources.
  * @param board reference to the board.
  */
-BoardHandler::BoardHandler(Board *board)
-{
+BoardHandler::BoardHandler(Board *board) {
   // TRACE("BoardHandler:init: %s", path);
   _board = board;
 }
@@ -68,8 +69,7 @@ BoardHandler::BoardHandler(Board *board)
 // void handleStatus() {}
 
 /** Use url parameters to establish / verify a WiFi connection. */
-void BoardHandler::handleConnect(WebServer &server)
-{
+void BoardHandler::handleConnect(WebServer &server) {
   unsigned long connectTimeout =
       millis() + (60 * 1000); // TODO: make configurable
   server.send(200);
@@ -109,8 +109,7 @@ void BoardHandler::handleConnect(WebServer &server)
 
 
 // Return list of local networks.
-void BoardHandler::handleScan(WebServer &server)
-{
+void BoardHandler::handleScan(WebServer &server) {
   int8_t scanState = WiFi.scanComplete();
   if (scanState == WIFI_SCAN_FAILED) {
     // restart an async network scan
@@ -140,9 +139,9 @@ void BoardHandler::handleScan(WebServer &server)
   }
 } // handleScan()
 
+
 // reset or reboot the device
-void BoardHandler::handleReboot(WebServer &server, bool wipe)
-{
+void BoardHandler::handleReboot(WebServer &server, bool wipe) {
   server.send(200);
   server.client().stop();
   _board->reboot(wipe);
@@ -161,8 +160,9 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 #endif
 {
-  TRACE("Board:can(%s)", requestUri.c_str());
-  return (requestUri.startsWith(SVC_ANY));
+  bool can = (requestMethod == HTTP_GET) && ((requestUri.startsWith("/$")) || (requestUri == "/"));
+  // TRACE("Board:can %d (%s)=%d", requestMethod, requestUri.c_str(), can);
+  return (can);
 } // canHandle
 
 
@@ -183,6 +183,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   TRACE("handle(%s)", requestUri2.c_str());
   String output;
   const char *output_type = nullptr; // when output_type is set then send output as response.
+  FS *fs = _board->fileSystem;
 
   bool ret = true;
   bool unSafeMode = !_board->isSafeMode;
@@ -225,7 +226,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
 #if defined(ESP8266)
     FSInfo fs_info;
-    _board->fileSystem->info(fs_info);
+    fs->info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
 #elif defined(ESP32)
@@ -246,7 +247,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   } else if (unSafeMode && (uri.startsWith(SVC_RESETALL))) {
     // Reset file system, network parameters and reboot
 #if defined(ESP8266)
-    _board->fileSystem->format();
+    fs->format();
 #elif defined(ESP32)
     SPIFFS.format();
 #endif
@@ -266,7 +267,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     output = FPSTR(updateContent);
     output_type = TEXT_HTML;
 
-  } else if (unSafeMode && (uri.startsWith(SVC_UPLOAD))) {
+  } else if (unSafeMode && (uri.startsWith(PAGE_UPLOAD))) {
     // Bulk File Upload UI.
     output = FPSTR(uploadContent);
     output_type = TEXT_HTML;
@@ -275,7 +276,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     // List files in filesystem
     MicroJsonComposer jc;
 #if defined(ESP8266)
-    Dir dir = _board->fileSystem->openDir("/");
+    Dir dir = fs->openDir("/");
 
     jc.openArray();
     while (dir.next()) {
@@ -287,7 +288,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     } // while
 #elif defined(ESP32)
     // TODO:ESP32 ???
-    File root = _board->fileSystem->open("/");
+    File root = fs->open("/");
 
     jc.openArray();
 
@@ -319,13 +320,12 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   } else if (unSafeMode && (uri.startsWith("/$cleanweb"))) {
     // remove files but configuration
-    FS *fs = _board->fileSystem;
     Dir dir = fs->openDir("/");
 
     while (dir.next()) {
       String fn = dir.fileName();
       fn.toLowerCase();
-      if (! fn.endsWith(".json"))
+      if (!fn.endsWith(".json"))
         fs->remove(dir.fileName());
     } // while
 
@@ -334,7 +334,33 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     ElementRegistry::list(output);
     output_type = TEXT_JSON;
 
+  } else if (uri == "/") {
+    // handle a redirect to the defined homepage or system system / update
+    TRACE("Redirect...");
+    String url;
+
+    if (_board->isCaptiveMode()) {
+      url = "http://";
+      url.concat(WiFi.softAPIP().toString()); // _board->deviceName
+      url.concat(PAGE_SETUP);
+
+    } else {
+      url = _board->homepage;
+      if (!fs->exists(url)) {
+        url = PAGE_UPDATE_VERS;
+        FSInfo fsi;
+        fs->info(fsi);
+        if (fsi.totalBytes < 500000) {
+          // small file system
+          url.concat('m');
+        }
+      }
+    } // if
+    server.sendHeader("Location", url, true);
+    server.send(302);
+
   } else {
+    TRACE("uri:%s", uri.c_str());
     ret = false;
   }
 

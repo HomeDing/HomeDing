@@ -276,16 +276,13 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     // List files in filesystem
     MicroJsonComposer jc;
 #if defined(ESP8266)
-    Dir dir = fs->openDir("/");
+    String path = "/";
+    Dir dir = fs->openDir(path);
 
     jc.openArray();
-    while (dir.next()) {
-      jc.openObject();
-      jc.addProperty("type", "file");
-      jc.addProperty("name", dir.fileName());
-      jc.addProperty("size", dir.fileSize());
-      jc.closeObject();
-    } // while
+    listDirectory(jc, "/", dir);
+
+
 #elif defined(ESP32)
     // TODO:ESP32 ???
     File root = fs->open("/");
@@ -372,5 +369,26 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   return (ret);
 } // handle()
+
+
+// list files in filesystem recursively.
+void BoardHandler::listDirectory(MicroJsonComposer &jc, String path, Dir dir) {
+  while (dir.next()) {
+    String name = dir.fileName();
+
+    if (dir.isDirectory()) {
+      Dir subDir = _board->fileSystem->openDir(path + name);
+      listDirectory(jc, path + name + "/", subDir);
+    } else {
+      jc.openObject();
+      jc.addProperty("type", "file");
+      String longName = path + name;
+      longName.replace("//", "/");
+      jc.addProperty("name", longName);
+      jc.addProperty("size", dir.fileSize());
+      jc.closeObject();
+    } // if
+  } // while
+}
 
 // End.

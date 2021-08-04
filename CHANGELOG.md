@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## Breaking Changes
+
+* **LittleFS** -
+  LitteFS is now the default filesystem. 
+  
+  As the SPIFFS filesystem is deprecated the LittleFS filesystem is supported from now on.
+
+  When updating the configuration files and any changed files in the filesystem
+  should be downloaded because they will be deleted by the new firmware like on a fresh restart.
+  The WiFi configuration is persisted outside the filesystem.
+
+  This version still supports both implementations, see filesystem initializing in main sketch.
+
+
 ## [Unreleased]
 
 *   saving state of elements to survive a boot / but no power down.

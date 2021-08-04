@@ -37,10 +37,12 @@ To send an action to a element a parameter can be added like:
 #ifndef BOARDSERVER_H
 #define BOARDSERVER_H
 
+#include <MicroJsonComposer.h>
+
 // Content types for http results
 
 #define TEXT_JSON "text/javascript; charset=utf-8" // Content type for JSON.
-#define TEXT_HTML "text/html"                      // Content type for HTML.
+#define TEXT_HTML "text/html" // Content type for HTML.
 
 /**
  * @brief The BoardHandler is a local class of the main sketch that implements a
@@ -54,8 +56,7 @@ To send an action to a element a parameter can be added like:
  * @sample /$board
  * @sample /$board/button/f1
  */
-class BoardHandler : public RequestHandler
-{
+class BoardHandler : public RequestHandler {
 public:
   /**
    * @brief Construct a new BoardHandler object
@@ -70,9 +71,9 @@ public:
    * @param requestUri current url of the request.
    * @return true When the method and requestUri match a state request.
    */
-#if defined (ESP8266)
+#if defined(ESP8266)
   bool canHandle(HTTPMethod requestMethod, const String &requestUri) override;
-#elif defined (ESP32)
+#elif defined(ESP32)
   bool canHandle(HTTPMethod requestMethod, String requestUri) override;
 #endif
 
@@ -84,9 +85,9 @@ public:
    * @return true When the state could be retrieved.
    * @return false
    */
-#if defined (ESP8266)
+#if defined(ESP8266)
   bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override;
-#elif defined (ESP32)
+#elif defined(ESP32)
   bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override;
 #endif
 
@@ -114,6 +115,10 @@ protected:
    * @param server The Web Server on the access point.
    */
   void handleConnect(WebServer &server);
+
+private:
+  // list files in filesystem recursively.
+  void listDirectory(MicroJsonComposer &jc, String path, Dir dir);
 };
 
 #endif

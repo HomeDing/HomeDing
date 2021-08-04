@@ -124,7 +124,7 @@ void Board::_checkNetState() {
   hd_yield();
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
-    LOGGER_RAW("new netstate: %d", newState);
+    TRACE("new netstate: %d", newState);
     _wifi_status = newState;
   }
 }
@@ -317,6 +317,7 @@ void Board::loop() {
   } else if (boardState == BOARDSTATE::LOAD) {
     // load all config files and create+start elements
     _addAllElements();
+    // Logger::logger_level = LOGGER_LEVEL_TRACE;
     if (state) {
       state->load();
     }
@@ -476,13 +477,13 @@ void Board::loop() {
     const char *name = WiFi.getHostname();
 
     displayInfo(name, WiFi.localIP().toString().c_str());
-    LOGGER_INFO(
-        "%s (%s) connected to %s (%s mode)",
-        name,
-        WiFi.localIP().toString().c_str(),
-        WiFi.SSID().c_str(),
-        (isSafeMode ? "safe" : "unsafe"));
-    if (WiFi.getMode() == WIFI_AP) {
+    LOGGER_JUSTINFO("connected to %s (%s mode)",
+                    WiFi.SSID().c_str(),
+                    (isSafeMode ? "safe" : "unsafe"));
+
+    LOGGER_JUSTINFO("start http://%s/", name);
+
+    if (WiFi.getMode() == WIFI_AP_STA) {
       WiFi.mode(WIFI_STA); // after config mode, the AP needs to be closed down and Station Mode can start.
     }
 
@@ -895,7 +896,7 @@ void Board::reboot(bool wipe) {
 
 
 void Board::displayInfo(const char *text1, const char *text2) {
-  LOGGER_JUSTINFO("%s %s", text1, text2 ? text2 : "");
+  LOGGER_RAW("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

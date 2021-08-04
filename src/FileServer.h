@@ -23,6 +23,8 @@
 
 #include <HomeDing.h>
 
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+
 /**
  * @brief Request Handler implementation for static files in file system.
  * Implements delivering static files and uploading files.
@@ -36,8 +38,8 @@ public:
    * Serving static data down and upload.
    * @param cache_header Cache Header to be used in replies.
    */
-  FileServerHandler(FS &fs, const char *cache_header, Board *board)
-      : _fs(fs), _board(board), _cache_header(cache_header) {
+  FileServerHandler(FS &fs, Board *board)
+      : _fs(fs), _board(board) {
   }
 
 
@@ -63,7 +65,7 @@ public:
   bool canUpload(String uri) override
 #endif
   {
-    // only allow upload on root fs level.
+    // only allow upload with POST on root fs level.
     return ((!_board->isSafeMode) && (uri == "/"));
   } // canUpload()
 
@@ -108,14 +110,15 @@ public:
       fName = "/" + fName;
     }
 
-    // LOGGER_TRACE("upload...<%s>", fName.c_str());
+    TRACE("upload...<%s>", fName.c_str());
     if (fName.indexOf('#') > 0) {
-      // LOGGER_TRACE("no #...");
+      TRACE("no #...");
     } else if (fName.indexOf('$') > 0) {
-      // LOGGER_TRACE("no $...");
+      TRACE("no $...");
 
     } else if (upload.status == UPLOAD_FILE_START) {
       if (_fs.exists(fName)) {
+        TRACE("  ...remove");
         _fs.remove(fName);
       } // if
 
@@ -135,12 +138,11 @@ public:
     } // if
   } // upload()
 
+
 protected:
   FS _fs;
   File _fsUploadFile;
   Board *_board;
-
-  String _cache_header;
 };
 
 #endif

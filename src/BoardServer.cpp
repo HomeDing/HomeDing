@@ -342,11 +342,12 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
       url.concat(PAGE_SETUP);
 
     } else {
+      FSInfo fsi;
+      fs->info(fsi);
       url = _board->homepage;
-      if (!fs->exists(url)) {
+      if (fsi.usedBytes < 9000) {
+        // assuming UI files not installed // fs->exists(url)
         url = PAGE_UPDATE_VERS;
-        FSInfo fsi;
-        fs->info(fsi);
         if (fsi.totalBytes < 500000) {
           // small file system
           url.concat('m');

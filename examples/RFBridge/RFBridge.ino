@@ -73,10 +73,13 @@ void setup(void) {
   Serial.setDebugOutput(false);
 #endif
 
-  LOGGER_INFO("Device starting...");
+  LOGGER_INFO("Device (" __FILE__ ") starting...");
 
   // ----- setup the platform with webserver and file system -----
-  filesys = &SPIFFS;
+
+  // filesys = &LittleFS; // now LittleFS is the default filesystem
+  filesys = &SPIFFS; // use this line when compiling for SPIFFS 
+
   mainBoard.init(&server, filesys);
   hd_yield();
 
@@ -86,7 +89,7 @@ void setup(void) {
   server.addHandler(new BoardHandler(&mainBoard));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, "no-cache", &mainBoard));
+  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
   // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {

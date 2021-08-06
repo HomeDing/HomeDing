@@ -60,7 +60,7 @@ jobs:
             - name: ESP8266 and ESP32 OLED driver for SSD1306 displays
             - name: Adafruit NeoPixel
             - name: RotaryEncoder
-            - name: DHT sensor library for ESPx
+            - name: DHTNEW
             - name: my92xx
             - name: INA219_WE
             - name: Radio

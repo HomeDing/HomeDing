@@ -24,7 +24,7 @@
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
-#include <DHTesp.h>
+#include <dhtnew.h>
 
 /**
  * @brief The DHTElement is an special Element that creates actions based on a
@@ -78,7 +78,7 @@ protected:
   virtual void sendData(String &values);
 
 private:
-  DHTesp::DHT_MODEL_t _type = DHTesp::AUTO_DETECT;
+  uint8_t _type = 0;
 
   /**
    * @brief GPIO pin to be used for data transfer to sensor.
@@ -107,7 +107,7 @@ private:
    */
   String _humAction;
 
-  DHTesp _dht;
+  DHTNEW *_dht;
 }; // class DHTElement
 
 

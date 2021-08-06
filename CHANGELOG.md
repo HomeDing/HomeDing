@@ -21,6 +21,11 @@ All notable changes to this project will be documented in this file.
 *   saving state of elements to survive a boot / but no power down.
 *   arduino-lint github action
 
+*   startup without files in filesystem will cause ota to be started to enable update over the wire.
+
+*   dhtElement supporting DHT11, DHT22 switched to another library.
+
+
 ### Changes / Enhancements
 
 * The redirection handler is moved into board server.

@@ -345,7 +345,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
       FSInfo fsi;
       fs->info(fsi);
       url = _board->homepage;
-      if (fsi.usedBytes < 9000) {
+      if (fsi.usedBytes < 18000) {
         // assuming UI files not installed // fs->exists(url)
         url = PAGE_UPDATE_VERS;
         if (fsi.totalBytes < 500000) {

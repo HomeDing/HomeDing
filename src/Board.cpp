@@ -141,7 +141,7 @@ void Board::_addAllElements() {
   // TRACE("addElements()");
   Element *_lastElem = NULL; // last created Element
 
-  MicroJson *mj =  new MicroJson(
+  MicroJson *mj = new MicroJson(
       [this, &_lastElem](int level, char *path, char *value) {
         // TRACE("callback %d %s =%s", level, path, value ? value : "-");
         _checkNetState();
@@ -193,11 +193,6 @@ void Board::_addAllElements() {
     // config the Elements of the device
     mj->parseFile(fileSystem, CONF_FILENAME);
     _checkNetState();
-
-    if (!_elementList) {
-      // no element defined, so allow configuration in any case.
-      isSafeMode = false;
-    }
   } // if
 
   delete mj;
@@ -317,7 +312,15 @@ void Board::loop() {
   } else if (boardState == BOARDSTATE::LOAD) {
     // load all config files and create+start elements
     _addAllElements();
-    // Logger::logger_level = LOGGER_LEVEL_TRACE;
+    if (!_elementList) {
+      Logger::logger_level = LOGGER_LEVEL_TRACE;
+      // no element defined, so allow configuration in any case.
+      isSafeMode = false;
+      // start up ota
+      Element *e = ElementRegistry::createElement("ota");
+      _addElement("ota/0", e);
+    }
+
     if (state) {
       state->load();
     }

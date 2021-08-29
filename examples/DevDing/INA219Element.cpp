@@ -32,8 +32,7 @@
  * @brief static factory function to create a new INA219Element
  * @return INA219Element* created element
  */
-Element *INA219Element::create()
-{
+Element *INA219Element::create() {
   return (new INA219Element());
 } // create()
 
@@ -45,13 +44,11 @@ INA219Element::INA219Element()
       _gain(INA219_PGAIN::PG_320),
       _mode(INA219_MEASURE_MODE::CONTINUOUS),
       _range(INA219_BUS_RANGE::BRNG_32),
-      _samples(INA219_ADC_MODE::BIT_MODE_12)
-{
+      _samples(INA219_ADC_MODE::BIT_MODE_12) {
 }
 
 
-void INA219Element::init(Board *board)
-{
+void INA219Element::init(Board *board) {
   TRACE("init()");
   SensorElement::init(board);
 } // init()
@@ -60,8 +57,7 @@ void INA219Element::init(Board *board)
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool INA219Element::set(const char *name, const char *value)
-{
+bool INA219Element::set(const char *name, const char *value) {
   bool ret = SensorElement::set(name, value);
 
   if (!ret) {
@@ -76,6 +72,12 @@ bool INA219Element::set(const char *name, const char *value)
     } else if (_stricmp(name, "onPower") == 0) {
       _powerAction = value;
 
+    } else if (_stricmp(name, "mode") == 0) {
+      if (_stricmp(value, "once") == 0)
+        _mode = INA219_MEASURE_MODE::TRIGGERED;
+      else if (_stricmp(value, "continuous") == 0)
+        _mode = INA219_MEASURE_MODE::CONTINUOUS;
+
     } else if (_stricmp(name, "gain") == 0) {
       if (_stricmp(value, "40") == 0)
         _gain = INA219_PGAIN::PG_40;
@@ -86,11 +88,11 @@ bool INA219Element::set(const char *name, const char *value)
       else if (_stricmp(value, "320") == 0)
         _gain = INA219_PGAIN::PG_320;
 
-    } else if (_stricmp(name, "mode") == 0) {
-      if (_stricmp(value, "once") == 0)
-        _mode = INA219_MEASURE_MODE::TRIGGERED;
-      else if (_stricmp(value, "continuous") == 0)
-        _mode = INA219_MEASURE_MODE::CONTINUOUS;
+    } else if (_stricmp(name, "range") == 0) {
+      if (_stricmp(value, "16") == 0)
+        _range = INA219_BUS_RANGE::BRNG_16;
+      else if (_stricmp(value, "32") == 0)
+        _range = INA219_BUS_RANGE::BRNG_32;
 
     } else if (_stricmp(name, "samples") == 0) {
       if (_stricmp(value, "9bit") == 0)
@@ -117,12 +119,6 @@ bool INA219Element::set(const char *name, const char *value)
       else if (_stricmp(value, "128") == 0)
         _samples = INA219_ADC_MODE::SAMPLE_MODE_128;
 
-    } else if (_stricmp(name, "range") == 0) {
-      if (_stricmp(value, "16") == 0)
-        _range = INA219_BUS_RANGE::BRNG_16;
-      else if (_stricmp(value, "32") == 0)
-        _range = INA219_BUS_RANGE::BRNG_32;
-
     } else {
       ret = false;
     } // if
@@ -136,8 +132,7 @@ bool INA219Element::set(const char *name, const char *value)
 /**
  * @brief Activate the INA219Element.
  */
-void INA219Element::start()
-{
+void INA219Element::start() {
   TRACE("start()");
 
   _sensor = new (std::nothrow) INA219_WE(0x40);
@@ -165,8 +160,7 @@ void INA219Element::start()
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-bool INA219Element::getProbe(String &values)
-{
+bool INA219Element::getProbe(String &values) {
   bool newData = false;
   if (_sensor) {
     char buffer[12 * 3];
@@ -193,13 +187,12 @@ bool INA219Element::getProbe(String &values)
       values = buffer;
       newData = true;
     } // if
-  }   // if (_sensor)
+  } // if (_sensor)
   return (newData);
 } // getProbe()
 
 
-void INA219Element::sendData(String &values)
-{
+void INA219Element::sendData(String &values) {
   TRACE("data:%s", values.c_str());
   // dispatch values.
   _board->dispatchItem(_voltageAction, values, 0);
@@ -212,15 +205,15 @@ void INA219Element::sendData(String &values)
  * @brief push the current value of all properties to the callback.
  */
 void INA219Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+    std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _printInteger(_value));
+  callback("voltage", Element::getItemValue(_lastValues, 0).c_str());
+  callback("current", Element::getItemValue(_lastValues, 1).c_str());
+  callback("power", Element::getItemValue(_lastValues, 2).c_str());
 } // pushState()
 
 
-void INA219Element::term()
-{
+void INA219Element::term() {
   TRACE("term()");
   SensorElement::term();
 

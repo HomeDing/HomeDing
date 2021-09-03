@@ -170,7 +170,7 @@ void DiagElement::start()
       } else if (adr == 0x3C) {
         TRACE(" 0x03C (SH1106, SSD1306, SSD1309)");
       } else if (adr == 0x40) {
-        TRACE(" 0x27 (INA219) found.");
+        TRACE(" 0x27 (INA219, INA226) found.");
       } else if (adr == (0x51)) {
         TRACE(" 0x51 (RTC, PCF8563)");
       } else if (adr == 0x63) {

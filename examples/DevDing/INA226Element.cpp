@@ -20,7 +20,7 @@
 #include "INA226Element.h"
 
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -172,7 +172,7 @@ void INA226Element::start() {
  * @brief Give some processing time to the Element to check for next actions.
  */
 bool INA226Element::getProbe(String &values) {
-  bool newData = false;
+  bool done = false;
   if (_sensor) {
     char buffer[12 * 3];
 
@@ -186,7 +186,10 @@ bool INA226Element::getProbe(String &values) {
 
     } else if (_sensor->overflow) {
       TRACE("overflow");
-      // term();
+      done = true;
+      values = ""; // no values 
+      term();
+      start();
 
     } else {
       // read and debug output
@@ -200,10 +203,10 @@ bool INA226Element::getProbe(String &values) {
 
       snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
       values = buffer;
-      newData = true;
+      done = true;
     } // if
   } // if (_sensor)
-  return (newData);
+  return (done);
 } // getProbe()
 
 

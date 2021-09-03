@@ -126,7 +126,7 @@ bool DiagElement::set(const char *name, const char *value)
 
 
 /**
- * @brief Activate the DelementiagElement.
+ * @brief Activate the DiagElement.
  */
 void DiagElement::start()
 {

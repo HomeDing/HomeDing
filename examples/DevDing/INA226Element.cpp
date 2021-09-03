@@ -20,7 +20,7 @@
 #include "INA226Element.h"
 
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -99,17 +99,36 @@ bool INA226Element::set(const char *name, const char *value) {
       else if (_stricmp(value, "8244") == 0)
         _convTime = INA226_CONV_TIME::CONV_TIME_8244;
 
-    } else if (_stricmp(name, "averages") == 0) {
-      // typedef enum INA226_AVERAGES{
-      //     AVERAGE_1       = 0x0000,
-      //     AVERAGE_4       = 0x0200,
-      //     AVERAGE_16      = 0x0400,
-      //     AVERAGE_64      = 0x0600,
-      //     AVERAGE_128     = 0x0800,
-      //     AVERAGE_256     = 0x0A00,
-      //     AVERAGE_512     = 0x0C00,
-      //     AVERAGE_1024    = 0x0E00
-      // } averageMode;
+    } else if (_stricmp(name, "average") == 0) {
+      int avg = _atoi(value);
+      switch (avg) {
+      case 1:
+        _averageMode = INA226_AVERAGES::AVERAGE_1;
+        break;
+      case 4:
+        _averageMode = INA226_AVERAGES::AVERAGE_4;
+        break;
+      case 16:
+        _averageMode = INA226_AVERAGES::AVERAGE_16;
+        break;
+      case 64:
+        _averageMode = INA226_AVERAGES::AVERAGE_64;
+        break;
+      case 128:
+        _averageMode = INA226_AVERAGES::AVERAGE_128;
+        break;
+      case 256:
+        _averageMode = INA226_AVERAGES::AVERAGE_256;
+        break;
+      case 512:
+        _averageMode = INA226_AVERAGES::AVERAGE_512;
+        break;
+      case 1024:
+        _averageMode = INA226_AVERAGES::AVERAGE_1024;
+        break;
+      default:
+        LOGGER_EINFO("Average %d unsupported.", avg);
+      }
 
     } else {
       ret = false;
@@ -131,21 +150,21 @@ void INA226Element::start() {
   if (_sensor) {
     _sensor->init();
 
-    LOGGER_EINFO(" mode 0x%04x", _mode);
+    TRACE(" mode 0x%04x", _mode);
     _sensor->setMeasureMode(_mode);
 
-    LOGGER_EINFO(" current Range 0x%04x", _cRange);
+    TRACE(" shunt %5.2f", _shunt);
+    TRACE(" current Range %5.2f", _cRange);
     _sensor->setResistorRange(_shunt, _cRange);
 
-    LOGGER_EINFO(" convTime 0x%04x", _convTime);
+    TRACE(" convTime 0x%04x", _convTime);
     _sensor->setConversionTime(_convTime);
 
-    LOGGER_EINFO(" averageMode 0x%04x", _averageMode);
+    TRACE(" averageMode 0x%04x", _averageMode);
     _sensor->setAverage(_averageMode);
 
     SensorElement::start();
   } // if
-
 } // start()
 
 
@@ -158,16 +177,15 @@ bool INA226Element::getProbe(String &values) {
     char buffer[12 * 3];
 
     if (_mode == INA226_MEASURE_MODE::TRIGGERED) {
-      LOGGER_EINFO("startMeasurement");
+      TRACE("startMeasurement");
       _sensor->startSingleMeasurementNoWait();
     }
 
-    if (_sensor->isBusy()) {  
-      LOGGER_EINFO("busy");
+    if (_sensor->isBusy()) {
       // wait
 
     } else if (_sensor->overflow) {
-      LOGGER_EERR("overflow");
+      TRACE("overflow");
       // term();
 
     } else {
@@ -176,9 +194,9 @@ bool INA226Element::getProbe(String &values) {
       float current_mA = _sensor->getCurrent_mA();
       float power_mW = _sensor->getBusPower();
 
-      LOGGER_EINFO("Voltage %5.2f V", busVoltage_V);
-      LOGGER_EINFO("Current %5.2f mA", current_mA);
-      LOGGER_EINFO("Power   %f mW", power_mW);
+      TRACE("Voltage %5.2f V", busVoltage_V);
+      TRACE("Current %5.2f mA", current_mA);
+      TRACE("Power   %f mW", power_mW);
 
       snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
       values = buffer;

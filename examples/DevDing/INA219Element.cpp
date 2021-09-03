@@ -14,10 +14,6 @@
  * Changelog:see INA219Element.h
  */
 
-// https://arduino-projekte.webnode.at/meine-libraries/stromsensor-ina219/
-// https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout?view=all
-
-
 #include <Arduino.h>
 #include <HomeDing.h>
 
@@ -139,21 +135,20 @@ void INA219Element::start() {
   if (_sensor) {
     _sensor->init();
 
-    LOGGER_EINFO(" mode 0x%04x", _mode);
+    TRACE(" mode 0x%04x", _mode);
     _sensor->setMeasureMode(_mode);
 
-    LOGGER_EINFO(" gain 0x%04x", _gain);
+    TRACE(" gain 0x%04x", _gain);
     _sensor->setPGain(_gain);
 
-    LOGGER_EINFO(" range 0x%04x", _range);
+    TRACE(" range 0x%04x", _range);
     _sensor->setBusRange(_range);
 
-    LOGGER_EINFO(" samples 0x%04x", _samples);
+    TRACE(" samples 0x%04x", _samples);
     _sensor->setADCMode(_samples);
 
     SensorElement::start();
   } // if
-
 } // start()
 
 
@@ -173,15 +168,14 @@ bool INA219Element::getProbe(String &values) {
       LOGGER_EERR("overflow");
       term();
     } else {
-
       // read and debug output
       float busVoltage_V = _sensor->getBusVoltage_V();
       float current_mA = _sensor->getCurrent_mA();
       float power_mW = _sensor->getBusPower();
 
-      // LOGGER_EINFO("Voltage %5.2f V", busVoltage_V);
-      // LOGGER_EINFO("Current %5.2f mA", current_mA);
-      // LOGGER_EINFO("Power   %5.2f mW", power_mW);
+      // TRACE("Voltage %5.2f V", busVoltage_V);
+      // TRACE("Current %5.2f mA", current_mA);
+      // TRACE("Power   %5.2f mW", power_mW);
 
       snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
       values = buffer;

@@ -13,6 +13,7 @@
  * 
  * Changelog:
  * * 12.08.2020 created by Matthias Hertel
+ * * 31.08.2021 finalized for power sensor example
  */
 
 #ifndef INA226ELEMENT_H
@@ -23,8 +24,7 @@
 #include "INA226_WE.h"
 
 /**
- * @brief INA226Element implements...
- * @details
+ * @brief INA226Element implements reading data from an INA266 sensor.
  */
 
 class INA226Element : public SensorElement {
@@ -80,7 +80,12 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
+  // SensorElement functions
+
+  // try to get the next probe
   virtual bool getProbe(String &values);
+
+  // emit actions using latest data
   virtual void sendData(String &values);
 
 private:
@@ -96,12 +101,6 @@ private:
   float _cRange;
   INA226_CONV_TIME _convTime;
   INA226_AVERAGES _averageMode;
-
-  /**
-   * @brief The actual value.
-   */
-  int _value;
-
 
   /**
    * @brief The _xAction holds the actions that is submitted when ...

@@ -13,6 +13,7 @@
  * 
  * Changelog:
  * * 12.08.2020 created by Matthias Hertel
+ * * 31.08.2021 finalized for power sensor example
  */
 
 #ifndef INA219ELEMENT_H
@@ -23,13 +24,7 @@
 #include "INA219_WE.h"
 
 /**
- * @brief INA219Element implements...
- * @details
-@verbatim
-
-The INA219Element can ...
-
-@endverbatim
+ * @brief INA219Element implements reading data from an INA219 sensor.
  */
 
 class INA219Element : public SensorElement
@@ -86,7 +81,12 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
+  // SensorElement functions
+
+  // try to get the next probe
   virtual bool getProbe(String &values);
+
+  // emit actions using latest data
   virtual void sendData(String &values);
 
 private:
@@ -98,12 +98,6 @@ private:
   INA219_MEASURE_MODE _mode;
   INA219_BUS_RANGE _range;
   INA219_ADC_MODE _samples;
-
-  /**
-   * @brief The actual value.
-   */
-  int _value;
-
 
   /**
    * @brief The _xAction holds the actions that is submitted when ...

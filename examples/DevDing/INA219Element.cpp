@@ -156,33 +156,38 @@ void INA219Element::start() {
  * @brief Give some processing time to the Element to check for next actions.
  */
 bool INA219Element::getProbe(String &values) {
-  bool newData = false;
+  bool done = false;
   if (_sensor) {
     char buffer[12 * 3];
 
     if (_mode == INA219_MEASURE_MODE::TRIGGERED) {
+      TRACE("startMeasurement");
       _sensor->startSingleMeasurement();
     }
 
     if (_sensor->getOverflow()) {
       LOGGER_EERR("overflow");
+      done = true;
+      values = ""; // no values
       term();
+      start();
+
     } else {
       // read and debug output
       float busVoltage_V = _sensor->getBusVoltage_V();
       float current_mA = _sensor->getCurrent_mA();
       float power_mW = _sensor->getBusPower();
 
-      // TRACE("Voltage %5.2f V", busVoltage_V);
-      // TRACE("Current %5.2f mA", current_mA);
-      // TRACE("Power   %5.2f mW", power_mW);
+      TRACE("Voltage %5.2f V", busVoltage_V);
+      TRACE("Current %5.2f mA", current_mA);
+      TRACE("Power   %f mW", power_mW);
 
       snprintf(buffer, sizeof(buffer), "%.2f,%.2f,%.2f", busVoltage_V, current_mA, power_mW);
       values = buffer;
-      newData = true;
+      done = true;
     } // if
   } // if (_sensor)
-  return (newData);
+  return (done);
 } // getProbe()
 
 

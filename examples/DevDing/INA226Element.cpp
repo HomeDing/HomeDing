@@ -185,9 +185,9 @@ bool INA226Element::getProbe(String &values) {
       // wait
 
     } else if (_sensor->overflow) {
-      TRACE("overflow");
+      LOGGER_EERR("overflow");
       done = true;
-      values = ""; // no values 
+      values = ""; // no values
       term();
       start();
 

@@ -38,7 +38,8 @@ All notable changes to this project will be documented in this file.
 * **[State Element](https://homeding.github.io/#page=/elements/state.md)** -
 
 * **[RTCState Element](https://homeding.github.io/#page=/elements/rtcstate.md)** -
-
+* **[Probe Example](https://homeding.github.io/#page=/examples/probe.md)** -
+    a new example providing a sketch and extra Elements to build a power consumption monitoring device using INA219 and ina226 chips.
 
 ## [0.7.0] - 2021-06-15
 

@@ -3,7 +3,6 @@
 This folder contains a implementations of a sketch and extra Elements to build a power consumption monitoring device
 using the HomeDing library.
 
-
 ## Components and Wiring
 
 To build the example you need a ESP8266 with 4MByte Flash Memory, an OLED display and a current sensot of type INA266 or INA 219.

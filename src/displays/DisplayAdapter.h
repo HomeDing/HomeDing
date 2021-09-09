@@ -24,6 +24,8 @@
 
 #include <Board.h>
 
+#define MAX_DISPLAY_STRING_LEN 80
+
 class DisplayAdapter
 {
 public:
@@ -96,7 +98,7 @@ public:
 
   virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text)
   {
-    return (_charWidth * strlen(text));
+    return (_charWidth * strnlen(text, MAX_DISPLAY_STRING_LEN));
   };
 
   virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1){};

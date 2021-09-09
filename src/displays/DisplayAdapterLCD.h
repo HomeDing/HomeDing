@@ -126,12 +126,12 @@ public:
    */
   int drawText(int16_t x, int16_t y, UNUSED int16_t h, const char *text)
   {
-    int w = strlen(text);
-    char buffer[80+4]; // 8 chars character buffer max.
+    int w = strnlen(text, MAX_DISPLAY_STRING_LEN);
+    char buffer[MAX_DISPLAY_STRING_LEN+4]; // 8 chars character buffer max.
     if ((x > 20) || (y > 4)) {
       Serial.printf("outside\n");
     } else {
-      strlcpy(buffer, text, 80);
+      strlcpy(buffer, text, MAX_DISPLAY_STRING_LEN);
       buffer[_cols-x] = '\0';
       display->setCursor(x, y);
       display->print(buffer);
@@ -153,7 +153,7 @@ private:
   LiquidCrystal_PCF8574 *display = NULL;
 
   /**
-   * @brief I2C Deisplay device address.
+   * @brief I2C Display device address.
    */
   int _address;
 

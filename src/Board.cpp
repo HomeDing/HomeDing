@@ -544,10 +544,16 @@ void Board::loop() {
 
 #if defined(ESP8266)
       // include the data required for the portal implementation: Overview of existing devices
-      MDNSResponder::hMDNSService serv = MDNS.addService(0, "homeding", "tcp", 80);
+      MDNSResponder::hMDNSService serv;
+
+      serv = MDNS.addService(0, "homeding", "tcp", 80);
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
       MDNS.addServiceTxt(serv, "title", title.c_str());
       MDNS.addServiceTxt(serv, "room", room.c_str());
+
+      serv = MDNS.addService(0, "http", "tcp", 80);
+      MDNS.addServiceTxt(serv, "path", homepage.c_str());
+
 #elif defined(ESP32)
       MDNS.addService("homeding", "tcp", 80);
       // TODO: incomplete ! ???

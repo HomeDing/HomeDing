@@ -26,6 +26,7 @@
  * * 31.08.2020 enable TRACE ouput using Macros to reduce production code size.
  * * 03.09.2020 forEach iterator over all elements added.
  * * 09.03.2021 less sharing class members in favor to methods.
+ * * 02.09.2021 advertise web server in mDNS.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -313,7 +314,7 @@ public:
 
 #if defined(ESP32)
   /**
-   * next freee ledc channel to be used on ESP32
+   * next free led channel to be used on ESP32
    */
   int nextLedChannel = 0;
 #endif

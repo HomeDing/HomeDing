@@ -79,7 +79,7 @@ const char *APpass = "wifibutton";
 
 void setup()
 {
-  //start serial monitor, SPIFFS and Config. Pin
+  //start serial monitor, FS and Config. Pin
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   delay(3000); // wait for

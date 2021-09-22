@@ -107,10 +107,10 @@ bool DeviceElement::set(const char *name, const char *value)
       LOGGER_EERR("use safemode parameter");
       _board->isSafeMode = _atob(value);
 
-    } else if (_stricmp(name, "onsysstart") == 0) {
+    } else if (_stricmp(name, "onSysStart") == 0) {
       _board->sysStartAction = value;
 
-    } else if (_stricmp(name, "onstart") == 0) {
+    } else if (_stricmp(name, "onStart") == 0) {
       _board->startAction = value;
 
     } else if (_stricmp(name, "cache") == 0) {

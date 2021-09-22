@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 
 *   dhtElement supporting DHT11, DHT22 switched to another library.
 
+*   The mDNS Protocol is now also used to publish the embedded web server.
 
 ### Changes / Enhancements
 

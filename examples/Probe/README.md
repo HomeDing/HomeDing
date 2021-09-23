@@ -23,6 +23,7 @@ A more detailed description can be found in the HomeDing documentation:
 -   **INA226Element.cpp** - Element interface for INA226 sensors
 -   **INA226Element.h** - Element implementation for INA226 sensors
 
+
 ### Directories
 
 -   **data** - example configurations (need to be renamed)

@@ -127,7 +127,7 @@ void setup(void) {
   // ----- setup the platform with webserver and file system -----
 
   filesys = &LittleFS; // now LittleFS is the default filesystem
-  // filesys = &SPIFFS; // use this line when compiling for SPIFFS 
+  // filesys = &SPIFFS; // use this line when compiling for SPIFFS
 
   mainBoard.init(&server, filesys);
   hd_yield();

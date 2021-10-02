@@ -1,1 +1,278 @@
-{"device":{"sys":"true","properties":["room","name","led","button","i2c-sda","i2c-scl","savemode","sd","reboottime","logfile","onstart","onsysstart","cache"],"events":["log"]},"element":{"properties":["loglevel","title","description"],"events":["start","stop"]},"analog":{"properties":["readtimems","hysteresis","pin","reference","mapinmin","mapinmax","mapoutmin","mapoutmax"],"actions":["onvalue","onreference","onhigh","onlow"]},"reference":{"properties":["reference","inverse"],"events":["value"],"actions":["onreference","onhigh","onlow"]},"and":{"sys":"false","properties":["invert"],"events":["value01","value02"],"actions":["onvalue"]},"button":{"properties":[],"events":["value"],"actions":["onclick","ondoubleclick","onpress"]},"digitalin":{"properties":["pin","inverse","pullup"],"actions":["onvalue","onhigh","onlow"]},"digitalsignal":{"properties":["pin","pullup"],"actions":["onvalue","onhigh","onlow","duration"]},"digitalout":{"properties":["pin","inverse"],"events":["on","off","value"]},"displaydot":{"sys":"false","properties":["page","x","y"],"events":["value","clear","redraw"]},"displaytext":{"sys":"false","properties":["page","x","y","fontsize","prefix","postfix"],"events":["value","clear","redraw"]},"displayline":{"sys":"false","properties":["page","x0","y0","x1","y1"],"events":["redraw"]},"pwmout":{"properties":["range","pin","inverse"],"events":["on","off","value"]},"remote":{"sys":"true","properties":["host","remoteid"],"events":["..."]},"rfcodes":{"properties":["pinrx","pintx","received"],"events":["value"],"actions":["onvalue"]},"rotary":{"properties":["pin1","pin2","step","value"],"actions":["onvalue"]},"switch":{"properties":[],"events":["value","toggle"],"actions":["onvalue","onhigh","onlow"]},"value":{"properties":["min","max"],"events":["value","up","down"],"actions":["onvalue"]},"map":{"properties":["type","rules/min","rules/max","rules/value","rules/onvalue"],"events":["value"],"actions":["onvalue"]},"scene":{"properties":[],"events":["value"],"actions":["onvalue/*"]},"ota":{"sys":"true","properties":["port","passwd"]},"ssdp":{"sys":"true","properties":["manufacturer","manufacturerurl","modelurl","modelnumber"]},"rtcstate":{"sys":"true"},"displaylcd":{"properties":["address","height"],"actions":["onpage"]},"displaysh1106":{"properties":["address","readtime","resetpin","height"],"actions":["onpage"]},"max7219":{"properties":["cspin","value","clear","brightness","mode"]},"bl0937":{"properties":["address","selpin","cfpin","cf1pin","cycletime","mode","powerfactor","poweradjust","currentfactor","currentadjust","voltagefactor","voltageadjust"],"actions":["onvoltage","oncurrent","onpower"]},"ina219":{"properties":["address","readtime","warmuptime","resendtime","restart","gain","mode","samples","range"],"actions":["onvoltage","oncurrent","onpower"]},"dht":{"properties":["type","pin","readtime","warmuptime","resendtime","restart"],"actions":["ontemperature","onhumidity"]},"sht20":{"icon":"dht","properties":["type","address","readtime","warmuptime","resendtime","restart"],"actions":["ontemperature","onhumidity"]},"ds18b20":{"properties":["pin","readtime","warmuptime","resendtime","restart"],"actions":["ontemperature"]},"bme680":{"properties":["address","readtime","warmuptime","resendtime","restart"],"actions":["ontemperature","onhumidity","onpressure","ongas"]},"bmp280":{"properties":["address","readtime","warmuptime","resendtime","restart"],"actions":["ontemperature","onpressure"]},"pms":{"properties":["pinrx","pintx","readtime","warmuptime","resendtime","restart"],"actions":["onvalue"]},"log":{"properties":["filesize","filename"],"events":["value"]},"color":{"properties":["loglevel","title","description"],"events":["value","mode","duration","saturation","lightness"],"actions":["onvalue"]},"light":{"properties":["pin","duration"],"events":["value","enable","brightness"]},"my9291":{"properties":["datapin","clockpin"],"events":["value","enable","brightness"]},"p9813":{"properties":["datapin","clockpin"],"events":["value","enable","brightness"]},"neo":{"properties":["pin","duration","count"],"events":["value","enable","mode","brightness"]},"alarm":{"icon":"default","properties":["time"],"actions":["ontime"]},"diag":{"sys":"true"},"dstime":{"sys":"true","properties":["address","time","readtime"]},"ntptime":{"sys":"true","properties":["ntpserver","zone","readtime"]},"schedule":{"properties":["ontime","offtime"],"actions":["onon","onoff","onvalue"]},"time":{"sys":"true","properties":["loglevel","title","description"],"actions":["onminute","ontimestamp","ontime","ondate"]},"timer":{"properties":["type","waittime","pulsetime","cycletime"],"events":["start","stop","next"],"actions":["onon","onoff","onvalue"]},"serialcmd":{"properties":["description"],"actions":["preset0","preset1","preset2","preset3"]},"weatherfeed":{"properties":["get","key","loc","readtime","path","actions/path"],"events":[],"actions":["actions/onvalue"]},"webproxy":{"sys":"true","properties":["url"]}}
+{
+  "device": {
+    "sys": "true",
+    "properties": ["room", "name", "led", "button", "i2c-sda", "i2c-scl", "safemode", "sd", "reboottime", "logfile", "onstart", "onsysstart", "cache"],
+    "events": ["log"],
+    "actions": ["onSysStart", "onStart"]
+  },
+
+  "element": {
+    "properties": ["loglevel", "title", "description"],
+    "events": ["start", "stop"]
+  },
+
+  "analog": {
+    "properties": ["readtimems", "hysteresis", "pin", "reference", "mapinmin", "mapinmax", "mapoutmin", "mapoutmax"],
+    "actions": ["onvalue", "onreference", "onhigh", "onlow"]
+  },
+
+  "reference": {
+    "properties": ["reference", "inverse"],
+    "events": ["value"],
+    "actions": ["onreference", "onhigh", "onlow"]
+  },
+
+  "and": {
+    "sys": "false",
+    "properties": ["invert"],
+    "events": ["value01", "value02"],
+    "actions": ["onvalue"]
+  },
+
+  "button": {
+    "properties": [],
+    "events": ["value"],
+    "actions": ["onclick", "ondoubleclick", "onpress"]
+  },
+
+  "digitalin": {
+    "properties": ["pin", "inverse", "pullup"],
+    "actions": ["onvalue", "onhigh", "onlow"]
+  },
+
+  "digitalsignal": {
+    "properties": ["pin", "pullup"],
+    "actions": ["onvalue", "onhigh", "onlow", "duration"]
+  },
+
+  "digitalout": {
+    "properties": ["pin", "inverse"],
+    "events": ["on", "off", "value"]
+  },
+
+  "displaydot": {
+    "sys": "false",
+    "properties": ["page", "x", "y"],
+    "events": ["value", "clear", "redraw"]
+  },
+
+  "displaytext": {
+    "sys": "false",
+    "properties": ["page", "x", "y", "fontsize", "prefix", "postfix"],
+    "events": ["value", "clear", "redraw"]
+  },
+
+  "displayline": {
+    "sys": "false",
+    "properties": ["page", "x0", "y0", "x1", "y1"],
+    "events": ["redraw"]
+  },
+
+  "pwmout": {
+    "properties": ["range", "pin", "inverse"],
+    "events": ["on", "off", "value"]
+  },
+
+  "remote": {
+    "sys": "true",
+    "properties": ["host", "remoteid"],
+    "events": ["..."]
+  },
+
+  "rfcodes": {
+    "properties": ["pinrx", "pintx", "received"],
+    "events": ["value"],
+    "actions": ["onvalue"]
+  },
+
+  "rotary": {
+    "properties": ["pin1", "pin2", "step", "value"],
+    "actions": ["onvalue"]
+  },
+
+  "switch": {
+    "properties": [],
+    "events": ["value", "toggle"],
+    "actions": ["onvalue", "onhigh", "onlow"]
+  },
+
+  "value": {
+    "properties": ["min", "max"],
+    "events": ["value", "up", "down"],
+    "actions": ["onvalue"]
+  },
+
+  "map": {
+    "properties": ["type", "rules/min", "rules/max", "rules/value", "rules/onvalue"],
+    "events": ["value"],
+    "actions": ["onvalue"]
+  },
+
+  "scene": {
+    "properties": [],
+    "events": ["value"],
+    "actions": ["onvalue/*"]
+  },
+
+  "ota": {
+    "sys": "true",
+    "properties": ["port", "passwd"]
+  },
+
+  "ssdp": {
+    "sys": "true",
+    "properties": ["manufacturer", "manufacturerurl", "modelurl", "modelnumber"]
+  },
+
+  "rtcstate": {
+    "sys": "true"
+  },
+
+  "displaylcd": {
+    "properties": ["address", "height"],
+    "actions": ["onpage"]
+  },
+
+  "displaysh1106": {
+    "properties": ["address", "readtime", "resetpin", "height", "brightness"],
+    "events": ["page", "addpage", "clear"],
+    "actions": ["onpage"]
+  },
+
+  "tm1637": {
+    "properties": ["datapin", "clockpin"],
+    "events": ["value", "enable", "brightness"]
+  },
+
+  "max7219": {
+    "properties": ["cspin", "value", "clear", "brightness", "mode"]
+  },
+
+  "bl0937": {
+    "properties": ["address", "selpin", "cfpin", "cf1pin", "cycletime", 
+       "mode", "powerfactor", "poweradjust", "currentfactor", "currentadjust", "voltagefactor", "voltageadjust"],
+    "actions": ["onvoltage", "oncurrent", "onpower"]
+  },  
+
+  "ina219": {
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart",
+    "gain", "mode", "samples", "range"],
+    "actions": ["onvoltage", "oncurrent", "onpower"]
+  },  
+
+  "dht": {
+    "properties": ["type", "pin", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["ontemperature", "onhumidity"]
+  },
+
+  "sht20": {
+    "icon": "dht",
+    "properties": ["type", "address", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["ontemperature", "onhumidity"]
+  },
+
+  "ds18b20": {
+    "properties": ["pin", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["ontemperature"]
+  },
+
+  "bme680": {
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["ontemperature", "onhumidity", "onpressure", "ongas"]
+  },  
+
+  "bmp280": {
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["ontemperature", "onpressure"]
+  },  
+
+  "pms": {
+    "properties": ["pinrx", "pintx", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["onvalue"]
+  },
+
+  "log": {
+    "properties": ["filesize", "filename"],
+    "events": ["value"]
+  },
+
+  "color": {
+    "properties": ["loglevel", "title", "description"],
+    "events": ["value", "mode", "duration", "saturation", "lightness"],
+    "actions": ["onvalue"]
+  },
+
+  "light": {
+    "properties": ["pin", "duration"],
+    "events": ["value", "enable", "brightness"]
+  },
+
+  "my9291": {
+    "properties": ["datapin", "clockpin"],
+    "events": ["value", "enable", "brightness"]
+  },
+
+  "p9813": {
+    "properties": ["datapin", "clockpin"],
+    "events": ["value", "enable", "brightness"]
+  },
+
+  "neo": {
+    "properties": ["pin", "duration", "count"],
+    "events": ["value", "enable", "mode", "brightness"]
+  },
+
+  "alarm": {
+    "icon": "default",
+    "properties": ["time"],
+    "actions": ["ontime"]
+  },
+
+  "diag": {
+    "sys": "true"
+  },
+
+  "dstime": {
+    "sys": "true",
+    "properties": ["address", "time", "readtime"]
+  },
+
+  "ntptime": {
+    "sys": "true",
+    "properties": ["ntpserver", "zone", "readtime"]
+  },
+
+  "schedule": {
+    "properties": ["ontime", "offtime"],
+    "actions": ["onon", "onoff", "onvalue"]
+  },
+
+  "time": {
+    "sys": "true",
+    "properties": ["loglevel", "title", "description"],
+    "actions": ["onminute", "ontimestamp", "ontime", "ondate"]
+  },
+
+  "timer": {
+    "properties": ["type", "waittime", "pulsetime", "cycletime"],
+    "events": ["start", "stop", "next"],
+    "actions": ["onon", "onoff", "onvalue"]
+  },
+
+  "serialcmd": {
+    "properties": ["description"],
+    "actions": ["preset0", "preset1", "preset2", "preset3"]
+  },
+
+  "weatherfeed": {
+    "properties": ["get", "key", "loc", "readtime", "path", "actions/path"],
+    "events": [],
+    "actions": ["actions/onvalue"]
+  },
+
+  "webproxy": {
+    "sys": "true",
+    "properties": ["url"]
+  }
+
+}

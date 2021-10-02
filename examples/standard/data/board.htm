@@ -1,211 +1,4 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>Board</title>
-
-  <link rel="icon" type="image/png" href="/favicon48.png" sizes="48x48">
-  <meta name="application-name" content="Ding" />
-  <meta name="msapplication-config" content="/browserconfig.xml" />
-  <meta name="msapplication-TileColor" content="#2b5797" />
-  <meta name="msapplication-TileImage" content="/favicon144.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon180.png" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="/site.webmanifest" />
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="icon" type="image/png" href="/favicon48.png" sizes="48x48">
-
-  <link Content-Type="text/css" href="/iotstyle.css" rel="stylesheet" />
-
-  <style>
-    svg.setconfig {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      height: 1.4rem;
-      width: 1.4rem;
-      background-size: 1.4rem;
-    }
-
-    img,
-    #panel {
-      -ms-user-select: none;
-      user-select: none;
-    }
-  </style>
-  <script src="/micro.js"></script>
-</head>
-
-<body>
-  <div class="container-fluid">
-    <div class="row u-header">
-      <a href="/" title="Start-Page"><img class="icon" src="/favicon.svg" /></a>
-      <h1>Board</h1>
-    </div>
-    <div class="row u-navbar">
-      <a class="button" href="/">Home</a>
-      <a class="button" href="/board.htm">Board</a>
-      <a class="button" href="/microide.htm">IDE</a>
-      <a class="button" href="/log.htm">Log</a>
-      <span class="gap"></span>
-      <button id="sysButton">sys</button>
-      <button id="addButton">+</button>
-    </div>
-
-    <div id="panel" class="row wrap"></div>
-
-    <div id="u-templates" style="display:none">
-
-      <div u-control="modal" u-is="modal">
-        <div class="modalBack" u-action="close"></div>
-        <div class="modalFrame" class="modal-object"></div>
-      </div>
-
-      <div class="cardheader block header">
-        <svg class="icon">
-          <use href="./icons.svg#${type}" />
-        </svg>
-        <h3 u-text="title"></h3>
-        <h4 u-text="description"></h4>
-        <svg class="setconfig">
-          <use href="./icons.svg#config" />
-        </svg>
-      </div>
-
-      <div class="col card" u-control="generic" u-is="generic" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block">
-          <div class="form-group"><label>Value:</label><span u-text="value"></span></div>
-        </div>
-      </div>
-
-      <div class="col card" u-control="schedule" id="${id}" u-is="generic" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <span class="u-bool ux-value" u-active="value" style="top:2rem;"></span>
-        <fieldset class="block btn-group">
-          <legend>Mode</legend>
-          <label><input name="mode" u-value="mode" type="radio" value="off">Off</label>
-          <label><input name="mode" u-value="mode" type="radio" value="on">On</label>
-          <label><input name="mode" u-value="mode" type="radio" value="timer">Timer</label>
-        </fieldset>
-        <div class="block">
-          <div class="form-group"><label>Start:</label><span u-text="ontime"></span></div>
-          <div class="form-group"><label>End:</label><span u-text="offtime"></span></div>
-        </div>
-      </div>
-
-      <div class="col card" u-control="dstime" id="${id}" u-is="dstime" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block">
-          <div class="form-group"><label>ReadTime:</label><input u-value="readtime" type="time" step="1" /></div>
-          <div class="form-group"><label>Now:</label><span u-text="now"></span></div>
-          <div class="form-group"><label>set Time:</label><span class="now"></span></div>
-          <button style="float:right">set</button>
-        </div>
-      </div>
-
-      <div class="col card" u-control="switch" id="${id}" u-is="switch" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block">
-          <span class="u-bool ux-value border" u-active="value"></span>
-          <div class="u-slider u-switch" u-active="value">
-            <label value="0">off</label>
-            <div class="box">
-              <div class="handle"></div>
-            </div>
-            <label value="1">on</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="col card" u-control="value" u-is="slider" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block">
-          <div class="form-group"><label>value:</label><span u-text="value"></span></div>
-          <div class="u-slider">
-            <label class="down"><svg class="icon">
-                <use href="./icons.svg#minus" />
-              </svg></label>
-            <div class="box" style="width:240px">
-              <div class="handle"></div>
-            </div>
-            <label class="up"><svg class="icon">
-                <use href="./icons.svg#plus" />
-              </svg></label>
-          </div>
-        </div>
-      </div>
-
-      <div class="col card" u-control="and" id="${id}" u-is="generic" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block">
-          <span class="u-bool ux-value" u-active="value"></span>
-          <div class="form-group"><label>value:</label><span u-text="value"></span></div>
-        </div>
-      </div>
-
-      <div class="col card" u-control="rfcodes" microID="${id}" u-is="generic">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block Element">
-          <div><label>Last Code:</label></div>
-          <pre>[<span u-text="value" style="user-select: text;"></span>]</pre>
-        </div>
-      </div>
-
-      <div class="col card" u-control="color" id="${id}" u-is="color" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block">
-          <div class="form-group"><label>value:</label><span u-text="value"></span><span class="color border"
-              style="width:6rem;"></span></div>
-          <input type="range" max="359" class="band border hue">
-          <input type="range" max="255" class="band border saturation" u-value="saturation">
-          <input type="range" max="255" class="band border lightness" u-value="lightness">
-          <input type="range" max="255" class="band border white">
-        </div>
-        <div class="block footer">
-          <button u-action="mode" value="fade">fade</button><button u-action="mode" value="fix">fix</button><button
-            u-action="mode" value="pulse">pulse</button><button u-action="mode" value="wheel">wheel</button>
-        </div>
-      </div>
-
-      <div class="col card" u-control="light" id="${id}" u-is="generic" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block">
-          <span u-color="value" class="border" style="width:4rem;height:4rem;float:right;border-radius:50%;"></span>
-          <div class="form-group"><label>value:</label><span u-text="value"></span></div>
-          <div class="form-group"><label>brightness:</label><span u-text="brightness"></span></div>
-        </div>
-      </div>
-
-      <div class="col card" u-control="bl0937" id="${id}" u-is="bl0937" microID="${id}">
-        <div u-is="include" ref=".cardheader"></div>
-        <div class="block">
-          <table style="width:100%;font-size:2rem">
-            <tr>
-              <td>
-                <span u-text="power"></span> W
-              </td>
-              <td style="display:none">
-                <span u-text="current"></span> mA
-              </td>
-              <td style="display:none">
-                <span u-text="voltage"></span> V
-              </td>
-            </tr>
-          </table>
-          mode: <button u-action="mode" value="current">current</button>
-          <button u-action="mode" value="voltage">voltage</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    var panelObj = document.getElementById('panel');
+<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport'content='width=device-width,initial-scale=1'><title>Board</title><link rel='icon'type='image/png'href='/favicon48.png'sizes='48x48'><meta name='application-name'content='Ding'><meta name='msapplication-config'content='/browserconfig.xml'><meta name='msapplication-TileColor'content='#2b5797'><meta name='msapplication-TileImage'content='/favicon144.png'><link rel='apple-touch-icon'sizes='180x180'href='/favicon180.png'><meta name='mobile-web-app-capable'content='yes'><link rel='manifest'href='/site.webmanifest'><meta name='theme-color'content='#ffffff'><link rel='icon'type='image/png'href='/favicon48.png'sizes='48x48'><link content-type='text/css'href='/iotstyle.css'rel='stylesheet'><style>svg.setconfig{position:absolute;top:.5rem;right:.5rem;height:1.4rem;width:1.4rem;background-size:1.4rem}#panel,img{-ms-user-select:none;user-select:none}</style><script src='/micro.js'></script></head><body><div class='container-fluid'><div class='row u-header'><a href='/'title='Start-Page'><img class='icon'src='/favicon.svg'></a><h1>Board</h1></div><div class='row u-navbar'><a class='button'href='/'>Home</a> <a class='button'href='/board.htm'>Board</a> <a class='button'href='/microide.htm'>IDE</a> <a class='button'href='/log.htm'>Log</a> <span class='gap'></span> <button id='sysButton'>sys</button> <button id='addButton'>+</button></div><div id='panel'class='row wrap'></div><div id='u-templates'style='display:none'><div u-control='modal'u-is='modal'><div class='modalBack'u-action='close'></div><div class='modalFrame'class='modal-object'></div></div><div class='cardheader block header'><svg class='icon'><use href='./icons.svg#${type}'/></svg><h3 u-text='title'class='setfocus'></h3><h4 u-text='description'></h4><svg class='setconfig'><use href='./icons.svg#config'/></svg></div><div class='col card'u-control='generic'u-is='generic'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><div class='form-group'><label>Value:</label><span u-text='value'></span></div></div></div><div class='col card'u-control='schedule'id='${id}'u-is='generic'microid='${id}'><div u-is='include'ref='.cardheader'></div><span class='u-bool ux-value'u-active='value'style='top:2rem'></span><fieldset class='block btn-group'><legend>Mode</legend><label><input name='mode'u-value='mode'type='radio'value='off'>Off</label> <label><input name='mode'u-value='mode'type='radio'value='on'>On</label> <label><input name='mode'u-value='mode'type='radio'value='timer'>Timer</label></fieldset><div class='block'><div class='form-group'><label>Start:</label><span u-text='ontime'></span></div><div class='form-group'><label>End:</label><span u-text='offtime'></span></div></div></div><div class='col card'u-control='dstime'id='${id}'u-is='dstime'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><div class='form-group'><label>ReadTime:</label><input u-value='readtime'type='time'step='1'></div><div class='form-group'><label>Now:</label><span u-text='now'></span></div><div class='form-group'><label>set Time:</label><span class='now'></span></div><button style='float:right'>set</button></div></div><div class='col card'u-control='switch'id='${id}'u-is='generic'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><span class='u-bool ux-value border'u-active='value'></span><div u-is='input'><label class='down'>off</label> <input class='switch'u-value='value'type='range'> <label class='up'>on</label></div></div></div><div class='col card'u-control='value'id='${id}'u-is='generic'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><div class='form-group'><label>value:</label><span u-text='value'></span></div><div u-is='input'><label class='down'><svg class='icon'><use href='./icons.svg#minus'/></svg></label> <input u-value='value'type='range'> <label class='down'><svg class='icon'><use href='./icons.svg#plus'/></svg></label></div></div></div><div class='col card'u-control='logic'id='${id}'u-is='generic'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><span class='u-bool ux-value'u-active='value'></span><div class='form-group'><label>value:</label><span u-text='value'></span></div></div></div><div class='col card'u-control='rfcodes'microid='${id}'u-is='generic'><div u-is='include'ref='.cardheader'></div><div class='block Element'><div><label>Last Code:</label></div><pre>[<span u-text='value'style='user-select:text'></span>]</pre></div></div><div class='col card'u-control='color'id='${id}'u-is='color'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><div class='form-group'><label>value:</label><span u-text='value'></span><span class='color border'style='width:6rem'></span></div><input type='range'max='359'style='width:100%'class='band hue'> <input type='range'max='100'style='width:100%'class='band saturation'u-value='saturation'> <input type='range'max='100'style='width:100%'class='band lightness'u-value='lightness'> <input type='range'max='255'style='width:100%'class='band white'></div><div class='block footer'><button u-action='mode'value='fade'>fade</button><button u-action='mode'value='fix'>fix</button><button u-action='mode'value='pulse'>pulse</button><button u-action='mode'value='wheel'>wheel</button></div></div><div class='col card'u-control='light'id='${id}'u-is='generic'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><span u-color='value'class='border'style='width:4rem;height:4rem;float:right;border-radius:50%'></span><div class='form-group'><label>value:</label><span u-text='value'></span></div><div class='form-group'><label>brightness:</label><span u-text='brightness'></span></div></div></div><div class='col card'u-control='tm1637'id='${id}'u-is='generic'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><div style='text-align:center'><span u-text='value'style='font-size:4rem;font-style:italic'></span></div><div class='form-group'><label>brightness:</label><span u-text='brightness'></span></div></div></div><div class='col card'u-control='ina2xx'id='${id}'u-is='generic'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><div class='form-group'><label>Voltage:</label><span u-text='voltage'></span></div><div class='form-group'><label>Current:</label><span u-text='current'></span></div><div class='form-group'><label>Power:</label><span u-text='power'></span></div></div></div><div class='col card'u-control='bl0937'id='${id}'u-is='bl0937'microid='${id}'><div u-is='include'ref='.cardheader'></div><div class='block'><table style='width:100%;font-size:2rem'><tr><td><span u-text='power'></span> W</td><td style='display:none'><span u-text='current'></span> mA</td><td style='display:none'><span u-text='voltage'></span> V</td></tr></table>mode: <button u-action='mode'value='current'>current</button> <button u-action='mode'value='voltage'>voltage</button></div></div></div></div><script>var panelObj = document.getElementById('panel');
     var addObj = document.getElementById('addButton');
     var sysObj = document.getElementById('sysButton');
     var refreshState = ''; // nothing in progress
@@ -240,8 +33,9 @@
     var alias = {
       "sht20": "dht",
       "displayssd1306": "displayoled",
-      "displaysh1106": "displayoled"
-      , "neo": "light",
+      "displaysh1106": "displayoled",
+      "neo": "light", "and": "logic", "or": "logic",
+      "ina219": "ina2xx", "ina226": "ina2xx"
       // ,
       // "my9291": "light"
     };
@@ -341,12 +135,14 @@
       var p3 = fetchJSON('/env.json')
         .then(function (json) {
           envData = json;
+          uElements.env = envData;
         });
 
       var configData;
       var p4 = fetchJSON('/config.json')
         .then(function (json) {
           configData = json;
+          uElements.config = configData;
         });
 
       Promise.allSettled([p0, p1, p2, p3, p4]).then(function () {
@@ -373,8 +169,4 @@
       // disable header and navbar in portal mode.
       document.querySelector('.u-header').style.display = 'none';
       document.querySelector('.u-navbar').style.display = 'none';
-    } // if
-  </script>
-</body>
-
-</html>
+    } // if</script></body></html>

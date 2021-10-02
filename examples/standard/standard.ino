@@ -61,12 +61,11 @@
 
 #define HOMEDING_INCLUDE_WEATHERFEED
 
-// ===== Start Arduino Sketch
-
 #include <Arduino.h>
 #include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
+#include <LittleFS.h> // File System for Web Server Files
 #if defined(ESP32)
 #include <SPIFFS.h> // File System for Web Server Files
 #endif
@@ -106,10 +105,10 @@ void setup(void) {
   Serial.setDebugOutput(false);
 #endif
 
-  LOGGER_INFO("Device starting...");
+  LOGGER_INFO("Device (" __FILE__ ") starting...");
 
   // ----- setup the platform with webserver and file system -----
-  filesys = &SPIFFS;
+  filesys = &LittleFS; // now LittleFS is the default filesystem
   mainBoard.init(&server, filesys);
   hd_yield();
 

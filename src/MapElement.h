@@ -89,12 +89,12 @@ private:
   std::vector<String> _mValue;   // new value when rule is choosen
   std::vector<String> _mActions; // actions when rule is choosen
 
-  void _mapValue(const char *value);
-
   /**
    * @brief The _valueAction holds the actions that is submitted when ...
    */
   String _valueAction;
+
+  void _mapValue(const char *value);
 };
 
 /* ===== Register the Element ===== */

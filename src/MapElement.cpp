@@ -28,8 +28,7 @@
  * @brief static factory function to create a new MapElement
  * @return MapElement* created element
  */
-Element *MapElement::create()
-{
+Element *MapElement::create() {
   return (new MapElement());
 } // create()
 
@@ -39,8 +38,7 @@ Element *MapElement::create()
 // MapElement::MapElement() {}
 
 
-void MapElement::init(Board *board)
-{
+void MapElement::init(Board *board) {
   Element::init(board);
 
   // create the map members with a reasonable size.
@@ -51,9 +49,8 @@ void MapElement::init(Board *board)
 } // init()
 
 
-void MapElement::_mapValue(const char *value)
-{
-  // TRACE("map '%s'", value);
+void MapElement::_mapValue(const char *value) {
+  TRACE("map '%s'", value);
   int mapSize = _mMax.size();
   int cFound = -1;
 
@@ -66,7 +63,7 @@ void MapElement::_mapValue(const char *value)
       // value is always inside when no lower boundary is given
     } else if ((_isStringType) && _stricmp(value, _mMin[c].c_str()) < 0) {
       ruleFits = false; // no match, value is too low
-    } else if (_atoi(value) < _mMin[c].toInt()) {
+    } else if ((!_isStringType) && _atoi(value) < _mMin[c].toInt()) {
       ruleFits = false; // no match, value is too low
     }
 
@@ -75,7 +72,7 @@ void MapElement::_mapValue(const char *value)
       // value is always inside when no upper boundary is given
     } else if ((_isStringType) && _stricmp(value, _mMax[c].c_str()) > 0) {
       ruleFits = false;
-    } else if (_atoi(value) > _mMax[c].toInt()) {
+    } else if ((!_isStringType) && _atoi(value) > _mMax[c].toInt()) {
       ruleFits = false;
     }
 
@@ -88,19 +85,16 @@ void MapElement::_mapValue(const char *value)
   // TRACE("rule=%d", cFound);
 
   if (cFound < 0) {
-    LOGGER_EERR("NO RULE FITS: %s", value);
+    LOGGER_EERR("NO RULE FITS: '%s'", value);
   } else if (cFound != _currentMapIndex) {
     if (_mValue[cFound].isEmpty()) {
       _value = value;
     } else {
       _value = _mValue[cFound];
     }
-    // TRACE("new Value=%s", _value.c_str());
+    TRACE("new Value=%s", _value.c_str());
     _currentMapIndex = cFound;
     _needUpdate = true;
-
-    _board->dispatch(_mActions[cFound], _value);
-    _board->dispatch(_valueAction, _value);
   }
 } // _mapValue()
 
@@ -108,8 +102,7 @@ void MapElement::_mapValue(const char *value)
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool MapElement::set(const char *name, const char *value)
-{
+bool MapElement::set(const char *name, const char *value) {
   TRACE("set '%s'='%s'", name, value);
   bool ret = true;
 
@@ -135,7 +128,6 @@ bool MapElement::set(const char *name, const char *value)
       // request space for new index
       _mMin.resize(mapIndex + 2);
       _mMax.resize(mapIndex + 2);
-      TRACE("check1: %d", _mMin[mapIndex].isEmpty());
       _mValue.resize(mapIndex + 2);
       _mActions.resize(mapIndex + 2);
     } // if
@@ -144,6 +136,10 @@ bool MapElement::set(const char *name, const char *value)
       _mMin[mapIndex] = value;
 
     } else if (_stricmp(mapName, "max") == 0) {
+      _mMax[mapIndex] = value;
+
+    } else if (_stricmp(mapName, "equal") == 0) {
+      _mMin[mapIndex] = value;
       _mMax[mapIndex] = value;
 
     } else if (_stricmp(mapName, "value") == 0) {
@@ -164,8 +160,7 @@ bool MapElement::set(const char *name, const char *value)
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void MapElement::loop()
-{
+void MapElement::loop() {
   if (_needUpdate) {
     _board->dispatch(_mActions[_currentMapIndex], _value);
     _board->dispatch(_valueAction, _value);
@@ -178,8 +173,7 @@ void MapElement::loop()
  * @brief push the current value of all properties to the callback.
  */
 void MapElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+    std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback("value", _value.c_str());
 } // pushState()

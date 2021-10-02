@@ -31,18 +31,9 @@
 SignalParser sig;
 SignalCollector col;
 
-int RFCodesElement::_pinTx = NO_PIN;
-int RFCodesElement::_pinRx = NO_PIN;
-String RFCodesElement::_valueAction;
+String RFCodesElement::_receivedCode;
 
 bool RFCodesElement::_initialized = false;
-
-String RFCodesElement::_receivedCode;
-unsigned long RFCodesElement::_receivedMillis = 0; // when code was received
-time_t RFCodesElement::_receivedTime;
-
-String RFCodesElement::_lastCode;
-unsigned long RFCodesElement::_clearTime = 3 * 1000; // 3 seconds
 
 /* ===== Static factory function ===== */
 
@@ -50,14 +41,19 @@ unsigned long RFCodesElement::_clearTime = 3 * 1000; // 3 seconds
  * @brief static factory function to create a new RFCodesElement
  * @return RFCodesElement* created element
  */
-Element *RFCodesElement::create()
-{
+Element *RFCodesElement::create() {
   return (new RFCodesElement());
 } // create()
 
 
-void RFCodesElement::_receive(const char *newCode)
-{
+RFCodesElement::RFCodesElement() {
+  _clearTime = 10 * 1000; // 10 seconds
+  _pinRx = NO_PIN;
+  _pinTx = NO_PIN;
+}
+
+
+void RFCodesElement::_receive(const char *newCode) {
   _receivedCode = newCode;
 }
 
@@ -66,15 +62,11 @@ void RFCodesElement::_receive(const char *newCode)
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool RFCodesElement::set(const char *name, const char *value)
-{
+bool RFCodesElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
-    col.send(value);
-    LOGGER_INFO("sending: %s", value);
-     _lastCode = value;
-     _receivedTime = 0;
+    _sendValue = value; // will be sent in loop()
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
@@ -102,10 +94,7 @@ bool RFCodesElement::set(const char *name, const char *value)
 /**
  * @brief Activate the RFCodesElement.
  */
-void RFCodesElement::start()
-{
-  // TRACE("start()");
-
+void RFCodesElement::start() {
   // initialize the rfcodes library only once.
   if (!_initialized) {
     TRACE("start rx-pin=%d, tx-pin=%d", _pinRx, _pinTx);
@@ -127,24 +116,35 @@ void RFCodesElement::start()
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void RFCodesElement::loop()
-{
+void RFCodesElement::loop() {
+  unsigned long now = millis();
+
   Element::loop();
   col.loop(); // process received bytes
-  
-  if (!_receivedCode.isEmpty()) {
-    unsigned long now = millis();
-    TRACE("receive: [%s]", _receivedCode.c_str());
 
-    if ((_receivedCode != _lastCode) || (now > _receivedMillis + _clearTime)) {
-      // TRACE("process: [%s]", _receivedCode.c_str());
-      _lastCode = _receivedCode;
+  if (!_sendValue.isEmpty()) {
+    const char *v = _sendValue.c_str();
+    TRACE("sending: [%s]", v);
+    col.send(v);
+    _sendValue.clear();
+
+  } else if (!_receivedCode.isEmpty()) {
+    TRACE("received: [%s]", _receivedCode.c_str());
+
+    if (_receivedCode != _lastReceivedCode) {
+      TRACE("process: [%s]", _receivedCode.c_str());
+      _lastReceivedCode = _receivedCode;
       _receivedMillis = now;
       _receivedTime = time(nullptr);
       _board->dispatch(_valueAction, _receivedCode);
     }
     _receivedCode = "";
+
+  } else if ((!_lastReceivedCode.isEmpty()) && (now > _receivedMillis + _clearTime)) {
+    _lastReceivedCode.clear();
+    _receivedTime = 0;
   }
+
 } // loop()
 
 
@@ -152,10 +152,9 @@ void RFCodesElement::loop()
  * @brief push the current value of all properties to the callback.
  */
 void RFCodesElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+    std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _lastCode.c_str());
+  callback("value", _lastReceivedCode.c_str());
   callback("received", String(_receivedTime).c_str());
   // callback("value", _receivedCode.c_str());
 } // pushState()

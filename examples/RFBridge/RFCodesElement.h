@@ -34,8 +34,7 @@ The RFCodesElement can ...
 @endverbatim
  */
 
-class RFCodesElement : public Element
-{
+class RFCodesElement : public Element {
 public:
   /**
    * @brief Factory function to create a RFCodesElement.
@@ -48,17 +47,12 @@ public:
    */
   static bool registered;
 
-  /** 
-   * The GPIO pin used for the transmitter.
-   */
-  static int _pinTx;
-
-  /** 
-   * The GPIO pin used for the receiver.
-   */
-  static int _pinRx;
-
   static void _receive(const char *newCode);
+
+  /**
+   * @brief Construct a new RFCodesElement
+   */
+  RFCodesElement();
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -89,16 +83,31 @@ public:
 private:
   static bool _initialized;
 
-  static String _receivedCode; // code just received
-  
+  static String _receivedCode; // code just received, static to be used by the interrupt code
+
+  /** The GPIO pin used for the transmitter. */
+  int _pinTx;
+
+  /** The GPIO pin used for the receiver. */
+  int _pinRx;
+
+
+  String _lastReceivedCode; // last processed code for detecting multiple times the same code arrives
+  unsigned long _receivedMillis;
+
+  String _sendValue; // code to be sent (inbound value)
+
+
   /// time, when the lastCode was received
-  static unsigned long _receivedMillis;
-  static time_t _receivedTime;
+  time_t _receivedTime;
 
-  static String _lastCode; // last processed code
-  static unsigned long _clearTime; // no process codes in this time
 
- static String _valueAction;
+  /**
+   * @brief The time where the same received code is detected as the same code. After this time the code is re-evaluated.
+   */
+  unsigned long _clearTime; // no process codes in this time
+
+  String _valueAction;
 
   /**
    * @brief The actual value.

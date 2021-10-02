@@ -37,6 +37,10 @@
 #include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
+#include <LittleFS.h> // File System for Web Server Files
+#if defined(ESP32)
+#include <SPIFFS.h> // File System for Web Server Files
+#endif
 
 #include <BoardServer.h> // Web Server Middleware for Elements
 #include <FileServer.h> // Web Server Middleware for UI
@@ -77,8 +81,7 @@ void setup(void) {
 
   // ----- setup the platform with webserver and file system -----
 
-  // filesys = &LittleFS; // now LittleFS is the default filesystem
-  filesys = &SPIFFS; // use this line when compiling for SPIFFS 
+  filesys = &LittleFS; // now LittleFS is the default filesystem
 
   mainBoard.init(&server, filesys);
   hd_yield();

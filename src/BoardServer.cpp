@@ -15,6 +15,28 @@
  * Changelog: see BoardServer.h
  */
 
+// http://nodeding/api/sysinfo
+// http://nodeding/api/elements
+// http://nodeding/api/list
+// http://nodeding/api/state
+// http://nodeding/api/state/device/0
+// http://nodeding/api/state/device/0?title=over
+
+// http://nodeding/api/reboot
+// http://nodeding/api/-reset
+// http://nodeding/api/-resetall
+// http://nodeding/api/-cleanweb
+
+// http://nodeding/api/$setup
+// http://nodeding/api/$update
+// http://nodeding/api/$upload
+
+// http://nodeding/api/scan
+// http://nodeding/api/-connect?n=netname&p=passwd
+
+// http://nodeding/ // redirect to defined start page
+
+
 #include <Arduino.h>
 #include <Board.h>
 #include <Element.h>
@@ -31,25 +53,17 @@
 
 #include <MicroJsonComposer.h>
 
+// used for built-in files
 #define SVC_ANY "/$"
 
-// integrated htm files
-#define PAGE_SETUP "/$setup"
-#define PAGE_UPLOAD "/$upload"
+// used for services
+#define API_ROUTE "/api/"
 
-#define PAGE_UPDATE "/$update"
+// integrated htm files
 #define PAGE_UPDATE_VERS "/$update.htm#v03"
 
-// services
-#define SVC_REBOOT "/$reboot"
-#define SVC_RESET "/$reset"
-#define SVC_RESETALL "/$resetall"
-#define SVC_SYSINFO "/$sysinfo"
-
-#define SVC_ELEMENTS "/$elements"
-#define SVC_LISTFILES "/$list"
-
 #define SVC_BOARD "/$board"
+#define SVC_STATE "/api/state"
 
 // use TRACE for compiling with detailed TRACE output.
 #define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
@@ -148,6 +162,16 @@ void BoardHandler::handleReboot(WebServer &server, bool wipe) {
 } // handleReboot()
 
 
+// return list of all known elements in registry
+void BoardHandler::handleElements(WebServer &server) {
+  String output;
+  ElementRegistry::list(output);
+  server.sendHeader("Cache-Control", "no-cache");
+  server.sendHeader("X-Content-Type-Options", "no-sniff");
+  server.send(200, TEXT_JSON, output);
+} // handleElements()
+
+
 /**
  * @brief Verify if the method and requestUri can be handles by this module.
  * @param requestMethod current http request method.
@@ -160,8 +184,10 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 #endif
 {
-  bool can = (requestMethod == HTTP_GET) && ((requestUri.startsWith("/$")) || (requestUri == "/"));
-  // TRACE("Board:can %d (%s)=%d", requestMethod, requestUri.c_str(), can);
+  bool can = ((requestMethod == HTTP_GET) // only GET requests in the API
+              && (requestUri.startsWith(SVC_ANY) // old api entries
+                  || requestUri.startsWith(API_ROUTE) // new api entries
+                  || (requestUri == "/"))); // handle redirect
   return (can);
 } // canHandle
 
@@ -188,31 +214,43 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   bool ret = true;
   bool unSafeMode = !_board->isSafeMode;
   String uri = requestUri2;
+  String api;
 
   uri.toLowerCase();
   output.reserve(512);
 
-  if (uri.startsWith(SVC_BOARD)) {
-    // most common request
-    // everything behind  "/$board/" is used to address a specific element
-    // TRACE("board/(%s)", uri.c_str());
+  if (uri.startsWith(SVC_ANY)) {
+    api = uri.substring(2);
 
-    String eId(uri.substring(8));
+  } else if (uri.startsWith(API_ROUTE)) {
+    api = uri.substring(5);
+  }
+
+  if ((api == "board") || (api == "state")) {
+    // most common request, return state of all elements
+    _board->getState(output, String());
+    output_type = TEXT_JSON;
+
+  } else if ((api.startsWith("state/")) || (api.startsWith("board/"))) {
+    // everything behind  "/api/state/" is used to address a specific element
+    String id(api.substring(6));
+
+    // TRACE("state/(%s)", uri.c_str());
     int argCount = server.args();
 
     if (argCount == 0) {
       // get status of all or the specified element
-      _board->getState(output, eId);
+      _board->getState(output, id);
 
     } else {
       // send all actions to the specified element per given argument
       for (int a = 0; a < argCount; a++) {
-        _board->queueActionTo(eId, server.argName(a), server.arg(a));
+        _board->queueActionTo(id, server.argName(a), server.arg(a));
       }
     } // if
     output_type = TEXT_JSON;
 
-  } else if (uri.startsWith(SVC_SYSINFO)) {
+  } else if (api == "sysinfo") {
     unsigned long now = millis();
     MicroJsonComposer jc;
 
@@ -243,8 +281,16 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     output = jc.stringify();
     output_type = TEXT_JSON;
 
-    // ===== these actions are only in non-safemode
-  } else if (unSafeMode && (uri.startsWith(SVC_RESETALL))) {
+    // ===== restarting modes
+  } else if (api == "reboot") {
+    // no reset of parameters, just reboot
+    handleReboot(server, true);
+
+  } else if (unSafeMode && (api == "reset")) {
+    // Reset network parameters and reboot
+    handleReboot(server, true);
+
+  } else if (unSafeMode && (api == "resetall")) {
     // Reset file system, network parameters and reboot
 #if defined(ESP8266)
     fs->format();
@@ -253,26 +299,35 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 #endif
     handleReboot(server, true);
 
-  } else if (unSafeMode && (uri.startsWith(SVC_RESET))) {
-    // Reset network parameters and reboot
-    handleReboot(server, true);
+  } else if (unSafeMode && (api == "cleanweb")) {
+    // remove files but configuration
+    Dir dir = fs->openDir("/");
 
-  } else if (unSafeMode && (uri.startsWith(PAGE_SETUP))) {
+    while (dir.next()) {
+      String fn = dir.fileName();
+      fn.toLowerCase();
+      if (!fn.endsWith(".json"))
+        fs->remove(dir.fileName());
+    } // while
+
+
+    // ===== builtin web pages
+  } else if (unSafeMode && (uri.startsWith("/$setup"))) {
     // Network Config Page
+    output_type = TEXT_HTML;
     output = FPSTR(setupContent);
-    output_type = TEXT_HTML;
 
-  } else if (unSafeMode && (uri.startsWith(PAGE_UPDATE) || uri.startsWith("/$boot"))) {
-    // Bootstrap page
+  } else if (unSafeMode && (uri.startsWith("/$update"))) {
+    // Bootstrap Page
+    output_type = TEXT_HTML;
     output = FPSTR(updateContent);
-    output_type = TEXT_HTML;
 
-  } else if (unSafeMode && (uri.startsWith(PAGE_UPLOAD))) {
-    // Bulk File Upload UI.
+  } else if (unSafeMode && (uri.startsWith("/$upload"))) {
+    // Bulk File Upload Page
+    output_type = TEXT_HTML;
     output = FPSTR(uploadContent);
-    output_type = TEXT_HTML;
 
-  } else if (unSafeMode && (uri.startsWith(SVC_LISTFILES))) {
+  } else if (unSafeMode && (api == "list")) {
     // List files in filesystem
     MicroJsonComposer jc;
 #if defined(ESP8266)
@@ -305,31 +360,15 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     output = jc.stringify();
     output_type = TEXT_JSON;
 
-  } else if (unSafeMode && (uri == "/$scan")) {
+    // ===== Connection Manager services
+  } else if (unSafeMode && (api == "scan")) {
     handleScan(server);
 
-  } else if (unSafeMode && (uri == "/$connect")) {
+  } else if (unSafeMode && (api == "connect")) {
     handleConnect(server);
 
-  } else if (uri == SVC_REBOOT) {
-    // Reboot device
-    handleReboot(server);
-
-  } else if (unSafeMode && (uri.startsWith("/$cleanweb"))) {
-    // remove files but configuration
-    Dir dir = fs->openDir("/");
-
-    while (dir.next()) {
-      String fn = dir.fileName();
-      fn.toLowerCase();
-      if (!fn.endsWith(".json"))
-        fs->remove(dir.fileName());
-    } // while
-
-  } else if (unSafeMode && (uri.startsWith(SVC_ELEMENTS))) {
-    // List all registered Elements
-    ElementRegistry::list(output);
-    output_type = TEXT_JSON;
+  } else if (unSafeMode && (api == "elements")) {
+    handleElements(server);
 
   } else if (uri == "/") {
     // handle a redirect to the defined homepage or system system / update
@@ -339,7 +378,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     if (_board->isCaptiveMode()) {
       url = "http://";
       url.concat(WiFi.softAPIP().toString()); // _board->deviceName
-      url.concat(PAGE_SETUP);
+      url.concat("/$setup");
 
     } else {
       FSInfo fsi;

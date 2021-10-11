@@ -38,14 +38,6 @@ Element *P9813Element::create()
 
 /* ===== Element functions ===== */
 
-void P9813Element::init(Board *board)
-{
-  TRACE("init()");
-  LightElement::init(board);
-  // do something here like initialization
-} // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */

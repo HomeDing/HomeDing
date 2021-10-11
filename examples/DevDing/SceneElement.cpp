@@ -46,14 +46,6 @@ SceneElement::SceneElement()
 }
 
 
-void SceneElement::init(Board *board)
-{
-  TRACE("init()");
-  Element::init(board);
-  // do something here like initialization
-} // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */

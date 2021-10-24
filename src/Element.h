@@ -72,9 +72,16 @@ enum Element_StartupMode {
  * @brief This is the base class for all Elements that can be managed by the
  * Board.
  */
-class Element
-{
+class Element {
 public:
+  // Datatype definitions for elements processing different types
+  enum DATATYPE : int {
+    STRING = 0, // unspecified, all data can be presented as strings
+    BOOLEAN, // a boolean (stored as integer 0/1)
+    INTEGER, // a number without any decimals
+    FLOAT // a number with decimals
+  };
+
   /**
    * @brief The id of the Element. Visible to anyone.
    */

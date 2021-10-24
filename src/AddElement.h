@@ -1,6 +1,6 @@
 /**
  * @file AddElement.h
- * @brief Logical Base Element that collects input values and settings.
+ * @brief Element that adds given input values.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -19,11 +19,9 @@
 #define ADDELEMENT_H
 
 #include <HomeDing.h>
+#include <CalcElement.h>
 
-#define MAX_INPUTS 8
-
-class AddElement : public Element
-{
+class AddElement : public CalcElement {
 public:
   /**
    * @brief Factory function to create a AndElement.
@@ -41,45 +39,15 @@ public:
    */
   virtual void start();
 
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
-  virtual bool set(const char *name, const char *value) override;
-
-  /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop() override;
-
-
-  /**
-   * @brief push the current outgoing value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
-  /// number of given input values.
-  int  _inputs = 0;
-
-  /// flag set to true for the need of re-calculation of the output.
-  bool _needRecalc;
-
-  /// current input values.
-  int _inValue[MAX_INPUTS];
-
-  /// current output value.
-  int _value;
-
-  /// The _valueAction holds the actions that is submitted when outvalue has changed.
-  String _valueAction;
+  /**
+   * @brief Do the calculation on all input values.
+   */
+  virtual void _calc() override;
 };
 
+/* ===== Register the Element ===== */
 
 #ifdef HOMEDING_REGISTER
 // Register the AddElement in the ElementRegistry.

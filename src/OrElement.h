@@ -1,6 +1,6 @@
 /**
  * @file OrElement.h
- * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
+ * @brief Element that combines boolean input values using the OR and optional NOT operator and sends actions.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -20,9 +20,9 @@
 
 #include <HomeDing.h>
 
-#include <LogicElement.h>
+#include <CalcElement.h>
 
-class OrElement : public LogicElement {
+class OrElement : public CalcElement {
 public:
   /**
    * @brief Factory function to create a OrElement.
@@ -36,9 +36,16 @@ public:
   static bool registered;
 
   /**
-   * @brief Give some processing time to the timer to check for next action.
+   * @brief Activate the Element.
    */
-  virtual void loop() override;
+  virtual void start();
+
+
+protected:
+  /**
+   * @brief Do the calculation on all input values.
+   */
+  virtual void _calc() override;
 };
 
 /* ===== Register the Element ===== */

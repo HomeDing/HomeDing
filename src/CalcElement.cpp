@@ -1,5 +1,5 @@
 /**
- * @file LogicElement.cpp
+ * @file CalcElement.cpp
  * @brief Logical Base Element that collects input values and settings.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -11,18 +11,18 @@
  *
  * More information on https://www.mathertel.de/Arduino
  *
- * Changelog:see LogicElement.h
+ * Changelog:see CalcElement.h
  */
 
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <LogicElement.h>
+#include <CalcElement.h>
 
 
 /* ===== Element functions ===== */
 
-void LogicElement::start() {
+void CalcElement::start() {
   Element::start();
   _needRecalc = true;
 }
@@ -31,7 +31,7 @@ void LogicElement::start() {
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool LogicElement::set(const char *name, const char *value) {
+bool CalcElement::set(const char *name, const char *value) {
   bool ret = true;
   // LOGGER_EINFO("set %s = %s", name, value);
 
@@ -40,11 +40,12 @@ bool LogicElement::set(const char *name, const char *value) {
 
     if ((indx >= 0) && (indx < MAX_INPUTS)) {
       if (_inputs < indx + 1) _inputs = indx + 1;
-      _value[indx] = _atob(value);
+      _inStringValues[indx] = value;
       _needRecalc = true;
     }
 
   } else if (_stricmp(name, "invert") == 0) {
+    // the invert property is used for AND and OR element.
     _invert = _atob(value);
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
@@ -58,12 +59,37 @@ bool LogicElement::set(const char *name, const char *value) {
 
 
 /**
+ * @brief Give some processing time to the Element to check for next actions.
+ */
+void CalcElement::loop() {
+  if (_needRecalc) {
+    String oldValue = _value;
+
+    _calc();
+    if (_value != oldValue) {
+      _board->dispatch(_valueAction, _value);
+    }
+    _needRecalc = false;
+  } // if
+  Element::loop();
+} // loop()
+
+
+/**
  * @brief push the current value of all properties to the callback.
  */
-void LogicElement::pushState(
+void CalcElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _printBoolean(_outValue));
+  callback(PROP_VALUE, _value.c_str());
 } // pushState()
+
+
+/**
+ * @brief function for calculating from input to output values.
+ */
+void CalcElement::_calc() {
+};
+
 
 // End

@@ -23,7 +23,7 @@ All notable changes to this project will be documented in this file.
 
 *   startup without files in filesystem will cause ota to be started to enable update over the wire.
 
-*   dhtElement supporting DHT11, DHT22 switched to another library.
+*   The **[DHT Element](https://homeding.github.io/#page=/elements/dht.md)** supporting the DHT11, DHT22 temperature and humidity sensor is switched to another library.
 
 *   The mDNS Protocol is now also used to publish the embedded web server.
 
@@ -39,8 +39,23 @@ All notable changes to this project will be documented in this file.
 * **[State Element](https://homeding.github.io/#page=/elements/state.md)** -
 
 * **[RTCState Element](https://homeding.github.io/#page=/elements/rtcstate.md)** -
+
+* **[ADD Element](https://homeding.github.io/#page=/elements/add.md)** -
+    a new element adding multiple input values.
+
+* **[AND Element](https://homeding.github.io/#page=/elements/and.md)** -
+    a new element combining multiple input values using the logical AND function.
+
+* **[OR Element](https://homeding.github.io/#page=/elements/or.md)** -
+    a new element combining multiple input values using the logical OR function.
+
 * **[Probe Example](https://homeding.github.io/#page=/examples/probe.md)** -
     a new example providing a sketch and extra Elements to build a power consumption monitoring device using INA219 and ina226 chips.
+
+* **[Probe Example](https://homeding.github.io/#page=/examples/probe.md)** - A new example to implement current sensor with long time logging using INA219 or INA226 sensor chips.
+
+* The built-in services implemented by the boardserver can now be reached using the `/api/` route without the `$` character. E.g. <http://homeding/api/sysinfo>.
+
 
 ## [0.7.0] - 2021-06-15
 

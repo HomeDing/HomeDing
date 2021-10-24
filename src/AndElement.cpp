@@ -1,6 +1,6 @@
 /**
  * @file AndElement.cpp
- * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
+ * @brief Element that combines boolean input values using the AND and optional NOT operator and sends actions.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -32,29 +32,27 @@ Element *AndElement::create() {
 
 /* ===== Element functions ===== */
 
+void AndElement::start() {
+  CalcElement::start();
+  _type = DATATYPE::BOOLEAN;
+}
+
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void AndElement::loop() {
-  if (_needRecalc) {
-    bool newOut = (_inputs > 0); // out = false when no inbound value is given.
+void AndElement::_calc() {
+  bool newValue = (_inputs > 0); // out = false when no inbound value is given.
 
-    for (int n = 0; n < _inputs; n++) {
-      newOut = (newOut && _value[n]);
-    }
 
-    if (_invert) {
-      newOut = !newOut;
-    }
+  for (int n = 0; n < _inputs; n++) {
+    newValue = (newValue && _atob(_inStringValues[n].c_str()));
+  }
 
-    if (newOut != _outValue) {
-      _board->dispatch(_valueAction, newOut);
-      _outValue = newOut;
-    }
-
-    _needRecalc = false;
-  } // if
-  LogicElement::loop();
+  if (_invert) {
+    newValue = !newValue;
+  }
+  _value = String(newValue);
+  CalcElement::_calc();
 } // loop()
 
 

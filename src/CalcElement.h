@@ -1,5 +1,5 @@
 /**
- * @file LogicElement.h
+ * @file CalcElement.h
  * @brief Logical Base Element that collects input values and settings.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
@@ -12,17 +12,17 @@
  * More information on https://www.mathertel.de/Arduino
  * 
  * Changelog:
- * * 27.07.2021 created by Matthias Hertel
+ * * 10.10.2021 created by Matthias Hertel
  */
 
-#ifndef LOGICELEMENT_H
-#define LOGICELEMENT_H
+#ifndef CALCELEMENT_H
+#define CALCELEMENT_H
 
 #include <HomeDing.h>
 
 #define MAX_INPUTS 8
 
-class LogicElement : public Element
+class CalcElement : public Element
 {
 public:
   /**
@@ -39,6 +39,13 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
+
+  /**
+   * @brief Give some processing time to the element to do something on it's own
+   */
+  virtual void loop();
+
+
   /**
    * @brief push the current outgoing value of all properties to the callback.
    * @param callback callback function that is used for every property.
@@ -50,20 +57,31 @@ protected:
   /// number of given input values.
   int  _inputs = 0;
 
-  /// invert/NOT Option.
+  Element::DATATYPE _type = DATATYPE::STRING;
+
+  /// invert/NOT Option for boolean outputs.
   bool _invert = false;
 
   /// flag set to true for the need of re-calculation of the output.
   bool _needRecalc;
 
-  /// current input values.
-  bool _value[MAX_INPUTS];
+  /// current string based input values.
+  String _inStringValues[MAX_INPUTS];
 
-  /// current output value.
-  bool _outValue;
+  // /// current integer based input values.
+  // int _inIntValues[MAX_INPUTS];
+
+  /// current (formatted) output value.
+  String _value;
 
   /// The _valueAction holds the actions that is submitted when outvalue has changed.
   String _valueAction;
+
+  /**
+   * @brief function for calculating from input to output values.
+   */
+  virtual void _calc();
+
 };
 
 /* ===== This Element will not be registered and configured. Use derived classes. ===== */

@@ -68,6 +68,7 @@
 
 #include <FS.h> // File System for Web Server Files
 
+#include <BuiltinHandler.h> // Serve Built-in files
 #include <BoardServer.h> // Web Server Middleware for Elements
 #include <FileServer.h> // Web Server Middleware for UI
 
@@ -102,7 +103,9 @@ void setup(void) {
 #else
   Serial.setDebugOutput(false);
 #endif
+
 #ifdef DBG_TRACE
+  // wait so the serial monitor can capture all output.
   delay(3000);
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
@@ -112,13 +115,15 @@ void setup(void) {
 
   // ----- setup the platform with webserver and file system -----
 
-  // filesys = &LittleFS; // now LittleFS is the default filesystem
-  filesys = &SPIFFS; // use this line when compiling for SPIFFS 
+  filesys = &SPIFFS; // use SPIFFS when compiling for very small flash sizes <=1MByte 
 
   mainBoard.init(&server, filesys);
   hd_yield();
 
   // ----- adding web server handlers -----
+
+  // Builtin Files
+  server.addHandler(new BuiltinHandler(&mainBoard));
 
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));
@@ -138,7 +143,7 @@ void setup(void) {
 
     } else {
       // standard not found in browser.
-      server.send(404, TEXT_HTML, FPSTR(respond404));
+      server.send(404, "text/html", FPSTR(respond404));
     }
   });
 

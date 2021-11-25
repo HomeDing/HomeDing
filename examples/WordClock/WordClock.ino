@@ -35,16 +35,13 @@
 
 // The WordClock Element in WordClock.cpp is included automatically, because it is in the sketch folder.
 
-// ===== Start Arduino Sketch
-
 #include <Arduino.h>
 #include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
-#if defined(ESP32)
-#include <SPIFFS.h> // File System for Web Server Files
-#endif
+#include <LittleFS.h> // File System for Web Server Files
 
+#include <BuiltinHandler.h> // Serve Built-in files
 #include <BoardServer.h> // Web Server Middleware for Elements
 #include <FileServer.h> // Web Server Middleware for UI
 
@@ -87,20 +84,24 @@ void setup(void) {
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-  LOGGER_INFO("Device starting...");
+  LOGGER_INFO("Device (" __FILE__ ") starting...");
 
   // ----- setup the platform with webserver and file system -----
-  filesys = &SPIFFS;
+  filesys = &LittleFS; // LittleFS is the default filesystem
+
   mainBoard.init(&server, filesys);
   hd_yield();
 
   // ----- adding web server handlers -----
 
+  // Builtin Files
+  server.addHandler(new BuiltinHandler(&mainBoard));
+
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, "no-cache", &mainBoard));
+  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
   // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {
@@ -114,7 +115,7 @@ void setup(void) {
 
     } else {
       // standard not found in browser.
-      server.send(404, TEXT_HTML, FPSTR(respond404));
+      server.send(404, "text/html", FPSTR(respond404));
     }
   });
 

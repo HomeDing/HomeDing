@@ -27,10 +27,6 @@
 // http://nodeding/api/-resetall
 // http://nodeding/api/-cleanweb
 
-// http://nodeding/api/$setup
-// http://nodeding/api/$update
-// http://nodeding/api/$upload
-
 // http://nodeding/api/scan
 // http://nodeding/api/-connect?n=netname&p=passwd
 
@@ -44,7 +40,6 @@
 #include <BoardServer.h>
 #include <ElementRegistry.h>
 
-#include "upload.h"
 #include <FS.h>
 
 #if defined(ESP32)
@@ -65,12 +60,15 @@
 #define SVC_BOARD "/$board"
 #define SVC_STATE "/api/state"
 
+// Content types for http results
+#define TEXT_JSON "text/javascript; charset=utf-8" // Content type for JSON.
+
+
 // use TRACE for compiling with detailed TRACE output.
 #define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Construct a new State Handler object
- * @param path The root path of the state ressources.
  * @param board reference to the board.
  */
 BoardHandler::BoardHandler(Board *board) {
@@ -310,22 +308,6 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
         fs->remove(dir.fileName());
     } // while
 
-
-    // ===== builtin web pages
-  } else if (unSafeMode && (uri.startsWith("/$setup"))) {
-    // Network Config Page
-    output_type = TEXT_HTML;
-    output = FPSTR(setupContent);
-
-  } else if (unSafeMode && (uri.startsWith("/$update"))) {
-    // Bootstrap Page
-    output_type = TEXT_HTML;
-    output = FPSTR(updateContent);
-
-  } else if (unSafeMode && (uri.startsWith("/$upload"))) {
-    // Bulk File Upload Page
-    output_type = TEXT_HTML;
-    output = FPSTR(uploadContent);
 
   } else if (unSafeMode && (api == "list")) {
     // List files in filesystem

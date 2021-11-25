@@ -20,7 +20,7 @@
  *
  * @details
 @verbatim
-This handler registers to all http GET request to the urls startng with `/$`.
+This handler registers to all http GET request to the urls starting with `/$`.
 
 The state of all existing elements can be retrieved by using the base url
 like: <http://devding/$board>.
@@ -39,11 +39,6 @@ To send an action to a element a parameter can be added like:
 
 #include <MicroJsonComposer.h>
 
-// Content types for http results
-
-#define TEXT_JSON "text/javascript; charset=utf-8" // Content type for JSON.
-#define TEXT_HTML "text/html" // Content type for HTML.
-
 /**
  * @brief The BoardHandler is a local class of the main sketch that implements a
  * RequestHandler that is used to respond the state of the Elements on the
@@ -60,7 +55,6 @@ class BoardHandler : public RequestHandler {
 public:
   /**
    * @brief Construct a new BoardHandler object
-   * @param path The root path of the state ressources.
    * @param board reference to the board.
    */
   BoardHandler(Board *board);

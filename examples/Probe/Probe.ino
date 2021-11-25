@@ -39,14 +39,13 @@
 // are addded automatically as they are inside the example folder.
 
 
-// ===== Start Arduino Sketch
-
 #include <Arduino.h>
 #include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
 #include <LittleFS.h> // File System for Web Server Files
 
+#include <BuiltinHandler.h> // Serve Built-in files
 #include <BoardServer.h> // Web Server Middleware for Elements
 #include <FileServer.h> // Web Server Middleware for UI
 
@@ -82,15 +81,18 @@ void setup(void) {
   Serial.setDebugOutput(false);
 #endif
 
-  LOGGER_INFO("Device starting...");
+  LOGGER_INFO("Device (" __FILE__ ") starting...");
 
   // ----- setup the platform with webserver and file system -----
-  filesys = &LittleFS; // now LittleFS is the default filesystem
+  filesys = &LittleFS; // LittleFS is the default filesystem
 
   mainBoard.init(&server, filesys);
   hd_yield();
 
   // ----- adding web server handlers -----
+
+  // Builtin Files
+  server.addHandler(new BuiltinHandler(&mainBoard));
 
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));
@@ -110,7 +112,7 @@ void setup(void) {
 
     } else {
       // standard not found in browser.
-      server.send(404, TEXT_HTML, FPSTR(respond404));
+      server.send(404, "text/html", FPSTR(respond404));
     }
   });
 

@@ -211,7 +211,14 @@ public:
    */
   void setSleepTime(unsigned long secs);
 
+
   // ===== queue / process / dispatch actions =====
+
+  /**
+   * check if the dispatch queue is empty
+   * @return true when no action is in queue.
+   */
+  bool queueIsEmpty();
 
   /**
    * send all the actions to the right elements.
@@ -240,21 +247,16 @@ public:
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(String &action, String &value);
-
-  /**
-   * Send a actions to a give element.
-   * @param typeId type/id of the element.
-   * @param action action or property.
-   * @param value the value
-   */
-  void queueActionTo(const String &typeId, const String &action, const String &value);
+  void dispatch(const String &action, const String &value);
 
   /**
    * @brief Dispatch an action without queueing it. 
    * @param action The action string.
    */
   void dispatchAction(String action);
+
+
+  // ===== low power / sleep mode =====
 
   /**
    * do not start sleep mode because element is active.

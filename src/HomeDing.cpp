@@ -12,8 +12,6 @@ const char *PROP_PIN = "pin";
 const char *PROP_INVERSE = "inverse";
 
 const char *ACTION_ONVALUE = "onValue";
-const char *ACTION_ONHIGH = "onHigh";
-const char *ACTION_ONLOW = "onLow";
 const char *ACTION_ONTEMPERATURE = "onTemperature";
 const char *ACTION_ONHUMIDITY = "onHumidity";
 const char *ACTION_ONPRESSURE = "onPressure";

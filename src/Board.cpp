@@ -41,7 +41,7 @@ extern "C" {
 // #define ETAG_SUPPORT
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...) LOGGER_TRACE(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -64,6 +64,8 @@ extern const char *passPhrase;
  */
 void Board::init(WebServer *serv, FS *fs) {
   // TRACE("Board Init");
+  WiFi.persistent(true);
+
   server = serv;
   fileSystem = fs;
 
@@ -103,7 +105,8 @@ void Board::init(WebServer *serv, FS *fs) {
 
   deviceName = WiFi.getHostname(); // use mac based default device name
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
-      // https://tools.ietf.org/html/rfc1123 952
+  // https://tools.ietf.org/html/rfc1123 952
+  hd_yield();
 } // init()
 
 
@@ -652,6 +655,13 @@ Element *Board::findById(const char *id) {
 } // findById
 
 
+// ===== queue / process / dispatch actions =====
+
+bool Board::queueIsEmpty() {
+  return (_actionList.length() == 0);
+}
+
+
 /** Queue an action for later dispatching. */
 void Board::_queueAction(const String &action, const String &v) {
   String tmp = action;
@@ -711,7 +721,7 @@ void Board::dispatchAction(String action) {
  * @brief Save an action to the _actionList.
  */
 void Board::dispatch(String &action, int value) {
-  if (action.length() > 0)
+  if (!action.isEmpty())
     _queueAction(action, String(value));
 } // dispatch
 
@@ -720,7 +730,7 @@ void Board::dispatch(String &action, int value) {
  * @brief Save an action to the _actionList.
  */
 void Board::dispatch(String &action, const char *value) {
-  if (action.length() > 0)
+  if (!action.isEmpty())
     _queueAction(action, String(value));
 } // dispatch
 
@@ -728,8 +738,8 @@ void Board::dispatch(String &action, const char *value) {
 /**
  * @brief Save an action to the _actionList.
  */
-void Board::dispatch(String &action, String &value) {
-  if (action.length() > 0)
+void Board::dispatch(const String &action, const String &value) {
+  if (!action.isEmpty())
     _queueAction(action, value);
 } // dispatch
 
@@ -745,20 +755,7 @@ void Board::dispatchItem(String &action, String &values, int n) {
 } // dispatchItem
 
 
-/**
-   * Send a actions to a give element.
-   * @param typeId type/id of the element.
-   * @param action action or property.
-   * @param value the value
-   */
-void Board::queueActionTo(const String &typeId, const String &action, const String &value) {
-  String tmp = typeId + "?" + action + "=" + value;
-  // TRACE("queue(%s)", tmp.c_str());
-  if (_actionList.length() > 0)
-    _actionList.concat(ACTION_SEPARATOR);
-  _actionList.concat(tmp);
-} // queueActionTo
-
+// ===== low power / sleep mode =====
 
 /**
  * do not start sleep mode because element is active.

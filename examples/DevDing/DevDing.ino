@@ -86,7 +86,7 @@ static const char respond404[] PROGMEM =
 
 #include "secrets.h"
 
-// need a WebServer
+// WebServer on port 80 to reach Web UI and services
 WebServer server(80);
 
 // HomeDing core functionality
@@ -126,7 +126,6 @@ void setup(void) {
   filesys = &LittleFS; // LittleFS is the default filesystem
 
   mainBoard.init(&server, filesys);
-  hd_yield();
 
   // ----- adding web server handlers -----
 

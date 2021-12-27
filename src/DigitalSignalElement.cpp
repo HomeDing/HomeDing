@@ -44,13 +44,13 @@ bool DigitalSignalElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "pullup") == 0) {
     _pullup = _atob(value);
 
-  } else if (_stricmp(name, ACTION_ONHIGH) == 0) {
+  } else if (_stricmp(name, "onHigh") == 0) {
     _highAction = value;
 
-  } else if (_stricmp(name, ACTION_ONLOW) == 0) {
+  } else if (_stricmp(name, "onLow") == 0) {
     _lowAction = value;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (_stricmp(name, "onValue") == 0) {
     _valueAction = value;
 
   } else if (_stricmp(name, "duration") == 0) {

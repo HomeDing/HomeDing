@@ -243,7 +243,8 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     } else {
       // send all actions to the specified element per given argument
       for (int a = 0; a < argCount; a++) {
-        _board->queueActionTo(id, server.argName(a), server.arg(a));
+        String tmp = id + "?" + server.argName(a) + "=$v";
+        _board->dispatch(tmp, server.arg(a));
       }
     } // if
     output_type = TEXT_JSON;
@@ -282,7 +283,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     // ===== restarting modes
   } else if (api == "reboot") {
     // no reset of parameters, just reboot
-    handleReboot(server, true);
+    handleReboot(server, false);
 
   } else if (unSafeMode && (api == "reset")) {
     // Reset network parameters and reboot

@@ -59,15 +59,20 @@ const byte DNS_PORT = 53;
 extern const char *ssid;
 extern const char *passPhrase;
 
+static const char respond404[] PROGMEM =
+    "<html><head><title>File not found</title></head><body>File not found</body></html>";
+
 /**
  * @brief Initialize a blank board.
  */
-void Board::init(WebServer *serv, FS *fs) {
-  // TRACE("Board Init");
+void Board::init(WebServer *serv, FS *fs, const char *buildName) {
   WiFi.persistent(true);
+
+  LOGGER_INFO("Device %s starting...", buildName);
 
   server = serv;
   fileSystem = fs;
+  build = buildName;
 
   bool mounted = fileSystem->begin();
   if (!mounted) {
@@ -401,12 +406,11 @@ void Board::loop() {
     } else if (netMode == NetMode_PASS) {
       // 3. priority:
       // use fixed network and passPhrase known at compile time.
-      // works only after a successfull network connection in the past.
       TRACE("NetMode_PASS: %s", ssid);
 
       if (!*ssid) {
-        LOGGER_TRACE("SKIP");
-        connectPhaseEnd = now;
+        TRACE("SKIP");
+        connectPhaseEnd = 0;
         return;
       } else {
         WiFi.mode(WIFI_STA);
@@ -421,8 +425,6 @@ void Board::loop() {
 
     // wait some(12) seconds for connecting to the network
     connectPhaseEnd = now + maxNetConnextTime;
-    // LOGGER_TRACE("  set phase: %ld %ld %d", now, connectPhaseEnd, maxNetConnextTime);
-
 
   } else if ((boardState == BOARDSTATE::WAITNET) || (boardState == BOARDSTATE::WAIT)) {
     // make sysLED blink.
@@ -449,7 +451,9 @@ void Board::loop() {
           (_wifi_status == WL_CONNECT_FAILED) ||
           (now > connectPhaseEnd)) {
 
-        if (now > connectPhaseEnd) {
+        if (!connectPhaseEnd) {
+          // no LOGGER_TRACE;
+        } else if (now > connectPhaseEnd) {
           LOGGER_TRACE("timed out.");
         } else {
           LOGGER_TRACE("wifi status=(%d)", _wifi_status);
@@ -460,7 +464,7 @@ void Board::loop() {
         if (netMode) {
           _newState(BOARDSTATE::CONNECT); // try next mode
         } else {
-          LOGGER_INFO("no-net restarting...\n");
+          LOGGER_INFO("no-net");
           _resetCount = RTCVariables::setResetCounter(0);
 
           delay(500);
@@ -519,6 +523,7 @@ void Board::loop() {
       server->enableETag(true, [this](FS &, const String &path) -> String {
         String eTag;
         if (!path.endsWith(".txt")) {
+          // txt files contain logs that must not be cached.
           // eTag = esp8266webserver::calcETag(fs, path);
           // File f = fs.open(path, "r");
           // eTag = f.getLastWrite()
@@ -539,6 +544,12 @@ void Board::loop() {
 
     // start file server for static files in the file system.
     server->serveStatic("/", *fileSystem, "/", cacheHeader.c_str());
+
+    server->onNotFound([this]() {
+      TRACE("notFound: %s", server.uri().c_str());
+      server->send(404, "text/html", FPSTR(respond404));
+    });
+
 
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode

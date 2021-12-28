@@ -1,7 +1,18 @@
-
-// MicroJsonComposer.h
-//
-// ===== JSON Composer =====
+/**
+ * @file MicroJsonComposer.cpp
+ * @brief String based buffer to create JSON objects.
+ * 
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license.
+ * https://www.mathertel.de/License.aspx.
+ * 
+ * More information on https://www.mathertel.de/Arduino
+ * 
+ * Changelog:see MicroJsonComposer.h
+ */
 
 #include <Arduino.h>
 #include <MicroJsonComposer.h>
@@ -51,6 +62,13 @@ void MicroJsonComposer::addProperty(const char *key, String value)
   _out.concat('\"');
   _fresh = false;
 };
+
+// Create a property with char* value
+void MicroJsonComposer::addProperty(const char *key, const char *value)
+{
+  addProperty(key, String(value));
+}
+
 
 // Create a property with int value
 void MicroJsonComposer::addProperty(const char *key, long value)

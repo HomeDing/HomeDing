@@ -28,7 +28,7 @@
 // http://nodeding/api/-cleanweb
 
 // http://nodeding/api/scan
-// http://nodeding/api/-connect?n=netname&p=passwd
+// http://nodeding/api/connect?n=netname&p=passwd
 
 // http://nodeding/ // redirect to defined start page
 
@@ -259,7 +259,8 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     jc.addProperty("freeHeap", ESP.getFreeHeap());
 
     jc.addProperty("flashSize", ESP.getFlashChipSize());
-    // jc.addProperty("flash-real-size", ESP.getFlashChipRealSize());
+    jc.addProperty("coreVersion", String(_board->version));
+    jc.addProperty("coreBuild", String(_board->build));
 
 #if defined(ESP8266)
     FSInfo fs_info;

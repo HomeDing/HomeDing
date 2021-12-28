@@ -154,6 +154,13 @@ class Board {
 
 
 public:
+
+  // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
+  const char *version = "0.81";
+
+  // The build name defined by the main sketch e.g. "minimal", "standard", "radio"
+  String build;
+
   // ----- Time functionality -----
 
   /**
@@ -178,7 +185,7 @@ public:
    * Initialize a blank board.
    * @param s The WebServer is always required.
    */
-  void init(WebServer *s, FS *fs);
+  void init(WebServer *s, FS *fs, const char* buildName = "");
 
   // ===== Board state functionality =====
 
@@ -197,7 +204,7 @@ public:
   void loop();
 
 
-  // ===== set board behavior =====
+  // ===== low power / sleep mode =====
 
   // start deep sleep mode in some milliseconds
   void startSleep();
@@ -210,6 +217,12 @@ public:
    * @param secs duration in seconds.
    */
   void setSleepTime(unsigned long secs);
+
+
+  /**
+   * do not start sleep mode because element is active.
+   */
+  void deferSleepMode();
 
 
   // ===== queue / process / dispatch actions =====
@@ -256,13 +269,7 @@ public:
   void dispatchAction(String action);
 
 
-  // ===== low power / sleep mode =====
-
-  /**
-   * do not start sleep mode because element is active.
-   */
-  void deferSleepMode();
-
+  // ===== state of elements =====
 
   /**
    * Get the state (current values) of a single or all objects
@@ -311,7 +318,7 @@ public:
   /**
    * Min. time to wait for a configuration mode request.
    */
-  int minConfigTime = 10 * 1000;
+  int minConfigTime = 6 * 1000;
 
 
 #if defined(ESP32)

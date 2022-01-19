@@ -1,0 +1,37 @@
+{
+  "device": {
+    "0": {
+      "name": "radioding",
+      "description": "IoT Device with Radio and LCD",
+      "loglevel": 2,
+      "logfile": 1,
+      "led": "D0",
+      "button": "D4",
+      "reboottime": "8h",
+      "I2C-SDA": "D2",
+      "I2C-SCL": "D1"
+    }
+  },
+  "ota": {
+    "0": {
+      "port": 8266,
+      "passwd": "123",
+      "description": "Listen for Updates"
+    }
+  },
+  "ssdp": {
+    "0": {
+      "ModelUrl": "https://www.mathertel.de/Arduino"
+    }
+  },
+  "displaylcd": {
+    "0": {
+      "description": "LCD"
+    }
+  },
+  "diag": {
+    "0": {
+      "x": "x"
+    }
+  }
+}

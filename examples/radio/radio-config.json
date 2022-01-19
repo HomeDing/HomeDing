@@ -1,0 +1,93 @@
+{
+  "rotary": { 
+    "0": {
+      "description": "Rotary Input",
+      "pin1": "D5",
+      "pin2": "D6",
+      "step": 1,
+      "onValue": "menu/0?value=$v"
+    }
+  },
+  "digitalin": {
+    "0": {
+      "description": "select",
+      "pin": "D7",
+      "inverse": "true",
+      "pullup": "true",
+      "onlow": "menu/0?select=1"
+    }
+  },
+  "value": {
+    "volume": {
+      "min": 0,
+      "max": 15,
+      "value": 3,
+      "onValue": "radio/r?volume=$v"
+    },
+    "frequency": {
+      "min": 8700,
+      "max": 10800,
+      "step": 10,
+      "value": 8930,
+      "onValue": "radio/r?frequency=$v"
+    }
+  },
+  "switch": {
+    "mono": {
+      "value": 0,
+      "onValue": "radio/r?mono=$v"
+    },
+    "mute": {
+      "value": 0,
+      "onValue": "radio/r?mute=$v"
+    },
+    "bassboost": {
+      "value": 0,
+      "onValue": "radio/r?bassboost=$v"
+    }
+  },
+  "menu": {
+    "0": {
+      "loglevel": 2,
+      "onValue": "device/0?log=menu-val:$v",
+      "onDisplay": "device/0?log=menu-disp:=$v,displaytext/text?value=$v",
+      "valueElements": "volume,frequency,mono,mute,bassboost"
+    }
+  },
+  "radio": {
+    "r": {
+      "loglevel": 2,
+      "description": "A Radio",
+      "volume": 0,
+      "onVolume": "displaytext/v?value=$v",
+      "onFrequency": "displaytext/f?value=$v",
+      "onStationName": "displaytext/text?value=$v",
+      "onRDSText": "device/0?log=text:$v",
+      "onRSSI": "displaytext/rssi?value=$v"
+    }
+  },
+  "webbutton": {
+    "HR3": {
+      "description": "HR3",
+      "onclick": "value/frequency?value=8930"
+    }
+  },
+  "displaytext": {
+    "f": {
+      "x": 0,
+      "y": 0
+    },
+    "v": {
+      "x": 8,
+      "y": 0
+    },
+    "rssi": {
+      "x": 12,
+      "y": 0
+    },
+    "text": {
+      "x": 0,
+      "y": 1
+    }
+  }
+}

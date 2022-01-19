@@ -78,9 +78,10 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
-  /**
-   * @brief The actual volumne.
-   */
+  /** * true when a radio chip was found in i2c . */
+  bool _found = 0;
+
+  /** * @brief The actual volume. */
   int _volume = 0;
 
   /**

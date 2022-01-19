@@ -30,8 +30,8 @@
 /* ===== Define local constants and often used strings ===== */
 
 #define FIX_BAND RADIO_BAND_FM ///< The band that will be tuned by this sketch is FM.
-#define FIX_STATION 8930       ///< The station that will be tuned by this sketch is 89.30 MHz.
-#define FIX_VOLUME 4           ///< The volume that will be set by this sketch is level 4.
+#define FIX_STATION 8930 ///< The station that will be tuned by this sketch is 89.30 MHz.
+#define FIX_VOLUME 4 ///< The volume that will be set by this sketch is level 4.
 
 // The radio library only supports one radio device so all references and data can be static.
 // That simplifies the callback rds functions.
@@ -53,8 +53,7 @@ unsigned int _nextCheck = 0;
 
 // const RadioElement *__radioelement;
 
-void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4)
-{
+void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
   // LOGGER_RAW("RDS %d %d %d %d", block1, block2, block3,  block4);
   rds.processData(block1, block2, block3, block4);
 }
@@ -66,24 +65,21 @@ void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t blo
  * @brief static factory function to create a new RadioElement
  * @return RadioElement* created element
  */
-Element *RadioElement::create()
-{
+Element *RadioElement::create() {
   return (new RadioElement());
 } // create()
 
 
 /* ===== Element functions ===== */
 
-RadioElement::RadioElement()
-{
+RadioElement::RadioElement() {
   startupMode = Element_StartupMode::System;
 }
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool RadioElement::set(const char *name, const char *value)
-{
+bool RadioElement::set(const char *name, const char *value) {
   bool ret = true;
   int v;
 
@@ -162,8 +158,7 @@ bool RadioElement::set(const char *name, const char *value)
 /**
  * @brief Activate the RadioElement.
  */
-void RadioElement::start()
-{
+void RadioElement::start() {
   LOGGER_ETRACE("start()");
 
   // Verify parameters
@@ -172,19 +167,19 @@ void RadioElement::start()
   // Enable information to the Serial port
   radio.debugEnable(true);
   radio._wireDebug(loglevel == 2); // debug the wire protocol on loglevel 2
+  _found = radio.initWire(Wire);
 
-  // Initialize the Radio
-  radio.setup(RADIO_RESETPIN, _resetpin);
-  radio.setup(RADIO_SDAPIN, _board->I2cSda); // SI4703 requires this, others ignore.
-  radio.setup(RADIO_I2CADDRESS, 0);          //  use default or check some addresses
-  if (_antenna)
-    radio.setup(RADIO_ANTENNA, _antenna);
-
-  bool found = radio.initWire(Wire);
-
-  if (!found) {
+  if (!_found) {
     LOGGER_EERR("not found");
   } else {
+    // Initialize the Radio
+    radio.setup(RADIO_RESETPIN, _resetpin);
+    radio.setup(RADIO_SDAPIN, _board->I2cSda); // SI4703 requires this, others ignore.
+    radio.setup(RADIO_I2CADDRESS, 0); //  use default or check some addresses
+    if (_antenna) {
+      radio.setup(RADIO_ANTENNA, _antenna);
+    }
+
     // Set all radio setting to the fixed values.
     radio.setBandFrequency(FIX_BAND, FIX_STATION);
     radio.setVolume(_volume);
@@ -199,13 +194,13 @@ void RadioElement::start()
     // setup the information chain for RDS data.
     radio.attachReceiveRDS(RDS_process);
 
-    rds.attachServicenNameCallback([](char *value) {
+    rds.attachServicenNameCallback([](const char *value) {
       LOGGER_RAW("STATION: %s", value);
       _stationName = value;
       _newSN = true;
     });
 
-    rds.attachTextCallback([](char *value) {
+    rds.attachTextCallback([](const char *value) {
       LOGGER_RAW("RDSTEXT: %s", value);
       _rdsText = value;
       _newR = true;
@@ -220,29 +215,30 @@ void RadioElement::start()
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void RadioElement::loop()
-{
+void RadioElement::loop() {
   // do something
-  radio.checkRDS();
-  unsigned int now = _board->getSeconds();
-  RADIO_INFO newri;
+  if (_found) {
+    radio.checkRDS();
+    unsigned int now = _board->getSeconds();
+    RADIO_INFO newri;
 
-  if (_newSN) {
-    _board->dispatch(_stationAction, _stationName);
-    _newSN = false;
-  }
+    if (_newSN) {
+      _board->dispatch(_stationAction, _stationName);
+      _newSN = false;
+    }
 
-  if (_newR) {
-    _board->dispatch(_rdsTextAction, _rdsText);
-    _newR = false;
-  }
+    if (_newR) {
+      _board->dispatch(_rdsTextAction, _rdsText);
+      _newR = false;
+    }
 
-  if (now > _nextCheck) {
-    radio.getRadioInfo(&newri);
-    if (newri.rssi != _ri.rssi)
-      _board->dispatch(_rssiAction, newri.rssi);
-    memcpy(&_ri, &newri, sizeof(RADIO_INFO));
-    _nextCheck = now + _checkInfo;
+    if (now > _nextCheck) {
+      radio.getRadioInfo(&newri);
+      if (newri.rssi != _ri.rssi)
+        _board->dispatch(_rssiAction, newri.rssi);
+      memcpy(&_ri, &newri, sizeof(RADIO_INFO));
+      _nextCheck = now + _checkInfo;
+    }
   }
 } // loop()
 
@@ -251,8 +247,7 @@ void RadioElement::loop()
  * @brief push the current value of all properties to the callback.
  */
 void RadioElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+    std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback("frequency", _printInteger(_freq));
   callback("volume", _printInteger(_volume));

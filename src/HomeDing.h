@@ -70,6 +70,7 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_AND
 #define HOMEDING_INCLUDE_OR
 #define HOMEDING_INCLUDE_ADD
+#define HOMEDING_INCLUDE_SCENE
 #define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
@@ -182,6 +183,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_PWMOut
 #include <PWMOutElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_SCENE
+#include <SceneElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_LOG

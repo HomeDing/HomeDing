@@ -8,7 +8,8 @@
  * More information on https://www.mathertel.de/Arduino
  * 
  * Changelog:
- * * 30.07.2018 created by Matthias Hertel
+ * * 05.07.2021 created by Matthias Hertel
+ * * 19.01.2022 finalized including delay
  */
 
 #ifndef SCENEELEMENT_H
@@ -52,34 +53,33 @@ public:
    */
   virtual void loop() override;
 
-
-  /**
-   * @brief stop all activities and go inactive.
-   */
-  virtual void term() override;
-
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
-
 private:
-  /**
-   * @brief The actual value.
-   */
-  String _value;
+  /** The next action to be sent. Will be set to -1 after all actions are done. */
+  int _count;
 
   /**
-   * @brief The actual value.
+   * @brief The delay between executing the steps
    */
-  bool _newValue;
+  unsigned long _delay;
 
   /**
-   * @brief The _actions hold a list of actions.
+   * @brief The time for the next step.
    */
-  std::vector<String> _actions;
+  unsigned long _nextStep;
+
+  /**
+   * @brief The _steps hold a list of actions.
+   */
+  std::vector<String> _steps;
 };
+
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+// Register the SceneElement onto the ElementRegistry.
+bool SceneElement::registered =
+    ElementRegistry::registerElement("scene", SceneElement::create);
+#endif
+
 
 #endif

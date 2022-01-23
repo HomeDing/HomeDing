@@ -51,9 +51,6 @@
 // integrated htm files
 #define PAGE_UPDATE_VERS "/$update.htm#v03"
 
-#define SVC_BOARD "/$board"
-#define SVC_STATE "/api/state"
-
 // Content types for http results
 #define TEXT_JSON "application/json; charset=utf-8" // Content type for JSON.
 #define TEXT_PLAIN "text/plain; charset=utf-8" // Content type for txt and empty results.
@@ -72,8 +69,6 @@ BoardHandler::BoardHandler(Board *board) {
 }
 
 // ===== board specific services
-
-// void handleStatus() {}
 
 /** Use url parameters to establish / verify a WiFi connection. */
 void BoardHandler::handleConnect(WebServer &server) {
@@ -121,7 +116,7 @@ void BoardHandler::handleConnect(WebServer &server) {
 
 // Return list of local networks.
 // TODO:refactor return result as string. no server send here.
-String BoardHandler::handleScan(WebServer &server) {
+String BoardHandler::handleScan() {
   TRACE("handleScan");
   String result;
 
@@ -304,7 +299,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
     // ===== Connection Manager services
   } else if (unSafeMode && (api == "scan")) {
-    output = handleScan(server);
+    output = handleScan();
     output_type = output.length() ? TEXT_JSON : TEXT_PLAIN;
 
   } else if (unSafeMode && (api == "connect")) {
@@ -377,7 +372,7 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
     String name = path + entry.name();
     // LOGGER_JUSTINFO("is: %s", name.c_str());
 
-    if (name.indexOf('#') >= 0) {
+    if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
       // do not report as file
 
     } else if (entry.isDirectory()) {

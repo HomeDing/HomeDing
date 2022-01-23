@@ -84,12 +84,7 @@ bool NTPTimeElement::set(const char *name, const char *value) {
  */
 void NTPTimeElement::start() {
   Element::start();
-#if defined(ESP8266)
-  configTime(_timezone.c_str(), _ntpServer.c_str());
-#elif defined(ESP32)
-  // TODO: ESP32 implementation
-  configTime(3600, 3600, "pool.ntp.org");
-#endif
+  configTzTime(_timezone.c_str(), _ntpServer.c_str());
 } // start()
 
 void NTPTimeElement::pushState(

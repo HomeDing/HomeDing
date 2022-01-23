@@ -99,7 +99,7 @@ protected:
   void handleReboot(WebServer &server, bool wipe = false);
 
   /** @brief Return list of local networks. */
-  String handleScan(WebServer &server);
+  String handleScan();
 
   /**
    * @brief Use url parameters to establish / verify a WiFi connection.

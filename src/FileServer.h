@@ -16,6 +16,7 @@
  * * 13.12.2019 no upload and delete when running in safemode
  * * 16.05.2021 update to ESP8266 board version 3.0
  * * 10.07.2021 add starting '/' to filenames if not present.
+ * * 22.01.2022 create folders before writing to a file.
  */
 
 #ifndef FILESERVER_H
@@ -23,7 +24,7 @@
 
 #include <HomeDing.h>
 
-#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Request Handler implementation for static files in file system.
@@ -38,7 +39,7 @@ public:
    * Serving static data down and upload.
    * @param cache_header Cache Header to be used in replies.
    */
-  FileServerHandler(FS &fs, Board *board)
+  FileServerHandler(FILESYSTEM &fs, Board *board)
       : _fs(fs), _board(board) {
   }
 
@@ -98,22 +99,25 @@ public:
   } // handle()
 
 
+// handle uploading of payload of a file.
+// ensure the file has no '#' and no '$' character.
 #if defined(ESP8266)
   void upload(UNUSED WebServer &server, UNUSED const String &requestUri, HTTPUpload &upload) override
 #elif defined(ESP32)
   void upload(UNUSED WebServer &server, UNUSED String requestUri, HTTPUpload &upload) override
 #endif
   {
-    // ensure that filename starts with '/'
+    // ensure that filename starts with '/' and is lowercase
     String fName = upload.filename;
+    fName.toLowerCase();
     if (!fName.startsWith("/")) {
       fName = "/" + fName;
     }
 
     TRACE("upload...<%s>", fName.c_str());
-    if (fName.indexOf('#') > 0) {
+    if (fName.indexOf('#') >= 0) {
       TRACE("no #...");
-    } else if (fName.indexOf('$') > 0) {
+    } else if (fName.indexOf('$') >= 0) {
       TRACE("no $...");
 
     } else if (upload.status == UPLOAD_FILE_START) {
@@ -121,6 +125,14 @@ public:
         TRACE("  ...remove");
         _fs.remove(fName);
       } // if
+
+      // create folder when required ???
+      String folders = fName;
+      int n = folders.indexOf('/', 1);
+      while (n > 0) {
+        _fs.mkdir(folders.substring(0, n)); // no harm if folder exists.
+        n = folders.indexOf('/', n + 1);
+      };
 
       _fsUploadFile = _fs.open(fName, "w");
       _board->filesVersion++;

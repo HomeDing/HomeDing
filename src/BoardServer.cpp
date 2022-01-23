@@ -57,7 +57,7 @@
 
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Construct a new State Handler object
@@ -365,18 +365,16 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
   FILESYSTEM *fs = _board->fileSystem;
   File dir = fs->open(path, "r");
-  LOGGER_JUSTINFO("handleListFiles(%s)", path.c_str());
+  TRACE("handleListFiles(%s)", path.c_str());
   // ASSERT: last char of path = '/'
 
   while (File entry = dir.openNextFile()) {
     String name = path + entry.name();
-    // LOGGER_JUSTINFO("is: %s", name.c_str());
 
     if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
       // do not report as file
 
     } else if (entry.isDirectory()) {
-      // LOGGER_JUSTINFO("isDir.");
       jc.openObject();
       jc.addProperty("type", "dir");
       jc.addProperty("name", name);
@@ -384,7 +382,6 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
       handleListFiles(jc, name + "/");
 
     } else {
-      // LOGGER_JUSTINFO("isFile.");
       jc.openObject();
       jc.addProperty("type", "file");
       jc.addProperty("name", name);

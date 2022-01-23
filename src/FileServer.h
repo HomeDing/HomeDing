@@ -17,6 +17,7 @@
  * * 16.05.2021 update to ESP8266 board version 3.0
  * * 10.07.2021 add starting '/' to filenames if not present.
  * * 22.01.2022 create folders before writing to a file.
+ * * 22.01.2022 delete folders enabled.
  */
 
 #ifndef FILESERVER_H
@@ -83,13 +84,23 @@ public:
       fName = "/" + fName;
     }
 
-    // LOGGER_RAW("File:handle(%s)", requestUri.c_str());
+    // LOGGER_RAW("File:handle(%s)", fName.c_str());
     if (requestMethod == HTTP_POST) {
       server.send(200); // all done in upload. no other forms.
 
     } else if (requestMethod == HTTP_DELETE) {
+      LOGGER_JUSTINFO("Delete %d", _fs.exists(fName));
       if (_fs.exists(fName)) {
+#if defined(ESP8266)
         _fs.remove(fName);
+#elif defined(ESP32)
+        File f = _fs.open(fName);
+        if (f.isDirectory()) {
+          _fs.rmdir(fName);
+        } else {
+          _fs.remove(fName);
+        }
+#endif
         _board->filesVersion++;
       }
 

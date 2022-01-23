@@ -46,7 +46,7 @@ int RTCVariables::setResetCounter(int cnt)
 #if defined(ESP8266)
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &memData, sizeof(memData));
 #elif defined(ESP32)
-  // TODO: ESP32 implementation
+  // TODO:ESP32 implementation
 #endif
   return (cnt);
 };
@@ -66,7 +66,7 @@ int RTCVariables::getResetCounter()
     cnt = (memData & 0x000000FF);
   }
 #elif defined(ESP32)
-  // TODO: ESP32 implementation
+  // TODO:ESP32 implementation
 #endif
   return (cnt);
 };
@@ -85,7 +85,7 @@ void RTCVariables::setStateString(String &state)
     ESP.rtcUserMemoryWrite(STATE_OFFSET, &memMagic, sizeof(memMagic));
     ESP.rtcUserMemoryWrite(STATE_DATA, (uint32_t *)state.c_str(), len + 1);
 #elif defined(ESP32)
-  // TODO: ESP32 implementation
+  // TODO:ESP32 implementation
 #endif
   } // if
 }
@@ -108,7 +108,7 @@ String RTCVariables::getStateString()
   }
   LOGGER_INFO("readState=\"%s\"", state.c_str());
 #elif defined(ESP32)
-  // TODO: ESP32 implementation
+  // TODO:ESP32 implementation
 #endif
   return (state);
 };

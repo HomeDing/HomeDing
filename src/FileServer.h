@@ -126,13 +126,15 @@ public:
         _fs.remove(fName);
       } // if
 
-      // create folder when required ???
+#if defined(ESP32)
+      // create folder when required, LittleFS on ESP32 doesn't create folders automatically.
       String folders = fName;
       int n = folders.indexOf('/', 1);
       while (n > 0) {
         _fs.mkdir(folders.substring(0, n)); // no harm if folder exists.
         n = folders.indexOf('/', n + 1);
       };
+#endif
 
       _fsUploadFile = _fs.open(fName, "w");
       _board->filesVersion++;

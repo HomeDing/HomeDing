@@ -61,8 +61,6 @@ public:
 
   /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
 
@@ -86,7 +84,7 @@ bool MY9291Element::registered =
 #endif
 
 #elif defined(ESP32)
-// TODO: ESP32 require implementation ?
+// TODO:ESP32 require implementation ?
 #endif
 
 #endif // MY9291ELEMENT_H

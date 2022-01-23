@@ -10,14 +10,13 @@
 // More information on https://www.mathertel.de/Arduino
 // -----
 // 17.06.2018 created by Matthias Hertel
+// 23.01.2022 startup after network. 
 // -----
 
 #ifndef SSDPELEMENT_H
 #define SSDPELEMENT_H
 
 #include <HomeDing.h>
-
-/// enable the SSDP Protocol to find the device in the network
 
 #if defined(ESP8266)
 #include <ESP8266SSDP.h>
@@ -27,14 +26,7 @@
 
 /**
  * @brief Element for enabling Element discovery using the SSDP protocol.
- * @details
-@verbatim
-
-SSDP...
-
-@endverbatim
  */
-
 class SSDPElement : public Element
 {
 public:
@@ -64,8 +56,11 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
+  /**
+   * @brief Activate the Element.
+   */
+  virtual void start() override;
 
-  // start() is not required;
   // loop() is not required because no local activities
   // pushState() is not required because no dynamic properties
   // term() is not required because no terminateion functionality

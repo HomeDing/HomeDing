@@ -294,7 +294,7 @@ extern const char *ACTION_ONPRESSURE;
 #include <MenuElement.h>
 #endif
 
-#if defined(HOMEDING_INCLUDE_SSDP) && defined(ESP8266)
+#if defined(HOMEDING_INCLUDE_SSDP)
 #include <core/SSDPElement.h>
 #endif
 

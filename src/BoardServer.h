@@ -98,11 +98,8 @@ protected:
   */
   void handleReboot(WebServer &server, bool wipe = false);
 
-  /** @brief Return list of available elements. */
-  void handleElements(WebServer &server);
-
   /** @brief Return list of local networks. */
-  void handleScan(WebServer &server);
+  String handleScan(WebServer &server);
 
   /**
    * @brief Use url parameters to establish / verify a WiFi connection.
@@ -112,7 +109,11 @@ protected:
 
 private:
   // list files in filesystem recursively.
-  void listDirectory(MicroJsonComposer &jc, String path, Dir dir);
+  void handleListFiles(MicroJsonComposer &jc, String path);
+
+  // clean out all files in filesystem except config files.
+  void handleCleanWeb(String path);
+
 };
 
 #endif

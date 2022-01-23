@@ -38,17 +38,18 @@
 #if defined(ESP32)
 #include <WebServer.h>
 #include <WiFi.h>
+#include <LittleFS.h>
+#define FILESYSTEM fs::LittleFSFS
 
-// #define ESP8266WebServer WebServer
-
-#include <FS.h>
 #define PIN_WIRE_SDA 21
 #define PIN_WIRE_SCL 22
 
 #elif defined(ESP8266)
+#include <FS.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #define WebServer ESP8266WebServer
+#define FILESYSTEM FS
 
 #endif
 
@@ -185,7 +186,7 @@ public:
    * Initialize a blank board.
    * @param s The WebServer is always required.
    */
-  void init(WebServer *s, FS *fs, const char* buildName = "");
+  void init(WebServer *s, FILESYSTEM *fs, const char* buildName = "");
 
   // ===== Board state functionality =====
 
@@ -343,7 +344,7 @@ public:
   WebServer *server;
 
   // FileSystem instance
-  FS *fileSystem;
+  FILESYSTEM *fileSystem;
 
   // a counter used as eTag that gets incremented when any file is changed.
   unsigned int filesVersion;
@@ -407,14 +408,13 @@ public:
   String room;
 
 private:
-  /**
-   * Reset Counter
-   */
+  /** Reset Counter to detect multiple hardware resets in a row. */
   int _resetCount;
 
+  /** current state of the board. */
   enum BOARDSTATE boardState;
 
-  /** This flag is set to true when restarting after a deep sleep. This allows shortening wait times */
+  /** This flag is set to true when restarting after a deep sleep allowing shortening wait times. */
   bool _isWakeupStart;
 
   /** if > 0; system goes to deep sleep at this millis() */

@@ -24,7 +24,7 @@
 
 #include <HomeDing.h>
 
-#define TRACE(...) LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Request Handler implementation for static files in file system.

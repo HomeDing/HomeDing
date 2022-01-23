@@ -29,7 +29,6 @@ extern "C" {
 
 #elif defined(ESP32)
 #include <ESPmDNS.h>
-#include <SPIFFS.h>
 #endif
 
 #include <ElementRegistry.h>
@@ -65,7 +64,7 @@ static const char respond404[] PROGMEM =
 /**
  * @brief Initialize a blank board.
  */
-void Board::init(WebServer *serv, FS *fs, const char *buildName) {
+void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   WiFi.persistent(true);
 
   LOGGER_INFO("Device %s starting...", buildName);
@@ -101,16 +100,17 @@ void Board::init(WebServer *serv, FS *fs, const char *buildName) {
   if (_isWakeupStart) {
     LOGGER_INFO("Reset from Deep Sleep mode.");
   }
+  enableWiFiAtBootTime();
 
 #elif defined(ESP32)
   _isWakeupStart = false; // TODO:ESP32 ???
 #endif
 
-  enableWiFiAtBootTime();
-
   deviceName = WiFi.getHostname(); // use mac based default device name
+  TRACE("dn1: %s", deviceName.c_str());
   deviceName.replace("_", ""); // Underline in hostname is not conformant, see
   // https://tools.ietf.org/html/rfc1123 952
+  TRACE("dn2: %s", deviceName.c_str());
   hd_yield();
 } // init()
 
@@ -520,7 +520,7 @@ void Board::loop() {
       // enable eTags in results for static files
 
       // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
-      server->enableETag(true, [this](FS &, const String &path) -> String {
+      server->enableETag(true, [this](FILESYSTEM &, const String &path) -> String {
         String eTag;
         if (!path.endsWith(".txt")) {
           // txt files contain logs that must not be cached.
@@ -546,7 +546,7 @@ void Board::loop() {
     server->serveStatic("/", *fileSystem, "/", cacheHeader.c_str());
 
     server->onNotFound([this]() {
-      TRACE("notFound: %s", server.uri().c_str());
+      TRACE("notFound: %s", server->uri().c_str());
       server->send(404, "text/html", FPSTR(respond404));
     });
 
@@ -565,12 +565,11 @@ void Board::loop() {
       MDNS.addServiceTxt(serv, "title", title.c_str());
       MDNS.addServiceTxt(serv, "room", room.c_str());
 
-      serv = MDNS.addService(0, "http", "tcp", 80);
-      MDNS.addServiceTxt(serv, "path", homepage.c_str());
-
 #elif defined(ESP32)
       MDNS.addService("homeding", "tcp", 80);
-      // TODO: incomplete ! ???
+      MDNS.addServiceTxt("homeding", "tcp", "path", homepage.c_str());
+      MDNS.addServiceTxt("homeding", "tcp", "title", title.c_str());
+      MDNS.addServiceTxt("homeding", "tcp", "room", room.c_str());
 #endif
     } // if
 

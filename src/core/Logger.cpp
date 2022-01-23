@@ -18,7 +18,6 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <FS.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -32,7 +31,7 @@ static const char *LOGFILE_NAME = "/log.txt";
 static const char *LOGFILE_OLD_NAME = "/log_old.txt";
 
 // initialize file system for log file
-void Logger::init(FS *fs)
+void Logger::init(FILESYSTEM *fs)
 {
   _fileSystem = fs;
 } // init()
@@ -139,7 +138,7 @@ int Logger::logger_level = LOGGER_LEVEL_INFO;
 
 bool Logger::_logFileEnabled = false;
 
-FS *Logger::_fileSystem = nullptr;
+FILESYSTEM *Logger::_fileSystem = nullptr;
 
 
 // end.

@@ -27,6 +27,7 @@
 #ifndef MICROJSON_H
 #define MICROJSON_H
 
+#include <functional>
 #include <FS.h>
 
 #define MICROJSON_PATH_SEPARATOR '/'

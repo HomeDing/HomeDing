@@ -55,9 +55,12 @@
 #define LOGGER_RAW(...)                     \
   DEBUG_ESP_PORT.printf("  >" __VA_ARGS__); \
   DEBUG_ESP_PORT.println()
+
 #elif defined(ESP32)
-  log_printf("  >" __VA_ARGS__);
+#define LOGGER_RAW(...)          \
+  log_printf("  >" __VA_ARGS__); \
   log_printf("\n");
+
 #else
 #define LOGGER_RAW(...)
 #endif
@@ -74,10 +77,9 @@
   Logger::LoggerEPrint(this, LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 
-#include <Element.h>
+#include <Board.h>
 
-class Logger
-{
+class Logger {
 public:
   static int logger_level; // initialized to 0 === LOGGER_LEVEL_ERR;
 
@@ -95,7 +97,7 @@ public:
    * initialize file system for log file
    * @param fs file system to be used.
    */
-  static void init(FS *fs);
+  static void init(FILESYSTEM *fs);
 
   /*
    * enable/disable log file
@@ -108,7 +110,7 @@ public:
 
 private:
   // File System for logging file
-  static FS *_fileSystem;
+  static FILESYSTEM *_fileSystem;
 
   // initialized to false === no logging to file;
   static bool _logFileEnabled;

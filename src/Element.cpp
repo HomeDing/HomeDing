@@ -222,10 +222,13 @@ unsigned long Element::_scanDuration(const char *value)
 /* Return a pin value from a string. */
 int Element::_atopin(const char *value)
 {
+#if defined(ESP8266)
   static int GPIO[11] = {16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1};
+#endif
 
   int pin = -1;
   if (value) {
+#if defined(ESP8266)
     char ch = tolower(*value);
     if (ch == 'd') {
       int n = atoi(value + 1); // scan a number right after the 'D'
@@ -238,6 +241,9 @@ int Element::_atopin(const char *value)
     } else {
       pin = _atoi(value);
     }
+#else
+      pin = _atoi(value);
+#endif
   }
   return (pin);
 } // _atopin()

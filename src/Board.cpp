@@ -554,9 +554,9 @@ void Board::loop() {
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode
     if (!_isWakeupStart && (mDNS_sd)) {
-      MDNS.begin(deviceName.c_str());
 
 #if defined(ESP8266)
+      MDNS.begin(deviceName.c_str());
       // include the data required for the portal implementation: Overview of existing devices
       MDNSResponder::hMDNSService serv;
 
@@ -565,11 +565,48 @@ void Board::loop() {
       MDNS.addServiceTxt(serv, "title", title.c_str());
       MDNS.addServiceTxt(serv, "room", room.c_str());
 
+#elif defined(ESP32x)
+      // using https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/mdns.html
+      // https://github.com/espressif/esp-idf/blob/master/examples/protocols/mdns/main/mdns_example_main.c
+
+      LOGGER_JUSTINFO("a0");
+      //initialize mDNS service
+      esp_err_t err = mdns_init();
+      if (err) {
+        LOGGER_JUSTINFO("MDNS Init failed: %d\n", err);
+        return;
+      }
+
+      //set hostname
+      mdns_hostname_set(deviceName.c_str());
+      //set default instance
+      mdns_instance_name_set("HomeDing on ESP32");
+
+      LOGGER_JUSTINFO("b0");
+      mdns_service_add(NULL, "_homeding", "_tcp", 80, NULL, 0);
+
+      LOGGER_JUSTINFO("a");
+      mdns_txt_item_t txtData[3] = {
+          {"path", homepage.c_str()},
+          {"title", title.c_str()},
+          {"room", room.c_str()}};
+      LOGGER_JUSTINFO("b");
+
+      // if (mdns_service_txt_set("_homeding", "_tcp", txtData, 3)) {
+      //   LOGGER_ERR("Failed adding HomeDing txt");
+      // }
+      LOGGER_JUSTINFO("c");
+
 #elif defined(ESP32)
-      MDNS.addService("homeding", "tcp", 80);
-      MDNS.addServiceTxt("homeding", "tcp", "path", homepage.c_str());
-      MDNS.addServiceTxt("homeding", "tcp", "title", title.c_str());
-      MDNS.addServiceTxt("homeding", "tcp", "room", room.c_str());
+      LOGGER_JUSTINFO("a1===");
+      // MDNS.begin(deviceName.c_str());
+      // MDNS.addService("_homeding", "_tcp", 80);
+      // MDNS.addServiceTxt("_homeding", "_tcp", "path", homepage.c_str());
+      // MDNS.addServiceTxt("_homeding", "_tcp", "title", title.c_str());
+      // MDNS.addServiceTxt("_homeding", "_tcp", "path", "/index.htm");
+      // MDNS.addServiceTxt("_homeding", "_tcp", "title", "try me");
+      // MDNS.addServiceTxt("_homeding", "_tcp", "room", room.c_str());
+      LOGGER_JUSTINFO("b1");
 #endif
     } // if
 

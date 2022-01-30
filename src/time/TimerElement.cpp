@@ -32,7 +32,7 @@ Element *TimerElement::create()
  */
 bool TimerElement::set(const char *name, const char *value)
 {
-  unsigned long now = _board->getSeconds();
+  unsigned long now = millis();
   bool ret = true;
   // TRACE("set %s=%s", name, value);
 
@@ -50,17 +50,17 @@ bool TimerElement::set(const char *name, const char *value)
     _restart = _atob(value);
 
   } else if (_stricmp(name, "cycletime") == 0) {
-    _cycleTime = _atotime(value);
+    _cycleTime = _scanDuration(value);
 
   } else if (_stricmp(name, "waittime") == 0) {
-    _waitTime = _atotime(value);
+    _waitTime = _scanDuration(value);
 
   } else if (_stricmp(name, "pulsetime") == 0) {
-    _pulseTime = _atotime(value);
+    _pulseTime = _scanDuration(value);
 
   } else if (_stricmp(name, "start") == 0) {
     _mode = Mode::TIMER;
-    _startTime = _board->getSeconds();
+    _startTime = now;
 
   } else if (_stricmp(name, "stop") == 0) {
     if (_mode == Mode::TIMER) {
@@ -71,7 +71,7 @@ bool TimerElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "next") == 0) {
     if (_mode == Mode::TIMER) {
       // time from start in seconds
-      unsigned long tfs = _board->getSeconds() - _startTime;
+      unsigned long tfs = now - _startTime;
 
       if (tfs < _waitTime) {
         // skip wait phase
@@ -121,7 +121,7 @@ void TimerElement::start()
   Element::start();
   if ((_mode == Mode::TIMER) && (_restart)) {
     // start Timer automatically
-    _startTime = _board->getSeconds();
+    _startTime = millis();
   } else {
     _mode = Mode::OFF;
   } // if
@@ -143,9 +143,10 @@ void TimerElement::loop()
     newValue = false;
 
   } else if (_mode == Mode::TIMER) {
+    unsigned long now = millis();
 
     // time from start in seconds
-    unsigned long tfs = _board->getSeconds() - _startTime;
+    unsigned long tfs = now - _startTime;
 
     if (tfs < _waitTime) {
       newValue = false;
@@ -160,7 +161,7 @@ void TimerElement::loop()
       newValue = false;
       if (_restart) {
         // and update in next loop()
-        _startTime = _board->getSeconds();
+        _startTime = now;
       } else {
         _mode = Mode::OFF;
       }
@@ -187,7 +188,7 @@ void TimerElement::loop()
 void TimerElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  unsigned long now = _board->getSeconds();
+  unsigned long now = millis();
 
   Element::pushState(callback);
   callback("mode", _mode == Mode::TIMER ? "timer"

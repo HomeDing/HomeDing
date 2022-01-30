@@ -16,6 +16,7 @@
  * * 15.05.2018 set = properties and actions interface.
  * * 24.01.2020 timer type once doesn't start automatically. 
  * * 24.04.2021 mode=ON|TIMER|OFF added.
+ * * 24.01.2022 resolution increased. milliseconds as durations enabled.
  */
 
 #ifndef TIMERELEMENT_H

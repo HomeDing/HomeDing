@@ -71,7 +71,6 @@ private:
     fix = 0,   // take inbound value for output
     fade = 1,  // fade to inbound value from current value
     wheel = 2, // single color output cycling through whole hue cycle
-    // flow = 4,
     pulse = 4,
     more
   };
@@ -99,16 +98,6 @@ private:
   unsigned long _startTime;
 
   /**
-   * @brief The lightness of a color given by hsl.
-   */
-  int _lightness = 127;
-
-  /**
-   * @brief The saturation of the colors in the animation.
-   */
-  int _saturation = 255;
-
-  /**
    * @brief The duration of one animation cycle or transition in milliSeconds.
    */
   Mode _mode = Mode::fix;
@@ -118,10 +107,6 @@ private:
    */
   String _valueAction;
 
-  /**
-   * @brief The _brightAction holds the actions that is submitted when brightness changes.
-   */
-  String _brightAction;
 };
 
 #ifdef HOMEDING_REGISTER

@@ -56,8 +56,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_CORE
 
-#define HOMEDING_INCLUDE_SYSTEM // all system elements
+// all system elements
+#define HOMEDING_INCLUDE_SYSTEM
 
+// most often used Elements
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Switch
@@ -75,18 +77,21 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
-#define HOMEDING_INCLUDE_Map
 #define HOMEDING_INCLUDE_RTCSTATE
+#define HOMEDING_INCLUDE_MAP
 
 #define HOMEDING_INCLUDE_LOG
-
 #define HOMEDING_INCLUDE_REMOTE
 #endif
 
 #ifdef HOMEDING_INCLUDE_SYSTEM
-#define HOMEDING_INCLUDE_SSDP
 #define HOMEDING_INCLUDE_NTPTIME
 #define HOMEDING_INCLUDE_Time
+#endif
+
+// system elements only in full firmware
+#ifdef HOMEDING_INCLUDE_FULL_SYSTEM
+#define HOMEDING_INCLUDE_SSDP
 #endif
 
 // Easy include of all elements for an attached display.
@@ -134,7 +139,7 @@ extern const char *ACTION_ONPRESSURE;
 #include <AnalogElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_Map
+#ifdef HOMEDING_INCLUDE_MAP
 #include <MapElement.h>
 #endif
 

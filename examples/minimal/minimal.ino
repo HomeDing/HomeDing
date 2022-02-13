@@ -3,8 +3,21 @@
  * @brief Minimal Sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
  * 
- * The primary reason for this Sketch is to have a small firmware with the elements
- * for a simple switching device without displays.
+ * The use-case covered with this Sketch is to compile a small firmware
+ * with the elements for a devices with 1MByte flash without displays like
+ * * switchable plugs and sockets including capturing power consumption
+ * * bulbs
+ * * temperature sensors
+ * * led stripe controllers with single color
+ * * led stripe controllers with neopixel
+ *  
+ * Compile with
+ * * Board: Generic ESP8266 module
+ * * Flash Size: 1M (FS:128kb, OTA:~438KB)
+ * * Flash Mode: DOUT 
+ * * Debug Port: "Disabled"
+ * * Debug Level: "None"
+ * * MMU: 32+32 balanced
  * 
  * There is minified WebUI available. 
  * 
@@ -22,6 +35,7 @@
  * * 12.11.2019 Minimal Example created from development sketch.
  * * 20.12.2019 updated from DevDing example
  * * 07.04.2019 updated from DevDing example, no sensor elements, no elements that need libraries.
+ * * 10.02.2022 remove using SPIFFS in favour of LittleFS - saving code space.
  */
 
 // ----- activatable debug options
@@ -45,7 +59,6 @@
 #define HOMEDING_INCLUDE_DigitalOut
 
 #define HOMEDING_INCLUDE_AND
-#define HOMEDING_INCLUDE_Map
 #define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
@@ -67,6 +80,7 @@
 #include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
+#include <LittleFS.h> // File System for Web Server Files
 
 #include <BuiltinHandler.h> // Serve Built-in files
 #include <BoardServer.h> // Web Server Middleware for Elements
@@ -107,8 +121,7 @@ void setup(void) {
 
   // ----- setup the platform with webserver and file system -----
 
-  // use SPIFFS when compiling for very small flash sizes <=1MByte 
-  mainBoard.init(&server, &SPIFFS, __FILE__);
+  mainBoard.init(&server, &LittleFS, "minimal");
 
   // ----- adding web server handlers -----
 

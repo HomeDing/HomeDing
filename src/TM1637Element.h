@@ -79,4 +79,14 @@ private:
   TM1637 *_disp;
 };
 
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+
+// Register the TM1637Element onto the ElementRegistry.
+bool TM1637Element::registered =
+    ElementRegistry::registerElement("tm1637", TM1637Element::create);
+#endif
+
+
 #endif

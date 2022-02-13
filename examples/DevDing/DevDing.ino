@@ -3,6 +3,22 @@
  * @brief Experimental sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
  * This sketch is also used as an incubator project for new and unfinished elements.
+ *
+ * The use-case covered with this Sketch is to compile a full featured firmware
+ * with the most common and not too execeptional elements for a devices with 4MByte flash like
+ * * full featured environment sensors
+ * * ...
+ * All elements from the minimal sketch are included by default.
+ *  
+ * Compile with
+ * * Board: NodeMCU 1.0
+ * * Flash Size: 4M (FS:2MB, OTA:~1019KB)
+ * * Debug Port: "Serial"
+ * * Debug Level: "None"
+ * * MMU: 32+32 balanced
+ * 
+ * There is full featured WebUI available. 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -35,6 +51,7 @@
 
 // Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
+#define HOMEDING_INCLUDE_FULL_SYSTEM
 
 // Enable some Sensor Elements
 #define HOMEDING_INCLUDE_DHT
@@ -117,7 +134,7 @@ void setup(void) {
   // ----- setup the platform with webserver and file system -----
 
   // LittleFS is the default filesystem
-  mainBoard.init(&server, &LittleFS, __FILE__);
+  mainBoard.init(&server, &LittleFS, "DevDing");
 
   // ----- adding web server handlers -----
 

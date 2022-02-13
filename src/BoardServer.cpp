@@ -145,7 +145,7 @@ String BoardHandler::handleScan() {
     WiFi.scanDelete();
     result = jc.stringify();
   }
-  return(result);
+  return (result);
 } // handleScan()
 
 
@@ -361,6 +361,39 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 } // handle()
 
 
+#if defined(ESP8266) // && defined(SPIFFS)
+
+// ESP8266 SPIFFS implementation, compatible with LittleFS on ESP8266
+// list files in filesystem recursively.
+
+void listDirectory(MicroJsonComposer &jc, FILESYSTEM *fs, String path, Dir dir) {
+  while (dir.next()) {
+    String name = dir.fileName();
+
+    if (dir.isDirectory()) {
+      Dir subDir = fs->openDir(path + name);
+      listDirectory(jc, fs, path + name + "/", subDir);
+    } else {
+      jc.openObject();
+      jc.addProperty("type", "file");
+      String longName = path + name;
+      longName.replace("//", "/");
+      jc.addProperty("name", longName);
+      jc.addProperty("size", dir.fileSize());
+      jc.closeObject();
+    } // if
+  } // while
+}
+
+void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
+  FILESYSTEM *fs = _board->fileSystem;
+  Dir dir = fs->openDir(path);
+  listDirectory(jc, fs, "/", dir);
+}
+
+
+#elif defined(ESP32)
+
 // list files in filesystem recursively.
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
   FILESYSTEM *fs = _board->fileSystem;
@@ -375,10 +408,10 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
       // do not report as file
 
     } else if (entry.isDirectory()) {
-      jc.openObject();
-      jc.addProperty("type", "dir");
-      jc.addProperty("name", name);
-      jc.closeObject();
+      // jc.openObject();
+      // jc.addProperty("type", "dir");
+      // jc.addProperty("name", name);
+      // jc.closeObject();
       handleListFiles(jc, name + "/");
 
     } else {
@@ -386,11 +419,13 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
       jc.addProperty("type", "file");
       jc.addProperty("name", name);
       jc.addProperty("size", entry.size());
-      jc.addProperty("time", entry.getLastWrite());
+      // jc.addProperty("time", entry.getLastWrite());
       jc.closeObject();
     } // if
   } // while
 } // handleListFiles()
+
+#endif
 
 
 void BoardHandler::handleCleanWeb(String path) {

@@ -42,21 +42,15 @@
 #include <FileServer.h> // Web Server Middleware for UI
 
 
-static const char respond404[] PROGMEM =
-    "<html><head><title>File not found</title></head><body>File not found</body></html>";
-
 // ===== WLAN credentials =====
 
 #include "secrets.h"
 
-// need a WebServer
+// WebServer on port 80 to reach Web UI and services
 WebServer server(80);
 
 // HomeDing core functionality
 Board mainBoard;
-
-// Filesystem to be used.
-FS *filesys;
 
 
 // ===== implement =====
@@ -73,13 +67,11 @@ void setup(void) {
   Serial.setDebugOutput(false);
 #endif
 
-  LOGGER_INFO("Device (" __FILE__ ") starting...");
 
   // ----- setup the platform with webserver and file system -----
-  filesys = &LittleFS; // LittleFS is the default filesystem
 
-  mainBoard.init(&server, filesys);
-  hd_yield();
+  // LittleFS is the default filesystem
+  mainBoard.init(&server, &LittleFS, "rfbridge");
 
   // ----- adding web server handlers -----
 
@@ -91,22 +83,6 @@ void setup(void) {
 
   // UPLOAD and DELETE of static files in the file system.
   server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
-  // GET static files is added after network connectivity is given.
-
-  server.onNotFound([]() {
-    const char *uri = server.uri().c_str();
-    LOGGER_JUSTINFO("notFound: %s", uri);
-
-    if (mainBoard.isCaptiveMode() && (!filesys->exists(uri))) {
-      String url = "http://192.168.4.1/$setup.htm";
-      server.sendHeader("Location", url, true);
-      server.send(302);
-
-    } else {
-      // standard not found in browser.
-      server.send(404, "text/html", FPSTR(respond404));
-    }
-  });
 
   LOGGER_INFO("setup done.");
 } // setup

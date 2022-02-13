@@ -77,12 +77,10 @@ class Board;
 #ifdef DEBUG_ESP_PORT
 
 /** The TRACE Macros for creating output with timing hints: */
-#define TRACE_START unsigned long __TRACE_START_TIME = millis();
-#define TRACE_END unsigned long __TRACE_END_TIME = millis();
-#define TRACE_TIME (__TRACE_END_TIME - __TRACE_START_TIME)
-#define TRACE_TIMEPRINT(topic, id, min) \
-  if (TRACE_TIME >= min)                \
-    LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
+#define TRACE_START // unsigned long __TRACE_START_TIME = millis();
+#define TRACE_END // unsigned long __TRACE_END_TIME = millis();
+#define TRACE_TIME // (__TRACE_END_TIME - __TRACE_START_TIME)
+#define TRACE_TIMEPRINT(topic, id, min) // if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
 
 #else
 // #define TRACE(...)

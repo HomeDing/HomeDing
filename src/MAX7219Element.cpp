@@ -22,7 +22,7 @@
 #include "SPI.h"
 
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -101,8 +101,7 @@ void MAX7219Element::_writeNumber(String number)
 
   memset(data, 0, sizeof(data));
 
-  // Serial.print("NUM:");
-  // Serial.println(number);
+  // TRACE("NUM: %d", number.c_str());
 
   // fill data array with digits and decimal point
 

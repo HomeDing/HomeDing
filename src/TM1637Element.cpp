@@ -104,19 +104,4 @@ void TM1637Element::pushState(
 } // pushState()
 
 
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to TM1637Element.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the TM1637Element onto the ElementRegistry.
-bool TM1637Element::registered =
-    ElementRegistry::registerElement("tm1637", TM1637Element::create);
-// #endif
-
 // End

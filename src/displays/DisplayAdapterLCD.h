@@ -129,7 +129,7 @@ public:
     int w = strnlen(text, MAX_DISPLAY_STRING_LEN);
     char buffer[MAX_DISPLAY_STRING_LEN+4]; // 8 chars character buffer max.
     if ((x > 20) || (y > 4)) {
-      Serial.printf("outside\n");
+      // TRACE("outside");
     } else {
       strlcpy(buffer, text, MAX_DISPLAY_STRING_LEN);
       buffer[_cols-x] = '\0';

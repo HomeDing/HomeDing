@@ -19,8 +19,6 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-// #include <ESP8266mDNS.h>
-
 #include "DiagElement.h"
 
 #if defined(ESP32)
@@ -57,22 +55,7 @@ void DiagElement::init(Board *board) {
 bool DiagElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "heap") == 0) {
-#if defined(ESP8266)
-    // log some heap information. using http://nodeding/$board/diag/0?heap=1
-    TRACE("===== HEAP =====");
-    uint32_t free;
-    uint16_t max;
-    uint8_t frag;
-    ESP.getHeapStats(&free, &max, &frag);
-    LOGGER_EINFO("heap free: %5d - max: %5d - frag: %3d%%", free, max, frag);
-
-#elif defined(ESP32)
-    LOGGER_EINFO("heap: %5d / %5d", ESP.getFreeHeap(), ESP.getHeapSize());
-
-#endif
-
-  } else if (_stricmp(name, "rtcmem") == 0) {
+  if (_stricmp(name, "rtcmem") == 0) {
     // log some heap information. using http://nodeding/$board/diag/0?rtcmem=1
 #if defined(ESP8266)
     // dump rtc Memory

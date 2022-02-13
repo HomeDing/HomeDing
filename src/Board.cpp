@@ -1,12 +1,12 @@
 /**
  * @file Board.cpp
  * @author Matthias Hertel (https://www.mathertel.de)
- * 
+ *
  * @brief Implementation of the Board class for the HomeDing Library
- * 
+ *
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
- * 
+ *
  * More information on https://www.mathertel.de/Arduino.
  *
  * Changelog: see Board.h
@@ -36,8 +36,6 @@ extern "C" {
 #include "MicroJsonParser.h"
 
 #include <DNSServer.h>
-
-// #define ETAG_SUPPORT
 
 // use TRACE for compiling with detailed TRACE output.
 #define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
@@ -118,7 +116,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 /**
  * @brief Check the mode the device in running.
  * @return true when board is runing in captive mode.
- * @return false when board is runing in normal mode. 
+ * @return false when board is runing in normal mode.
  */
 bool Board::isCaptiveMode() {
   return ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE));
@@ -126,7 +124,7 @@ bool Board::isCaptiveMode() {
 
 
 /**
- * @brief 
+ * @brief
  */
 void Board::_checkNetState() {
   hd_yield();
@@ -516,8 +514,9 @@ void Board::loop() {
     filesVersion = random(8000); // will incremented on every file upload by file server
 
     if (cacheHeader == "etag") {
-#ifdef ETAG_SUPPORT
+#if defined(HOMEDING_SUPPORT_ETAG)
       // enable eTags in results for static files
+      // by setting "cache": "etag" inc env.json on the device element
 
       // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
       server->enableETag(true, [this](FILESYSTEM &, const String &path) -> String {
@@ -570,16 +569,16 @@ void Board::loop() {
       // https://github.com/espressif/esp-idf/blob/master/examples/protocols/mdns/main/mdns_example_main.c
 
       LOGGER_JUSTINFO("a0");
-      //initialize mDNS service
+      // initialize mDNS service
       esp_err_t err = mdns_init();
       if (err) {
         LOGGER_JUSTINFO("MDNS Init failed: %d\n", err);
         return;
       }
 
-      //set hostname
+      // set hostname
       mdns_hostname_set(deviceName.c_str());
-      //set default instance
+      // set default instance
       mdns_instance_name_set("HomeDing on ESP32");
 
       LOGGER_JUSTINFO("b0");
@@ -613,8 +612,7 @@ void Board::loop() {
     _newState(BOARDSTATE::RUN);
   } else if (boardState == BOARDSTATE::SLEEP) {
     // just wait.
-    Serial.write('*');
-    Serial.flush();
+
   } else if (boardState == BOARDSTATE::STARTCAPTIVE) {
     uint8_t mac[6];
     char ssid[64];

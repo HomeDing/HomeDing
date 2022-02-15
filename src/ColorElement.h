@@ -14,6 +14,7 @@
  * Changelog:
  * * 28.12.2019 created by Matthias Hertel
  * * 28.12.2019 take over modes from neo element. 
+ * * 13.02.2022 pass through brightness. 
 */
 
 #ifndef COLORELEMENT_H
@@ -81,6 +82,12 @@ private:
    */
   uint32_t _value = 0;
 
+
+  /** @brief  The actual brightness output. 
+   * The Light element uses this property as a factor for all PWM output.
+  */
+  int _brightness = 50; // percent
+
   /**
    * @brief The values for a transition.
    */
@@ -106,6 +113,11 @@ private:
    * @brief The _valueAction holds the actions that is submitted when the color changes.
    */
   String _valueAction;
+
+  /**
+   * @brief The _brightnessAction holds the actions that is submitted when the brightness changes.
+   */
+  String _brightnessAction;
 
 };
 

@@ -41,7 +41,7 @@ Element *ColorElement::create() {
 #define MAX_HUE 1536
 
 /*
- * Convert hue into a color value 0x00RRGGBB
+ * Convert hue into a color value 0x00rrggbb
  * using interger based calculations. The hue value must be in range 0 to 1535.
  *
  * @brief
@@ -103,7 +103,7 @@ bool ColorElement::set(const char *name, const char *value) {
   bool ret = true;
   unsigned long now = millis();
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     uint32_t colorValue = _atoColor(value);
 
     if (_mode == Mode::fade) {
@@ -115,6 +115,12 @@ bool ColorElement::set(const char *name, const char *value) {
     } else if ((_mode == Mode::fix) || (_mode == Mode::pulse)) {
       _toValue = colorValue;
     }
+
+  } else if (_stricmp(name, "brightness") == 0) {
+    // pass through the brightness
+    int b = _atoi(value);
+    _brightness = constrain(b, 0, 100);
+    _board->dispatch(_brightnessAction, b);
 
   } else if (_stricmp(name, "mode") == 0) {
     if (_stricmp(value, "fade") == 0) {
@@ -134,13 +140,17 @@ bool ColorElement::set(const char *name, const char *value) {
       _toValue = _value;
     } // if
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-    // save the actions
-    _valueAction = value;
-
   } else if (_stricmp(name, "duration") == 0) {
     // duration for wheel, pulse and fade effect
     _duration = _scanDuration(value);
+
+  } else if (_stricmp(name, "onValue") == 0) {
+    // save the actions
+    _valueAction = value;
+
+  } else if (_stricmp(name, "onBrightness") == 0) {
+    // save the actions
+    _brightnessAction = value;
 
   } else {
     ret = Element::set(name, value);
@@ -262,6 +272,7 @@ void ColorElement::pushState(
   }
 
   callback("duration", String(_duration).c_str());
+  callback("brightness", String(_brightness).c_str());
 } // pushState()
 
 

@@ -89,7 +89,7 @@ protected:
   /** @brief Brightness level in percent. 
    * The Light element uses this property as a factor for all PWM output.
   */
-  int brightness = 128; // percent
+  int brightness = 50; // percent
 
   /**
    * @brief The actual / new value of the output value.

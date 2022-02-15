@@ -69,12 +69,6 @@ public:
    */
   virtual void loop() override;
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
 
   enum class Mode {
     color = 0,
@@ -92,6 +86,8 @@ private:
 
   /** Number of pixels in the stripe */
   int _count;
+
+  /** Overall brightness in range 0...100 from LightElement */
 
   /** data output pin is taken from _pins[0]*/
 

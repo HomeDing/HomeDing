@@ -39,9 +39,9 @@ void LightElement::setOutput(String value)
     int c = col & 0x00FF;
 
 #if defined(ESP8266)
-    analogWrite(_pins[n], c * brightness / 255);
+    analogWrite(_pins[n], c * brightness / 100);
 #elif (defined(ESP32))
-    ledcWrite(_channels[n], c * brightness / 255);
+    ledcWrite(_channels[n], c * brightness / 100);
 #endif
 
     TRACE("%d pin=%d value=%02x", n, _pins[n], c);
@@ -82,7 +82,7 @@ bool LightElement::set(const char *name, const char *pValue)
 
   } else if (_stricmp(name, "brightness") == 0) {
     brightness = _atoi(pValue);
-    brightness = constrain(brightness, 0, 255);
+    brightness = constrain(brightness, 0, 100);
     needUpdate = true;
 
   } else if (_stricmp(name, PROP_PIN) == 0) {

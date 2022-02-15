@@ -52,7 +52,7 @@ void NeoElement::_setColors(String colList)
     _strip->setPixelColor(n++, col);
   }
   needUpdate = true;
-}
+} // _setColors()
 
 
 /* ===== Static factory function ===== */
@@ -89,7 +89,7 @@ bool NeoElement::set(const char *name, const char *pValue)
   // TRACE("set %s=%s", name, value);
   bool ret = LightElement::set(name, pValue);
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     // saving to LightElement::value was handled in LightElement
     _mode = Mode::color;
     if (_strip)
@@ -113,9 +113,9 @@ bool NeoElement::set(const char *name, const char *pValue)
   } else if (_stricmp(name, "brightness") == 0) {
     // saving to LightElement::brightness was handled in LightElement
     if (_strip) {
-      _strip->setBrightness(brightness);
+      _strip->setBrightness(brightness * 255 / 100); // convert to 0...255
       if (_mode == Mode::color) {
-        _setColors(value);
+        _setColors(value); // re-submit colors
       }
     }
 
@@ -141,8 +141,8 @@ void NeoElement::start()
   _strip = new (std::nothrow) Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
   if (_strip) {
     _strip->begin();
-    _setColors(value);
     _strip->setBrightness(brightness);
+    _setColors(value);
   } // if
   // TRACE("start %d,%d", (_strip != nullptr), brightness);
 } // start()
@@ -194,17 +194,6 @@ void NeoElement::loop()
     }
   } // if
 } // loop()
-
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void NeoElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  LightElement::pushState(callback);
-  // callback("value", value.c_str());
-} // pushState()
 
 
 // End

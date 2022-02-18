@@ -106,7 +106,7 @@ bool MapElement::set(const char *name, const char *value) {
   TRACE("set '%s'='%s'", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     // find the right map entry (first that matches)
     _mapValue(value);
 
@@ -142,10 +142,10 @@ bool MapElement::set(const char *name, const char *value) {
       _mMin[mapIndex] = value;
       _mMax[mapIndex] = value;
 
-    } else if (_stricmp(mapName, "value") == 0) {
+    } else if (_stricmp(mapName, PROP_VALUE) == 0) {
       _mValue[mapIndex] = value;
 
-    } else if (_stricmp(mapName, "onValue") == 0) {
+    } else if (_stricmp(mapName, ACTION_ONVALUE) == 0) {
       _mActions[mapIndex] = value;
     } // if
 
@@ -175,7 +175,7 @@ void MapElement::loop() {
 void MapElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _value.c_str());
+  callback(PROP_VALUE, _value.c_str());
 } // pushState()
 
 // End

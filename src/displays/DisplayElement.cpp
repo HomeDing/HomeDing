@@ -20,7 +20,7 @@
 
 #include "DisplayElement.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Private functions ===== */
 
@@ -28,12 +28,12 @@ void DisplayElement::_reset() {
   // reset
   if (_resetpin >= 0) {
     pinMode(_resetpin, OUTPUT);
-    digitalWrite(_resetpin, LOW); // turn low to reset OLED
+    digitalWrite(_resetpin, LOW);  // turn low to reset OLED
     delay(250);
-    digitalWrite(_resetpin, HIGH); // while OLED is running, must set high
+    digitalWrite(_resetpin, HIGH);  // while OLED is running, must set high
     delay(250);
-  } // if
-} // _reset()
+  }  // if
+}  // _reset()
 
 
 void DisplayElement::_newPage(int page) {
@@ -54,7 +54,7 @@ void DisplayElement::_newPage(int page) {
       _board->dispatch(_onPage, da->page);
     }
   }
-} // _newPage()
+}  // _newPage()
 
 
 /* ===== Element functions ===== */
@@ -87,7 +87,7 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "width") == 0) {
     _width = _atoi(value);
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
     _brightness = _atoi(value);
     if (active && da) {
       da->setBrightness(_brightness);
@@ -112,10 +112,10 @@ bool DisplayElement::set(const char *name, const char *value) {
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
@@ -125,19 +125,19 @@ void DisplayElement::start() {
   // TRACE("start()");
   Element::start();
   _reset();
-} // start()
+}  // start()
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void DisplayElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   DisplayAdapter *da = _board->display;
   if (da) {
-    callback("brightness", String(_brightness).c_str());
+    callback(PROP_BRIGHTNESS, String(_brightness).c_str());
     callback("page", String(_board->display->page).c_str());
   }
-} // pushState()
+}  // pushState()
 
 // End

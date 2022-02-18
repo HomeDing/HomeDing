@@ -1,9 +1,7 @@
 @echo off
 
-set ESPTOOLS=%LOCALAPPDATA%\Arduino15\packages\esp8266\hardware\esp8266\3.0.2\tools
-
-@REM need python 3.x
-@REM + pip install pyserial
+@REM set ESPTOOLS=%LOCALAPPDATA%\Arduino15\packages\esp8266\hardware\esp8266\3.0.2\tools
+set ESPTOOLS=%USERPROFILE%\Projects\Arduino\Sketches\Hardware\esp8266com\esp8266\tools
 
 if [%1]==[] (
   echo missing device name as parameter
@@ -11,8 +9,8 @@ if [%1]==[] (
 )
 set devicename=%1
 
-if EXIST "..\..\_temp\DevDing.ino.bin" ( set binfile="..\..\_temp\DevDing.ino.bin" )
-if EXIST ".\_temp\DevDing.ino.bin"     ( set binfile=".\_temp\DevDing.ino.bin" )
+if EXIST "..\..\build\DevDing.ino.bin" ( set binfile="..\..\build\DevDing.ino.bin" )
+if EXIST ".\build\DevDing.ino.bin"     ( set binfile=".\build\DevDing.ino.bin" )
 
 echo Uploading %binfile%...
 python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a 123 -f %binfile% 

@@ -29,9 +29,9 @@
 
 /* ===== Define local constants and often used strings ===== */
 
-#define FIX_BAND RADIO_BAND_FM ///< The band that will be tuned by this sketch is FM.
-#define FIX_STATION 8930 ///< The station that will be tuned by this sketch is 89.30 MHz.
-#define FIX_VOLUME 4 ///< The volume that will be set by this sketch is level 4.
+#define FIX_BAND RADIO_BAND_FM  ///< The band that will be tuned by this sketch is FM.
+#define FIX_STATION 8930        ///< The station that will be tuned by this sketch is 89.30 MHz.
+#define FIX_VOLUME 4            ///< The volume that will be set by this sketch is level 4.
 
 // The radio library only supports one radio device so all references and data can be static.
 // That simplifies the callback rds functions.
@@ -67,7 +67,7 @@ void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t blo
  */
 Element *RadioElement::create() {
   return (new RadioElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -140,7 +140,7 @@ bool RadioElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onRSSI") == 0) {
     _rssiAction = value;
 
-  } else if (_stricmp(name, "address") == 0) {
+  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
     // _resetpin = _atopin(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {
@@ -148,10 +148,10 @@ bool RadioElement::set(const char *name, const char *value) {
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 // radio
 
@@ -166,7 +166,7 @@ void RadioElement::start() {
 
   // Enable information to the Serial port
   radio.debugEnable(true);
-  radio._wireDebug(loglevel == 2); // debug the wire protocol on loglevel 2
+  radio._wireDebug(loglevel == 2);  // debug the wire protocol on loglevel 2
   _found = radio.initWire(Wire);
 
   if (!_found) {
@@ -174,8 +174,8 @@ void RadioElement::start() {
   } else {
     // Initialize the Radio
     radio.setup(RADIO_RESETPIN, _resetpin);
-    radio.setup(RADIO_SDAPIN, _board->I2cSda); // SI4703 requires this, others ignore.
-    radio.setup(RADIO_I2CADDRESS, 0); //  use default or check some addresses
+    radio.setup(RADIO_SDAPIN, _board->I2cSda);  // SI4703 requires this, others ignore.
+    radio.setup(RADIO_I2CADDRESS, 0);           //  use default or check some addresses
     if (_antenna) {
       radio.setup(RADIO_ANTENNA, _antenna);
     }
@@ -205,11 +205,11 @@ void RadioElement::start() {
       _rdsText = value;
       _newR = true;
     });
-  } // if
+  }  // if
 
   // radio._wireDebug(false);
 
-} // start()
+}  // start()
 
 
 /**
@@ -240,14 +240,14 @@ void RadioElement::loop() {
       _nextCheck = now + _checkInfo;
     }
   }
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void RadioElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback("frequency", _printInteger(_freq));
   callback("volume", _printInteger(_volume));
@@ -255,7 +255,7 @@ void RadioElement::pushState(
   callback("snr", String(_ri.snr).c_str());
   callback("stationname", _stationName.c_str());
   callback("rdstext", _rdsText.c_str());
-} // pushState()
+}  // pushState()
 
 
 /* ===== Register the Element ===== */
@@ -270,7 +270,7 @@ void RadioElement::pushState(
 // #ifdef HOMEDING_REGISTER
 // Register the RadioElement onto the ElementRegistry.
 bool RadioElement::registered =
-    ElementRegistry::registerElement("radio", RadioElement::create);
+  ElementRegistry::registerElement("radio", RadioElement::create);
 // #endif
 
 // End

@@ -1,21 +1,21 @@
 /**
  * @file TheColorAnimationElement.h
  * @brief The ColorAnimation Element creates a series or pattern of color values.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD 3-Clause style license,
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 28.12.2019 created by Matthias Hertel
- * * 28.12.2019 take over modes from neo element. 
- * * 13.02.2022 pass through brightness. 
-*/
+ * * 28.12.2019 take over modes from neo element.
+ * * 13.02.2022 pass through brightness.
+ */
 
 #ifndef COLORELEMENT_H
 #define COLORELEMENT_H
@@ -31,8 +31,7 @@ This is typically used for controlling multiple light emitting devices.
 @endverbatim
  */
 
-class ColorElement : public Element
-{
+class ColorElement : public Element {
 public:
   /**
    * @brief Factory function to create a ColorElement.
@@ -65,13 +64,13 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
   enum class Mode {
-    fix = 0,   // take inbound value for output
-    fade = 1,  // fade to inbound value from current value
-    wheel = 2, // single color output cycling through whole hue cycle
+    fix = 0,    // take inbound value for output
+    fade = 1,   // fade to inbound value from current value
+    wheel = 2,  // single color output cycling through whole hue cycle
     pulse = 4,
     more
   };
@@ -83,10 +82,10 @@ private:
   uint32_t _value = 0;
 
 
-  /** @brief  The actual brightness output. 
+  /** @brief  The actual brightness output.
    * The Light element uses this property as a factor for all PWM output.
-  */
-  int _brightness = 50; // percent
+   */
+  int _brightness = 50;  // percent
 
   /**
    * @brief The values for a transition.
@@ -118,14 +117,13 @@ private:
    * @brief The _brightnessAction holds the actions that is submitted when the brightness changes.
    */
   String _brightnessAction;
-
 };
 
 #ifdef HOMEDING_REGISTER
 // Register the ColorElement in the ElementRegistry.
 bool ColorElement::registered =
-    ElementRegistry::registerElement("color", ColorElement::create);
- #endif
+  ElementRegistry::registerElement("color", ColorElement::create);
+#endif
 
 
 #endif

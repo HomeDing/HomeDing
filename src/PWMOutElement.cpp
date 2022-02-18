@@ -19,14 +19,12 @@
  * @brief static factory function to create a new PWMOutElement.
  * @return PWMOutElement* as Element* created element
  */
-Element *PWMOutElement::create()
-{
+Element *PWMOutElement::create() {
   return (new PWMOutElement());
-} // create()
+}  // create()
 
 
-bool PWMOutElement::set(const char *name, const char *value)
-{
+bool PWMOutElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
@@ -43,16 +41,15 @@ bool PWMOutElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the PWMOutElement.
  */
-void PWMOutElement::start()
-{
+void PWMOutElement::start() {
   if (_pin < 0) {
     LOGGER_EERR("no pin");
 
@@ -72,37 +69,35 @@ void PWMOutElement::start()
 
     _setValue(_value);
 
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 void PWMOutElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, _printInteger(_value));
-} // pushState()
+}  // pushState()
 
 
 /**
  * @brief set the physical level based on _inverse
  * @param logicalHigh
  */
-void PWMOutElement::_setValue(int newValue)
-{
+void PWMOutElement::_setValue(int newValue) {
   // TRACE("setValue(%d)", newValue);
   _value = newValue;
 
   if (active) {
-    int v  = (_inverse) ? _range - _value : _value;
+    int v = (_inverse) ? _range - _value : _value;
 #if defined(ESP8266)
     analogWrite(_pin, v);
 #elif (defined(ESP32))
     ledcWrite(_channel, v);
 #endif
 
-  } // if
-} // _setValue
+  }  // if
+}  // _setValue
 
 
 // End

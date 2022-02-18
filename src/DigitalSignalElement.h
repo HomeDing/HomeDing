@@ -23,17 +23,11 @@
 
 #include <HomeDing.h>
 
-#define BUTTON_TYPE_LEVEL 0x00
-#define BUTTON_TYPE_TOGGLE 0x01
-
-// class OneButton;
-
 /**
  * @brief The DigitalSignalElement is an special Element that creates actions based
  * on a digital IO signal.
  */
-class DigitalSignalElement : public Element
-{
+class DigitalSignalElement : public Element {
 public:
   /**
    * @brief Factory function to create a DigitalSignalElement.
@@ -72,7 +66,7 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
   // ----- static interrupt stuff -----
@@ -147,7 +141,7 @@ private:
 #ifdef HOMEDING_REGISTER
 // Register the DigitalSignalElement onto the ElementRegistry.
 bool DigitalSignalElement::registered =
-    ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
+  ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
 #endif
 
-#endif // DIGITALSIGNAL_H
+#endif  // DIGITALSIGNAL_H

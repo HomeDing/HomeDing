@@ -26,17 +26,15 @@
  * @brief static factory function to create a new SHT20Element
  * @return SHT20Element* created element
  */
-Element *SHT20Element::create()
-{
+Element *SHT20Element::create() {
   return (new SHT20Element());
-} // create()
+}  // create()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool SHT20Element::set(const char *name, const char *value)
-{
+bool SHT20Element::set(const char *name, const char *value) {
   bool ret = SensorElement::set(name, value);
 
   if (!ret) {
@@ -52,10 +50,10 @@ bool SHT20Element::set(const char *name, const char *value)
       _humidityAction = value;
       ret = true;
 
-    } // if
-  } // if
+    }  // if
+  }    // if
   return (ret);
-} // set()
+}  // set()
 
 // ===== SHT20 specific commands. see data Data Sheet.
 
@@ -71,18 +69,17 @@ bool SHT20Element::set(const char *name, const char *value)
 // calculate crc8 for data
 // assuming 0 as a crc start and POLYNOMIAL = 0x131;
 // See https://www.sensirion.com/ ... Sensirion_Humidity_Sensors_SHT2x_CRC_Calculation.pdf
-byte crc8(byte *data, int length)
-{
+byte crc8(byte *data, int length) {
   byte crc = 0;
 
-  //calculates 8-Bit checksum with given polynomial
+  // calculates 8-Bit checksum with given polynomial
 
   while (length) {
     crc ^= *data;
 
     for (int bit = 8; bit > 0; --bit) {
       if (crc & 0x80)
-        crc = (crc << 1) ^ 0x131; // POLYNOMIAL
+        crc = (crc << 1) ^ 0x131;  // POLYNOMIAL
       else
         crc = (crc << 1);
     }
@@ -91,17 +88,15 @@ byte crc8(byte *data, int length)
     data++;
   }
   return (crc);
-} // crc8
+}  // crc8
 
 
-void SHT20Element::_start(int cmd)
-{
+void SHT20Element::_start(int cmd) {
   WireUtils::write(_address, cmd, nullptr, 0);
 }
 
-uint16_t SHT20Element::_read()
-{
-  uint16_t ret = 0; // no value
+uint16_t SHT20Element::_read() {
+  uint16_t ret = 0;  // no value
   uint8_t data[3];
   int8_t readLen = 0;
 
@@ -109,9 +104,9 @@ uint16_t SHT20Element::_read()
   if ((readLen == sizeof(data)) && (data[2] == crc8(data, 2))) {
     // good reading
     ret = ((uint16_t)(data[0]) << 8) + data[1];
-  } // if
+  }  // if
   return (ret & 0xFFFC);
-} // _read()
+}  // _read()
 
 
 // ===== Element functions
@@ -119,8 +114,7 @@ uint16_t SHT20Element::_read()
 /**
  * @brief Activate the SHT20Element.
  */
-void SHT20Element::start()
-{
+void SHT20Element::start() {
   if (!_address) {
     LOGGER_EERR("no address");
     term();
@@ -133,25 +127,24 @@ void SHT20Element::start()
 
     } else {
       SensorElement::start();
-    } // if
-  } // if
-} // start()
+    }  // if
+  }    // if
+}  // start()
 
 
 // ===== Sensor functions
 
 /** return true when reading a probe is done.
-  * return any existing value or empty for no data could be read.
-  * As the sensor needs 2 cycles of measurements for temp and hum the state is used to control this.
-  * 0: start temp
-  * 1: read temp
-  * 2: start hum
-  * 3: read hum
-  * 4: report values, reset state
-  * 4: report error
-  * */
-bool SHT20Element::getProbe(String &values)
-{
+ * return any existing value or empty for no data could be read.
+ * As the sensor needs 2 cycles of measurements for temp and hum the state is used to control this.
+ * 0: start temp
+ * 1: read temp
+ * 2: start hum
+ * 3: read hum
+ * 4: report values, reset state
+ * 4: report error
+ * */
+bool SHT20Element::getProbe(String &values) {
   bool newData = false;
   unsigned long now = millis();
 
@@ -196,23 +189,21 @@ bool SHT20Element::getProbe(String &values)
     values = "";
   }
   return (newData);
-} // getProbe()
+}  // getProbe()
 
 
-void SHT20Element::sendData(String &values)
-{
+void SHT20Element::sendData(String &values) {
   // dispatch values.
   _board->dispatchItem(_temperatureAction, values, 0);
   _board->dispatchItem(_humidityAction, values, 1);
-} // sendData()
+}  // sendData()
 
 
 void SHT20Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   SensorElement::pushState(callback);
   callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
   callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
-} // pushState()
+}  // pushState()
 
 // End

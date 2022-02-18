@@ -1,16 +1,16 @@
 /**
  * @file CalcElement.h
  * @brief Logical Base Element that collects input values and settings.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 10.10.2021 created by Matthias Hertel
  */
@@ -22,8 +22,7 @@
 
 #define MAX_INPUTS 8
 
-class CalcElement : public Element
-{
+class CalcElement : public Element {
 public:
   /**
    * @brief Activate the Element.
@@ -51,11 +50,11 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
   /// number of given input values.
-  int  _inputs = 0;
+  int _inputs = 0;
 
   Element::DATATYPE _type = DATATYPE::STRING;
 
@@ -81,7 +80,6 @@ protected:
    * @brief function for calculating from input to output values.
    */
   virtual void _calc();
-
 };
 
 /* ===== This Element will not be registered and configured. Use derived classes. ===== */

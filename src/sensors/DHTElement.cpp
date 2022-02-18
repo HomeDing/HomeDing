@@ -27,7 +27,7 @@
  */
 Element *DHTElement::create() {
   return (new DHTElement());
-} // create()
+}  // create()
 
 
 /**
@@ -38,7 +38,7 @@ bool DHTElement::set(const char *name, const char *value) {
 
   if (!ret) {
     // Not handled by the SensorElement
-    ret = true; // assume
+    ret = true;  // assume
     if (_stricmp(name, "type") == 0) {
       if (_stricmp(value, "DHT11") == 0) {
         _type = 11;
@@ -68,10 +68,10 @@ bool DHTElement::set(const char *name, const char *value) {
 
     } else {
       ret = false;
-    } // if
-  } // if
+    }  // if
+  }    // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
@@ -90,8 +90,8 @@ void DHTElement::start() {
       digitalWrite(_powerpin, physLevel);
     }
     _dht = new DHTNEW(_pin);
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 /**
@@ -108,7 +108,7 @@ void DHTElement::term() {
   _dht->powerDown();
   delete (_dht);
   SensorElement::term();
-} // start()
+}  // start()
 
 
 bool DHTElement::getProbe(String &values) {
@@ -125,24 +125,24 @@ bool DHTElement::getProbe(String &values) {
 
   } else if (ret != DHTLIB_WAITING_FOR_READ) {
     LOGGER_EERR("dht err: %d", ret);
-  } // if
+  }  // if
 
   return (newData);
-} // getProbe()
+}  // getProbe()
 
 
 void DHTElement::sendData(String &values) {
   _board->dispatchItem(_tempAction, values, 0);
   _board->dispatchItem(_humAction, values, 1);
-} // sendData()
+}  // sendData()
 
 
 void DHTElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   SensorElement::pushState(callback);
   callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
   callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
-} // pushState()
+}  // pushState()
 
 
 // End

@@ -103,7 +103,7 @@ bool ColorElement::set(const char *name, const char *value) {
   bool ret = true;
   unsigned long now = millis();
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     uint32_t colorValue = _atoColor(value);
 
     if (_mode == Mode::fade) {
@@ -116,7 +116,7 @@ bool ColorElement::set(const char *name, const char *value) {
       _toValue = colorValue;
     }
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
     // pass through the brightness
     int b = _atoi(value);
     _brightness = constrain(b, 0, 100);
@@ -144,7 +144,7 @@ bool ColorElement::set(const char *name, const char *value) {
     // duration for wheel, pulse and fade effect
     _duration = _scanDuration(value);
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     // save the actions
     _valueAction = value;
 
@@ -272,7 +272,7 @@ void ColorElement::pushState(
   }
 
   callback("duration", String(_duration).c_str());
-  callback("brightness", String(_brightness).c_str());
+  callback(PROP_BRIGHTNESS, String(_brightness).c_str());
 } // pushState()
 
 

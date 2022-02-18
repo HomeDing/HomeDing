@@ -20,7 +20,7 @@
 #include "TM1637Element.h"
 
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 // from: https://github.com/pjpmarques/ChainableLED/blob/master/ChainableLED.cpp
 
@@ -32,7 +32,7 @@
  */
 Element *TM1637Element::create() {
   return (new TM1637Element());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -44,11 +44,11 @@ bool TM1637Element::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (_stricmp(name, PROP_VALUE) == 0) {
     _value = value;
     _needUpdate = true;
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
     int b = _atoi(value);
     b = constrain(b, 0, 8);
     if (b != _brightness) {
@@ -63,9 +63,9 @@ bool TM1637Element::set(const char *name, const char *value) {
     _clockPin = _atopin(value);
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
@@ -78,7 +78,7 @@ void TM1637Element::start() {
     Element::start();
     _needUpdate = true;
   }
-} // start()
+}  // start()
 
 
 /**
@@ -91,17 +91,17 @@ void TM1637Element::loop() {
     _disp->display(_value);
     _needUpdate = false;
   }
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void TM1637Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, _value.c_str());
-} // pushState()
+}  // pushState()
 
 
 // End

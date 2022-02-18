@@ -5,9 +5,9 @@
 #ifndef HOMEDING_H
 #define HOMEDING_H
 
-#include <Board.h> // Platform
-#include <Element.h> // Abstract Elements
-#include <ElementRegistry.h> // Element Registry
+#include <Board.h>            // Platform
+#include <Element.h>          // Abstract Elements
+#include <ElementRegistry.h>  // Element Registry
 
 // some common property names
 
@@ -15,6 +15,7 @@ extern const char *PROP_VALUE;
 extern const char *PROP_PIN;
 extern const char *PROP_ADDRESS;
 extern const char *PROP_INVERSE;
+extern const char *PROP_BRIGHTNESS;
 
 extern const char *ACTION_ONVALUE;
 extern const char *ACTION_ONTEMPERATURE;
@@ -29,11 +30,11 @@ extern const char *ACTION_ONPRESSURE;
 // ===== SYSTEM Elements =====
 
 // The only strictly required elements are: DeviceElement and OTAElement. They are included any time.
-// The other system level elements SSDPElement, TimeElement 
+// The other system level elements SSDPElement, TimeElement
 
 #ifdef HOMEDING_INCLUDE_ALL
 
-#define HOMEDING_INCLUDE_SYSTEM // all system elements
+#define HOMEDING_INCLUDE_SYSTEM  // all system elements
 #define HOMEDING_INCLUDE_CORE
 #define HOMEDING_INCLUDE_TM1637
 #define HOMEDING_INCLUDE_PMS
@@ -46,7 +47,7 @@ extern const char *ACTION_ONPRESSURE;
 // ===== CORE Elements =====
 
 // The Core Elements that are very common and add themselves to the ElementRegistry
-// when the corresponding HOMEDING_INCLUDE_Xxxx macro is defined. 
+// when the corresponding HOMEDING_INCLUDE_Xxxx macro is defined.
 // Easy include of all elements that do not require a separate library
 // by defining HOMEDING_INCLUDE_CORE.
 

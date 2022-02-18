@@ -25,17 +25,15 @@
  * @brief static factory function to create a new DS18B20Element
  * @return DS18B20Element* created element
  */
-Element *DS18B20Element::create()
-{
+Element *DS18B20Element::create() {
   return (new DS18B20Element());
-} // create()
+}  // create()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool DS18B20Element::set(const char *name, const char *value)
-{
+bool DS18B20Element::set(const char *name, const char *value) {
   bool ret = SensorElement::set(name, value);
 
   if (!ret) {
@@ -46,17 +44,16 @@ bool DS18B20Element::set(const char *name, const char *value)
     } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
       _tempAction = value;
       ret = true;
-    } // if
-  } // if
+    }  // if
+  }    // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the DS18B20Element.
  */
-void DS18B20Element::start()
-{
+void DS18B20Element::start() {
   // TRACE("start()");
   if (_pin >= 0) {
     _oneWire = new (std::nothrow) OneWire(_pin);
@@ -72,19 +69,18 @@ void DS18B20Element::start()
     } else {
       // TRACE("no address.");
     }
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 // ===== OneWire commands and timings
-#define COMMAND_CONVERT 0x44 // This command initiates a temperature conversion.
-#define COMMAND_READ_SCRATCHPAD 0xbe // This command initiates reading the content of the scratchpad.
-#define CONVERT_MSECS 750 // time in msec for 12 bit conversion
+#define COMMAND_CONVERT 0x44          // This command initiates a temperature conversion.
+#define COMMAND_READ_SCRATCHPAD 0xbe  // This command initiates reading the content of the scratchpad.
+#define CONVERT_MSECS 750             // time in msec for 12 bit conversion
 
 /** return true when reading a probe is done.
-  * return any existing value or empty for no data could be read. */
-bool DS18B20Element::getProbe(String &values)
-{
+ * return any existing value or empty for no data could be read. */
+bool DS18B20Element::getProbe(String &values) {
   // LOGGER_EINFO("getProbe()");
   bool newData = false;
 
@@ -94,7 +90,7 @@ bool DS18B20Element::getProbe(String &values)
     // LOGGER_EINFO("convert");
     _oneWire->reset();
     _oneWire->select(_addr);
-    _oneWire->write(COMMAND_CONVERT, 1); // start conversion
+    _oneWire->write(COMMAND_CONVERT, 1);  // start conversion
     _isReady = millis() + CONVERT_MSECS;
 
   } else if (_isReady < millis()) {
@@ -104,7 +100,7 @@ bool DS18B20Element::getProbe(String &values)
 
     _oneWire->reset();
     _oneWire->select(_addr);
-    _oneWire->write(COMMAND_READ_SCRATCHPAD); // Read Scratchpad
+    _oneWire->write(COMMAND_READ_SCRATCHPAD);  // Read Scratchpad
 
     // read all 9 scratchpad bytes
     for (int i = 0; i < 9; i++) {
@@ -120,26 +116,24 @@ bool DS18B20Element::getProbe(String &values)
 
     _isReady = 0;
     newData = true;
-  } // if
+  }  // if
 
   return (newData);
-} // getProbe()
+}  // getProbe()
 
 
-void DS18B20Element::sendData(String &values)
-{
+void DS18B20Element::sendData(String &values) {
   // dispatch value.
   // TRACE("sending %s", values.c_str());
   _board->dispatch(_tempAction, values);
-} // sendData()
+}  // sendData()
 
 
 void DS18B20Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   SensorElement::pushState(callback);
   callback("temperature", _lastValues.c_str());
-} // pushState()
+}  // pushState()
 
 
 // ===== private functions =====

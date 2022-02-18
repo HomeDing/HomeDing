@@ -52,10 +52,10 @@ bool CalcElement::set(const char *name, const char *value) {
     _valueAction = value;
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
@@ -70,26 +70,25 @@ void CalcElement::loop() {
       _board->dispatch(_valueAction, _value);
     }
     _needRecalc = false;
-  } // if
+  }  // if
   Element::loop();
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void CalcElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, _value.c_str());
-} // pushState()
+}  // pushState()
 
 
 /**
  * @brief function for calculating from input to output values.
  */
-void CalcElement::_calc() {
-};
+void CalcElement::_calc(){};
 
 
 // End

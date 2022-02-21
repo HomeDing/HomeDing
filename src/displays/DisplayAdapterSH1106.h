@@ -18,25 +18,20 @@
 #include <displays/DisplayAdapterOLED.h>
 
 
-class DisplayAdapterSH1106 : public DisplayAdapterOLED
-{
+class DisplayAdapterSH1106 : public DisplayAdapterOLED {
 public:
   /**
    * @brief Construct a new Display Adapter for a SH1106 display
    * using specific parameters.
    */
-  DisplayAdapterSH1106(int address, int h)
-  {
-    _address = address;
-    _h = h;
-  } // DisplayAdapterSH1106()
-
+  DisplayAdapterSH1106(int address, int height, int rotation)
+    : DisplayAdapterOLED(address, height, rotation) {
+  }  // DisplayAdapterSH1106()
 
   virtual ~DisplayAdapterSH1106() = default;
 
 
-  bool init(Board *board)
-  {
+  bool init(Board *board) {
     if (!disp) {
       // allocate a new class for this display
 
@@ -45,10 +40,10 @@ public:
         return (false);
 
       } else {
-        OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
+        OLEDDISPLAY_GEOMETRY res = (_height == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
         disp = new (std::nothrow) SH1106Wire(_address, board->I2cSda, board->I2cScl, res);
       }
-    } // if
+    }  // if
 
     if (!disp) {
       return (false);
@@ -56,20 +51,13 @@ public:
     } else {
       disp->init();
       DisplayAdapterOLED::init(board, disp);
-    } // if
+    }  // if
     return (true);
-  }; // init()
+  };  // init()
 
 private:
-  /**
-   * @brief I2C Display device address.
-   */
-  int _address;
-
-  int _h;
-
   SH1106Wire *disp = nullptr;
 
-}; // class
+};  // class
 
-#endif // DisplayAdapterSH1106_H
+#endif  // DisplayAdapterSH1106_H

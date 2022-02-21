@@ -75,20 +75,9 @@ bool DisplayElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
   DisplayAdapter *da = _board->display;
 
-  if (_stricmp(name, PROP_ADDRESS) == 0) {
-    _address = _atoi(value);
-
-  } else if (_stricmp(name, "resetpin") == 0) {
-    _resetpin = _atopin(value);
-
-  } else if (_stricmp(name, "height") == 0) {
-    _height = _atoi(value);
-
-  } else if (_stricmp(name, "width") == 0) {
-    _width = _atoi(value);
-
-  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
-    _brightness = _atoi(value);
+  if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
+    int b = _atoi(value);
+    _brightness = constrain(b, 0, 100);
     if (active && da) {
       da->setBrightness(_brightness);
     }
@@ -109,6 +98,27 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onpage") == 0) {
     // action with current visible page
     _onPage = value;
+
+    // === These properties can only be used during configuration:
+
+  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
+    _address = _atoi(value);
+
+  } else if (_stricmp(name, "resetpin") == 0) {
+    _resetpin = _atopin(value);
+
+  } else if (_stricmp(name, "height") == 0) {
+    _height = _atoi(value);
+
+  } else if (_stricmp(name, "width") == 0) {
+    _width = _atoi(value);
+
+  } else if (_stricmp(name, "rotation") == 0) {
+    int r = _atoi(value);
+    r = (r / 90);
+    r = constrain(r, 0, 3);
+    _rotation = r * 90;
+    // TRACE("rotation=%d", _rotation);
 
   } else {
     ret = Element::set(name, value);

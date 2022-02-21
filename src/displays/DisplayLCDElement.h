@@ -27,8 +27,7 @@
  * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplayLCDElement : public DisplayElement
-{
+class DisplayLCDElement : public DisplayElement {
 public:
   /**
    * @brief Factory function to create a DisplayLCDElement.
@@ -64,7 +63,7 @@ public:
 #ifdef HOMEDING_REGISTER
 // Register the DisplaySSD1306Element onto the ElementRegistry.
 bool DisplayLCDElement::registered =
-    ElementRegistry::registerElement("displayLCD", DisplayLCDElement::create);
+  ElementRegistry::registerElement("displayLCD", DisplayLCDElement::create);
 #endif
 
 

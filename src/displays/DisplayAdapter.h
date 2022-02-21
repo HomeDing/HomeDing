@@ -26,14 +26,12 @@
 
 #define MAX_DISPLAY_STRING_LEN 80
 
-class DisplayAdapter
-{
+class DisplayAdapter {
 public:
-  DisplayAdapter()
-  {
-    _lineHeight = 1;
-    _charWidth = 1;
-  } // DisplayAdapter()
+  DisplayAdapter(int lineHeight, int charWidth) {
+    _lineHeight = lineHeight;
+    _charWidth = charWidth;
+  }  // DisplayAdapter()
 
   virtual ~DisplayAdapter() = default;
 
@@ -42,8 +40,7 @@ public:
    * @return true when display is ready for operation.
    * @return false otherwise.
    */
-  virtual bool init(UNUSED Board *board)
-  {
+  virtual bool init(UNUSED Board *board) {
     return (true);
   };
 
@@ -52,29 +49,24 @@ public:
    */
   virtual void clear(){};
 
-  virtual void setLineHeight(int16_t lh)
-  {
+  virtual void setLineHeight(int16_t lh) {
     _lineHeight = lh;
   };
 
-  virtual int getFontHeight(int fontsize)
-  {
+  virtual int getFontHeight(int fontsize) {
     return (fontsize);
   };
 
-  virtual int16_t getLineHeight()
-  {
+  virtual int16_t getLineHeight() {
     return (_lineHeight);
   };
 
 
-  virtual void setCharWidth(int16_t cw)
-  {
+  virtual void setCharWidth(int16_t cw) {
     _charWidth = cw;
   };
 
-  virtual int16_t getCharWidth()
-  {
+  virtual int16_t getCharWidth() {
     return (_charWidth);
   };
 
@@ -91,20 +83,17 @@ public:
 
   // virtual void setColor(int col) {};
 
-  virtual int drawText(int16_t x, int16_t y, int16_t h, String &text)
-  {
+  virtual int drawText(int16_t x, int16_t y, int16_t h, String &text) {
     return (drawText(x, y, h, text.c_str()));
   };
 
-  virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text)
-  {
+  virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text) {
     return (_charWidth * strnlen(text, MAX_DISPLAY_STRING_LEN));
   };
 
   virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1){};
 
-  virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill)
-  {
+  virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill) {
     return (h);
   };
 
@@ -132,4 +121,4 @@ private:
   int16_t _charWidth;
 };
 
-#endif // DisplayAdapter_H
+#endif  // DisplayAdapter_H

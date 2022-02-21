@@ -18,25 +18,20 @@
 #include <displays/DisplayAdapterOLED.h>
 
 
-class DisplayAdapterSSD1306 : public DisplayAdapterOLED
-{
+class DisplayAdapterSSD1306 : public DisplayAdapterOLED {
 public:
   /**
-   * @brief Construct a new Display Adapter for a SH1106 display
+   * @brief Construct a new Display Adapter for a SSD1306 display
    * using specific parameters.
    */
-  DisplayAdapterSSD1306(int address, int h)
-  {
-    _address = address;
-    _h = h;
-  } // DisplayAdapterSSD1306()
-
+  DisplayAdapterSSD1306(int address, int height, int rotation = 0)
+    : DisplayAdapterOLED(address, height, rotation) {
+  }  // DisplayAdapterSSD1306()
 
   virtual ~DisplayAdapterSSD1306() = default;
 
 
-  bool init(Board *board)
-  {
+  bool init(Board *board) {
     if (!disp) {
       // allocate a new class for this display
 
@@ -45,10 +40,10 @@ public:
         return (false);
 
       } else {
-        OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
+        OLEDDISPLAY_GEOMETRY res = (_height == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
         disp = new (std::nothrow) SSD1306Wire(_address, board->I2cSda, board->I2cScl, res);
       }
-    } // if
+    }  // if
 
     if (!disp) {
       return (false);
@@ -56,19 +51,12 @@ public:
     } else {
       disp->init();
       DisplayAdapterOLED::init(board, disp);
-    } // if
+    }  // if
     return (true);
-  }; // init()
+  };  // init()
 
 private:
-  /**
-   * @brief I2C Display device address.
-   */
-  int _address;
-
-  int _h;
-
   SSD1306Wire *disp = nullptr;
-}; // class
+};  // class
 
-#endif // DisplayAdapterSSD1306_H
+#endif  // DisplayAdapterSSD1306_H

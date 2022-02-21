@@ -28,34 +28,22 @@
  * @brief static factory function to create a new DisplaySH1106Element
  * @return DisplaySH1106Element* created element
  */
-Element *DisplaySH1106Element::create()
-{
+Element *DisplaySH1106Element::create() {
   return (new DisplaySH1106Element());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
 /**
- * @brief Set a parameter or property to a new value or start an action.
- */
-bool DisplaySH1106Element::set(const char *name, const char *value)
-{
-  bool ret = DisplayElement::set(name, value);
-  return (ret);
-} // set()
-
-
-/**
  * @brief Activate the DisplaySH1106Element and register a Display Adapter to
  * LCD in the board.
  */
-void DisplaySH1106Element::start()
-{
+void DisplaySH1106Element::start() {
   DisplayElement::start();
 
   // TRACE("start()");
-  DisplayAdapter *d = new DisplayAdapterSH1106(_address, _height);
+  DisplayAdapter *d = new DisplayAdapterSH1106(_address, _height, _rotation);
 
   if (d->init(_board)) {
     _board->display = d;
@@ -64,7 +52,7 @@ void DisplaySH1106Element::start()
     LOGGER_EERR("no display found.");
     delete d;
     active = false;
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 // End

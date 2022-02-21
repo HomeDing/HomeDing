@@ -20,8 +20,7 @@
 
 #include <functional>
 
-class DisplayElement : public Element
-{
+class DisplayElement : public Element {
 public:
   /* ===== Element functions ===== */
 
@@ -49,7 +48,7 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
   // common properties for display elements
@@ -66,8 +65,11 @@ protected:
   /** height of display */
   int _height = 64;
 
-  /** brightness of display */
-  int _brightness = 128;
+  /** brightness of display 0...100 (percent) */
+  int _brightness = 80;
+
+  /** rotation of display */
+  int _rotation = 0;
 
   /** event when page changes */
   String _onPage;
@@ -80,4 +82,4 @@ private:
 
 // This is a base class that will not be registered
 
-#endif // DISPLAYELEMENT_H
+#endif  // DISPLAYELEMENT_H

@@ -18,38 +18,20 @@
 #include <LiquidCrystal_PCF8574.h>
 #include <displays/DisplayAdapter.h>
 
-class DisplayAdapterLCD : public DisplayAdapter
-{
+class DisplayAdapterLCD : public DisplayAdapter {
 public:
-  /**
-   * @brief Construct a new Display Adapter for a LiquidCrystal display
-   * using common address 0x27 and 2*16 layout
-   */
-  DisplayAdapterLCD()
-  {
-    // use parameters of a common display board.
-    DisplayAdapterLCD(0x27, 2, 16);
-  } // DisplayAdapterLCD()
-
-
-  virtual ~DisplayAdapterLCD() = default;
-
-
   /**
    * @brief Construct a new Display Adapter for a SSD1306 display
    * using specific parameters.
    */
   DisplayAdapterLCD(int address, int lines, int columns)
-      : _address(address), _lines(lines), _cols(columns)
-  {
-    setLineHeight(1);
-    setCharWidth(1);
+    : DisplayAdapter(1, 1), _address(address), _lines(lines), _cols(columns) {
+  }  // DisplayAdapterLCD()
 
-  } // DisplayAdapterLCD()
+  virtual ~DisplayAdapterLCD() = default;
 
 
-  bool init(Board *board)
-  {
+  bool init(Board *board) {
     // test if a device is attached
     if (!WireUtils::exists(_address)) {
       LOGGER_ERR("not found");
@@ -67,10 +49,10 @@ public:
 
         display->begin(_cols, _lines);
 
-        byte dotOff[] = {0b00000, 0b01110, 0b10001, 0b10001,
-                         0b10001, 0b01110, 0b00000, 0b00000};
-        byte dotOn[] = {0b00000, 0b01110, 0b11111, 0b11111,
-                        0b11111, 0b01110, 0b00000, 0b00000};
+        byte dotOff[] = { 0b00000, 0b01110, 0b10001, 0b10001,
+                          0b10001, 0b01110, 0b00000, 0b00000 };
+        byte dotOn[] = { 0b00000, 0b01110, 0b11111, 0b11111,
+                         0b11111, 0b01110, 0b00000, 0b00000 };
 
         display->createChar(1, dotOff);
         display->createChar(2, dotOn);
@@ -79,22 +61,21 @@ public:
         display->setBacklight(1);
       }
 
-    } // if
+    }  // if
     return (true);
-  }; // init()
+  };  // init()
 
 
   /**
    * @brief Clear all displayed information from the display.
    */
-  void clear()
-  {
+  void clear() {
     display->clear();
-  }; // clear()
+  };  // clear()
 
 
   int getFontHeight(UNUSED int fontsize) override {
-    return(1);
+    return (1);
   };
 
   /**
@@ -104,17 +85,16 @@ public:
    * @param w width of the area.
    * @param h height of the area, assumed always 1.
    */
-  void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h)
-  {
+  void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h) {
     display->setCursor(x, y);
     if (y < _lines) {
       while ((x < _cols) && (w > 0)) {
         display->write(' ');
         w--;
         x++;
-      } // while
-    } // if
-  }; // clear()
+      }  // while
+    }    // if
+  };     // clear()
 
 
   /**
@@ -124,27 +104,25 @@ public:
    * @param h height of the characters, ignored for this display.
    * @param text the text.
    */
-  int drawText(int16_t x, int16_t y, UNUSED int16_t h, const char *text)
-  {
+  int drawText(int16_t x, int16_t y, UNUSED int16_t h, const char *text) {
     int w = strnlen(text, MAX_DISPLAY_STRING_LEN);
-    char buffer[MAX_DISPLAY_STRING_LEN+4]; // 8 chars character buffer max.
+    char buffer[MAX_DISPLAY_STRING_LEN + 4];  // 8 chars character buffer max.
     if ((x > 20) || (y > 4)) {
       // TRACE("outside");
     } else {
       strlcpy(buffer, text, MAX_DISPLAY_STRING_LEN);
-      buffer[_cols-x] = '\0';
+      buffer[_cols - x] = '\0';
       display->setCursor(x, y);
       display->print(buffer);
     }
     return (w);
-  } // drawText
+  }  // drawText
 
 
-  int drawDot(int16_t x, int16_t y, UNUSED int16_t h, bool fill)
-  {
+  int drawDot(int16_t x, int16_t y, UNUSED int16_t h, bool fill) {
     drawText(x, y, 1, fill ? "\02" : "\01");
     return (1);
-  }; // drawDot()
+  };  // drawDot()
 
 private:
   /**
@@ -161,4 +139,4 @@ private:
   int _cols;
 };
 
-#endif // DisplayAdapterLCD_H
+#endif  // DisplayAdapterLCD_H

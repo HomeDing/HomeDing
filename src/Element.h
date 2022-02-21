@@ -28,7 +28,7 @@ class Board;
 class Element;
 
 // enable / disable core features
-#define HOMEDING_SUPPORT_ETAG
+// #define HOMEDING_SUPPORT_ETAG
 
 // ===== Pins =====
 // some EPS8266 boards do not have Dx pins defined.+

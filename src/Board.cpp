@@ -23,7 +23,7 @@
 #if defined(ESP8266)
 #include <ESP8266mDNS.h>
 extern "C" {
-#include <user_interface.h> // https://github.com/esp8266/Arduino actually tools/sdk/include
+#include <user_interface.h>  // https://github.com/esp8266/Arduino actually tools/sdk/include
 }
 #include "sntp.h"
 
@@ -38,7 +38,7 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -57,7 +57,7 @@ extern const char *ssid;
 extern const char *passPhrase;
 
 static const char respond404[] PROGMEM =
-    "<html><head><title>File not found</title></head><body>File not found</body></html>";
+  "<html><head><title>File not found</title></head><body>File not found</body></html>";
 
 /**
  * @brief Initialize a blank board.
@@ -86,9 +86,9 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   cacheHeader = "no-cache";
 
   _newState(BOARDSTATE::NONE);
-  _deepSleepStart = 0; // no deep sleep to be started
-  _deepSleepBlock = false; // no deep sleep is blocked
-  _deepSleepTime = 60; // one minute
+  _deepSleepStart = 0;      // no deep sleep to be started
+  _deepSleepBlock = false;  // no deep sleep is blocked
+  _deepSleepTime = 60;      // one minute
 
   _cntDeepSleep = 0;
 
@@ -101,16 +101,40 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   enableWiFiAtBootTime();
 
 #elif defined(ESP32)
-  _isWakeupStart = false; // TODO:ESP32 ???
+  _isWakeupStart = false;  // TODO:ESP32 ???
 #endif
 
-  deviceName = WiFi.getHostname(); // use mac based default device name
+  deviceName = WiFi.getHostname();  // use mac based default device name
   TRACE("dn1: %s", deviceName.c_str());
-  deviceName.replace("_", ""); // Underline in hostname is not conformant, see
+  deviceName.replace("_", "");  // Underline in hostname is not conformant, see
   // https://tools.ietf.org/html/rfc1123 952
   TRACE("dn2: %s", deviceName.c_str());
   hd_yield();
-} // init()
+}  // init()
+
+
+void Board::add(const char *id, Element *e) {
+  // LOGGER_TRACE("add(%s)", id);
+  _addedElements++;
+
+  strcpy(e->id, id);
+  Element::_strlower(e->id);
+  Element *l = _elementList;
+
+  // append to end of list.
+  if (!l) {
+    // first Element.
+    _elementList = e;
+  } else {
+    // search last Element.
+    while (l->next)
+      l = l->next;
+    // append.
+    l->next = e;
+  }  // if
+  e->next = nullptr;
+  e->init(this);
+}
 
 
 /**
@@ -120,7 +144,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
  */
 bool Board::isCaptiveMode() {
   return ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE));
-} // isCaptiveMode()
+}  // isCaptiveMode()
 
 
 /**
@@ -145,51 +169,51 @@ void Board::_checkNetState() {
  */
 void Board::_addAllElements() {
   // TRACE("addElements()");
-  Element *_lastElem = NULL; // last created Element
+  Element *_lastElem = NULL;  // last created Element
 
   MicroJson *mj = new MicroJson(
-      [this, &_lastElem](int level, char *path, char *value) {
-        // TRACE("callback %d %s =%s", level, path, value ? value : "-");
-        _checkNetState();
+    [this, &_lastElem](int level, char *path, char *value) {
+      // TRACE("callback %d %s =%s", level, path, value ? value : "-");
+      _checkNetState();
 
-        if (level == 1) {
+      if (level == 1) {
 
-        } else if (level == 2) {
-          // create new element
-          TRACE("new %s", path);
-          // extract type name
-          char typeName[32];
+      } else if (level == 2) {
+        // create new element
+        TRACE("new %s", path);
+        // extract type name
+        char typeName[32];
 
-          char *p = path;
-          char *t = typeName;
-          while (*p && *p != MICROJSON_PATH_SEPARATOR) {
-            *t++ = *p++;
-          } // while
-          *t = '\0';
+        char *p = path;
+        char *t = typeName;
+        while (*p && *p != MICROJSON_PATH_SEPARATOR) {
+          *t++ = *p++;
+        }  // while
+        *t = '\0';
 
-          // typeName starts with "web" ?
-          if (Element::_stristartswith(typeName, "web")) {
-            // don't try to create web elements
-            _lastElem = nullptr;
+        // typeName starts with "web" ?
+        if (Element::_stristartswith(typeName, "web")) {
+          // don't try to create web elements
+          _lastElem = nullptr;
+        } else {
+          _lastElem = ElementRegistry::createElement(typeName);
+          if (!_lastElem) {
+            LOGGER_ERR("Cannot create Element type %s", typeName);
           } else {
-            _lastElem = ElementRegistry::createElement(typeName);
-            if (!_lastElem) {
-              LOGGER_ERR("Cannot create Element type %s", typeName);
-            } else {
-              // add to the list of elements
-              _addElement(path, _lastElem);
-            }
-          } // if
+            // add to the list of elements
+            add(path, _lastElem);
+          }
+        }  // if
 
-        } else if ((level > 2) && (_lastElem) && (value)) {
-          // Search 2. slash as starting point for name to include 3. level
-          char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
-          name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
-          TRACE(" (%s) %s=%s", path, name, value ? value : "-");
-          // add a parameter to the last Element
-          _lastElem->set(name, value);
-        } // if
-      });
+      } else if ((level > 2) && (_lastElem) && (value)) {
+        // Search 2. slash as starting point for name to include 3. level
+        char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
+        name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
+        TRACE(" (%s) %s=%s", path, name, value ? value : "-");
+        // add a parameter to the last Element
+        _lastElem->set(name, value);
+      }  // if
+    });
 
   if (mj) {
     // config the thing to the local network
@@ -199,10 +223,10 @@ void Board::_addAllElements() {
     // config the Elements of the device
     mj->parseFile(fileSystem, CONF_FILENAME);
     _checkNetState();
-  } // if
+  }  // if
 
   delete mj;
-} // _addAllElements()
+}  // _addAllElements()
 
 
 void Board::start(Element_StartupMode startupMode) {
@@ -215,16 +239,17 @@ void Board::start(Element_StartupMode startupMode) {
     if ((!l->active) && (l->startupMode <= startupMode)) {
       // start element when not already active
       TRACE("starting %s...", l->id);
-      l->start();
+      l->setup();  // one-time initialization
+      l->start();  // start...
       hd_yield();
-    } // if
+    }  // if
 
     l = l->next;
-  } // while
+  }  // while
 
   active = true;
   _nextElement = NULL;
-} // start()
+}  // start()
 
 
 // switch to a new state
@@ -258,13 +283,13 @@ void Board::loop() {
         if (time(nullptr)) {
           start(Element_StartupMode::Time);
           startComplete = true;
-        } // if
-      } // if
+        }  // if
+      }    // if
 
       if (startComplete) {
-        dispatch(startAction); // dispatched when all elements are active.
+        dispatch(startAction);  // dispatched when all elements are active.
       }
-    } // if ! startComplete
+    }  // if ! startComplete
 
     // dispatch next action from _actionList if any
     if (_actionList.length() > 0) {
@@ -279,15 +304,15 @@ void Board::loop() {
       } else {
         _lastAction = _actionList;
         _actionList = (const char *)NULL;
-      } // if
+      }  // if
       dispatchAction(_lastAction);
       return;
-    } // if
+    }  // if
 
     // give some time to next active element
     if (_nextElement == NULL) {
       _nextElement = _elementList;
-    } // if
+    }  // if
     if (_nextElement) {
       if (_nextElement->active) {
         TRACE_START;
@@ -296,7 +321,7 @@ void Board::loop() {
         TRACE_TIMEPRINT("loop", _nextElement->id, 5);
       }
       _nextElement = _nextElement->next;
-    } // if
+    }  // if
 
     if ((!_deepSleepBlock) && (_deepSleepStart > 0)) {
       _cntDeepSleep++;
@@ -309,7 +334,7 @@ void Board::loop() {
         ESP.deepSleep(_deepSleepTime * 1000 * 1000);
         _newState(BOARDSTATE::SLEEP);
       }
-    } // if
+    }  // if
 
   } else if (boardState == BOARDSTATE::NONE) {
     TRACE("AutoConnect=%d", WiFi.getAutoConnect());
@@ -324,7 +349,7 @@ void Board::loop() {
       isSafeMode = false;
       // start up ota
       Element *e = ElementRegistry::createElement("ota");
-      _addElement("ota/0", e);
+      add("ota/0", e);
     }
 
     if (state) {
@@ -337,7 +362,7 @@ void Board::loop() {
       // enforce un-safemode on double reset
       LOGGER_TRACE("Reset #%d", _resetCount);
       isSafeMode = false;
-    } // if
+    }  // if
     _resetCount = RTCVariables::setResetCounter(_resetCount + 1);
 
     // search any time requesting elements
@@ -345,9 +370,9 @@ void Board::loop() {
     while (l != nullptr) {
       if (l->startupMode == Element_StartupMode::Time) {
         hasTimeElements = true;
-      } // if
+      }  // if
       l = l->next;
-    } // while
+    }  // while
 
     // setup system wide stuff
     WiFi.setHostname(deviceName.c_str());
@@ -373,7 +398,7 @@ void Board::loop() {
 
     // detect no configured network situation
     if (((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0)) || (_resetCount == 2)) {
-      _newState(BOARDSTATE::STARTCAPTIVE); // start hotspot right now.
+      _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
     } else {
       _newState(BOARDSTATE::CONNECT);
     }
@@ -414,7 +439,7 @@ void Board::loop() {
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, passPhrase);
       }
-    } // if
+    }  // if
 
     // Enable sysButton for entering config mode
     if (sysButton >= 0) {
@@ -429,7 +454,7 @@ void Board::loop() {
     // short pulses for normal=safemode, long pulses for unsafemode.
     if (sysLED >= 0) {
       digitalWrite(sysLED, (now % 700) > (isSafeMode ? 100 : 600) ? HIGH : LOW);
-    } // if
+    }  // if
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
@@ -443,11 +468,9 @@ void Board::loop() {
         WiFi.setAutoReconnect(true);
         WiFi.setAutoConnect(true);
         _newState(BOARDSTATE::WAIT);
-      } // if
+      }  // if
 
-      if ((_wifi_status == WL_NO_SSID_AVAIL) ||
-          (_wifi_status == WL_CONNECT_FAILED) ||
-          (now > connectPhaseEnd)) {
+      if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (now > connectPhaseEnd)) {
 
         if (!connectPhaseEnd) {
           // no LOGGER_TRACE;
@@ -455,27 +478,27 @@ void Board::loop() {
           LOGGER_TRACE("timed out.");
         } else {
           LOGGER_TRACE("wifi status=(%d)", _wifi_status);
-        } // if
+        }  // if
 
         netMode -= 1;
         // LOGGER_TRACE("next connect method = %d\n", netMode);
         if (netMode) {
-          _newState(BOARDSTATE::CONNECT); // try next mode
+          _newState(BOARDSTATE::CONNECT);  // try next mode
         } else {
           LOGGER_INFO("no-net");
           _resetCount = RTCVariables::setResetCounter(0);
 
           delay(500);
           ESP.restart();
-        } // if
-      } // if
-    } // if
+        }  // if
+      }    // if
+    }      // if
 
     if (boardState == BOARDSTATE::WAIT) {
       if (_isWakeupStart || (now >= configPhaseEnd)) {
         _newState(BOARDSTATE::GREET);
       }
-    } // if
+    }  // if
     hd_yield();
 
 
@@ -492,14 +515,14 @@ void Board::loop() {
     LOGGER_JUSTINFO("start http://%s/", name);
 
     if (WiFi.getMode() == WIFI_AP_STA) {
-      WiFi.mode(WIFI_STA); // after config mode, the AP needs to be closed down and Station Mode can start.
+      WiFi.mode(WIFI_STA);  // after config mode, the AP needs to be closed down and Station Mode can start.
     }
 
     if (display) {
       delay(1600);
       display->clear();
       display->flush();
-    } // if
+    }  // if
 
     // release sysLED
     if (sysLED >= 0) {
@@ -510,8 +533,8 @@ void Board::loop() {
     server->begin();
     server->enableCORS(true);
 
-    randomSeed(millis()); // millis varies on every start, good enough
-    filesVersion = random(8000); // will incremented on every file upload by file server
+    randomSeed(millis());         // millis varies on every start, good enough
+    filesVersion = random(8000);  // will incremented on every file upload by file server
 
     if (cacheHeader == "etag") {
 #if defined(HOMEDING_SUPPORT_ETAG)
@@ -528,16 +551,16 @@ void Board::loop() {
           // eTag = f.getLastWrite()
           // f.close();
           // use current counter
-          eTag = String(filesVersion, 16); // f.getLastWrite()
+          eTag = String(filesVersion, 16);  // f.getLastWrite()
         }
         return (eTag);
       });
 #endif
-      cacheHeader = ""; // do not pass this cache header
+      cacheHeader = "";  // do not pass this cache header
     }
 
     start(Element_StartupMode::Network);
-    dispatch(sysStartAction); // dispatched when network is available
+    dispatch(sysStartAction);  // dispatched when network is available
 
     // ===== initialize network dependant services
 
@@ -586,9 +609,10 @@ void Board::loop() {
 
       LOGGER_JUSTINFO("a");
       mdns_txt_item_t txtData[3] = {
-          {"path", homepage.c_str()},
-          {"title", title.c_str()},
-          {"room", room.c_str()}};
+        { "path", homepage.c_str() },
+        { "title", title.c_str() },
+        { "room", room.c_str() }
+      };
       LOGGER_JUSTINFO("b");
 
       // if (mdns_service_txt_set("_homeding", "_tcp", txtData, 3)) {
@@ -607,7 +631,7 @@ void Board::loop() {
       // MDNS.addServiceTxt("_homeding", "_tcp", "room", room.c_str());
       LOGGER_JUSTINFO("b1");
 #endif
-    } // if
+    }  // if
 
     _newState(BOARDSTATE::RUN);
   } else if (boardState == BOARDSTATE::SLEEP) {
@@ -646,12 +670,12 @@ void Board::loop() {
     // make sysLED blink 3 sec with a short flash.
     if (sysLED >= 0) {
       digitalWrite(sysLED, ((now % 3000) > 120) ? HIGH : LOW);
-    } // if
+    }  // if
 
     if (now > _captiveEnd)
       reboot(false);
-  } // if
-} // loop()
+  }  // if
+}  // loop()
 
 
 // ===== set board behavior
@@ -660,7 +684,7 @@ void Board::loop() {
 void Board::setSleepTime(unsigned long secs) {
   TRACE("setSleepTime(%d)", secs);
   _deepSleepTime = secs;
-} // setSleepTime()
+}  // setSleepTime()
 
 
 // start deep sleep mode when idle.
@@ -671,14 +695,14 @@ void Board::startSleep() {
     // give a minute time to block deep sleep mode
     _deepSleepStart += 60 * 1000;
   }
-} // startSleep()
+}  // startSleep()
 
 
 // block any deep sleep until next reset.
 void Board::cancelSleep() {
   TRACE("cancelSleep");
   _deepSleepBlock = true;
-} // cancelSleep()
+}  // cancelSleep()
 
 
 Element *Board::findById(String &id) {
@@ -692,12 +716,12 @@ Element *Board::findById(const char *id) {
   while (l != NULL) {
     if (strcmp(l->id, id) == 0) {
       // LOGGER_TRACE(" found:%s", l->id);
-      break; // while
-    } // if
+      break;  // while
+    }         // if
     l = l->next;
-  } // while
+  }  // while
   return (l);
-} // findById
+}  // findById
 
 
 // ===== queue / process / dispatch actions =====
@@ -715,7 +739,7 @@ void Board::_queueAction(const String &action, const String &v) {
   if (_actionList.length() > 0)
     _actionList.concat(ACTION_SEPARATOR);
   _actionList.concat(tmp);
-} // _queueAction
+}  // _queueAction
 
 
 // send a event out to the defined target.
@@ -759,7 +783,7 @@ void Board::dispatchAction(String action) {
   }
   // TRACE_END;
   // TRACE_TIMEPRINT("used time:", "", 25);
-} // dispatchAction()
+}  // dispatchAction()
 
 
 /**
@@ -768,7 +792,7 @@ void Board::dispatchAction(String action) {
 void Board::dispatch(String &action, int value) {
   if (!action.isEmpty())
     _queueAction(action, String(value));
-} // dispatch
+}  // dispatch
 
 
 /**
@@ -777,7 +801,7 @@ void Board::dispatch(String &action, int value) {
 void Board::dispatch(String &action, const char *value) {
   if (!action.isEmpty())
     _queueAction(action, String(value));
-} // dispatch
+}  // dispatch
 
 
 /**
@@ -786,7 +810,7 @@ void Board::dispatch(String &action, const char *value) {
 void Board::dispatch(const String &action, const String &value) {
   if (!action.isEmpty())
     _queueAction(action, value);
-} // dispatch
+}  // dispatch
 
 
 /**
@@ -796,8 +820,8 @@ void Board::dispatchItem(String &action, String &values, int n) {
   if (action && values) {
     String v = Element::getItemValue(values, n);
     if (v) _queueAction(action, v);
-  } // if
-} // dispatchItem
+  }  // if
+}  // dispatchItem
 
 
 // ===== low power / sleep mode =====
@@ -808,7 +832,7 @@ void Board::dispatchItem(String &action, String &values, int n) {
 void Board::deferSleepMode() {
   // reset the counter to ensure looping all active elements
   _cntDeepSleep = 0;
-} // deferSleepMode()
+}  // deferSleepMode()
 
 
 void Board::getState(String &out, const String &path) {
@@ -832,10 +856,10 @@ void Board::getState(String &out, const String &path) {
         ret.concat("\",");
       });
       ret += "},";
-    } // if
+    }  // if
 
     l = l->next;
-  } // while
+  }  // while
 
 
   // close root object
@@ -848,7 +872,7 @@ void Board::getState(String &out, const String &path) {
   // ret.replace("},", "},\n");
 
   out = ret;
-} // getState
+}  // getState
 
 // ===== Time functionality =====
 
@@ -862,9 +886,9 @@ time_t Board::getTime() {
   time_t current_stamp = time(nullptr);
   if (current_stamp <= MIN_VALID_TIME) {
     current_stamp = 0;
-  } // if
+  }  // if
   return (current_stamp);
-} // getTime()
+}  // getTime()
 
 
 // return the seconds of today in localtime.
@@ -877,7 +901,7 @@ time_t Board::getTimeOfDay() {
   } else {
     return (0);
   }
-} // getTimeOfDay()
+}  // getTimeOfDay()
 
 
 /**
@@ -893,13 +917,13 @@ Element *Board::getElement(const char *elementType) {
   Element *l = _elementList;
   while (l != NULL) {
     if (String(l->id).substring(0, tnLength).equalsIgnoreCase(tn)) {
-      break; // while
-    } // if
+      break;  // while
+    }         // if
     l = l->next;
-  } // while
+  }  // while
   // LOGGER_TRACE("found: %d", l);
   return (l);
-} // getElement()
+}  // getElement()
 
 
 Element *Board::getElement(const char *elementType, const char *elementName) {
@@ -911,12 +935,12 @@ Element *Board::getElement(const char *elementType, const char *elementName) {
   while (l != NULL) {
     if (String(l->id).equalsIgnoreCase(tn)) {
       break;
-    } // if
+    }  // if
     l = l->next;
-  } // while
+  }  // while
   return (l);
 
-} // getElement()
+}  // getElement()
 
 
 /**
@@ -929,8 +953,8 @@ void Board::forEach(const char *prefix, ElementCallbackFn fCallback) {
       (fCallback)(l);
     }
     l = l->next;
-  } // while
-} // forEach()
+  }  // while
+}  // forEach()
 
 
 void Board::reboot(bool wipe) {
@@ -955,35 +979,8 @@ void Board::displayInfo(const char *text1, const char *text2) {
       display->drawText(0, display->getLineHeight(), 0, text2);
     }
     display->flush();
-  } // if
+  }  // if
 }
-
-
-/**
- * @brief Add another element to the board into the list of created elements.
- */
-void Board::_addElement(const char *id, Element *e) {
-  // LOGGER_TRACE("_add(%s)", id);
-  _addedElements++;
-
-  strcpy(e->id, id);
-  Element::_strlower(e->id);
-  Element *l = _elementList;
-
-  // append to end of list.
-  if (!l) {
-    // first Element.
-    _elementList = e;
-  } else {
-    // search last Element.
-    while (l->next)
-      l = l->next;
-    // append.
-    l->next = e;
-  } // if
-  e->next = nullptr;
-  e->init(this);
-} // _addElement()
 
 
 // End

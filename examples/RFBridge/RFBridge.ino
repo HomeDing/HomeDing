@@ -2,7 +2,7 @@
  * @file RFBridge.ino
  * @brief Standard Sketch that uses the HomeDing Library to implement Things attached the
  * Internet. Special Element is included to implement a Bridge style device that can send RF433 codes.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -34,12 +34,12 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <FS.h> // File System for Web Server Files
-#include <LittleFS.h> // File System for Web Server Files
+#include <FS.h>        // File System for Web Server Files
+#include <LittleFS.h>  // File System for Web Server Files
 
-#include <BuiltinHandler.h> // Serve Built-in files
-#include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h> // Web Server Middleware for UI
+#include <BuiltinHandler.h>  // Serve Built-in files
+#include <BoardServer.h>     // Web Server Middleware for Elements
+#include <FileServer.h>      // Web Server Middleware for UI
 
 
 // ===== WLAN credentials =====
@@ -48,10 +48,6 @@
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
-
-// HomeDing core functionality
-Board mainBoard;
-
 
 // ===== implement =====
 
@@ -67,32 +63,30 @@ void setup(void) {
   Serial.setDebugOutput(false);
 #endif
 
-
   // ----- setup the platform with webserver and file system -----
 
-  // LittleFS is the default filesystem
-  mainBoard.init(&server, &LittleFS, "rfbridge");
+  homeding.init(&server, &LittleFS, "rfbridge");
 
   // ----- adding web server handlers -----
 
   // Builtin Files
-  server.addHandler(new BuiltinHandler(&mainBoard));
+  server.addHandler(new BuiltinHandler(&homeding));
 
   // Board status and actions
-  server.addHandler(new BoardHandler(&mainBoard));
+  server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
+  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
 
   LOGGER_INFO("setup done.");
-} // setup
+}  // setup
 
 
 // handle all give time to all Elements and active components.
 void loop(void) {
   server.handleClient();
-  mainBoard.loop();
-} // loop()
+  homeding.loop();
+}  // loop()
 
 
 // end.

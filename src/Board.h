@@ -77,10 +77,10 @@ class Board;
 #ifdef DEBUG_ESP_PORT
 
 /** The TRACE Macros for creating output with timing hints: */
-#define TRACE_START // unsigned long __TRACE_START_TIME = millis();
-#define TRACE_END // unsigned long __TRACE_END_TIME = millis();
-#define TRACE_TIME // (__TRACE_END_TIME - __TRACE_START_TIME)
-#define TRACE_TIMEPRINT(topic, id, min) // if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
+#define TRACE_START                      // unsigned long __TRACE_START_TIME = millis();
+#define TRACE_END                        // unsigned long __TRACE_END_TIME = millis();
+#define TRACE_TIME                       // (__TRACE_END_TIME - __TRACE_START_TIME)
+#define TRACE_TIMEPRINT(topic, id, min)  // if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
 
 #else
 // #define TRACE(...)
@@ -107,7 +107,7 @@ class Board;
  * @brief iterator callback function.
  */
 typedef std::function<void(Element *e)>
-    ElementCallbackFn;
+  ElementCallbackFn;
 
 
 /** inline yield function for cooperative multitasking platforms. */
@@ -133,27 +133,26 @@ class Board {
   /** States of the board */
   enum BOARDSTATE : int {
     // ===== startup operation states
-    NONE = 0, // unspecified
-    LOAD = 1, // load configurations and create elements. Start SYS
+    NONE = 0,  // unspecified
+    LOAD = 1,  // load configurations and create elements. Start SYS
 
-    CONNECT = 2, // define how to connect, AUTO, PSK or PASSWD
-    WAITNET = 3, // Wait for network connectivity or configuration request.
-    WAIT = 5, // network is connected but wait for configuration request.
+    CONNECT = 2,  // define how to connect, AUTO, PSK or PASSWD
+    WAITNET = 3,  // Wait for network connectivity or configuration request.
+    WAIT = 5,     // network is connected but wait for configuration request.
 
     // ===== normal operation states
-    GREET = 10, // network established, start NET Elements
-    RUN = 12, // in normal operation mode.
+    GREET = 10,  // network established, start NET Elements
+    RUN = 12,    // in normal operation mode.
 
-    SLEEP = 18, // start sleep mode.
+    SLEEP = 18,  // start sleep mode.
 
     // ===== config operation states
-    STARTCAPTIVE = 21, // Scan local available Networks
-    RUNCAPTIVE = 22 // Enable Network Configuration UI
+    STARTCAPTIVE = 21,  // Scan local available Networks
+    RUNCAPTIVE = 22     // Enable Network Configuration UI
   };
 
 
 public:
-
   // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
   const char *version = "0.81";
 
@@ -184,7 +183,14 @@ public:
    * Initialize a blank board.
    * @param s The WebServer is always required.
    */
-  void init(WebServer *s, FILESYSTEM *fs, const char* buildName = "");
+  void init(WebServer *s, FILESYSTEM *fs, const char *buildName = "");
+
+  /**
+   * Directly add an element to the list of created elements.
+   * @param id id of element.
+   * @param e reference to element.
+   */
+  void add(const char *id, Element *e);
 
   // ===== Board state functionality =====
 
@@ -262,7 +268,7 @@ public:
   void dispatch(const String &action, const String &value);
 
   /**
-   * @brief Dispatch an action without queueing it. 
+   * @brief Dispatch an action without queueing it.
    * @param action The action string.
    */
   void dispatchAction(String action);
@@ -426,13 +432,6 @@ private:
 
 
   /**
-   * Add another element to the board into the list of created elements.
-   * @param id id of element.
-   * @param e reference to element.
-   */
-  void _addElement(const char *id, Element *e);
-
-  /**
    * Add and config all Elements defined in the config files.
    */
   void _addAllElements();
@@ -462,9 +461,9 @@ private:
 
   // state and timing
 
-  unsigned long configPhaseEnd; // millis when current config mode (boardstate) is over, next mode
-  unsigned long connectPhaseEnd; // for waiting on net connection
-  unsigned long _captiveEnd; // terminate/reset captive portal mode after 5 minutes.
+  unsigned long configPhaseEnd;   // millis when current config mode (boardstate) is over, next mode
+  unsigned long connectPhaseEnd;  // for waiting on net connection
+  unsigned long _captiveEnd;      // terminate/reset captive portal mode after 5 minutes.
   void _newState(enum BOARDSTATE newState);
 
   bool active = false;

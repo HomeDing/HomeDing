@@ -130,6 +130,11 @@ public:
 
 
   /**
+   * @brief setup the element so it can be started ans stopped.
+   */
+  virtual void setup();
+
+  /**
    * @brief Activate the Element.
    */
   virtual void start();

@@ -13,17 +13,16 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Element functions ===== */
 
 /**
  * @brief initialize the common functionality of all element objects.
  */
-void Element::init(Board *board)
-{
+void Element::init(Board *board) {
   _board = board;
-} // init()
+}  // init()
 
 
 /**
@@ -33,8 +32,7 @@ void Element::init(Board *board)
  * @return true when property could be changed and the corresponding action
  * could be executed.
  */
-bool Element::set(const char *name, const char *value)
-{
+bool Element::set(const char *name, const char *value) {
   // TRACE("set %s=%s", name, value);
   bool ret = true;
 
@@ -59,34 +57,38 @@ bool Element::set(const char *name, const char *value)
   } else {
     // LOGGER_EERR("cannot set property %s:", name, value); // not an error when used for testing common properties
     ret = false;
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
+
+
+/**
+ * @brief setup the element so it can be started ans stopped.
+ */
+void Element::setup() {}
 
 
 /**
  * @brief Activate the Element.
  */
-void Element::start()
-{
+void Element::start() {
   active = true;
-} // start()
+}  // start()
 
 
 /**
  * @brief Give some processing time to the element to do something on it's own
  */
-void Element::loop() {} // loop()
+void Element::loop() {}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   callback("active", active ? "true" : "false");
-} // pushState()
+}  // pushState()
 
 
 /**
@@ -94,36 +96,32 @@ void Element::pushState(
  * @param key The key of state variable.
  * @param value The value of state variable.
  */
-void Element::saveState(const char *key, const char *value)
-{
+void Element::saveState(const char *key, const char *value) {
   TRACE("saveState(%s=%s)", key, value);
   if (active && _useState && _board->state) {
     _board->state->save(this, key, value);
   }
-} // saveState
+}  // saveState
 
 
 /**
  * @brief stop all activities and go inactive.
  */
-void Element::term()
-{
+void Element::term() {
   TRACE("term()");
   active = false;
-} // term()
+}  // term()
 
 // ===== static string to value helper function ===== //
 
 /* Return am integer value from a string. */
-int Element::_atoi(const char *value)
-{
+int Element::_atoi(const char *value) {
   return (strtol(value, nullptr, 0));
-} // _atoi()
+}  // _atoi()
 
 
 /* Return a boolean value from a string. */
-bool Element::_atob(const char *value)
-{
+bool Element::_atob(const char *value) {
   bool ret = false;
 
   if ((!value) || (strnlen(value, 6) > 5)) {
@@ -138,14 +136,13 @@ bool Element::_atob(const char *value)
     } else if (_stricmp(value, "high") == 0) {
       ret = true;
     }
-  } // if
+  }  // if
   return (ret);
-} // _atob()
+}  // _atob()
 
 
 /* Return a time value from a string. */
-unsigned long Element::_atotime(const char *value)
-{
+unsigned long Element::_atotime(const char *value) {
   unsigned long ret = 0;
   char *pEnd;
 
@@ -169,14 +166,13 @@ unsigned long Element::_atotime(const char *value)
       ret *= (60);
     }
     // if (*pEnd == 's') { ret *= 1 }
-  } // if
+  }  // if
   return (ret);
-} // _atotime()
+}  // _atotime()
 
 
 /* Return a duration value from a string as milliseconds. */
-unsigned long Element::_scanDuration(const char *value)
-{
+unsigned long Element::_scanDuration(const char *value) {
   unsigned long ret = 0;
   char *pEnd;
 
@@ -211,19 +207,18 @@ unsigned long Element::_scanDuration(const char *value)
       ret *= (60 * 60 * 1000);
     } else if (*pEnd == 'm') {
       ret *= (60 * 1000);
-    } else { // simple seconds
+    } else {  // simple seconds
       ret *= 1000;
     }
-  } // if
+  }  // if
   return (ret);
-} // _scanDuration()
+}  // _scanDuration()
 
 
 /* Return a pin value from a string. */
-int Element::_atopin(const char *value)
-{
+int Element::_atopin(const char *value) {
 #if defined(ESP8266)
-  static int GPIO[11] = {16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1};
+  static int GPIO[11] = { 16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1 };
 #endif
 
   int pin = -1;
@@ -231,27 +226,26 @@ int Element::_atopin(const char *value)
 #if defined(ESP8266)
     char ch = tolower(*value);
     if (ch == 'd') {
-      int n = atoi(value + 1); // scan a number right after the 'D'
+      int n = atoi(value + 1);  // scan a number right after the 'D'
       if ((n >= 0) && (n <= 10))
         pin = GPIO[n];
 
     } else if (ch == 'a') {
-      pin = A0; // only analog pin on ESP8266
+      pin = A0;  // only analog pin on ESP8266
 
     } else {
       pin = _atoi(value);
     }
 #else
-      pin = _atoi(value);
+    pin = _atoi(value);
 #endif
   }
   return (pin);
-} // _atopin()
+}  // _atopin()
 
 
-uint32_t Element::_atoColor(const char *value)
-{
-  uint32_t ret = 0x00000000; // black
+uint32_t Element::_atoColor(const char *value) {
+  uint32_t ret = 0x00000000;  // black
 
   if (value) {
     char ch0 = value[0];
@@ -271,36 +265,32 @@ uint32_t Element::_atoColor(const char *value)
     } else if (_stricmp(value, "white") == 0) {
       ret = 0xFFFFFFFF;
     }
-  } // if
+  }  // if
   return ret;
-} // _atoColor()
+}  // _atoColor()
 
 
 // ===== static value to string helper function ===== //
 
 char Element::_convertBuffer[32];
 
-char *Element::_printBoolean(bool b)
-{
+char *Element::_printBoolean(bool b) {
   return (char *)(b ? "1" : "0");
 };
 
-char *Element::_printInteger(int v)
-{
+char *Element::_printInteger(int v) {
   itoa(v, _convertBuffer, 10);
   return (_convertBuffer);
 };
 
-char *Element::_printInteger(unsigned long v)
-{
+char *Element::_printInteger(unsigned long v) {
   ultoa(v, _convertBuffer, 10);
   return (_convertBuffer);
 };
 
 // ===== static general string helper function ===== //
 
-int Element::_stricmp(const char *str1, const char *str2)
-{
+int Element::_stricmp(const char *str1, const char *str2) {
   char c1, c2;
 
   do {
@@ -314,44 +304,41 @@ int Element::_stricmp(const char *str1, const char *str2)
       c2 += 'a' - 'A';
   } while ((c1) && (c1 == c2));
   return (int)(c1 - c2);
-} // _stricmp
+}  // _stricmp
 
 
 // String start with prefix, case insensitive.
-bool Element::_stristartswith(const char *s, const char *prefix)
-{
-  bool ret = true; // until we find a difference
+bool Element::_stristartswith(const char *s, const char *prefix) {
+  bool ret = true;  // until we find a difference
   if (s && prefix) {
     while (ret && *s && *prefix) {
       if (tolower(*s) != tolower(*prefix))
         ret = false;
       s++;
       prefix++;
-    } // while
+    }  // while
     if (*prefix)
       ret = false;
   } else {
     ret = false;
   }
   return (ret);
-} // _stristartswith()
+}  // _stristartswith()
 
 
-void Element::_strlower(char *str)
-{
+void Element::_strlower(char *str) {
   if (str) {
     while (*str) {
       if ((*str >= 'A') && (*str <= 'Z'))
         *str += 'a' - 'A';
       str++;
-    } // while
-  }   // if
-} // _strlower
+    }  // while
+  }    // if
+}  // _strlower
 
 
 /** Get item[index] from string */
-String Element::getItemValue(String data, int index)
-{
+String Element::getItemValue(String data, int index) {
   String ret;
   int found = 0;
   int startIndex = 0;
@@ -371,19 +358,18 @@ String Element::getItemValue(String data, int index)
     }
     i++;
     p++;
-  } // while
+  }  // while
 
   if (found > index) {
     ret = data.substring(startIndex, endIndex);
   }
 
   return (ret);
-} // getItemValue()
+}  // getItemValue()
 
 
 /** Get first item from string and remove from string */
-String Element::popItemValue(String &data)
-{
+String Element::popItemValue(String &data) {
   String item;
 
   if (data.length() > 0) {
@@ -396,9 +382,9 @@ String Element::popItemValue(String &data)
       item = data;
       data = (const char *)nullptr;
     }
-  } // if
+  }  // if
   return (item);
-} // popItemValue
+}  // popItemValue
 
 
 // End

@@ -33,7 +33,7 @@
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
-#define HOMEDING_INCLUDE_SHT20 // + 1176 bytes
+#define HOMEDING_INCLUDE_SHT20  // + 1176 bytes
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -64,33 +64,20 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <FS.h> // File System for Web Server Files
-#include <LittleFS.h> // File System for Web Server Files
-#if defined(ESP32)
-#include <SPIFFS.h> // File System for Web Server Files
-#endif
+#include <FS.h>        // File System for Web Server Files
+#include <LittleFS.h>  // File System for Web Server Files
 
-#include <BuiltinHandler.h> // Serve Built-in files
-#include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h> // Web Server Middleware for UI
+#include <BuiltinHandler.h>  // Serve Built-in files
+#include <BoardServer.h>     // Web Server Middleware for Elements
+#include <FileServer.h>      // Web Server Middleware for UI
 
-
-static const char respond404[] PROGMEM =
-    "<html><head><title>File not found</title></head><body>File not found</body></html>";
 
 // ===== WLAN credentials =====
 
 #include "secrets.h"
 
-// need a WebServer
+// WebServer on port 80 to reach Web UI and services
 WebServer server(80);
-
-// HomeDing core functionality
-Board mainBoard;
-
-// Filesystem to be used.
-FS *filesys;
-
 
 // ===== implement =====
 
@@ -106,50 +93,29 @@ void setup(void) {
   Serial.setDebugOutput(false);
 #endif
 
-  LOGGER_INFO("Device (" __FILE__ ") starting...");
-
   // ----- setup the platform with webserver and file system -----
-  filesys = &LittleFS; // LittleFS is the default filesystem
-
-  mainBoard.init(&server, filesys);
-  hd_yield();
+  homeding.init(&server, &LittleFS, "radio");
 
   // ----- adding web server handlers -----
 
   // Builtin Files
-  server.addHandler(new BuiltinHandler(&mainBoard));
+  server.addHandler(new BuiltinHandler(&homeding));
 
   // Board status and actions
-  server.addHandler(new BoardHandler(&mainBoard));
+  server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
-  // GET static files is added after network connectivity is given.
-
-  server.onNotFound([]() {
-    const char *uri = server.uri().c_str();
-    LOGGER_JUSTINFO("notFound: %s", uri);
-
-    if (mainBoard.isCaptiveMode() && (!filesys->exists(uri))) {
-      String url = "http://192.168.4.1/$setup.htm";
-      server.sendHeader("Location", url, true);
-      server.send(302);
-
-    } else {
-      // standard not found in browser.
-      server.send(404, "text/html", FPSTR(respond404));
-    }
-  });
+  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
 
   LOGGER_INFO("setup done.");
-} // setup
+}  // setup
 
 
 // handle all give time to all Elements and active components.
 void loop(void) {
   server.handleClient();
-  mainBoard.loop();
-} // loop()
+  homeding.loop();
+}  // loop()
 
 
 // end.

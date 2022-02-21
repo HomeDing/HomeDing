@@ -22,6 +22,9 @@ extern const char *ACTION_ONTEMPERATURE;
 extern const char *ACTION_ONHUMIDITY;
 extern const char *ACTION_ONPRESSURE;
 
+// global access to the board implementation
+extern Board homeding;
+
 // ===== SYS and Common Elements =====
 
 // These elements that are required in any case add themselves to the ElementRegistry.

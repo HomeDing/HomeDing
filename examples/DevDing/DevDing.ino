@@ -9,15 +9,15 @@
  * * full featured environment sensors
  * * ...
  * All elements from the minimal sketch are included by default.
- *  
+ *
  * Compile with
  * * Board: NodeMCU 1.0
  * * Flash Size: 4M (FS:2MB, OTA:~1019KB)
  * * Debug Port: "Serial"
  * * Debug Level: "None"
  * * MMU: 32+32 balanced
- * 
- * There is full featured WebUI available. 
+ *
+ * There is full featured WebUI available.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -38,8 +38,8 @@
 // ----- activatable debug options
 
 // #define DBG_GDB // start with debugger
-#define DBG_TRACE // trace level for all elements
-#define NET_DEBUG // show network event in output
+#define DBG_TRACE  // trace level for all elements
+#define NET_DEBUG  // show network event in output
 
 #ifdef DBG_GDB
 #include <GDBStub.h>
@@ -57,7 +57,7 @@
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
-#define HOMEDING_INCLUDE_SHT20 // + 1176 bytes
+#define HOMEDING_INCLUDE_SHT20  // + 1176 bytes
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -88,24 +88,22 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <FS.h> // File System for Web Server Files
-#include <LittleFS.h> // File System for Web Server Files
+#include <FS.h>        // File System for Web Server Files
+#include <LittleFS.h>  // File System for Web Server Files
 
-#include <BuiltinHandler.h> // Serve Built-in files
-#include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h> // Web Server Middleware for UI
+#include <BuiltinHandler.h>  // Serve Built-in files
+#include <BoardServer.h>     // Web Server Middleware for Elements
+#include <FileServer.h>      // Web Server Middleware for UI
 
 
 // ===== WLAN credentials =====
 
 #include "secrets.h"
 
+#include "MiniElement.h"
+
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
-
-// HomeDing core functionality
-Board mainBoard;
-
 
 // ===== implement =====
 
@@ -134,28 +132,31 @@ void setup(void) {
   // ----- setup the platform with webserver and file system -----
 
   // LittleFS is the default filesystem
-  mainBoard.init(&server, &LittleFS, "DevDing");
+  homeding.init(&server, &LittleFS, "DevDing");
 
   // ----- adding web server handlers -----
 
   // Builtin Files
-  server.addHandler(new BuiltinHandler(&mainBoard));
+  server.addHandler(new BuiltinHandler(&homeding));
 
   // Board status and actions
-  server.addHandler(new BoardHandler(&mainBoard));
+  server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
+  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
+
+  // enable this line to see MiniElement() working
+  // homeding.add("mini/1", new MiniElement());
 
   LOGGER_INFO("setup done.");
-} // setup
+}  // setup
 
 
 // handle all give time to all Elements and active components.
 void loop(void) {
   server.handleClient();
-  mainBoard.loop();
-} // loop()
+  homeding.loop();
+}  // loop()
 
 
 // end.

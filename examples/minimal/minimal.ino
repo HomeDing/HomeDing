@@ -2,7 +2,7 @@
  * @file Minimal.ino
  * @brief Minimal Sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
- * 
+ *
  * The use-case covered with this Sketch is to compile a small firmware
  * with the elements for a devices with 1MByte flash without displays like
  * * switchable plugs and sockets including capturing power consumption
@@ -10,17 +10,17 @@
  * * temperature sensors
  * * led stripe controllers with single color
  * * led stripe controllers with neopixel
- *  
+ *
  * Compile with
  * * Board: Generic ESP8266 module
  * * Flash Size: 1M (FS:128kb, OTA:~438KB)
- * * Flash Mode: DOUT 
+ * * Flash Mode: DOUT
  * * Debug Port: "Disabled"
  * * Debug Level: "None"
  * * MMU: 32+32 balanced
- * 
- * There is minified WebUI available. 
- * 
+ *
+ * There is minified WebUI available.
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -79,12 +79,12 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <FS.h> // File System for Web Server Files
-#include <LittleFS.h> // File System for Web Server Files
+#include <FS.h>        // File System for Web Server Files
+#include <LittleFS.h>  // File System for Web Server Files
 
-#include <BuiltinHandler.h> // Serve Built-in files
-#include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h> // Web Server Middleware for UI
+#include <BuiltinHandler.h>  // Serve Built-in files
+#include <BoardServer.h>     // Web Server Middleware for Elements
+#include <FileServer.h>      // Web Server Middleware for UI
 
 
 // ===== WLAN credentials =====
@@ -93,10 +93,6 @@
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
-
-// HomeDing core functionality
-Board mainBoard;
-
 
 // ===== implement =====
 
@@ -121,28 +117,28 @@ void setup(void) {
 
   // ----- setup the platform with webserver and file system -----
 
-  mainBoard.init(&server, &LittleFS, "minimal");
+  homeding.init(&server, &LittleFS, "minimal");
 
   // ----- adding web server handlers -----
 
   // Builtin Files
-  server.addHandler(new BuiltinHandler(&mainBoard));
+  server.addHandler(new BuiltinHandler(&homeding));
 
   // Board status and actions
-  server.addHandler(new BoardHandler(&mainBoard));
+  server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
+  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
 
   LOGGER_INFO("setup done.");
-} // setup
+}  // setup
 
 
 // handle all give time to all Elements and active components.
 void loop(void) {
   server.handleClient();
-  mainBoard.loop();
-} // loop()
+  homeding.loop();
+}  // loop()
 
 
 // end.

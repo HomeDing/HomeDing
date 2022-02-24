@@ -109,9 +109,8 @@
   },
 
   "scene": {
-    "properties": [],
-    "events": ["value"],
-    "actions": ["onvalue/*"]
+    "properties": ["steps", "delay"],
+    "events": ["start"]
   },
 
   "ota": {
@@ -198,8 +197,8 @@
 
   "color": {
     "properties": ["loglevel", "title", "description"],
-    "events": ["value", "mode", "duration", "saturation", "lightness"],
-    "actions": ["onvalue"]
+    "events": ["config", "value", "mode", "duration", "brightness"],
+    "actions": ["onvalue", "onbrightness"]
   },
 
   "light": {

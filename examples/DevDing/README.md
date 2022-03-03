@@ -13,6 +13,14 @@ This is an empty element that can be used as a template for implementing new ele
 All the virtual and overwritten methods that may be implemented are present in this implementation.
 They may be removed in Element implementations when not required to reduce program size.
 
+
+## MyElement series
+
+These files are used by the step-by-step example on
+how to [Create a new Element](https://homeding.github.io/steps/newelement.htm)
+and enriching the functionality.
+
+
 ## Diag Element
 
 This is an element that registers itself at system startup
@@ -22,6 +30,7 @@ and sends some diagnostic output to the Serial Console upon request:
 *   i2c bus configuration
 *   scan i2c bus for devices
 *   dump content of RTC memory
+
 
 ## SerialCmd Element
 

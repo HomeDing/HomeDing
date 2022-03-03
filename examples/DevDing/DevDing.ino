@@ -49,7 +49,8 @@
 
 #define HOMEDING_REGISTER 1
 
-// Enable the Core Elements of the HomeDing Library
+// Enable the following grouped elements of the HomeDing Library
+#define HOMEDING_INCLUDE_SYSTEM
 #define HOMEDING_INCLUDE_CORE
 #define HOMEDING_INCLUDE_FULL_SYSTEM
 
@@ -100,7 +101,8 @@
 
 #include "secrets.h"
 
-#include "MiniElement.h"
+// #include "MyElement-01.h"
+// #include "MyElement-02.h"
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
@@ -145,8 +147,9 @@ void setup(void) {
   // UPLOAD and DELETE of static files in the file system.
   server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
 
-  // enable this line to see MiniElement() working
-  // homeding.add("mini/1", new MiniElement());
+  // enable initialization line to see MyElement working
+  // homeding.add("my/1", new MyElement01());
+  // homeding.add("my/2", new MyElement02());
 
   LOGGER_INFO("setup done.");
 }  // setup

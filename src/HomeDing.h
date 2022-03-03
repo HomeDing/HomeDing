@@ -81,7 +81,6 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
-#define HOMEDING_INCLUDE_RTCSTATE
 #define HOMEDING_INCLUDE_MAP
 
 #define HOMEDING_INCLUDE_LOG
@@ -96,6 +95,7 @@ extern Board homeding;
 // system elements only in full firmware
 #ifdef HOMEDING_INCLUDE_FULL_SYSTEM
 #define HOMEDING_INCLUDE_SSDP
+#define HOMEDING_INCLUDE_RTCSTATE
 #endif
 
 // Easy include of all elements for an attached display.

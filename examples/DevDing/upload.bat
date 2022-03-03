@@ -12,7 +12,7 @@ set devicename=%1
 if EXIST "..\..\build\DevDing.ino.bin" ( set binfile="..\..\build\DevDing.ino.bin" )
 if EXIST ".\build\DevDing.ino.bin"     ( set binfile=".\build\DevDing.ino.bin" )
 
-echo Uploading %binfile%...
+echo uploading: %binfile% to device %devicename% ...
 python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a 123 -f %binfile% 
 
 :end

@@ -26,7 +26,9 @@
 #define HOMEDING_REGISTER 1
 
 // Enable the Core Elements of the HomeDing Library
+#define HOMEDING_INCLUDE_SYSTEM
 #define HOMEDING_INCLUDE_CORE
+#define HOMEDING_INCLUDE_FULL_SYSTEM
 
 // Enable some TIME Elements
 #define HOMEDING_INCLUDE_DSTIME

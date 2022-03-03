@@ -2,6 +2,19 @@
  * @file Standard.ino
  * @brief Standard Sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
+ * The use-case covered with this Sketch is to compile a firmware for controlling radio chips
+ * using the radio element that is part of this example.
+ * It is based on the standard example and provides the additional files implementing the radio element.
+ *
+ * Compile with
+ * * Board: NodeMCU 1.0
+ * * Flash Size: 4M (FS:2MB, OTA:~1019KB)
+ * * Debug Port: "Serial"
+ * * Debug Level: "None"
+ * * MMU: 32+32 balanced
+ *
+ * The WebUI available in the standard example data folder can be used.
+
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -27,7 +40,9 @@
 #define HOMEDING_REGISTER 1
 
 // Enable the Core Elements of the HomeDing Library
+#define HOMEDING_INCLUDE_SYSTEM
 #define HOMEDING_INCLUDE_CORE
+#define HOMEDING_INCLUDE_FULL_SYSTEM
 
 // Enable some Sensor Elements
 #define HOMEDING_INCLUDE_DHT
@@ -94,6 +109,7 @@ void setup(void) {
 #endif
 
   // ----- setup the platform with webserver and file system -----
+
   homeding.init(&server, &LittleFS, "radio");
 
   // ----- adding web server handlers -----

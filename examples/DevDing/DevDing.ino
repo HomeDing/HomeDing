@@ -118,17 +118,49 @@ void setup(void) {
   gdbstub_init();
 #endif
 
-#ifdef NET_DEBUG
-  Serial.setDebugOutput(true);
-#else
-  Serial.setDebugOutput(false);
-#endif
-
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
   delay(3000);
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
+#endif
+
+#ifdef NET_DEBUG
+  Serial.setDebugOutput(true);
+  // eSTAConnected = WiFi.onStationModeConnected(onSTAConnected);
+  static WiFiEventHandler eSTAConnected =
+    WiFi.onStationModeConnected([](WiFiEventStationModeConnected e) {
+      Serial.printf("WiFi Connected: SSID %s Channel %d\n",
+                    e.ssid.c_str(), e.channel);
+    });
+
+  static WiFiEventHandler eSTAGotIP =
+    WiFi.onStationModeGotIP([](WiFiEventStationModeGotIP e) {
+      Serial.printf("WiFi GotIP: localIP %s SubnetMask %s GatewayIP %s\n",
+                    e.ip.toString().c_str(), e.mask.toString().c_str(), e.gw.toString().c_str());
+    });
+
+  static WiFiEventHandler eSTADisConnected =
+    WiFi.onStationModeDisconnected([](WiFiEventStationModeDisconnected e) {
+      Serial.printf("WiFi Disconnected: SSID %s Reason %d\n",
+                    e.ssid.c_str(), e.reason);
+    });
+
+  static WiFiEventHandler h3 = WiFi.onStationModeDHCPTimeout([](void) {
+    Serial.println("WiFi Station DHCPTimeout.");
+  });
+
+  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](const WiFiEventSoftAPModeStationConnected& event) {
+    Serial.println("WiFi AP Station connected.");
+  });
+
+  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](const WiFiEventSoftAPModeProbeRequestReceived& event) {
+    Serial.println("WiFi AP Station probe.");
+  });
+
+  Serial.printf("WiFi.AutoConnect=%d\n", WiFi.getAutoConnect());
+#else
+  Serial.setDebugOutput(false);
 #endif
 
   // ----- setup the platform with webserver and file system -----
@@ -152,11 +184,21 @@ void setup(void) {
   // homeding.add("my/2", new MyElement02());
 
   LOGGER_INFO("setup done.");
+
 }  // setup
 
 
 // handle all give time to all Elements and active components.
 void loop(void) {
+#ifdef NET_DEBUG
+  static wl_status_t lastState = (wl_status_t)100;
+  wl_status_t newState = WiFi.status();
+  if (newState != lastState) {
+    Serial.printf("WiFi status: %d\n", newState);
+    lastState = newState;
+  }
+#endif
+
   server.handleClient();
   homeding.loop();
 }  // loop()

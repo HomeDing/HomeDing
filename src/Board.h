@@ -339,15 +339,13 @@ public:
   int I2cSda = PIN_WIRE_SDA;
   int I2cScl = PIN_WIRE_SCL;
 
-  /**
-   * Service discovery
-   */
+  /** Service discovery enabled */
   bool mDNS_sd = true;
 
-  // WebServer instance
+  /** WebServer instance */
   WebServer *server;
 
-  // FileSystem instance
+  /** FileSystem instance */
   FILESYSTEM *fileSystem;
 
   // a counter used as eTag that gets incremented when any file is changed.

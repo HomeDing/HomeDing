@@ -38,7 +38,8 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...)     // LOGGER_TRACE(__VA_ARGS__)
+#define NETTRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -98,7 +99,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   if (_isWakeupStart) {
     LOGGER_INFO("Reset from Deep Sleep mode.");
   }
-  enableWiFiAtBootTime();
+  // enableWiFiAtBootTime();
 
 #elif defined(ESP32)
   _isWakeupStart = false;  // TODO:ESP32 ???
@@ -154,7 +155,7 @@ void Board::_checkNetState() {
   hd_yield();
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
-    TRACE("new netstate: %d", newState);
+    NETTRACE("new netstate: %d", newState);
     _wifi_status = newState;
   }
 }
@@ -255,8 +256,8 @@ void Board::start(Element_StartupMode startupMode) {
 // switch to a new state
 void Board::_newState(enum BOARDSTATE newState) {
   hd_yield();
-  // TRACE("WiFi: %d,%d", WiFi.getMode(), WiFi.status());
-  TRACE("State=%d", newState);
+  NETTRACE("WiFi: %d,%d", WiFi.getMode(), WiFi.status());
+  NETTRACE("New State=%d", newState);
   boardState = newState;
 }
 
@@ -358,6 +359,10 @@ void Board::loop() {
 
     _resetCount = RTCVariables::getResetCounter();
 
+    if (sysButton >= 0) {
+      pinMode(sysButton, INPUT_PULLUP);
+    }
+
     if (_resetCount > 0) {
       // enforce un-safemode on double reset
       LOGGER_TRACE("Reset #%d", _resetCount);
@@ -375,7 +380,6 @@ void Board::loop() {
     }  // while
 
     // setup system wide stuff
-    WiFi.setHostname(deviceName.c_str());
     Wire.begin(I2cSda, I2cScl);
 
     start(Element_StartupMode::System);
@@ -393,12 +397,18 @@ void Board::loop() {
       digitalWrite(sysLED, HIGH);
     }
 
-    // TRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
-    // TRACE("resetCount=%d", _resetCount);
+    NETTRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
+    TRACE("resetCount=%d", _resetCount);
 
     // detect no configured network situation
-    if (((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0)) || (_resetCount == 2)) {
+    if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0)) {
+      TRACE("No Net Config");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
+
+    } else if (_resetCount == 2) {
+      TRACE("Reset*2");
+      _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
+
     } else {
       _newState(BOARDSTATE::CONNECT);
     }
@@ -408,8 +418,11 @@ void Board::loop() {
 
 
   } else if (boardState == BOARDSTATE::CONNECT) {
-    // TRACE("autoconnect=%d", WiFi.getAutoConnect());
-
+    WiFi.mode(WIFI_STA);
+    WiFi.setHostname(deviceName.c_str());
+    WiFi.setAutoConnect(false);
+    WiFi.setAutoReconnect(true);
+    WiFi.begin();
     _newState(BOARDSTATE::WAITNET);
 
     if (netMode == NetMode_AUTO) {
@@ -429,10 +442,10 @@ void Board::loop() {
     } else if (netMode == NetMode_PASS) {
       // 3. priority:
       // use fixed network and passPhrase known at compile time.
-      TRACE("NetMode_PASS: %s", ssid);
+      LOGGER_TRACE("NetMode_PASS: %s", ssid);
 
       if (!*ssid) {
-        TRACE("SKIP");
+        LOGGER_TRACE("SKIP");
         connectPhaseEnd = 0;
         return;
       } else {
@@ -440,11 +453,6 @@ void Board::loop() {
         WiFi.begin(ssid, passPhrase);
       }
     }  // if
-
-    // Enable sysButton for entering config mode
-    if (sysButton >= 0) {
-      pinMode(sysButton, INPUT_PULLUP);
-    }
 
     // wait some(12) seconds for connecting to the network
     connectPhaseEnd = now + maxNetConnextTime;
@@ -458,15 +466,15 @@ void Board::loop() {
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
-      // TRACE("sysbutton pressed");
+      TRACE("sysbutton %d pressed %d", sysButton, digitalRead(sysButton));
       _newState(BOARDSTATE::STARTCAPTIVE);
     }
 
     if (boardState == BOARDSTATE::WAITNET) {
       if (_wifi_status == WL_CONNECTED) {
         LOGGER_TRACE("connected.");
-        WiFi.setAutoReconnect(true);
-        WiFi.setAutoConnect(true);
+        // WiFi.setAutoReconnect(true);
+        // WiFi.setAutoConnect(true);
         _newState(BOARDSTATE::WAIT);
       }  // if
 
@@ -509,9 +517,7 @@ void Board::loop() {
 
     displayInfo(name, WiFi.localIP().toString().c_str());
     LOGGER_JUSTINFO("connected to %s (%s mode)",
-                    WiFi.SSID().c_str(),
-                    (isSafeMode ? "safe" : "unsafe"));
-
+                    WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
     LOGGER_JUSTINFO("start http://%s/", name);
 
     if (WiFi.getMode() == WIFI_AP_STA) {

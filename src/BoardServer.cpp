@@ -52,12 +52,12 @@
 #define PAGE_UPDATE_VERS "/$update.htm#v03"
 
 // Content types for http results
-#define TEXT_JSON "application/json; charset=utf-8" // Content type for JSON.
-#define TEXT_PLAIN "text/plain; charset=utf-8" // Content type for txt and empty results.
+#define TEXT_JSON "application/json; charset=utf-8"  // Content type for JSON.
+#define TEXT_PLAIN "text/plain; charset=utf-8"       // Content type for txt and empty results.
 
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Construct a new State Handler object
@@ -74,23 +74,24 @@ BoardHandler::BoardHandler(Board *board) {
 void BoardHandler::handleConnect(WebServer &server) {
   TRACE("handleConnect");
   unsigned long connectTimeout =
-      millis() + (60 * 1000); // TODO: make configurable
+    millis() + (60 * 1000);  // TODO: make configurable
+  String netName, netPass;
   server.send(200);
 
   if (server.hasArg("n")) {
     // const char *netName = server.arg("n").c_str();
-    String netName = server.arg("n");
-    String netPass = server.arg("p");
+    netName = server.arg("n");
+    netPass = server.arg("p");
     TRACE("connect %s/%s", netName.c_str(), netPass.c_str());
 
     _board->displayInfo("setup network", netName.c_str());
     WiFi.mode(WIFI_STA);
     WiFi.begin(netName.c_str(), netPass.c_str());
 
-  } else if (server.hasArg("wps")) {
+    // } else if (server.hasArg("wps")) {
     // TODO:WPS start using wps
     // WiFi.beginWPSConfig();
-  } // if
+  }  // if
 
   while (connectTimeout > millis()) {
     delay(100);
@@ -99,19 +100,19 @@ void BoardHandler::handleConnect(WebServer &server) {
 
     if (wifi_status == WL_CONNECTED) {
       WiFi.persistent(true);
-      WiFi.setAutoConnect(true);
       _board->displayInfo("ok.");
       break;
+
     } else if ((wifi_status == WL_NO_SSID_AVAIL) || (wifi_status == WL_CONNECT_FAILED)) {
       _board->displayInfo("failed.");
       WiFi.disconnect(true);
       break;
-    } // if
+    }  // if
 
-  } // while
+  }  // while
   delay(400);
   _board->reboot(false);
-} // handleConnect()
+}  // handleConnect()
 
 
 // Return list of local networks.
@@ -146,7 +147,7 @@ String BoardHandler::handleScan() {
     result = jc.stringify();
   }
   return (result);
-} // handleScan()
+}  // handleScan()
 
 
 // reset or reboot the device
@@ -154,7 +155,7 @@ void BoardHandler::handleReboot(WebServer &server, bool wipe) {
   server.send(200);
   server.client().stop();
   _board->reboot(wipe);
-} // handleReboot()
+}  // handleReboot()
 
 
 /**
@@ -169,12 +170,12 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 #endif
 {
-  bool can = ((requestMethod == HTTP_GET) // only GET requests in the API
-              && (requestUri.startsWith(SVC_ANY) // old api entries
-                  || requestUri.startsWith(API_ROUTE) // new api entries
-                  || (requestUri == "/"))); // handle redirect
+  bool can = ((requestMethod == HTTP_GET)              // only GET requests in the API
+              && (requestUri.startsWith(SVC_ANY)       // old api entries
+                  || requestUri.startsWith(API_ROUTE)  // new api entries
+                  || (requestUri == "/")));            // handle redirect
   return (can);
-} // canHandle
+}  // canHandle
 
 
 /**
@@ -193,7 +194,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 {
   TRACE("handle(%s)", requestUri2.c_str());
   String output;
-  const char *output_type = nullptr; // when output_type is set then send output as response.
+  const char *output_type = nullptr;  // when output_type is set then send output as response.
   FILESYSTEM *fs = _board->fileSystem;
 
   bool ret = true;
@@ -233,7 +234,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
         String tmp = id + "?" + server.argName(a) + "=$v";
         _board->dispatch(tmp, server.arg(a));
       }
-    } // if
+    }  // if
     output_type = TEXT_JSON;
 
   } else if (api == "sysinfo") {
@@ -317,7 +318,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
     if (_board->isCaptiveMode()) {
       url = "http://";
-      url.concat(WiFi.softAPIP().toString()); // _board->deviceName
+      url.concat(WiFi.softAPIP().toString());  // _board->deviceName
       url.concat("/$setup");
 
     } else {
@@ -342,7 +343,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
       }
 #endif
 
-    } // if
+    }  // if
     server.sendHeader("Location", url, true);
     server.send(302);
 
@@ -358,10 +359,10 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   }
 
   return (ret);
-} // handle()
+}  // handle()
 
 
-#if defined(ESP8266) // && defined(SPIFFS)
+#if defined(ESP8266)  // && defined(SPIFFS)
 
 // ESP8266 SPIFFS implementation, compatible with LittleFS on ESP8266
 // list files in filesystem recursively.
@@ -373,6 +374,10 @@ void listDirectory(MicroJsonComposer &jc, FILESYSTEM *fs, String path, Dir dir) 
     if (dir.isDirectory()) {
       Dir subDir = fs->openDir(path + name);
       listDirectory(jc, fs, path + name + "/", subDir);
+
+    } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
+      // do not report as file
+
     } else {
       jc.openObject();
       jc.addProperty("type", "file");
@@ -381,8 +386,8 @@ void listDirectory(MicroJsonComposer &jc, FILESYSTEM *fs, String path, Dir dir) 
       jc.addProperty("name", longName);
       jc.addProperty("size", dir.fileSize());
       jc.closeObject();
-    } // if
-  } // while
+    }  // if
+  }    // while
 }
 
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
@@ -421,9 +426,9 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
       jc.addProperty("size", entry.size());
       // jc.addProperty("time", entry.getLastWrite());
       jc.closeObject();
-    } // if
-  } // while
-} // handleListFiles()
+    }  // if
+  }    // while
+}  // handleListFiles()
 
 #endif
 
@@ -444,9 +449,9 @@ void BoardHandler::handleCleanWeb(String path) {
     } else {
       LOGGER_JUSTINFO("isFile.");
       // fSys->remove(name);
-    } // if
-  } // while
-} // handleCleanWeb()
+    }  // if
+  }    // while
+}  // handleCleanWeb()
 
 
 // End.

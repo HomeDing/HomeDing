@@ -89,7 +89,7 @@ public:
       server.send(200); // all done in upload. no other forms.
 
     } else if (requestMethod == HTTP_DELETE) {
-      LOGGER_JUSTINFO("Delete %d", _fs.exists(fName));
+      TRACE("Delete %d", _fs.exists(fName));
       if (_fs.exists(fName)) {
 #if defined(ESP8266)
         _fs.remove(fName);

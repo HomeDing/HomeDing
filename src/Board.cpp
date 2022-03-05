@@ -38,8 +38,8 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)     // LOGGER_TRACE(__VA_ARGS__)
-#define NETTRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+#define NETTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -264,6 +264,8 @@ void Board::_newState(enum BOARDSTATE newState) {
 // loop next element, only one at a time!
 void Board::loop() {
   unsigned long now = millis();
+  static String netpass;
+
   _checkNetState();
 
   if (boardState == BOARDSTATE::RUN) {
@@ -338,7 +340,12 @@ void Board::loop() {
     }  // if
 
   } else if (boardState == BOARDSTATE::NONE) {
-    TRACE("AutoConnect=%d", WiFi.getAutoConnect());
+    File f = fileSystem->open(NET_FILENAME, "r");
+    if (f) {
+      netpass = f.readString();
+      LOGGER_INFO(" $net=<%s>", netpass.c_str());
+      f.close();
+    }
     _newState(BOARDSTATE::LOAD);
 
   } else if (boardState == BOARDSTATE::LOAD) {
@@ -385,12 +392,6 @@ void Board::loop() {
     start(Element_StartupMode::System);
     displayInfo(HOMEDING_GREETING);
 
-    if (WiFi.SSID().length() > 0) {
-      netMode = NetMode_AUTO;
-    } else {
-      netMode = NetMode_PASS;
-    }
-
     // Enable sysLED for blinking while waiting for network or config mode
     if (sysLED >= 0) {
       pinMode(sysLED, OUTPUT);
@@ -398,18 +399,26 @@ void Board::loop() {
     }
 
     NETTRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
-    TRACE("resetCount=%d", _resetCount);
+    NETTRACE("$net=%s", netpass.substring(0, netpass.indexOf(',')).c_str());
+    NETTRACE("resetCount=%d", _resetCount);
 
     // detect no configured network situation
-    if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0)) {
-      TRACE("No Net Config");
+    if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
+      NETTRACE("No Net Config");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
     } else if (_resetCount == 2) {
-      TRACE("Reset*2");
+      NETTRACE("Reset*2");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
+    } else if (WiFi.SSID().length() || netpass.length()) {
+      NETTRACE("Auto");
+      netMode = NetMode_AUTO;
+      _newState(BOARDSTATE::CONNECT);
+
     } else {
+      NETTRACE("Pass");
+      netMode = NetMode_PASS;
       _newState(BOARDSTATE::CONNECT);
     }
 
@@ -419,25 +428,25 @@ void Board::loop() {
 
   } else if (boardState == BOARDSTATE::CONNECT) {
     WiFi.mode(WIFI_STA);
+    // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  // required to set hostname properly
     WiFi.setHostname(deviceName.c_str());
-    WiFi.setAutoConnect(false);
     WiFi.setAutoReconnect(true);
-    WiFi.begin();
     _newState(BOARDSTATE::WAITNET);
 
     if (netMode == NetMode_AUTO) {
       // 1. priority:
       // give autoconnect the chance to do it.
       // works only after a successfull network connection in the past.
+      WiFi.setAutoConnect(true);
+      WiFi.begin();
       LOGGER_TRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
 
     } else if (netMode == NetMode_PSK) {
       // 2. priority:
-      // explicit connect with the saved passwords.
-      // works only after a successfull network connection in the past.
-      LOGGER_TRACE("NetMode_PSK");
-      WiFi.mode(WIFI_STA);
-      WiFi.begin();
+      // connect with the saved network and password
+      int off = netpass.indexOf(',');
+      WiFi.begin(netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
+      NETTRACE("NetMode_PSK <%s>,<%s>", netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
 
     } else if (netMode == NetMode_PASS) {
       // 3. priority:

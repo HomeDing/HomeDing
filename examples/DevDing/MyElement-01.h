@@ -14,10 +14,10 @@
  * 30.12.2021 example implemented
  */
 
-// #include <Arduino.h>
-// #include <HomeDing.h>
-
-// Board homeding;
+#if defined(ESP32)
+// ESP32 DEV boards do not have a builtin LED. Use Port 25.
+#define LED_BUILTIN 25
+#endif
 
 class MyElement01 : public Element {
 

@@ -102,6 +102,11 @@ class Board;
  */
 #define CONF_FILENAME "/config.json"
 
+/**
+ * The $net.txt file contains the configured network and credentials.
+ */
+#define NET_FILENAME "/$net.txt"
+
 
 /**
  * @brief iterator callback function.

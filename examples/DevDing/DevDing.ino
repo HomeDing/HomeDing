@@ -125,7 +125,7 @@ void setup(void) {
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-#ifdef NET_DEBUG
+#if defined(NET_DEBUG) && defined (ESP8266)
   Serial.setDebugOutput(true);
   // eSTAConnected = WiFi.onStationModeConnected(onSTAConnected);
   static WiFiEventHandler eSTAConnected =
@@ -159,6 +159,8 @@ void setup(void) {
   });
 
   Serial.printf("WiFi.AutoConnect=%d\n", WiFi.getAutoConnect());
+#elif defined(NET_DEBUG)
+  Serial.setDebugOutput(true);
 #else
   Serial.setDebugOutput(false);
 #endif

@@ -101,6 +101,14 @@ void BoardHandler::handleConnect(WebServer &server) {
     if (wifi_status == WL_CONNECTED) {
       WiFi.persistent(true);
       _board->displayInfo("ok.");
+
+      File f = _board->fileSystem->open(NET_FILENAME, "w");
+      if (f) {
+        f.print(netName);
+        f.print(',');
+        f.print(netPass);
+        f.close();
+      }
       break;
 
     } else if ((wifi_status == WL_NO_SSID_AVAIL) || (wifi_status == WL_CONNECT_FAILED)) {

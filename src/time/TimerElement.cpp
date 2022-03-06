@@ -15,23 +15,21 @@
 
 #include <time/TimerElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new TimerElement
  * @return TimerElement* created element
  */
-Element *TimerElement::create()
-{
+Element *TimerElement::create() {
   return (new TimerElement());
-} // create()
+}  // create()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool TimerElement::set(const char *name, const char *value)
-{
+bool TimerElement::set(const char *name, const char *value) {
   unsigned long now = millis();
   bool ret = true;
   // TRACE("set %s=%s", name, value);
@@ -43,7 +41,6 @@ bool TimerElement::set(const char *name, const char *value)
       _mode = Mode::ON;
     } else if (_stricmp(value, "timer") == 0) {
       _mode = Mode::TIMER;
-      _startTime = now;
     }
 
   } else if (_stricmp(name, "restart") == 0) {
@@ -85,7 +82,7 @@ bool TimerElement::set(const char *name, const char *value)
         // restart
         _startTime = now;
       }
-    } // if TIMER
+    }  // if TIMER
 
   } else if (_stricmp(name, "onon") == 0) {
     _onAction = value;
@@ -101,22 +98,21 @@ bool TimerElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the TimerElement.
  */
-void TimerElement::start()
-{
+void TimerElement::start() {
   // TRACE("start()");
 
   if (_cycleTime < _waitTime + _pulseTime) {
     _cycleTime = _waitTime + _pulseTime;
-  } // if
+  }  // if
 
   Element::start();
   if ((_mode == Mode::TIMER) && (_restart)) {
@@ -124,16 +120,15 @@ void TimerElement::start()
     _startTime = millis();
   } else {
     _mode = Mode::OFF;
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  * will never change the mode.
  */
-void TimerElement::loop()
-{
+void TimerElement::loop() {
   bool newValue = _value;
 
   if (_mode == Mode::ON) {
@@ -166,7 +161,7 @@ void TimerElement::loop()
         _mode = Mode::OFF;
       }
     }
-  } // if
+  }  // if
 
   if (newValue == _value) {
     // no need to send an action.
@@ -177,17 +172,16 @@ void TimerElement::loop()
   } else {
     _board->dispatch(_offAction);
     _board->dispatch(_valueAction, "0");
-  } // if
+  }  // if
   _value = newValue;
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void TimerElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   unsigned long now = millis();
 
   Element::pushState(callback);
@@ -200,14 +194,13 @@ void TimerElement::pushState(
     callback("time", String(now - _startTime).c_str());
   }
   callback(PROP_VALUE, _value ? "1" : "0");
-} // pushState()
+}  // pushState()
 
 
 /**
  * @brief stop all activities of the timer and go inactive.
  */
-void TimerElement::term()
-{
+void TimerElement::term() {
   if (_mode == Mode::TIMER) {
     _board->dispatch(_endAction);
   }
@@ -220,7 +213,7 @@ void TimerElement::term()
   }
 
   Element::term();
-} // term()
+}  // term()
 
 
 // End

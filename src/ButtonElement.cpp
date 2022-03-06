@@ -85,15 +85,6 @@ bool ButtonElement::set(const char *name, const char *value)
 
 
 /**
- * @brief Activate the ButtonElement.
- */
-void ButtonElement::start()
-{
-  Element::start();
-} // start()
-
-
-/**
  * @brief check the input level.
  */
 void ButtonElement::loop()

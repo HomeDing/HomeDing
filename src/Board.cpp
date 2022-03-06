@@ -39,6 +39,8 @@ extern "C" {
 
 // use TRACE for compiling with detailed TRACE output.
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+
+// use NETTRACE for compiling with detailed output on startup & joining the network.
 #define NETTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
@@ -106,16 +108,14 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 #endif
 
   deviceName = WiFi.getHostname();  // use mac based default device name
-  TRACE("dn1: %s", deviceName.c_str());
   deviceName.replace("_", "");  // Underline in hostname is not conformant, see
   // https://tools.ietf.org/html/rfc1123 952
-  TRACE("dn2: %s", deviceName.c_str());
   hd_yield();
 }  // init()
 
 
 void Board::add(const char *id, Element *e) {
-  // LOGGER_TRACE("add(%s)", id);
+  // TRACE("add(%s)", id);
   _addedElements++;
 
   strcpy(e->id, id);
@@ -169,7 +169,7 @@ void Board::_checkNetState() {
  * @brief Add and config the Elements defined in the config files.
  */
 void Board::_addAllElements() {
-  // TRACE("addElements()");
+  // TRACE("addAllElements()");
   Element *_lastElem = NULL;  // last created Element
 
   MicroJson *mj = new MicroJson(
@@ -343,7 +343,6 @@ void Board::loop() {
     File f = fileSystem->open(NET_FILENAME, "r");
     if (f) {
       netpass = f.readString();
-      LOGGER_INFO(" $net=<%s>", netpass.c_str());
       f.close();
     }
     _newState(BOARDSTATE::LOAD);
@@ -439,7 +438,7 @@ void Board::loop() {
       // works only after a successfull network connection in the past.
       WiFi.setAutoConnect(true);
       WiFi.begin();
-      LOGGER_TRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
+      NETTRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
 
     } else if (netMode == NetMode_PSK) {
       // 2. priority:
@@ -451,10 +450,10 @@ void Board::loop() {
     } else if (netMode == NetMode_PASS) {
       // 3. priority:
       // use fixed network and passPhrase known at compile time.
-      LOGGER_TRACE("NetMode_PASS: %s", ssid);
+      NETTRACE("NetMode_PASS: %s", ssid);
 
       if (!*ssid) {
-        LOGGER_TRACE("SKIP");
+        NETTRACE("SKIP");
         connectPhaseEnd = 0;
         return;
       } else {
@@ -481,7 +480,7 @@ void Board::loop() {
 
     if (boardState == BOARDSTATE::WAITNET) {
       if (_wifi_status == WL_CONNECTED) {
-        LOGGER_TRACE("connected.");
+        NETTRACE("connected.");
         // WiFi.setAutoReconnect(true);
         // WiFi.setAutoConnect(true);
         _newState(BOARDSTATE::WAIT);
@@ -490,15 +489,15 @@ void Board::loop() {
       if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (now > connectPhaseEnd)) {
 
         if (!connectPhaseEnd) {
-          // no LOGGER_TRACE;
+          // no TRACE;
         } else if (now > connectPhaseEnd) {
-          LOGGER_TRACE("timed out.");
+          NETTRACE("timed out.");
         } else {
-          LOGGER_TRACE("wifi status=(%d)", _wifi_status);
+          NETTRACE("wifi status=(%d)", _wifi_status);
         }  // if
 
         netMode -= 1;
-        // LOGGER_TRACE("next connect method = %d\n", netMode);
+        // NETTRACE("next connect method = %d\n", netMode);
         if (netMode) {
           _newState(BOARDSTATE::CONNECT);  // try next mode
         } else {
@@ -725,12 +724,12 @@ Element *Board::findById(String &id) {
 }
 
 Element *Board::findById(const char *id) {
-  // LOGGER_TRACE("findById(%s)", id);
+  // TRACE("findById(%s)", id);
 
   Element *l = _elementList;
   while (l != NULL) {
     if (strcmp(l->id, id) == 0) {
-      // LOGGER_TRACE(" found:%s", l->id);
+      // TRACE(" found:%s", l->id);
       break;  // while
     }         // if
     l = l->next;
@@ -857,13 +856,13 @@ void Board::getState(String &out, const String &path) {
 
   Element *l = _elementList;
   while (l != NULL) {
-    // LOGGER_TRACE("  ->%s", l->id);
+    // TRACE("  ->%s", l->id);
     if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
       ret += '\"';
       ret += l->id;
       ret += "\":{";
       l->pushState([&ret](const char *name, const char *value) {
-        // LOGGER_TRACE("->%s=%s", name, value);
+        // TRACE("->%s=%s", name, value);
         ret.concat('\"');
         ret.concat(name);
         ret.concat("\":\"");
@@ -923,7 +922,7 @@ time_t Board::getTimeOfDay() {
  * @brief Get a Element by typename. Returns the first found element.
  */
 Element *Board::getElement(const char *elementType) {
-  // LOGGER_TRACE("getElement(%s)", elementType);
+  // TRACE("getElement(%s)", elementType);
 
   String tn = elementType;
   tn.concat(ELEM_ID_SEPARATOR);
@@ -936,7 +935,7 @@ Element *Board::getElement(const char *elementType) {
     }         // if
     l = l->next;
   }  // while
-  // LOGGER_TRACE("found: %d", l);
+  // TRACE("found: %d", l);
   return (l);
 }  // getElement()
 

@@ -39,7 +39,7 @@
 
 // #define DBG_GDB // start with debugger
 #define DBG_TRACE  // trace level for all elements
-#define NET_DEBUG  // show network event in output
+// #define NET_DEBUG  // show network event in output
 
 #ifdef DBG_GDB
 #include <GDBStub.h>
@@ -159,8 +159,12 @@ void setup(void) {
   });
 
   Serial.printf("WiFi.AutoConnect=%d\n", WiFi.getAutoConnect());
-#elif defined(NET_DEBUG)
+
+#elif defined(NET_DEBUG) && defined(ESP32)
   Serial.setDebugOutput(true);
+
+  // WiFi.onEvent()
+
 #else
   Serial.setDebugOutput(false);
 #endif

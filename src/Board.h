@@ -62,9 +62,10 @@
 // forward class declarations
 class Board;
 
+#include <Element.h>
+#include <displays/DisplayElement.h>
 #include <displays/DisplayAdapter.h>
 
-#include <Element.h>
 #include <StateElement.h>
 #include <core/Logger.h>
 #include <core/RTCVariables.h>

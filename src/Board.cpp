@@ -108,7 +108,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 #endif
 
   deviceName = WiFi.getHostname();  // use mac based default device name
-  deviceName.replace("_", "");  // Underline in hostname is not conformant, see
+  deviceName.replace("_", "");      // Underline in hostname is not conformant, see
   // https://tools.ietf.org/html/rfc1123 952
   hd_yield();
 }  // init()
@@ -426,9 +426,10 @@ void Board::loop() {
 
 
   } else if (boardState == BOARDSTATE::CONNECT) {
-    WiFi.mode(WIFI_STA);
     // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  // required to set hostname properly
     WiFi.setHostname(deviceName.c_str());
+    WiFi.mode(WIFI_STA);
+
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
 
@@ -985,7 +986,7 @@ void Board::reboot(bool wipe) {
 
 
 void Board::displayInfo(const char *text1, const char *text2) {
-  LOGGER_RAW("%s %s", text1, text2 ? text2 : "");
+  TRACE("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

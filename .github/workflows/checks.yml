@@ -65,6 +65,8 @@ jobs:
             - name: INA219_WE
             - name: Radio
             - name: RFCodes
+            - name: Adafruit ST7735 and ST7789 Library
+            - name: Adafruit GFX Library
           sketch-paths: |
             - 'examples/minimal'
             - 'examples/standard'

@@ -98,6 +98,7 @@ public:
         if (f.isDirectory()) {
           _fs.rmdir(fName);
         } else {
+          f.close();
           _fs.remove(fName);
         }
 #endif

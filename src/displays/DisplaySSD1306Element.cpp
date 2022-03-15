@@ -35,6 +35,8 @@ Element *DisplaySSD1306Element::create() {
 
 /* ===== Element functions ===== */
 
+// All required parameters are handled by DisplayElement::set()
+
 /**
  * @brief Activate the DisplaySSD1306Element and register a Display Adapter to
  * LCD in the board.
@@ -43,16 +45,19 @@ void DisplaySSD1306Element::start() {
   DisplayElement::start();
   // TRACE("start()");
 
-  DisplayAdapter *d = new DisplayAdapterSSD1306(_address, _height, _rotation);
-  if (d->init(_board)) {
-    _board->display = d;
-    d->setBrightness(_brightness);
+  DisplayAdapter *d = new DisplayAdapterSSD1306();
 
-  } else {
-    LOGGER_EERR("no display found.");
-    delete d;
-    active = false;
-  }  // if
+  if (d->setup(_board, &config)) {
+    if (d->start()) {
+      _board->display = d;
+      // d->setBrightness(config.brightness); ??? done during init
+
+    } else {
+      LOGGER_EERR("no display found.");
+      delete d;
+      active = false;
+    }  // if
+  }    // if
 }  // start()
 
 // End

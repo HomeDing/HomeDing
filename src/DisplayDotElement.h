@@ -55,17 +55,6 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Activate the DisplayDotElement.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
-  virtual void start() override;
-
-  /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop() override;
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -84,21 +73,6 @@ private:
    * @brief value to be displayed 
    */
   bool _value;
-
-  /**
-   * @brief Redraw needed flag;
-   */
-  bool _neededraw = false;
-
-  /**
-   * @brief This variable corresponds to the x parameter.
-   */
-  int _x = 0;
-
-  /**
-   * @brief This variable corresponds to the y parameter.
-   */
-  int _y = 0;
 
   int _w = 11;
   int _h = 11;

@@ -23,77 +23,40 @@
  * @brief static factory function to create a new DisplayLineElement.
  * @return DisplayLineElement* as Element* created element
  */
-Element *DisplayLineElement::create()
-{
+Element *DisplayLineElement::create() {
   return (new DisplayLineElement());
-} // create()
+}  // create()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool DisplayLineElement::set(const char *name, const char *value)
-{
-  bool ret = DisplayOutputElement::set(name, value);
+bool DisplayLineElement::set(const char *name, const char *value) {
+  bool ret = true;
 
-  if (!ret) {
-    ret = true;
+  if (DisplayOutputElement::set(name, value)) {
+    // done
+  } else if (_stricmp(name, "x1") == 0) {
+    _x1 = _atoi(value);
 
-    if (_stricmp(name, "x0") == 0) {
-      _x0 = _atoi(value);
+  } else if (_stricmp(name, "y1") == 0) {
+    _y1 = _atoi(value);
 
-    } else if (_stricmp(name, "x1") == 0) {
-      _x1 = _atoi(value);
-
-    } else if (_stricmp(name, "y0") == 0) {
-      _y0 = _atoi(value);
-
-    } else if (_stricmp(name, "y1") == 0) {
-      _y1 = _atoi(value);
-
-    } else {
-      ret = false;
-    }
-  } // if
+  } else {
+    ret = false;
+  }  // if
 
   return (ret);
-} // set()
-
-
-/**
- * @brief Activate the DisplayLineElement.
- */
-void DisplayLineElement::start()
-{
-  DisplayOutputElement::start();
-  if (_display) {
-    draw();
-  } // if
-} // start()
-
-
-/**
- * @brief check the state of the DHT values and eventually create actions.
- */
-void DisplayLineElement::loop()
-{
-  if (_neededraw) {
-    if (_display->page == _page) {
-      _display->drawLine(_x0, _y0, _x1, _y1);
-      _display->flush();
-    }
-    _neededraw = false;
-  } // if
-} // loop()
+}  // set()
 
 
 /**
  * @brief Draw this output element.
- * 
+ *
  */
-void DisplayLineElement::draw()
-{
-  _neededraw = true;
+void DisplayLineElement::draw() {
+  DisplayOutputElement::draw();
+  _display->drawLine(_x, _y, _x1, _y1);
 }
 
 

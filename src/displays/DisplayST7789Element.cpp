@@ -1,5 +1,5 @@
 /**
- * @file DisplayLCDElement.cpp
+ * @file DisplayST7789Element.cpp
  * @brief Display Element for HD44780 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -11,46 +11,48 @@
  *
  * More information on https://www.mathertel.de/Arduino
  *
- * Changelog:see DisplayLCDElement.h
+ * Changelog:see DisplayST7789Element.h
  */
 
 #include <Arduino.h>
 #include <Board.h>
 #include <HomeDing.h>
 
-#include <displays/DisplayLCDElement.h>
+#include <displays/DisplayST7789Element.h>
 
-#include <displays/DisplayAdapterLCD.h>
+#include <displays/DisplayAdapterST7789.h>
+
+#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
 /**
- * @brief static factory function to create a new DisplayLCDElement
- * @return DisplayLCDElement* created element
+ * @brief static factory function to create a new DisplayST7789Element
+ * @return DisplayST7789Element* created element
  */
-Element *DisplayLCDElement::create() {
-  return (new DisplayLCDElement());
+Element *DisplayST7789Element::create() {
+  return (new DisplayST7789Element());
 }  // create()
 
 
 /* ===== Element functions ===== */
 
-DisplayLCDElement::DisplayLCDElement() {
-  config.i2cAddress = 0x27;
-  config.height = 2;
-  config.width = 16;
-}
-
 // All required parameters are handled by DisplayElement::set()
 
 /**
- * @brief Activate the DisplayLCDElement and register a Display Adapter to LCD
+ * @brief Activate the DisplayST7789Element and register a Display Adapter to LCD
  * in the board.
  */
-void DisplayLCDElement::start() {
-  // TRACE("start()");
-  DisplayAdapter *d = new DisplayAdapterLCD();
+void DisplayST7789Element::start() {
+  TRACE("start()");
+  config.spiCS = 5;
+  config.spiDC = 16;
+  config.spiRST = 23;
+  config.spiMOSI = 19;
+  config.spiMISO = -1;
+  config.spiCLK = 18;
 
+  DisplayAdapter *d = new DisplayAdapterST7789();
   if (d->setup(_board, &config)) {
     bool success = d->start();
     if (success) {

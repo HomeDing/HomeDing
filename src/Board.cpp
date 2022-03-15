@@ -636,7 +636,7 @@ void Board::loop() {
       LOGGER_JUSTINFO("c");
 
 #elif defined(ESP32)
-      LOGGER_JUSTINFO("a1===");
+      LOGGER_JUSTINFO("MDNS-1");
       // MDNS.begin(deviceName.c_str());
       // MDNS.addService("_homeding", "_tcp", 80);
       // MDNS.addServiceTxt("_homeding", "_tcp", "path", homepage.c_str());
@@ -644,7 +644,7 @@ void Board::loop() {
       // MDNS.addServiceTxt("_homeding", "_tcp", "path", "/index.htm");
       // MDNS.addServiceTxt("_homeding", "_tcp", "title", "try me");
       // MDNS.addServiceTxt("_homeding", "_tcp", "room", room.c_str());
-      LOGGER_JUSTINFO("b1");
+      // LOGGER_JUSTINFO("MDNS-2");
 #endif
     }  // if
 

@@ -229,6 +229,10 @@ extern Board homeding;
 #include <displays/DisplaySH1106Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYST7789
+#include <displays/DisplayST7789Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DisplayText
 #include <DisplayTextElement.h>
 #endif

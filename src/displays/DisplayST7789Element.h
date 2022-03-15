@@ -1,5 +1,5 @@
 /**
- * @file DisplayLCDElement.h
+ * @file DisplayST7789Element.h
  * @brief Display Element for HD44780 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -15,22 +15,22 @@
  * * 18.09.2018 created by Matthias Hertel
  */
 
-#ifndef DisplayLCDElement_H
-#define DisplayLCDElement_H
+#ifndef DISPLAYST7789ELEMENT_H
+#define DISPLAYST7789ELEMENT_H
 
 #include "DisplayElement.h"
 
 /**
- * @brief DisplayLCDElement implements creating an Display Adapter for a LCD
+ * @brief DisplayST7789Element implements creating an Display Adapter for a LCD
  * attached to the I2C bus.
  * @details
  * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplayLCDElement : public DisplayElement {
+class DisplayST7789Element : public DisplayElement {
 public:
   /**
-   * @brief Factory function to create a DisplayLCDElement.
+   * @brief Factory function to create a DisplayST7789Element.
    * @return Element*
    */
   static Element *create();
@@ -41,11 +41,6 @@ public:
   static bool registered;
 
   /**
-   * @brief Constructor of a new DisplayLCDElement.
-   */
-  DisplayLCDElement();
-
-  /**
    * @brief Activate the Element.
    */
   virtual void start() override;
@@ -53,8 +48,8 @@ public:
 
 #ifdef HOMEDING_REGISTER
 // Register the DisplaySSD1306Element onto the ElementRegistry.
-bool DisplayLCDElement::registered =
-  ElementRegistry::registerElement("displayLCD", DisplayLCDElement::create);
+bool DisplayST7789Element::registered =
+  ElementRegistry::registerElement("DisplayST7789", DisplayST7789Element::create);
 #endif
 
 

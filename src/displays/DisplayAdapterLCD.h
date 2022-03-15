@@ -20,18 +20,8 @@
 
 class DisplayAdapterLCD : public DisplayAdapter {
 public:
-  /**
-   * @brief Construct a new Display Adapter for a SSD1306 display
-   * using specific parameters.
-   */
-  DisplayAdapterLCD(int address, int lines, int columns)
-    : DisplayAdapter(1, 1), _address(address), _lines(lines), _cols(columns) {
-  }  // DisplayAdapterLCD()
 
-  virtual ~DisplayAdapterLCD() = default;
-
-
-  bool init(Board *board) {
+  bool start() override {
     // test if a device is attached
     if (!WireUtils::exists(_address)) {
       LOGGER_ERR("not found");
@@ -45,7 +35,7 @@ public:
         return (false);
 
       } else {
-        DisplayAdapter::init(board);
+        DisplayAdapter::start();
 
         display->begin(_cols, _lines);
 
@@ -69,14 +59,10 @@ public:
   /**
    * @brief Clear all displayed information from the display.
    */
-  void clear() {
+  void clear() override {
     display->clear();
   };  // clear()
 
-
-  int getFontHeight(UNUSED int fontsize) override {
-    return (1);
-  };
 
   /**
    * @brief Clear information from the display in this area.
@@ -85,7 +71,7 @@ public:
    * @param w width of the area.
    * @param h height of the area, assumed always 1.
    */
-  void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h) {
+  void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h) override {
     display->setCursor(x, y);
     if (y < _lines) {
       while ((x < _cols) && (w > 0)) {
@@ -104,7 +90,7 @@ public:
    * @param h height of the characters, ignored for this display.
    * @param text the text.
    */
-  int drawText(int16_t x, int16_t y, UNUSED int16_t h, const char *text) {
+  int drawText(int16_t x, int16_t y, UNUSED int16_t h, const char *text) override {
     int w = strnlen(text, MAX_DISPLAY_STRING_LEN);
     char buffer[MAX_DISPLAY_STRING_LEN + 4];  // 8 chars character buffer max.
     if ((x > 20) || (y > 4)) {
@@ -119,7 +105,7 @@ public:
   }  // drawText
 
 
-  int drawDot(int16_t x, int16_t y, UNUSED int16_t h, bool fill) {
+  int drawDot(int16_t x, int16_t y, UNUSED int16_t h, bool fill) override {
     drawText(x, y, 1, fill ? "\02" : "\01");
     return (1);
   };  // drawDot()

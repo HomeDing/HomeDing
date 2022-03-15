@@ -19,32 +19,22 @@
 
 class DisplayAdapterOLED : public DisplayAdapter {
 public:
-  /**
-   * @brief Construct a new Display Adapter for a SH1106 display
-   * using specific parameters.
-   */
-  DisplayAdapterOLED(int address, int height, int rotation)
-    : DisplayAdapter(10, 8), _address(address), _height(height), _rotation(rotation) {
-  }  // DisplayAdapterSH1106()
+  virtual bool start() override {
+    DisplayAdapter::start();
 
-  virtual ~DisplayAdapterOLED() = default;
-
-
-  virtual bool init(UNUSED Board *board, OLEDDisplay *d) {
-    display = d;
-    d->init();
+    display->init();
     hd_yield();
 
-    if (_rotation == 0) {
-      d->flipScreenVertically();
+    if (conf->rotation == 0) {
+      display->flipScreenVertically();
     }
 
-    d->setTextAlignment(TEXT_ALIGN_LEFT);
-    d->setFont(ArialMT_Plain_10);
+    display->setTextAlignment(TEXT_ALIGN_LEFT);
+    display->setFont(ArialMT_Plain_10);
     hd_yield();
 
-    d->clear();
-    d->display();
+    display->clear();
+    display->display();
     hd_yield();
 
     return (true);
@@ -58,20 +48,11 @@ public:
   /**
    * @brief Clear all displayed information from the display.
    */
-  void clear() {
+  void clear() override {
     display->clear();
     _dirty = true;
   };  // clear()
 
-
-  int getFontHeight(int fontsize) override {
-    int h = 0;
-    const uint8_t *fontData = _getFontData(fontsize);
-    if (fontData) {
-      h = pgm_read_byte(fontData + HEIGHT_POS);
-    }
-    return (h);
-  };
 
   /**
    * @brief Clear information from the display in this area.
@@ -80,7 +61,7 @@ public:
    * @param w width of the area.
    * @param h height of the area.
    */
-  void clear(int16_t x, int16_t y, int16_t w, int16_t h) {
+  void clear(int16_t x, int16_t y, int16_t w, int16_t h) override {
     display->setColor(BLACK);
     display->fillRect(x, y, w, h);
     _dirty = true;
@@ -95,7 +76,7 @@ public:
    * @param text the text.
    * @return width of drawn text.
    */
-  int drawText(int16_t x, int16_t y, int16_t h, const char *text) {
+  int drawText(int16_t x, int16_t y, int16_t h, const char *text) override {
     String tmp(text);
     const uint8_t *fontData = _getFontData(h);
     int w = 0;
@@ -111,14 +92,14 @@ public:
   }  // drawText()
 
 
-  void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+  void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
     display->setColor(WHITE);
     display->drawLine(x0, y0, x1, y1);
     _dirty = true;
   }  // drawLine()
 
 
-  int drawDot(int16_t x, int16_t y, int16_t h, bool fill) {
+  int drawDot(int16_t x, int16_t y, int16_t h, bool fill) override {
     int r = h / 2;
 
     display->setColor(WHITE);
@@ -140,19 +121,11 @@ public:
 
 protected:
   /**
-   * @brief I2C Display device address.
-   */
-  int _address;
-
-  int _height;
-  int _rotation;
-
-private:
-  /**
    * @brief Reference to the used library object
    */
   OLEDDisplay *display = NULL;
 
+private:
   bool _dirty;
 
   /**

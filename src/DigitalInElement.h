@@ -50,11 +50,10 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Activate the Element.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
+  /** @brief Setup the Element. */
+  virtual void setup() override;
+
+  /** @brief Activate the Element.*/
   virtual void start() override;
 
   /**

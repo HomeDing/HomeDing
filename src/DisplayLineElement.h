@@ -56,18 +56,6 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
-   * @brief Activate the DisplayLineElement.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
-  virtual void start() override;
-
-  /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop() override;
-
-  /**
    * @brief Draw this output element.
    */
   virtual void draw() override;
@@ -76,15 +64,8 @@ private:
   /**
    * @brief This variable corresponds to the x0 parameter.
    */
-  uint8_t _x0 = 0;
-  uint8_t _y0 = 0;
   uint8_t _x1 = 0;
   uint8_t _y1 = 0;
-
-  /**
-   * @brief Redraw needed flag;
-   */
-  bool _neededraw = false;
 };
 
 #ifdef HOMEDING_REGISTER

@@ -35,6 +35,8 @@ Element *DisplaySH1106Element::create() {
 
 /* ===== Element functions ===== */
 
+// All required parameters are handled by DisplayElement::set()
+
 /**
  * @brief Activate the DisplaySH1106Element and register a Display Adapter to
  * LCD in the board.
@@ -43,16 +45,18 @@ void DisplaySH1106Element::start() {
   DisplayElement::start();
 
   // TRACE("start()");
-  DisplayAdapter *d = new DisplayAdapterSH1106(_address, _height, _rotation);
+  DisplayAdapter *d = new DisplayAdapterSH1106();
 
-  if (d->init(_board)) {
-    _board->display = d;
+  if (d->setup(_board, &config)) {
+    if (d->start()) {
+      _board->display = d;
 
-  } else {
-    LOGGER_EERR("no display found.");
-    delete d;
-    active = false;
-  }  // if
+    } else {
+      LOGGER_EERR("no display found.");
+      delete d;
+      active = false;
+    }  // if
+  }    // if
 }  // start()
 
 // End

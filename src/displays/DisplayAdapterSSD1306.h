@@ -20,28 +20,17 @@
 
 class DisplayAdapterSSD1306 : public DisplayAdapterOLED {
 public:
-  /**
-   * @brief Construct a new Display Adapter for a SSD1306 display
-   * using specific parameters.
-   */
-  DisplayAdapterSSD1306(int address, int height, int rotation = 0)
-    : DisplayAdapterOLED(address, height, rotation) {
-  }  // DisplayAdapterSSD1306()
-
-  virtual ~DisplayAdapterSSD1306() = default;
-
-
-  bool init(Board *board) {
+  bool start() override {
     if (!disp) {
       // allocate a new class for this display
 
-      if (!WireUtils::exists(_address)) {
-        LOGGER_ERR("not found %d", _address);
+      if (!WireUtils::exists(conf->i2cAddress)) {
+        LOGGER_ERR("not found %d", conf->i2cAddress);
         return (false);
 
       } else {
-        OLEDDISPLAY_GEOMETRY res = (_height == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
-        disp = new (std::nothrow) SSD1306Wire(_address, board->I2cSda, board->I2cScl, res);
+        OLEDDISPLAY_GEOMETRY res = (conf->height == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
+        disp = new (std::nothrow) SSD1306Wire(conf->i2cAddress, conf->i2cSDA, conf->i2cSCL, res);
       }
     }  // if
 
@@ -49,8 +38,8 @@ public:
       return (false);
 
     } else {
-      disp->init();
-      DisplayAdapterOLED::init(board, disp);
+      display = disp;
+      DisplayAdapterOLED::start();
     }  // if
     return (true);
   };  // init()

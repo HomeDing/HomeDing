@@ -59,14 +59,21 @@ bool DigitalInElement::set(const char *name, const char *value) {
 }  // set()
 
 
+/** @brief Setup the Element. */
+void DigitalInElement::setup() {
+  // only start with valid pin as input.
+  if (_pin >= 0) {
+    pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
+  }
+};
+
 /**
  * @brief Activate the DigitalInElement.
  */
 void DigitalInElement::start() {
-  // only start with valid pin as input.
   // TRACE("start (%d)", _pin);
+  // only start with valid pin as input.
   if (_pin >= 0) {
-    pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
     _lastInLevel = digitalRead(_pin);
     if (_inverse)
       _lastInLevel = !_lastInLevel;
@@ -79,18 +86,16 @@ void DigitalInElement::start() {
  * @brief check the state of the input.
  */
 void DigitalInElement::loop() {
-  if (_pin >= 0) {
-    int lev = digitalRead(_pin);
-    if (_inverse)
-      lev = !lev;
+  int lev = digitalRead(_pin);
+  if (_inverse)
+    lev = !lev;
 
-    if (lev != _lastInLevel) {
-      // TRACE("output %d->%d)", _lastInLevel, lev);
-      _board->dispatch(lev ? _highAction : _lowAction);
-      _board->dispatch(_valueAction, lev ? "1" : "0");
-      _lastInLevel = lev;
-    }  // if
-  }    // if
+  if (lev != _lastInLevel) {
+    // TRACE("output %d->%d)", _lastInLevel, lev);
+    _board->dispatch(lev ? _highAction : _lowAction);
+    _board->dispatch(_valueAction, lev ? "1" : "0");
+    _lastInLevel = lev;
+  }  // if
 }  // loop()
 
 

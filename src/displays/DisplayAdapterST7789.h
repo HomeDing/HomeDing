@@ -19,8 +19,8 @@
 #include <Adafruit_ST7789.h>  // Hardware-specific library for ST7789
 #include <SPI.h>
 #include <fonts/font10.h>
-#include <Fonts/font16.h>
-#include <Fonts/font24.h>
+#include <fonts/font16.h>
+#include <fonts/font24.h>
 
 #include <displays/DisplayAdapter.h>
 

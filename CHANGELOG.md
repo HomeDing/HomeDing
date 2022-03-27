@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 The released version 0.7.2 was stable enough to do many implementations so many changes
 where not published in a release.
 
+This release includes support for ESP32 based implementations in addition to ESP8266.
+
 ### Breaking Changes
 
 With the 0.8.x version the SPIFFS filesystem is not supported any more
@@ -38,35 +40,42 @@ resulting a a reformatted flash disk space when updating.
 
 A lot new elements and examples:
 
-* **[TM1637 Element](https://homeding.github.io/#page=/elements/tm1637.md)** -
+* **[TM1637 Element](https://homeding.github.io/elements/tm1637.htm)** -
     new element supporting 4-digit time displays with the tm1637 chip.
 
-* **[State Element](https://homeding.github.io/#page=/elements/state.md)** -
+* **[State Element](https://homeding.github.io/elements/state.htm)** -
 
-* **[RTCState Element](https://homeding.github.io/#page=/elements/rtcstate.md)** -
+* **[RTCState Element](https://homeding.github.io/elements/rtcstate.htm)** -
 
-* **[ADD Element](https://homeding.github.io/#page=/elements/add.md)** -
+* **[ADD Element](https://homeding.github.io/elements/add.htm)** -
     a new element adding multiple input values.
 
-* **[AND Element](https://homeding.github.io/#page=/elements/and.md)** -
+* **[AND Element](https://homeding.github.io/elements/and.htm)** -
     a new element combining multiple input values using the logical AND function.
 
-* **[OR Element](https://homeding.github.io/#page=/elements/or.md)** -
+* **[OR Element](https://homeding.github.io/elements/or.htm)** -
     a new element combining multiple input values using the logical OR function.
 
-* **[Probe Example](https://homeding.github.io/#page=/examples/probe.md)** -
-    a new example providing a sketch and extra Elements to build a power consumption monitoring device using INA219 and ina226 chips.
+* **[MAP Element](https://homeding.github.io/elements/map.htm)** -
+* **[Scene Element](https://homeding.github.io/elements/scene.htm)** -
 
-* **[Probe Example](https://homeding.github.io/#page=/examples/probe.md)** - A new example to implement current sensor with long time logging using INA219 or INA226 sensor chips.
+
+* **[Probe Example](https://homeding.github.io/examples/probe.htm)** -
+  A new example providing a sketch and extra Elements to build a power consumption monitoring device using INA219 and ina226 chips.
+
+* **[RFBridge Example](https://homeding.github.io/examples/rfbridge.htm)** -
+  A new example to implement a RF433 bridge device sending and receiving 433MHz signals.
 
 * saving state of elements to survive a boot / but no power down.
 * arduino-lint github action
 
 * startup without files in filesystem will cause ota to be started to enable update over the wire.
 
-* The **[DHT Element](https://homeding.github.io/#page=/elements/dht.md)** supporting the DHT11, DHT22 temperature and humidity sensor is switched to another library.
+* The **[DHT Element](https://homeding.github.io/elements/dht.htm)** supporting the DHT11, DHT22 temperature and humidity sensor is switched to another library.
 
 * The mDNS Protocol is now also used to publish the embedded web server.
+
+* The startup sequence and WiFi Manager implementation was improved.
 
 ## [0.7.0] - 2021-06-15
 
@@ -84,10 +93,10 @@ and is still more beta than ESP8266 board support.
   It has created to separate the bridge supporting RFCodes Element out of the standard set of elements
   to avoid that the RFCodes library is required all the time.
 
-  There will be a specific story in the HomeDing documentation at <https://homeding.github.io/#page=/stories.md>
+  There will be a specific story in the HomeDing documentation at <https://homeding.github.io/stories.htm>
   on this example when work is done.
 
-* [BME680 Element](https://homeding.github.io/#page=/elements/bme680.md) Bosch library updated to version 1.6.1480
+* [BME680 Element](https://homeding.github.io/elements/bme680.htm) Bosch library updated to version 1.6.1480
 
 * [State implementation for Elements]()
 
@@ -97,7 +106,7 @@ and is still more beta than ESP8266 board support.
 
   new, to be documented.
 
-* [Timer Element](https://homeding.github.io/#page=/elements/timer.md)
+* [Timer Element](https://homeding.github.io/elements/timer.htm)
 
   **mode** - The Timer can be disabled by setting mode to "ON" or "OFF". To re-enable the timer set mode to "TIMER".
 
@@ -123,11 +132,11 @@ and is still more beta than ESP8266 board support.
 
 ### Enhancements
 
-* **[Display Elements](https://homeding.github.io/#page=/displays.md)**
+* **[Display Elements](https://homeding.github.io/displays.htm)**
 
   **brightness** - The brightness of the display can be controlled with this action and is reported in the element state. Default is 128 of 255.
 
-* **[Analog Element](https://homeding.github.io/#page=/elements/analog.md)**
+* **[Analog Element](https://homeding.github.io/elements/analog.htm)**
 
   **mapIn___** and **mapOut___** properties can be used to calculate
   a meaningful range of values from the analog raw value.
@@ -142,19 +151,19 @@ and is still more beta than ESP8266 board support.
 
 ### Added Elements
 
-* **[Digital Signal Element](https://homeding.github.io/#page=/elements/digitalsignal.md)**
+* **[Digital Signal Element](https://homeding.github.io/elements/digitalsignal.htm)**
     A new element that uses an interrupt driven approach to capture digital input signal changes.
 
-* **[BL0937 Element](https://homeding.github.io/#page=/elements/bl0937.md)**
+* **[BL0937 Element](https://homeding.github.io/elements/bl0937.htm)**
     A new element to support single phase energy monitoring using BL0937, HLW8012 or HJL-01 chips.
 
-* **[MAX7219 Element](https://homeding.github.io/#page=/elements/max7219.md)**
+* **[MAX7219 Element](https://homeding.github.io/elements/max7219.htm)**
     A new Element for driving a MAX7219 chip 8x8 matrix or 8x7-segment number driver using SPI.
 
-* **[SHT20 Element](https://homeding.github.io/#page=/elements/sht20.md)**
+* **[SHT20 Element](https://homeding.github.io/elements/sht20.htm)**
     A new Element for driving the SHT20 temperature and humidity sensor using i2c bus.
 
-* **[Reference Element](https://homeding.github.io/#page=/elements/reference.md)**
+* **[Reference Element](https://homeding.github.io/elements/reference.htm)**
     A new Element for calculating a boolean from comparing a value against a reference value.
 
 ## [0.5.0] - 2020-09-13
@@ -170,15 +179,15 @@ This release focuses on stability and better developer support. New Elements is 
 
 ### Added Examples
 
-* **[Development example](https://homeding.github.io/#page=/examples/develop.md)** - The example can be used for for experimental and incubator implementations.<br />
+* **[Development example](https://homeding.github.io/examples/develop.htm)** - The example can be used for for experimental and incubator implementations.<br />
   In the folder you can find elements that should not be present in long-time running devices but can help wile developing.<br />
   This sketch includes all common elements and those under development or of interest.
 
-* **[Minimal example](https://homeding.github.io/#page=/examples/minimal.md)** - The example can be compiled to get a small firmware that runs on 1MByte flash boards with reduced functionality.
+* **[Minimal example](https://homeding.github.io/examples/minimal.htm)** - The example can be compiled to get a small firmware that runs on 1MByte flash boards with reduced functionality.
 
 ### Added Elements
 
-These Elements are added to the [Development example](https://homeding.github.io/#page=/examples/develop.md) and are in an early development state or for development purpose only. When finalized they will be moved into the core library.
+These Elements are added to the [Development example](https://homeding.github.io/examples/develop.htm) and are in an early development state or for development purpose only. When finalized they will be moved into the core library.
 
 * **Diag Element** - is included in the DevDing example to help analyzing the current I2C devices and memory.
 * **RFSend Element** - An experimental Element for sending rf433 signals.
@@ -188,34 +197,34 @@ These Elements are added to the [Development example](https://homeding.github.io
 
 ### Enhancements
 
-* **[Device Element](https://homeding.github.io/#page=/elements/device.md)** - Serval improvements.
-  * **safeMode** - The safeMode (see <https://homeding.github.io/#page=/safemode.md>) advanced in this release but still WIP.<br/>
+* **[Device Element](https://homeding.github.io/elements/device.htm)** - Serval improvements.
+  * **safeMode** - The safeMode (see <https://homeding.github.io/safemode.htm>) advanced in this release but still WIP.<br/>
     The `safeMode` is reported in Serial output and in the response of the `/$sysinfo` request.<br/>
     Since this release the safeMode is on by default.
-  * **sleepTime** - The [deep sleep mode](https://homeding.github.io/#page=/boards/deepsleep.md)
+  * **sleepTime** - The [deep sleep mode](https://homeding.github.io/boards/deepsleep.htm)
     is now supported for devices that will not be always available through the built-in web server.
   * **cache** - The `cache` parameter can be used to switch on client side caching for the static files.
   * **sd** - The `sd` parameter can be used to switch off mDNS discovery for a device.
 
-* **[NTPTime Element](https://homeding.github.io/#page=/elements/ntptime.md)**
+* **[NTPTime Element](https://homeding.github.io/elements/ntptime.htm)**
   * **zone** - The NTPTime Element is now using newer the ANSI ntp time functions. See example `NTP-TZ-DST.ino`.<br/>
       The zone parameter now can include summer time adjustments.<br/>
       Changing `zone` parameter of ntpTimeElement to use the POSIX TZ format.<br/>
       Examples can be found at <https://sites.google.com/a/usapiens.com/opnode/time-zones><br/>
       The system now handles refreshing the time from an NTP Server.
 
-* **[Value Element](https://homeding.github.io/#page=/elements/value.md)**
+* **[Value Element](https://homeding.github.io/elements/value.htm)**
   * **type** - The Value Element now also supports values in string format by setting "type"="string".
 
-* **[WeatherFeed Element](https://homeding.github.io/#page=/elements/weatherfeed.md)** - finalized.
+* **[WeatherFeed Element](https://homeding.github.io/elements/weatherfeed.htm)** - finalized.
   * The WeatherFeedElement pulls weather forecast information for a specific location from
     the internet service from <https://openweathermap> and dispatches actions with specific data items.
-  * See story [Build a Weather forecast display](https://homeding.github.io/#page=/stories/story-weatherdisplay.md).
+  * See story [Build a Weather forecast display](https://homeding.github.io/stories/story-weatherdisplay.htm).
 
-* **[DHT Element](https://homeding.github.io/#page=/elements/dht.md)**
+* **[DHT Element](https://homeding.github.io/elements/dht.htm)**
   * **powerPin** and **powerInverse** - The DHT Element has support for a power controlling GPIO pin to reset the sensor when required.
 
-* **[Sensor Elements](https://homeding.github.io/#page=/elements/sensors.md)**
+* **[Sensor Elements](https://homeding.github.io/elements/sensors.htm)**
   * **warmupTime** - the time a sensor required to be usable for first data acquiring.
   * **restart** - This parameter can be set to true when the sensor can be restarted after failure.
 

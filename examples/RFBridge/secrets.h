@@ -4,7 +4,7 @@
 // into the source code and the uploaded sketch.
 // 
 // Using the WiFi Manager is preferred and avoids reprogramming when your network changes.
-// See https://homeding.github.io/#page=/wifimanager.md
+// See https://homeding.github.io/wifimanager.htm
 
 // ssid and passPhrase can be used when compiling for a specific environment as a 2. option.
 

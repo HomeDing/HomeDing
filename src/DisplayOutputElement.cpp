@@ -62,7 +62,7 @@ void DisplayOutputElement::start() {
 
   } else {
     if (_color == COLOR_UNDEFINED) {
-      _color = d->getColor(); // get standard draw/text color drom display.
+      _color = d->getColor(); // get standard draw/text color from display.
     }
     _display = d;
     if (_page > d->maxpage) {

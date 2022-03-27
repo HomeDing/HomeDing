@@ -1,6 +1,6 @@
 /**
- * @file DisplaySSD1306Element.h
- * @brief Display Element for SSD1306 based OLED displays.
+ * @file DisplayMAX7219Element.h
+ * @brief Display Element for HD44780 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -12,27 +12,25 @@
  * More information on https://www.mathertel.de/Arduino
  *
  * Changelog:
- * * 18.09.2018 created by Matthias Hertel
- * * 29.08.2020 based on DisplayElement
- * * 20.03.2022 Using Adafruit SSD1306 library
+ * * 23.03.2022 created by Matthias Hertel
  */
 
-#ifndef DisplaySSD1306Element_H
-#define DisplaySSD1306Element_H
+#ifndef DISPLAYMAX7219ELEMENT_H
+#define DISPLAYMAX7219ELEMENT_H
 
 #include "DisplayElement.h"
 
 /**
- * @brief DisplaySSD1306Element implements creating an Display Adapter for a OLED
+ * @brief DisplayMAX7219Element implements creating an Display Adapter for a LCD
  * attached to the I2C bus.
  * @details
  * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplaySSD1306Element : public DisplayElement {
+class DisplayMAX7219Element : public DisplayElement {
 public:
   /**
-   * @brief Factory function to create a DisplaySSD1306Element.
+   * @brief Factory function to create a DisplayMAX7219Element.
    * @return Element*
    */
   static Element *create();
@@ -50,8 +48,8 @@ public:
 
 #ifdef HOMEDING_REGISTER
 // Register the DisplaySSD1306Element onto the ElementRegistry.
-bool DisplaySSD1306Element::registered =
-  ElementRegistry::registerElement("DisplaySSD1306", DisplaySSD1306Element::create);
+bool DisplayMAX7219Element::registered =
+  ElementRegistry::registerElement("DisplayMAX7219", DisplayMAX7219Element::create);
 #endif
 
 

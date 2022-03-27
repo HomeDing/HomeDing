@@ -16,6 +16,7 @@
  * * MMU: 32+32 balanced
  *
  * There is full featured WebUI available in the data folder.
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -40,7 +41,7 @@
 
 #define HOMEDING_REGISTER 1
 
-// Enable the Core Elements of the HomeDing Library
+// Enable the following element groups of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
 #define HOMEDING_INCLUDE_CORE
 #define HOMEDING_INCLUDE_FULL_SYSTEM
@@ -49,7 +50,7 @@
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_DS18B20
-#define HOMEDING_INCLUDE_SHT20  // + 1176 bytes
+#define HOMEDING_INCLUDE_SHT20
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -67,7 +68,10 @@
 #define HOMEDING_INCLUDE_DISPLAYLCD
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
-#define HOMEDING_INCLUDE_TM1637
+// eneble these lines to get more displays supported
+// #define HOMEDING_INCLUDE_DISPLAYST7789
+// #define HOMEDING_INCLUDE_DISPLAYMAX7219
+// #define HOMEDING_INCLUDE_TM1637
 
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR

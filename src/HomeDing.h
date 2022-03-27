@@ -221,6 +221,10 @@ extern Board homeding;
 #include <displays/DisplayLCDElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYMAX7219
+#include <displays/DisplayMAX7219Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DISPLAYSSD1306
 #include <displays/DisplaySSD1306Element.h>
 #endif

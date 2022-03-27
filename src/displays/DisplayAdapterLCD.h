@@ -20,15 +20,14 @@
 
 class DisplayAdapterLCD : public DisplayAdapter {
 public:
-
   bool start() override {
     // test if a device is attached
-    if (!WireUtils::exists(_address)) {
+    if (!WireUtils::exists(conf->i2cAddress)) {
       LOGGER_ERR("not found");
       return (false);
 
     } else {
-      display = new (std::nothrow) LiquidCrystal_PCF8574(_address);
+      display = new (std::nothrow) LiquidCrystal_PCF8574(conf->i2cAddress);
 
       if (!display) {
         LOGGER_ERR("not found");
@@ -37,7 +36,9 @@ public:
       } else {
         DisplayAdapter::start();
 
-        display->begin(_cols, _lines);
+        display->begin(conf->width, conf->height);
+        lineHeight = 1;
+        charWidth = 1;
 
         byte dotOff[] = { 0b00000, 0b01110, 0b10001, 0b10001,
                           0b10001, 0b01110, 0b00000, 0b00000 };
@@ -73,8 +74,8 @@ public:
    */
   void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h) override {
     display->setCursor(x, y);
-    if (y < _lines) {
-      while ((x < _cols) && (w > 0)) {
+    if (y < conf->height) {
+      while ((x < conf->width) && (w > 0)) {
         display->write(' ');
         w--;
         x++;
@@ -97,7 +98,7 @@ public:
       // TRACE("outside");
     } else {
       strlcpy(buffer, text, MAX_DISPLAY_STRING_LEN);
-      buffer[_cols - x] = '\0';
+      buffer[conf->width - x] = '\0';
       display->setCursor(x, y);
       display->print(buffer);
     }
@@ -115,14 +116,6 @@ private:
    * @brief Reference to the used library object
    */
   LiquidCrystal_PCF8574 *display = NULL;
-
-  /**
-   * @brief I2C Display device address.
-   */
-  int _address;
-
-  int _lines;
-  int _cols;
 };
 
 #endif  // DisplayAdapterLCD_H

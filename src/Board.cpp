@@ -155,7 +155,7 @@ void Board::_checkNetState() {
   hd_yield();
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
-    NETTRACE("new netstate: %d", newState);
+    NETTRACE("netstate: %d", newState);
     _wifi_status = newState;
   }
 }
@@ -371,7 +371,7 @@ void Board::loop() {
 
     if (_resetCount > 0) {
       // enforce un-safemode on double reset
-      LOGGER_TRACE("Reset #%d", _resetCount);
+      LOGGER_INFO("Reset #%d", _resetCount);
       isSafeMode = false;
     }  // if
     _resetCount = RTCVariables::setResetCounter(_resetCount + 1);
@@ -427,8 +427,9 @@ void Board::loop() {
 
   } else if (boardState == BOARDSTATE::CONNECT) {
     // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  // required to set hostname properly
-    WiFi.setHostname(deviceName.c_str());
+    WiFi.setHostname(deviceName.c_str());  // for ESP32
     WiFi.mode(WIFI_STA);
+    WiFi.setHostname(deviceName.c_str());  // for ESP8266
 
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
@@ -482,8 +483,6 @@ void Board::loop() {
     if (boardState == BOARDSTATE::WAITNET) {
       if (_wifi_status == WL_CONNECTED) {
         NETTRACE("connected.");
-        // WiFi.setAutoReconnect(true);
-        // WiFi.setAutoConnect(true);
         _newState(BOARDSTATE::WAIT);
       }  // if
 

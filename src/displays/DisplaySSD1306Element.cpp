@@ -1,6 +1,6 @@
 /**
  * @file DisplaySSD1306Element.cpp
- * @brief Display Element for SSD1306 based OLED displays.
+ * @brief Display Element for HD44780 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -18,9 +18,11 @@
 #include <Board.h>
 #include <HomeDing.h>
 
-#include "DisplaySSD1306Element.h"
+#include <displays/DisplaySSD1306Element.h>
 
 #include <displays/DisplayAdapterSSD1306.h>
+
+#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -38,24 +40,22 @@ Element *DisplaySSD1306Element::create() {
 // All required parameters are handled by DisplayElement::set()
 
 /**
- * @brief Activate the DisplaySSD1306Element and register a Display Adapter to
- * LCD in the board.
+ * @brief Activate the DisplaySSD1306Element and register a Display Adapter to LCD
+ * in the board.
  */
 void DisplaySSD1306Element::start() {
-  DisplayElement::start();
-  // TRACE("start()");
+  TRACE("start()");
 
   DisplayAdapter *d = new DisplayAdapterSSD1306();
-
   if (d->setup(_board, &config)) {
-    if (d->start()) {
+    bool success = d->start();
+    if (success) {
       _board->display = d;
-      // d->setBrightness(config.brightness); ??? done during init
+      DisplayElement::start();
 
     } else {
       LOGGER_EERR("no display found.");
       delete d;
-      active = false;
     }  // if
   }    // if
 }  // start()

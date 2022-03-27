@@ -29,6 +29,8 @@
 
 class DisplayAdapter {
 public:
+  virtual ~DisplayAdapter() = default;
+
   DisplayAdapter() {
     color = 0x00FFFFFF;      // white
     backColor = 0x00000000;  // black

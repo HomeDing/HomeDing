@@ -72,7 +72,7 @@ void DisplayElement::init(Board *board) {
   // use system wide I2C by default
   config.i2cSDA = board->I2cSda;
   config.i2cSCL = board->I2cScl;
-    
+
   // use system wide SPI by default
   // config.spiMISO = ;
   // config.spiMOSI = ;
@@ -112,8 +112,31 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // === These properties can only be used during configuration:
 
+    // i2c bus
+
   } else if (_stricmp(name, "address") == 0) {
     config.i2cAddress = _atoi(value);
+
+    // spi bus
+
+  } else if (_stricmp(name, "spimosi") == 0) {
+    config.spiMOSI = _atopin(value);
+
+  } else if (_stricmp(name, "spimiso") == 0) {
+    config.spiMISO = _atopin(value);
+
+  } else if (_stricmp(name, "spiclk") == 0) {
+    config.spiCLK = _atopin(value);
+
+  } else if (_stricmp(name, "spics") == 0) {
+    config.spiCS = _atopin(value);
+
+  } else if (_stricmp(name, "spidc") == 0) {
+    config.spiDC = _atopin(value);
+
+
+  } else if (_stricmp(name, "invert") == 0) {
+    config.invert = _atob(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {
     config.resetPin = _atopin(value);

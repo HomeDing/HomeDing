@@ -13,6 +13,7 @@
  *
  * Changelog:
  * * 29.08.2020 created by Matthias Hertel
+ * * 17.03.2022 unified DisplayConfig
  */
 
 #ifndef DISPLAYELEMENT_H
@@ -21,16 +22,16 @@
 #include <functional>
 
 struct DisplayConfig {
-  /** width of display */
+  /** Width of display */
   int width = 128;
 
-  /** height of display */
+  /** Height of display */
   int height = 64;
 
-  /** brightness of display 0...100 (percent) */
+  /** Brightness of display 0...100 (percent) */
   int brightness = 80;
 
-  /** rotation of display */
+  /** Rotation of the display */
   int rotation = 0;
 
   /** Pin to reset the display chip */
@@ -39,18 +40,21 @@ struct DisplayConfig {
   /** Pin to enable backlight etc. */
   int lightPin = -1;
 
+  /** Pin to reset the display chip */
+  bool invert = -false;
+
   /* ===== I2C interface ===== */
 
-  int i2cAddress = 0;  // i2c address
-  int i2cSDA = 0;  // i2c data
-  int i2cSCL = 0;  // i2c clock
+  int i2cAddress = 0;  ///< i2c address
+  int i2cSDA = 0;      ///< i2c data
+  int i2cSCL = 0;      ///< i2c clock
 
   /* ===== SPI interface ===== */
-  int spiMOSI = -1;  // SPI interface MOSI pin
-  int spiMISO = -1;  // SPI interface MISO pin
-  int spiCLK = -1;   // SPI interface clock CLK pin
-  int spiCS = -1;   // SPI interface chip select CS pin
-  int spiDC = -1;   // SPI interface Data-Command DC pin
+  int spiMOSI = -1;  ///< SPI interface MOSI pin
+  int spiMISO = -1;  ///< SPI interface MISO pin
+  int spiCLK = -1;   ///< SPI interface clock CLK pin
+  int spiCS = -1;    ///< SPI interface chip select CS pin
+  int spiDC = -1;    ///< SPI interface Data-Command DC pin
   int spiRST = -1;
 };
 
@@ -94,7 +98,6 @@ public:
   // === common properties for initializing display adapters
 
 protected:
-
   struct DisplayConfig config;
 
   /** event when page changes */

@@ -56,16 +56,17 @@ jobs:
           libraries: |
             - source-path: ./
             - name: OneWire
-            - name: LiquidCrystal_PCF8574
-            - name: ESP8266 and ESP32 OLED driver for SSD1306 displays
-            - name: Adafruit NeoPixel
             - name: RotaryEncoder
             - name: DHTNEW
             - name: my92xx
             - name: INA219_WE
             - name: Radio
             - name: RFCodes
+            - name: LiquidCrystal_PCF8574
+            - name: Adafruit NeoPixel
             - name: Adafruit ST7735 and ST7789 Library
+            - name: Adafruit SH110X
+            - name: Adafruit SSD1306
             - name: Adafruit GFX Library
           sketch-paths: |
             - 'examples/minimal'

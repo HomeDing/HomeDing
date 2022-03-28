@@ -985,7 +985,7 @@ void Board::reboot(bool wipe) {
 
 
 void Board::displayInfo(const char *text1, const char *text2) {
-  TRACE("%s %s", text1, text2 ? text2 : "");
+  LOGGER_JUSTINFO("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

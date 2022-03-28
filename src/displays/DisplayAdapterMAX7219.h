@@ -34,7 +34,7 @@ public:
     // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
     // LOGGER_JUSTINFO("  pins: l:%d, r:%d", conf->lightPin, conf->resetPin);
     // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
-    // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK);
+    // LOGGER_JUSTINFO("   spi: cs:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiMOSI, conf->spiCLK);
 
     int bytes = conf->width * conf->height;
     _csPin = conf->spiCS;
@@ -137,10 +137,8 @@ public:
     // buffer = display->getBuffer();
 
     // shift to display !
-
     SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
     for (int y = 0; y < 8; y++) {
-
       // transfer all data from one horizontal line into daisychained buffers.
       digitalWrite(_csPin, LOW);
       for (int x = 0; x < 4; x++) {
@@ -151,6 +149,7 @@ public:
       // save data into display.
       digitalWrite(_csPin, HIGH);
     }  // for
+    SPI.endTransaction();
   };
 
 private:

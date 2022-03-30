@@ -22,6 +22,8 @@
 
 #include <RemoteElement.h>
 
+#include <WiFiClient.h>
+
 /**
  * @brief static factory function to create a new RemoteElement.
  * @return RemoteElement* as Element* created element

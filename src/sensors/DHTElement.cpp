@@ -21,6 +21,8 @@
 
 #include <sensors/DHTElement.h>
 
+#include <dhtnew.h>
+
 /**
  * @brief static factory function to create a new DHTElement
  * @return DHTElement* created element

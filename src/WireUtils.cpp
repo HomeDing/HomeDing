@@ -1,7 +1,8 @@
 /**
  * @file WireUtils.cpp
  *
- * @brief Wire Utils are some helpful methods and makros to use the i2c bus through the Wire library,
+ * @brief Wire Utils are some helpful methods and makros to use the i2c bus
+ * through the Wire library,
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

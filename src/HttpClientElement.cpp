@@ -22,6 +22,8 @@
 
 #include <HttpClientElement.h>
 
+#include <WiFiClient.h>
+
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 #define MAX_WAIT_FOR_RESPONSE 20

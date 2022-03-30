@@ -20,7 +20,6 @@
 #define HTTPCLIENTELEMENT_H
 
 #include <HomeDing.h>
-#include <WiFiClient.h>
 
 /**
  * @brief The RemoteElement is an special Element that creates actions based on

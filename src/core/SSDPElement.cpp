@@ -16,6 +16,12 @@
 
 #include <core/SSDPElement.h>
 
+#if defined(ESP8266)
+#include <ESP8266SSDP.h>
+#elif defined(ESP32)
+#include <ESP32SSDP.h>
+#endif
+
 #define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */

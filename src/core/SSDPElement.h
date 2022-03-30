@@ -18,12 +18,6 @@
 
 #include <HomeDing.h>
 
-#if defined(ESP8266)
-#include <ESP8266SSDP.h>
-#elif defined(ESP32)
-#include <ESP32SSDP.h>
-#endif
-
 /**
  * @brief Element for enabling Element discovery using the SSDP protocol.
  */

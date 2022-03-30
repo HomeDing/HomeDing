@@ -22,9 +22,10 @@
 #define DHTELEMENT_H
 
 #include <HomeDing.h>
+
 #include <sensors/SensorElement.h>
 
-#include <dhtnew.h>
+class DHTNEW; // forward
 
 /**
  * @brief The DHTElement is an special Element that creates actions based on a

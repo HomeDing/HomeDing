@@ -19,7 +19,7 @@ This Library is published using a [BSD 3-clause license](./LICENSE).
 ## Support of many sensors, displays and other IO
 
 The Homeding library has implemented many
-[Elements](https://homeding.github.io/elements.htm) for simple Input and Output of signals,
+[Elements](https://homeding.github.io/elements/index.htm) for simple Input and Output of signals,
 [sensors](https://homeding.github.io/sensors/sensors.htm),
 [displays](https://homeding.github.io/displays/index.htm), lightning, logical processing, time support and many others.
 

@@ -20,7 +20,7 @@
 #include "TM1637Element.h"
 
 
-#define TRACE(...) LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 #define TM1637_MAXDIGITS 10
 #define TM1637_DELAY 20
@@ -102,14 +102,14 @@ int TM1637Element::_io(const char *seq, int data) {
   return (ret);
 }  // _send()
 
-// display raw data
+// display raw data and set brightness
 void TM1637Element::_displayRaw(int *data) {
   _io("(V)", TM1637_CMD_WRITE);
   _io("(V", TM1637_CMD_ADDRESS + 0);
   for (unsigned int i = 0; i < _digits; i++) {
     _io("V", data[i]);
   }
-  _io(")(V)", TM1637_CMD_CONTROL + (_brightness > 0) ? TM1637_ON + (_brightness - 1) : 0);
+  _io(")(V)", TM1637_CMD_CONTROL + ((_brightness > 0) ? TM1637_ON + (_brightness - 1) : 0));
 }  // _displayRaw()
 
 
@@ -172,12 +172,12 @@ bool TM1637Element::set(const char *name, const char *value) {
     _needUpdate = true;
 
   } else if (_stricmp(name, "type") == 0) {
-    if (_stricmp(value, "tm1637")) {
+    if (_stricmp(value, "tm1637") == 0) {
       _type = TYPE_TM1637;
       _ioDelay = TM1637_DELAY;
-    // } else if (_stricmp(value, "tm1638")) {
-    //   _type = TYPE_TM1638;
-    //   _ioDelay = TM1637_DELAY;
+      // } else if (_stricmp(value, "tm1638")) {
+      //   _type = TYPE_TM1638;
+      //   _ioDelay = TM1637_DELAY;
     }
 
   } else if (_stricmp(name, "datapin") == 0) {
@@ -203,6 +203,7 @@ void TM1637Element::start() {
   TRACE("start()");
 
   if ((_type == TYPE_TM1637) && (_dataPin >= 0) && (_clockPin >= 0)) {
+    TRACE("start(TYPE_TM1637)");
     _digits = 4;
     // _digits = constrain(_digits, 0, TM1637_MAXDIGITS);
 
@@ -214,15 +215,14 @@ void TM1637Element::start() {
     Element::start();
     _needUpdate = true;
 
-  // } else if ((_type == TYPE_TM1638) && (_dataPin >= 0) && (_clockPin >= 0) && (_csPin >= 0)) {
-  //   _digits = 8;
+    // } else if ((_type == TYPE_TM1638) && (_dataPin >= 0) && (_clockPin >= 0) && (_csPin >= 0)) {
+    //   _digits = 8;
 
-  //   pinMode(_clockPin, OUTPUT);
-  //   pinMode(_dataPin, OUTPUT);
-  //   pinMode(_csPin, OUTPUT);
-  //   digitalWrite(_clockPin, HIGH);
-  //   digitalWrite(_dataPin, HIGH);
-
+    //   pinMode(_clockPin, OUTPUT);
+    //   pinMode(_dataPin, OUTPUT);
+    //   pinMode(_csPin, OUTPUT);
+    //   digitalWrite(_clockPin, HIGH);
+    //   digitalWrite(_dataPin, HIGH);
   }
 }  // start()
 

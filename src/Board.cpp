@@ -41,7 +41,7 @@ extern "C" {
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...) // LOGGER_TRACE(__VA_ARGS__)
+#define NETTRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -576,16 +576,7 @@ void Board::loop() {
     start(Element_StartupMode::Network);
     dispatch(sysStartAction);  // dispatched when network is available
 
-    // ===== initialize network dependant services
-
-    // start file server for static files in the file system.
-    server->serveStatic("/", *fileSystem, "/", cacheHeader.c_str());
-
-    server->onNotFound([this]() {
-      TRACE("notFound: %s", server->uri().c_str());
-      server->send(404, "text/html", FPSTR(respond404));
-    });
-
+    // ===== finish network setup
 
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode
@@ -601,53 +592,28 @@ void Board::loop() {
       MDNS.addServiceTxt(serv, "title", title.c_str());
       MDNS.addServiceTxt(serv, "room", room.c_str());
 
-#elif defined(ESP32x)
-      // using https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/mdns.html
-      // https://github.com/espressif/esp-idf/blob/master/examples/protocols/mdns/main/mdns_example_main.c
-
-      LOGGER_JUSTINFO("a0");
-      // initialize mDNS service
-      esp_err_t err = mdns_init();
-      if (err) {
-        LOGGER_JUSTINFO("MDNS Init failed: %d\n", err);
-        return;
-      }
-
-      // set hostname
-      mdns_hostname_set(deviceName.c_str());
-      // set default instance
-      mdns_instance_name_set("HomeDing on ESP32");
-
-      LOGGER_JUSTINFO("b0");
-      mdns_service_add(NULL, "_homeding", "_tcp", 80, NULL, 0);
-
-      LOGGER_JUSTINFO("a");
-      mdns_txt_item_t txtData[3] = {
-        { "path", homepage.c_str() },
-        { "title", title.c_str() },
-        { "room", room.c_str() }
-      };
-      LOGGER_JUSTINFO("b");
-
-      // if (mdns_service_txt_set("_homeding", "_tcp", txtData, 3)) {
-      //   LOGGER_ERR("Failed adding HomeDing txt");
-      // }
-      LOGGER_JUSTINFO("c");
-
 #elif defined(ESP32)
-      LOGGER_JUSTINFO("MDNS-1");
-      // MDNS.begin(deviceName.c_str());
-      // MDNS.addService("_homeding", "_tcp", 80);
-      // MDNS.addServiceTxt("_homeding", "_tcp", "path", homepage.c_str());
-      // MDNS.addServiceTxt("_homeding", "_tcp", "title", title.c_str());
-      // MDNS.addServiceTxt("_homeding", "_tcp", "path", "/index.htm");
-      // MDNS.addServiceTxt("_homeding", "_tcp", "title", "try me");
-      // MDNS.addServiceTxt("_homeding", "_tcp", "room", room.c_str());
-      // LOGGER_JUSTINFO("MDNS-2");
+      MDNS.begin(deviceName.c_str());
+      MDNS.addService("homeding", "tcp", 80);
+      MDNS.addServiceTxt("homeding", "tcp", "path", homepage.c_str());
+      MDNS.addServiceTxt("homeding", "tcp", "title", title.c_str());
+      MDNS.addServiceTxt("homeding", "tcp", "room", room.c_str());
 #endif
     }  // if
 
+
+    // ===== initialize network dependant services
+
+    // start file server for static files in the file system.
+    server->serveStatic("/", *fileSystem, "/", cacheHeader.c_str());
+
+    server->onNotFound([this]() {
+      TRACE("notFound: %s", server->uri().c_str());
+      server->send(404, "text/html", FPSTR(respond404));
+    });
+
     _newState(BOARDSTATE::RUN);
+
   } else if (boardState == BOARDSTATE::SLEEP) {
     // just wait.
 

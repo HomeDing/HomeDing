@@ -17,15 +17,17 @@
  * * created by Matthias Hertel
  * * 21.01.2020 supporting arrays
  * * 11.04.2020 better supporting arrays
- * * 18.04.2020 correct handling empty obejcts a.k.a '{}'
+ * * 18.04.2020 correct handling empty objects a.k.a '{}'
  * * 18.04.2020 reduce memory footprint
  * * 27.06.2020 enable parsing partial JSON in junks
+ * * 16.05.2021 use strlcat.
  */
 
 
 #ifndef MICROJSON_H
 #define MICROJSON_H
 
+#include <functional>
 #include <FS.h>
 
 #define MICROJSON_PATH_SEPARATOR '/'
@@ -78,6 +80,9 @@ protected:
    * @param s input characters
    */
   void parseChar(const char *s);
+
+  void _sendPath(int _level, char *path);
+  void _sendValue(int _level, char *path, char *name, char *value);
 
   int _state;
   int __level;

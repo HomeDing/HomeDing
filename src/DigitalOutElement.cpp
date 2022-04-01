@@ -19,14 +19,12 @@
  * @brief static factory function to create a new DigitalOutElement.
  * @return DigitalOutElement* as Element* created element
  */
-Element *DigitalOutElement::create()
-{
+Element *DigitalOutElement::create() {
   return (new DigitalOutElement());
-} // create()
+}  // create()
 
 
-bool DigitalOutElement::set(const char *name, const char *value)
-{
+bool DigitalOutElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
@@ -46,46 +44,46 @@ bool DigitalOutElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the DigitalOutElement.
  */
-void DigitalOutElement::start()
-{
+void DigitalOutElement::start() {
   if (_pin < 0) {
     LOGGER_EERR("no pin");
+
+  } else if ((_pin >= 6) && (_pin <= 11)) {
+    LOGGER_EERR("no valid pin");
 
   } else {
     Element::start();
     // enable output and stay off
     pinMode(_pin, OUTPUT);
     _setLevel(_lastValue);
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 void DigitalOutElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _lastValue ? "1" : "0");
-} // pushState()
+  callback(PROP_VALUE, _printBoolean(_lastValue));
+}  // pushState()
 
 
 /**
  * @brief set the physical level based on _inverse
  * @param logicalHigh
  */
-void DigitalOutElement::_setLevel(bool logicalHigh)
-{
+void DigitalOutElement::_setLevel(bool logicalHigh) {
   _lastValue = (logicalHigh ? HIGH : LOW);
   int physLevel = (_inverse ? (!_lastValue) : _lastValue);
   if (active)
     digitalWrite(_pin, physLevel);
-} // _setLevel
+}  // _setLevel
 
 // End

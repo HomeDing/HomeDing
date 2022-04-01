@@ -1,0 +1,6 @@
+{
+  "board": "esp8266:esp8266:nodemcuv2",
+  "configuration": "xtal=80,vt=flash,exception=legacy,ssl=all,eesz=4M1M,led=2,ip=lm2f,dbg=Serial,lvl=None____,wipe=none,baud=115200",
+  "sketch": "DevDing.ino",
+  "output": ".\\_temp"
+}

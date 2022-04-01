@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="120" viewBox="0 0 144 48"><style>text {font-family: sans-serif;}
+    #axis line {stroke:#008800;stroke-width:.2;}
+    #panel path, #panel line, #panel polyline {stroke:black;stroke-width:0.2;fill:none;}
+    #panel line.hline {}
+    .panel-back {fill:#f8f8f8}
+    #h-labels text {transform:scale(1, -1);text-anchor:middle;font-size:2.5px;}
+    #v-labels text {transform:scale(1, -1);text-anchor:end;font-size:2.5px;}
+    #v-labels line {stroke:#008800;stroke-width:.2;}
+    #ind {pointer-events: none;}
+    #ind line {stroke:darkgreen;stroke-width:0.2}
+    #ind circle {fill:none; stroke:darkgreen;stroke-width:0.2}
+    #ind .info .back {fill:white;stroke: black; stroke-width:0.1}
+    #ind text {transform:scale(1, -1);text-anchor:start;font-size:2.6px;}
+  </style><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth" viewBox="0 0 20 20"><path d="M0,0 L0,6 L9,3 z" fill="#f00" /></marker><marker id="circle" markerWidth="4" markerHeight="4" refX="2" refY="2"><circle cx="2" cy="2" r="2" stroke="none" fill="#444444"/></marker></defs><g id="background" transform="matrix(1,0,0,-1,0,48)"><rect width="144" height="48" fill="#ffffff" /><rect x="12" y="8" width="128" height="36" fill="#f2f0f2" /></g><g id="axis" transform="matrix(1,0,0,-1,0,48)"><line x1="12" y1="4" x2="12" y2="44" /><line x1="8" y1="8" x2="140" y2="8" /></g><g id="v-labels" transform="matrix(1,0,0,-1,0,41)"></g><g id="h-labels" transform="matrix(1,0,0,-1,12,44)"></g><!-- region for the chartline is 136*40 starting in 0/0 --><!-- <polyline marker-end="url(#arrow)" marker-start="url(#circle)" marker-mid="url(#circle)" />--><g id="panel" transform="matrix(1,0,0,-1,12,40)"><rect class="panel-back" width="128" height="36" /></g><g id="ind" transform="matrix(1,0,0,-1,12,40)" style="display:none"><line x1="12" y1="0" x2="12" y2="36" /><circle  cx="12" cy="8" r="1.2" /><g class="info" transform="translate(4, 12)"><rect class="back" width="18" height="10" /><text x="1" y="-7" id="indx"></text><text x="1" y="-4" id="indV1"></text><text x="1" y="-1" id="indV2"></text></g></g><script href="microsvg.js" ></script><script href="chartline.js" ></script></svg>

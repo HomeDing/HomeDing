@@ -58,6 +58,11 @@ public:
 private:
   int _pin = -1;
 
+#if defined(ESP32)
+  /** channel for ESP32 */
+  int _channel;
+#endif
+
   // when _inverse == true: logical HIGH will produce a physical LOW level.
   bool _inverse = false;
 

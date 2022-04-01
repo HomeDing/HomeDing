@@ -1,0 +1,51 @@
+{
+  "diag": {
+    "0": {
+      "description": "ota"
+    }
+  },
+  "ina226": {
+    "0": {
+      "title": "sensor",
+      "description": "Voltage and Current Sensor",
+      "shunt": "0.002",
+      "range": "1",
+      "average": "4",
+      "warmuptime": "2s",
+      "readtime": "10s",
+      "onVoltage": "displaytext/v?value=$v",
+      "onCurrent": "displaytext/a?value=$v,log/a?value=$v",
+      "onPower": "displaytext/p?value=$v"
+    }
+  },
+  "displaytext": {
+    "v": {
+      "x": 0,
+      "y": 0,
+      "postfix": " V",
+      "description": "voltage"
+    },
+    "a": {
+      "x": 0,
+      "y": 12,
+      "postfix": " mA",
+      "description": "Ampere"
+    },
+    "p": {
+      "x": 0,
+      "y": 24,
+      "postfix": " mW",
+      "description": "Power"
+    }
+  },
+  "log": {
+    "a": {
+      "title": "mA",
+      "description": "log current",
+      "x-averagetime": "00:02:00",
+      "filesize": "10000",
+      "filename": "/a-log.txt",
+      "yformat": "num:2"
+    }
+  }
+}

@@ -28,51 +28,40 @@
  * @brief static factory function to create a new DisplayLCDElement
  * @return DisplayLCDElement* created element
  */
-Element *DisplayLCDElement::create()
-{
+Element *DisplayLCDElement::create() {
   return (new DisplayLCDElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
-DisplayLCDElement::DisplayLCDElement()
-{
-  startupMode = Element_StartupMode::System;
-  // standards for LCD on I2C
-  _address = 0x27;
-  _height = 2;
-  _width = 16;
+DisplayLCDElement::DisplayLCDElement() {
+  config.i2cAddress = 0x27;
+  config.height = 2;
+  config.width = 16;
 }
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
-bool DisplayLCDElement::set(const char *name, const char *value)
-{
-  bool ret = DisplayElement::set(name, value);
-  return (ret);
-} // set()
-
+// All required parameters are handled by DisplayElement::set()
 
 /**
  * @brief Activate the DisplayLCDElement and register a Display Adapter to LCD
  * in the board.
  */
-void DisplayLCDElement::start()
-{
+void DisplayLCDElement::start() {
   // TRACE("start()");
-  DisplayAdapter *d = new DisplayAdapterLCD(_address, _height, _width);
+  DisplayAdapter *d = new DisplayAdapterLCD();
 
-  bool success = d->init(_board);
-  if (success) {
-    _board->display = d;
-    DisplayElement::start();
+  if (d->setup(_board, &config)) {
+    bool success = d->start();
+    if (success) {
+      _board->display = d;
+      DisplayElement::start();
 
-  } else {
-    LOGGER_EERR("no display found.");
-    delete d;
-  } // if
-} // start()
+    } else {
+      LOGGER_EERR("no display found.");
+      delete d;
+    }  // if
+  }    // if
+}  // start()
 
 // End

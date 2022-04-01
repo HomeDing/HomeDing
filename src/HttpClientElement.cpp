@@ -22,6 +22,8 @@
 
 #include <HttpClientElement.h>
 
+#include <WiFiClient.h>
+
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 #define MAX_WAIT_FOR_RESPONSE 20
@@ -183,7 +185,7 @@ void HttpClientElement::loop()
           processHeader(key, val);
         }
       }
-      yield();
+      hd_yield();
     } // while available
 
   } else if (_state == STATE::BODY) {

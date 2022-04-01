@@ -26,17 +26,15 @@
  * @brief static factory function to create a new BMP280Element
  * @return BMP280Element* created element
  */
-Element *BMP280Element::create()
-{
+Element *BMP280Element::create() {
   return (new BMP280Element());
-} // create()
+}  // create()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool BMP280Element::set(const char *name, const char *value)
-{
+bool BMP280Element::set(const char *name, const char *value) {
   bool ret = SensorElement::set(name, value);
 
   if (!ret) {
@@ -52,22 +50,22 @@ bool BMP280Element::set(const char *name, const char *value)
       _pressureAction = value;
       ret = true;
 
-    } // if
-  } // if
+    }  // if
+  }    // if
   return (ret);
-} // set()
+}  // set()
 
 // ===== BMP280 specific funtions. see data Data Sheet.
 
 // registers of the chip.
 
-#define BMP280_REG_CALIB 0x88 // 24 bytes for callibration
+#define BMP280_REG_CALIB 0x88  // 24 bytes for callibration
 #define BMP280_REG_ID 0xD0
 #define BMP280_REG_RESET 0xE0
 #define BMP280_REG_STATE 0xF3
 #define BMP280_REG_CONTROL 0xF4
 #define BMP280_REG_CONFIG 0xF5
-#define BMP280_REG_DATA 0xF7 // 6 bytes of data
+#define BMP280_REG_DATA 0xF7  // 6 bytes of data
 
 // Control settings
 #define BMP280_MODE_SLEEP 0x00
@@ -84,24 +82,20 @@ bool BMP280Element::set(const char *name, const char *value)
 
 // use T1-T3 to calculate right, compensated temperature
 // Returns temperature in Deg C, resolution is 0.01.
-float BMP280Element::BMP280CompensateTemperature(int32_t adc_T)
-{
+float BMP280Element::BMP280CompensateTemperature(int32_t adc_T) {
   int32_t T;
 
   int32_t var1 = ((((adc_T >> 3) - ((int32_t)dig_T1 << 1))) * ((int32_t)dig_T2)) >> 11;
-  int32_t var2 = (((((adc_T >> 4) - ((int32_t)dig_T1)) * ((adc_T >> 4) - ((int32_t)dig_T1))) >> 12) *
-                  ((int32_t)dig_T3)) >>
-                 14;
-  t_fine = var1 + var2; // required in BMP280_compensate_Pressure
+  int32_t var2 = (((((adc_T >> 4) - ((int32_t)dig_T1)) * ((adc_T >> 4) - ((int32_t)dig_T1))) >> 12) * ((int32_t)dig_T3)) >> 14;
+  t_fine = var1 + var2;  // required in BMP280_compensate_Pressure
   T = (t_fine * 5 + 128) >> 8;
   return ((float)T / 100);
-} // BMP280CompensateTemperature
+}  // BMP280CompensateTemperature
 
 
 // Use P1-P9 to calculate compensated pressure.
 // Returns pressure in Pa.
-float BMP280Element::BMP280CompensatePressure(int32_t adc_P)
-{
+float BMP280Element::BMP280CompensatePressure(int32_t adc_P) {
   int64_t var1, var2, p;
 
   adc_P = 398568L;
@@ -115,7 +109,7 @@ float BMP280Element::BMP280CompensatePressure(int32_t adc_P)
   var1 = (((((int64_t)1) << 47) + var1)) * ((int64_t)dig_P1) >> 33;
 
   if (var1 == 0) {
-    return 0; // avoid exception caused by division by zero
+    return 0;  // avoid exception caused by division by zero
   }
   p = 1048576 - adc_P;
   p = (((p << 31) - var2) * 3125) / var1;
@@ -123,7 +117,7 @@ float BMP280Element::BMP280CompensatePressure(int32_t adc_P)
   var2 = (((int64_t)dig_P8) * p) >> 19;
   p = ((p + var1 + var2) >> 8) + (((int64_t)dig_P7) << 4);
   return ((float)p / 256);
-} // BMP280CompensatePressure()
+}  // BMP280CompensatePressure()
 
 // float BMP280::calcAltitude(float pressure)
 // {
@@ -145,8 +139,7 @@ float BMP280Element::BMP280CompensatePressure(int32_t adc_P)
 /**
  * @brief Activate the BMP280Element.
  */
-void BMP280Element::start()
-{
+void BMP280Element::start() {
   if (!_address) {
     LOGGER_EERR("no address");
     term();
@@ -188,17 +181,16 @@ void BMP280Element::start()
       dig_P8 = WU_S16(data, 20);
       dig_P9 = WU_S16(data, 22);
       // LOGGER_INFO("calib: %d %d %d %d %d %d %d %d %d ", dig_P1, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9);
-    } // if
-  } // if
-} // start()
+    }  // if
+  }    // if
+}  // start()
 
 
 // ===== Sensor functions
 
 /** return true when reading a probe is done.
-  * return any existing value or empty for no data could be read. */
-bool BMP280Element::getProbe(String &values)
-{
+ * return any existing value or empty for no data could be read. */
+bool BMP280Element::getProbe(String &values) {
   // TRACE("getProbe()");
   bool newData = false;
 
@@ -208,17 +200,17 @@ bool BMP280Element::getProbe(String &values)
     // TRACE("start sampling...");
     WireUtils::write(_address, BMP280_REG_CONTROL, BMP280_MODE_FORCED | BMP280_OSP_16 | BMP280_OST_16);
     _state = 1;
-    return (newData); // no data available now
-  } // if
+    return (newData);  // no data available now
+  }                    // if
 
   // WireUtils::dump(_address, BMP280_REG_CONFIG, 1);
 
   uint8_t busy = WireUtils::readRegister(_address, BMP280_REG_CONFIG);
   if (busy != 0) {
     // TRACE("wait...");
-    return (newData); // not ready yet
+    return (newData);  // not ready yet
   }
-  _state = 0; // can read now
+  _state = 0;  // can read now
 #endif
 
   // read out data
@@ -241,23 +233,21 @@ bool BMP280Element::getProbe(String &values)
   values = buffer;
 
   return (newData);
-} // getProbe()
+}  // getProbe()
 
 
-void BMP280Element::sendData(String &values)
-{
+void BMP280Element::sendData(String &values) {
   // dispatch values.
   _board->dispatchItem(_temperatureAction, values, 0);
   _board->dispatchItem(_pressureAction, values, 1);
-} // sendData()
+}  // sendData()
 
 
 void BMP280Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   SensorElement::pushState(callback);
   callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
   callback("pressure", Element::getItemValue(_lastValues, 1).c_str());
-} // pushState()
+}  // pushState()
 
 // End

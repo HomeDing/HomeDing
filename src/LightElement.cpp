@@ -19,29 +19,33 @@
 
 #include <LightElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief Construct a new LightElement.
  */
-LightElement::LightElement()
-{
+LightElement::LightElement() {
   startupMode = Element_StartupMode::System;
 }
 
 
-void LightElement::setOutput(String value)
-{
+void LightElement::setOutput(String value) {
   TRACE("setOutput(%s)", value.c_str());
   uint32_t col = _atoColor(value.c_str());
 
   for (int n = _count - 1; n >= 0; n--) {
     int c = col & 0x00FF;
-    analogWrite(_pins[n], c * brightness / 255);
+
+#if defined(ESP8266)
+    analogWrite(_pins[n], c * brightness / 100);
+#elif (defined(ESP32))
+    ledcWrite(_channels[n], c * brightness / 100);
+#endif
+
     TRACE("%d pin=%d value=%02x", n, _pins[n], c);
     col = col >> 8;
-  } // for
-} // setOutput()
+  }  // for
+}  // setOutput()
 
 
 /* ===== Static factory function ===== */
@@ -50,10 +54,9 @@ void LightElement::setOutput(String value)
  * @brief static factory function to create a new LightElement
  * @return LightElement* created element
  */
-Element *LightElement::create()
-{
+Element *LightElement::create() {
   return (new LightElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -61,8 +64,7 @@ Element *LightElement::create()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool LightElement::set(const char *name, const char *pValue)
-{
+bool LightElement::set(const char *name, const char *pValue) {
   bool ret = true;
   TRACE("set %s=%s", name, pValue);
 
@@ -74,9 +76,9 @@ bool LightElement::set(const char *name, const char *pValue)
     enabled = _atob(pValue);
     needUpdate = true;
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
     brightness = _atoi(pValue);
-    brightness = constrain(brightness, 0, 255);
+    brightness = constrain(brightness, 0, 100);
     needUpdate = true;
 
   } else if (_stricmp(name, PROP_PIN) == 0) {
@@ -85,61 +87,67 @@ bool LightElement::set(const char *name, const char *pValue)
       String p = getItemValue(pValue, _count);
       if (p.isEmpty()) {
         break;
-      } // while
+      }  // while
       _pins[_count] = _atopin(p.c_str());
       TRACE("pin[%d]=%d", _count, _pins[_count]);
       _count++;
-    } // while
+    }  // while
 
   } else {
     ret = Element::set(name, pValue);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the LightElement.
  */
-void LightElement::start()
-{
+void LightElement::start() {
   Element::start();
 
+#if defined(ESP8266)
   analogWriteRange(256);
+#endif
+
   for (int n = 0; n < 3; n++) {
+#if defined(ESP8266)
     pinMode(_pins[n], OUTPUT);
-  } // for
+#elif (defined(ESP32))
+    _channels[n] = _board->nextLedChannel++;
+    ledcSetup(_channels[n], 8000, 8);
+    ledcAttachPin(_pins[n], _channels[n]);
+#endif
+  }  // for
 
   needUpdate = true;
   loop();
-} // start()
+}  // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
 _ */
-void LightElement::loop()
-{
+void LightElement::loop() {
   if (needUpdate) {
     // send value to setOutput
     setOutput(enabled ? value : "x00000000");
     needUpdate = false;
-  } // if
-} // loop()
+  }  // if
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void LightElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", value.c_str());
+  callback(PROP_VALUE, value.c_str());
   callback("enable", enabled ? "1" : "0");
-  callback("brightness", String(brightness).c_str());
-} // pushState()
+  callback(PROP_BRIGHTNESS, _printInteger(brightness));
+}  // pushState()
 
 
 // End

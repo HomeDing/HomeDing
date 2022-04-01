@@ -1,11 +1,17 @@
 @echo off
 
+set ESPTOOLS=%LOCALAPPDATA%\Arduino15\packages\esp8266\hardware\esp8266\3.0.2\tools
+
 if [%1]==[] (
   echo missing device name as parameter
   goto :end
 )
 set devicename=%1
 
-python.exe %LOCALAPPDATA%\Arduino15\packages\esp8266\hardware\esp8266\2.7.4\tools\espota.py -i %devicename% -p 8266 --auth=123 -f ..\..\_temp\Standard.ino.bin 
+if EXIST "..\..\_temp\standard.ino.bin" ( set binfile="..\..\_temp\standard.ino.bin" )
+if EXIST ".\_temp\standard.ino.bin"     ( set binfile=".\_temp\standard.ino.bin" )
+
+echo uploading: %binfile% to device %devicename% ...
+python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a 123 -f %binfile% 
 
 :end

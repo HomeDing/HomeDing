@@ -17,13 +17,15 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP8266)
+
 #include <sensors/MY9291Element.h>
 
 #include "my92xx.h"
 
 my92xx *_my92xx;
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -111,3 +113,4 @@ void MY9291Element::setOutput(String value)
   _my92xx->update();
 } // setOutput()
 
+#endif

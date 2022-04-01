@@ -5,27 +5,25 @@
 #ifndef HOMEDING_H
 #define HOMEDING_H
 
-#include <Board.h> // Platform
-#include <Element.h> // Abstract Elements
-#include <ElementRegistry.h> // Element Registry
+#include <Board.h>            // Platform
+#include <Element.h>          // Abstract Elements
+#include <ElementRegistry.h>  // Element Registry
 
 // some common property names
 
 extern const char *PROP_VALUE;
-extern const char *PROP_DESCRIPTION;
 extern const char *PROP_PIN;
 extern const char *PROP_ADDRESS;
-
 extern const char *PROP_INVERSE;
-extern const char *PROP_PULLUP;
-extern const char *PROP_DURATION;
+extern const char *PROP_BRIGHTNESS;
 
 extern const char *ACTION_ONVALUE;
-extern const char *ACTION_ONHIGH;
-extern const char *ACTION_ONLOW;
 extern const char *ACTION_ONTEMPERATURE;
 extern const char *ACTION_ONHUMIDITY;
 extern const char *ACTION_ONPRESSURE;
+
+// global access to the board implementation
+extern Board homeding;
 
 // ===== SYS and Common Elements =====
 
@@ -35,12 +33,24 @@ extern const char *ACTION_ONPRESSURE;
 // ===== SYSTEM Elements =====
 
 // The only strictly required elements are: DeviceElement and OTAElement. They are included any time.
-// The other system level elements SSDPElement, TimeElement 
+// The other system level elements SSDPElement, TimeElement
+
+#ifdef HOMEDING_INCLUDE_ALL
+
+#define HOMEDING_INCLUDE_SYSTEM  // all system elements
+#define HOMEDING_INCLUDE_CORE
+#define HOMEDING_INCLUDE_TM1637
+#define HOMEDING_INCLUDE_PMS
+#define HOMEDING_INCLUDE_WEATHERFEED
+
+#endif
+
+
 
 // ===== CORE Elements =====
 
 // The Core Elements that are very common and add themselves to the ElementRegistry
-// when the corresponding HOMEDING_INCLUDE_Xxxx macro is defined. 
+// when the corresponding HOMEDING_INCLUDE_Xxxx macro is defined.
 // Easy include of all elements that do not require a separate library
 // by defining HOMEDING_INCLUDE_CORE.
 
@@ -50,8 +60,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_CORE
 
-#define HOMEDING_INCLUDE_SYSTEM // all system elements
+// all system elements
+#define HOMEDING_INCLUDE_SYSTEM
 
+// most often used Elements
 #define HOMEDING_INCLUDE_Value
 #define HOMEDING_INCLUDE_Button
 #define HOMEDING_INCLUDE_Switch
@@ -62,20 +74,28 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_PWMOut
 
 #define HOMEDING_INCLUDE_AND
+#define HOMEDING_INCLUDE_OR
+#define HOMEDING_INCLUDE_ADD
+#define HOMEDING_INCLUDE_SCENE
 #define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
+#define HOMEDING_INCLUDE_MAP
 
 #define HOMEDING_INCLUDE_LOG
-
 #define HOMEDING_INCLUDE_REMOTE
 #endif
 
 #ifdef HOMEDING_INCLUDE_SYSTEM
-#define HOMEDING_INCLUDE_SSDP
 #define HOMEDING_INCLUDE_NTPTIME
 #define HOMEDING_INCLUDE_Time
+#endif
+
+// system elements only in full firmware
+#ifdef HOMEDING_INCLUDE_FULL_SYSTEM
+#define HOMEDING_INCLUDE_SSDP
+#define HOMEDING_INCLUDE_RTCSTATE
 #endif
 
 // Easy include of all elements for an attached display.
@@ -87,7 +107,7 @@ extern const char *ACTION_ONPRESSURE;
 #define HOMEDING_INCLUDE_DisplayLine
 #endif
 
-#include <core/logger.h>
+#include <core/Logger.h>
 
 // Register the Elements by including the definition with defined HOMEDING_REGISTER
 
@@ -107,12 +127,28 @@ extern const char *ACTION_ONPRESSURE;
 #include <AndElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_OR
+#include <OrElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_ADD
+#include <AddElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_REFERENCE
 #include <ReferenceElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_Analog
 #include <AnalogElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_MAP
+#include <MapElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_RTCSTATE
+#include <RTCStateElement.h>
 #endif
 
 // ===== Time related Elements =====
@@ -158,6 +194,10 @@ extern const char *ACTION_ONPRESSURE;
 #include <PWMOutElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_SCENE
+#include <SceneElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_LOG
 #include <core/LogElement.h>
 #endif
@@ -181,12 +221,20 @@ extern const char *ACTION_ONPRESSURE;
 #include <displays/DisplayLCDElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYMAX7219
+#include <displays/DisplayMAX7219Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DISPLAYSSD1306
 #include <displays/DisplaySSD1306Element.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DISPLAYSH1106
 #include <displays/DisplaySH1106Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYST7789
+#include <displays/DisplayST7789Element.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayText
@@ -199,6 +247,10 @@ extern const char *ACTION_ONPRESSURE;
 
 #ifdef HOMEDING_INCLUDE_DisplayLine
 #include <DisplayLineElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_TM1637
+#include <TM1637Element.h>
 #endif
 
 // ===== OPTIONAL ELEMENTS =====
@@ -219,8 +271,8 @@ extern const char *ACTION_ONPRESSURE;
 #include <NeoElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_RFSend
-#include <RFSendElement.h>
+#ifdef HOMEDING_INCLUDE_RFCODES
+#include <RFCodesElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_ROTARY
@@ -259,7 +311,7 @@ extern const char *ACTION_ONPRESSURE;
 #include <MenuElement.h>
 #endif
 
-#if defined(HOMEDING_INCLUDE_SSDP) && defined(ESP8266)
+#if defined(HOMEDING_INCLUDE_SSDP)
 #include <core/SSDPElement.h>
 #endif
 

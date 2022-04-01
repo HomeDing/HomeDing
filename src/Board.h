@@ -23,8 +23,10 @@
  * * 11.10.2018 move network initialization into board loop.
  * * 10.12.2019 reset counter to enter unsafe mode and config mode.
  * * 25.01.2020 device startup actions added.
- * * 31.08.2020 enable TRACE ouput using Macros to reduce production code size. 
- * * 03.09.2020 forEach iterator over all elements added. 
+ * * 31.08.2020 enable TRACE ouput using Macros to reduce production code size.
+ * * 03.09.2020 forEach iterator over all elements added.
+ * * 09.03.2021 less sharing class members in favor to methods.
+ * * 02.09.2021 advertise web server in mDNS.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -36,23 +38,22 @@
 #if defined(ESP32)
 #include <WebServer.h>
 #include <WiFi.h>
+#include <LittleFS.h>
+#define FILESYSTEM fs::LittleFSFS
 
-// #define ESP8266WebServer WebServer
-
-#include <FS.h>
 #define PIN_WIRE_SDA 21
 #define PIN_WIRE_SCL 22
 
 #elif defined(ESP8266)
+#include <FS.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
-
 #define WebServer ESP8266WebServer
+#define FILESYSTEM FS
 
 #endif
 
 #include <WiFiClient.h>
-
 
 #include <time.h>
 
@@ -61,9 +62,13 @@
 // forward class declarations
 class Board;
 
+#include <Element.h>
+#include <displays/DisplayElement.h>
 #include <displays/DisplayAdapter.h>
 
-#include "core/Logger.h"
+#include <StateElement.h>
+#include <core/Logger.h>
+#include <core/RTCVariables.h>
 
 #define HOMEDING_GREETING "HomeDing"
 
@@ -73,12 +78,10 @@ class Board;
 #ifdef DEBUG_ESP_PORT
 
 /** The TRACE Macros for creating output with timing hints: */
-#define TRACE_START unsigned long __TRACE_START_TIME = millis();
-#define TRACE_END unsigned long __TRACE_END_TIME = millis();
-#define TRACE_TIME (__TRACE_END_TIME - __TRACE_START_TIME)
-#define TRACE_TIMEPRINT(topic, id, min) \
-  if (TRACE_TIME >= min)                \
-    LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
+#define TRACE_START                      // unsigned long __TRACE_START_TIME = millis();
+#define TRACE_END                        // unsigned long __TRACE_END_TIME = millis();
+#define TRACE_TIME                       // (__TRACE_END_TIME - __TRACE_START_TIME)
+#define TRACE_TIMEPRINT(topic, id, min)  // if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
 
 #else
 // #define TRACE(...)
@@ -100,38 +103,24 @@ class Board;
  */
 #define CONF_FILENAME "/config.json"
 
-
 /**
- * State of Board
+ * The $net.txt file contains the configured network and credentials.
  */
-typedef enum {
-  // ===== startup operation states
-  BOARDSTATE_NONE = 0, // unspecified
-  BOARDSTATE_LOAD = 1, // load configurations and create elements. Start SYS
+#define NET_FILENAME "/$net.txt"
 
-  BOARDSTATE_CONNECT = 2, // define how to connect, AUTO, PSK or PASSWD
-  BOARDSTATE_WAITNET = 3, // Wait for network connectivity or configuration request.
-  BOARDSTATE_WAIT = 5,    // network is connected but wait for configuration request.
-
-  // ===== normal operation states
-  BOARDSTATE_GREET = 10, // network established, start NET Elements
-  BOARDSTATE_RUN = 12,   // in normal operation mode.
-  // start TIME Elements
-  // restart on network lost > 30 secs.
-
-  BOARDSTATE_SLEEP = 18, // start sleep mode.
-
-  // ===== config operation states
-  BOARDSTATE_STARTCAPTIVE = 21, // Scan local available Networks
-  BOARDSTATE_RUNCAPTIVE = 22    // Enable Network Configuration UI
-
-} BoardState;
 
 /**
  * @brief iterator callback function.
  */
 typedef std::function<void(Element *e)>
-    ElementCallbackFn;
+  ElementCallbackFn;
+
+
+/** inline yield function for cooperative multitasking platforms. */
+inline __attribute__((always_inline)) void hd_yield() {
+  // delay(1);
+  optimistic_yield(100);
+}
 
 
 /**
@@ -145,10 +134,37 @@ typedef std::function<void(Element *e)>
  * The dispatch method can dispatch multiple actions separated by comma at once.
  * Example: display/active?show=1,digitalout/led?on,device/main?log=*on*
  */
-class Board
-{
+class Board {
+
+  /** States of the board */
+  enum BOARDSTATE : int {
+    // ===== startup operation states
+    NONE = 0,  // unspecified
+    LOAD = 1,  // load configurations and create elements. Start SYS
+
+    CONNECT = 2,  // define how to connect, AUTO, PSK or PASSWD
+    WAITNET = 3,  // Wait for network connectivity or configuration request.
+    WAIT = 5,     // network is connected but wait for configuration request.
+
+    // ===== normal operation states
+    GREET = 10,  // network established, start NET Elements
+    RUN = 12,    // in normal operation mode.
+
+    SLEEP = 18,  // start sleep mode.
+
+    // ===== config operation states
+    STARTCAPTIVE = 21,  // Scan local available Networks
+    RUNCAPTIVE = 22     // Enable Network Configuration UI
+  };
+
 
 public:
+  // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
+  const char *version = "0.82";
+
+  // The build name defined by the main sketch e.g. "minimal", "standard", "radio"
+  String build;
+
   // ----- Time functionality -----
 
   /**
@@ -173,7 +189,14 @@ public:
    * Initialize a blank board.
    * @param s The WebServer is always required.
    */
-  void init(WebServer *s, FS *fs);
+  void init(WebServer *s, FILESYSTEM *fs, const char *buildName = "");
+
+  /**
+   * Directly add an element to the list of created elements.
+   * @param id id of element.
+   * @param e reference to element.
+   */
+  void add(const char *id, Element *e);
 
   // ===== Board state functionality =====
 
@@ -191,14 +214,50 @@ public:
    */
   void loop();
 
-  void dispatchItem(String &action, String &values, int item);
+
+  // ===== low power / sleep mode =====
+
+  // start deep sleep mode in some milliseconds
+  void startSleep();
+
+  // do not start deep sleep mode until reboot
+  void cancelSleep();
+
+  /**
+   * set the duration of a deep sleep.
+   * @param secs duration in seconds.
+   */
+  void setSleepTime(unsigned long secs);
+
+
+  /**
+   * do not start sleep mode because element is active.
+   */
+  void deferSleepMode();
+
+
+  // ===== queue / process / dispatch actions =====
+
+  /**
+   * check if the dispatch queue is empty
+   * @return true when no action is in queue.
+   */
+  bool queueIsEmpty();
+
+  /**
+   * send all the actions to the right elements.
+   * @param action list of actions.
+   * @param value the value for $v placeholder.
+   * @param item use the n-th item of the value.
+   */
+  void dispatchItem(String &action, String &values, int n);
 
   /**
    * send all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(String &action, const char *value = NULL);
+  void dispatch(String &action, const char *value = nullptr);
 
   /**
    * send all the actions to the right elements.
@@ -212,21 +271,16 @@ public:
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(String &action, String &value);
+  void dispatch(const String &action, const String &value);
 
   /**
-   * Send a actions to a give element.
-   * @param typeId type/id of the element.
-   * @param action action or property.
-   * @param value the value
+   * @brief Dispatch an action without queueing it.
+   * @param action The action string.
    */
-  void queueActionTo(const String &typeId, const String &action, const String &value);
+  void dispatchAction(String action);
 
-  /**
-   * do not start sleep mode because element is active.
-   */
-  void deferSleepMode();
 
+  // ===== state of elements =====
 
   /**
    * Get the state (current values) of a single or all objects
@@ -240,6 +294,12 @@ public:
    * Display Adapter when a display is configured.
    */
   DisplayAdapter *display = NULL;
+
+
+  /**
+   * State Element to save state data.
+   */
+  StateElement *state = NULL;
 
 
   /**
@@ -261,19 +321,23 @@ public:
    */
   bool isSafeMode;
 
-  /** This flag is set to true when restarting after a deep sleep. This allows shortening wait times */
-  bool isWakeupStart;
-
   /**
    * Switch to next network connect mode in msec.
    */
-  int maxNetConnextTime = 6 * 1000;
+  int maxNetConnextTime = 12 * 1000;
 
   /**
    * Min. time to wait for a configuration mode request.
    */
-  int minConfigTime = 10 * 1000;
+  int minConfigTime = 6 * 1000;
 
+
+#if defined(ESP32)
+  /**
+   * next free led channel to be used on ESP32
+   */
+  int nextLedChannel = 0;
+#endif
 
   /**
    * Common I2C settings.
@@ -281,16 +345,17 @@ public:
   int I2cSda = PIN_WIRE_SDA;
   int I2cScl = PIN_WIRE_SCL;
 
-  /**
-   * Service discovery
-   */
+  /** Service discovery enabled */
   bool mDNS_sd = true;
 
-  // WebServer instance
+  /** WebServer instance */
   WebServer *server;
 
-  // FileSystem instance
-  FS *fileSystem;
+  /** FileSystem instance */
+  FILESYSTEM *fileSystem;
+
+  // a counter used as eTag that gets incremented when any file is changed.
+  unsigned int filesVersion;
 
   /**
    * Iterator through all Elements.
@@ -347,29 +412,28 @@ public:
   // short readable name of the device used for discovery and web gui
   String title;
 
-  BoardState boardState;
-
-  /** if true, no deep sleep will be performed. This allows using the Web UI until next reboot. */
-  bool deepSleepBlock;
-
-  /** if > 0; system goes to deep sleep at this millis() */
-  unsigned long deepSleepStart;
-
-  /** time for deep sleep */
-  unsigned long deepSleepTime;
+  // short readable name of the device used for discovery and web gui
+  String room;
 
 private:
-  /**
-   * Reset Counter
-   */
+  /** Reset Counter to detect multiple hardware resets in a row. */
   int _resetCount;
 
-  /**
-   * Add another element to the board into the list of created elements.
-   * @param id id of element.
-   * @param e reference to element.
-   */
-  void _addElement(const char *id, Element *e);
+  /** current state of the board. */
+  enum BOARDSTATE boardState;
+
+  /** This flag is set to true when restarting after a deep sleep allowing shortening wait times. */
+  bool _isWakeupStart;
+
+  /** if > 0; system goes to deep sleep at this millis() */
+  unsigned long _deepSleepStart;
+
+  /** if true, no deep sleep will be performed. This allows using the Web UI until next reboot. */
+  bool _deepSleepBlock;
+
+  /** time for deep sleep */
+  unsigned long _deepSleepTime;
+
 
   /**
    * Add and config all Elements defined in the config files.
@@ -397,16 +461,14 @@ private:
    */
   void _queueAction(const String &action, const String &v);
 
-  void _dispatchSingle(String evt);
-
   int _addedElements = 0;
 
   // state and timing
 
-  unsigned long configPhaseEnd;  // millis when current config mode (boardstate) is over, next mode
-  unsigned long connectPhaseEnd; // for waiting on net connection
-  unsigned long _captiveEnd;     // terminate/reset captive portal mode after 5 minutes.
-  void _newState(BoardState newState);
+  unsigned long configPhaseEnd;   // millis when current config mode (boardstate) is over, next mode
+  unsigned long connectPhaseEnd;  // for waiting on net connection
+  unsigned long _captiveEnd;      // terminate/reset captive portal mode after 5 minutes.
+  void _newState(enum BOARDSTATE newState);
 
   bool active = false;
 

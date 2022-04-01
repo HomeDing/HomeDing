@@ -18,20 +18,18 @@
 
 #include <AnalogElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new AnalogElement.
  * @return AnalogElement* as Element* created element
  */
-Element *AnalogElement::create()
-{
+Element *AnalogElement::create() {
   return (new AnalogElement());
-} // create()
+}  // create()
 
 
-float AnalogElement::mapFloat(int value)
-{
+float AnalogElement::mapFloat(int value) {
   return (value - _inMin) * (_outMax - _outMin) / (_inMax - _inMin) + _outMin;
 }
 
@@ -39,8 +37,7 @@ float AnalogElement::mapFloat(int value)
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool AnalogElement::set(const char *name, const char *value)
-{
+bool AnalogElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, "readtimems") == 0) {
@@ -85,16 +82,15 @@ bool AnalogElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the AnalogElement.
  */
-void AnalogElement::start()
-{
+void AnalogElement::start() {
   _nextReadMS = millis() + _readTimeMS;
   _lastReference = -1;
 
@@ -102,15 +98,14 @@ void AnalogElement::start()
   _useMap = ((_inMin != _inMax) && (_outMin != _outMax));
 
   Element::start();
-} // start()
+}  // start()
 
 int rawValue;
 
 /**
  * @brief check the state of the input.
  */
-void AnalogElement::loop()
-{
+void AnalogElement::loop() {
   unsigned int now = millis();
 
   if (_nextReadMS <= now) {
@@ -136,24 +131,23 @@ void AnalogElement::loop()
           _board->dispatch(_highAction);
         } else {
           _board->dispatch(_lowAction);
-        } // if
+        }  // if
 
         _lastReference = r;
-      } // if
-    }   // if
+      }  // if
+    }    // if
 
     _nextReadMS = millis() + _readTimeMS;
   }
-} // loop()
+}  // loop()
 
 
 void AnalogElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_value).c_str());
-  callback("rawvalue", String(rawValue).c_str());
-  callback("reference", String(_lastReference).c_str());
-} // pushState()
+  callback(PROP_VALUE, _printInteger(_value));
+  callback("rawvalue", _printInteger(rawValue));
+  callback("reference", _printInteger(_lastReference));
+}  // pushState()
 
 // End

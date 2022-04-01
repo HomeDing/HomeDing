@@ -57,13 +57,6 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
-   * @brief Activate the Element.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
-  virtual void start() override;
-
-  /**
    * @brief check the state of the input signal and eventually emit actions.
    */
   virtual void loop() override;

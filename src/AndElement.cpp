@@ -1,6 +1,6 @@
 /**
  * @file AndElement.cpp
- * @brief Logical Element that combines boolean input values using the AND and optional NOT operator and sends actions.
+ * @brief Element that combines boolean input values using the AND and optional NOT operator and sends actions.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -19,79 +19,41 @@
 
 #include <AndElement.h>
 
-/* ===== Define local constants and often used strings ===== */
-
 /* ===== Static factory function ===== */
 
 /**
  * @brief static factory function to create a new AndElement
  * @return AndElement* created element
  */
-Element *AndElement::create()
-{
+Element *AndElement::create() {
   return (new AndElement());
 } // create()
 
 
 /* ===== Element functions ===== */
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
-bool AndElement::set(const char *name, const char *value)
-{
-  bool ret = true;
-
-  if (strstr(name, PROP_VALUE) == name) {
-    // name starts with "value"
-    int indx = _atoi(name + 5);
-    // LOGGER_EINFO("vx(%s, %d)", name, indx);
-    if ((indx > 0) && (indx <= AndElementInputs))
-      _value[indx - 1] = _atob(value);
-
-    // LOGGER_EINFO("data %d, %d", _value[0], _value[1]);
-
-  } else if (_stricmp(name, "invert") == 0) {
-    _invert = _atob(value);
-
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-    _valueAction = value;
-  } else {
-    ret = Element::set(name, value);
-  } // if
-
-  return (ret);
-} // set()
-
+void AndElement::start() {
+  CalcElement::start();
+  _type = DATATYPE::BOOLEAN;
+}
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void AndElement::loop()
-{
-  // do something
-  bool out = (_value[0] && _value[1]);
-  if (_invert) {
-    out = !out;
+void AndElement::_calc() {
+  bool newValue = (_inputs > 0); // out = false when no inbound value is given.
+
+
+  for (int n = 0; n < _inputs; n++) {
+    newValue = (newValue && _atob(_inStringValues[n].c_str()));
   }
 
-  if (out != _outValue) {
-    // LOGGER_EINFO("data %d, %d", _value[0], _value[1]);
-    // LOGGER_EINFO("new value=%d", out);
-    _board->dispatch(_valueAction, out);
-    _outValue = out;
+  if (_invert) {
+    newValue = !newValue;
   }
+  _value = String(newValue);
+  CalcElement::_calc();
 } // loop()
 
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void AndElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  Element::pushState(callback);
-  callback(PROP_VALUE, String(_outValue).c_str());
-} // pushState()
 
 // End

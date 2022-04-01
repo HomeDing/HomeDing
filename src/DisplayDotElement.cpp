@@ -19,93 +19,59 @@
 
 #include <DisplayDotElement.h>
 
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+
 /**
  * @brief static factory function to create a new DisplayDotElement.
  * @return DisplayDotElement* as Element* created element
  */
-Element *DisplayDotElement::create()
-{
+Element *DisplayDotElement::create() {
   return (new DisplayDotElement());
-} // create()
+}  // create()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool DisplayDotElement::set(const char *name, const char *value)
-{
+bool DisplayDotElement::set(const char *name, const char *value) {
+  TRACE("set %s=%s", name, value);
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (DisplayOutputElement::set(name, value)) {
+    // done
+  } else if (_stricmp(name, PROP_VALUE) == 0) {
     _value = _atob(value);
-
-  } else if (_stricmp(name, "x") == 0) {
-    _x = _atoi(value);
-
-  } else if (_stricmp(name, "y") == 0) {
-    _y = _atoi(value);
-
-  } else if (!active) {
-    // no actions.
-    ret = Element::set(name, value);
-    if (!ret) {
-      LOGGER_EERR("inactive");
-    }
+    _neededraw = true;
 
   } else if (_stricmp(name, "clear") == 0) {
     _value = false;
-
-  } else if (_stricmp(name, "redraw") == 0) {
-    _displayValue = !_value; // enforce drawing it again
+    _neededraw = true;
 
   } else {
-    ret = Element::set(name, value);
-  } // if
+    ret = false;
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
- * @brief Activate the DisplayDotElement.
+ * @brief Draw this output element.
+ *
  */
-void DisplayDotElement::start()
-{
-  DisplayAdapter *d = _board->display;
-
-  if (d == NULL) {
-    LOGGER_EERR("no display defined");
-
-  } else {
-    _display = d;
-    _displayValue = !_value; // send to display next time
-    Element::start();
-  } // if
-} // start()
-
-
-/**
- * @brief check the state of the DHT values and eventually create actions.
- */
-void DisplayDotElement::loop()
-{
-  if (_value != _displayValue) {
-    _display->clear(_x, _y, _w, _h);
-    _display->drawDot(_x, _y, _h, _value);
-    _display->flush();
-    _displayValue = _value;
-  } // if
-} // loop()
-
+void DisplayDotElement::draw() {
+  DisplayOutputElement::draw();
+  _display->clear(_x, _y, _w, _h);
+  _display->drawDot(_x, _y, _h, _value);
+}
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void DisplayDotElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, _value ? "1" : "0");
-} // pushState()
+}  // pushState()
 
 // End

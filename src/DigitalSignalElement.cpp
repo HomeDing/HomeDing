@@ -1,6 +1,6 @@
 /**
  * @file DigitalSignalElement.cpp
- * @brief Input Element for the IoT Board Library typically used for digital short spike signals 
+ * @brief Input Element for the IoT Board Library typically used for digital short spike signals
  * and frequency inputs.
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -19,55 +19,52 @@
 
 #include <DigitalSignalElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new DigitalSignalElement.
  * @return DigitalSignalElement* as Element* created element
  */
-Element *DigitalSignalElement::create()
-{
+Element *DigitalSignalElement::create() {
   return (new DigitalSignalElement());
-} // create()
+}  // create()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool DigitalSignalElement::set(const char *name, const char *value)
-{
+bool DigitalSignalElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_PIN) == 0) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, PROP_PULLUP) == 0) {
+  } else if (_stricmp(name, "pullup") == 0) {
     _pullup = _atob(value);
 
-  } else if (_stricmp(name, ACTION_ONHIGH) == 0) {
+  } else if (_stricmp(name, "onHigh") == 0) {
     _highAction = value;
 
-  } else if (_stricmp(name, ACTION_ONLOW) == 0) {
+  } else if (_stricmp(name, "onLow") == 0) {
     _lowAction = value;
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
-  } else if (_stricmp(name, PROP_DURATION) == 0) {
+  } else if (_stricmp(name, "duration") == 0) {
     _valueAction = value;
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the DigitalSignalElement.
  */
-void DigitalSignalElement::start()
-{
+void DigitalSignalElement::start() {
   // only start with valid pin as input.
   TRACE("start pin=%d", _pin);
   if ((_pin >= 0) && (_usedSignals < 8)) {
@@ -94,15 +91,14 @@ void DigitalSignalElement::start()
     }
 
     Element::start();
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 /**
  * @brief check the state of the input.
  */
-void DigitalSignalElement::loop()
-{
+void DigitalSignalElement::loop() {
   unsigned long now = millis();
   unsigned long cnt = DigitalSignalElement::_signalCount[_signalOff];
 
@@ -128,54 +124,45 @@ void DigitalSignalElement::loop()
       _board->dispatch(_valueAction, 0);
       _board->dispatch(_lowAction, 0);
       _pulseValue = false;
-    } // if
-  } // if
-} // loop()
+    }  // if
+  }    // if
+}  // loop()
 
 
 void DigitalSignalElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _pulseValue ? "1" : "0");
-} // pushState()
+  callback(PROP_VALUE, _printBoolean(_pulseValue));
+}  // pushState()
 
 // ----- static interrupt stuff here -----
 
 uint DigitalSignalElement::_usedSignals = 0;
-unsigned long DigitalSignalElement::_signalCount[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+unsigned long DigitalSignalElement::_signalCount[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 // increment counter on interrupt
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal0()
-{
+IRAM_ATTR void DigitalSignalElement::onSignal0() {
   DigitalSignalElement::_signalCount[0]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal1()
-{
+IRAM_ATTR void DigitalSignalElement::onSignal1() {
   DigitalSignalElement::_signalCount[1]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal2()
-{
+IRAM_ATTR void DigitalSignalElement::onSignal2() {
   DigitalSignalElement::_signalCount[2]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal3()
-{
+IRAM_ATTR void DigitalSignalElement::onSignal3() {
   DigitalSignalElement::_signalCount[3]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal4()
-{
+IRAM_ATTR void DigitalSignalElement::onSignal4() {
   DigitalSignalElement::_signalCount[4]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal5()
-{
+IRAM_ATTR void DigitalSignalElement::onSignal5() {
   DigitalSignalElement::_signalCount[5]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal6()
-{
+IRAM_ATTR void DigitalSignalElement::onSignal6() {
   DigitalSignalElement::_signalCount[6]++;
 }
-ICACHE_RAM_ATTR void DigitalSignalElement::onSignal7()
-{
+IRAM_ATTR void DigitalSignalElement::onSignal7() {
   DigitalSignalElement::_signalCount[7]++;
 }
 

@@ -16,10 +16,11 @@
  * Changelog:
  * * 30.05.2018 created by Matthias Hertel
  * * 21.12.2018 refactoring.
+ * * 31.07.2021 include handling redirect on "/" request.
  *
  * @details
 @verbatim
-This handler registers to all http GET request to the urls startng with `/$`.
+This handler registers to all http GET request to the urls starting with `/$`.
 
 The state of all existing elements can be retrieved by using the base url
 like: <http://devding/$board>.
@@ -36,10 +37,7 @@ To send an action to a element a parameter can be added like:
 #ifndef BOARDSERVER_H
 #define BOARDSERVER_H
 
-// Content types for http results
-
-#define TEXT_JSON "text/javascript; charset=utf-8" // Content type for JSON.
-#define TEXT_HTML "text/html" // Content type for HTML.
+#include <MicroJsonComposer.h>
 
 /**
  * @brief The BoardHandler is a local class of the main sketch that implements a
@@ -53,12 +51,10 @@ To send an action to a element a parameter can be added like:
  * @sample /$board
  * @sample /$board/button/f1
  */
-class BoardHandler : public RequestHandler
-{
+class BoardHandler : public RequestHandler {
 public:
   /**
    * @brief Construct a new BoardHandler object
-   * @param path The root path of the state ressources.
    * @param board reference to the board.
    */
   BoardHandler(Board *board);
@@ -69,7 +65,11 @@ public:
    * @param requestUri current url of the request.
    * @return true When the method and requestUri match a state request.
    */
-  bool canHandle(HTTPMethod requestMethod, String requestUri);
+#if defined(ESP8266)
+  bool canHandle(HTTPMethod requestMethod, const String &requestUri) override;
+#elif defined(ESP32)
+  bool canHandle(HTTPMethod requestMethod, String requestUri) override;
+#endif
 
   /**
    * @brief Handle the request of the state.
@@ -79,8 +79,11 @@ public:
    * @return true When the state could be retrieved.
    * @return false
    */
-  bool handle(WebServer &server, HTTPMethod requestMethod,
-              String requestUri);
+#if defined(ESP8266)
+  bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override;
+#elif defined(ESP32)
+  bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override;
+#endif
 
 
 protected:
@@ -95,13 +98,22 @@ protected:
   */
   void handleReboot(WebServer &server, bool wipe = false);
 
-  /** @brief Return list of available elements. */
-  void handleElements(WebServer &server);
-
   /** @brief Return list of local networks. */
-  void handleScan(WebServer &server);
+  String handleScan();
 
+  /**
+   * @brief Use url parameters to establish / verify a WiFi connection.
+   * @param server The Web Server on the access point.
+   */
   void handleConnect(WebServer &server);
+
+private:
+  // list files in filesystem recursively.
+  void handleListFiles(MicroJsonComposer &jc, String path);
+
+  // clean out all files in filesystem except config files.
+  void handleCleanWeb(String path);
+
 };
 
 #endif

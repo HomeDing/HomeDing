@@ -18,22 +18,16 @@
  * * 30.10.2020 created by Matthias Hertel
  */
 
-#ifndef DIGITALIN_H
-#define DIGITALIN_H
+#ifndef DIGITALSIGNAL_H
+#define DIGITALSIGNAL_H
 
 #include <HomeDing.h>
-
-#define BUTTON_TYPE_LEVEL 0x00
-#define BUTTON_TYPE_TOGGLE 0x01
-
-// class OneButton;
 
 /**
  * @brief The DigitalSignalElement is an special Element that creates actions based
  * on a digital IO signal.
  */
-class DigitalSignalElement : public Element
-{
+class DigitalSignalElement : public Element {
 public:
   /**
    * @brief Factory function to create a DigitalSignalElement.
@@ -72,7 +66,7 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
   // ----- static interrupt stuff -----
@@ -81,14 +75,14 @@ private:
   static uint _usedSignals;
   static unsigned long _signalCount[8];
 
-  static ICACHE_RAM_ATTR void onSignal0();
-  static ICACHE_RAM_ATTR void onSignal1();
-  static ICACHE_RAM_ATTR void onSignal2();
-  static ICACHE_RAM_ATTR void onSignal3();
-  static ICACHE_RAM_ATTR void onSignal4();
-  static ICACHE_RAM_ATTR void onSignal5();
-  static ICACHE_RAM_ATTR void onSignal6();
-  static ICACHE_RAM_ATTR void onSignal7();
+  static void onSignal0();
+  static void onSignal1();
+  static void onSignal2();
+  static void onSignal3();
+  static void onSignal4();
+  static void onSignal5();
+  static void onSignal6();
+  static void onSignal7();
 
   // ----- private element members -----
 
@@ -147,7 +141,7 @@ private:
 #ifdef HOMEDING_REGISTER
 // Register the DigitalSignalElement onto the ElementRegistry.
 bool DigitalSignalElement::registered =
-    ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
+  ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
 #endif
 
-#endif // DIGITALIN_H
+#endif  // DIGITALSIGNAL_H

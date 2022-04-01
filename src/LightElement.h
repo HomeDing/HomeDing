@@ -60,8 +60,6 @@ public:
 
   /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
 
@@ -91,7 +89,7 @@ protected:
   /** @brief Brightness level in percent. 
    * The Light element uses this property as a factor for all PWM output.
   */
-  int brightness = 128; // percent
+  int brightness = 50; // percent
 
   /**
    * @brief The actual / new value of the output value.
@@ -100,6 +98,10 @@ protected:
 
   /** data output pins (W,R,G,B) or pins[0] only. */
   int _pins[MAXPINS] = {0, 0, 0, 0}; //  = {D8, D6, D7, 0};
+
+#if (defined(ESP32))
+  int _channels[MAXPINS] = {0, 0, 0, 0}; // led channels for ESP32
+#endif
 
   /** set color pattern */
   virtual void setOutput(String value);

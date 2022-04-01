@@ -27,8 +27,7 @@
  * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplayLCDElement : public DisplayElement
-{
+class DisplayLCDElement : public DisplayElement {
 public:
   /**
    * @brief Factory function to create a DisplayLCDElement.
@@ -47,18 +46,7 @@ public:
   DisplayLCDElement();
 
   /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
-  virtual bool set(const char *name, const char *value) override;
-
-  /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
 };
@@ -66,7 +54,7 @@ public:
 #ifdef HOMEDING_REGISTER
 // Register the DisplaySSD1306Element onto the ElementRegistry.
 bool DisplayLCDElement::registered =
-    ElementRegistry::registerElement("displayLCD", DisplayLCDElement::create);
+  ElementRegistry::registerElement("displayLCD", DisplayLCDElement::create);
 #endif
 
 

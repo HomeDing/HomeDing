@@ -27,6 +27,8 @@
 class Board;
 class Element;
 
+// enable / disable core features
+// #define HOMEDING_SUPPORT_ETAG
 
 // ===== Pins =====
 // some EPS8266 boards do not have Dx pins defined.+
@@ -49,15 +51,16 @@ class Element;
  * starting/activating the element.
  */
 enum Element_StartupMode {
-  System = 1, // right after loading the configurations.
+  System = 1,  // right after loading the configurations.
   Network = 2, // after a network connectivity in AP Mode was established.
-  Time = 3, // after a valid local time was set.
-  Manual = 9 // manually started.
+  Time = 3,    // after a valid local time was set.
+  Manual = 9   // manually started.
 };
 
 #define ACTION_SEPARATOR ','
 
 #define VALUE_SEPARATOR ','
+#define LIST_SEPARATOR ','
 
 // id can be multi-level when using the slash as a separator.
 // like "device/name"
@@ -71,9 +74,16 @@ enum Element_StartupMode {
  * @brief This is the base class for all Elements that can be managed by the
  * Board.
  */
-class Element
-{
+class Element {
 public:
+  // Datatype definitions for elements processing different types
+  enum DATATYPE : int {
+    STRING = 0, // unspecified, all data can be presented as strings
+    BOOLEAN, // a boolean (stored as integer 0/1)
+    INTEGER, // a number without any decimals
+    FLOAT // a number with decimals
+  };
+
   /**
    * @brief The id of the Element. Visible to anyone.
    */
@@ -120,17 +130,12 @@ public:
 
 
   /**
-   * @brief Get a property value.
-   * @param name Name of property.
-   * @return actual value of property.
+   * @brief setup the element so it can be started ans stopped.
    */
-  virtual const char *get(const char *name);
-
+  virtual void setup();
 
   /**
    * @brief Activate the Element.
-   * @return true when activation was good.
-   * @return false when activation failed.
    */
   virtual void start();
 
@@ -153,6 +158,16 @@ public:
    */
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback);
+
+
+  /**
+   * @brief save a local state to a state element.
+   * @param key The key of state variable.
+   * @param value The value of state variable.
+   */
+  void saveState(const char *key, const char *value);
+
+  // ===== static string to value helper function ===== //
 
   /**
    * @brief Return an integer value from a string in various formats.
@@ -187,6 +202,13 @@ public:
   static unsigned long _atotime(const char *value);
 
   /**
+   * @brief Return a duration value from a string as milliseconds.
+   * @param value Given value as string.
+   * @return time or duration as milliseconds.
+   */
+  static unsigned long _scanDuration(const char *value);
+
+  /**
    * @brief Return a pin value from a string.
    * @details pin values can be entered using the "D0" or "A0" syntax or by
    * specifying a GPIO number. Mappings are taken from NodeMCU.
@@ -217,6 +239,15 @@ public:
   uint32_t _atoColor(const char *value);
 
 
+  // ===== static value to string helper function ===== //
+
+  static char *_printBoolean(bool b);
+  static char *_printInteger(int v);
+  static char *_printInteger(unsigned long v);
+
+
+  // ===== static general string helper function ===== //
+
   /**
    * @brief replacement of the CPP stricmp function not available on Arduino.
    */
@@ -234,9 +265,15 @@ public:
    */
   static void _strlower(char *str);
 
+  /* ===== String as List functions =====*/
+  // These are useful function to use a String
+  // as a List of strings separated by LIST_SEPARATOR (',').
 
   /** Get item[index] from string */
   static String getItemValue(String data, int index);
+
+  /** Get first item from string and remove from string */
+  static String popItemValue(String &data);
 
 
 protected:
@@ -245,7 +282,13 @@ protected:
    */
   Board *_board;
 
-  // private:
+  /**
+   * @brief Flag to mark that the element should save the state.
+   */
+  bool _useState = false;
+
+private:
+  static char _convertBuffer[32];
 };
 
 #endif

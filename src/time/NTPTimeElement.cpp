@@ -32,12 +32,14 @@
 
 #include <time/NTPTimeElement.h>
 
-#if defined (ESP8266)
+#if defined(ESP8266)
 #include <TZ.h>
 
-#elif defined (ESP32)
+#elif defined(ESP32)
 // There is no TZ definition in ESP32 SDK so include LONDON timezone here as an example.
-#define TZ_Europe_London	PSTR("GMT0BST,M3.5.0/1,M10.5.0")
+#define TZ_Europe_London PSTR("GMT0BST,M3.5.0/1,M10.5.0")
+
+#include "time.h"
 
 #endif
 
@@ -46,14 +48,12 @@
  * @brief static factory function to create a new NTPTimeElement
  * @return NTPTimeElement* created element
  */
-Element *NTPTimeElement::create()
-{
+Element *NTPTimeElement::create() {
   return (new NTPTimeElement());
 } // create()
 
 
-NTPTimeElement::NTPTimeElement()
-{
+NTPTimeElement::NTPTimeElement() {
   // set some defaults
   _ntpServer = "pool.ntp.org";
   _timezone = TZ_Europe_London; // e.g. "CET-1CEST,M3.5.0,M10.5.0/3"
@@ -63,8 +63,7 @@ NTPTimeElement::NTPTimeElement()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool NTPTimeElement::set(const char *name, const char *value)
-{
+bool NTPTimeElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, "ntpserver") == 0) {
@@ -83,15 +82,13 @@ bool NTPTimeElement::set(const char *name, const char *value)
 /**
  * @brief Activate the NTPTimeElement.
  */
-void NTPTimeElement::start()
-{
+void NTPTimeElement::start() {
   Element::start();
-  configTime(_timezone.c_str(), _ntpServer.c_str());
+  configTzTime(_timezone.c_str(), _ntpServer.c_str());
 } // start()
 
 void NTPTimeElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+    std::function<void(const char *pName, const char *eValue)> callback) {
   time_t tStamp = time(nullptr);
   char tmp[32];
 

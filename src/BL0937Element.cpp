@@ -36,7 +36,7 @@ volatile unsigned long cf1SigLast;
 volatile unsigned int cf1SigCnt = 0;
 
 // interrupt routine for power measurement. increment power counter and set exact cycle time.
-ICACHE_RAM_ATTR void onPowerSignal()
+IRAM_ATTR void onPowerSignal()
 {
   unsigned long now = micros();
   if (!powSigStart) {
@@ -50,7 +50,7 @@ ICACHE_RAM_ATTR void onPowerSignal()
 
 
 // interrupt routine for current measurement. increment counter and set exact cycle time.
-ICACHE_RAM_ATTR void onCF1Signal()
+IRAM_ATTR void onCF1Signal()
 {
   unsigned long now = micros();
   if (!cf1SigStart) {
@@ -236,44 +236,26 @@ void BL0937Element::loop()
 void BL0937Element::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
-  char buf[38];
-
   Element::pushState(callback);
 
   // report actual cycletime and mode
-  callback("cycletime", ultoa(_cycleTime, buf, 10));
+  callback("cycletime", _printInteger(_cycleTime));
   callback("mode", _voltageMode ? "voltage" : "current");
 
   // report actual power and factor in use.
-  callback("power", ultoa(_powerValue, buf, 10));
+  callback("power", _printInteger(_powerValue));
   callback("powerfactor", String(_powerFactor).c_str());
 
   if (_voltageMode == HIGH) {
     // report actual current and factor in use.
-    callback("voltage", ultoa(_voltageValue, buf, 10));
+    callback("voltage", _printInteger(_voltageValue));
     callback("voltagefactor", String(_voltageFactor).c_str());
 
   } else {
     // report actual current and factor in use.
-    callback("current", ultoa(_currentValue, buf, 10));
+    callback("current", _printInteger(_currentValue));
     callback("currentfactor", String(_currentFactor).c_str());
   }
-
-  // debug only
-  // callback("cnt1", String(cf1SigCnt).c_str());
-  // callback("cnt2", String(powSigCnt).c_str());
-
-  // callback("pc", String(_powerCount).c_str());
-  // callback("pd", String(_powerDuration).c_str());
-
 } // pushState()
-
-
-void BL0937Element::term()
-{
-  TRACE("term()");
-  active = false;
-} // term()
-
 
 // End

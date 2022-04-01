@@ -24,17 +24,11 @@
 
 #include <HomeDing.h>
 
-#define BUTTON_TYPE_LEVEL 0x00
-#define BUTTON_TYPE_TOGGLE 0x01
-
-// class OneButton;
-
 /**
  * @brief The DigitalInElement is an special Element that creates actions based
  * on a digital IO signal.
  */
-class DigitalInElement : public Element
-{
+class DigitalInElement : public Element {
 public:
   /**
    * @brief Factory function to create a DigitalInElement.
@@ -56,11 +50,10 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Activate the Element.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
+  /** @brief Setup the Element. */
+  virtual void setup() override;
+
+  /** @brief Activate the Element.*/
   virtual void start() override;
 
   /**
@@ -73,7 +66,7 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
   /**
@@ -115,7 +108,7 @@ private:
 #ifdef HOMEDING_REGISTER
 // Register the DigitalInElement onto the ElementRegistry.
 bool DigitalInElement::registered =
-    ElementRegistry::registerElement("digitalin", DigitalInElement::create);
+  ElementRegistry::registerElement("digitalin", DigitalInElement::create);
 #endif
 
-#endif // DIGITALIN_H
+#endif  // DIGITALIN_H

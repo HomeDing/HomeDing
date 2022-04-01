@@ -23,25 +23,31 @@
 #include <WireUtils.h>
 
 #include <Board.h>
+#include <displays/DisplayElement.h>
 
-class DisplayAdapter
-{
+#define MAX_DISPLAY_STRING_LEN 80
+
+class DisplayAdapter {
 public:
-  DisplayAdapter()
-  {
-    _lineHeight = 1;
-    _charWidth = 1;
-  } // DisplayAdapter()
-
   virtual ~DisplayAdapter() = default;
+
+  DisplayAdapter() {
+    color = 0x00FFFFFF;      // white
+    backColor = 0x00000000;  // black
+  }
+
+  virtual bool setup(Board *b, struct DisplayConfig *c) {
+    board = b;
+    conf = c;
+    return (true);
+  }  // setup()
 
   /**
    * @brief start the display.
    * @return true when display is ready for operation.
    * @return false otherwise.
    */
-  virtual bool init(UNUSED Board *board)
-  {
+  virtual bool start() {
     return (true);
   };
 
@@ -50,33 +56,24 @@ public:
    */
   virtual void clear(){};
 
-  virtual void setLineHeight(int16_t lh)
-  {
-    _lineHeight = lh;
+  /// get height of the last drawn textline. Depends on font and text height.
+  virtual int16_t getLineHeight() {
+    return (lineHeight);
   };
 
-  virtual int getFontHeight(int fontsize)
-  {
-    return (fontsize);
-  };
-
-  virtual int16_t getLineHeight()
-  {
-    return (_lineHeight);
-  };
-
-
-  virtual void setCharWidth(int16_t cw)
-  {
-    _charWidth = cw;
-  };
-
-  virtual int16_t getCharWidth()
-  {
-    return (_charWidth);
-  };
 
   virtual void setBrightness(UNUSED uint8_t bright){};
+
+
+  virtual void setColor(uint32_t col) {
+    color = col;
+  };
+
+
+  virtual uint32_t getColor() {
+    return (color);
+  };
+
 
   /**
    * @brief Clear a position or region.
@@ -87,22 +84,17 @@ public:
    */
   virtual void clear(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h){};
 
-  // virtual void setColor(int col) {};
-
-  virtual int drawText(int16_t x, int16_t y, int16_t h, String &text)
-  {
+  virtual int drawText(int16_t x, int16_t y, int16_t h, String &text) {
     return (drawText(x, y, h, text.c_str()));
   };
 
-  virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text)
-  {
-    return (_charWidth * strlen(text));
+  virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text) {
+    return (charWidth * strnlen(text, MAX_DISPLAY_STRING_LEN));
   };
 
   virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1){};
 
-  virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill)
-  {
+  virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill) {
     return (h);
   };
 
@@ -112,12 +104,26 @@ public:
    */
   virtual void flush(){};
 
-private:
-  // define the default line height
-  int16_t _lineHeight;
+  /**
+   * @brief current displayed page
+   */
+  int page = 1;
 
-  // define the default character width
-  int16_t _charWidth;
+  /**
+   * @brief max used page
+   */
+  int maxpage = 1;
+
+protected:
+  struct DisplayConfig *conf;
+
+  int16_t lineHeight;  ///< total height of a text line
+  int16_t charWidth;   ///< width of a character
+
+  uint32_t color;      ///< draw/text color
+  uint32_t backColor;  ///< background color
+
+  Board *board;
 };
 
-#endif // DisplayAdapter_H
+#endif  // DisplayAdapter_H

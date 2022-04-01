@@ -1,13 +1,11 @@
 /**
  * @file fileserver.h
- * @brief Implementation of extended http based file server.
+ * @brief Implementation of the extended http based file server to upload and delete files.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
- * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
- *
- * This work is licensed under a BSD style license,
- * https://www.mathertel.de/License.aspx.
+ * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
  *
  * More information on https://www.mathertel.de/Arduino.
  *
@@ -16,6 +14,10 @@
  * * 04.02.2019 simplifications, saving memory.
  * * 24.11.2019 simplifications, using serveStatic for delivering filesystem files.
  * * 13.12.2019 no upload and delete when running in safemode
+ * * 16.05.2021 update to ESP8266 board version 3.0
+ * * 10.07.2021 add starting '/' to filenames if not present.
+ * * 22.01.2022 create folders before writing to a file.
+ * * 22.01.2022 delete folders enabled.
  */
 
 #ifndef FILESERVER_H
@@ -23,12 +25,13 @@
 
 #include <HomeDing.h>
 
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+
 /**
  * @brief Request Handler implementation for static files in file system.
  * Implements delivering static files and uploading files.
  */
-class FileServerHandler : public RequestHandler
-{
+class FileServerHandler : public RequestHandler {
 public:
   /**
    * @brief Construct a new File Server Handler object
@@ -37,9 +40,8 @@ public:
    * Serving static data down and upload.
    * @param cache_header Cache Header to be used in replies.
    */
-  FileServerHandler(FS &fs, const char *cache_header, Board *board)
-      : _fs(fs), _board(board), _cache_header(cache_header)
-  {
+  FileServerHandler(FILESYSTEM &fs, Board *board)
+      : _fs(fs), _board(board) {
   }
 
 
@@ -49,30 +51,58 @@ public:
     @param requestUri request ressource from the http request line.
     @return true when method can be handled.
   */
-  bool canHandle(HTTPMethod requestMethod, UNUSED String requestUri) override
+#if defined(ESP8266)
+  bool canHandle(HTTPMethod requestMethod, UNUSED const String &uri) override
+#elif defined(ESP32)
+  bool canHandle(HTTPMethod requestMethod, UNUSED String uri) override
+#endif
   {
     return ((!_board->isSafeMode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
   } // canHandle()
 
 
-  bool canUpload(String requestUri) override
+#if defined(ESP8266)
+  bool canUpload(const String &uri) override
+#elif defined(ESP32)
+  bool canUpload(String uri) override
+#endif
   {
-    // only allow upload on root fs level.
-    return ((!_board->isSafeMode) && (requestUri == "/"));
+    // only allow upload with POST on root fs level.
+    return ((!_board->isSafeMode) && (uri == "/"));
   } // canUpload()
 
 
-  bool handle(WebServer &server, HTTPMethod requestMethod,
-              String requestUri) override
+#if defined(ESP8266)
+  bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override
+#elif defined(ESP32)
+  bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override
+#endif
   {
+    // ensure that filename starts with '/'
+    String fName = requestUri;
+    if (!fName.startsWith("/")) {
+      fName = "/" + fName;
+    }
+
+    // LOGGER_RAW("File:handle(%s)", fName.c_str());
     if (requestMethod == HTTP_POST) {
       server.send(200); // all done in upload. no other forms.
 
     } else if (requestMethod == HTTP_DELETE) {
-      if (_fs.exists(requestUri)) {
-        _fs.remove(requestUri);
-      } else {
-        LOGGER_ERR("File <%s> doesn't exist.", requestUri.c_str());
+      TRACE("Delete %d", _fs.exists(fName));
+      if (_fs.exists(fName)) {
+#if defined(ESP8266)
+        _fs.remove(fName);
+#elif defined(ESP32)
+        File f = _fs.open(fName);
+        if (f.isDirectory()) {
+          _fs.rmdir(fName);
+        } else {
+          f.close();
+          _fs.remove(fName);
+        }
+#endif
+        _board->filesVersion++;
       }
 
     } // if
@@ -81,40 +111,64 @@ public:
   } // handle()
 
 
+// handle uploading of payload of a file.
+// ensure the file has no '#' and no '$' character.
+#if defined(ESP8266)
+  void upload(UNUSED WebServer &server, UNUSED const String &requestUri, HTTPUpload &upload) override
+#elif defined(ESP32)
   void upload(UNUSED WebServer &server, UNUSED String requestUri, HTTPUpload &upload) override
+#endif
   {
-    // LOGGER_TRACE("upload...<%s>", upload.filename.c_str());
-    if (!upload.filename.startsWith("/")) {
-      // LOGGER_TRACE("no /...");
-    } else if (upload.filename.indexOf('#') > 0) {
-      // LOGGER_TRACE("no #...");
-    } else if (upload.filename.indexOf('$') > 0) {
-      // LOGGER_TRACE("no $...");
+    // ensure that filename starts with '/' and is lowercase
+    String fName = upload.filename;
+    fName.toLowerCase();
+    if (!fName.startsWith("/")) {
+      fName = "/" + fName;
+    }
+
+    TRACE("upload...<%s>", fName.c_str());
+    if (fName.indexOf('#') >= 0) {
+      TRACE("no #...");
+    } else if (fName.indexOf('$') >= 0) {
+      TRACE("no $...");
 
     } else if (upload.status == UPLOAD_FILE_START) {
-      if (_fs.exists(upload.filename)) {
-        _fs.remove(upload.filename);
+      if (_fs.exists(fName)) {
+        TRACE("  ...remove");
+        _fs.remove(fName);
       } // if
 
-      _fsUploadFile = _fs.open(upload.filename, "w");
+#if defined(ESP32)
+      // create folder when required, LittleFS on ESP32 doesn't create folders automatically.
+      String folders = fName;
+      int n = folders.indexOf('/', 1);
+      while (n > 0) {
+        _fs.mkdir(folders.substring(0, n)); // no harm if folder exists.
+        n = folders.indexOf('/', n + 1);
+      };
+#endif
+
+      _fsUploadFile = _fs.open(fName, "w");
+      _board->filesVersion++;
 
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       if (_fsUploadFile)
         _fsUploadFile.write(upload.buf, upload.currentSize);
-      yield();
+      hd_yield();
 
     } else if (upload.status == UPLOAD_FILE_END) {
-      if (_fsUploadFile)
+      if (_fsUploadFile) {
         _fsUploadFile.close();
+        _board->filesVersion++;
+      }
     } // if
   } // upload()
+
 
 protected:
   FS _fs;
   File _fsUploadFile;
   Board *_board;
-
-  String _cache_header;
 };
 
 #endif

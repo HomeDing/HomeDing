@@ -1,7 +1,8 @@
 /**
  * @file WireUtils.cpp
  *
- * @brief Wire Utils are some helpful methods and makros to use the i2c bus through the Wire library,
+ * @brief Wire Utils are some helpful methods and makros to use the i2c bus
+ * through the Wire library,
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -53,7 +54,7 @@ uint8_t WireUtils::readRegister(uint8_t address, uint8_t reg)
   Wire.endTransmission();
 
   Wire.requestFrom(address, (uint8_t)1);
-  data = Wire.read();
+  data = (uint8_t)Wire.read();
   return (data);
 } // read()
 
@@ -74,7 +75,7 @@ uint8_t WireUtils::readBuffer(uint8_t address, uint8_t reg, uint8_t *data, uint8
 
   Wire.requestFrom(address, len);
   while (Wire.available() && (done < len)) {
-    *d = Wire.read();
+    *d = (uint8_t)Wire.read();
     done++;
     d++;
   }
@@ -126,7 +127,7 @@ uint8_t WireUtils::request(uint8_t address, uint8_t *data, uint8_t len)
   uint8_t *d = data;
   uint8_t done = Wire.requestFrom(address, len);
   for (int n= 0; n < done; n++) {
-    *d++ = Wire.read();
+    *d++ = (uint8_t)Wire.read();
   }  
 
 #ifdef WIREDUMP

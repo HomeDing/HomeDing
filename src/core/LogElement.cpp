@@ -21,7 +21,7 @@
 
 #include <FS.h>
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -29,23 +29,20 @@
  * @brief static factory function to create a new LogElement
  * @return LogElement* created element
  */
-Element *LogElement::create()
-{
+Element *LogElement::create() {
   return (new LogElement());
 } // create()
 
 
 /* ===== Element functions ===== */
 
-LogElement::LogElement()
-{
+LogElement::LogElement() {
   startupMode = Element_StartupMode::Time;
 }
 
 
-void LogElement::_logToFile()
-{
-  TRACE("log(%d,%s)", _timestamp, _value.c_str());
+void LogElement::_logToFile() {
+  TRACE("log(%lld,%s)", _timestamp, _value.c_str());
 
   File f = _board->fileSystem->open(_logfileName, "a");
 
@@ -58,13 +55,13 @@ void LogElement::_logToFile()
   } // if
   f.print(_timestamp);
   f.print(',');
-  f.println(_value);
+  f.print(_value);
+  f.print('\n');
   f.close();
 };
 
 
-void LogElement::init(Board *board)
-{
+void LogElement::init(Board *board) {
   Element::init(board);
   // do something here like initialization
   _changed = false;
@@ -74,8 +71,7 @@ void LogElement::init(Board *board)
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool LogElement::set(const char *name, const char *value)
-{
+bool LogElement::set(const char *name, const char *value) {
   TRACE("set %s = %s", name, value);
   bool ret = true;
 
@@ -85,22 +81,17 @@ bool LogElement::set(const char *name, const char *value)
 
       if (_avgTime > 0) {
         if (!_avgEnd) {
-          TRACE("start avg");
-
           unsigned long now = millis();
           // start a new build average values
           _timestamp = time(nullptr) + _avgTime / 2 / 1000; // timestamp to record the average
           _avgEnd = now + _avgTime;
-TRACE("_avgEnd=%d", _avgEnd);
           _avgCount = 0;
           _avgSum = 0;
         }
-          TRACE("add avg");
         _avgCount++;
         _avgSum += atof(value);
 
       } else {
-          TRACE("direct value");
         _value = value;
         _timestamp = time(nullptr);
         _changed = true;
@@ -109,7 +100,7 @@ TRACE("_avgEnd=%d", _avgEnd);
 
   } else if (_stricmp(name, "averagetime") == 0) {
     _avgTime = _atotime(value) * 1000;
-TRACE("_avgTime=%d", _avgTime);
+    TRACE("_avgTime=%d", _avgTime);
 
   } else if (_stricmp(name, "filesize") == 0) {
     _filesize = _atoi(value);
@@ -131,8 +122,7 @@ TRACE("_avgTime=%d", _avgTime);
 /**
  * @brief Activate the LogElement.
  */
-void LogElement::start()
-{
+void LogElement::start() {
   // TRACE("start(%s)", _logfileName.c_str());
 
   // Verify parameters
@@ -145,23 +135,21 @@ void LogElement::start()
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void LogElement::loop()
-{
+void LogElement::loop() {
   unsigned long now = millis();
 
   // check for average calculation end
   if ((_avgTime) && (_avgEnd) && (now > _avgEnd)) {
-TRACE("now=%d", now);
     _value = String(_avgSum / _avgCount, 2);
-    TRACE("calc(%s)", _value.c_str());
     _changed = true;
     _avgEnd = 0;
   }
 
   // save to file
-  if (_changed)
+  if (_changed) {
     _logToFile();
-  _changed = false;
+    _changed = false;
+  }
 } // loop()
 
 
@@ -169,8 +157,7 @@ TRACE("now=%d", now);
  * @brief push the current value of all properties to the callback.
  */
 void LogElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+    std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, String(_value).c_str());
 } // pushState()

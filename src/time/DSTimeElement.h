@@ -74,7 +74,7 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
-  // time between 2 time syncronizations
+  // time between 2 time synchronizations
   int _readTime;
 
   /**

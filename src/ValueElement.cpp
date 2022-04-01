@@ -23,33 +23,30 @@
  * @brief static factory function to create a new ValueElement
  * @return ValueElement* created element
  */
-Element *ValueElement::create()
-{
+Element *ValueElement::create() {
   return (new ValueElement());
-} // create()
+}  // create()
 
 
 // set a new value, maybe adjust to range
-bool ValueElement::_setValue(int newValue, bool forceAction)
-{
+bool ValueElement::_setValue(int newValue, bool forceAction) {
   bool ret = false;
   _isValid = true;
-  
+
   newValue = constrain(newValue, _minRange, _maxRange);
 
   if (forceAction || ((active) && (_value != newValue))) {
     _board->dispatch(_valueAction, newValue);
     ret = true;
-  } // if
-  
+  }  // if
   _value = newValue;
+  saveState(PROP_VALUE, String(_value).c_str());
   return (ret);
-} // _setValue()
+}  // _setValue()
 
 
 // set a new value, maybe adjust to range
-bool ValueElement::_setValue(const char *newValue, bool forceAction)
-{
+bool ValueElement::_setValue(const char *newValue, bool forceAction) {
   bool ret = false;
   _isValid = true;
 
@@ -58,12 +55,12 @@ bool ValueElement::_setValue(const char *newValue, bool forceAction)
     ret = true;
   }
   _valueString = newValue;
+  saveState(PROP_VALUE, _valueString.c_str());
   return (ret);
-} // _setValue()
+}  // _setValue()
 
 
-int ValueElement::_getValueInt()
-{
+int ValueElement::_getValueInt() {
   return (_value);
 }
 
@@ -71,8 +68,7 @@ int ValueElement::_getValueInt()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool ValueElement::set(const char *name, const char *value)
-{
+bool ValueElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
@@ -108,14 +104,13 @@ bool ValueElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
-void ValueElement::start()
-{
+void ValueElement::start() {
   Element::start();
 
   // Generate label from id if not given
@@ -131,29 +126,26 @@ void ValueElement::start()
     } else {
       _setValue(_value, true);
     }
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void ValueElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, (_isStringType ? _valueString : String(_value)).c_str());
-} // pushState()
+}  // pushState()
 
 /** return actual value */
-int ValueElement::getValue()
-{
+int ValueElement::getValue() {
   return (_value);
 }
 
 /** return actual value */
-const char *ValueElement::getLabel()
-{
+const char *ValueElement::getLabel() {
   return (_label.c_str());
 }
 

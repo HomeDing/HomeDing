@@ -9,66 +9,73 @@
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * -----
  * * 25.07.2018 created by Matthias Hertel
+ * * 18.03.2022 based on Adafruit GFX driver
  */
 
 #ifndef DisplayAdapterSSD1306_H
 #define DisplayAdapterSSD1306_H
 
-#include <SSD1306Wire.h>
-#include <displays/DisplayAdapterOLED.h>
+#include <displays/DisplayAdapterGFX.h>
+
+#include <Adafruit_SSD1306.h>  // Hardware-specific library for SSD1306
+#include <SPI.h>
+#include <Wire.h>
 
 
-class DisplayAdapterSSD1306 : public DisplayAdapterOLED
-{
+class DisplayAdapterSSD1306 : public DisplayAdapterGFX {
 public:
-  /**
-   * @brief Construct a new Display Adapter for a SH1106 display
-   * using specific parameters.
-   */
-  DisplayAdapterSSD1306(int address, int h)
-  {
-    _address = address;
-    _h = h;
-  } // DisplayAdapterSSD1306()
+  ~DisplayAdapterSSD1306() = default;
 
+  bool start() override {
+    // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
+    // LOGGER_JUSTINFO("  pins: l:%d, r:%d", conf->lightPin, conf->resetPin);
+    // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
+    // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK);
 
-  virtual ~DisplayAdapterSSD1306() = default;
+    display = new (std::nothrow) Adafruit_SSD1306(conf->width, conf->height, &Wire, conf->resetPin);
 
-
-  bool init(Board *board)
-  {
-    if (!disp) {
-      // allocate a new class for this display
-
-      if (!WireUtils::exists(_address)) {
-        LOGGER_ERR("not found %d", _address);
-        return (false);
-
-      } else {
-        OLEDDISPLAY_GEOMETRY res = (_h == 64 ? GEOMETRY_128_64 : GEOMETRY_128_32);
-        disp = new (std::nothrow) SSD1306Wire(_address, board->I2cSda, board->I2cScl, res);
-      }
-    } // if
-
-    if (!disp) {
+    if (!display) {
+      LOGGER_ERR("not found");
       return (false);
 
     } else {
-      disp->init();
-      DisplayAdapterOLED::init(board, disp);
-    } // if
+      gfxDisplay = (Adafruit_GFX *)display;
+      display->begin(SSD1306_SWITCHCAPVCC, conf->i2cAddress);
+      backColor565 = SSD1306_BLACK;
+      drawColor565 = SSD1306_WHITE;
+      DisplayAdapterGFX::start();
+    }  // if
     return (true);
-  }; // init()
+  };  // init()
+
+
+  virtual void setBrightness(uint8_t bright) override {
+    display->dim(bright < 50);
+  };
+
+  virtual void setColor(uint32_t col) override {
+    // LOGGER_JUSTINFO("no-setColor");
+  };
+
+  virtual uint32_t getColor() override {
+    return(0x00FFFFFF); // white
+  };
+
+  /**
+   * @brief The flush method must be called after every output sequence to allow
+   * combined sending new information to the display.
+   */
+  virtual void flush() override{
+    // LOGGER_JUSTINFO("flush()");
+    display->display();
+  };
+
 
 private:
   /**
-   * @brief I2C Display device address.
+   * @brief Reference to the used library object
    */
-  int _address;
+  Adafruit_SSD1306 *display = nullptr;
+};
 
-  int _h;
-
-  SSD1306Wire *disp = nullptr;
-}; // class
-
-#endif // DisplayAdapterSSD1306_H
+#endif  // DisplayAdapterSSD1306_H

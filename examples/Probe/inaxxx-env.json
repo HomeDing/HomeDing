@@ -1,0 +1,38 @@
+{
+  "device": {
+    "0": {
+      "name": "itest",
+      "description": "IoT Dev-Device for recording power consumption.",
+      "loglevel": "2",
+      "button": "D3",
+      "led": "D4",
+      "logfile": 1,
+      "safemode": "false",
+      "homepage": "/index.htm",
+      "cache": "no-cache",
+      "i2c-SDA": "D2",
+      "i2c-SCL": "D1"
+    }
+  },
+  "ota": {
+    "0": {
+      "port": 8266,
+      "passwd": "123"
+    }
+  },
+  "ssdp": {
+    "0": {}
+  },
+  "ntptime": {
+    "on": {
+      "zone": "CET-1CEST,M3.5.0,M10.5.0/3"
+    }
+  },
+  "displaysh1106": {
+    "0": {
+      "description": "local display",
+      "address": "0x3C",
+      "height": 64
+    }
+  }
+}

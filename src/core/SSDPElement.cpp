@@ -16,6 +16,13 @@
 
 #include <core/SSDPElement.h>
 
+#if defined(ESP8266)
+#include <ESP8266SSDP.h>
+#elif defined(ESP32)
+#include <ESP32SSDP.h>
+#endif
+
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -23,8 +30,7 @@
  * @brief static factory function to create a new SSDPElement
  * @return SSDPElement* created element
  */
-Element *SSDPElement::create()
-{
+Element *SSDPElement::create() {
   return (new SSDPElement());
 } // create()
 
@@ -34,8 +40,7 @@ Element *SSDPElement::create()
 /**
  * @brief initialize the common functionality of all element objects.
  */
-void SSDPElement::init(Board *board)
-{
+void SSDPElement::init(Board *board) {
   Element::init(board);
 
   Element *deviceElement = board->getElement("device");
@@ -50,15 +55,19 @@ void SSDPElement::init(Board *board)
     SSDP.setSchemaURL("ssdp.xml"); // url to get the SSDP detailed information
 
     // set default values
+#if defined(ESP8266)
     SSDP.setSerialNumber(ESP.getChipId());
+#elif defined(ESP32)
+    // SSDP.setSerialNumber(ESP.getEfuseMac());
+#endif
+
     SSDP.setURL("/");
     SSDP.setModelURL("https://homeding.github.io/");
     SSDP.setManufacturer("Matthias Hertel");
     SSDP.setManufacturerURL("https://www.mathertel.de");
-
     SSDP.setName(board->deviceName);
-    SSDP.begin();
-    ESP8266WebServer *server = board->server;
+
+    WebServer *server = board->server;
     server->on("/ssdp.xml", HTTP_GET, [server]() {
       SSDP.schema(server->client());
     });
@@ -70,8 +79,7 @@ void SSDPElement::init(Board *board)
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool SSDPElement::set(const char *name, const char *value)
-{
+bool SSDPElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, "Manufacturer") == 0) {
@@ -93,5 +101,11 @@ bool SSDPElement::set(const char *name, const char *value)
   return (ret);
 } // set()
 
+
+/** @brief Activate the Element. */
+void SSDPElement::start() {
+  Element::start();
+  SSDP.begin();
+};
 
 // End

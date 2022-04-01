@@ -1,13 +1,9 @@
 /**
  * @file TemplateElement.cpp
- * @brief Element Template class.
- *
  * @author Matthias Hertel, https://www.mathertel.de
  *
- * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
- *
- * This work is licensed under a BSD 3-Clause style license,
- * https://www.mathertel.de/License.aspx.
+ * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
  *
  * More information on https://www.mathertel.de/Arduino
  *
@@ -114,7 +110,7 @@ void TemplateElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_value).c_str());
+  callback(PROP_VALUE, _printInteger(_value));
 } // pushState()
 
 

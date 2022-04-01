@@ -1,18 +1,29 @@
 # The HomeDing Library
 
+[![Arduino Library Checks](https://github.com/HomeDing/HomeDing/actions/workflows/checks.yml/badge.svg)](https://github.com/HomeDing/HomeDing/actions/workflows/checks.yml)
 [![arduino-library-badge](https://www.ardu-badge.com/badge/HomeDing.svg?)](https://www.ardu-badge.com/HomeDing)
 [![GitLicense](https://gitlicense.com/badge/HomeDing/HomeDing)](https://gitlicense.com/license/HomeDing/HomeDing)
 
+The HomeDing library for Arduino is a low code solution and library to build small IoT devices
+without the need for cloud services or a local central device.
+It is a complete ecosystem of IoT specific elements that can be activated and configured on demand without compiling a new firmware.
+It is extensible by adding new specific elements.
+
+The devices run stand-alone only connected to the local WiFi and provide
+information and control of the device using a built-in web server.
+
 Documentation can be found in at [HomeDing documentation site](https://homeding.github.io)
 
-## Summary 
+This Library is published using a [BSD 3-clause license](./LICENSE).
 
-The HomeDing library for Arduino enables building IoT devices using ESP8266 based boards.
-It is a complete ecosystem of the required internal functionality based on elements that can be activated and integrated by configuration.
-It is extensible by adding specific elements.
+## Support of many sensors, displays and other IO
 
+The Homeding library has implemented many
+[Elements](https://homeding.github.io/elements/index.htm) for simple Input and Output of signals,
+[sensors](https://homeding.github.io/sensors/sensors.htm),
+[displays](https://homeding.github.io/displays/index.htm), lightning, logical processing, time support and many others.
 
-The embedded Web Server enables controlling the device and linking devices together.
+The embedded Web Server enables configuration and control of the device.
 
 It supports:
 
@@ -24,10 +35,10 @@ It supports:
 
 More documentation can be found in the  [HomeDing documentation site](https://homeding.github.io)
 
-
 ## BSD License
 
 The HomeDing library is open-source and uses one of the most permissive licenses so you can use it for any project:
+
 * Private use
 * Commercial use
 * You can modify
@@ -37,3 +48,6 @@ If you like to contribute by additions or bug fixes you are welcome to open issu
 
 If you plan to use it in a commercial product you are welcome to contact me regarding working and planning the future.
 
+## Included Libraries / Components
+
+* The **BME680 sensor** Element uses the Open Source from the Arduino Library published by Bosch Sensortec GmbH <https://github.com/BoschSensortec/BSEC-Arduino-library/tree/master/src/bme680> using a BSD 3-clause license.

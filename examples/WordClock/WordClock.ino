@@ -13,6 +13,7 @@
  *
  * Changelog:
  * * 21.11.2020 Example created.
+ * * 15.06.2021 usable with esp8266 board manager version >= 3.0.0
  */
 
 // ----- activatable debug options
@@ -24,7 +25,7 @@
 // Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_CORE
 
-// The Elements required from the standard set can be minimal:
+// The Elements required from the standard set can be reduced to the minimal set:
 
 // Network Time is the time source.
 #define HOMEDING_INCLUDE_NTPTIME
@@ -38,23 +39,15 @@
 #include <HomeDing.h>
 
 #include <FS.h> // File System for Web Server Files
+#include <LittleFS.h> // File System for Web Server Files
 
+#include <BuiltinHandler.h> // Serve Built-in files
 #include <BoardServer.h> // Web Server Middleware for Elements
-#include <FileServer.h>  // Web Server Middleware for UI
+#include <FileServer.h> // Web Server Middleware for UI
 
-// ===== define full functional Web UI with 4MByte Flash devices
-
-#define SETUP_URL "/$setup#v02"
-
-
-// ===== forward declarations
-
-void handleRedirect();
-void setup(void);
-void loop(void);
 
 static const char respond404[] PROGMEM =
-    R"==(<html><head><title>File not found</title></head><body>File not found</body></html>)==";
+    "<html><head><title>File not found</title></head><body>File not found</body></html>";
 
 // ===== WLAN credentials =====
 
@@ -63,35 +56,19 @@ static const char respond404[] PROGMEM =
 // need a WebServer
 WebServer server(80);
 
-// ===== application state variables =====
-
+// HomeDing core functionality
 Board mainBoard;
 
+// Filesystem to be used.
+FS *filesys;
+
+
 // ===== implement =====
-
-void handleRedirect()
-{
-  LOGGER_RAW("Redirect...");
-
-  String url;
-  if (!mainBoard.isCaptiveMode()) {
-    url = mainBoard.homepage;
-  } else {
-    url = "http://";
-    url.concat(WiFi.softAPIP().toString()); // mainBoard.deviceName
-    url.concat(SETUP_URL);
-  }
-  server.sendHeader("Location", url, true);
-  server.send(302);
-  server.client().stop();
-} // handleRedirect()
-
 
 /**
  * Setup all components and Serial debugging helpers
  */
-void setup(void)
-{
+void setup(void) {
   Serial.begin(115200);
 
 #ifdef NET_DEBUG
@@ -99,42 +76,46 @@ void setup(void)
 #else
   Serial.setDebugOutput(false);
 #endif
+
 #ifdef DBG_TRACE
+  // wait so the serial monitor can capture all output.
   delay(3000);
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-  LOGGER_INFO("Device starting...");
+  LOGGER_INFO("Device (" __FILE__ ") starting...");
 
-  // ----- setup the file system and load configuration -----
-  mainBoard.init(&server, &SPIFFS);
-  yield();
+  // ----- setup the platform with webserver and file system -----
+  filesys = &LittleFS; // LittleFS is the default filesystem
+
+  mainBoard.init(&server, filesys);
+  hd_yield();
 
   // ----- adding web server handlers -----
-  // redirect to index.htm when only domain name is given.
-  server.on("/", HTTP_GET, handleRedirect);
+
+  // Builtin Files
+  server.addHandler(new BuiltinHandler(&mainBoard));
 
   // Board status and actions
   server.addHandler(new BoardHandler(&mainBoard));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, "no-cache", &mainBoard));
+  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
   // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {
     const char *uri = server.uri().c_str();
-    LOGGER_RAW("notFound: %s", uri);
+    LOGGER_JUSTINFO("notFound: %s", uri);
 
-    if ((mainBoard.boardState == BOARDSTATE_RUNCAPTIVE) &&
-        ((strcmp(uri, "/connecttest.txt") == 0) ||
-         (strcmp(uri, "/redirect") == 0) ||
-         (strcmp(uri, "/generate_204") == 0) ||
-         (strcmp(uri, "/more.txt") == 0))) {
-      handleRedirect();
+    if (mainBoard.isCaptiveMode() && (!filesys->exists(uri))) {
+      String url = "http://192.168.4.1/$setup.htm";
+      server.sendHeader("Location", url, true);
+      server.send(302);
+
     } else {
       // standard not found in browser.
-      server.send(404, TEXT_HTML, FPSTR(respond404));
+      server.send(404, "text/html", FPSTR(respond404));
     }
   });
 
@@ -143,8 +124,7 @@ void setup(void)
 
 
 // handle all give time to all Elements and active components.
-void loop(void)
-{
+void loop(void) {
   server.handleClient();
   mainBoard.loop();
 } // loop()

@@ -13,17 +13,16 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Element functions ===== */
 
 /**
  * @brief initialize the common functionality of all element objects.
  */
-void Element::init(Board *board)
-{
+void Element::init(Board *board) {
   _board = board;
-} // init()
+}  // init()
 
 
 /**
@@ -33,8 +32,8 @@ void Element::init(Board *board)
  * @return true when property could be changed and the corresponding action
  * could be executed.
  */
-bool Element::set(const char *name, const char *value)
-{
+bool Element::set(const char *name, const char *value) {
+  // TRACE("set %s=%s", name, value);
   bool ret = true;
 
   if (_stricmp(name, "start") == 0) {
@@ -44,87 +43,85 @@ bool Element::set(const char *name, const char *value)
   } else if (_stricmp(name, "stop") == 0) {
     term();
 
-  } else if (_stricmp(name, "loglevel") == 0) {
+  } else if (_stricmp(name, "logLevel") == 0) {
     loglevel = _atoi(value);
+
+  } else if (_stricmp(name, "useState") == 0) {
+    _useState = _atob(value);
 
     // do not report an error for the following properties,
     // as they are used by the web ui and stored in the config files only.
   } else if (_stricmp(name, "description") == 0) {
   } else if (_stricmp(name, "title") == 0) {
-  } else if (_stricmp(name, "room") == 0) {
 
   } else {
     // LOGGER_EERR("cannot set property %s:", name, value); // not an error when used for testing common properties
     ret = false;
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
+
+
+/**
+ * @brief setup the element so it can be started ans stopped.
+ */
+void Element::setup() {}
 
 
 /**
  * @brief Activate the Element.
  */
-void Element::start()
-{
+void Element::start() {
   active = true;
-} // start()
+}  // start()
 
 
 /**
  * @brief Give some processing time to the element to do something on it's own
  */
-void Element::loop() {} // loop()
+void Element::loop() {}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   callback("active", active ? "true" : "false");
-} // pushState()
+}  // pushState()
 
 
 /**
- * @brief Get a property value.
+ * @brief save a local state to a state element.
+ * @param key The key of state variable.
+ * @param value The value of state variable.
  */
-const char *Element::get(const char *propName)
-{
-  TRACE("get(%s)", propName);
-  String ret;
-
-  pushState([this, propName, &ret](const char *name, const char *value) {
-    // TRACE("-%s:%s", name, value);
-    if (_stricmp(name, propName) == 0) {
-      ret = value;
-    }
-  });
-
-  return (ret.c_str());
-};
+void Element::saveState(const char *key, const char *value) {
+  TRACE("saveState(%s=%s)", key, value);
+  if (active && _useState && _board->state) {
+    _board->state->save(this, key, value);
+  }
+}  // saveState
 
 
 /**
  * @brief stop all activities and go inactive.
  */
-void Element::term()
-{
+void Element::term() {
   TRACE("term()");
   active = false;
-} // term()
+}  // term()
 
+// ===== static string to value helper function ===== //
 
 /* Return am integer value from a string. */
-int Element::_atoi(const char *value)
-{
+int Element::_atoi(const char *value) {
   return (strtol(value, nullptr, 0));
-} // _atoi()
+}  // _atoi()
 
 
 /* Return a boolean value from a string. */
-bool Element::_atob(const char *value)
-{
+bool Element::_atob(const char *value) {
   bool ret = false;
 
   if ((!value) || (strnlen(value, 6) > 5)) {
@@ -139,14 +136,13 @@ bool Element::_atob(const char *value)
     } else if (_stricmp(value, "high") == 0) {
       ret = true;
     }
-  } // if
+  }  // if
   return (ret);
-} // _atob()
+}  // _atob()
 
 
 /* Return a time value from a string. */
-unsigned long Element::_atotime(const char *value)
-{
+unsigned long Element::_atotime(const char *value) {
   unsigned long ret = 0;
   char *pEnd;
 
@@ -160,42 +156,96 @@ unsigned long Element::_atotime(const char *value)
 
   } else {
     ret = strtol(value, &pEnd, 10);
-    if (*pEnd == 'd') { ret *= (24 * 60 * 60); }
-    if (*pEnd == 'h') { ret *=      (60 * 60); }
-    if (*pEnd == 'm') { ret *=           (60); }
+    if (*pEnd == 'd') {
+      ret *= (24 * 60 * 60);
+    }
+    if (*pEnd == 'h') {
+      ret *= (60 * 60);
+    }
+    if (*pEnd == 'm') {
+      ret *= (60);
+    }
     // if (*pEnd == 's') { ret *= 1 }
-  } // if
+  }  // if
   return (ret);
-} // _atotime()
+}  // _atotime()
+
+
+/* Return a duration value from a string as milliseconds. */
+unsigned long Element::_scanDuration(const char *value) {
+  unsigned long ret = 0;
+  char *pEnd;
+
+  if (strchr(value, ':') != nullptr) {
+    // scan using format hh:mm[:ss[.mmm]]
+    ret += strtol(value, &pEnd, 10) * 60 * 60 * 1000;
+    if (*pEnd == ':')
+      ret += strtol(pEnd + 1, &pEnd, 10) * 60 * 1000;
+    if (*pEnd == ':') {
+      ret += strtol(pEnd + 1, &pEnd, 10) * 1000;
+      if (*pEnd == '.') {
+        char *pMS;
+        pEnd++;
+        unsigned long ms = strtol(pEnd, &pMS, 10);
+        while (pMS - pEnd < 3) {
+          ms = 10 * ms;
+          pMS++;
+        }
+        ret += ms;
+      }
+    }
+
+  } else if (strstr(value, "ms") != nullptr) {
+    // scan using format 000ms
+    ret = strtol(value, &pEnd, 10);
+
+  } else {
+    ret = strtol(value, &pEnd, 10);
+    if (*pEnd == 'd') {
+      ret *= (24 * 60 * 60 * 1000);
+    } else if (*pEnd == 'h') {
+      ret *= (60 * 60 * 1000);
+    } else if (*pEnd == 'm') {
+      ret *= (60 * 1000);
+    } else {  // simple seconds
+      ret *= 1000;
+    }
+  }  // if
+  return (ret);
+}  // _scanDuration()
 
 
 /* Return a pin value from a string. */
-int Element::_atopin(const char *value)
-{
-  static int GPIO[11] = {16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1};
+int Element::_atopin(const char *value) {
+#if defined(ESP8266)
+  static int GPIO[11] = { 16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1 };
+#endif
 
   int pin = -1;
   if (value) {
+#if defined(ESP8266)
     char ch = tolower(*value);
     if (ch == 'd') {
-      int n = atoi(value + 1); // scan a number right after the 'D'
+      int n = atoi(value + 1);  // scan a number right after the 'D'
       if ((n >= 0) && (n <= 10))
         pin = GPIO[n];
 
     } else if (ch == 'a') {
-      pin = A0; // only analog pin on ESP8266
+      pin = A0;  // only analog pin on ESP8266
 
     } else {
       pin = _atoi(value);
     }
+#else
+    pin = _atoi(value);
+#endif
   }
   return (pin);
-} // _atopin()
+}  // _atopin()
 
 
-uint32_t Element::_atoColor(const char *value)
-{
-  uint32_t ret = 0x00000000; // black
+uint32_t Element::_atoColor(const char *value) {
+  uint32_t ret = 0x00000000;  // black
 
   if (value) {
     char ch0 = value[0];
@@ -215,13 +265,32 @@ uint32_t Element::_atoColor(const char *value)
     } else if (_stricmp(value, "white") == 0) {
       ret = 0xFFFFFFFF;
     }
-  } // if
+  }  // if
   return ret;
-} // _atoColor()
+}  // _atoColor()
 
 
-int Element::_stricmp(const char *str1, const char *str2)
-{
+// ===== static value to string helper function ===== //
+
+char Element::_convertBuffer[32];
+
+char *Element::_printBoolean(bool b) {
+  return (char *)(b ? "1" : "0");
+};
+
+char *Element::_printInteger(int v) {
+  itoa(v, _convertBuffer, 10);
+  return (_convertBuffer);
+};
+
+char *Element::_printInteger(unsigned long v) {
+  ultoa(v, _convertBuffer, 10);
+  return (_convertBuffer);
+};
+
+// ===== static general string helper function ===== //
+
+int Element::_stricmp(const char *str1, const char *str2) {
   char c1, c2;
 
   do {
@@ -235,45 +304,41 @@ int Element::_stricmp(const char *str1, const char *str2)
       c2 += 'a' - 'A';
   } while ((c1) && (c1 == c2));
   return (int)(c1 - c2);
-} // _stricmp
+}  // _stricmp
 
 
 // String start with prefix, case insensitive.
-bool Element::_stristartswith(const char *s, const char *prefix)
-{
-  bool ret = true; // until we find a difference
+bool Element::_stristartswith(const char *s, const char *prefix) {
+  bool ret = true;  // until we find a difference
   if (s && prefix) {
     while (ret && *s && *prefix) {
       if (tolower(*s) != tolower(*prefix))
         ret = false;
       s++;
       prefix++;
-    } // while
+    }  // while
     if (*prefix)
       ret = false;
   } else {
     ret = false;
   }
   return (ret);
-} // _stristartswith()
+}  // _stristartswith()
 
 
-void Element::_strlower(char *str)
-{
+void Element::_strlower(char *str) {
   if (str) {
     while (*str) {
       if ((*str >= 'A') && (*str <= 'Z'))
         *str += 'a' - 'A';
       str++;
-    } // while
-  } // if
-} // _strlower
+    }  // while
+  }    // if
+}  // _strlower
 
 
-// https://stackoverflow.com/questions/9072320/split-string-into-string-array
 /** Get item[index] from string */
-String Element::getItemValue(String data, int index)
-{
+String Element::getItemValue(String data, int index) {
   String ret;
   int found = 0;
   int startIndex = 0;
@@ -283,7 +348,7 @@ String Element::getItemValue(String data, int index)
   const char *p = data.c_str();
 
   while (found <= index) {
-    if ((*p == VALUE_SEPARATOR) || (!*p)) {
+    if ((*p == LIST_SEPARATOR) || (!*p)) {
       found++;
       startIndex = endIndex + 1;
       endIndex = i;
@@ -293,14 +358,33 @@ String Element::getItemValue(String data, int index)
     }
     i++;
     p++;
-  } // while
+  }  // while
 
   if (found > index) {
     ret = data.substring(startIndex, endIndex);
   }
 
   return (ret);
-} // getItemValue()
+}  // getItemValue()
+
+
+/** Get first item from string and remove from string */
+String Element::popItemValue(String &data) {
+  String item;
+
+  if (data.length() > 0) {
+    // extract first action
+    int pos = data.indexOf(LIST_SEPARATOR);
+    if (pos > 0) {
+      item = data.substring(0, pos);
+      data.remove(0, pos + 1);
+    } else {
+      item = data;
+      data = (const char *)nullptr;
+    }
+  }  // if
+  return (item);
+}  // popItemValue
 
 
 // End

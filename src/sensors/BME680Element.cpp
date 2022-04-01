@@ -18,28 +18,26 @@
 #include <HomeDing.h>
 
 #include <sensors/BME680Element.h>
+
+#include <sensors/bme680.h>
 #include <WireUtils.h>
 
 /* ===== Define local constants and often used strings ===== */
 
-// #define SEALEVELPRESSURE_HPA (1013.25)
 struct bme680_dev gas_sensor;
 
 // ===== adapter functions for bme library
 
-static void delay_msec(uint32_t ms)
-{
+static void delay_msec(uint32_t ms) {
   delay(ms);
 }
 
-static int8_t i2c_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
-{
+static int8_t i2c_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len) {
   int8_t readLen = WireUtils::readBuffer(dev_id, reg_addr, reg_data, len);
   return (readLen != len);
 }
 
-static int8_t i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
-{
+static int8_t i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len) {
   WireUtils::write(dev_id, reg_addr, reg_data, len);
   return (0);
 }
@@ -47,8 +45,7 @@ static int8_t i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uin
 
 // ===== private methods
 
-unsigned long BME680Element::beginReading(void)
-{
+unsigned long BME680Element::beginReading(void) {
   uint8_t set_required_settings;
   uint16_t meas_period;
 
@@ -62,7 +59,7 @@ unsigned long BME680Element::beginReading(void)
   gas_sensor.gas_sett.run_gas = BME680_ENABLE_GAS_MEAS;
   /* Create a ramp heat waveform in 3 steps */
   gas_sensor.gas_sett.heatr_temp = 320; /* degree Celsius */
-  gas_sensor.gas_sett.heatr_dur = 150; /* milliseconds */
+  gas_sensor.gas_sett.heatr_dur = 150;  /* milliseconds */
 
   /* Select the power mode */
   /* Must be set before writing the sensor configuration */
@@ -82,7 +79,7 @@ unsigned long BME680Element::beginReading(void)
   // TRACE("meas_period=%d", meas_period);
 
   return (millis() + meas_period);
-} // beginReading()
+}  // beginReading()
 
 /* ===== Static factory function ===== */
 
@@ -90,10 +87,9 @@ unsigned long BME680Element::beginReading(void)
  * @brief static factory function to create a new BME680Element
  * @return BME680Element* created element
  */
-Element *BME680Element::create()
-{
+Element *BME680Element::create() {
   return (new BME680Element());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -102,8 +98,7 @@ Element *BME680Element::create()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool BME680Element::set(const char *name, const char *value)
-{
+bool BME680Element::set(const char *name, const char *value) {
   bool ret = SensorElement::set(name, value);
 
   if (!ret) {
@@ -126,18 +121,17 @@ bool BME680Element::set(const char *name, const char *value)
     } else if (_stricmp(name, "ongas") == 0) {
       _gasAction = value;
       ret = true;
-    } // if
-  } // if
+    }  // if
+  }    // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the BME680Element.
  */
-void BME680Element::start()
-{
+void BME680Element::start() {
   // TRACE("start()");
   // Setup sensor connectivity and check if sensor is present.
   gas_sensor.dev_id = _address;
@@ -145,10 +139,10 @@ void BME680Element::start()
   gas_sensor.read = i2c_read;
   gas_sensor.write = i2c_write;
   gas_sensor.delay_ms = delay_msec;
-  /* amb_temp can be set to 25 prior to configuring the gas sensor 
-     * or by performing a few temperature readings without operating the gas sensor.
-     */
-  gas_sensor.amb_temp = 25; // just a first guess. will be updated.
+  /* amb_temp can be set to 25 prior to configuring the gas sensor
+   * or by performing a few temperature readings without operating the gas sensor.
+   */
+  gas_sensor.amb_temp = 25;  // just a first guess. will be updated.
 
   int8_t rslt = bme680_init(&gas_sensor);
 
@@ -157,13 +151,12 @@ void BME680Element::start()
   } else {
     SensorElement::start();
   }
-} // start()
+}  // start()
 
 
-bool BME680Element::getProbe(String &values)
-{
+bool BME680Element::getProbe(String &values) {
   bool newData = false;
-  char buffer[32];
+  char buffer[48];
 
   if (!_dataAvailable) {
     // start reading
@@ -182,11 +175,11 @@ bool BME680Element::getProbe(String &values)
     } else {
       snprintf(buffer, sizeof(buffer),
                //  "%.2f,%.2f,%.0f,%.0f,%d",
-               "%d.%02d,%d.%03d,%d,%d",
+               "%d.%02d,%d.%03d,%d.%02d,%d",
                data.temperature / 100, data.temperature % 100,
                data.humidity / 1000, data.humidity % 1000,
-               data.pressure,
-               data.gas_resistance); // data.gas_index
+               data.pressure / 100, data.pressure % 100,
+               data.gas_resistance);  // data.gas_index
       // LOGGER_EINFO("data=%s", buffer);
       // update ambient temperature for next read
       gas_sensor.amb_temp = (data.temperature + 50) / 100;
@@ -197,29 +190,27 @@ bool BME680Element::getProbe(String &values)
     _dataAvailable = 0;
   }
   return (newData);
-} // getProbe()
+}  // getProbe()
 
 
-void BME680Element::sendData(String &values)
-{
+void BME680Element::sendData(String &values) {
   _board->dispatchItem(_temperatureAction, values, 0);
   _board->dispatchItem(_humidityAction, values, 1);
   _board->dispatchItem(_pressureAction, values, 2);
   _board->dispatchItem(_gasAction, values, 3);
-} // sendData()
+}  // sendData()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void BME680Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   SensorElement::pushState(callback);
   callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
   callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
   callback("pressure", Element::getItemValue(_lastValues, 2).c_str());
   callback("gas", Element::getItemValue(_lastValues, 3).c_str());
-} // pushState()
+}  // pushState()
 
 // End

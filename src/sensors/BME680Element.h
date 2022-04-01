@@ -24,8 +24,6 @@
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
-#include <sensors/bme680.h>
-
 /**
  * @brief BME680Element implements...
  * @details
@@ -87,7 +85,7 @@ private:
    */
   unsigned long _dataAvailable;
 
-  int _address = BME680_I2C_ADDR_SECONDARY; // BME680 I2C addresses are 0x76 or 0x77
+  int _address = 0x77; // BME680 I2C addresses are 0x76 or 0x77
 
   /**
    * @brief The actions emitted when a new temperature value was read from the

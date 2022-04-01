@@ -23,6 +23,7 @@
 
 #include <HomeDing.h>
 #include <displays/DisplayAdapter.h>
+#include <DisplayOutputElement.h>
 
 /**
  * @brief The DisplayDotElement is an Element that allows to create information
@@ -30,7 +31,7 @@
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayDotElement : public Element
+class DisplayDotElement : public DisplayOutputElement
 {
 public:
   /**
@@ -54,17 +55,6 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Activate the DisplayDotElement.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
-  virtual void start() override;
-
-  /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop() override;
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -73,6 +63,10 @@ public:
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
+  /**
+   * @brief Draw this output element.
+   */
+  virtual void draw() override;
 
 private:
   /**
@@ -80,25 +74,8 @@ private:
    */
   bool _value;
 
-  /**
-   * @brief displayed value
-   */
-  bool _displayValue;
-
-  /**
-   * @brief This variable corresponds to the x parameter.
-   */
-  int _x = 0;
-
-  /**
-   * @brief This variable corresponds to the y parameter.
-   */
-  int _y = 0;
-
   int _w = 11;
   int _h = 11;
-
-  DisplayAdapter *_display = NULL;
 };
 
 #ifdef HOMEDING_REGISTER

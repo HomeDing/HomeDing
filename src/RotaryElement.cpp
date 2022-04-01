@@ -32,7 +32,7 @@ RotaryEncoder *__encoder;
 /**
  * @brief The interrupt service routine to check the signals from the rotary encoder 
  */
-ICACHE_RAM_ATTR void __checkPosition()
+IRAM_ATTR void __checkPosition()
 {
   __encoder->tick(); // just call tick() to check the state.
 }

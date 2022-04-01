@@ -15,6 +15,8 @@
  * * 27.04.2018 Based on Element class.
  * * 15.05.2018 set = properties and actions interface.
  * * 24.01.2020 timer type once doesn't start automatically. 
+ * * 24.04.2021 mode=ON|TIMER|OFF added.
+ * * 24.01.2022 resolution increased. milliseconds as durations enabled.
  */
 
 #ifndef TIMERELEMENT_H
@@ -30,15 +32,14 @@ The Timer Element can automatically produce 2 actions after a specified timing.
 
                 +--> "on" action  +--> "off" action
                 |                 |
-________________/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\______________
+________________/^^^^^^^^^^^^^^^^^\______________
 
 <-- waittime --> <-- pulsetime -->
 <------------- cycletime ----------------------->
-<- _state=0  --> <- _state=1 ----> <- _state=2 -> <- _state=3 (no LOOP) ...
 
-When timer type = "LOOP" the timer automatically starts from the begining
-after finishing the cycletime. The cycletime is atomatically adjusted to
-minimum of waittime+pulsetime. The units are in minutes
+When timer restart is activated the timer automatically starts from the begining
+after finishing the cycletime. The cycletime is automatically adjusted to
+minimum of waittime+pulsetime.
 
 "onon": "device.main:log:start relais...",
 "onoff": "device.main:log:stop relais..."
@@ -58,20 +59,15 @@ minimum of waittime+pulsetime. The units are in minutes
 #define TIMER_TYPE_LOOP 0x01
 
 
-/**
- * @brief current state of the timer.
- */
-typedef enum {
-  TIMERSTATE_ENDED = 0, // cycletime ended but type != LOOP.
-  TIMERSTATE_WAIT = 1, // while waittime is running
-  TIMERSTATE_PULSE = 2, // while pulsetime is running.
-  TIMERSTATE_CYCLE = 3 // while cycletime is not over.
-} TimerState;
-
-
 class TimerElement : public Element
 {
 public:
+  enum Mode {
+    OFF = 0,  // outbound value is OFF(0).
+    ON = 1,   // outbound value is ON(0).
+    TIMER = 2 // outbound value by timer.
+  };
+
   /**
    * @brief Factory function to create a TimerElement.
    * @return Element*
@@ -94,8 +90,6 @@ public:
 
   /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
 
@@ -118,9 +112,19 @@ public:
 
 private:
   /**
-   * @brief type of timer like LOOP
+   * @brief outbound value
    */
-  int _type = TIMER_TYPE_ONCE;
+  bool _value;
+
+  /**
+   * @brief Automatic restart the timer when cycletime is over.
+   */
+  bool _restart = false;
+
+  /**
+   * @brief Mode of operation.
+   */
+  Mode _mode = Mode::TIMER;
 
   /**
    * @brief time of a complete timer cycle.
@@ -128,21 +132,21 @@ private:
    * This variable corresponds to the "cycletime" parameter.
    * When not specified the _cycleTime is calculated by waittime + pulsetime.
    */
-  uint16_t _cycleTime = 0;
+  unsigned long _cycleTime = 0;
 
   /**
    * @brief time before "on" action.
    *
    * This variable corresponds to the "waittime" parameter.
    */
-  uint16_t _waitTime = 0; // minutes to wait until next water will be started
+  unsigned long _waitTime = 0; // seconds before the pulsetime begins
 
   /**
    * @brief time between "on" and "off" action.
    *
    * This variable corresponds to the "pulsetime" parameter.
    */
-  uint16_t _pulseTime = 0; // minutes when water will be served
+  unsigned long _pulseTime = 0; // seconds of the pulsetime
 
   /**
    * @brief The _onAction holds the actions that is submitted when the pulse
@@ -171,25 +175,6 @@ private:
    * @brief The effective time (in seconds) the timer has started.
    */
   unsigned long _startTime;
-
-  /**
-   * @brief current state of the timer.
-   * 0: while waittime is running.
-   * 1: while pulsetime is running.
-   * 2: while cycletime is not over.
-   * 3: cycletime ended but type != LOOP.
-   */
-  TimerState _state = TIMERSTATE_ENDED;
-
-  /**
-   * @brief start the timer from the beginning.
-   */
-  void _startTimer();
-
-  /**
-   * @brief stop the timer and set to off state.
-   */
-  void _stopTimer();
 };
 
 

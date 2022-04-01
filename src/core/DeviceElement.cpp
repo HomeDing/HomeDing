@@ -52,23 +52,15 @@ bool DeviceElement::set(const char *name, const char *value)
   // ===== actions send to device =====
   if (_stricmp(name, "log") == 0) {
     // Log something
-    LOGGER_JUSTINFO(value ? value : "NULL");
+    LOGGER_INFO(value ? value : "NULL");
+
+    // ===== sleep behavior =====
 
   } else if (_stricmp(name, "sleep") == 0) {
+    _board->startSleep();
 
-    if (_atob(value)) {
-      // start deep sleep
-      TRACE("start sleep");
-      _board->deepSleepStart = millis();
-      if (!_board->isWakeupStart) {
-        // give a minute time to block deep sleep mode
-        _board->deepSleepStart += 60 * 1000;
-      }
-    } else {
-      // block any deep sleep until next reset.
-      TRACE("block sleep");
-      _board->deepSleepBlock = true;
-    }
+  } else if (_stricmp(name, "nosleep") == 0) {
+    _board->cancelSleep();
 
     // ===== Web UI =====
   } else if (_stricmp(name, "homepage") == 0) {
@@ -77,10 +69,13 @@ bool DeviceElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "title") == 0) {
     _board->title = value;
 
+  } else if (_stricmp(name, "room") == 0) {
+    _board->room = value;
+
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
 
-  } else if (_stricmp(name, PROP_DESCRIPTION) == 0) {
+  } else if (_stricmp(name, "description") == 0) {
     _description = value; // is used in SSDP
 
   } else if (_stricmp(name, "loglevel") == 0) {
@@ -89,7 +84,7 @@ bool DeviceElement::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "logfile") == 0) {
     // enable/disable logfile feature
-    Logger::logger_file = _atob(value);
+    Logger::setLogFile(_atob(value));
 
   } else if (_stricmp(name, "reset") == 0) {
     // reboot is called reset in ESP
@@ -112,9 +107,10 @@ bool DeviceElement::set(const char *name, const char *value)
       LOGGER_EERR("use safemode parameter");
       _board->isSafeMode = _atob(value);
 
-    } else if (_stricmp(name, "onsysstart") == 0) {
+    } else if (_stricmp(name, "onSysStart") == 0) {
       _board->sysStartAction = value;
-    } else if (_stricmp(name, "onstart") == 0) {
+
+    } else if (_stricmp(name, "onStart") == 0) {
       _board->startAction = value;
 
     } else if (_stricmp(name, "cache") == 0) {
@@ -135,8 +131,7 @@ bool DeviceElement::set(const char *name, const char *value)
       _board->maxNetConnextTime = _atotime(value) * 1000;
 
     } else if (_stricmp(name, "sleeptime") == 0) {
-      _board->deepSleepTime = _atotime(value);
-
+      _board->setSleepTime(_atotime(value));
 
       // ===== I2C bus =====
     } else if (_stricmp(name, "i2c-sda") == 0) {
@@ -190,9 +185,9 @@ void DeviceElement::pushState(
   Element::pushState(callback);
   callback("name", _board->deviceName.c_str());
   callback("title", _board->title.c_str());
-  callback(PROP_DESCRIPTION, _description.c_str());
+  callback("description", _description.c_str());
   callback("safemode", _board->isSafeMode ? "true" : "false");
-  callback("sd", _board->mDNS_sd ? "true" : "false");
+  callback("sd", _printBoolean( _board->mDNS_sd));
   callback("nextboot", String(_nextBoot - now).c_str());
 } // pushState()
 

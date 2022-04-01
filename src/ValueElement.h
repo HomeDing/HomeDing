@@ -89,12 +89,13 @@ protected:
 
   virtual int _getValueInt();
 
-private:
   /**
    * @brief The actual value.
    */
   int _value = 0;
   String _valueString;
+
+private:
 
   String _label;
 

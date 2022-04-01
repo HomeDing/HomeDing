@@ -41,9 +41,9 @@ public:
 
   /**
    * @brief List all registered elements in JSON array format:
-   * @param buffer for the names.
+   * @returns String with all registered element types.
    */
-  static void list(String &buffer);
+  static String list();
 
 private:
   static int _count;

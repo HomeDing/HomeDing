@@ -8,4 +8,4 @@ Another typical board for this is a [ESP8266-01 board](/boards/esp01) with 1MByt
 
 More details about this example can be found in the online documentation at
 
-<https://homeding.github.io/#page=/examples/minimal.md>
+<https://homeding.github.io/examples/minimal.htm>

@@ -1,16 +1,16 @@
 /**
  * @file NeoElement.h
  * @brief Output Element to control neopixel / WS2812 based LED stripes on a GPIO pin.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 30.07.2019 created by Matthias Hertel
  * * 15.11.2019 some more modes implemented
@@ -30,8 +30,7 @@
  * @brief NeoElement implements an Element to drive LED stripes with the WS2812 LEDs.
  */
 
-class NeoElement : public LightElement
-{
+class NeoElement : public LightElement {
 public:
   /**
    * @brief Factory function to create a NeoElement.
@@ -61,8 +60,6 @@ public:
 
   /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
 
@@ -71,12 +68,6 @@ public:
    */
   virtual void loop() override;
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
 
   enum class Mode {
     color = 0,
@@ -89,11 +80,13 @@ public:
 private:
   /**
    * @brief The actual mode.
-  */
+   */
   Mode _mode;
 
   /** Number of pixels in the stripe */
   int _count;
+
+  /** Overall brightness in range 0...100 from LightElement */
 
   /** data output pin is taken from _pins[0]*/
 
@@ -106,20 +99,15 @@ private:
   void _setColors(String colList);
 
   Adafruit_NeoPixel *_strip = (Adafruit_NeoPixel *)NULL;
-
 };
 
 
 /* ===== Register the Element ===== */
 
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to NeoElement.h:
-
 #ifdef HOMEDING_REGISTER
 // Register the NeoElement onto the ElementRegistry.
 bool NeoElement::registered =
-    ElementRegistry::registerElement("neo", NeoElement::create);
+  ElementRegistry::registerElement("neo", NeoElement::create);
 #endif
 
 #endif

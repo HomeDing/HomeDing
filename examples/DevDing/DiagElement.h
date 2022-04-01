@@ -84,7 +84,7 @@ private:
    */
   String _xAction;
 
-  String _i2cAddresses;
+  String _scanI2C();
 };
 
 #endif

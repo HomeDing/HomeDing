@@ -76,6 +76,15 @@ bool ScheduleElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
+  } else if (_stricmp(name, "mode") == 0) {
+    if (_stricmp(value, "off") == 0) {
+      _mode = Mode::OFF;
+    } else if (_stricmp(value, "on") == 0) {
+      _mode = Mode::ON;
+    } else if (_stricmp(value, "timer") == 0) {
+      _mode = Mode::TIMER;
+    }
+
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
 
@@ -92,8 +101,6 @@ bool ScheduleElement::set(const char *name, const char *value)
  */
 void ScheduleElement::start()
 {
-  // TRACE("start()");
-
   // Verify parameters
   _init = false;
 
@@ -102,7 +109,6 @@ void ScheduleElement::start()
   } else {
     Element::start();
   } // if
-
 } // start()
 
 
@@ -112,10 +118,16 @@ void ScheduleElement::start()
 void ScheduleElement::loop()
 {
   time_t ct = _board->getTimeOfDay();
+  bool newValue = _value;
 
-  if (ct > 0) {
+  if (_mode == Mode::ON) {
+    newValue = true;
+
+  } else if (_mode == Mode::OFF) {
+    newValue = false;
+
+  } else if (ct > 0) {
     // There is a local time available.
-    bool newValue;
 
     // find the current value
     if (_startTime < _endTime) {
@@ -125,19 +137,20 @@ void ScheduleElement::loop()
       // overnight.
       newValue = ((ct >= _startTime) || (ct < _endTime));
     }
-
-    if ((newValue == _value) && (_init)) {
-      // no need to send an action.
-    } else if (newValue) {
-      _board->dispatch(_onAction);
-      _board->dispatch(_valueAction, "1");
-    } else {
-      _board->dispatch(_offAction);
-      _board->dispatch(_valueAction, "0");
-    }
-    _value = newValue;
-    _init = true;
   } // if
+
+  if ((newValue == _value) && (_init)) {
+    // no need to send an action.
+  } else if (newValue) {
+    _board->dispatch(_onAction);
+    _board->dispatch(_valueAction, "1");
+
+  } else {
+    _board->dispatch(_offAction);
+    _board->dispatch(_valueAction, "0");
+  } // if
+  _init = true;
+  _value = newValue;
 } // loop()
 
 
@@ -148,7 +161,10 @@ void ScheduleElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_value).c_str());
+  callback("mode", _mode == Mode::TIMER ? "timer"
+                   : _mode == Mode::ON  ? "on"
+                                        : "off");
+  callback(PROP_VALUE, _value ? "1" : "0");
 } // pushState()
 
 // End

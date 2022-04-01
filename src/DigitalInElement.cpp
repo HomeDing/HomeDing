@@ -23,17 +23,15 @@
  * @brief static factory function to create a new DigitalInElement.
  * @return DigitalInElement* as Element* created element
  */
-Element *DigitalInElement::create()
-{
+Element *DigitalInElement::create() {
   return (new DigitalInElement());
-} // create()
+}  // create()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool DigitalInElement::set(const char *name, const char *value)
-{
+bool DigitalInElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_PIN) == 0) {
@@ -56,53 +54,55 @@ bool DigitalInElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
+
+/** @brief Setup the Element. */
+void DigitalInElement::setup() {
+  // only start with valid pin as input.
+  if (_pin >= 0) {
+    pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
+  }
+};
 
 /**
  * @brief Activate the DigitalInElement.
  */
-void DigitalInElement::start()
-{
-  // only start with valid pin as input.
+void DigitalInElement::start() {
   // TRACE("start (%d)", _pin);
+  // only start with valid pin as input.
   if (_pin >= 0) {
-    pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
     _lastInLevel = digitalRead(_pin);
     if (_inverse)
       _lastInLevel = !_lastInLevel;
     Element::start();
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 /**
  * @brief check the state of the input.
  */
-void DigitalInElement::loop()
-{
-  if (_pin >= 0) {
-    int lev = digitalRead(_pin);
-    if (_inverse)
-      lev = !lev;
+void DigitalInElement::loop() {
+  int lev = digitalRead(_pin);
+  if (_inverse)
+    lev = !lev;
 
-    if (lev != _lastInLevel) {
-      // TRACE("output %d->%d)", _lastInLevel, lev);
-      _board->dispatch(lev ? _highAction : _lowAction);
-      _board->dispatch(_valueAction, lev ? "1" : "0");
-      _lastInLevel = lev;
-    } // if
-  } // if
-} // loop()
+  if (lev != _lastInLevel) {
+    // TRACE("output %d->%d)", _lastInLevel, lev);
+    _board->dispatch(lev ? _highAction : _lowAction);
+    _board->dispatch(_valueAction, lev ? "1" : "0");
+    _lastInLevel = lev;
+  }  // if
+}  // loop()
 
 
 void DigitalInElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _lastInLevel ? "1" : "0");
-} // pushState()
+  callback(PROP_VALUE, _printBoolean(_lastInLevel));
+}  // pushState()
 
 // End

@@ -1,14 +1,10 @@
 /**
  * @file TemplateElement.h
- * @brief Element Template class.
- * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
- * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
  *
- * This work is licensed under a BSD 3-Clause style license,
- * https://www.mathertel.de/License.aspx.
- * 
  * More information on https://www.mathertel.de/Arduino
  * 
  * Changelog:
@@ -19,15 +15,9 @@
 #define TEMPLATEELEMENT_H
 
 /**
- * @brief TemplateElement implements...
- * @details
-@verbatim
-
-The TemplateElement can ...
-
-@endverbatim
+ * @brief 
+ * 
  */
-
 class TemplateElement : public Element
 {
 public:

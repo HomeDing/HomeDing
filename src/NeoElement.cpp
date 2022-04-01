@@ -20,14 +20,13 @@
 #include <NeoElement.h>
 
 
-void NeoElement::_setColors(String colList)
-{
+void NeoElement::_setColors(String colList) {
   uint16_t pixels = _strip->numPixels();
 
   String sCol;
   uint32_t col;
   int n = 0;
-  int def = 0; // defined colors
+  int def = 0;  // defined colors
 
   while ((colList.length() > 0) && (n < pixels)) {
     int p = colList.indexOf(',');
@@ -38,11 +37,11 @@ void NeoElement::_setColors(String colList)
     } else {
       sCol = colList;
       colList = (const char *)NULL;
-    } // if
+    }  // if
 
     col = _atoColor(sCol.c_str());
     _strip->setPixelColor(n++, col);
-  } // while
+  }  // while
 
   // at the end of the defined colors.
   // now repeat until all PixelColors are set
@@ -52,7 +51,7 @@ void NeoElement::_setColors(String colList)
     _strip->setPixelColor(n++, col);
   }
   needUpdate = true;
-}
+}  // _setColors()
 
 
 /* ===== Static factory function ===== */
@@ -61,31 +60,28 @@ void NeoElement::_setColors(String colList)
  * @brief static factory function to create a new NeoElement
  * @return NeoElement* created element
  */
-Element *NeoElement::create()
-{
+Element *NeoElement::create() {
   return (new NeoElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
 /** set initial/default values on properties. */
-void NeoElement::init(Board *board)
-{
+void NeoElement::init(Board *board) {
   Element::init(board);
 
   // set defaults:
   _mode = Mode::color;
   value = "0";
   _count = 8;
-} // init()
+}  // init()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool NeoElement::set(const char *name, const char *pValue)
-{
+bool NeoElement::set(const char *name, const char *pValue) {
   // TRACE("set %s=%s", name, value);
   bool ret = LightElement::set(name, pValue);
 
@@ -108,60 +104,65 @@ bool NeoElement::set(const char *name, const char *pValue)
       _strip->setBrightness(brightness);
       needUpdate = true;
     }
-    ret = true; // not handled in LightElement
+    ret = true;  // not handled in LightElement
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
     // saving to LightElement::brightness was handled in LightElement
     if (_strip) {
-      _strip->setBrightness(brightness);
+      _strip->setBrightness(brightness * 255 / 100);  // convert to 0...255
       if (_mode == Mode::color) {
-        _setColors(value);
+        _setColors(value);  // re-submit colors
       }
     }
 
-  } else if (_stricmp(name, PROP_DURATION) == 0) {
-    duration = _atotime(pValue) * 1000; // in msecs.
+  } else if (_stricmp(name, "duration") == 0) {
+    duration = _atotime(pValue) * 1000;  // in msecs.
 
   } else if (_stricmp(name, "count") == 0) {
     _count = _atoi(pValue);
-    ret = true; // not handled in LightElement
-  } // if
+    ret = true;  // not handled in LightElement
+  }              // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the NeoElement.
  */
-void NeoElement::start()
-{
+void NeoElement::start() {
   LightElement::start();
 
   _strip = new (std::nothrow) Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
   if (_strip) {
     _strip->begin();
-    _setColors(value);
     _strip->setBrightness(brightness);
-  } // if
+    _setColors(value);
+  }  // if
   // TRACE("start %d,%d", (_strip != nullptr), brightness);
-} // start()
+}  // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void NeoElement::loop()
-{
+void NeoElement::loop() {
   if (_strip) {
     if (needUpdate) {
-      // this time send to strip
+      // some settings have been changed
+      if (enabled) {
+        if (_mode == Mode::color) {
+          _setColors(value);
+        }
+      } else {
+        _strip->clear();
+      }
       _strip->show();
       needUpdate = false;
 
-    } else if ((_mode != Mode::color) && (duration != 0)) {
+    } else if (enabled && (_mode != Mode::color) && (duration != 0)) {
       // dynamic color patterns
-      unsigned long now = millis(); // current (relative) time in msecs.
+      unsigned long now = millis();  // current (relative) time in msecs.
       unsigned int hue = (now % duration) * 65536L / duration;
 
       if (_mode == Mode::wheel) {
@@ -182,22 +183,11 @@ void NeoElement::loop()
         _strip->setBrightness(b * brightness / 100);
         _setColors(value);
 
-      } // if
+      }  // if
       needUpdate = true;
     }
-  } // if
-} // loop()
-
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void NeoElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  LightElement::pushState(callback);
-  // callback("value", value.c_str());
-} // pushState()
+  }  // if
+}  // loop()
 
 
 // End

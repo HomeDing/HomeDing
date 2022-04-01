@@ -1,6 +1,6 @@
 /**
  * @file DisplaySSD1306Element.cpp
- * @brief Display Element for SSD1306 based OLED displays.
+ * @brief Display Element for HD44780 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -18,9 +18,11 @@
 #include <Board.h>
 #include <HomeDing.h>
 
-#include "DisplaySSD1306Element.h"
+#include <displays/DisplaySSD1306Element.h>
 
 #include <displays/DisplayAdapterSSD1306.h>
+
+#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -28,46 +30,34 @@
  * @brief static factory function to create a new DisplaySSD1306Element
  * @return DisplaySSD1306Element* created element
  */
-Element *DisplaySSD1306Element::create()
-{
+Element *DisplaySSD1306Element::create() {
   return (new DisplaySSD1306Element());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
-bool DisplaySSD1306Element::set(const char *name, const char *value)
-{
-  bool ret = true;
-
-  ret = DisplayElement::set(name, value);
-
-  return (ret);
-} // set()
-
+// All required parameters are handled by DisplayElement::set()
 
 /**
- * @brief Activate the DisplaySSD1306Element and register a Display Adapter to
- * LCD in the board.
+ * @brief Activate the DisplaySSD1306Element and register a Display Adapter to LCD
+ * in the board.
  */
-void DisplaySSD1306Element::start()
-{
-  DisplayElement::start();
-  // TRACE("start()");
+void DisplaySSD1306Element::start() {
+  TRACE("start()");
 
-  DisplayAdapter *d = new DisplayAdapterSSD1306(_address, _height);
-  if (d->init(_board)) {
-    _board->display = d;
-    d->setBrightness(_brightness);
+  DisplayAdapter *d = new DisplayAdapterSSD1306();
+  if (d->setup(_board, &config)) {
+    bool success = d->start();
+    if (success) {
+      _board->display = d;
+      DisplayElement::start();
 
-  } else {
-    LOGGER_EERR("no display found.");
-    delete d;
-    active = false;
-  } // if
-} // start()
+    } else {
+      LOGGER_EERR("no display found.");
+      delete d;
+    }  // if
+  }    // if
+}  // start()
 
 // End

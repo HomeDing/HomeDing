@@ -21,8 +21,7 @@
 
 #include "SPI.h"
 
-
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -39,36 +38,32 @@
  * @brief static factory function to create a new MAX7219Element
  * @return MAX7219Element* created element
  */
-Element *MAX7219Element::create()
-{
+Element *MAX7219Element::create() {
   return (new MAX7219Element());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
-void MAX7219Element::_write(byte address, byte data)
-{
+void MAX7219Element::_write(byte address, byte data) {
   digitalWrite(_csPin, LOW);
   SPI.transfer(address);
   SPI.transfer(data);
   digitalWrite(_csPin, HIGH);
 }
 
-void MAX7219Element::_clear()
-{
+void MAX7219Element::_clear() {
   if (_decodeMode != 0x00) {
-    _decodeMode = 0x00; // no decode
+    _decodeMode = 0x00;  // no decode
     _write(REG_DECODEMODE, _decodeMode);
   }
   for (int i = 1; i <= 8; i++) {
     _write(i, B00000000);
   }
-} // _clear()
+}  // _clear()
 
 
-void MAX7219Element::_setBrightness(int level)
-{
+void MAX7219Element::_setBrightness(int level) {
   _brightness = constrain(level, 0, 16);
   if (active) {
     if (_brightness == 0) {
@@ -76,23 +71,21 @@ void MAX7219Element::_setBrightness(int level)
 
     } else {
       _write(REG_SHUTDOWN, 1);
-      _write(REG_INTENSITY, _brightness-1);
+      _write(REG_INTENSITY, _brightness - 1);
     }
   }
-} // _setBrightness()
+}  // _setBrightness()
 
 
-void MAX7219Element::_writeRow(byte row, byte data)
-{
+void MAX7219Element::_writeRow(byte row, byte data) {
   if (_decodeMode != 0x00) {
-    _decodeMode = 0x00; // no decode
+    _decodeMode = 0x00;  // no decode
     _write(REG_DECODEMODE, _decodeMode);
   }
   _write(row + 1, data);
 }
 
-void MAX7219Element::_writeNumber(String number)
-{
+void MAX7219Element::_writeNumber(String number) {
   int len = number.length();
   byte data[8];
   int digits = 0;
@@ -101,8 +94,7 @@ void MAX7219Element::_writeNumber(String number)
 
   memset(data, 0, sizeof(data));
 
-  // Serial.print("NUM:");
-  // Serial.println(number);
+  // TRACE("NUM: %d", number.c_str());
 
   // fill data array with digits and decimal point
 
@@ -110,17 +102,17 @@ void MAX7219Element::_writeNumber(String number)
     char ch = number[i];
 
     if ((ch == '.') || (ch == ',')) {
-      data[digits] = 0x80; //  set decimal point
+      data[digits] = 0x80;  //  set decimal point
 
     } else if (isdigit(ch)) {
       data[digits] += (ch - '0');
-      m |= 1 << digits; // set this digit in decode mode
+      m |= 1 << digits;  // set this digit in decode mode
       digits++;
     }
-  } // for
+  }  // for
 
   if (_decodeMode != m) {
-    _decodeMode = m; // no decode
+    _decodeMode = m;  // no decode
     _write(REG_DECODEMODE, m);
   }
 
@@ -128,15 +120,14 @@ void MAX7219Element::_writeNumber(String number)
   for (int row = 0; row < 8; row++) {
     _write(row + 1, data[row]);
   }
-} // _writeNumber()
+}  // _writeNumber()
 
 
-/** 
+/**
  * write a bit pattern
  * @param value in format "0x0f1ef000e0e00000"
-*/
-void MAX7219Element::_writeM8X8(String value)
-{
+ */
+void MAX7219Element::_writeM8X8(String value) {
   TRACE("writeM8X8(%s)", value.c_str());
 
   int row = 1;
@@ -147,27 +138,25 @@ void MAX7219Element::_writeM8X8(String value)
     value.remove(0, 2);
 
     if (x.equalsIgnoreCase("0x"))
-      continue; // ignore this.
+      continue;  // ignore this.
 
     byte bits = strtol(x.c_str(), nullptr, 16);
     _write(row++, bits);
-  } // while
-} // _writeM8X8()
+  }  // while
+}  // _writeM8X8()
 
 
-void MAX7219Element::init(Board *board)
-{
+void MAX7219Element::init(Board *board) {
   TRACE("init()");
   Element::init(board);
   // do something here like initialization
-} // init()
+}  // init()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool MAX7219Element::set(const char *name, const char *value)
-{
+bool MAX7219Element::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
@@ -180,7 +169,7 @@ bool MAX7219Element::set(const char *name, const char *value)
   } else if (_stricmp(name, "cspin") == 0) {
     _csPin = _atopin(value);
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
     _setBrightness(_atoi(value));
 
   } else if (_stricmp(name, "mode") == 0) {
@@ -192,17 +181,16 @@ bool MAX7219Element::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the MAX7219Element.
  */
-void MAX7219Element::start()
-{
+void MAX7219Element::start() {
   TRACE("start()");
   TRACE("csPin=%d", _csPin);
   TRACE("mode=%d", _mode);
@@ -213,27 +201,26 @@ void MAX7219Element::start()
     SPI.begin();
     pinMode(_csPin, OUTPUT);
     digitalWrite(_csPin, HIGH);
-    _write(REG_DISPLAYTEST, 0); // no test mode
-    _write(REG_SCANLIMIT, 0x07); // all digits
-    _write(REG_DECODEMODE, _decodeMode); // no decode
-    _write(REG_SHUTDOWN, 1); // enable
+    _write(REG_DISPLAYTEST, 0);           // no test mode
+    _write(REG_SCANLIMIT, 0x07);          // all digits
+    _write(REG_DECODEMODE, _decodeMode);  // no decode
+    _write(REG_SHUTDOWN, 1);              // enable
 
     _write(REG_INTENSITY, _brightness);
     _lastValue = "";
     _clear();
 
     Element::start();
-  } // if
+  }  // if
 
 
-} // start()
+}  // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void MAX7219Element::loop()
-{
+void MAX7219Element::loop() {
   // do something
   if (!_value.equals(_lastValue)) {
     if (_mode == Mode::numeric) {
@@ -243,20 +230,19 @@ void MAX7219Element::loop()
     }
     _lastValue = _value;
   }
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void MAX7219Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback("mode", _mode == Mode::numeric ? "numeric" : "8x8");
-  callback("brightness", String(_brightness).c_str());
+  callback(PROP_BRIGHTNESS, _printInteger(_brightness));
   callback(PROP_VALUE, String(_value).c_str());
-} // pushState()
+}  // pushState()
 
 
 // End

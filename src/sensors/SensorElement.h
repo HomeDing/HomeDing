@@ -43,8 +43,6 @@ public:
 
   /**
    * @brief Activate the SensorElement.
-   * @return true when activation was good.
-   * @return false when activation failed.
    */
   virtual void start() override;
 

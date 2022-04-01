@@ -14,10 +14,10 @@
  * Changelog:see DiagElement.h
  */
 
+// open http://nodeding/diag
+
 #include <Arduino.h>
 #include <HomeDing.h>
-
-// #include <ESP8266mDNS.h>
 
 #include "DiagElement.h"
 
@@ -33,51 +33,29 @@
  * @brief static factory function to create a new DiagElement
  * @return DiagElement* created element
  */
-Element *DiagElement::create()
-{
+Element *DiagElement::create() {
   return (new DiagElement());
 } // create()
 
 
 /* ===== Element functions ===== */
 
-DiagElement::DiagElement()
-{
+DiagElement::DiagElement() {
   startupMode = Element_StartupMode::System;
 }
 
-void DiagElement::init(Board *board)
-{
+void DiagElement::init(Board *board) {
   Element::init(board);
-
-  // startup before network
-  startupMode = Element_StartupMode::System;
 } // init()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool DiagElement::set(const char *name, const char *value)
-{
+bool DiagElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "heap") == 0) {
-#if defined(ESP8266)
-    // log some heap information. using http://nodeding/$board/diag/0?heap=1
-    TRACE("===== HEAP =====");
-    uint32_t free;
-    uint16_t max;
-    uint8_t frag;
-    ESP.getHeapStats(&free, &max, &frag);
-    LOGGER_EINFO("heap free: %5d - max: %5d - frag: %3d%%", free, max, frag);
-
-#elif defined(ESP32)
-    LOGGER_EINFO("heap: %5d / %5d", ESP.getFreeHeap(), ESP.getHeapSize());
-
-#endif
-
-  } else if (_stricmp(name, "rtcmem") == 0) {
+  if (_stricmp(name, "rtcmem") == 0) {
     // log some heap information. using http://nodeding/$board/diag/0?rtcmem=1
 #if defined(ESP8266)
     // dump rtc Memory
@@ -103,20 +81,6 @@ bool DiagElement::set(const char *name, const char *value)
     } // for
 #endif
 
-  // } else if (_stricmp(name, "mdns") == 0) {
-  //   // log some heap information. using http://nodeding/$board/diag/0?mdns=1
-  //   TRACE("===== mdns =====");
-  //   Serial.flush();
-
-  //   // add mDNS service discovery feature
-  //   // see http://www.dns-sd.org/
-  //   // https://tools.ietf.org/html/rfc6762
-  //   // https://tools.ietf.org/html/rfc6763
-  //   MDNSResponder::hMDNSService serv = MDNS.addService(0, "http", "tcp", 80);
-  //   MDNS.addServiceTxt(serv, "path", "/");
-
-  //   TRACE("done.");
-
   } else {
     ret = Element::set(name, value);
   } // if
@@ -125,14 +89,62 @@ bool DiagElement::set(const char *name, const char *value)
 } // set()
 
 
+String DiagElement::_scanI2C() {
+  String out;
+  char buffer[128];
+
+  sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
+  out += buffer;
+
+  int num = 0;
+
+  for (int adr = 1; adr < 127; adr++) {
+    // The i2c scanner uses the return value of Write.endTransmission
+    // to find a device that acknowledged to the address.
+    Wire.beginTransmission(adr);
+    int error = Wire.endTransmission();
+
+    if (error == 0) {
+      sprintf(buffer, "* 0x%02x found.\n", adr);
+      out += buffer;
+
+      if (adr == 0x11) {
+        out += "  (SI4721)\n";
+      } else if (adr == 0x27) {
+        out += "  (LCD, PCF8574)\n";
+      } else if (adr == 0x3C) {
+        out += "  (SH1106, SSD1306, SSD1309)\n";
+      } else if (adr == 0x40) {
+        out += "  (INA219, INA226) found.";
+      } else if (adr == (0x51)) {
+        out += "  (RTC, PCF8563)\n";
+      } else if (adr == 0x63) {
+        out += "  (Radio, SI4730)\n";
+      } else if (adr == (0x68)) {
+        out += "  (RTC, DS1307)\n";
+      }
+      yield();
+      num++;
+    }
+  } // for
+  sprintf(buffer, "%2d devices found.\n", num);
+  out += buffer;
+  return (out);
+} // _scanI2C
+
+
 /**
- * @brief Activate the DelementiagElement.
+ * @brief Activate the DiagElement.
  */
-void DiagElement::start()
-{
-  delay(2000); // wait some time for Serial output sync
+void DiagElement::start() {
   TRACE("start()");
   Element::start();
+
+  // enable I2C scan output using http://nodeding/diag
+  _board->server->on("/diag", HTTP_GET, [this]() {
+    _board->server->send(200, "text/plain", _scanI2C());
+  });
+
 
 #if defined(ESP8266)
   TRACE("Reset Reason: %s", ESP.getResetReason().c_str());
@@ -145,46 +157,6 @@ void DiagElement::start()
   TRACE(" Free Memory: %d", ESP.getFreeHeap());
   TRACE(" Mac-address: %s", WiFi.macAddress().c_str());
 
-  // ===== scan the the I2C bus and report found devices =====
-  TRACE("Scan i2c (sda=%d, scl=%d)...", _board->I2cSda, _board->I2cScl);
-
-  int error, adr;
-  int num;
-
-  num = 0;
-  for (adr = 1; adr < 127; adr++) {
-    // The i2c scanner uses the return value of Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
-    Wire.beginTransmission(adr);
-    error = Wire.endTransmission();
-
-    if (error == 0) {
-      _i2cAddresses += "0x";
-      _i2cAddresses += String(adr, 16); //  adr;
-      _i2cAddresses += ',';
-
-      if (adr == 0x11) {
-        TRACE(" 0x11 (SI4721) found.");
-      } else if (adr == 0x27) {
-        TRACE(" 0x27 (LCD, PCF8574) found.");
-      } else if (adr == 0x3C) {
-        TRACE(" 0x03C (SH1106, SSD1306, SSD1309) found.");
-      } else if (adr == 0x40) {
-        TRACE(" 0x27 (INA219) found.");
-      } else if (adr == 0x63) {
-        TRACE(" 0x63 (SI4730 radio) found.");
-
-      } else {
-        TRACE(" 0X%02x (unknown) found.", adr);
-      }
-      num++;
-
-    } else if (error == 4) {
-      // TRACE(" 0x%02x error.", adr);
-    } // if
-    yield();
-  } // for
-  TRACE(" %2d devices found.", num);
 } // start()
 
 
@@ -192,12 +164,9 @@ void DiagElement::start()
  * @brief push the current value of all properties to the callback.
  */
 void DiagElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+    std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("i2cAddresses", _i2cAddresses.c_str());
 } // pushState()
-
 
 
 /* ===== Register the Element ===== */

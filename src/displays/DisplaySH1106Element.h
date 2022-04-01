@@ -27,8 +27,7 @@
  * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplaySH1106Element : public DisplayElement
-{
+class DisplaySH1106Element : public DisplayElement {
 public:
   /* ===== Static factory function ===== */
 
@@ -46,27 +45,15 @@ public:
   /* ===== Element functions ===== */
 
   /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
-  virtual bool set(const char *name, const char *value) override;
-
-  /**
    * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
    */
   virtual void start() override;
-
 };
 
 #ifdef HOMEDING_REGISTER
 // Register the DisplaySH1106Element onto the ElementRegistry.
 bool DisplaySH1106Element::registered = ElementRegistry::registerElement(
-    "displaySH1106", DisplaySH1106Element::create);
+  "displaySH1106", DisplaySH1106Element::create);
 #endif
 
 #endif

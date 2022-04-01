@@ -21,8 +21,7 @@
 #include <sensors/SensorElement.h>
 
 
-SensorElement::SensorElement()
-{
+SensorElement::SensorElement() {
   _readTime = 60; // read from sensor once a minute
   _resendTime = 0; // Not enabled resending probes.
   _warmupTime = 3; // secs.
@@ -35,8 +34,7 @@ SensorElement::SensorElement()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool SensorElement::set(const char *name, const char *value)
-{
+bool SensorElement::set(const char *name, const char *value) {
   bool ret = Element::set(name, value);
 
   if (!ret) {
@@ -60,8 +58,7 @@ bool SensorElement::set(const char *name, const char *value)
 /**
  * @brief Activate the SensorElement.
  */
-void SensorElement::start()
-{
+void SensorElement::start() {
   unsigned int now = millis();
   Element::start();
 
@@ -75,8 +72,7 @@ void SensorElement::start()
  * This method is called when the sensor stopped working.
  * It reactivates the element when specified by restart property. 
  */
-void SensorElement::term()
-{
+void SensorElement::term() {
   unsigned int now = millis();
   Element::term();
   if (_isReading && _sensorWorkedOnce && _restart) {
@@ -93,8 +89,7 @@ void SensorElement::term()
  * @brief read or send sensor data.
  * This method will not be called when the element is not active.
  */
-void SensorElement::loop()
-{
+void SensorElement::loop() {
   unsigned long now = millis();
   String value;
 
@@ -106,12 +101,15 @@ void SensorElement::loop()
     _isReading = false;
 
     if (done) {
-      _sensorWorkedOnce = true;
-      _nextRead = now + _readTime * 1000;
-      if (!value.equals(_lastValues)) {
-        _nextSend = now; // enforce sending now
+      if (value.length() > 0) {
+        // it's a valid value from the sensor
+        _sensorWorkedOnce = true;
+        if (!value.equals(_lastValues)) {
+          _nextSend = now; // enforce sending now
+        } // if
+        _lastValues = value;
       } // if
-      _lastValues = value;
+      _nextRead = now + _readTime * 1000;
     } // if
 
   } else if (_nextSend && (_nextSend < now)) {
@@ -124,22 +122,19 @@ void SensorElement::loop()
 
 
 void SensorElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+    std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
 } // pushState()
 
 
 // ===== private functions =====
 
-bool SensorElement::getProbe(UNUSED String &values)
-{
+bool SensorElement::getProbe(UNUSED String &values) {
   return (true); // always simulate data is fine
 } // getProbe()
 
 
-void SensorElement::sendData(UNUSED String &values)
-{
+void SensorElement::sendData(UNUSED String &values) {
 } // sendData()
 
 

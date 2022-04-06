@@ -17,7 +17,19 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <NeoElement.h>
+#include <light/NeoElement.h>
+
+
+void NeoElement::show(uint32_t color, int brightness) {
+  // TRACE("show(x%08x, %d)", color, brightness);
+
+  // set _brightness and value of base class LightElement
+  LightElement::show(color, brightness);
+
+  _strip->setBrightness(_brightness * 255 / 100);
+  _strip->fill(color);
+  _strip->show();
+}  // show()
 
 
 void NeoElement::_setColors(String colList) {
@@ -101,7 +113,7 @@ bool NeoElement::set(const char *name, const char *pValue) {
     else if (_stricmp(pValue, "pulse") == 0)
       _mode = Mode::pulse;
     if (_strip) {
-      _strip->setBrightness(brightness);
+      _strip->setBrightness(_brightness * 255 / 100);
       needUpdate = true;
     }
     ret = true;  // not handled in LightElement
@@ -109,10 +121,8 @@ bool NeoElement::set(const char *name, const char *pValue) {
   } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
     // saving to LightElement::brightness was handled in LightElement
     if (_strip) {
-      _strip->setBrightness(brightness * 255 / 100);  // convert to 0...255
-      if (_mode == Mode::color) {
-        _setColors(value);  // re-submit colors
-      }
+      _strip->setBrightness(_brightness * 255 / 100);  // convert to 0...255
+      needUpdate = true;
     }
 
   } else if (_stricmp(name, "duration") == 0) {
@@ -136,7 +146,7 @@ void NeoElement::start() {
   _strip = new (std::nothrow) Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
   if (_strip) {
     _strip->begin();
-    _strip->setBrightness(brightness);
+    _strip->setBrightness(_brightness);
     _setColors(value);
   }  // if
   // TRACE("start %d,%d", (_strip != nullptr), brightness);
@@ -180,7 +190,7 @@ void NeoElement::loop() {
         int b = (now % duration) * 510L / duration;
         if (b > 255)
           b = 510 - b;
-        _strip->setBrightness(b * brightness / 100);
+        _strip->setBrightness(b * _brightness / 100);
         _setColors(value);
 
       }  // if

@@ -75,6 +75,11 @@ public:
   virtual void pushState(
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
+  /**
+   * @brief direct function to show a color and brightness.
+   */
+  virtual void show(uint32_t color, int brightness);
+
 protected:
   /**
    * @brief The actual / new value of the output value.
@@ -89,7 +94,7 @@ protected:
   /** @brief Brightness level in percent. 
    * The Light element uses this property as a factor for all PWM output.
   */
-  int brightness = 50; // percent
+  int _brightness = 50; // percent
 
   /**
    * @brief The actual / new value of the output value.
@@ -102,9 +107,6 @@ protected:
 #if (defined(ESP32))
   int _channels[MAXPINS] = {0, 0, 0, 0}; // led channels for ESP32
 #endif
-
-  /** set color pattern */
-  virtual void setOutput(String value);
 
   /**
    * @brief set to true after a color has been prepares to be send to the pixels next loop().

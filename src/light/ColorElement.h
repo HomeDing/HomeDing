@@ -20,6 +20,11 @@
 #ifndef COLORELEMENT_H
 #define COLORELEMENT_H
 
+#include <vector>
+
+#include <HomeDing.h>
+#include <light/LightElement.h>
+
 /**
  * @brief ColorElement implements...
  * @details
@@ -82,6 +87,9 @@ private:
   uint32_t _value = 0;
 
 
+  boolean _needUpdate = false;
+
+
   /** @brief  The actual brightness output.
    * The Light element uses this property as a factor for all PWM output.
    */
@@ -112,6 +120,11 @@ private:
    * @brief The _valueAction holds the actions that is submitted when the color changes.
    */
   String _valueAction;
+
+  /**
+   * @brief linked elements
+   */
+  std::vector<LightElement *> _lightElements; // direct linked elements
 
   /**
    * @brief The _brightnessAction holds the actions that is submitted when the brightness changes.

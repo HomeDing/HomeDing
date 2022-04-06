@@ -32,7 +32,7 @@ jobs:
           library-manager: update
           verbose: false
 
-  checks:
+  check-eps8266:
     name: compile examples on ESP8266
     runs-on: ubuntu-latest
 

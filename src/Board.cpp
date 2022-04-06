@@ -403,11 +403,11 @@ void Board::loop() {
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
-      NETTRACE("No Net Config");
+      LOGGER_JUSTINFO("No Net Config");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
     } else if (_resetCount == 2) {
-      NETTRACE("Reset*2");
+      LOGGER_JUSTINFO("Reset*2");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
     } else if (WiFi.SSID().length() || netpass.length()) {
@@ -476,7 +476,7 @@ void Board::loop() {
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
-      TRACE("sysbutton %d pressed %d", sysButton, digitalRead(sysButton));
+      LOGGER_JUSTINFO("sysbutton %d pressed %d", sysButton, digitalRead(sysButton));
       _newState(BOARDSTATE::STARTCAPTIVE);
     }
 
@@ -906,6 +906,22 @@ Element *Board::getElement(const char *elementType) {
 }  // getElement()
 
 
+/**
+ * @brief Get a Element by typename/id.
+ */
+Element *Board::getElementById(const char *elementId) {
+  TRACE("getElementById(%s)", elementId);
+
+  Element *l = _elementList;
+  while (l != NULL) {
+    if (Element::_stricmp(l->id, elementId) == 0) { break; }
+    l = l->next;
+  }  // while
+  // TRACE("found: 0x%08x", l);
+  return (l);
+}  // getElementById()
+
+
 Element *Board::getElement(const char *elementType, const char *elementName) {
   String tn = elementType;
   tn.concat('/');
@@ -937,6 +953,10 @@ void Board::forEach(const char *prefix, ElementCallbackFn fCallback) {
 }  // forEach()
 
 
+/**
+ * @brief Reset/restart the board.
+ * @param wipe is set to true to disconnect from WiFi and forget saved network credentials. 
+ */
 void Board::reboot(bool wipe) {
   LOGGER_INFO("reboot...");
   if (wipe)

@@ -380,6 +380,17 @@ public:
    */
   Element *getElement(const char *elementType, const char *elementName);
 
+  /**
+   * Get an Element by type/name. Returns found element.
+   * @param elementId type and name of element.
+   * @return Element* element in list with this type/name.
+   */
+  Element *getElementById(const char *elementId);
+
+  /**
+   * @brief Reset/restart the board.
+   * @param wipe is set to true to disconnect from WiFi and forget saved network credentials.
+   */
   static void reboot(bool wipe);
 
   /**

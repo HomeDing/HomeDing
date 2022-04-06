@@ -21,7 +21,7 @@
 #define NEOELEMENT_H
 
 #include <HomeDing.h>
-#include <LightElement.h>
+#include <light/LightElement.h>
 
 // https://github.com/adafruit/Adafruit_NeoPixel
 #include <Adafruit_NeoPixel.h>
@@ -76,6 +76,8 @@ public:
     pulse = 3,
     more
   };
+
+  virtual void show(uint32_t color, int brightness) override;
 
 private:
   /**

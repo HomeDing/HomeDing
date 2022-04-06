@@ -253,23 +253,34 @@ extern Board homeding;
 #include <TM1637Element.h>
 #endif
 
+// ===== LIGHT ELEMENTS =====
+
+#ifdef HOMEDING_INCLUDE_LIGHT
+#include <light/LightElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_COLOR
+#include <light/ColorElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_NEOPIXEL
+#include <light/NeoElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_MY9291
+#include "light/MY9291Element.h"
+#endif
+
+#ifdef HOMEDING_INCLUDE_P9813
+#include "light/P9813Element.h"
+#endif
+
 // ===== OPTIONAL ELEMENTS =====
 
 #ifdef HOMEDING_INCLUDE_DHT
 #include <sensors/DHTElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_COLOR
-#include <ColorElement.h>
-#endif
-
-#ifdef HOMEDING_INCLUDE_LIGHT
-#include <LightElement.h>
-#endif
-
-#ifdef HOMEDING_INCLUDE_NEOPIXEL
-#include <NeoElement.h>
-#endif
 
 #ifdef HOMEDING_INCLUDE_RFCODES
 #include <RFCodesElement.h>
@@ -301,10 +312,6 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_MAX7219
 #include <MAX7219Element.h>
-#endif
-
-#ifdef HOMEDING_INCLUDE_MY9291
-#include "sensors/MY9291Element.h"
 #endif
 
 #ifdef HOMEDING_INCLUDE_MENU

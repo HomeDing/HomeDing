@@ -17,9 +17,9 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <LightElement.h>
+#include <light/LightElement.h>
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief Construct a new LightElement.
@@ -29,12 +29,16 @@ LightElement::LightElement() {
 }
 
 
-void LightElement::setOutput(String value) {
-  TRACE("setOutput(%s)", value.c_str());
-  uint32_t col = _atoColor(value.c_str());
+void LightElement::show(uint32_t color, int brightness) {
+  TRACE("show(x%08x, %d)", color, brightness);
+
+  brightness = constrain(brightness, 0, 100);
+  _brightness = brightness;
+
+  value = "#" + String(color, 16);
 
   for (int n = _count - 1; n >= 0; n--) {
-    int c = col & 0x00FF;
+    int c = color & 0x00FF;
 
 #if defined(ESP8266)
     analogWrite(_pins[n], c * brightness / 100);
@@ -43,9 +47,9 @@ void LightElement::setOutput(String value) {
 #endif
 
     TRACE("%d pin=%d value=%02x", n, _pins[n], c);
-    col = col >> 8;
+    color = color >> 8;
   }  // for
-}  // setOutput()
+}  // show()
 
 
 /* ===== Static factory function ===== */
@@ -77,8 +81,8 @@ bool LightElement::set(const char *name, const char *pValue) {
     needUpdate = true;
 
   } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
-    brightness = _atoi(pValue);
-    brightness = constrain(brightness, 0, 100);
+    _brightness = _atoi(pValue);
+    _brightness = constrain(_brightness, 0, 100);
     needUpdate = true;
 
   } else if (_stricmp(name, PROP_PIN) == 0) {
@@ -111,7 +115,7 @@ void LightElement::start() {
   analogWriteRange(256);
 #endif
 
-  for (int n = 0; n < 3; n++) {
+  for (int n = 0; n < _count; n++) {
 #if defined(ESP8266)
     pinMode(_pins[n], OUTPUT);
 #elif (defined(ESP32))
@@ -131,8 +135,14 @@ void LightElement::start() {
 _ */
 void LightElement::loop() {
   if (needUpdate) {
-    // send value to setOutput
-    setOutput(enabled ? value : "x00000000");
+    // send value to show() from setup or dispatched event
+    if (!enabled) {
+      show(0x00000000, _brightness);
+
+    } else {
+      uint32_t col = _atoColor(value.c_str());
+      show(col, _brightness);
+    }
     needUpdate = false;
   }  // if
 }  // loop()
@@ -146,7 +156,7 @@ void LightElement::pushState(
   Element::pushState(callback);
   callback(PROP_VALUE, value.c_str());
   callback("enable", enabled ? "1" : "0");
-  callback(PROP_BRIGHTNESS, _printInteger(brightness));
+  callback(PROP_BRIGHTNESS, _printInteger(_brightness));
 }  // pushState()
 
 

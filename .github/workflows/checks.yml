@@ -32,7 +32,7 @@ jobs:
           library-manager: update
           verbose: false
 
-  check-eps8266:
+  check-esp8266:
     name: compile examples on ESP8266
     runs-on: ubuntu-latest
 
@@ -76,3 +76,43 @@ jobs:
           # size-report-sketch: 'ConnectionHandlerDemo'
           # enable-size-deltas-report: 'true'
           # sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
+
+  check-esp32:
+    name: compile examples on ESP32
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Run Arduino Compiler
+      # see https://github.com/arduino/compile-sketches
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          verbose: true
+          platforms: |
+            # Install ESP32 platform via Boards Manager
+            - name: "esp32:esp32"
+              source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+              version: 2.0.2
+          fqbn: esp32:esp32:esp32
+          libraries: |
+            - source-path: ./
+            - name: OneWire
+            - name: RotaryEncoder
+            - name: DHTNEW
+            - name: my92xx
+            - name: INA219_WE
+            - name: Radio
+            - name: RFCodes
+            - name: LiquidCrystal_PCF8574
+            - name: Adafruit NeoPixel
+            - name: Adafruit ST7735 and ST7789 Library
+            - name: Adafruit SH110X
+            - name: Adafruit SSD1306
+            - name: Adafruit GFX Library
+            - source-url: "https://github.com/luc-github/ESP32SSDP.git"
+          sketch-paths: |
+            - 'examples/standard'

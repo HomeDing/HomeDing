@@ -71,7 +71,7 @@
 // Enable some TIME Elements
 #define HOMEDING_INCLUDE_DSTIME
 
-// Enable Elements for Displays
+// Enable Elements for Displays (+36k program space, 32400 free heap)
 #define HOMEDING_INCLUDE_DISPLAY
 #define HOMEDING_INCLUDE_DISPLAYLCD
 #define HOMEDING_INCLUDE_DISPLAYSSD1306

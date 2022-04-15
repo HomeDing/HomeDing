@@ -29,35 +29,31 @@
  * @brief static factory function to create a new TemplateElement
  * @return TemplateElement* created element
  */
-Element *TemplateElement::create()
-{
+Element *TemplateElement::create() {
   return (new TemplateElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
-TemplateElement::TemplateElement()
-{
+TemplateElement::TemplateElement() {
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
   _value = 0;
 }
 
 
-void TemplateElement::init(Board *board)
-{
+void TemplateElement::init(Board *board) {
   TRACE("init()");
   Element::init(board);
   // do something here like initialization
-} // init()
+}  // init()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool TemplateElement::set(const char *name, const char *value)
-{
+bool TemplateElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
@@ -72,17 +68,16 @@ bool TemplateElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the TemplateElement.
  */
-void TemplateElement::start()
-{
+void TemplateElement::start() {
   TRACE("start()");
 
   // Verify parameters
@@ -91,34 +86,31 @@ void TemplateElement::start()
   Element::start();
   // } // if
 
-} // start()
+}  // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void TemplateElement::loop()
-{
+void TemplateElement::loop() {
   // do something
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void TemplateElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, _printInteger(_value));
-} // pushState()
+}  // pushState()
 
 
-void TemplateElement::term()
-{
+void TemplateElement::term() {
   TRACE("term()");
-  active = false;
-} // term()
+  Element::term();
+}  // term()
 
 
 /* ===== Register the Element ===== */
@@ -133,7 +125,7 @@ void TemplateElement::term()
 // #ifdef HOMEDING_REGISTER
 // Register the TemplateElement onto the ElementRegistry.
 bool TemplateElement::registered =
-    ElementRegistry::registerElement("template", TemplateElement::create);
+  ElementRegistry::registerElement("template", TemplateElement::create);
 // #endif
 
 // End

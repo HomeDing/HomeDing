@@ -35,6 +35,13 @@
 
 // for non-element classes
 
+#define LOGGER_ALWAYS(...) \
+  Logger::LoggerPrint(NULL, -1, __VA_ARGS__)
+
+/** Send Information to Serial output only and always. */
+#define LOGGER_JUSTINFO(...) \
+  Logger::LoggerPrint(NULL, LOGGER_LEVEL_INFO, __VA_ARGS__)
+
 /** Send error to Logfile and serial output. */
 #define LOGGER_ERR(...) \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_ERR, __VA_ARGS__)
@@ -42,10 +49,6 @@
 /** Send information to logfile and serial output. */
 #define LOGGER_INFO(...) \
   Logger::LoggerPrint("sys", LOGGER_LEVEL_INFO, __VA_ARGS__)
-
-/** Send Information to Serial output only. */
-#define LOGGER_JUSTINFO(...) \
-  Logger::LoggerPrint(NULL, LOGGER_LEVEL_INFO, __VA_ARGS__)
 
 /** Send trace information to serial output. */
 #define LOGGER_TRACE(...) \

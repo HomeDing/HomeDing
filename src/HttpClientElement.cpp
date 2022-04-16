@@ -75,7 +75,7 @@ void HttpClientElement::processHeader(String &key, String &value)
 {
   // TRACE(" =<%s>:<%s>", key.c_str(), value.c_str());
   if (key.equalsIgnoreCase("Content-Length")) {
-    _contentLength = atoi(value.c_str());
+    _contentLength = _atoi(value.c_str());
   }
 };
 

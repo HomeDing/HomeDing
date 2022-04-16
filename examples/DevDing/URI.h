@@ -14,9 +14,24 @@
 class URI {
 public:
   ~URI() {
-    if (buffer) free(buffer);
+    clear();
   };
 
+  // reset all class information and buffer 
+  void clear() {
+    protocol = nullptr;
+    user = nullptr;
+    passwd = nullptr;
+    server = nullptr;
+    port = 0;
+    path = nullptr;
+    query = nullptr;
+
+    if (buffer) free(buffer);
+    buffer = nullptr;
+  }
+
+  // parse the URI 
   void parse(const char *uri) {
     Serial.print("--uri=");
     Serial.println(uri);
@@ -74,13 +89,13 @@ public:
       }
     }
 
-    Serial.printf("--protocol=%s\n", protocol ? protocol : "-");
-    Serial.printf("--user=%s\n", user ? user : "-");
-    Serial.printf("--passwd=%s\n", passwd ? passwd : "-");
-    Serial.printf("--server=%s\n", server ? server : "-");
-    Serial.printf("--port=%d\n", port);
-    Serial.printf("--path=%s\n", path ? path : "-");
-    Serial.printf("--query=%s\n", query ? query : "-");
+    // Serial.printf("--protocol=%s\n", protocol ? protocol : "-");
+    // Serial.printf("--user=%s\n", user ? user : "-");
+    // Serial.printf("--passwd=%s\n", passwd ? passwd : "-");
+    // Serial.printf("--server=%s\n", server ? server : "-");
+    // Serial.printf("--port=%d\n", port);
+    // Serial.printf("--path=%s\n", path ? path : "-");
+    // Serial.printf("--query=%s\n", query ? query : "-");
   }
 
   char *protocol = nullptr;

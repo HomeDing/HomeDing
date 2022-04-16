@@ -226,7 +226,7 @@ int Element::_atopin(const char *value) {
 #if defined(ESP8266)
     char ch = tolower(*value);
     if (ch == 'd') {
-      int n = atoi(value + 1);  // scan a number right after the 'D'
+      int n = _atoi(value + 1);  // scan a number right after the 'D'
       if ((n >= 0) && (n <= 10))
         pin = GPIO[n];
 

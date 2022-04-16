@@ -122,7 +122,7 @@ void MQTTElement::_connect() {
     uint8_t retries = 3;
 
     do {
-      ret = client->connect("myDev", _uri.user, _uri.passwd);
+      ret = client->connect(_clientID.c_str(), _uri.user, _uri.passwd);
       if (!ret) {
         LOGGER_EERR("connect failed: %d", ret);
         client->disconnect();
@@ -162,8 +162,11 @@ bool MQTTElement::set(const char *name, const char *value) {
     _isSecure = (_stricmp(_uri.protocol, "mqtts") == 0);
 
     if (_uri.port == 0) {
-      _uri.port = _isSecure ? 8883 : 1883;
+      _uri.port = _isSecure ? 8883 : 1883; // use standard ports.
     }
+
+  } else if (_stricmp(name, "clientid") == 0) {
+    _clientID = value;
 
   } else if (_stricmp(name, "topic") == 0) {
     _topic = value;
@@ -174,11 +177,11 @@ bool MQTTElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "buffersize") == 0) {
     _bufferSize = _atoi(value);
 
-  } else if (_stricmp(name, "qos") == 0) {
-    _qos = _atoi(value);
-
   } else if (_stricmp(name, "retain") == 0) {
     _retain = _atob(value);
+
+  } else if (_stricmp(name, "qos") == 0) {
+    _qos = _atoi(value);
 
     // } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     // save the actions
@@ -197,6 +200,10 @@ bool MQTTElement::set(const char *name, const char *value) {
  */
 void MQTTElement::start() {
   TRACE("start()");
+
+  if (_clientID.isEmpty()) {
+    _clientID = _board->deviceName;
+  }
 
   // Verify parameters
   if (_uri.server == nullptr) {

@@ -46,7 +46,7 @@ void AddElement::_calc() {
   int newValue = 0;
 
   for (int n = 0; n < _inputs; n++) {
-    newValue += atoi(_inStringValues[n].c_str());
+    newValue += _atoi(_inStringValues[n].c_str());
   }
   _value = String(newValue);
   CalcElement::_calc();

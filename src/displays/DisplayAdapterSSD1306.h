@@ -53,7 +53,7 @@ public:
     display->dim(bright < 50);
   };
 
-  virtual void setColor(uint32_t col) override {
+  virtual void setColor(uint32_t UNUSED col) override {
     // LOGGER_JUSTINFO("no-setColor");
   };
 

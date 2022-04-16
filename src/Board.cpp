@@ -38,10 +38,10 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+#define NETTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -115,7 +115,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
 
 void Board::add(const char *id, Element *e) {
-  // TRACE("add(%s)", id);
+  TRACE("add(%s)", id);
   _addedElements++;
 
   strcpy(e->id, id);
@@ -169,7 +169,7 @@ void Board::_checkNetState() {
  * @brief Add and config the Elements defined in the config files.
  */
 void Board::_addAllElements() {
-  // TRACE("addAllElements()");
+  TRACE("addAllElements()");
   Element *_lastElem = NULL;  // last created Element
 
   MicroJson *mj = new MicroJson(
@@ -350,6 +350,7 @@ void Board::loop() {
   } else if (boardState == BOARDSTATE::LOAD) {
     // load all config files and create+start elements
     _addAllElements();
+    TRACE("Elements created.");
     if (!_elementList) {
       Logger::logger_level = LOGGER_LEVEL_TRACE;
       // no element defined, so allow configuration in any case.
@@ -752,10 +753,11 @@ void Board::dispatchAction(String action) {
         name = action.substring(pos1 + 1);
         value = "";
       }
+
       bool ret = target->set(name.c_str(), value.c_str());
+
       // also show action in log when target has trace loglevel
-      if ((Logger::logger_level < LOGGER_LEVEL_TRACE) && (target->loglevel >= LOGGER_LEVEL_TRACE))
-        Logger::LoggerPrint("sys", LOGGER_LEVEL_TRACE, "dispatch (%s)", action.c_str());
+      Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action (%s)", action.c_str());
 
       if (!ret)
         LOGGER_ERR("Event '%s' was not handled", action.c_str());
@@ -955,7 +957,7 @@ void Board::forEach(const char *prefix, ElementCallbackFn fCallback) {
 
 /**
  * @brief Reset/restart the board.
- * @param wipe is set to true to disconnect from WiFi and forget saved network credentials. 
+ * @param wipe is set to true to disconnect from WiFi and forget saved network credentials.
  */
 void Board::reboot(bool wipe) {
   LOGGER_INFO("reboot...");
@@ -971,7 +973,7 @@ void Board::reboot(bool wipe) {
 
 
 void Board::displayInfo(const char *text1, const char *text2) {
-  LOGGER_JUSTINFO("%s %s", text1, text2 ? text2 : "");
+  LOGGER_ALWAYS("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

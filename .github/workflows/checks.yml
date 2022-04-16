@@ -68,6 +68,7 @@ jobs:
             - name: Adafruit SH110X
             - name: Adafruit SSD1306
             - name: Adafruit GFX Library
+            - name: PubSubClient
           sketch-paths: |
             - 'examples/minimal'
             - 'examples/standard'
@@ -113,6 +114,7 @@ jobs:
             - name: Adafruit SH110X
             - name: Adafruit SSD1306
             - name: Adafruit GFX Library
+            - name: PubSubClient
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
           sketch-paths: |
             - 'examples/standard'

@@ -98,12 +98,14 @@ private:
 
   String _fingerprint;  ///< Server SHA1 fingerprint for secure connections
 
-  URI _uri; ///< used mqtt server.
-
-  bool _isSecure;  ///< establish secure connection
-  String _topic;   ///< topic path
-  int _qos;        ///< Quality Of Service for topic
-  bool _retain;    ///< retain value flag
+  // MQTT specific settings
+  
+  URI _uri;          ///< used mqtt server.
+  String _clientID;  ///< the clientID on the mqtt connection
+  bool _isSecure;    ///< establish secure connection
+  String _topic;     ///< topic path
+  int _qos;          ///< Quality Of Service for topic
+  bool _retain;      ///< retain value flag
 
   /**
    * @brief The _xAction holds the actions that is submitted when ...

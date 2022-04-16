@@ -9,6 +9,8 @@ It includes capabilities that can be combined by configuration providing a flexi
 
 [![Build Examples for ESP32](https://github.com/HomeDing/HomeDing/actions/workflows/buildESP32.yml/badge.svg)](https://github.com/HomeDing/HomeDing/actions/workflows/buildESP32.yml)
 
+[![arduino-library-badge](https://www.ardu-badge.com/badge/HomeDing.svg?)](https://www.ardu-badge.com/HomeDing)
+
 [![GitLicense](https://gitlicense.com/badge/HomeDing/HomeDing)](https://gitlicense.com/license/HomeDing/HomeDing)
 
 The library includes a complete ecosystem of IoT specific Elements that interact using events and actions.

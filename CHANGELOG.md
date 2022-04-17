@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.3] - unreleased
+
+### Changes / Enhancements
+
+New elements:
+
+* **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** -
+    supports sending values to MQTT servers based on actions.
+
+
+
 ## [0.8.2] - 2022-03-28
 
 The released version 0.7.2 was stable enough to do many implementations so many changes

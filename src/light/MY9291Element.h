@@ -27,7 +27,7 @@
 #if defined(ESP8266)
 
 #include <HomeDing.h>
-#include <LightElement.h>
+#include <light/LightElement.h>
 
 class MY9291Element : public LightElement
 {
@@ -65,9 +65,9 @@ public:
   virtual void start() override;
 
   /**
-   * @brief use the output function for a single color value.
+   * @brief direct function to show a color and brightness.
    */
-  virtual void setOutput(String value) override;
+  virtual void show(uint32_t color, int brightness);
 
 private:
     // _pins[0] is used as datapin

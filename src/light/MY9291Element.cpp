@@ -19,7 +19,7 @@
 
 #if defined(ESP8266)
 
-#include <sensors/MY9291Element.h>
+#include <light/MY9291Element.h>
 
 #include "my92xx.h"
 
@@ -85,31 +85,29 @@ void MY9291Element::start()
 {
   // Verify parameters
   if ((DI_PIN >= 0) && (DCKI_PIN >= 0)) {
-    Element::start();
     if (!_my92xx) {
       _my92xx = new my92xx(MY92XX_MODEL_MY9291, 1, DI_PIN, DCKI_PIN, MY92XX_COMMAND_DEFAULT);
     }
-    setOutput(value);
+    LightElement::start();
   } // if
 
 } // start()
 
 
-void MY9291Element::setOutput(String value)
+void MY9291Element::show(uint32_t color, int brightness)
 {
-  uint32_t col = _atoColor(value.c_str());
+  LightElement::show(color, brightness);
 
-  int white = (col & 0xFF000000) >> 24;
-  int red = (col & 0x00FF0000) >> 16;
-  int green = (col & 0x0000FF00) >> 8;
-  int blue = (col & 0x000000FF);
+  int white = (color & 0xFF000000) >> 24;
+  int red = (color & 0x00FF0000) >> 16;
+  int green = (color & 0x0000FF00) >> 8;
+  int blue = (color & 0x000000FF);
 
   _my92xx->setState(true);
-  _my92xx->setChannel(0, red * brightness / 100);
-  _my92xx->setChannel(1, green * brightness / 100);
-  _my92xx->setChannel(2, blue * brightness / 100);
+  _my92xx->setChannel(0, red * _brightness / 100);
+  _my92xx->setChannel(1, green * _brightness / 100);
+  _my92xx->setChannel(2, blue * _brightness / 100);
   _my92xx->setChannel(3, white);
-
   _my92xx->update();
 } // setOutput()
 

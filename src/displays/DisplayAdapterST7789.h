@@ -22,16 +22,22 @@
 
 class DisplayAdapterST7789 : public DisplayAdapterGFX {
 public:
-
   ~DisplayAdapterST7789() = default;
 
   bool start() override {
     // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
     // LOGGER_JUSTINFO("  pins: l:%d, r:%d", conf->lightPin, conf->resetPin);
     // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
-    // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK);
+    // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, miso:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiMISO, conf->spiCLK);
 
-    display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK, conf->resetPin);
+#if defined(ESP8266)
+    display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->resetPin);
+
+#elif defined(ESP32)
+    SPI.begin(conf->spiCLK, conf->spiMISO, conf->spiMOSI);
+    // display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK, conf->resetPin);
+    display = new (std::nothrow) Adafruit_ST7789(&SPI, conf->spiCS, conf->spiDC, conf->resetPin);
+#endif
 
     if (!display) {
       LOGGER_ERR("not found");

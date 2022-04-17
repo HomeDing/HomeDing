@@ -17,7 +17,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include "P9813Element.h"
+#include "light/P9813Element.h"
 
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
@@ -64,6 +64,7 @@ bool P9813Element::set(const char *name, const char *value)
 // send a 32-bit data set for P9813, can be used for start, stop and data.
 void P9813Element::sendPixelData(const uint32_t data)
 {
+  // LOGGER_JUSTINFO("sendPixelData(%d %d): 0x%08x", _pins[0], _pins[1], data);
   int datapin = _pins[0];
   int clkpin = _pins[1];
   uint32_t bits = data;
@@ -87,16 +88,17 @@ void P9813Element::sendPixelData(const uint32_t data)
 } // sendPixelData()
 
 
-void P9813Element::setOutput(String value)
-{
-  uint32_t col = _atoColor(value.c_str());
+void P9813Element::show(uint32_t color, int brightness) {
+  LightElement::show(color, brightness);
+
+  // LOGGER_JUSTINFO("show %s, %d", value, _brightness);
 
   // Start frame
   sendPixelData(0x00000000);
 
-  uint8_t blue =  (((col & 0x000000FF)) * brightness) / 100;
-  uint8_t green = (((col & 0x0000FF00) >> 8) * brightness) / 100;
-  uint8_t red =   (((col & 0x00FF0000) >> 16) * brightness) / 100;
+  uint8_t blue =  (((color & 0x000000FF)) * _brightness) / 100;
+  uint8_t green = (((color & 0x0000FF00) >> 8) * _brightness) / 100;
+  uint8_t red =   (((color & 0x00FF0000) >> 16) * _brightness) / 100;
 
   // send prefix
   uint32_t data = 0xC0000000; // first 2 bits (flag bits) set
@@ -115,7 +117,7 @@ void P9813Element::setOutput(String value)
 
   // Terminate frame
   sendPixelData(0x00000000);
-} // setOutput()
+}
 
 
 /**
@@ -123,7 +125,7 @@ void P9813Element::setOutput(String value)
  */
 void P9813Element::start()
 {
-  TRACE("start()");
+  TRACE("start(%d %d)", _pins[0], _pins[1]);
 
   // Verify parameters
   if ((_pins[0] >= 0) && (_pins[1] >= 0)) {
@@ -143,21 +145,5 @@ void P9813Element::pushState(
 {
   LightElement::pushState(callback);
 } // pushState()
-
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to P9813Element.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the P9813Element onto the ElementRegistry.
-bool P9813Element::registered =
-    ElementRegistry::registerElement("p9813", P9813Element::create);
-// #endif
 
 // End

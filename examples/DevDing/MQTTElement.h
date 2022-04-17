@@ -1,5 +1,5 @@
 /**
- * @file TemplateElement.h
+ * @file MQTTElement.h
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -8,20 +8,21 @@
  * More information on https://www.mathertel.de/Arduino
  *
  * Changelog:
- * * 30.01.2022 created by Matthias Hertel
+ * * 01.04.2022 created by Matthias Hertel
  */
 
 #pragma once
 
 #include <HomeDing.h>
+#include "URI.h"
 
 /**
- * @brief
+ * @brief This Element enables communication to MQTT servers to publish a single topic.
  */
-class TemplateElement : public Element {
+class MQTTElement : public Element {
 public:
   /**
-   * @brief Factory function to create a TemplateElement.
+   * @brief Factory function to create a MQTTElement.
    * @return Element*
    */
   static Element *create();
@@ -32,9 +33,9 @@ public:
   static bool registered;
 
   /**
-   * @brief Construct a new TemplateElement
+   * @brief Construct a new MQTTElement
    */
-  TemplateElement();
+  MQTTElement();
 
   /**
    * @brief initialize a new Element.
@@ -76,14 +77,38 @@ public:
     std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
+  void _setup();
+  void _connect();
+
   /**
    * @brief The actual value.
    */
-  int _value = 0;
+  String _value;
 
+  /**
+   * @brief The actual value.
+   */
+  bool _needSending;
+
+  int _bufferSize = 0;  // secure buffer size
+  int _errCount = 0;    ///< counting errors to stop communication after too many.
+
+  WiFiClient *_client;  ///< Secure or unsecure client
+  class MQTTElementImpl *_impl;
+
+  String _fingerprint;  ///< Server SHA1 fingerprint for secure connections
+
+  // MQTT specific settings
+  
+  URI _uri;          ///< used mqtt server.
+  String _clientID;  ///< the clientID on the mqtt connection
+  bool _isSecure;    ///< establish secure connection
+  String _topic;     ///< topic path
+  int _qos;          ///< Quality Of Service for topic
+  bool _retain;      ///< retain value flag
 
   /**
    * @brief The _xAction holds the actions that is submitted when ...
    */
-  String _xAction;
+  // String _xAction;
 };

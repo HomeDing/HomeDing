@@ -38,10 +38,10 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+#define NETTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -115,7 +115,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
 
 void Board::add(const char *id, Element *e) {
-  // TRACE("add(%s)", id);
+  TRACE("add(%s)", id);
   _addedElements++;
 
   strcpy(e->id, id);
@@ -169,7 +169,7 @@ void Board::_checkNetState() {
  * @brief Add and config the Elements defined in the config files.
  */
 void Board::_addAllElements() {
-  // TRACE("addAllElements()");
+  TRACE("addAllElements()");
   Element *_lastElem = NULL;  // last created Element
 
   MicroJson *mj = new MicroJson(
@@ -350,6 +350,7 @@ void Board::loop() {
   } else if (boardState == BOARDSTATE::LOAD) {
     // load all config files and create+start elements
     _addAllElements();
+    TRACE("Elements created.");
     if (!_elementList) {
       Logger::logger_level = LOGGER_LEVEL_TRACE;
       // no element defined, so allow configuration in any case.
@@ -403,11 +404,11 @@ void Board::loop() {
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
-      NETTRACE("No Net Config");
+      LOGGER_JUSTINFO("No Net Config");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
     } else if (_resetCount == 2) {
-      NETTRACE("Reset*2");
+      LOGGER_JUSTINFO("Reset*2");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
     } else if (WiFi.SSID().length() || netpass.length()) {
@@ -476,7 +477,7 @@ void Board::loop() {
 
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
-      TRACE("sysbutton %d pressed %d", sysButton, digitalRead(sysButton));
+      LOGGER_JUSTINFO("sysbutton %d pressed %d", sysButton, digitalRead(sysButton));
       _newState(BOARDSTATE::STARTCAPTIVE);
     }
 
@@ -752,10 +753,11 @@ void Board::dispatchAction(String action) {
         name = action.substring(pos1 + 1);
         value = "";
       }
+
       bool ret = target->set(name.c_str(), value.c_str());
+
       // also show action in log when target has trace loglevel
-      if ((Logger::logger_level < LOGGER_LEVEL_TRACE) && (target->loglevel >= LOGGER_LEVEL_TRACE))
-        Logger::LoggerPrint("sys", LOGGER_LEVEL_TRACE, "dispatch (%s)", action.c_str());
+      Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action (%s)", action.c_str());
 
       if (!ret)
         LOGGER_ERR("Event '%s' was not handled", action.c_str());
@@ -906,6 +908,22 @@ Element *Board::getElement(const char *elementType) {
 }  // getElement()
 
 
+/**
+ * @brief Get a Element by typename/id.
+ */
+Element *Board::getElementById(const char *elementId) {
+  TRACE("getElementById(%s)", elementId);
+
+  Element *l = _elementList;
+  while (l != NULL) {
+    if (Element::_stricmp(l->id, elementId) == 0) { break; }
+    l = l->next;
+  }  // while
+  // TRACE("found: 0x%08x", l);
+  return (l);
+}  // getElementById()
+
+
 Element *Board::getElement(const char *elementType, const char *elementName) {
   String tn = elementType;
   tn.concat('/');
@@ -937,6 +955,10 @@ void Board::forEach(const char *prefix, ElementCallbackFn fCallback) {
 }  // forEach()
 
 
+/**
+ * @brief Reset/restart the board.
+ * @param wipe is set to true to disconnect from WiFi and forget saved network credentials.
+ */
 void Board::reboot(bool wipe) {
   LOGGER_INFO("reboot...");
   if (wipe)
@@ -951,7 +973,7 @@ void Board::reboot(bool wipe) {
 
 
 void Board::displayInfo(const char *text1, const char *text2) {
-  LOGGER_JUSTINFO("%s %s", text1, text2 ? text2 : "");
+  LOGGER_ALWAYS("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

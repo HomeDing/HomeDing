@@ -20,7 +20,7 @@
 #define P9813ELEMENT_H
 
 #include <HomeDing.h>
-#include <LightElement.h>
+#include <light/LightElement.h>
 
 /**
  * @brief The P8913Element implements communication with P9813 LED driver chips to implement RGB lights.
@@ -58,9 +58,9 @@ public:
   virtual void start() override;
 
   /**
-   * @brief use the output function for a single color value.
+   * @brief direct function to show a color and brightness.
    */
-  virtual void setOutput(String value) override;
+  virtual void show(uint32_t color, int brightness);
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -76,5 +76,11 @@ private:
   void sendPixelData(const uint32_t data);
 
 };
+
+#ifdef HOMEDING_REGISTER
+// Register the P9813Element onto the ElementRegistry.
+bool P9813Element::registered =
+    ElementRegistry::registerElement("p9813", P9813Element::create);
+#endif
 
 #endif

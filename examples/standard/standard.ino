@@ -79,6 +79,8 @@
 #define HOMEDING_INCLUDE_NEOPIXEL
 #define HOMEDING_INCLUDE_MY9291
 
+// Network Services
+#define HOMEDING_INCLUDE_MQTT
 #define HOMEDING_INCLUDE_WEATHERFEED
 
 #include <Arduino.h>

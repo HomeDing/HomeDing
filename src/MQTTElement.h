@@ -95,3 +95,11 @@ private:
   // implementation details
   class MQTTElementImpl *_impl;
 };
+
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+// Register the MQTTElement onto the ElementRegistry.
+bool MQTTElement::registered =
+  ElementRegistry::registerElement("mqtt", MQTTElement::create);
+#endif

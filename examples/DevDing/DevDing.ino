@@ -86,6 +86,8 @@
 #define HOMEDING_INCLUDE_NEOPIXEL
 #define HOMEDING_INCLUDE_MY9291
 
+// Network Services
+#define HOMEDING_INCLUDE_MQTT
 #define HOMEDING_INCLUDE_WEATHERFEED
 
 #include <Arduino.h>
@@ -123,6 +125,7 @@ void setup(void) {
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
   delay(3000);
+  Serial.println();
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif

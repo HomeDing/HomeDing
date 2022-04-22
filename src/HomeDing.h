@@ -210,6 +210,10 @@ extern Board homeding;
 #include <RemoteElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_MQTT
+#include <MQTTElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_WEATHERFEED
 #include <WeatherFeedElement.h>
 #endif

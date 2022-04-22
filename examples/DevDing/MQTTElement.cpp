@@ -14,27 +14,61 @@
 #include <HomeDing.h>
 
 #include "MQTTElement.h"
+#include "URI.h"
 
 #include <PubSubClient.h>
 
-
-#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
-
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Define implementation class (data only) ===== */
+
+#define MAX_ERRORS 6
+#define RETRY_TIME 5000
 
 class MQTTElementImpl {
 public:
   /** States of the Network Connection */
   enum STATE : int {
     DISCONNECTED = 0,
-    INITIALIZED = 10,
+    INITIALIZED = 10,  // can connect / reconnect
     CONNECTED = 11,
     UNUSABLE = 99
   };
 
-  PubSubClient *_mqttClient;  ///< mqtt specific communication using _client connection.
   STATE state = STATE::DISCONNECTED;
+
+  /**
+   * @brief The actual values to be published.
+   * using a list of topic=value like 'temperature=23.77,humidity=55'
+   * or a single value using "value=nnnn"
+   */
+  String _value;
+
+  /**
+   * @brief The _valeAction holds the actions that is submitted when subscription data has arrived.
+   * It can use the $k (key) and $v (value) placeholders to allow wildcard subscriptions like `device/+`.
+   */
+  String _valueAction;
+
+  // MQTT specific settings
+
+  URI uri;                ///< used mqtt server.
+  String clientID;        ///< the clientID on the mqtt connection
+  bool _isSecure;         ///< establish secure connection
+  int bufferSize = 0;     ///< secure buffer size
+  String fingerprint;     ///< Server SHA1 fingerprint for secure connections
+  String publishTopic;    ///< topic path for publishing (without wildcard)
+  String subscribeTopic;  ///< topic path for subscription
+  bool hasWildcard;       ///< `+` wildcard in publish topic in use
+  int qos;                ///< Quality of Service for subscribed topic
+  bool retain;            ///< retain value flag for published values
+
+  // MQTT implementation
+
+  WiFiClient *client;        ///< Secure or unsecure client
+  PubSubClient *mqttClient;  ///< mqtt specific communication using client connection.
+  int errCount = 0;          ///< counting errors to stop communication after too many.
+  unsigned long nextConnect = 0;
 };
 
 
@@ -53,7 +87,6 @@ Element *MQTTElement::create() {
 
 MQTTElement::MQTTElement() {
   _impl = new MQTTElementImpl();
-  _needSending = false;
 }
 
 
@@ -64,20 +97,22 @@ void MQTTElement::init(Board *board) {
 }  // init()
 
 
-
+/**
+ * @brief Setup connection parameters and registrations for the given server.
+ */
 void MQTTElement::_setup() {
-  // Secure mode preparations
+  TRACE("setup()");
 
   // first time initialzation of client
-  if (_isSecure) {
+  if (_impl->_isSecure) {
     WiFiClientSecure *secClient;
 
     TRACE("create secure client");
     secClient = new WiFiClientSecure();
 
     // if a fingerprint signature is given, check in SSL cert of server
-    if (!_fingerprint.isEmpty()) {
-      secClient->setFingerprint(_fingerprint.c_str());
+    if (!_impl->fingerprint.isEmpty()) {
+      secClient->setFingerprint(_impl->fingerprint.c_str());
     } else {
       secClient->setInsecure();
     }
@@ -85,28 +120,38 @@ void MQTTElement::_setup() {
     // probe for supported TLS buffer size
     // see https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/bearssl-client-secure-class.html
     int probeSize = 512;  // start with smallest possible buffer
-    while ((_bufferSize == 0) && (probeSize <= 4096)) {
-      bool b = secClient->probeMaxFragmentLength(_uri.server, _uri.port, probeSize);
+    while ((_impl->bufferSize == 0) && (probeSize <= 4096)) {
+      bool b = secClient->probeMaxFragmentLength(_impl->uri.server, _impl->uri.port, probeSize);
       TRACE("probeSize(%d)=%d", probeSize, b);
       if (b) {
-        _bufferSize = probeSize;
+        _impl->bufferSize = probeSize;
       } else {
         probeSize = probeSize * 2;
       }
     }
-    if (_bufferSize) {
-      secClient->setBufferSizes(_bufferSize, 512);
-      _client = secClient;
+    if (_impl->bufferSize) {
+      secClient->setBufferSizes(_impl->bufferSize, 512);
+      _impl->client = secClient;
     }
 
   } else {
     TRACE("create non-secure client");
-    _client = new WiFiClient();
+    _impl->client = new WiFiClient();
   }
 
-  if (_client) {
-    _impl->_mqttClient = new PubSubClient(*_client);
-    _impl->_mqttClient->setServer(_uri.server, _uri.port);
+  if (_impl->client) {
+    _impl->mqttClient = new PubSubClient(*_impl->client);
+    _impl->mqttClient->setServer(_impl->uri.server, _impl->uri.port);
+
+    if (!_impl->subscribeTopic.isEmpty()) {
+      _impl->mqttClient->setCallback([this](char *topic, byte *payload, unsigned int length) {
+        char msg[length + 2];
+        memcpy(msg, payload, length);
+        msg[length] = '\0';
+        this->_received(String(topic), String(msg));
+      });
+    }
+
     _impl->state = MQTTElementImpl::INITIALIZED;
   } else {
     _impl->state = MQTTElementImpl::UNUSABLE;
@@ -114,81 +159,109 @@ void MQTTElement::_setup() {
 }
 
 
+/**
+ * @brief Connect and re-connect to the server. Subscribe in case of subscriptions required.
+ */
 void MQTTElement::_connect() {
-  PubSubClient *client = _impl->_mqttClient;
+  PubSubClient *client = _impl->mqttClient;
+  unsigned long now = millis();
 
-  if (_impl->state == MQTTElementImpl::INITIALIZED) {
-    int8_t ret;
-    uint8_t retries = 3;
+  if (now < _impl->nextConnect) {
+    // must wait...
 
-    do {
-      ret = client->connect(_clientID.c_str(), _uri.user, _uri.passwd);
-      if (!ret) {
-        LOGGER_EERR("connect failed: %d", ret);
-        client->disconnect();
-        delay(5000);  // wait 5 seconds
-        retries--;
-      }
-    } while ((!ret) && (retries >= 0));
+  } else {
+    TRACE("connect...");
 
+    // try once only.
+    int8_t ret = client->connect(_impl->clientID.c_str(), _impl->uri.user, _impl->uri.passwd);
     if (!ret) {
       client->disconnect();
-      Element::term();
+      _impl->errCount++;                      // will case termination after too many errors
+      _impl->nextConnect = now + RETRY_TIME;  // will case retry some time.
+      LOGGER_EERR("connect failed (%d)", _impl->errCount);
 
     } else {
-      LOGGER_ETRACE("connected.");
+      TRACE("connected.");
       _impl->state = MQTTElementImpl::CONNECTED;
+
+      if (!_impl->subscribeTopic.isEmpty()) {
+        TRACE("subscribe to %s", _impl->subscribeTopic.c_str());
+        client->subscribe(_impl->subscribeTopic.c_str(), _impl->qos);
+      }
     }
   }
-}
+}  // connect()
+
+
+/**
+ * @brief  A message was received by the subscription.
+ */
+void MQTTElement::_received(String topic, String payload) {
+  LOGGER_ETRACE("Received: %s:%s", topic.c_str(), payload.c_str());
+
+  String tmp = _impl->_valueAction;
+  tmp.replace("$t", topic);
+  int n = topic.lastIndexOf('/');
+  tmp.replace("$k", topic.substring(n + 1));
+
+  _board->dispatch(tmp, payload);
+}  // _received
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool MQTTElement::set(const char *name, const char *value) {
+  TRACE("set %s=%s", name, value);
   bool ret = true;
 
   // ===== actions
 
-  if (_stricmp(name, "value") == 0) {
-    _value = value;
-    _needSending = true;
+  if (Element::set(name, value)) {
+    // done.
+
+  } else if ((active && _impl->hasWildcard) || (_stricmp(name, "value") == 0)) {
+    // action is treated as data topics
+    if (!_impl->_value.isEmpty()) { _impl->_value.concat(','); }
+    _impl->_value.concat(name);
+    _impl->_value.concat('=');
+    _impl->_value.concat(value);
 
     // ===== configuration properties
 
   } else if (_stricmp(name, "server") == 0) {
-    _uri.parse(value);
-    _isSecure = (_stricmp(_uri.protocol, "mqtts") == 0);
-
-    if (_uri.port == 0) {
-      _uri.port = _isSecure ? 8883 : 1883; // use standard ports.
+    _impl->uri.parse(value);
+    _impl->_isSecure = (_stricmp(_impl->uri.protocol, "mqtts") == 0);
+    if (_impl->uri.port == 0) {
+      _impl->uri.port = _impl->_isSecure ? 8883 : 1883;  // use standard ports.
     }
 
   } else if (_stricmp(name, "clientid") == 0) {
-    _clientID = value;
+    _impl->clientID = value;
 
-  } else if (_stricmp(name, "topic") == 0) {
-    _topic = value;
+  } else if (_stricmp(name, "publish") == 0) {
+    _impl->publishTopic = value;
+
+  } else if (_stricmp(name, "subscribe") == 0) {
+    _impl->subscribeTopic = value;
 
   } else if (_stricmp(name, "fingerprint") == 0) {
-    _fingerprint = value;
+    _impl->fingerprint = value;
 
   } else if (_stricmp(name, "buffersize") == 0) {
-    _bufferSize = _atoi(value);
+    _impl->bufferSize = _atoi(value);
 
   } else if (_stricmp(name, "retain") == 0) {
-    _retain = _atob(value);
+    _impl->retain = _atob(value);
 
   } else if (_stricmp(name, "qos") == 0) {
-    _qos = _atoi(value);
+    _impl->qos = _atoi(value);
 
-    // } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-    // save the actions
-    // _xAction = value;
+  } else if (_stricmp(name, "onValue") == 0) {
+    _impl->_valueAction = value;
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
 
   return (ret);
@@ -201,17 +274,25 @@ bool MQTTElement::set(const char *name, const char *value) {
 void MQTTElement::start() {
   TRACE("start()");
 
-  if (_clientID.isEmpty()) {
-    _clientID = _board->deviceName;
+  if (_impl->clientID.isEmpty()) {
+    _impl->clientID = _board->deviceName;
   }
 
   // Verify parameters
-  if (_uri.server == nullptr) {
+  if (_impl->uri.server == nullptr) {
     LOGGER_EERR("missing `server` parameter.");
-  } else if (_topic.isEmpty()) {
-    LOGGER_EERR("missing `feed` parameter.");
+
+  } else if (_impl->publishTopic.isEmpty() && _impl->subscribeTopic.isEmpty()) {
+    LOGGER_EERR("missing a `topic` parameter.");
+
   } else {
     Element::start();
+    _impl->hasWildcard = (_impl->publishTopic.endsWith("/+"));
+    if (_impl->hasWildcard) {
+      // remove last '+' character
+      _impl->publishTopic.remove(_impl->publishTopic.length() - 1);
+    }
+
     _impl->state = MQTTElementImpl::STATE::DISCONNECTED;
   }
 }  // start()
@@ -219,46 +300,60 @@ void MQTTElement::start() {
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
+ * Do only one activity at a time no to block too long.
  */
 void MQTTElement::loop() {
-  PubSubClient *client = _impl->_mqttClient;
+  PubSubClient *client = _impl->mqttClient;
 
   if (client)
     client->loop();
 
-  if (_needSending) {
-    TRACE("loop: %s", _value.c_str());
+  if (!_impl->_value.isEmpty()) {
+    // TRACE("loop: %s", _impl->_value.c_str());
 
-    if (_errCount > 12) {
+    if (_impl->errCount > MAX_ERRORS) {
       // dump, stop network activities...
-      _needSending = false;
+      LOGGER_EERR("too many errors");
+      term();
 
     } else if (_impl->state == MQTTElementImpl::DISCONNECTED) {
-      TRACE("setup...");
       _setup();
 
     } else if (_impl->state == MQTTElementImpl::CONNECTED && (!client->connected())) {
-      TRACE("re-connect...");
       _impl->state = MQTTElementImpl::INITIALIZED;
 
     } else if (_impl->state == MQTTElementImpl::INITIALIZED) {
-      TRACE("connect...");
       _connect();
 
     } else if (_impl->state == MQTTElementImpl::CONNECTED) {
-      LOGGER_ETRACE("publish %s='%s'", _topic.c_str(), _value.c_str());
-      bool done = client->publish(_topic.c_str(), _value.c_str(), _retain);
+      // extract first item with (key '=' value)
+      String item = Element::popItemValue(_impl->_value);
 
-      if (done) {
-        TRACE("OK!");
-        _errCount = -1;
+      int n = item.indexOf('=');
+      String k;
+      String v = item.substring(n + 1);
+
+      if (_impl->hasWildcard) {
+        // build topic name
+        k = _impl->publishTopic + item.substring(0, n);
       } else {
-        TRACE("Failed");
+        // publishTopic has full topic name
+        k = _impl->publishTopic;
       }
-      _needSending = false;
+
+      LOGGER_ETRACE("publish %s %s", k.c_str(), v.c_str());
+      bool done = client->publish(k.c_str(), v.c_str(), _impl->retain);
+
+      if (!done) {
+        LOGGER_EERR("failed.");
+        _impl->errCount++;
+      } else {
+
+        TRACE("OK!");
+        _impl->errCount = 0;
+      }
     }  // if
 
-    _errCount++;
   }  // if
 }  // loop()
 
@@ -269,7 +364,7 @@ void MQTTElement::loop() {
 void MQTTElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _value.c_str());
+  callback(PROP_VALUE, _impl->_value.c_str());
 }  // pushState()
 
 

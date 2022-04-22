@@ -9,12 +9,12 @@
  *
  * Changelog:
  * * 01.04.2022 created by Matthias Hertel
+ * * 22.04.2022 running version with publish & subscribe
  */
 
 #pragma once
 
 #include <HomeDing.h>
-#include "URI.h"
 
 /**
  * @brief This Element enables communication to MQTT servers to publish a single topic.
@@ -77,38 +77,21 @@ public:
     std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
+  /**
+   * @brief Setup connection parameters and registrations for the given server.
+   */
   void _setup();
+
+  /**
+   * @brief Connect and re-connect to the server. Subscribe in case of subscriptions required.
+   */
   void _connect();
 
   /**
-   * @brief The actual value.
+   * @brief  A message was received by the subscription.
    */
-  String _value;
+  void _received(String topic, String payload);
 
-  /**
-   * @brief The actual value.
-   */
-  bool _needSending;
-
-  int _bufferSize = 0;  // secure buffer size
-  int _errCount = 0;    ///< counting errors to stop communication after too many.
-
-  WiFiClient *_client;  ///< Secure or unsecure client
+  // implementation details
   class MQTTElementImpl *_impl;
-
-  String _fingerprint;  ///< Server SHA1 fingerprint for secure connections
-
-  // MQTT specific settings
-  
-  URI _uri;          ///< used mqtt server.
-  String _clientID;  ///< the clientID on the mqtt connection
-  bool _isSecure;    ///< establish secure connection
-  String _topic;     ///< topic path
-  int _qos;          ///< Quality Of Service for topic
-  bool _retain;      ///< retain value flag
-
-  /**
-   * @brief The _xAction holds the actions that is submitted when ...
-   */
-  // String _xAction;
 };

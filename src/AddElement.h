@@ -1,22 +1,21 @@
 /**
  * @file AddElement.h
  * @brief Element that adds given input values.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 13.10.2021 created by Matthias Hertel
  */
 
-#ifndef ADDELEMENT_H
-#define ADDELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 #include <CalcElement.h>
@@ -52,8 +51,5 @@ protected:
 #ifdef HOMEDING_REGISTER
 // Register the AddElement in the ElementRegistry.
 bool AddElement::registered =
-    ElementRegistry::registerElement("add", AddElement::create);
-#endif
-
-
+  ElementRegistry::registerElement("add", AddElement::create);
 #endif

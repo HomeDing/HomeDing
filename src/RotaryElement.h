@@ -15,8 +15,7 @@
  * * 15.09.2018 created by Matthias Hertel
  */
 
-#ifndef RotaryElement_H
-#define RotaryElement_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -105,6 +104,4 @@ private:
 // Register the RotaryElement onto the ElementRegistry.
 bool RotaryElement::registered =
     ElementRegistry::registerElement("rotary", RotaryElement::create);
-#endif
-
 #endif

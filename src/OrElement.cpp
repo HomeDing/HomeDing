@@ -32,8 +32,7 @@ Element *OrElement::create() {
 
 /* ===== Element functions ===== */
 
-void OrElement::start() {
-  CalcElement::start();
+OrElement::OrElement() {
   _type = DATATYPE::BOOLEAN;
 }
 
@@ -41,18 +40,17 @@ void OrElement::start() {
  * @brief Give some processing time to the Element to check for next actions.
  */
 void OrElement::_calc() {
-  bool newValue = (_inputs > 0); // out = false when no inbound value is given.
+  bool newValue = false; // out = false when no inbound value is given.
 
-
-  for (int n = 0; n < _inputs; n++) {
-    newValue = (newValue || _atob(_inStringValues[n].c_str()));
+  // must not continue looping when newValue == true.
+  for (int n = 0; (! newValue) && (n < _inputs); n++) {
+    newValue = _atob(_inStringValues[n].c_str());
   }
 
   if (_invert) {
     newValue = !newValue;
   }
-  _value = String(newValue);
-  CalcElement::_calc();
+  _value = newValue;
 } // loop()
 
 

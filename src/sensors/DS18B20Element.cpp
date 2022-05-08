@@ -20,6 +20,24 @@
 
 #include <sensors/DS18B20Element.h>
 
+#include <OneWire.h>
+
+class DS18B20ElementImpl {
+public:
+  OneWire *oneWire;
+
+  int pin = -1;
+  uint8_t addr[8];
+
+  /** time in msecs when data is ready */
+  unsigned long dataIsReady;
+
+  /**
+   * @brief The tempAction is emitted when a new temp was read from the DHT
+   * sensor.
+   */
+  String tempAction;
+};
 
 /**
  * @brief static factory function to create a new DS18B20Element
@@ -31,6 +49,14 @@ Element *DS18B20Element::create() {
 
 
 /**
+ * @brief Construct a new DS18B20Element
+ */
+DS18B20Element::DS18B20Element() {
+  _impl = new DS18B20ElementImpl();
+}
+
+
+/**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DS18B20Element::set(const char *name, const char *value) {
@@ -38,11 +64,11 @@ bool DS18B20Element::set(const char *name, const char *value) {
 
   if (!ret) {
     if (_stricmp(name, PROP_PIN) == 0) {
-      _pin = _atopin(value);
+      _impl->pin = _atopin(value);
       ret = true;
 
     } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
-      _tempAction = value;
+      _impl->tempAction = value;
       ret = true;
     }  // if
   }    // if
@@ -55,13 +81,13 @@ bool DS18B20Element::set(const char *name, const char *value) {
  */
 void DS18B20Element::start() {
   // TRACE("start()");
-  if (_pin >= 0) {
-    _oneWire = new (std::nothrow) OneWire(_pin);
+  if (_impl->pin >= 0) {
+    _impl->oneWire = new (std::nothrow) OneWire(_impl->pin);
 
-    if (_oneWire) {
+    if (_impl->oneWire) {
       // search first device
-      _oneWire->reset_search();
-      if (_oneWire->search(_addr)) {
+      _impl->oneWire->reset_search();
+      if (_impl->oneWire->search(_impl->addr)) {
         // addr[0] should be 0x28 on a DS18B20 sensor.
         // TRACE("Address: %02x%02x.%02x%02x.%02x%02x.%02x%02x", _addr[0], _addr[1], _addr[2], _addr[3], _addr[4], _addr[5], _addr[6], _addr[7]);
         SensorElement::start();
@@ -85,26 +111,26 @@ bool DS18B20Element::getProbe(String &values) {
   bool newData = false;
 
 
-  if (_isReady == 0) {
+  if (_impl->dataIsReady == 0) {
     // start conversion now
     // LOGGER_EINFO("convert");
-    _oneWire->reset();
-    _oneWire->select(_addr);
-    _oneWire->write(COMMAND_CONVERT, 1);  // start conversion
-    _isReady = millis() + CONVERT_MSECS;
+    _impl->oneWire->reset();
+    _impl->oneWire->select(_impl->addr);
+    _impl->oneWire->write(COMMAND_CONVERT, 1);  // start conversion
+    _impl->dataIsReady = millis() + CONVERT_MSECS;
 
-  } else if (_isReady < millis()) {
+  } else if (_impl->dataIsReady < millis()) {
     // fetch data from sensor
     // LOGGER_EINFO("fetch");
     uint8_t data[12];
 
-    _oneWire->reset();
-    _oneWire->select(_addr);
-    _oneWire->write(COMMAND_READ_SCRATCHPAD);  // Read Scratchpad
+    _impl->oneWire->reset();
+    _impl->oneWire->select(_impl->addr);
+    _impl->oneWire->write(COMMAND_READ_SCRATCHPAD);  // Read Scratchpad
 
     // read all 9 scratchpad bytes
     for (int i = 0; i < 9; i++) {
-      data[i] = _oneWire->read();
+      data[i] = _impl->oneWire->read();
     }
     // TRACE("Data: %02x %02x %02x %02x", data[0], data[1], data[2], data[3]);
 
@@ -114,7 +140,7 @@ bool DS18B20Element::getProbe(String &values) {
     // TRACE("raw temperature: %d", temp);
     values = String((float)temp / 16, 2);
 
-    _isReady = 0;
+    _impl->dataIsReady = 0;
     newData = true;
   }  // if
 
@@ -125,7 +151,7 @@ bool DS18B20Element::getProbe(String &values) {
 void DS18B20Element::sendData(String &values) {
   // dispatch value.
   // TRACE("sending %s", values.c_str());
-  _board->dispatch(_tempAction, values);
+  _board->dispatch(_impl->tempAction, values);
 }  // sendData()
 
 

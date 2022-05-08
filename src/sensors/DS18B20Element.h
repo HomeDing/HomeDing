@@ -1,8 +1,8 @@
 /**
  * @file DS18B20Element .h
- * 
+ *
  * @brief Optional Input Element for the HomeDing Library to read DS18B20 sensors and create actions.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -22,14 +22,12 @@
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
-#include <OneWire.h>
-
 /**
  * @brief The DS18B20Element  is an special Element that creates actions based on a
  * digital IO signal.
  */
-class DS18B20Element : public SensorElement
-{
+class DS18B20Element : public SensorElement {
+
 public:
   /**
    * @brief Factory function to create a DS18B20Element .
@@ -42,6 +40,10 @@ public:
    */
   static bool registered;
 
+  /**
+   * @brief Construct a new DS18B20Element
+   */
+  DS18B20Element();
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -64,33 +66,23 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
   virtual bool getProbe(String &values);
   virtual void sendData(String &values);
 
 private:
-  int _pin = -1;
-  OneWire *_oneWire;
-  uint8_t _addr[8];
-
-  /** time in msecs when data is ready */
-  unsigned long _isReady;
-
-  /**
-   * @brief The _tempAction is emitted when a new temp was read from the DHT
-   * sensor.
-   */
-  String _tempAction;
+  // implementation details
+  class DS18B20ElementImpl *_impl;
 };
 
 
 #ifdef HOMEDING_REGISTER
 // Register the DS18B20Element  in the ElementRegistry.
 bool DS18B20Element ::registered =
-    ElementRegistry::registerElement("ds18b20", DS18B20Element ::create);
+  ElementRegistry::registerElement("ds18b20", DS18B20Element ::create);
 #endif
 
 
-#endif // DS18B20ELEMENT_H
+#endif  // DS18B20ELEMENT_H

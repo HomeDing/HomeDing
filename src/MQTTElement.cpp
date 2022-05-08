@@ -14,11 +14,13 @@
 #include <HomeDing.h>
 
 #include <MQTTElement.h>
-#include <URI.h>
 
+#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 
-#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
+#include <URI.h>
+
+#define TRACE(...)  // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Define implementation class (data only) ===== */
 
@@ -58,6 +60,8 @@ public:
   int bufferSize = 0;     ///< secure buffer size
   String fingerprint;     ///< Server SHA1 fingerprint for secure connections
   String publishTopic;    ///< topic path for publishing (without wildcard)
+  String lastWill;        ///< last Will for publishing
+  String lastWillTopic;   ///> topic for last will
   String subscribeTopic;  ///< topic path for subscription
   bool hasWildcard;       ///< `+` wildcard in publish topic in use
   int qos;                ///< Quality of Service for subscribed topic
@@ -112,13 +116,16 @@ void MQTTElement::_setup() {
 
     // if a fingerprint signature is given, check in SSL cert of server
     if (!_impl->fingerprint.isEmpty()) {
+#if defined(ESP8266)
       secClient->setFingerprint(_impl->fingerprint.c_str());
+#endif
     } else {
       secClient->setInsecure();
     }
 
     // probe for supported TLS buffer size
     // see https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/bearssl-client-secure-class.html
+#if defined(ESP8266)
     int probeSize = 512;  // start with smallest possible buffer
     while ((_impl->bufferSize == 0) && (probeSize <= 4096)) {
       bool b = secClient->probeMaxFragmentLength(_impl->uri.server, _impl->uri.port, probeSize);
@@ -133,6 +140,10 @@ void MQTTElement::_setup() {
       secClient->setBufferSizes(_impl->bufferSize, 512);
       _impl->client = secClient;
     }
+
+#elif defined(ESP32)
+    // secClient->setBufferSizes(512, 512);
+#endif
 
   } else {
     TRACE("create non-secure client");
@@ -173,13 +184,18 @@ void MQTTElement::_connect() {
     TRACE("connect...");
 
     // try once only.
-    int8_t ret = client->connect(_impl->clientID.c_str(), _impl->uri.user, _impl->uri.passwd);
+    int8_t ret;
+    if (_impl->lastWill.isEmpty()) {
+      ret = client->connect(_impl->clientID.c_str(), _impl->uri.user, _impl->uri.passwd);
+    } else {
+      ret = client->connect(_impl->clientID.c_str(), _impl->uri.user, _impl->uri.passwd, _impl->publishTopic.c_str(), _impl->qos, true, _impl->lastWill.c_str());
+    }
+
     if (!ret) {
       client->disconnect();
       _impl->errCount++;                      // will case termination after too many errors
       _impl->nextConnect = now + RETRY_TIME;  // will case retry some time.
       LOGGER_EERR("connect failed (%d)", _impl->errCount);
-
     } else {
       TRACE("connected.");
       _impl->state = MQTTElementImpl::CONNECTED;
@@ -242,6 +258,12 @@ bool MQTTElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "publish") == 0) {
     _impl->publishTopic = value;
 
+  } else if (_stricmp(name, "lastWillTopic") == 0) {
+    _impl->lastWillTopic = value;
+
+  } else if (_stricmp(name, "lastwill") == 0) {
+    _impl->lastWill = value;
+
   } else if (_stricmp(name, "subscribe") == 0) {
     _impl->subscribeTopic = value;
 
@@ -291,6 +313,10 @@ void MQTTElement::start() {
     if (_impl->hasWildcard) {
       // remove last '+' character
       _impl->publishTopic.remove(_impl->publishTopic.length() - 1);
+    }
+
+    if (_impl->lastWillTopic.isEmpty()) {
+      _impl->lastWillTopic = _impl->publishTopic;
     }
 
     _impl->state = MQTTElementImpl::STATE::DISCONNECTED;

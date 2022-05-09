@@ -39,6 +39,7 @@ jobs:
           libraries: |
             - source-path: ./
             - name: OneWire
+            - name: DallasTemperature
             - name: RotaryEncoder
             - name: DHTNEW
             - name: my92xx

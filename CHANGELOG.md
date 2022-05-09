@@ -11,7 +11,8 @@ New elements:
 * **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** -
     supports sending values to MQTT servers based on actions.
 
-
+* **DallasElement** is an enhanced version of the former Ds18B20Element
+now supporting different sensors using the OneWire protocol.
 
 ## [0.8.2] - 2022-03-28
 

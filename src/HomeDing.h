@@ -294,8 +294,8 @@ extern Board homeding;
 #include <RotaryElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_DS18B20
-#include <sensors/DS18B20Element.h>
+#ifdef HOMEDING_INCLUDE_DALLAS
+#include <sensors/DallasElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_BMP280

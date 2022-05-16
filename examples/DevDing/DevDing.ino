@@ -59,6 +59,7 @@
 #define HOMEDING_INCLUDE_DALLAS
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_SHT20
+#define HOMEDING_INCLUDE_BH1750
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -78,7 +79,10 @@
 #define HOMEDING_INCLUDE_DISPLAYSH1106
 #define HOMEDING_INCLUDE_DISPLAYST7789
 #define HOMEDING_INCLUDE_DISPLAYMAX7219
+
+// Enable simple display Elements
 #define HOMEDING_INCLUDE_TM1637
+#define HOMEDING_INCLUDE_MAX7219
 
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR

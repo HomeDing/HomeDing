@@ -18,11 +18,11 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include "BH1750Element.h"
+#include <sensors/BH1750Element.h>
 
 #include <WireUtils.h>
 
-#define TRACE(...) LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new BH1750Element
@@ -121,10 +121,8 @@ bool BH1750Element::getProbe(String &values) {
   } else if (_dataIsReady < now) {
     uint8_t data[4];
     WireUtils::request(_address, data, 2);  // One Time H-Resolution Mode
-
     unsigned int count = (data[0] << 8) + data[1];
-
-    TRACE("got: %d %d %d", data[0], data[1], val);
+    TRACE("got: %d", count);
 
     values = String(_factor * count, 1);
     newData = true;
@@ -146,8 +144,5 @@ void BH1750Element::pushState(
   SensorElement::pushState(callback);
   callback("value", _lastValues.c_str());
 }  // pushState()
-
-bool BH1750Element::registered =
-  ElementRegistry::registerElement("bh1750", BH1750Element::create);
 
 // End

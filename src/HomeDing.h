@@ -314,6 +314,10 @@ extern Board homeding;
 #include <BL0937Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_BH1750
+#include <sensors/BH1750Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_MAX7219
 #include <MAX7219Element.h>
 #endif

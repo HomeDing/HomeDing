@@ -82,4 +82,6 @@ private:
 
 #ifdef HOMEDING_REGISTER
 // Register the BH1750Element in the ElementRegistry.
+bool BH1750Element::registered =
+  ElementRegistry::registerElement("bh1750", BH1750Element::create);
 #endif

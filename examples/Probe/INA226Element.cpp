@@ -45,12 +45,6 @@ INA226Element::INA226Element()
       _averageMode(INA226_AVERAGES::AVERAGE_16) {}
 
 
-void INA226Element::init(Board *board) {
-  TRACE("init()");
-  SensorElement::init(board);
-} // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */

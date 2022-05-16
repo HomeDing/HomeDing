@@ -94,13 +94,6 @@ MQTTElement::MQTTElement() {
 }
 
 
-void MQTTElement::init(Board *board) {
-  TRACE("init()");
-  Element::init(board);
-  // do something here like initialization
-}  // init()
-
-
 /**
  * @brief Setup connection parameters and registrations for the given server.
  */

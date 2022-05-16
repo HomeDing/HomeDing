@@ -44,12 +44,6 @@ INA219Element::INA219Element()
 }
 
 
-void INA219Element::init(Board *board) {
-  TRACE("init()");
-  SensorElement::init(board);
-} // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */

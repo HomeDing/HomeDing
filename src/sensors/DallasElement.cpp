@@ -1,7 +1,7 @@
 /**
  * @file DallasElement.cpp
  *
- * @brief Sensor Element for the HomeDing Library to read DS18B20 and other OneLine sensors supported 
+ * @brief Sensor Element for the HomeDing Library to read DS18B20 and other OneLine sensors supported
  * by the DallasTemperature library and create actions.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -21,7 +21,7 @@
 
 #include <sensors/DallasElement.h>
 
-#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -125,14 +125,15 @@ void DallasElement::start() {
 bool DallasElement::getProbe(String &values) {
   // TRACE("getProbe()");
   bool newData = false;
+  unsigned long now = millis();
 
   if (_impl->dataIsReady == 0) {
     // start conversion now
     TRACE("probe-start");
     _impl->sensors->requestTemperatures();
-    _impl->dataIsReady = millis() + _impl->sensors->millisToWaitForConversion(_impl->resolution);
+    _impl->dataIsReady = now + _impl->sensors->millisToWaitForConversion(_impl->resolution);
 
-  } else if (_impl->dataIsReady < millis()) {
+  } else if (_impl->dataIsReady < now) {
     TRACE("probe-done");
     float temp = _impl->sensors->getTempCByIndex(0);
     values = String(temp, 2);

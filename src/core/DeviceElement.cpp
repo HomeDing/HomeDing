@@ -186,9 +186,9 @@ void DeviceElement::pushState(
   callback("name", _board->deviceName.c_str());
   callback("title", _board->title.c_str());
   callback("description", _description.c_str());
-  callback("safemode", _board->isSafeMode ? "true" : "false");
+  callback("safemode", _printBoolean(_board->isSafeMode));
   callback("sd", _printBoolean( _board->mDNS_sd));
-  callback("nextboot", String(_nextBoot - now).c_str());
+  callback("nextboot", _printInteger(_nextBoot - now));
 } // pushState()
 
 

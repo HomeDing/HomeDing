@@ -289,11 +289,11 @@ void ColorElement::pushState(
 
   if (_mode != Mode::wheel) {
     sprintf(sColor, "x%08x", _toValue);  // do not report fading and interim colors
-    callback(PROP_VALUE, sColor);
+    callback("value", sColor);
   }
 
-  callback("duration", String(_duration).c_str());
-  callback(PROP_BRIGHTNESS, String(_brightness).c_str());
+  callback("duration", _printInteger(_duration));
+  callback("brightness", _printInteger(_brightness));
 }  // pushState()
 
 

@@ -44,10 +44,6 @@ DiagElement::DiagElement() {
   startupMode = Element_StartupMode::System;
 }
 
-void DiagElement::init(Board *board) {
-  Element::init(board);
-} // init()
-
 
 /**
  * @brief Set a parameter or property to a new value or start an action.

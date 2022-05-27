@@ -20,15 +20,9 @@
 
 #include <sensors/SensorElement.h>
 
-
+// setup default timings
 SensorElement::SensorElement() {
-  _readTime = 60; // read from sensor once a minute
-  _resendTime = 0; // Not enabled resending probes.
-  _warmupTime = 3; // secs.
-  _restart = false;
-  _sensorWorkedOnce = false;
-  _isReading = false;
-} // SensorElement()
+}  // SensorElement()
 
 
 /**
@@ -40,19 +34,23 @@ bool SensorElement::set(const char *name, const char *value) {
   if (!ret) {
     ret = true;
     if (_stricmp(name, "readtime") == 0) {
-      _readTime = _atotime(value);
+      _readTime = _scanDuration(value);
+
     } else if (_stricmp(name, "resendtime") == 0) {
-      _resendTime = _atotime(value);
+      _resendTime = _scanDuration(value);
+
     } else if (_stricmp(name, "warmuptime") == 0) {
-      _warmupTime = _atotime(value);
+      _warmupTime = _scanDuration(value);
+
     } else if (_stricmp(name, "restart") == 0) {
       _restart = _atob(value);
+
     } else {
       ret = false;
-    } // if
-  } // if
+    }  // if
+  }    // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
@@ -62,15 +60,15 @@ void SensorElement::start() {
   unsigned int now = millis();
   Element::start();
 
-  _nextRead = now + _warmupTime * 1000; // now + some seconds. allowing the sensor to get values.
+  _nextRead = now + _warmupTime;  // now + some seconds. allowing the sensor to get values.
   _nextSend = 0;
-} // start()
+}  // start()
 
 
 /**
  * @brief Dectivate the SensorElement.
  * This method is called when the sensor stopped working.
- * It reactivates the element when specified by restart property. 
+ * It reactivates the element when specified by restart property.
  */
 void SensorElement::term() {
   unsigned int now = millis();
@@ -80,9 +78,9 @@ void SensorElement::term() {
     this->start();
     _sensorWorkedOnce = false;
   }
-  _nextRead = now + _warmupTime * 1000; // now + some seconds. allowing the sensor to get values.
+  _nextRead = now + _warmupTime;  // now + some seconds. allowing the sensor to get values.
   _nextSend = 0;
-} // start()
+}  // start()
 
 
 /**
@@ -105,37 +103,44 @@ void SensorElement::loop() {
         // it's a valid value from the sensor
         _sensorWorkedOnce = true;
         if (!value.equals(_lastValues)) {
-          _nextSend = now; // enforce sending now
-        } // if
-        _lastValues = value;
-      } // if
-      _nextRead = now + _readTime * 1000;
-    } // if
+          _lastValues = value;
+          _nextSend = now;  // enforce sending now
+        }                   // if
+      }                     // if
+      _nextRead = now + _readTime;
+    }  // if
 
   } else if (_nextSend && (_nextSend < now)) {
     // TRACE("sending...");
     if (!_lastValues.isEmpty())
       sendData(_lastValues);
-    _nextSend = _resendTime ? now + _resendTime * 1000 : 0;
-  } // if
-} // loop()
+    _nextSend = _resendTime ? now + _resendTime : 0;
+  }  // if
+}  // loop()
 
 
 void SensorElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-} // pushState()
+  for (int n = 0; n < _valuesCount; n++) {
+    callback(
+      Element::getItemValue(_stateKeys, n).c_str(),
+      Element::getItemValue(_lastValues, n).c_str());
+  }
+}  // pushState()
 
 
 // ===== private functions =====
 
 bool SensorElement::getProbe(UNUSED String &values) {
-  return (true); // always simulate data is fine
-} // getProbe()
+  return (true);  // always simulate data is fine
+}  // getProbe()
 
 
 void SensorElement::sendData(UNUSED String &values) {
-} // sendData()
+  if (_valuesCount >= 1) { _board->dispatchItem(_value00Action, values, 0); }
+  if (_valuesCount >= 2) { _board->dispatchItem(_value01Action, values, 1); }
+}  // sendData()
 
 
 // End

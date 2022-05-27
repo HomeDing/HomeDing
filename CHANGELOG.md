@@ -14,6 +14,9 @@ New elements:
 * **DallasElement** is an enhanced version of the former Ds18B20Element
 now supporting different sensors using the OneWire protocol.
 
+* **SensorElement** is enhanced to support reporting the state and emitting actions for the sensor values
+  to simplify sensor implementations and save memory
+
 ## [0.8.2] - 2022-03-28
 
 The released version 0.7.2 was stable enough to do many implementations so many changes

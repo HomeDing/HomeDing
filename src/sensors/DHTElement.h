@@ -1,9 +1,9 @@
 /**
  * @file DHTElement.h
- * 
+ *
  * @brief Optional Input Element for the HomeDing Library to read DHT11 and
  * DHT22 sensors and create actions.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -25,14 +25,13 @@
 
 #include <sensors/SensorElement.h>
 
-class DHTNEW; // forward
+class DHTNEW;  // forward
 
 /**
  * @brief The DHTElement is an special Element that creates actions based on a
  * digital IO signal.
  */
-class DHTElement : public SensorElement
-{
+class DHTElement : public SensorElement {
 public:
   /**
    * @brief Factory function to create a DHTElement.
@@ -44,7 +43,6 @@ public:
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
-
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -67,16 +65,8 @@ public:
    */
   virtual void term() override;
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
-
 protected:
   virtual bool getProbe(String &values);
-  virtual void sendData(String &values);
 
 private:
   uint8_t _type = 0;
@@ -96,27 +86,14 @@ private:
    */
   bool _powerinverse = false;
 
-  /**
-   * @brief The _tempAction is emitted when a new temperature value was read from the DHT
-   * sensor.
-   */
-  String _tempAction;
-
-  /**
-   * @brief The _humAction is emitted when a new humidity was read from the DHT
-   * sensor.
-   */
-  String _humAction;
-
   DHTNEW *_dht;
-}; // class DHTElement
+};  // class DHTElement
 
 
 #ifdef HOMEDING_REGISTER
 // Register the DHTElement in the ElementRegistry.
-bool DHTElement::registered =
-    ElementRegistry::registerElement("dht", DHTElement::create);
+bool DHTElement::registered = ElementRegistry::registerElement("dht", DHTElement::create);
 #endif
 
 
-#endif // DHTELEMENT_H
+#endif  // DHTELEMENT_H

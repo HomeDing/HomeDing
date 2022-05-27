@@ -1,8 +1,8 @@
 /**
  * @file SensorElement.h
- * 
+ *
  * @brief This Input Element acts as the base class for some sensor elements that need collecting sensor data on a regular basis.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -22,10 +22,9 @@
 #include <HomeDing.h>
 
 /**
- * @brief The SensorElement acts as the base class for some sensor elements that need collecting sensor data on a regular basis.
+ * @brief The SensorElement acts as the base class for sensor elements that need collecting sensor data on a regular basis.
  */
-class SensorElement : public Element
-{
+class SensorElement : public Element {
 public:
   /**
    * @brief Construct a new SensorElement object.
@@ -61,42 +60,51 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
-  String _lastValues;
+  int _valuesCount = 0;  ///< number of values the sensor supports
+
+  String _lastValues;  ///< list of sensor values as "val1,val2"
+
+  String _stateKeys;  ///< list of keys in the state used for sensor values
+
+  // The actions for value[0], value[1]
+  String _value00Action;
+  String _value01Action;
 
   virtual bool getProbe(String &values);
   virtual void sendData(String &values);
 
 private:
   /**
-   * @brief The time between reading 2 probes.
+   * @brief The time between reading 2 probes. Default: 60 seconds.
    */
-  unsigned long _readTime;
+  unsigned long _readTime = 60 * 1000;
 
   /**
    * @brief The current values should be emitted again after some time even when not changing.
    */
-  unsigned long _resendTime;
+  unsigned long _resendTime = 0;
 
   /**
-   * @brief The time to pass before reading a sensor value.
+   * @brief The time to pass before reading a sensor value. Default: 3 seconds.
    */
-  unsigned long _warmupTime;
+  unsigned long _warmupTime = 3 * 1000;
 
-  bool _restart;
+  bool _restart = false;
 
   /**
    * @brief is set to true while in the getProbe function to distinguish term() calls internally and externally.
    */
-  bool _isReading;
+  bool _isReading = false;
 
-  bool _sensorWorkedOnce;
+  /** remember that the sensor worked at least once so restart with power pin may help */
+  bool _sensorWorkedOnce = false;
 
-  unsigned long _nextRead;
-  unsigned long _nextSend;
+  unsigned long _nextRead;  ///< time for next sensor reading
+  unsigned long _nextSend;  ///< time for next value sending
 };
 
 
-#endif // SENSORELEMENT_H
+#endif  // SENSORELEMENT_H

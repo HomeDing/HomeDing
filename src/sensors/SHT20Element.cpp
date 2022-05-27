@@ -35,23 +35,26 @@ Element *SHT20Element::create() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool SHT20Element::set(const char *name, const char *value) {
-  bool ret = SensorElement::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
-    if (_stricmp(name, PROP_ADDRESS) == 0) {
-      _address = _atoi(value);
-      ret = true;
+  if (SensorElement::set(name, value)) {
+    // ok.
 
-    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
-      _temperatureAction = value;
-      ret = true;
+  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
+    _address = _atoi(value);
+    ret = true;
 
-    } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
-      _humidityAction = value;
-      ret = true;
+  } else if (_stricmp(name, "onTemperature") == 0) {
+    _value00Action = value;
+    ret = true;
 
-    }  // if
-  }    // if
+  } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
+    _value01Action = value;
+    ret = true;
+  } else {
+    ret = false;
+  }  // if
+
   return (ret);
 }  // set()
 
@@ -123,6 +126,9 @@ void SHT20Element::start() {
 
     } else {
       SensorElement::start();
+      _valuesCount = 2;
+      _stateKeys = "temperature,humidity";
+
     }  // if
   }    // if
 }  // start()
@@ -173,33 +179,18 @@ bool SHT20Element::getProbe(String &values) {
     }
 
   } else if (_state == 4) {
-    newData = true;
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "%.2f,%.1f", _temperature, _humidity);
     values = buffer;
+    newData = true;
     _state = 0;
     // LOGGER_EINFO("values:%s", buffer);
 
   } else if (_state == 5) {
+    values.clear();
     newData = true;
-    values = "";
   }
   return (newData);
 }  // getProbe()
-
-
-void SHT20Element::sendData(String &values) {
-  // dispatch values.
-  _board->dispatchItem(_temperatureAction, values, 0);
-  _board->dispatchItem(_humidityAction, values, 1);
-}  // sendData()
-
-
-void SHT20Element::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  SensorElement::pushState(callback);
-  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
-  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
-}  // pushState()
 
 // End

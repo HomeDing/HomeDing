@@ -62,11 +62,11 @@ bool DHTElement::set(const char *name, const char *value) {
       _powerinverse = _atob(value);
       ret = true;
 
-    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
-      _tempAction = value;
+    } else if (_stricmp(name, "onTemperature") == 0) {
+      _value00Action = value;
 
     } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
-      _humAction = value;
+      _value01Action = value;
 
     } else {
       ret = false;
@@ -86,6 +86,9 @@ void DHTElement::start() {
 
   } else {
     SensorElement::start();
+    _valuesCount = 2;
+    _stateKeys = "temperature,humidity";
+
     if (_powerpin >= 0) {
       pinMode(_powerpin, OUTPUT);
       int physLevel = (_powerinverse ? LOW : HIGH);
@@ -131,20 +134,5 @@ bool DHTElement::getProbe(String &values) {
 
   return (newData);
 }  // getProbe()
-
-
-void DHTElement::sendData(String &values) {
-  _board->dispatchItem(_tempAction, values, 0);
-  _board->dispatchItem(_humAction, values, 1);
-}  // sendData()
-
-
-void DHTElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  SensorElement::pushState(callback);
-  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
-  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
-}  // pushState()
-
 
 // End

@@ -16,8 +16,7 @@
  * * 27.11.2020 created by Matthias Hertel
  */
 
-#ifndef SHT20ELEMENT_H
-#define SHT20ELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
@@ -59,16 +58,8 @@ public:
    */
   virtual void start() override;
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
-
 protected:
   virtual bool getProbe(String &values);
-  virtual void sendData(String &values);
 
 private:
   uint8_t _address = 0x40; // default i2c address
@@ -81,20 +72,9 @@ private:
 
   float _temperature;
   float _humidity;
-
-
-  /** The actions emitted when a new temperature value was read from the sensor. */
-  String _temperatureAction;
-
-  /** The actions emitted when a new humidity value was read from the sensor. */
-  String _humidityAction;
 };
 
 #ifdef HOMEDING_REGISTER
 // Register the SHT20Element in the ElementRegistry.
-bool SHT20Element::registered =
-    ElementRegistry::registerElement("sht20", SHT20Element::create);
+bool SHT20Element::registered = ElementRegistry::registerElement("sht20", SHT20Element::create);
 #endif
-
-
-#endif // SHT20ELEMENT_H

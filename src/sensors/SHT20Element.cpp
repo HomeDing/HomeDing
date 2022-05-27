@@ -91,16 +91,12 @@ byte crc8(byte *data, int length) {
 }  // crc8
 
 
-void SHT20Element::_start(int cmd) {
-  WireUtils::write(_address, cmd, nullptr, 0);
-}
-
 uint16_t SHT20Element::_read() {
   uint16_t ret = 0;  // no value
   uint8_t data[3];
   int8_t readLen = 0;
 
-  readLen = WireUtils::request(_address, data, sizeof(data));
+  readLen = WireUtils::readBuffer(_address, data, sizeof(data));
   if ((readLen == sizeof(data)) && (data[2] == crc8(data, 2))) {
     // good reading
     ret = ((uint16_t)(data[0]) << 8) + data[1];
@@ -150,7 +146,7 @@ bool SHT20Element::getProbe(String &values) {
 
   if (_state == 0) {
     _maxTime = now + 100;
-    _start(SHT20_START_TEMP);
+    WireUtils::write(_address, SHT20_START_TEMP);
     _state++;
 
   } else if (_state == 1) {
@@ -164,7 +160,7 @@ bool SHT20Element::getProbe(String &values) {
 
   } else if (_state == 2) {
     _maxTime = now + 50;
-    _start(SHT20_START_HUM);
+    WireUtils::write(_address, SHT20_START_HUM);
     _state++;
 
   } else if (_state == 3) {

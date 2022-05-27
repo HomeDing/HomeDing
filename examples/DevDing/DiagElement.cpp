@@ -100,6 +100,12 @@ String DiagElement::_scanI2C() {
     Wire.beginTransmission(adr);
     int error = Wire.endTransmission();
 
+    if (error) {
+      // try again for some devices that need wakeup
+      Wire.beginTransmission(adr);
+      error = Wire.endTransmission();
+    }
+
     if (error == 0) {
       sprintf(buffer, "* 0x%02x found.\n", adr);
       out += buffer;
@@ -114,6 +120,8 @@ String DiagElement::_scanI2C() {
         out += "  (INA219, INA226) found.";
       } else if (adr == (0x51)) {
         out += "  (RTC, PCF8563)\n";
+      } else if (adr == (0x5c)) {
+        out += "  (AM2320)\n";
       } else if (adr == 0x63) {
         out += "  (Radio, SI4730)\n";
       } else if (adr == (0x68)) {

@@ -76,9 +76,6 @@ private:
   unsigned long _maxTime;
 
 
-// start reading a register or measurement value
-  void _start(int cmd);
-
 // try read some bytes and return as 16-bit. 0 is error.
   uint16_t _read();
 

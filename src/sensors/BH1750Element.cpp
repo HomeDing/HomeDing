@@ -115,12 +115,12 @@ bool BH1750Element::getProbe(String &values) {
   if (_dataIsReady == 0) {
     TRACE("startProbe");
 
-    WireUtils::write(_address, _mode, nullptr, 0);  // One Time H-Resolution Mode
+    WireUtils::write(_address, _mode);  // One Time H-Resolution Mode
     _dataIsReady = now + ((_mode == 0x23) ? 20 : 130);
 
   } else if (_dataIsReady < now) {
     uint8_t data[4];
-    WireUtils::request(_address, data, 2);  // One Time H-Resolution Mode
+    WireUtils::readBuffer(_address, data, 2);  // One Time H-Resolution Mode
     unsigned int count = (data[0] << 8) + data[1];
     TRACE("got: %d", count);
 

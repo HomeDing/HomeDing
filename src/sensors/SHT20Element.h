@@ -66,6 +66,7 @@ private:
   uint8_t _state = 0; 
   unsigned long _maxTime;
 
+  uint8_t _crc8(uint8_t *data, int length);
 
 // try read some bytes and return as 16-bit. 0 is error.
   uint16_t _read();

@@ -56,9 +56,11 @@
 
 // Enable some Sensor Elements
 #define HOMEDING_INCLUDE_DHT
+#define HOMEDING_INCLUDE_AM2320
+#define HOMEDING_INCLUDE_SHT20
+#define HOMEDING_INCLUDE_AHT20
 #define HOMEDING_INCLUDE_DALLAS
 #define HOMEDING_INCLUDE_BME680
-#define HOMEDING_INCLUDE_SHT20
 #define HOMEDING_INCLUDE_BH1750
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.

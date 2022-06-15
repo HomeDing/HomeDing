@@ -2,8 +2,7 @@
 
 // default settings of the HomeDing CPP defines and Element registrations.
 
-#ifndef HOMEDING_H
-#define HOMEDING_H
+#pragma once
 
 #include <Board.h>            // Platform
 #include <Element.h>          // Abstract Elements
@@ -285,6 +284,9 @@ extern Board homeding;
 #include <sensors/DHTElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_SHT20
+#include <sensors/SHT20Element.h>
+#endif
 
 #ifdef HOMEDING_INCLUDE_RFCODES
 #include <RFCodesElement.h>
@@ -306,10 +308,6 @@ extern Board homeding;
 #include <sensors/BME680Element.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_SHT20
-#include <sensors/SHT20Element.h>
-#endif
-
 #ifdef HOMEDING_INCLUDE_BL0937
 #include <BL0937Element.h>
 #endif
@@ -328,7 +326,4 @@ extern Board homeding;
 
 #if defined(HOMEDING_INCLUDE_SSDP)
 #include <core/SSDPElement.h>
-#endif
-
-
 #endif

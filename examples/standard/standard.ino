@@ -46,11 +46,16 @@
 #define HOMEDING_INCLUDE_CORE
 #define HOMEDING_INCLUDE_FULL_SYSTEM
 
-// Enable some Sensor Elements
+// Enable some Common Sensor Elements
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_DALLAS
-#define HOMEDING_INCLUDE_BME680
+
+// Enable / Disable some more Sensor Elements upon requirement
+#define HOMEDING_INCLUDE_AM2320
 #define HOMEDING_INCLUDE_SHT20
+#define HOMEDING_INCLUDE_AHT20
+#define HOMEDING_INCLUDE_BME680
+#define HOMEDING_INCLUDE_BH1750
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM

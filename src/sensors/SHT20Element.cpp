@@ -72,7 +72,7 @@ bool SHT20Element::set(const char *name, const char *value) {
 // calculate crc8 for data
 // assuming 0 as a crc start and POLYNOMIAL = 0x131;
 // See https://www.sensirion.com/ ... Sensirion_Humidity_Sensors_SHT2x_CRC_Calculation.pdf
-byte crc8(byte *data, int length) {
+uint8_t SHT20Element::_crc8(uint8_t *data, int length) {
   byte crc = 0;
 
   // calculates 8-Bit checksum with given polynomial
@@ -91,7 +91,7 @@ byte crc8(byte *data, int length) {
     data++;
   }
   return (crc);
-}  // crc8
+}  // _crc8
 
 
 uint16_t SHT20Element::_read() {
@@ -100,7 +100,7 @@ uint16_t SHT20Element::_read() {
   int8_t readLen = 0;
 
   readLen = WireUtils::readBuffer(_address, data, sizeof(data));
-  if ((readLen == sizeof(data)) && (data[2] == crc8(data, 2))) {
+  if ((readLen == sizeof(data)) && (data[2] == SHT20Element::_crc8(data, 2))) {
     // good reading
     ret = ((uint16_t)(data[0]) << 8) + data[1];
   }  // if

@@ -92,9 +92,8 @@ void DisplayOutputElement::loop() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 void DisplayOutputElement::draw() {
-  DisplayAdapter *d = _board->display;
-  if (d) {
-    d->setColor(_color);
+  if (_display) {
+    _display->setColor(_color);
   }
 }
 

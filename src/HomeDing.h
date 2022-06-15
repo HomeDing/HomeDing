@@ -284,6 +284,10 @@ extern Board homeding;
 #include <sensors/DHTElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_AM2320
+#include <sensors/AM2320Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_SHT20
 #include <sensors/SHT20Element.h>
 #endif

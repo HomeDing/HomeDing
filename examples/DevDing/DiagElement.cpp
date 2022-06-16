@@ -112,8 +112,6 @@ String DiagElement::_scanI2C() {
     }
 
     if (error == 0) {
-      sprintf(buffer, "* 0x%02x found.\n", adr);
-      out += buffer;
       desc = nullptr;
 
       if (adr == 0x11) {
@@ -125,7 +123,7 @@ String DiagElement::_scanI2C() {
       } else if (adr == 0x3C) {
         desc = "SH1106,SSD1306,SSD1309";
       } else if (adr == 0x40) {
-        desc = "INA219,INA226) fou";
+        desc = "INA219,INA226";
       } else if (adr == (0x51)) {
         desc = "RTC,PCF8563";
       } else if (adr == (0x5c)) {
@@ -140,11 +138,8 @@ String DiagElement::_scanI2C() {
         desc = "BMP280";
       }
 
-      if (desc) {
-        out.concat("  (");
-        out.concat(desc);
-        out.concat(")\n");
-      }
+      sprintf(buffer, "* 0x%02x: (%s)\n", adr, desc ? desc : "");
+      out += buffer;
       yield();
       num++;
     }

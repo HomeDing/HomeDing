@@ -180,7 +180,7 @@ bool SHT20Element::getProbe(String &values) {
 
   } else if (_state == 4) {
     char buffer[32];
-    snprintf(buffer, sizeof(buffer), "%.2f,%.1f", _temperature, _humidity);
+    snprintf(buffer, sizeof(buffer), "%.2f,%.2f", _temperature, _humidity);
     values = buffer;
     newData = true;
     _state = 0;

@@ -173,9 +173,9 @@ bool AHT20Element::getProbe(String &values) {
       rawData = rawData & 0xfffff;
       temp = ((float)rawData * 200.0 / 0x100000) - 50;
 
-      values = String(temp, 2);
-      values += ',';
-      values += String(hum, 2);
+      char buffer[32];
+      snprintf(buffer, sizeof(buffer), "%.2f,%.2f", temp, hum);
+      values = buffer;
       TRACE("values: %s", values);
     }  // if
 

@@ -1,8 +1,8 @@
 /**
  * @file BMP280Element .h
- * 
+ *
  * @brief Optional Input Element for the HomeDing Library to read DS18B20 sensors and create actions.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -16,8 +16,7 @@
  * * 14.02.2020 created by Matthias Hertel
  */
 
-#ifndef BMP280ELEMENT_H
-#define BMP280ELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
@@ -28,8 +27,7 @@
  * @brief The BMP280Element  is an special Element that creates actions based on a
  * digital IO signal.
  */
-class BMP280Element : public SensorElement
-{
+class BMP280Element : public SensorElement {
 public:
   /**
    * @brief Factory function to create a BMP280Element .
@@ -59,20 +57,12 @@ public:
    */
   virtual void start() override;
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
-
 protected:
   virtual bool getProbe(String &values);
-  virtual void sendData(String &values);
 
 private:
-  uint8_t _address = 0x76; // default BMP280 I2C address
-  uint8_t _state = 0; // 0: sensor not started, 1: sensor was started
+  uint8_t _address = 0x76;  // default BMP280 I2C address
+  uint8_t _state = 0;       // 0: sensor not started, 1: sensor was started
 
   // temperature calibration factors
   uint16_t dig_T1;
@@ -90,24 +80,13 @@ private:
   int16_t dig_P8;
   int16_t dig_P9;
 
-  int32_t t_fine; // temperature required to calculate compensated pressure.
+  int32_t t_fine;  // temperature required to calculate compensated pressure.
 
   float BMP280CompensateTemperature(int32_t adc_T);
   float BMP280CompensatePressure(int32_t adc_P);
-
-  /** The actions emitted when a new temperature value was read from the sensor. */
-  String _temperatureAction;
-
-  /** The actions emitted when a new pressure value was read from the sensor. */
-  String _pressureAction;
 };
 
 #ifdef HOMEDING_REGISTER
 // Register the BMP280Element  in the ElementRegistry.
-bool BMP280Element ::registered =
-    ElementRegistry::registerElement("bmp280", BMP280Element::create);
+bool BMP280Element::registered = ElementRegistry::registerElement("bmp280", BMP280Element::create);
 #endif
-
-
-
-#endif // BMP280ELEMENT_H

@@ -22,7 +22,7 @@
 
 #include <WireUtils.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new AM2320Element
@@ -149,17 +149,15 @@ bool AM2320Element::getProbe(String &values) {
 
     if (crc == _crc16(outBuf, 4 + 2)) {
       // extract temperature
-      int16_t v = ((outBuf[4] & 0x7F) * 256 + outBuf[5]);
-      values = String(v * 0.1, 2);
-      values += ',';
+      int v1 = (outBuf[4] & 0x7F) * 256 + outBuf[5];
+      int v2 = outBuf[2] * 256 + outBuf[3];
 
-      // extract humidity
-      v = (outBuf[2] * 256 + outBuf[3]);
-      values += String(v * 0.1, 2);
+      char buffer[32];
+      snprintf(buffer, sizeof(buffer), "%.2f,%.2f", v1 * 0.1, v2 * 0.1);
+      values = buffer;
 
     } else {
-      values.clear(); // no values from sensor available
-
+      values.clear();  // no values from sensor available
     }
     done = true;
     _state = 0;

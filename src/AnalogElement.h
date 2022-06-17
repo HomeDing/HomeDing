@@ -15,19 +15,19 @@
  *
  * Changelog:
  * * 29.11.2018 created by Matthias Hertel
+ * * 17.06.2022 refactored to a SensorElement
  */
 
-#ifndef ANALOG_H
-#define ANALOG_H
+#pragma once
 
 #include <HomeDing.h>
+#include <sensors/SensorElement.h>
 
 /**
  * @brief The AnalogElement is an special Element that creates actions based on
  * a digital IO signal.
  */
-class AnalogElement : public Element
-{
+class AnalogElement : public SensorElement {
 public:
   /**
    * @brief Factory function to create a AnalogElement.
@@ -56,45 +56,33 @@ public:
    */
   virtual void start() override;
 
-  /**
-   * @brief check the state of the input signal and eventually emit actions.
-   */
-  virtual void loop() override;
+  // Sensor Element functions
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+  /// retrieve values from a sensor
+  bool getProbe(UNUSED String &values) override;
+
+  /// send data out by crating actions 
+  void sendData(UNUSED String &values) override ;
 
 private:
-  int _pin = A0;
+#if defined ESP8266
+  int _pin = A0;  // there is only one pin on ESP8266
+#else
+  int _pin = -1;  // pin must be configured
+#endif
 
   // map() function just like the standard arduino map() function but with float and boundaries from configuration.
-  float mapFloat(int value);
+  int map(int value);
 
   // map factors
-  bool _useMap = false; // use map function when all 4 factors are given.
+  bool _useMap = false;  // use map function when all 4 factors are given.
   int _inMin = 0, _inMax = 0, _outMin = 0, _outMax = 0;
 
-  // configuration of analog input sampling time in ms.
-  unsigned long _readTimeMS = 100;
-
-  // next read if analog input value in ms.
-  unsigned long _nextReadMS = 0;
-
-  int _value;
   int _hysteresis = 10;
-
   int _reference = 500;
+
+  int _lastValue;
   int _lastReference;
-
-  /** These actions are sent with the current value. */
-  String _valueAction;
-
-  /** These actions are sent with value=1 when the current value is above the reference value otherwise value=0. */
-  String _referenceAction;
 
   /** These actions are sent when the current value is above the reference value. */
   String _highAction;
@@ -105,8 +93,5 @@ private:
 
 #ifdef HOMEDING_REGISTER
 // Register the AnalogElement onto the ElementRegistry.
-bool AnalogElement::registered =
-    ElementRegistry::registerElement("analog", AnalogElement::create);
+bool AnalogElement::registered = ElementRegistry::registerElement("analog", AnalogElement::create);
 #endif
-
-#endif // ANALOG_H

@@ -29,26 +29,25 @@ SensorElement::SensorElement() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool SensorElement::set(const char *name, const char *value) {
-  bool ret = Element::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
-    ret = true;
-    if (_stricmp(name, "readtime") == 0) {
-      _readTime = _scanDuration(value);
+  if (Element::set(name, value)) {
+    // done.
+  } else if (_stricmp(name, "readtime") == 0) {
+    _readTime = _scanDuration(value);
 
-    } else if (_stricmp(name, "resendtime") == 0) {
-      _resendTime = _scanDuration(value);
+  } else if (_stricmp(name, "resendtime") == 0) {
+    _resendTime = _scanDuration(value);
 
-    } else if (_stricmp(name, "warmuptime") == 0) {
-      _warmupTime = _scanDuration(value);
+  } else if (_stricmp(name, "warmuptime") == 0) {
+    _warmupTime = _scanDuration(value);
 
-    } else if (_stricmp(name, "restart") == 0) {
-      _restart = _atob(value);
+  } else if (_stricmp(name, "restart") == 0) {
+    _restart = _atob(value);
 
-    } else {
-      ret = false;
-    }  // if
-  }    // if
+  } else {
+    ret = false;
+  }  // if
   return (ret);
 }  // set()
 

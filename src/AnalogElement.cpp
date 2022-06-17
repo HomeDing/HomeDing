@@ -29,8 +29,8 @@ Element *AnalogElement::create() {
 }  // create()
 
 
-float AnalogElement::mapFloat(int value) {
-  return (value - _inMin) * (_outMax - _outMin) / (_inMax - _inMin) + _outMin;
+int AnalogElement::map(int value) {
+  return ((value - _inMin) * (_outMax - _outMin)) / (_inMax - _inMin) + _outMin;
 }
 
 
@@ -40,15 +40,14 @@ float AnalogElement::mapFloat(int value) {
 bool AnalogElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "readtimems") == 0) {
-    _readTimeMS = _atoi(value);
+  if (SensorElement::set(name, value)) {
+    // done.
+
+  } else if (_stricmp(name, "pin") == 0) {
+    _pin = _atopin(value);
 
   } else if (_stricmp(name, "hysteresis") == 0) {
     _hysteresis = _atoi(value);
-
-    // } else if (_stricmp(name, PROP_PIN) == 0) {
-    //   _pin = _atopin(value);
-    // pin is always A0
 
     // } else if (_stricmp(name, "resolution") == 0) {
     // _resolution = _atoi(value); ???
@@ -68,11 +67,11 @@ bool AnalogElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "reference") == 0) {
     _reference = _atoi(value);
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
-    _valueAction = value;
+  } else if (_stricmp(name, "onvalue") == 0) {
+    _value00Action = value;
 
   } else if (_stricmp(name, "onreference") == 0) {
-    _referenceAction = value;
+    _value01Action = value;
 
   } else if (_stricmp(name, "onhigh") == 0) {
     _highAction = value;
@@ -81,7 +80,7 @@ bool AnalogElement::set(const char *name, const char *value) {
     _lowAction = value;
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
   return (ret);
 }  // set()
@@ -91,63 +90,54 @@ bool AnalogElement::set(const char *name, const char *value) {
  * @brief Activate the AnalogElement.
  */
 void AnalogElement::start() {
-  _nextReadMS = millis() + _readTimeMS;
   _lastReference = -1;
+  _lastValue = -1 - _hysteresis;  // use first value in any case
 
   // use mapping when reasonable factors are given
   _useMap = ((_inMin != _inMax) && (_outMin != _outMax));
 
-  Element::start();
+  TRACE("pin=%d", _pin);
+
+  SensorElement::start();
+  _valuesCount = 2;
+  _stateKeys = "value,reference";
 }  // start()
 
-int rawValue;
 
-/**
- * @brief check the state of the input.
- */
-void AnalogElement::loop() {
-  unsigned int now = millis();
+bool AnalogElement::getProbe(UNUSED String &values) {
+  int rawValue = analogRead(_pin);
+  int value;
 
-  if (_nextReadMS <= now) {
-    int v = analogRead(_pin);
-    rawValue = v;
-    if (_useMap) {
-      v = mapFloat(v);
-    }
-    TRACE("read(%d=>%d)", rawValue, v);
-
-    if ((v >= _value + _hysteresis) || (v <= _value - _hysteresis)) {
-
-      _value = v;
-      if (_valueAction.length() > 0)
-        _board->dispatch(_valueAction, v);
-
-      // compare against reference and send reference actions
-      int r = (v < _reference ? 0 : 1);
-      if (r != _lastReference) {
-        _board->dispatch(_referenceAction, r);
-
-        if (r) {
-          _board->dispatch(_highAction);
-        } else {
-          _board->dispatch(_lowAction);
-        }  // if
-
-        _lastReference = r;
-      }  // if
-    }    // if
-
-    _nextReadMS = millis() + _readTimeMS;
+  if (_useMap) {
+    value = map(rawValue);
+  } else {
+    value = rawValue;
   }
-}  // loop()
+
+  TRACE("read(%d=>%d)", rawValue, value);
+
+  if ((value >= _lastValue + _hysteresis) || (value <= _lastValue - _hysteresis)) {
+    _lastValue = value;
+    values = String(value) + ',' + (value < _reference ? "0" : "1");
+  }  // if
+
+  return (true);  // always simulate data is fine
+}  // getProbe()
 
 
-void AnalogElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-  callback(PROP_VALUE, _printInteger(_value));
-  callback("rawvalue", _printInteger(rawValue));
-  callback("reference", _printInteger(_lastReference));
-}  // pushState()
+void AnalogElement::sendData(UNUSED String &values) {
+  SensorElement::sendData(values);
+
+  int r = (values.endsWith(",1") ? 1 : 0);
+  if (r != _lastReference) {
+    if (r) {
+      _board->dispatch(_highAction);
+    } else {
+      _board->dispatch(_lowAction);
+    }  // if
+    _lastReference = r;
+  }  // if
+
+}  // sendData()
 
 // End

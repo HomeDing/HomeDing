@@ -16,8 +16,7 @@
  * * 12.02.2020 created by Matthias Hertel from DHT Element implemenation.
  */
 
-#ifndef SENSORELEMENT_H
-#define SENSORELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -73,7 +72,10 @@ protected:
   String _value00Action;
   String _value01Action;
 
+  /// retrieve values from a sensor
   virtual bool getProbe(String &values);
+
+  /// send data out by crating actions 
   virtual void sendData(String &values);
 
 private:
@@ -105,6 +107,3 @@ private:
   unsigned long _nextRead;  ///< time for next sensor reading
   unsigned long _nextSend;  ///< time for next value sending
 };
-
-
-#endif  // SENSORELEMENT_H

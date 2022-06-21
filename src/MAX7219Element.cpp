@@ -19,7 +19,7 @@
 
 #include <MAX7219Element.h>
 
-#include "SPI.h"
+#include <SPI.h>
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 

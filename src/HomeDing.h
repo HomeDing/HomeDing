@@ -69,6 +69,7 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalSignal
+#define HOMEDING_INCLUDE_Touch
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
 
@@ -183,6 +184,10 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_DigitalSignal
 #include <DigitalSignalElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_Touch
+#include <TouchElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DigitalOut

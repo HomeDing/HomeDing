@@ -186,7 +186,7 @@ extern Board homeding;
 #include <DigitalSignalElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_Touch
+#if defined(HOMEDING_INCLUDE_Touch) && defined(ESP32) 
 #include <TouchElement.h>
 #endif
 

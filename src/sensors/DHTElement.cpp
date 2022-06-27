@@ -38,42 +38,33 @@ Element *DHTElement::create() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DHTElement::set(const char *name, const char *value) {
-  bool ret = SensorElement::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
-    // Not handled by the SensorElement
-    ret = true;  // assume
-    if (_stricmp(name, "type") == 0) {
-      if (_stricmp(value, "DHT11") == 0) {
-        _type = 11;
-      } else if (_stricmp(value, "DHT22") == 0) {
-        _type = 22;
-      } else if (_stricmp(value, "AUTO") == 0) {
-        _type = 0;
-      }
+  if (SensorElement::set(name, value)) {
+    // done.
 
-    } else if (_stricmp(name, "pin") == 0) {
-      _pin = _atopin(value);
+  } else if (_stricmp(name, "pin") == 0) {
+    _pin = _atopin(value);
 
-    } else if (_stricmp(name, "powerpin") == 0) {
-      // the ouput pin to control powering the component
-      _powerpin = _atopin(value);
-      ret = true;
+  } else if (_stricmp(name, "powerpin") == 0) {
+    // the ouput pin to control powering the component
+    _powerpin = _atopin(value);
+    ret = true;
 
-    } else if (_stricmp(name, "powerinverse") == 0) {
-      _powerinverse = _atob(value);
-      ret = true;
+  } else if (_stricmp(name, "powerinverse") == 0) {
+    _powerinverse = _atob(value);
+    ret = true;
 
-    } else if (_stricmp(name, "onTemperature") == 0) {
-      _value00Action = value;
+  } else if (_stricmp(name, "onTemperature") == 0) {
+    _value00Action = value;
 
-    } else if (_stricmp(name, "onHumidity") == 0) {
-      _value01Action = value;
+  } else if (_stricmp(name, "onHumidity") == 0) {
+    _value01Action = value;
 
-    } else {
-      ret = false;
-    }  // if
-  }    // if
+  } else {
+    ret = false;
+
+  }  // if
   return (ret);
 }  // set()
 

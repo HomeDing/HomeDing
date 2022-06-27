@@ -69,8 +69,6 @@ protected:
   virtual bool getProbe(String &values);
 
 private:
-  uint8_t _type = 0;
-
   /**
    * @brief GPIO pin to be used for data transfer to sensor.
    */

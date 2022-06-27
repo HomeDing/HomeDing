@@ -23,6 +23,8 @@
 
 #include <dhtnew.h>
 
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+
 /**
  * @brief static factory function to create a new DHTElement
  * @return DHTElement* created element
@@ -50,7 +52,7 @@ bool DHTElement::set(const char *name, const char *value) {
         _type = 0;
       }
 
-    } else if (_stricmp(name, PROP_PIN) == 0) {
+    } else if (_stricmp(name, "pin") == 0) {
       _pin = _atopin(value);
 
     } else if (_stricmp(name, "powerpin") == 0) {
@@ -65,7 +67,7 @@ bool DHTElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "onTemperature") == 0) {
       _value00Action = value;
 
-    } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
+    } else if (_stricmp(name, "onHumidity") == 0) {
       _value01Action = value;
 
     } else {
@@ -103,7 +105,7 @@ void DHTElement::start() {
  * @brief Deactivate the DHTElement.
  */
 void DHTElement::term() {
-  // TRACE("term()");
+  TRACE("term()");
   // no need to call _dht.anyfunc()
   if (_powerpin >= 0) {
     pinMode(_powerpin, OUTPUT);
@@ -118,17 +120,24 @@ void DHTElement::term() {
 
 bool DHTElement::getProbe(String &values) {
   bool newData = false;
-  char buffer[16];
 
   // TRACE("getProbe()");
   int ret = _dht->read();
 
-  if (ret == DHTLIB_OK) {
-    newData = true;
+  if (ret == DHTLIB_WAITING_FOR_READ) {
+    setWait(2000);
+
+  } else if (ret == DHTLIB_OK) {
+    char buffer[16];
     snprintf(buffer, sizeof(buffer), "%.2f,%.2f", _dht->getTemperature(), _dht->getHumidity());
     values = buffer;
+    newData = true;
 
-  } else if (ret != DHTLIB_WAITING_FOR_READ) {
+  } else if (ret == DHTLIB_ERROR_SENSOR_NOT_READY) {
+    LOGGER_ETRACE("not found");
+    term();
+
+  } else {
     LOGGER_EERR("dht err: %d", ret);
   }  // if
 

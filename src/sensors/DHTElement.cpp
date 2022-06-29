@@ -56,10 +56,10 @@ bool DHTElement::set(const char *name, const char *value) {
     ret = true;
 
   } else if (_stricmp(name, "onTemperature") == 0) {
-    _value00Action = value;
+    _actions[0] = value;
 
   } else if (_stricmp(name, "onHumidity") == 0) {
-    _value01Action = value;
+    _actions[1] = value;
 
   } else {
     ret = false;

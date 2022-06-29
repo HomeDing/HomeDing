@@ -41,14 +41,14 @@ bool AHT20Element::set(const char *name, const char *value) {
 
   if (SensorElement::set(name, value)) {
     // ok.
-  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
+  } else if (_stricmp(name, "address") == 0) {
     _address = _atoi(value);
 
   } else if (_stricmp(name, "onTemperature") == 0) {
-    _value00Action = value;
+    _actions[0] = value;
 
-  } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
-    _value01Action = value;
+  } else if (_stricmp(name, "onHumidity") == 0) {
+    _actions[1] = value;
 
   } else {
     ret = false;
@@ -104,7 +104,7 @@ void AHT20Element::start() {
       // send initialization sequence
       uint8_t buf[3] = { 0xbe, 0x08, 0x00 };
       WireUtils::writeBuffer(_address, buf, 3);
-      _waitTimeEnd = millis() + 10;  // wait at least 10 ms
+      setWait(10); // wait at least 10 ms
 
     }  // if
   }    // if
@@ -124,14 +124,11 @@ bool AHT20Element::getProbe(String &values) {
   bool newData = false;
   unsigned long now = millis();
 
-  if (now < _waitTimeEnd) {
-    // wait
-
-  } else if (_state == 0) {
+  if (_state == 0) {
     // trigger measurement
     uint8_t buf[3] = { 0xac, 0x33, 0x00 };
     WireUtils::writeBuffer(_address, buf, 3);
-    _waitTimeEnd = millis() + 80;  // wait at least 80 ms
+    setWait(80); // wait at least 80 ms
     _state++;
 
   } else if (_state == 1) {
@@ -175,8 +172,8 @@ bool AHT20Element::getProbe(String &values) {
 
       char buffer[32];
       snprintf(buffer, sizeof(buffer), "%.2f,%.2f", temp, hum);
+      TRACE("values: %s", buffer);
       values = buffer;
-      TRACE("values: %s", values);
     }  // if
 
     newData = true;

@@ -71,7 +71,6 @@ protected:
 private:
   uint8_t _address = 0x38; // default i2c address
   uint8_t _state = 0; 
-  unsigned long _waitTimeEnd = 0;
 
   static uint8_t _crc8(uint8_t *data, int len);
 };

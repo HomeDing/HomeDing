@@ -43,10 +43,10 @@ bool BMP280Element::set(const char *name, const char *value) {
     _address = _atoi(value);
 
   } else if (_stricmp(name, "onTemperature") == 0) {
-    _value00Action = value;
+    _actions[0] = value;
 
   } else if (_stricmp(name, "onPressure") == 0) {
-    _value01Action = value;
+    _actions[1] = value;
 
   } else {
     ret = false;

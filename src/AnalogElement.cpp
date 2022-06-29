@@ -68,10 +68,10 @@ bool AnalogElement::set(const char *name, const char *value) {
     _reference = _atoi(value);
 
   } else if (_stricmp(name, "onvalue") == 0) {
-    _value00Action = value;
+    _actions[0] = value;
 
   } else if (_stricmp(name, "onreference") == 0) {
-    _value01Action = value;
+    _actions[1] = value;
 
   } else if (_stricmp(name, "onhigh") == 0) {
     _highAction = value;

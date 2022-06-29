@@ -39,7 +39,7 @@
 
 // #define DBG_GDB // start with debugger
 #define DBG_TRACE  // trace level for all elements
-// #define NET_DEBUG  // show network event in output
+#define NET_DEBUG  // show network event in output
 
 #ifdef DBG_GDB
 #include <GDBStub.h>
@@ -63,6 +63,7 @@
 #define HOMEDING_INCLUDE_BMP280
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_BH1750
+#define HOMEDING_INCLUDE_SCD4X
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM

@@ -301,6 +301,10 @@ extern Board homeding;
 #include <sensors/SHT20Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_SCD4X
+#include <sensors/SCD4XElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_RFCODES
 #include <RFCodesElement.h>
 #endif

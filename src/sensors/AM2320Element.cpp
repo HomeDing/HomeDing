@@ -41,14 +41,14 @@ bool AM2320Element::set(const char *name, const char *value) {
 
   if (SensorElement::set(name, value)) {
     // ok.
-  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
+  } else if (_stricmp(name, "address") == 0) {
     _address = _atoi(value);
 
   } else if (_stricmp(name, "onTemperature") == 0) {
-    _value00Action = value;
+    _actions[0] = value;
 
-  } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
-    _value01Action = value;
+  } else if (_stricmp(name, "onHumidity") == 0) {
+    _actions[1] = value;
 
   } else {
     ret = false;
@@ -134,11 +134,8 @@ bool AM2320Element::getProbe(String &values) {
     // start a reading sequence
     uint8_t buf[3] = { 0x03, 0x00, 0x04 };
     WireUtils::writeBuffer(_address, buf, 3);
-    _doneTime = now + 4;
-    _state++;
-
-  } else if ((_state == 2) && (now <= _doneTime)) {
-    // wait more...
+    setWait(4); // wait for next communication
+    _state = 2;
 
   } else if (_state == 2) {
     uint8_t outBuf[20];

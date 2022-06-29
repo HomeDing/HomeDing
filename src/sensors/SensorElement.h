@@ -69,8 +69,10 @@ protected:
   String _stateKeys;  ///< list of keys in the state used for sensor values
 
   // The actions for value[0], value[1]
-  String _value00Action;
-  String _value01Action;
+  std::vector<String> _actions;
+
+  /// set duration for waiting to next communication with the sensor
+  virtual void setWait(unsigned long waitMilliseconds);
 
   /// retrieve values from a sensor
   virtual bool getProbe(String &values);
@@ -79,31 +81,22 @@ protected:
   virtual void sendData(String &values);
 
 private:
-  /**
-   * @brief The time between reading 2 probes. Default: 60 seconds.
-   */
+  /// The time between reading 2 probes. Default Setting: 60 seconds.
   unsigned long _readTime = 60 * 1000;
 
-  /**
-   * @brief The current values should be emitted again after some time even when not changing.
-   */
+  /// The current values should be emitted again after some time even when not changing.
   unsigned long _resendTime = 0;
 
-  /**
-   * @brief The time to pass before reading a sensor value. Default: 3 seconds.
-   */
+  /// The time to pass before reading a sensor value the first time after Power Up. Default: 3 seconds.
   unsigned long _warmupTime = 3 * 1000;
 
   bool _restart = false;
 
-  /**
-   * @brief is set to true while in the getProbe function to distinguish term() calls internally and externally.
-   */
-  bool _isReading = false;
+  int _state = 0;
 
   /** remember that the sensor worked at least once so restart with power pin may help */
   bool _sensorWorkedOnce = false;
 
-  unsigned long _nextRead;  ///< time for next sensor reading
-  unsigned long _nextSend;  ///< time for next value sending
+  unsigned long _nextRead = 0;  ///< time for next sensor reading
+  unsigned long _nextSend = 0;  ///< time for next value re-sending
 };

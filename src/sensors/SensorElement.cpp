@@ -20,8 +20,17 @@
 
 #include <sensors/SensorElement.h>
 
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+
+#define STATE_OFF 0   // just got power on
+#define STATE_WAIT 1  // initialized, warmup or wait time beween probes
+#define STATE_READ 2  // Reading a value
+#define STATE_SEND 3  // Sending Data
+
+
 // setup default timings
 SensorElement::SensorElement() {
+  _actions.reserve(4);
 }  // SensorElement()
 
 
@@ -59,6 +68,8 @@ void SensorElement::start() {
   unsigned int now = millis();
   Element::start();
 
+  _sensorWorkedOnce = false;
+  _state = STATE_WAIT;
   _nextRead = now + _warmupTime;  // now + some seconds. allowing the sensor to get values.
   _nextSend = 0;
 }  // start()
@@ -72,14 +83,11 @@ void SensorElement::start() {
 void SensorElement::term() {
   unsigned int now = millis();
   Element::term();
-  if (_isReading && _sensorWorkedOnce && _restart) {
+  if (_state == STATE_READ && _sensorWorkedOnce && _restart) {
     // term() was initiated by sensor element and retry is configured.
     this->start();
-    _sensorWorkedOnce = false;
   }
-  _nextRead = now + _warmupTime;  // now + some seconds. allowing the sensor to get values.
-  _nextSend = 0;
-}  // start()
+}  // term()
 
 
 /**
@@ -90,12 +98,16 @@ void SensorElement::loop() {
   unsigned long now = millis();
   String value;
 
-  if (_nextRead <= now) {
+  if (now < _nextRead) {
+    // just wait on...
+
+  } else if (_state == STATE_WAIT) {
+    _state = STATE_READ;
+
+  } else if (_state == STATE_READ) {
     // time to get sensor data, repeat until returning true
     // TRACE("reading...");
-    _isReading = true;
     bool done = getProbe(value);
-    _isReading = false;
 
     if (done) {
       if (value.length() > 0) {
@@ -104,16 +116,28 @@ void SensorElement::loop() {
         if (!value.equals(_lastValues)) {
           _lastValues = value;
           _nextSend = now;  // enforce sending now
-        }                   // if
-      }                     // if
-      _nextRead = now + _readTime;
+          _state = STATE_SEND;
+        }  // if
+
+      } else if (_nextSend && (_nextSend < now)) {
+        _state = STATE_SEND;
+
+      } else {
+        _nextRead = now + _readTime;
+        _state = STATE_WAIT;
+      }  // if
+
     }  // if
 
-  } else if (_nextSend && (_nextSend < now)) {
+  } else if (_state == STATE_SEND) {
+    // time to send sensor data
     // TRACE("sending...");
     if (!_lastValues.isEmpty())
       sendData(_lastValues);
-    _nextSend = _resendTime ? now + _resendTime : 0;
+
+    _nextRead = now + _readTime;
+    _nextSend = (_resendTime ? now + _resendTime : 0);
+    _state = STATE_WAIT;
   }  // if
 }  // loop()
 
@@ -129,7 +153,12 @@ void SensorElement::pushState(
 }  // pushState()
 
 
-// ===== private functions =====
+// ===== protected functions =====
+
+void SensorElement::setWait(unsigned long waitMilliseconds) {
+  TRACE("setWait(%d)", waitMilliseconds);
+  _nextRead =  millis() + waitMilliseconds;
+}
 
 bool SensorElement::getProbe(UNUSED String &values) {
   return (true);  // always simulate data is fine
@@ -137,8 +166,10 @@ bool SensorElement::getProbe(UNUSED String &values) {
 
 
 void SensorElement::sendData(UNUSED String &values) {
-  if (_valuesCount >= 1) { _board->dispatchItem(_value00Action, values, 0); }
-  if (_valuesCount >= 2) { _board->dispatchItem(_value01Action, values, 1); }
+  TRACE("sendData()");
+  for (int n = 0; n < _valuesCount; n++) {
+    _board->dispatchItem(_actions[n], values, n);
+  }
 }  // sendData()
 
 

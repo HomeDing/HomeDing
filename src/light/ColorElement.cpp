@@ -125,21 +125,11 @@ bool ColorElement::set(const char *name, const char *value) {
 
 
   } else if (_stricmp(name, "mode") == 0) {
-    if (_stricmp(value, "fade") == 0) {
-      _mode = Mode::fade;
-      _toValue = _value;  // do not start fading without a new value
-
-    } else if (_stricmp(value, "wheel") == 0) {
-      _mode = Mode::wheel;
-
-    } else if (_stricmp(value, "pulse") == 0) {
-      _mode = Mode::pulse;
+    Mode m = (Mode)ListUtils::indexOf("fix,fade,wheel,pulse", value);
+    if ((m >= Mode::_min) && (m <= Mode::_max)) {
+      _mode = m;
       _toValue = _value;
       _startTime = now;
-
-    } else {
-      _mode = Mode::fix;
-      _toValue = _value;
     }  // if
 
   } else if (_stricmp(name, "duration") == 0) {

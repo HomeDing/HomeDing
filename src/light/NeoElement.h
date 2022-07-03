@@ -17,8 +17,7 @@
  * * 28.12.2019 less blocked time in loop()
  */
 
-#ifndef NEOELEMENT_H
-#define NEOELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 #include <light/LightElement.h>
@@ -70,11 +69,15 @@ public:
 
 
   enum class Mode {
-    color = 0,
-    wheel = 1,
-    flow = 2,
+    _min = 0,      // minimum value
+    _default = 0,  // default value
+
+    color = 0,       // take inbound value for output
+    wheel = 2,     // single color output cycling through whole hue cycle
+    flow = 2,      // rainbow colors flowing
     pulse = 3,
-    more
+
+    _max = 3  // maximum value
   };
 
   virtual void show(uint32_t color, int brightness) override;
@@ -83,10 +86,10 @@ private:
   /**
    * @brief The actual mode.
    */
-  Mode _mode;
+  Mode _mode = Mode::color;
 
   /** Number of pixels in the stripe */
-  int _count;
+  int _count = 8;
 
   /** Overall brightness in range 0...100 from LightElement */
 
@@ -110,6 +113,4 @@ private:
 // Register the NeoElement onto the ElementRegistry.
 bool NeoElement::registered =
   ElementRegistry::registerElement("neo", NeoElement::create);
-#endif
-
 #endif

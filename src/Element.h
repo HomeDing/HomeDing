@@ -23,6 +23,8 @@
 #include <memory>
 #include <string.h>
 
+#include <ListUtils.h>
+
 // forward class declarations
 class Board;
 class Element;

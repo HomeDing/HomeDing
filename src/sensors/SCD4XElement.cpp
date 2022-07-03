@@ -19,6 +19,7 @@
 #include <HomeDing.h>
 
 #include <sensors/SCD4XElement.h>
+#include <ListUtils.h>
 
 #include <WireUtils.h>
 
@@ -49,6 +50,11 @@ bool SCD4XElement::set(const char *name, const char *value) {
     // ok.
   } else if (_stricmp(name, "address") == 0) {
     _address = _atoi(value);
+
+  } else if (_stricmp(name, "mode") == 0) {
+    SCANMODE m = (SCANMODE)ListUtils::indexOf("continuous,lowpower,single", value);
+    if ((m >= SCANMODE::_min) && (m <= SCANMODE::_max))
+      _mode = m;
 
   } else if (_stricmp(name, "onCO2") == 0) {
     _actions[0] = value;
@@ -108,10 +114,11 @@ void SCD4XElement::start() {
       TRACE("init");
       SensorElement::start();
 
-      // send initialization sequence, in periodic mode measurement
-      uint8_t buf[2] = { 0x21, 0xb1 };
+      // send re-init sequence
+      uint8_t buf[2] = { 0x36, 0x46 };
       WireUtils::writeBuffer(_address, buf, 2);
-      setWait(5000);  // wait at least 5 seconds
+      setWait(20);  // wait at least 20 milli seconds
+      _state = 0;
 
     }  // if
   }    // if
@@ -120,31 +127,40 @@ void SCD4XElement::start() {
 
 // ===== Sensor functions
 
-/** return true when reading a probe is done.
- * return any existing value or empty for no data could be read.
- * As the sensor needs 2 cycles of measurements for temp and hum the state is used to control this.
- * 0: trigger measurement
- * 1: read status
- * 2: start data
- * */
+/** Return true when reading a probe is done.
+ * Return any existing value or empty for no data could be read.
+ * 0: start meassurement
+ * 1: start read
+ * 2: read
+ */
+
 bool SCD4XElement::getProbe(String &values) {
-  TRACE("getProbe()");
+  TRACE("getProbe(%d)", _state);
   bool newData = false;
   unsigned long now = millis();
 
   if (_state == 0) {
-    // send read data command
-    uint8_t buf[2] = { 0xec, 0x05 };
-    WireUtils::writeBuffer(_address, buf, sizeof(buf));
+    // need start command, send initialization sequence, in periodic mode measurement
+    uint8_t buf[2] = { 0x21, 0xb1 };
+    WireUtils::writeBuffer(_address, buf, 2);
+    setWait(5000);  // wait at least 5 seconds
     _state = 1;
 
   } else if (_state == 1) {
+    // send read data command
+    uint8_t buf[2] = { 0xec, 0x05 };
+    WireUtils::writeBuffer(_address, buf, sizeof(buf));
+    _state = 2;
+    setWait(1);  // wait at least 5 seconds
+
+  } else if (_state == 2) {
     uint8_t data[12];
     uint8_t readLen = WireUtils::readBuffer(_address, data, sizeof(data));
     TRACE("len: %d", readLen);
 
     if (readLen != sizeof(data)) {
-      setWait(1000);  // wait another time to get a valid measurement.
+      LOGGER_EERR("bad size");
+      term();
 
     } else {
       // check all crc data, ignore data with wrong crc
@@ -158,12 +174,17 @@ bool SCD4XElement::getProbe(String &values) {
         snprintf(buffer, sizeof(buffer), "%.0f,%.2f,%.2f", co2, temp, hum);
         values = buffer;
         TRACE("values: %s", buffer);
+        _state = 1;
+      } else {
+        LOGGER_EERR("bad checksum");
+        term();
       }
     }
     newData = true;
-    _state = 0;
+    _state = 1;
   }
   return (newData);
 }  // getProbe()
+
 
 // End

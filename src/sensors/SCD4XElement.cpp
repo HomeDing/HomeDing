@@ -44,6 +44,7 @@ SCD4XElement::SCD4XElement() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool SCD4XElement::set(const char *name, const char *value) {
+  // TRACE("set %s=%s", name, value);
   bool ret = true;
 
   if (SensorElement::set(name, value)) {
@@ -64,6 +65,11 @@ bool SCD4XElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "onHumidity") == 0) {
     _actions[2] = value;
+
+  } else if ((active) && (_stricmp(name, "factoryReset") == 0)) {
+    uint8_t buf[2] = { 0x36, 0x32 };  // factory-init sequence
+    WireUtils::writeBuffer(_address, buf, 2);
+    setWait(1200);  // wait at least 20 milli seconds
 
   } else {
     ret = false;
@@ -100,6 +106,7 @@ uint8_t SCD4XElement::_crc8(uint8_t *data, int len) {
  * @brief Activate the SCD4XElement.
  */
 void SCD4XElement::start() {
+  TRACE("start()");
   if (!_address) {
     LOGGER_EERR("no address");
     term();
@@ -111,7 +118,6 @@ void SCD4XElement::start() {
       term();
 
     } else {
-      TRACE("init");
       SensorElement::start();
 
       // send re-init sequence
@@ -138,22 +144,54 @@ bool SCD4XElement::getProbe(String &values) {
   TRACE("getProbe(%d)", _state);
   bool newData = false;
   unsigned long now = millis();
+  uint8_t buf[2];
+  int waitTime = 0;
 
   if (_state == 0) {
-    // need start command, send initialization sequence, in periodic mode measurement
-    uint8_t buf[2] = { 0x21, 0xb1 };
+    // Send a start command...
+    TRACE("start Mode(%d)", _mode);
+    buf[0] = 0x21;
+    if (_mode == SCANMODE::CONTINUOUS) {
+      buf[1] = 0xb1;  // start periodic measurement
+      waitTime = 5000;
+    } else if (_mode == SCANMODE::LOWPOWER) {
+      buf[1] = 0xac;  // start periodic low power measurement
+      waitTime = 30000;
+    } else if (_mode == SCANMODE::SINGLE) {
+      buf[1] = 0x9d;  // start single measurement mode
+      waitTime = 5000;
+    }
+    setWait(waitTime);
     WireUtils::writeBuffer(_address, buf, 2);
-    setWait(5000);  // wait at least 5 seconds
     _state = 1;
 
   } else if (_state == 1) {
-    // send read data command
-    uint8_t buf[2] = { 0xec, 0x05 };
-    WireUtils::writeBuffer(_address, buf, sizeof(buf));
-    _state = 2;
-    setWait(1);  // wait at least 5 seconds
+    // read data ready
+    uint8_t buf[2] = { 0xe4, 0xb8 };
+    uint8_t data[3];
+
+    WireUtils::writeBuffer(_address, buf, 2);
+    uint8_t readLen = WireUtils::readBuffer(_address, data, sizeof(data));
+
+    TRACE("state: %d, %02x %02x", readLen, data[0], data[1]);
+    if ((data[0] << 8 | data[1]) & 0x07FF) {
+      // data ready
+      _state = 2;
+
+    } else if (now - _startTime < 3000) {
+      setWait(500);  // wait some time for data ...
+
+    } else {
+      // re-init
+      _state = 0;
+    };
 
   } else if (_state == 2) {
+    // send read data command
+
+    uint8_t buf[2] = { 0xec, 0x05 };
+    WireUtils::writeBuffer(_address, buf, sizeof(buf));
+
     uint8_t data[12];
     uint8_t readLen = WireUtils::readBuffer(_address, data, sizeof(data));
     TRACE("len: %d", readLen);
@@ -171,17 +209,21 @@ bool SCD4XElement::getProbe(String &values) {
         float hum = 100 * (float)((uint16_t)data[6] << 8 | data[7]) / 65536;
 
         char buffer[32];
-        snprintf(buffer, sizeof(buffer), "%.0f,%.2f,%.2f", co2, temp, hum);
+        snprintf(buffer, sizeof(buffer), "%.0f, %.2f, %.2f", co2, temp, hum);
         values = buffer;
         TRACE("values: %s", buffer);
-        _state = 1;
+
+        if (_mode != SCANMODE::SINGLE) {
+          _state = 1;
+        } else {
+          _state = 0;
+        }
       } else {
         LOGGER_EERR("bad checksum");
         term();
       }
     }
     newData = true;
-    _state = 1;
   }
   return (newData);
 }  // getProbe()

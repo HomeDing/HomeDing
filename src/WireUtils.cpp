@@ -17,7 +17,8 @@
  */
 
 
-#include "WireUtils.h"
+#include <Arduino.h>
+#include <WireUtils.h>
 
 // activate to get some debug output.
 // #define WIREDUMP

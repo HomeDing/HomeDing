@@ -398,9 +398,9 @@ void Board::loop() {
       digitalWrite(sysLED, HIGH);
     }
 
-    NETTRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
-    NETTRACE("$net=%s", netpass.substring(0, netpass.indexOf(',')).c_str());
-    NETTRACE("resetCount=%d", _resetCount);
+    LOGGER_TRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
+    LOGGER_TRACE("$net=%s", netpass.substring(0, netpass.indexOf(',')).c_str());
+    LOGGER_TRACE("resetCount=%d", _resetCount);
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {

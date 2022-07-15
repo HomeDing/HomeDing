@@ -20,19 +20,14 @@
 
 #include <sensors/SensorElement.h>
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 #define STATE_OFF 0   // just got power on
 #define STATE_WAIT 1  // initialized, warmup or wait time beween probes
 #define STATE_READ 2  // Reading a value
 #define STATE_SEND 3  // Sending Data
 
-
-// setup default timings
-SensorElement::SensorElement() {
-  _actions.reserve(4);
-}  // SensorElement()
-
+SensorElement::SensorElement() { }
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -103,13 +98,13 @@ void SensorElement::loop() {
 
   } else if (_state == STATE_WAIT) {
     _state = STATE_READ;
+    _startTime = now;
 
   } else if (_state == STATE_READ) {
     // time to get sensor data, repeat until returning true
     // TRACE("reading...");
-    bool done = getProbe(value);
 
-    if (done) {
+    if (getProbe(value)) {
       if (value.length() > 0) {
         // it's a valid value from the sensor
         _sensorWorkedOnce = true;
@@ -157,7 +152,7 @@ void SensorElement::pushState(
 
 void SensorElement::setWait(unsigned long waitMilliseconds) {
   TRACE("setWait(%d)", waitMilliseconds);
-  _nextRead =  millis() + waitMilliseconds;
+  _nextRead = millis() + waitMilliseconds;
 }
 
 bool SensorElement::getProbe(UNUSED String &values) {

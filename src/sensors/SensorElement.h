@@ -65,11 +65,12 @@ protected:
   int _valuesCount = 0;  ///< number of values the sensor supports
 
   String _lastValues;  ///< list of sensor values as "val1,val2"
+  unsigned long _startTime;  ///< starting time of a measurement from millis()
 
   String _stateKeys;  ///< list of keys in the state used for sensor values
 
   // The actions for value[0], value[1]
-  std::vector<String> _actions;
+  String _actions[4];
 
   /// set duration for waiting to next communication with the sensor
   virtual void setWait(unsigned long waitMilliseconds);

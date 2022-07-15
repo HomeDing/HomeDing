@@ -16,8 +16,7 @@
  */
 
 
-#ifndef WIREUTILS_H
-#define WIREUTILS_H
+#pragma once
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -62,5 +61,3 @@ public:
   static uint8_t write(uint8_t address, uint8_t reg);
   static uint8_t write(uint8_t address, uint8_t reg, uint8_t data);
 };
-
-#endif

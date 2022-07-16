@@ -152,7 +152,6 @@ bool Board::isCaptiveMode() {
  * @brief
  */
 void Board::_checkNetState() {
-  hd_yield();
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
     NETTRACE("netstate: %d", newState);
@@ -175,7 +174,7 @@ void Board::_addAllElements() {
   MicroJson *mj = new MicroJson(
     [this, &_lastElem](int level, char *path, char *value) {
       // TRACE("callback %d %s =%s", level, path, value ? value : "-");
-      _checkNetState();
+      hd_yield();
 
       if (level == 1) {
 
@@ -219,11 +218,11 @@ void Board::_addAllElements() {
   if (mj) {
     // config the thing to the local network
     mj->parseFile(fileSystem, ENV_FILENAME);
-    _checkNetState();
+    hd_yield();
 
     // config the Elements of the device
     mj->parseFile(fileSystem, CONF_FILENAME);
-    _checkNetState();
+    hd_yield();
   }  // if
 
   delete mj;
@@ -266,10 +265,13 @@ void Board::loop() {
   unsigned long now = millis();
   static String netpass;
 
-  _checkNetState();
+  if (boardState != BOARDSTATE::RUN) {
+    _checkNetState();
+  }
 
   if (boardState == BOARDSTATE::RUN) {
     // Most common state first.
+
 #if defined(ESP8266)
     if (!_isWakeupStart) {
       MDNS.update();
@@ -340,6 +342,7 @@ void Board::loop() {
     }  // if
 
   } else if (boardState == BOARDSTATE::NONE) {
+    // load network connection details
     File f = fileSystem->open(NET_FILENAME, "r");
     if (f) {
       netpass = f.readString();
@@ -359,8 +362,10 @@ void Board::loop() {
       Element *e = ElementRegistry::createElement("ota");
       add("ota/0", e);
     }
+    _checkNetState();
 
     if (state) {
+      // when a state element is configured: use it to load state
       state->load();
     }
 

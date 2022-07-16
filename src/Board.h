@@ -140,7 +140,7 @@ class Board {
   enum BOARDSTATE : int {
     // ===== startup operation states
     NONE = 0,  // unspecified
-    LOAD = 1,  // load configurations and create elements. Start SYS
+    LOAD = 1,  // load configurations and create elements. Start SYS Elements
 
     CONNECT = 2,  // define how to connect, AUTO, PSK or PASSWD
     WAITNET = 3,  // Wait for network connectivity or configuration request.

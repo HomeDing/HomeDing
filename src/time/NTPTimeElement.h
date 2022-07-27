@@ -18,8 +18,9 @@
  * * 05.07.2020 SNTP API adjusted to new standard, see https://github.com/esp8266/Arduino/issues/7392
  */
 
-#ifndef NTPTIMEELEMENT_H
-#define NTPTIMEELEMENT_H
+#pragma once
+
+#include <HomeDing.h>
 
 /**
  * @brief The NTPTimeElement is an special Element that creates actions based on
@@ -80,6 +81,3 @@ private:
 bool NTPTimeElement::registered =
     ElementRegistry::registerElement("ntptime", NTPTimeElement::create);
 #endif
-
-
-#endif // NTPTIMEELEMENT_H

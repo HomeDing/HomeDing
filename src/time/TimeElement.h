@@ -16,8 +16,7 @@
  * * 09.10.2018 created by Matthias Hertel
  */
 
-#ifndef TIMEELEMENT_H
-#define TIMEELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -98,6 +97,3 @@ private:
 bool TimeElement::registered =
     ElementRegistry::registerElement("time", TimeElement::create);
 #endif
-
-
-#endif // TIMEELEMENT_H

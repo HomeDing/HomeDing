@@ -15,7 +15,13 @@ New elements:
 now supporting different sensors using the OneWire protocol.
 
 * **SensorElement** is enhanced to support reporting the state and emitting actions for the sensor values
-  to simplify sensor implementations and save memory
+  to simplify sensor implementations and save overall memory.
+
+Other:
+
+* The Update utility now can delete all files except config files at once using '/api/cleanweb'.
+  This is reducing the need to delete all files individually.
+
 
 ## [0.8.2] - 2022-03-28
 

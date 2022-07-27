@@ -432,11 +432,16 @@ void Board::loop() {
 
 
   } else if (boardState == BOARDSTATE::CONNECT) {
+#if defined(ESP8266)
     // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  // required to set hostname properly
-    WiFi.setHostname(deviceName.c_str());  // for ESP32
     WiFi.mode(WIFI_STA);
-    WiFi.setHostname(deviceName.c_str());  // for ESP8266
-
+    WiFi.setHostname(deviceName.c_str());
+#elif defined(ESP32)
+    WiFi.mode(WIFI_STA);
+    Serial.printf("Default hostname: %s\n", WiFi.hostname().c_str());
+    WiFi.setHostname(deviceName.c_str());  // for ESP32
+    Serial.printf("New hostname: %s\n", WiFi.hostname().c_str());
+#endif
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
 
@@ -880,11 +885,13 @@ time_t Board::getTime() {
 
 // return the seconds of today in localtime.
 time_t Board::getTimeOfDay() {
+  hd_yield();
   time_t ct = time(nullptr);
-  tm lt;
-  if (ct) {
-    localtime_r(&ct, &lt);
-    return ((lt.tm_hour * 60 * 60) + (lt.tm_min * 60) + lt.tm_sec);
+
+  if (ct > 0) {
+    struct tm *lt;
+    lt = localtime(&ct);
+    return ((lt->tm_hour * 60 * 60) + (lt->tm_min * 60) + lt->tm_sec);
   } else {
     return (0);
   }

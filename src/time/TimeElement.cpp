@@ -36,16 +36,14 @@ static const char *TIME_timestampFmt = "%Y-%m-%d %H:%M:%S";
  * @brief static factory function to create a new TimeElement
  * @return TimeElement* created element
  */
-Element *TimeElement::create()
-{
+Element *TimeElement::create() {
   return (new TimeElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
-TimeElement::TimeElement()
-{
+TimeElement::TimeElement() {
   startupMode = Element_StartupMode::Time;
 }
 
@@ -53,8 +51,7 @@ TimeElement::TimeElement()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool TimeElement::set(const char *name, const char *value)
-{
+bool TimeElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, TIME_ontime) == 0) {
@@ -71,16 +68,15 @@ bool TimeElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the TimeElement.
  */
-void TimeElement::start()
-{
+void TimeElement::start() {
   // TRACE("start()");
 
   // set some defaults
@@ -89,40 +85,40 @@ void TimeElement::start()
   _lastDate = 0;
 
   Element::start();
-} // start()
+}  // start()
 
 
 /**
  * @brief check the state of the DHT values and eventually create actions.
  */
-void TimeElement::loop()
-{
-  time_t ct = time(nullptr); // will not return 0, as a TIME element is started after localtime is available.
+void TimeElement::loop() {
+  time_t ct = time(nullptr);  // will not return 0, as a TIME element is started after localtime is available.
 
-  struct tm lt;
-  localtime_r(&ct, &lt);
+  if (ct > 0) {
+    struct tm *lt = localtime(&ct);
 
-  // check for time actions...
-  if (_lastTimestamp != ct) {
-    _sendAction(_timeAction, TIME_timeFmt, &lt);
-    _sendAction(_timestampAction, TIME_timestampFmt, &lt);
-    _lastTimestamp = ct;
-  } // if
+    // check for time actions...
+    if (_lastTimestamp != ct) {
+      _sendAction(_timeAction, TIME_timeFmt, lt);
+      _sendAction(_timestampAction, TIME_timestampFmt, lt);
+      _lastTimestamp = ct;
+    }  // if
 
-  // ignore seconds
-  ct -= (ct % 60);
-  if (_lastMinute != ct) {
-    _sendAction(_minuteAction, TIME_minuteFmt, &lt);
-    _lastMinute = ct;
-  } // if
+    // ignore seconds
+    ct -= (ct % 60);
+    if (_lastMinute != ct) {
+      _sendAction(_minuteAction, TIME_minuteFmt, lt);
+      _lastMinute = ct;
+    }  // if
 
-  // ignore time
-  ct -= (ct % (24 * 60 * 60));
-  if (_lastDate != ct) {
-    _sendAction(_dateAction, TIME_dateFmt, &lt);
-    _lastDate = ct;
-  } // if
-} // loop()
+    // ignore time
+    ct -= (ct % (24 * 60 * 60));
+    if (_lastDate != ct) {
+      _sendAction(_dateAction, TIME_dateFmt, lt);
+      _lastDate = ct;
+    }  // if
+  }
+}  // loop()
 
 
 // ===== private functions =====
@@ -133,14 +129,13 @@ void TimeElement::loop()
  * @param fmt Format for the value.
  * @param tmp the local time
  */
-void TimeElement::_sendAction(String &action, const char *fmt, struct tm *tmp)
-{
+void TimeElement::_sendAction(String &action, const char *fmt, struct tm *tmp) {
   if (action.length()) {
     char b[32];
     strftime(b, sizeof(b), fmt, tmp);
     _board->dispatch(action, b);
-  } // if
-} // _sendAction()
+  }  // if
+}  // _sendAction()
 
 
 // End.

@@ -384,7 +384,7 @@ void listDirectory(MicroJsonComposer &jc, FILESYSTEM *fs, String path, Dir dir) 
       listDirectory(jc, fs, path + name + "/", subDir);
 
     } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
-      // do not report as file
+      // do not report as a file
 
     } else {
       jc.openObject();
@@ -418,13 +418,9 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
     String name = path + entry.name();
 
     if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
-      // do not report as file
+      // do not report as a file
 
     } else if (entry.isDirectory()) {
-      // jc.openObject();
-      // jc.addProperty("type", "dir");
-      // jc.addProperty("name", name);
-      // jc.closeObject();
       handleListFiles(jc, name + "/");
 
     } else {
@@ -442,21 +438,28 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
 
 
 void BoardHandler::handleCleanWeb(String path) {
+  TRACE("handleCleanWeb(%s)", path.c_str());
   FILESYSTEM *fSys = _board->fileSystem;
-  LOGGER_JUSTINFO("handleCleanWeb(%s)", path.c_str());
   // ASSERT: last char of path = '/'
 
   fs::File dir = fSys->open(path, "r");
   while (File entry = dir.openNextFile()) {
     String name = path + entry.name();
-    LOGGER_JUSTINFO("is: %s", name.c_str());
+    TRACE("is: %s", name.c_str());
 
     if (entry.isDirectory()) {
-      LOGGER_JUSTINFO("isDir.");
+      TRACE("isDir.");
       handleCleanWeb((name + "/"));
+
+    } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
+      TRACE("isSecret.");
+
+    } else if (name.indexOf(".json") >= 0) {
+      TRACE("isConfig.");
+
     } else {
-      LOGGER_JUSTINFO("isFile.");
-      // fSys->remove(name);
+      TRACE("isFile.");
+      fSys->remove(name);
     }  // if
   }    // while
 }  // handleCleanWeb()

@@ -34,9 +34,7 @@ To send an action to a element a parameter can be added like:
 @endverbatim
  */
 
-#ifndef BOARDSERVER_H
-#define BOARDSERVER_H
-
+#pragma once
 #include <MicroJsonComposer.h>
 
 /**
@@ -111,9 +109,7 @@ private:
   // list files in filesystem recursively.
   void handleListFiles(MicroJsonComposer &jc, String path);
 
-  // clean out all files in filesystem except config files.
+  // clean out all files in filesystem except config and secret files.
   void handleCleanWeb(String path);
 
 };
-
-#endif

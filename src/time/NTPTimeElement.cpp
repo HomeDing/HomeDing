@@ -84,7 +84,7 @@ bool NTPTimeElement::set(const char *name, const char *value) {
  */
 void NTPTimeElement::start() {
   Element::start();
-  configTime(_timezone.c_str(), _ntpServer.c_str());
+  configTzTime(_timezone.c_str(), _ntpServer.c_str());
 } // start()
 
 void NTPTimeElement::pushState(

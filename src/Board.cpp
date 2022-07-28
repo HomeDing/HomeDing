@@ -438,9 +438,9 @@ void Board::loop() {
     WiFi.setHostname(deviceName.c_str());
 #elif defined(ESP32)
     WiFi.mode(WIFI_STA);
-    Serial.printf("Default hostname: %s\n", WiFi.hostname().c_str());
+    Serial.printf("Default hostname: %s\n", WiFi.getHostname());
     WiFi.setHostname(deviceName.c_str());  // for ESP32
-    Serial.printf("New hostname: %s\n", WiFi.hostname().c_str());
+    Serial.printf("New hostname: %s\n", WiFi.getHostname());
 #endif
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);

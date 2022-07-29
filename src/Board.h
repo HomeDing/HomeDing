@@ -167,6 +167,11 @@ public:
 
   // ----- Time functionality -----
 
+  /** The result of the millis() function at the start of loop().
+   * This can be used for all time / durtion calculations except high precission ones.
+   */
+  unsigned long nowMillis;
+
   /**
    * return the seconds since starting the device.
    */

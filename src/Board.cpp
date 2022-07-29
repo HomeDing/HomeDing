@@ -260,10 +260,11 @@ void Board::_newState(enum BOARDSTATE newState) {
   boardState = newState;
 }
 
-// loop next element, only one at a time!
+// loop next element, only one at a time! 
 void Board::loop() {
-  unsigned long now = millis();
   static String netpass;
+  
+  nowMillis = millis();
 
   if (boardState != BOARDSTATE::RUN) {
     _checkNetState();
@@ -332,7 +333,7 @@ void Board::loop() {
       _cntDeepSleep++;
 
       // deep sleep specified time.
-      if ((now > _deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
+      if ((nowMillis > _deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
         // all elements now had the chance to create and dispatch an event.
         LOGGER_INFO("sleep %d...", _deepSleepTime);
         Serial.flush();
@@ -428,7 +429,7 @@ void Board::loop() {
     }
 
     // wait at least some seconds for offering config mode
-    configPhaseEnd = now + minConfigTime;
+    configPhaseEnd = nowMillis + minConfigTime;
 
 
   } else if (boardState == BOARDSTATE::CONNECT) {
@@ -476,13 +477,13 @@ void Board::loop() {
     }  // if
 
     // wait some(12) seconds for connecting to the network
-    connectPhaseEnd = now + maxNetConnextTime;
+    connectPhaseEnd = nowMillis + maxNetConnextTime;
 
   } else if ((boardState == BOARDSTATE::WAITNET) || (boardState == BOARDSTATE::WAIT)) {
     // make sysLED blink.
     // short pulses for normal=safemode, long pulses for unsafemode.
     if (sysLED >= 0) {
-      digitalWrite(sysLED, (now % 700) > (isSafeMode ? 100 : 600) ? HIGH : LOW);
+      digitalWrite(sysLED, (nowMillis % 700) > (isSafeMode ? 100 : 600) ? HIGH : LOW);
     }  // if
 
     // check sysButton
@@ -497,11 +498,11 @@ void Board::loop() {
         _newState(BOARDSTATE::WAIT);
       }  // if
 
-      if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (now > connectPhaseEnd)) {
+      if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (nowMillis > connectPhaseEnd)) {
 
         if (!connectPhaseEnd) {
           // no TRACE;
-        } else if (now > connectPhaseEnd) {
+        } else if (nowMillis > connectPhaseEnd) {
           NETTRACE("timed out.");
         } else {
           NETTRACE("wifi status=(%d)", _wifi_status);
@@ -522,7 +523,7 @@ void Board::loop() {
     }      // if
 
     if (boardState == BOARDSTATE::WAIT) {
-      if (_isWakeupStart || (now >= configPhaseEnd)) {
+      if (_isWakeupStart || (nowMillis >= configPhaseEnd)) {
         _newState(BOARDSTATE::GREET);
       }
     }  // if
@@ -652,7 +653,7 @@ void Board::loop() {
     server->begin();
 
     _newState(BOARDSTATE::RUNCAPTIVE);
-    _captiveEnd = now + (5 * 60 * 1000);
+    _captiveEnd = nowMillis + (5 * 60 * 1000);
 
   } else if (boardState == BOARDSTATE::RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
@@ -660,10 +661,10 @@ void Board::loop() {
 
     // make sysLED blink 3 sec with a short flash.
     if (sysLED >= 0) {
-      digitalWrite(sysLED, ((now % 3000) > 120) ? HIGH : LOW);
+      digitalWrite(sysLED, ((nowMillis % 3000) > 120) ? HIGH : LOW);
     }  // if
 
-    if (now > _captiveEnd)
+    if (nowMillis > _captiveEnd)
       reboot(false);
   }  // if
 }  // loop()

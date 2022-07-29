@@ -1,6 +1,6 @@
 /**
  * @file BL0937Element.h
- * @brief Element to calculate voltage, current and power consumption using the BL0937 chip.
+ * @brief Element to calculate voltage, current and power consumption using a BL0937 chip.
  * 
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,19 +15,11 @@
  * * 02.11.2020 created by Matthias Hertel
  */
 
-#ifndef BL0937ELEMENT_H
-#define BL0937ELEMENT_H
+#pragma once
 
 /**
- * @brief BL0937Element implements...
- * @details
-@verbatim
-
-The BL0937Element can ...
-
-@endverbatim
+ * @brief BL0937Element implements calculating voltage, current and power consumption using a BL0937 chip.
  */
-
 class BL0937Element : public Element
 {
 public:
@@ -59,7 +51,7 @@ public:
   virtual void start() override;
 
   /**
-   * @brief Give some processing time to the timer to check for next action.
+   * @brief Give some processing time check for actions.
    */
   virtual void loop() override;
 
@@ -109,7 +101,4 @@ private:
 // Register the BL0937Element onto the ElementRegistry.
 bool BL0937Element::registered =
     ElementRegistry::registerElement("bl0937", BL0937Element::create);
-#endif
-
-
 #endif

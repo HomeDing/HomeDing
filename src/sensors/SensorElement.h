@@ -98,6 +98,9 @@ private:
   /** remember that the sensor worked at least once so restart with power pin may help */
   bool _sensorWorkedOnce = false;
 
-  unsigned long _nextRead = 0;  ///< time for next sensor reading
+  unsigned long _waitStart = 0;  ///< time when waiting was started
+  unsigned long _waitDuration = 0;  ///< time to wait (milliseconds)
+
+  unsigned long _lastRead = 0;  ///< time of last sensor reading
   unsigned long _nextSend = 0;  ///< time for next value re-sending
 };

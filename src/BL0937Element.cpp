@@ -19,7 +19,7 @@
 
 #include <BL0937Element.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 // ===== meassuring power consumption (CF pin) =====
 
@@ -27,6 +27,16 @@
 volatile unsigned long powSigStart;
 volatile unsigned long powSigLast;
 volatile unsigned int powSigCnt = 0;
+
+// ===== meassuring power consumption in Wh (CF pin) =====
+
+volatile unsigned long energyCount = 0;  // counting PowerSignal pulses
+unsigned long energyDayStart = 0;        // start of reporting day.
+time_t energyDate = 0;                   // start of reporting day.
+
+// the power pulse count (onPowerSignal) is directly proportional to energy.
+// x [W] = (_powerFactor * _powerCount) / _powerDuration [nsec];
+// x [Wh] = (_powerFactor * energyCount / 3600) / 1000000;
 
 // ===== meassuring current/voltage (CF1 pin) =====
 
@@ -36,8 +46,7 @@ volatile unsigned long cf1SigLast;
 volatile unsigned int cf1SigCnt = 0;
 
 // interrupt routine for power measurement. increment power counter and set exact cycle time.
-IRAM_ATTR void onPowerSignal()
-{
+IRAM_ATTR void onPowerSignal() {
   unsigned long now = micros();
   if (!powSigStart) {
     powSigStart = now;
@@ -45,13 +54,13 @@ IRAM_ATTR void onPowerSignal()
   } else {
     powSigCnt++;
   }
+  energyCount++;
   powSigLast = now;
-} // onPowerSignal
+}  // onPowerSignal
 
 
 // interrupt routine for current measurement. increment counter and set exact cycle time.
-IRAM_ATTR void onCF1Signal()
-{
+IRAM_ATTR void onCF1Signal() {
   unsigned long now = micros();
   if (!cf1SigStart) {
     cf1SigStart = now;
@@ -60,7 +69,7 @@ IRAM_ATTR void onCF1Signal()
     cf1SigCnt++;
   }
   cf1SigLast = now;
-} // onCF1Signal
+}  // onCF1Signal
 
 
 /* ===== Static factory function ===== */
@@ -69,10 +78,9 @@ IRAM_ATTR void onCF1Signal()
  * @brief static factory function to create a new BL0937Element
  * @return BL0937Element* created element
  */
-Element *BL0937Element::create()
-{
+Element *BL0937Element::create() {
   return (new BL0937Element());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -80,19 +88,15 @@ Element *BL0937Element::create()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool BL0937Element::set(const char *name, const char *value)
-{
+bool BL0937Element::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, "mode") == 0) {
-    if (_stricmp(value, "current") == 0) {
-      _voltageMode = LOW;
-    } else if (_stricmp(value, "voltage") == 0) {
-      _voltageMode = HIGH;
-    }
+    _voltageMode = (_stricmp(value, "current") != 0);
+
     if (active) {
       digitalWrite(_pinSel, _voltageMode);
-      powSigStart = 0; // start new cycle.
+      powSigStart = 0;  // start new cycle.
     }
 
   } else if (_stricmp(name, "selpin") == 0) {
@@ -139,17 +143,16 @@ bool BL0937Element::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
-/** 
+/**
  * @brief Activate the BL0937Element.
  */
-void BL0937Element::start()
-{
+void BL0937Element::start() {
   // TRACE("start()");
 
   if ((_pinSel < 0) || (_pinCF < 0) || (_pinCF1 < 0)) {
@@ -166,76 +169,91 @@ void BL0937Element::start()
     digitalWrite(_pinSel, _voltageMode);
 
     // start powerCounting
-    powSigStart = 0; // start new cycle.
+    powSigStart = 0;  // start new cycle.
     _cycleStart = now;
-    attachInterrupt(_pinCF, onPowerSignal, FALLING);
 
+    // start powerCounting per day
+    time_t timeOfDay = Board::getTimeOfDay();
+    energyCount = 0;
+    energyDate = time(nullptr) - timeOfDay;
+    energyDayStart = _board->nowMillis - (timeOfDay * 1000);
+
+    attachInterrupt(_pinCF, onPowerSignal, FALLING);
     attachInterrupt(_pinCF1, onCF1Signal, FALLING);
 
-    // if (parameters ok) {
     Element::start();
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
-/**
- * @brief Give some processing time to the Element to check for next actions.
- */
-void BL0937Element::loop()
-{
-  // do something
-  unsigned long now = millis();
+/** Give some processing time check for actions. */
+void BL0937Element::loop() {
 
-  if (now - _cycleStart > _cycleTime) {
-    unsigned long newValue = 0;
-    unsigned long newCurrentValue = 0;
-    unsigned long newVoltageValue = 0;
+  // Last day is over.
+  if ((_board->nowMillis - energyDayStart) > (24 * 60 * 60 * 1000)) {
+    // report day power consumption by resporting the pulse counts of the day
+    // as pulse are proportional to the used energy.
+
+    float f = _powerFactor / 3600 / 1000000;
+    float wh = energyCount * f;
+    LOGGER_EINFO("last day energy: %d,%f", energyDate, wh);
+    // board->dispatch(wh)
+
+    // start powerCounting per day
+    time_t timeOfDay = Board::getTimeOfDay();
+    energyCount = 0;
+    energyDate = time(nullptr) - timeOfDay;
+    energyDayStart = _board->nowMillis - (timeOfDay * 1000);
+  }  // if
+
+
+  // Cycle is over.
+  if (_board->nowMillis - _cycleStart > _cycleTime) {
+    unsigned long newPowerValue = 0;
+    unsigned long newVAValue = 0;  // voltage or Ampere
 
     // report new power value:
     if (powSigCnt > 2) {
       _powerCount = powSigCnt;
       _powerDuration = (powSigLast - powSigStart);
-      newValue = (_powerFactor * _powerCount) / _powerDuration;
+      newPowerValue = (_powerFactor * _powerCount) / _powerDuration;
     }
-    if (_powerValue != newValue) {
-      _board->dispatch(_powerAction, newValue);
+    if (_powerValue != newPowerValue) {
+      _board->dispatch(_powerAction, newPowerValue);
     }
-    _powerValue = newValue;
-    powSigStart = 0; // start new cycle.
+    _powerValue = newPowerValue;
+    powSigStart = 0;  // start new cycle.
 
     // report new cf1 value:
     _cf1Count = cf1SigCnt;
     _cf1Duration = (cf1SigLast - cf1SigStart);
+
     if (cf1SigCnt > 2) {
-      if (_voltageMode) {
-        newVoltageValue = (_voltageFactor * _cf1Count) / _cf1Duration;
-
-      } else {
-        newCurrentValue = (_currentFactor * _cf1Count) / _cf1Duration;
-      } // if
+      newVAValue = ((_voltageMode ? _voltageFactor : _currentFactor) * _cf1Count) / _cf1Duration;
     }
-    if (_voltageValue != newVoltageValue) {
-      _board->dispatch(_voltageAction, newVoltageValue);
-      _voltageValue = newVoltageValue;
-    } // if
 
-    if (_currentValue != newCurrentValue) {
-      _board->dispatch(_currentAction, newCurrentValue);
-      _currentValue = newCurrentValue;
-    } // if
+    if (_voltageValue != newVAValue) {
+      _board->dispatch(_voltageAction, newVAValue);
+      _voltageValue = newVAValue;
+    }  // if
 
-    cf1SigStart = 0; // start new cycle.
-    _cycleStart = now;
-  }
-} // loop()
+    if (_currentValue != newVAValue) {
+      _board->dispatch(_currentAction, newVAValue);
+      _currentValue = newVAValue;
+    }  // if
+
+    cf1SigStart = 0;  // start new cycle.
+    _cycleStart = _board->nowMillis;
+  }  // if
+
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void BL0937Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
 
   // report actual cycletime and mode
@@ -246,7 +264,11 @@ void BL0937Element::pushState(
   callback("power", _printInteger(_powerValue));
   callback("powerfactor", String(_powerFactor).c_str());
 
-  if (_voltageMode == HIGH) {
+  float f = _powerFactor / 3600 / 1000000;
+  float wh = energyCount * f;
+  callback("energy", String(wh).c_str());
+
+  if (_voltageMode) {
     // report actual current and factor in use.
     callback("voltage", _printInteger(_voltageValue));
     callback("voltagefactor", String(_voltageFactor).c_str());
@@ -256,6 +278,6 @@ void BL0937Element::pushState(
     callback("current", _printInteger(_currentValue));
     callback("currentfactor", String(_currentFactor).c_str());
   }
-} // pushState()
+}  // pushState()
 
 // End

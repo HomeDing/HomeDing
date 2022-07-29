@@ -50,6 +50,11 @@
     "events": ["on", "off", "value"]
   },
 
+  "touch": {
+    "properties": ["pin", "reference"],
+    "actions": ["onvalue", "onhigh", "onlow"]
+  },
+
   "displaydot": {
     "sys": "false",
     "properties": ["page", "x", "y"],
@@ -160,17 +165,29 @@
   },  
 
   "dht": {
-    "properties": ["type", "pin", "readtime", "warmuptime", "resendtime", "restart"],
+    "properties": ["pin", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["ontemperature", "onhumidity"]
+  },
+
+  "aht20": {
+    "icon": "dht",
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["ontemperature", "onhumidity"]
+  },
+
+  "am2320": {
+    "icon": "dht",
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onhumidity"]
   },
 
   "sht20": {
     "icon": "dht",
-    "properties": ["type", "address", "readtime", "warmuptime", "resendtime", "restart"],
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onhumidity"]
   },
 
-  "ds18b20": {
+  "dallas": {
     "properties": ["pin", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature"]
   },
@@ -184,6 +201,12 @@
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onpressure"]
   },  
+
+  "scd4x": {
+    "icon": "dht",
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["ontemperature", "onhumidity", "onco2"]
+  },
 
   "pms": {
     "properties": ["pinrx", "pintx", "readtime", "warmuptime", "resendtime", "restart"],

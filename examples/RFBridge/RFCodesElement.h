@@ -19,8 +19,7 @@
  * * 08.04.2021 include receiving RF codes.
  */
 
-#ifndef RFCodesElement_H_
-#define RFCodesElement_H_
+#pragma once
 
 #include <HomeDing.h>
 
@@ -123,6 +122,3 @@ private:
 bool RFCodesElement::registered =
     ElementRegistry::registerElement("rfcodes", RFCodesElement::create);
 // #endif
-
-
-#endif // RFCodesElement_H_

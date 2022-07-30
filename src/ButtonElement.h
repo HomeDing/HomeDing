@@ -24,8 +24,7 @@
  * * 18.08.2019 Remote actions
  */
 
-#ifndef BUTTON_H
-#define BUTTON_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -127,5 +126,3 @@ private:
 bool ButtonElement::registered =
     ElementRegistry::registerElement("button", ButtonElement::create);
 #endif
-
-#endif // BUTTON_H

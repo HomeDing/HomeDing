@@ -89,10 +89,7 @@ bool ButtonElement::set(const char *name, const char *value)
  */
 void ButtonElement::loop()
 {
-  unsigned long now = millis(); // current (relative) time in msecs.
-
-  // if (_state != STATE_INIT)
-  //   TRACE("loop-%d)", _state);
+  unsigned long now = _board->nowMillis; // current (relative) time in msecs.
 
   // state machine
   if (_state == STATE_INIT) { // waiting for menu pin being pressed.
@@ -126,7 +123,6 @@ void ButtonElement::loop()
 
     } else if (_inputLevel) {
       _state = STATE_HIGH2;
-      // _startTime = now; // remember starting time
     } // if
 
   } else if (_state == STATE_HIGH2) { // waiting for menu pin being released finally.

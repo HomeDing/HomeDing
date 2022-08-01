@@ -92,6 +92,7 @@ private:
   String _powerAction; // Actions with power consumption
   String _currentAction; // Actions with current value
   String _voltageAction; // Actions with voltage value
+  String _energyAction; // Actions with energy value of last period (day)
 };
 
 

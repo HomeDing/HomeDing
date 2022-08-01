@@ -31,8 +31,9 @@ volatile unsigned int powSigCnt = 0;
 // ===== meassuring power consumption in Wh (CF pin) =====
 
 volatile unsigned long energyCount = 0;  // counting PowerSignal pulses
-unsigned long energyDayStart = 0;        // start of reporting day.
-time_t energyDate = 0;                   // start of reporting day.
+
+time_t energyDate = 0;                 // start of reporting day.
+unsigned long energyCountLastDay = 0;  // from yesterday
 
 // the power pulse count (onPowerSignal) is directly proportional to energy.
 // x [W] = (_powerFactor * _powerCount) / _powerDuration [nsec];
@@ -141,6 +142,9 @@ bool BL0937Element::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onvoltage") == 0) {
     _voltageAction = value;
 
+  } else if (_stricmp(name, "onEnergy") == 0) {
+    _energyAction = value;
+
   } else {
     ret = Element::set(name, value);
   }  // if
@@ -173,15 +177,24 @@ void BL0937Element::start() {
     _cycleStart = now;
 
     // start powerCounting per day
-    time_t timeOfDay = Board::getTimeOfDay();
     energyCount = 0;
-    energyDate = time(nullptr) - timeOfDay;
-    energyDayStart = _board->nowMillis - (timeOfDay * 1000);
+    energyDate = time(nullptr) - Board::getTimeOfDay();
 
     attachInterrupt(_pinCF, onPowerSignal, FALLING);
     attachInterrupt(_pinCF1, onCF1Signal, FALLING);
 
     Element::start();
+
+// TODO: remove debug entpoint...
+    _board->server->on("/bl", HTTP_GET, [this]() {
+      String ret;
+      ret += "time: " + String(time(nullptr)) + "\n";
+      ret += "tod: " + String(Board::getTimeOfDay()) + "\n";
+      ret += "energyDate: " + String(energyDate) + "\n";
+      ret += "d: " + String(time(nullptr) - energyDate);
+      _board->server->send(200, "text/plain", ret.c_str());
+    });
+
   }  // if
 }  // start()
 
@@ -190,20 +203,20 @@ void BL0937Element::start() {
 void BL0937Element::loop() {
 
   // Last day is over.
-  if ((_board->nowMillis - energyDayStart) > (24 * 60 * 60 * 1000)) {
+  if ((time(nullptr) - energyDate) > (24 * 60 * 60)) {
     // report day power consumption by resporting the pulse counts of the day
     // as pulse are proportional to the used energy.
 
-    float f = _powerFactor / 3600 / 1000000;
-    float wh = energyCount * f;
-    LOGGER_EINFO("last day energy: %d,%f", energyDate, wh);
-    // board->dispatch(wh)
+    energyCountLastDay = energyCount;
+
+    float energyFactor = _powerFactor / 3600 / 1000000;
+    float wh = energyCount * energyFactor;
+    TRACE("last day energy: %d,%energyFactor", energyDate, wh);
+    _board->dispatch(_energyAction, String(wh));
 
     // start powerCounting per day
-    time_t timeOfDay = Board::getTimeOfDay();
     energyCount = 0;
-    energyDate = time(nullptr) - timeOfDay;
-    energyDayStart = _board->nowMillis - (timeOfDay * 1000);
+    energyDate = time(nullptr) - Board::getTimeOfDay();
   }  // if
 
 
@@ -264,9 +277,9 @@ void BL0937Element::pushState(
   callback("power", _printInteger(_powerValue));
   callback("powerfactor", String(_powerFactor).c_str());
 
-  float f = _powerFactor / 3600 / 1000000;
-  float wh = energyCount * f;
-  callback("energy", String(wh).c_str());
+  float energyFactor = _powerFactor / 3600 / 1000000;
+  callback("energy", String(energyCount * energyFactor).c_str());
+  callback("lastDay", String(energyCountLastDay * energyFactor).c_str());
 
   if (_voltageMode) {
     // report actual current and factor in use.

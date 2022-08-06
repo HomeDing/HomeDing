@@ -29,13 +29,26 @@ LightElement::LightElement() {
 }
 
 
-void LightElement::show(uint32_t color, int brightness) {
-  TRACE("show(x%08x, %d)", color, brightness);
+void LightElement::setColors(uint32_t *color, int brightness) {
+  // just take the first in the array as default.
+  setColor(*color, brightness);
+} // setColors
+
+
+// set output
+void LightElement::setColor(uint32_t color, int brightness) {
+  TRACE("setColor(#%08x, %d)", color, brightness);
+  char colBuffer[16];
 
   brightness = constrain(brightness, 0, 100);
   _brightness = brightness;
 
-  value = "#" + String(color, 16);
+  snprintf(colBuffer, sizeof(colBuffer), "#%08x", color);
+  value = colBuffer;
+
+  if (!enabled) {
+    color = 0;
+  }
 
   for (int n = _count - 1; n >= 0; n--) {
     int c = color & 0x00FF;
@@ -49,7 +62,7 @@ void LightElement::show(uint32_t color, int brightness) {
     TRACE("%d pin=%d value=%02x", n, _pins[n], c);
     color = color >> 8;
   }  // for
-}  // show()
+}  // setColor()
 
 
 /* ===== Static factory function ===== */
@@ -72,7 +85,7 @@ bool LightElement::set(const char *name, const char *pValue) {
   bool ret = true;
   TRACE("set %s=%s", name, pValue);
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     value = pValue;
     needUpdate = true;
 
@@ -80,12 +93,12 @@ bool LightElement::set(const char *name, const char *pValue) {
     enabled = _atob(pValue);
     needUpdate = true;
 
-  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
+  } else if (_stricmp(name, "brightness") == 0) {
     _brightness = _atoi(pValue);
     _brightness = constrain(_brightness, 0, 100);
     needUpdate = true;
 
-  } else if (_stricmp(name, PROP_PIN) == 0) {
+  } else if (_stricmp(name, "pin") == 0) {
     _count = 0;
     while (_count < LightElement::MAXPINS) {
       String p = getItemValue(pValue, _count);
@@ -135,14 +148,8 @@ void LightElement::start() {
 _ */
 void LightElement::loop() {
   if (needUpdate) {
-    // send value to show() from setup or dispatched event
-    if (!enabled) {
-      show(0x00000000, _brightness);
-
-    } else {
-      uint32_t col = _atoColor(value.c_str());
-      show(col, _brightness);
-    }
+    uint32_t col = _atoColor(value.c_str());
+    setColor(col, _brightness);
     needUpdate = false;
   }  // if
 }  // loop()

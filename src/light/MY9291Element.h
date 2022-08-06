@@ -67,7 +67,7 @@ public:
   /**
    * @brief direct function to show a color and brightness.
    */
-  virtual void show(uint32_t color, int brightness);
+  virtual void setColor(uint32_t color, int brightness);
 
 private:
     // _pins[0] is used as datapin
@@ -84,7 +84,7 @@ bool MY9291Element::registered =
 #endif
 
 #elif defined(ESP32)
-// TODO:ESP32 require implementation ?
+// No ESP32 based devices known with this chip.
 #endif
 
 #endif // MY9291ELEMENT_H

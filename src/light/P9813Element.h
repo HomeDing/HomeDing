@@ -60,7 +60,7 @@ public:
   /**
    * @brief direct function to show a color and brightness.
    */
-  virtual void show(uint32_t color, int brightness);
+  virtual void setColor(uint32_t color, int brightness);
 
   /**
    * @brief push the current value of all properties to the callback.

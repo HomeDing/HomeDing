@@ -80,7 +80,7 @@ public:
     _max = 3  // maximum value
   };
 
-  virtual void show(uint32_t color, int brightness) override;
+  virtual void setColor(uint32_t color, int brightness) override;
 
 private:
   /**

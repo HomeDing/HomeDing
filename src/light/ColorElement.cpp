@@ -137,7 +137,15 @@ bool ColorElement::set(const char *name, const char *value) {
     _duration = _scanDuration(value);
 
   } else if (_stristartswith(name, "elements[")) {
-    // direct linked element
+    // TODO: remove deprecated property in favor of "connect"
+
+    Element *e = _board->getElementById(value);
+    if (e) {
+      _lightElements.push_back(static_cast<LightElement *>(e));
+    }
+
+  } else if (_stristartswith(name, "connect[")) {
+    // direct connected element
 
     Element *e = _board->getElementById(value);
     if (e) {
@@ -251,7 +259,7 @@ void ColorElement::loop() {
     // send to linked light elements
     int num = _lightElements.size();
     for (int n = 0; n < num; n++) {
-      _lightElements[n]->show(nextValue, _brightness);
+      _lightElements[n]->setColor(nextValue, _brightness);
     }
 
     // dispatch as action

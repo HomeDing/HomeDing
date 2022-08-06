@@ -20,16 +20,20 @@
 #include <light/NeoElement.h>
 
 
-void NeoElement::show(uint32_t color, int brightness) {
-  // TRACE("show(x%08x, %d)", color, brightness);
+void NeoElement::setColor(uint32_t color, int brightness) {
+  // TRACE("setColor(x%08x, %d)", color, brightness);
 
   // set _brightness and value of base class LightElement
-  LightElement::show(color, brightness);
+  LightElement::setColor(color, brightness);
+
+  if (!enabled) {
+    color = 0;
+  }
 
   _strip->setBrightness(_brightness * 255 / 100);
   _strip->fill(color);
   _strip->show();
-}  // show()
+}  // setColor()
 
 
 void NeoElement::_setColors(String colList) {

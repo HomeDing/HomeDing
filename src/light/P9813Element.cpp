@@ -88,10 +88,10 @@ void P9813Element::sendPixelData(const uint32_t data)
 } // sendPixelData()
 
 
-void P9813Element::show(uint32_t color, int brightness) {
-  LightElement::show(color, brightness);
+void P9813Element::setColor(uint32_t color, int brightness) {
+  LightElement::setColor(color, brightness);
 
-  // LOGGER_JUSTINFO("show %s, %d", value, _brightness);
+  // LOGGER_JUSTINFO("setColor %s, %d", value, _brightness);
 
   // Start frame
   sendPixelData(0x00000000);

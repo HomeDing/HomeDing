@@ -25,7 +25,7 @@
 
 my92xx *_my92xx;
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -39,28 +39,25 @@ my92xx *_my92xx;
  * @brief static factory function to create a new MY9291Element
  * @return MY9291Element* created element
  */
-Element *MY9291Element::create()
-{
+Element *MY9291Element::create() {
   return (new MY9291Element());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
 
-void MY9291Element::init(Board *board)
-{
+void MY9291Element::init(Board *board) {
   LightElement::init(board);
   DI_PIN = 4;
   DCKI_PIN = 5;
-} // init()
+}  // init()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool MY9291Element::set(const char *name, const char *value)
-{
+bool MY9291Element::set(const char *name, const char *value) {
   LOGGER_INFO("set %s=%s", name, value);
 
   bool ret = LightElement::set(name, value);
@@ -72,32 +69,33 @@ bool MY9291Element::set(const char *name, const char *value)
 
   } else if (_stricmp(name, "clockpin") == 0) {
     DCKI_PIN = _atopin(value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the MY9291Element.
  */
-void MY9291Element::start()
-{
+void MY9291Element::start() {
   // Verify parameters
   if ((DI_PIN >= 0) && (DCKI_PIN >= 0)) {
     if (!_my92xx) {
       _my92xx = new my92xx(MY92XX_MODEL_MY9291, 1, DI_PIN, DCKI_PIN, MY92XX_COMMAND_DEFAULT);
     }
     LightElement::start();
-  } // if
+  }  // if
 
-} // start()
+}  // start()
 
 
-void MY9291Element::show(uint32_t color, int brightness)
-{
-  LightElement::show(color, brightness);
+void MY9291Element::setColor(uint32_t color, int brightness) {
+  LightElement::setColor(color, brightness);
 
+  if (!enabled) {
+    color = 0;
+  }
   int white = (color & 0xFF000000) >> 24;
   int red = (color & 0x00FF0000) >> 16;
   int green = (color & 0x0000FF00) >> 8;
@@ -109,6 +107,6 @@ void MY9291Element::show(uint32_t color, int brightness)
   _my92xx->setChannel(2, blue * _brightness / 100);
   _my92xx->setChannel(3, white);
   _my92xx->update();
-} // setOutput()
+}  // setOutput()
 
 #endif

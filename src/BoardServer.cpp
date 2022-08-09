@@ -178,10 +178,13 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 #endif
 {
+  // LOGGER_JUSTINFO("HTTP: > %s", requestUri.c_str());
   bool can = ((requestMethod == HTTP_GET)              // only GET requests in the API
-              && (requestUri.startsWith(SVC_ANY)       // old api entries
+              &&      (requestUri.startsWith(SVC_ANY)       // old api entries
                   || requestUri.startsWith(API_ROUTE)  // new api entries
-                  || (requestUri == "/")));            // handle redirect
+                  || (requestUri == "/")            // handle redirect
+                  || (_board->isCaptiveMode())));  // capt
+
   return (can);
 }  // canHandle
 
@@ -319,41 +322,41 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     output = ElementRegistry::list();
     output_type = TEXT_JSON;
 
-  } else if (uri == "/") {
+  } else if ((uri == "/") && (!_board->isCaptiveMode())) {
     // handle a redirect to the defined homepage or system system / update
-    TRACE("Redirect...");
-    String url;
-
-    if (_board->isCaptiveMode()) {
-      url = "http://";
-      url.concat(WiFi.softAPIP().toString());  // _board->deviceName
-      url.concat("/$setup");
-
-    } else {
-      url = _board->homepage;
+    LOGGER_JUSTINFO("Redirect...");
+    String url = _board->homepage;
 
 #if defined(ESP8266)
-      FSInfo fsi;
-      fs->info(fsi);
-      if (fsi.usedBytes < 18000) {
-        // assuming UI files not installed
-        url = PAGE_UPDATE_VERS;
-        if (fsi.totalBytes < 500000) {
-          // small file system
-          url.concat('m');
-        }
+    FSInfo fsi;
+    fs->info(fsi);
+    if (fsi.usedBytes < 18000) {
+      // assuming UI files not installed
+      url = PAGE_UPDATE_VERS;
+      if (fsi.totalBytes < 500000) {
+        // small file system
+        url.concat('m');
       }
+    }
 
 #elif defined(ESP32)
-      if (fs->usedBytes() < 18000) {
-        // assuming UI files not installed
-        url = PAGE_UPDATE_VERS;
-      }
+    if (fs->usedBytes() < 18000) {
+      // assuming UI files not installed
+      url = PAGE_UPDATE_VERS;
+    }
 #endif
 
-    }  // if
     server.sendHeader("Location", url, true);
     server.send(302);
+
+  } else if (_board->isCaptiveMode()) {
+    // Handle Redirect in Captive Portal Mode
+    // redirect requests like "/generate_204", "/gen_204", "/chat", /connecttest.txt
+    // to WIFI setup dialog /$setup
+
+    String url = "/$setup";
+    server.sendHeader("Location", url, true);
+    server.send(302);  // Found
 
   } else {
     TRACE("uri:%s", uri.c_str());

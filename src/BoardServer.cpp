@@ -49,7 +49,7 @@
 #define API_ROUTE "/api/"
 
 // integrated htm files
-#define PAGE_UPDATE_VERS "/$update.htm#v03"
+#define PAGE_UPDATE_VERS "/$update.htm#v09"
 
 // Content types for http results
 #define TEXT_JSON "application/json; charset=utf-8"  // Content type for JSON.

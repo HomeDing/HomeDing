@@ -60,10 +60,11 @@ bool SensorElement::set(const char *name, const char *value) {
  * @brief Activate the SensorElement.
  */
 void SensorElement::start() {
+  TRACE("start()");
   unsigned int now = millis();
   Element::start();
 
-  _sensorWorkedOnce = false;
+  // _sensorWorkedOnce = false;
   _state = STATE_WAIT;
   _lastRead = now + _warmupTime - _readTime;  // now + some seconds. allowing the sensor to get values.
   _nextSend = 0;
@@ -76,6 +77,7 @@ void SensorElement::start() {
  * It reactivates the element when specified by restart property.
  */
 void SensorElement::term() {
+  TRACE("term()");
   Element::term();
   if (_state == STATE_READ && _sensorWorkedOnce && _restart) {
     // term() was initiated by sensor element and retry is configured.

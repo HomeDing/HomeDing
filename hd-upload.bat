@@ -3,6 +3,8 @@ echo.
 echo [1mHomeDing Firmware OTA upload utility.[0m
 echo.
 
+set _binfolder=.\bin
+
 set ESPTOOLS=
 if EXIST "%LOCALAPPDATA%\Arduino15\packages\esp8266\hardware\esp8266\3.0.2\tools" ( set ESPTOOLS="%LOCALAPPDATA%\Arduino15\packages\esp8266\hardware\esp8266\3.0.2\tools")
 if EXIST "%USERPROFILE%\Projects\Arduino\Sketches\Hardware\esp8266com\esp8266\tools" ( set ESPTOOLS="%USERPROFILE%\Projects\Arduino\Sketches\Hardware\esp8266com\esp8266\tools")
@@ -24,13 +26,10 @@ if DEFINED _help (
   echo.
 )
 
-echo %1/%2/%3/%4/%5
 set _pass=123
-
 if [%1]==[-p] ( set _pass=%2 & shift /1 & shift /1 )
 
 echo %_pass%
-echo %1/%2/%3/%4/%5
 
 set devicename=%1
 set firmware=%2
@@ -51,7 +50,7 @@ if NOT DEFINED firmware (
   )
 
 ) ELSE (
-  FOR %%F IN (.\bin\%firmware%*.bin) DO (
+  FOR %%F IN (%_binfolder%\%firmware%*.bin) DO (
     echo [37m  %%F[30m
     set binfile=%%F%
   )
@@ -80,13 +79,14 @@ echo.  Firmware    = %binfile%
 echo.  Password    = %_pass%
 echo.
 
-echo python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a %_pass% -f %binfile% 
+python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a %_pass% -f %binfile% 
 echo.
 
-echo done.
+echo [1mdone.[0m
 
 :end
 
 set binfile=
 set _pass=
 set _help=
+echo.

@@ -15,22 +15,22 @@
  * Changelog: see BoardServer.h
  */
 
-// http://nodeding/api/sysinfo
-// http://nodeding/api/elements
-// http://nodeding/api/list
-// http://nodeding/api/state
-// http://nodeding/api/state/device/0
-// http://nodeding/api/state/device/0?title=over
+// http://homeding/api/sysinfo
+// http://homeding/api/elements
+// http://homeding/api/list
+// http://homeding/api/state
+// http://homeding/api/state/device/0
+// http://homeding/api/state/device/0?title=over
 
-// http://nodeding/api/reboot
-// http://nodeding/api/-reset
-// http://nodeding/api/-resetall
-// http://nodeding/api/-cleanweb
+// http://homeding/api/reboot
+// http://homeding/api/-reset
+// http://homeding/api/-resetall
+// http://homeding/api/-cleanweb
 
-// http://nodeding/api/scan
-// http://nodeding/api/connect?n=netname&p=passwd
+// http://homeding/api/scan
+// http://homeding/api/connect?n=netname&p=passwd
 
-// http://nodeding/ // redirect to defined start page
+// http://homeding/ // redirect to defined start page
 
 
 #include <Arduino.h>
@@ -180,10 +180,10 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 {
   // LOGGER_JUSTINFO("HTTP: > %s", requestUri.c_str());
   bool can = ((requestMethod == HTTP_GET)              // only GET requests in the API
-              &&      (requestUri.startsWith(SVC_ANY)       // old api entries
+              && (requestUri.startsWith(SVC_ANY)       // old api entries
                   || requestUri.startsWith(API_ROUTE)  // new api entries
-                  || (requestUri == "/")            // handle redirect
-                  || (_board->isCaptiveMode())));  // capt
+                  || (requestUri == "/")               // handle redirect
+                  || (_board->isCaptiveMode())));      // capt
 
   return (can);
 }  // canHandle
@@ -260,12 +260,14 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     jc.addProperty("flashSize", ESP.getFlashChipSize());
     jc.addProperty("coreVersion", String(_board->version));
     jc.addProperty("coreBuild", String(_board->build));
+    jc.addProperty("mac", WiFi.macAddress().c_str());
 
 #if defined(ESP8266)
     FSInfo fs_info;
     fs->info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
+
 #elif defined(ESP32)
     jc.addProperty("fsTotalBytes", fs->totalBytes());
     jc.addProperty("fsUsedBytes", fs->usedBytes());

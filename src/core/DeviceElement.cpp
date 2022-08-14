@@ -21,7 +21,7 @@
 
 #include <core/DeviceElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -164,6 +164,7 @@ void DeviceElement::start()
 
 void DeviceElement::loop()
 {
+  TRACE("loop()");
   unsigned long now = _board->getSeconds();
   if ((_rebootTime > 0) && (now > _nextBoot)) {
     LOGGER_EINFO("device restart initiated.");

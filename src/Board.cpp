@@ -107,9 +107,6 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   _isWakeupStart = false;  // TODO:ESP32 ???
 #endif
 
-  deviceName = WiFi.getHostname();  // use mac based default device name
-  deviceName.replace("_", "");      // Underline in hostname is not conformant, see
-  // https://tools.ietf.org/html/rfc1123 952
   hd_yield();
 }  // init()
 
@@ -260,10 +257,10 @@ void Board::_newState(enum BOARDSTATE newState) {
   boardState = newState;
 }
 
-// loop next element, only one at a time! 
+// loop next element, only one at a time!
 void Board::loop() {
   static String netpass;
-  
+
   nowMillis = millis();
 
   if (boardState != BOARDSTATE::RUN) {
@@ -359,9 +356,10 @@ void Board::loop() {
       Logger::logger_level = LOGGER_LEVEL_TRACE;
       // no element defined, so allow configuration in any case.
       isSafeMode = false;
-      // start up ota
-      Element *e = ElementRegistry::createElement("ota");
-      add("ota/0", e);
+
+      // start up simple device and ota
+      add("device/0", ElementRegistry::createElement("device"));
+      add("ota/0", ElementRegistry::createElement("ota"));
     }
     _checkNetState();
 
@@ -433,14 +431,20 @@ void Board::loop() {
 
 
   } else if (boardState == BOARDSTATE::CONNECT) {
+    TRACE("connect...");
+
 #if defined(ESP8266)
     // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  // required to set hostname properly
     WiFi.mode(WIFI_STA);
-    WiFi.setHostname(deviceName.c_str());
+    if (!deviceName.isEmpty()) {
+      WiFi.setHostname(deviceName.c_str());
+    }
 #elif defined(ESP32)
     WiFi.mode(WIFI_STA);
     Serial.printf("Default hostname: %s\n", WiFi.getHostname());
-    WiFi.setHostname(deviceName.c_str());  // for ESP32
+    if (!deviceName.isEmpty()) {
+      WiFi.setHostname(deviceName.c_str());  // for ESP32
+    }
     Serial.printf("New hostname: %s\n", WiFi.getHostname());
 #endif
     WiFi.setAutoReconnect(true);
@@ -535,6 +539,12 @@ void Board::loop() {
 
     const char *name = WiFi.getHostname();
 
+    if (deviceName.isEmpty()) {
+      TRACE("no device name configured");
+      TRACE("hostname=%s", name);
+      deviceName = name;
+    }  // if
+
     displayInfo(name, WiFi.localIP().toString().c_str());
     LOGGER_JUSTINFO("connected to %s (%s mode)",
                     WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
@@ -593,6 +603,7 @@ void Board::loop() {
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode
     if (!_isWakeupStart && (mDNS_sd)) {
+      TRACE("startup mdns... %s", deviceName.c_str());
 
 #if defined(ESP8266)
       MDNS.begin(deviceName.c_str());

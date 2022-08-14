@@ -17,20 +17,22 @@
  * * 30.05.2018 created by Matthias Hertel
  * * 21.12.2018 refactoring.
  * * 31.07.2021 include handling redirect on "/" request.
- *
+ * * deprecated: using the $board and other $xxx api calls will removed past version 0.9.0
+ *   $xxx will only be used for files included in the firmware. 
  * @details
+
 @verbatim
-This handler registers to all http GET request to the urls starting with `/$`.
+This handler registers to all http GET request to the urls starting with `/api`.
 
 The state of all existing elements can be retrieved by using the base url
-like: <http://devding/$board>.
+like: <http://homeding/api/state>.
 
 The state of a special existing element can be retrieved by using a more
-specific url like: <http://devding/$board/timer/blink>.
+specific url like: <http://homeding/api/state/timer/blink>.
 
 To send an action to a element a parameter can be added like:
-<http://devding/$board/displaydot/b?value=1> or
-<http://devding/$board/displaytext/info?show=Hello>
+<http://homeding/api/state/displaydot/b?value=1> or
+<http://homeding/api/state/displaytext/info?show=Hello>
 @endverbatim
  */
 
@@ -46,8 +48,8 @@ To send an action to a element a parameter can be added like:
  * make the URL accessible. When called without a specifc Element id, all
  * Elements are reported back. When called with a specifc Element id only thie
  * Element is reported back.
- * @sample /$board
- * @sample /$board/button/f1
+ * @sample /api/state
+ * @sample /api/state/button/f1
  */
 class BoardHandler : public RequestHandler {
 public:

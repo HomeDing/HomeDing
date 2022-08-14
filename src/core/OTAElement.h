@@ -16,8 +16,7 @@
 // 17.12.2019 less memory and cpu consumption
 // -----
 
-#ifndef OTAELEMENT_H
-#define OTAELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -73,5 +72,3 @@ private:
   uint16_t _port = 8266;
   String _passwd;
 };
-
-#endif

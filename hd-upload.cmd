@@ -1,18 +1,34 @@
 @echo off
+SETLOCAL EnableDelayedExpansion
 echo.
 echo [1mHomeDing Firmware OTA upload utility.[0m
 echo.
 
-set _binfolder=.\bin
+REM == Default Values ==
 
+set _binfolder=.\bin
+set _binfile=
+set _pass=123
 set ESPTOOLS=
 if EXIST "%LOCALAPPDATA%\Arduino15\packages\esp8266\hardware\esp8266\3.0.2\tools" ( set ESPTOOLS="%LOCALAPPDATA%\Arduino15\packages\esp8266\hardware\esp8266\3.0.2\tools")
 if EXIST "%USERPROFILE%\Projects\Arduino\Sketches\Hardware\esp8266com\esp8266\tools" ( set ESPTOOLS="%USERPROFILE%\Projects\Arduino\Sketches\Hardware\esp8266com\esp8266\tools")
-
 set _help=
-if [%1]==[--help] ( set _help=1 & shift /1 )
-if [%1]==[-h] ( set _help=1 & shift /1 )
-if [%1]==[] ( set _help=1 )
+
+if "%*"=="" ( set _help=1 )
+
+:restart 
+
+REM == Option Values ==
+
+if [%~1]==[--help] ( set _help=1 && shift /1 && goto :restart )
+if [%~1]==[-h] ( set _help=1 && shift /1 && goto :restart )
+if [%~1]==[/h] ( set _help=1 && shift /1 && goto :restart )
+if [%~1]==[/?] ( set _help=1 && shift /1 && goto :restart )
+
+if [%1]==[-p] (
+  set _pass=%2 && shift /1 && shift /1
+  goto :restart
+)
 
 if DEFINED _help (
   echo This is a helpful wrapper on Windows for the standard upload tool "espota.py" that
@@ -26,14 +42,8 @@ if DEFINED _help (
   echo.
 )
 
-set _pass=123
-if [%1]==[-p] ( set _pass=%2 & shift /1 & shift /1 )
-
-echo %_pass%
-
 set devicename=%1
 set firmware=%2
-set binfile=
 
 if NOT DEFINED devicename (
   echo [31m--missing ^<devicename^> as parameter 1--[30m
@@ -46,20 +56,20 @@ if NOT DEFINED firmware (
   @REM find last built bin file
   FOR %%F IN (.\build\*.bin) DO (
     @REM echo [37m  %%F[30m
-    set binfile=%%F%
+    set _binfile=%%F%
   )
 
 ) ELSE (
   FOR %%F IN (%_binfolder%\%firmware%*.bin) DO (
     echo [37m  %%F[30m
-    set binfile=%%F%
+    set _binfile=%%F%
   )
 )
 
 
 rem == verify parameters == 
 
-if NOT defined binfile (
+if NOT defined _binfile (
   echo [31m--no firmware file found--[30m
   goto :end
 )
@@ -75,18 +85,23 @@ rem == execute ==
 
 echo [1mUploading...[0m
 echo.  Device name = %devicename%
-echo.  Firmware    = %binfile%
+echo.  Firmware    = %_binfile%
 echo.  Password    = %_pass%
 echo.
 
-python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a %_pass% -f %binfile% 
+python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a %_pass% -f %_binfile% 
 echo.
 
 echo [1mdone.[0m
 
 :end
 
-set binfile=
+REM == Cleanup ==
+
+set _binfolder=
+set _binfile=
+set ESPTOOLS=
 set _pass=
 set _help=
+
 echo.

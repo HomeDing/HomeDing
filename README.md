@@ -60,3 +60,7 @@ If you plan to use it in a commercial product you are welcome to contact me rega
 ## Included Libraries / Components
 
 * The **BME680 sensor** Element uses the Open Source from the Arduino Library published by Bosch Sensortec GmbH <https://github.com/BoschSensortec/BSEC-Arduino-library/tree/master/src/bme680> using a BSD 3-clause license.
+
+## See also
+
+* [CLI for Homeding](https://homeding.github.io)

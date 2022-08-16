@@ -2,11 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.8.3] - unreleased
+### Changes / Enhancements
+
+
+## [0.9.0] - unreleased
 
 ### Changes / Enhancements
 
-New elements:
+* There are many enhancements and bug fixing in this release.
+
+* The /api endpoints are now standard all $board services are deprecated and will be removed in version 1.0
 
 * **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** -
     supports sending values to MQTT servers based on actions.
@@ -17,10 +22,8 @@ now supporting different sensors using the OneWire protocol.
 * **SensorElement** is enhanced to support reporting the state and emitting actions for the sensor values
   to simplify sensor implementations and save overall memory.
 
-Other:
-
-* The Update utility now can delete all files except config files at once using '/api/cleanweb'.
-  This is reducing the need to delete all files individually.
+* There are CLI commands available for updating and restoring device configurations
+  and uploading pre-build firmware.
 
 
 ## [0.8.2] - 2022-03-28

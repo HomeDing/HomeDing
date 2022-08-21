@@ -54,7 +54,7 @@ rem == find / verify firmware filename ==
 
 if NOT DEFINED firmware (
   @REM find last built bin file
-  FOR %%F IN (.\build\*.bin) DO (
+  FOR %%F IN (.\build\*.ino.bin) DO (
     @REM echo [37m  %%F[30m
     set _binfile=%%F%
   )

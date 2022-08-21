@@ -85,11 +85,16 @@ bool DiagElement::set(const char *name, const char *value) {
 }  // set()
 
 
-String DiagElement::_scanI2C() {
+String DiagElement::_handleDiag() {
   String out;
   char buffer[128];
   const char *desc = nullptr;
   unsigned long tStart = millis();
+
+  out += "**Info**\n";
+  out += "DeviceName: "; out += _board->deviceName; out += '\n';
+  out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n";
+  out += "\n";
 
   sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
   out += buffer;
@@ -151,7 +156,7 @@ String DiagElement::_scanI2C() {
   sprintf(buffer, "%3d devices found.\n", num);
   out += buffer;
   return (out);
-}  // _scanI2C
+}  // _handleDiag
 
 
 /**
@@ -163,7 +168,7 @@ void DiagElement::start() {
 
   // enable I2C scan output using http://nodeding/diag
   _board->server->on("/diag", HTTP_GET, [this]() {
-    _board->server->send(200, "text/plain", _scanI2C());
+    _board->server->send(200, "text/plain", _handleDiag());
   });
 
 

@@ -191,7 +191,7 @@ void TimerElement::pushState(
   if (_mode != Mode::TIMER) {
     callback("time", "0");
   } else {
-    callback("time", String(now - _startTime).c_str());
+    callback("time", String((now - _startTime) / 1000).c_str());
   }
   callback(PROP_VALUE, _value ? "1" : "0");
 }  // pushState()

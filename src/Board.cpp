@@ -610,6 +610,9 @@ void Board::loop() {
       // include the data required for the portal implementation: Overview of existing devices
       MDNSResponder::hMDNSService serv;
 
+      serv = MDNS.addService(0, "http", "tcp", 80);
+      MDNS.addServiceTxt(serv, "path", homepage.c_str());
+
       serv = MDNS.addService(0, "homeding", "tcp", 80);
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
       MDNS.addServiceTxt(serv, "title", title.c_str());

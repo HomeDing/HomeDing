@@ -78,7 +78,7 @@ private:
    */
   String _xAction;
 
-  String _scanI2C();
+  String _handleDiag();
 };
 
 #endif

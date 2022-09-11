@@ -38,9 +38,18 @@ bool CalcElement::set(const char *name, const char *value) {
   if (strstr(name, "value[") == name) {
     int indx = _atoi(name + 6);
 
-    if ((indx >= 0) && (indx < MAX_INPUTS)) {
+    if ((indx >= 0) && (indx < CALCELEMENT_MAX_INPUTS)) {
       if (_inputs < indx + 1) _inputs = indx + 1;
-      _inStringValues[indx] = value;
+
+      if (_type == DATATYPE::BOOLEAN) {
+        _inStringValues[indx] = _atob(value);
+      } else if (_type == DATATYPE::INTEGER) {
+        _inStringValues[indx] = _atoi(value);
+      } else if (_type == DATATYPE::FLOAT) {
+        _inStringValues[indx] = strtod(value, nullptr);
+      } else {
+        _inStringValues[indx] = value;
+      }
       _needRecalc = true;
     }
 

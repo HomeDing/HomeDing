@@ -21,7 +21,7 @@
 
 #include <core/DeviceElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -164,6 +164,7 @@ void DeviceElement::start()
 
 void DeviceElement::loop()
 {
+  TRACE("loop()");
   unsigned long now = _board->getSeconds();
   if ((_rebootTime > 0) && (now > _nextBoot)) {
     LOGGER_EINFO("device restart initiated.");
@@ -186,9 +187,9 @@ void DeviceElement::pushState(
   callback("name", _board->deviceName.c_str());
   callback("title", _board->title.c_str());
   callback("description", _description.c_str());
-  callback("safemode", _board->isSafeMode ? "true" : "false");
+  callback("safemode", _printBoolean(_board->isSafeMode));
   callback("sd", _printBoolean( _board->mDNS_sd));
-  callback("nextboot", String(_nextBoot - now).c_str());
+  callback("nextboot", _printInteger(_nextBoot - now));
 } // pushState()
 
 

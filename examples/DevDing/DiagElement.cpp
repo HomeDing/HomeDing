@@ -35,7 +35,7 @@
  */
 Element *DiagElement::create() {
   return (new DiagElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -43,10 +43,6 @@ Element *DiagElement::create() {
 DiagElement::DiagElement() {
   startupMode = Element_StartupMode::System;
 }
-
-void DiagElement::init(Board *board) {
-  Element::init(board);
-} // init()
 
 
 /**
@@ -78,59 +74,89 @@ bool DiagElement::set(const char *name, const char *value) {
         }
       }
       TRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
-    } // for
+    }  // for
 #endif
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
-String DiagElement::_scanI2C() {
+String DiagElement::_handleDiag() {
   String out;
   char buffer[128];
+  const char *desc = nullptr;
+  unsigned long tStart = millis();
+
+  out += "**Info**\n";
+  out += "DeviceName: "; out += _board->deviceName; out += '\n';
+  out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n";
+  out += "\n";
 
   sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
   out += buffer;
 
   int num = 0;
+  int adr = 1;
 
-  for (int adr = 1; adr < 127; adr++) {
+  while ((millis() < tStart + 3000) && (adr < 127)) {
+
     // The i2c scanner uses the return value of Write.endTransmission
     // to find a device that acknowledged to the address.
+    LOGGER_ETRACE("s=%02x", adr);
     Wire.beginTransmission(adr);
     int error = Wire.endTransmission();
 
+    if (error) {
+      // try again for some devices that need wakeup
+      Wire.beginTransmission(adr);
+      error = Wire.endTransmission();
+    }
+
     if (error == 0) {
-      sprintf(buffer, "* 0x%02x found.\n", adr);
-      out += buffer;
+      desc = nullptr;
 
       if (adr == 0x11) {
-        out += "  (SI4721)\n";
+        desc = "SI4721";
       } else if (adr == 0x27) {
-        out += "  (LCD, PCF8574)\n";
+        desc = "LCD,PCF8574";
+      } else if (adr == 0x38) {
+        desc = "AHT20";
       } else if (adr == 0x3C) {
-        out += "  (SH1106, SSD1306, SSD1309)\n";
+        desc = "SH1106,SSD1306,SSD1309";
       } else if (adr == 0x40) {
-        out += "  (INA219, INA226) found.";
+        desc = "INA219,INA226";
       } else if (adr == (0x51)) {
-        out += "  (RTC, PCF8563)\n";
+        desc = "RTC,PCF8563";
+      } else if (adr == (0x5c)) {
+        desc = "AM2320";
+      } else if (adr == 0x62) {
+        desc = "SCD-4x";
       } else if (adr == 0x63) {
-        out += "  (Radio, SI4730)\n";
+        desc = "Radio,SI4730";
       } else if (adr == (0x68)) {
-        out += "  (RTC, DS1307)\n";
+        desc = "RTC,DS1307";
+      } else if (adr == 0x77) {
+        desc = "BMP280";
       }
+
+      sprintf(buffer, "* 0x%02x: (%s)\n", adr, desc ? desc : "");
+      out += buffer;
       yield();
       num++;
     }
-  } // for
-  sprintf(buffer, "%2d devices found.\n", num);
+    adr++;
+  }  // while
+
+  sprintf(buffer, "%3d adresses scanned.\n", adr);
+  out += buffer;
+  sprintf(buffer, "%3d devices found.\n", num);
   out += buffer;
   return (out);
-} // _scanI2C
+}  // _handleDiag
 
 
 /**
@@ -142,7 +168,7 @@ void DiagElement::start() {
 
   // enable I2C scan output using http://nodeding/diag
   _board->server->on("/diag", HTTP_GET, [this]() {
-    _board->server->send(200, "text/plain", _scanI2C());
+    _board->server->send(200, "text/plain", _handleDiag());
   });
 
 
@@ -157,16 +183,16 @@ void DiagElement::start() {
   TRACE(" Free Memory: %d", ESP.getFreeHeap());
   TRACE(" Mac-address: %s", WiFi.macAddress().c_str());
 
-} // start()
+}  // start()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void DiagElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-} // pushState()
+}  // pushState()
 
 
 /* ===== Register the Element ===== */
@@ -181,7 +207,7 @@ void DiagElement::pushState(
 // #ifdef HOMEDING_REGISTER
 // Register the DiagElement onto the ElementRegistry.
 bool DiagElement::registered =
-    ElementRegistry::registerElement("diag", DiagElement::create);
+  ElementRegistry::registerElement("diag", DiagElement::create);
 // #endif
 
 // End

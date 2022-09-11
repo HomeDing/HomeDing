@@ -16,21 +16,19 @@
  */
 
 
-#ifndef WIREUTILS_H
-#define WIREUTILS_H
+#pragma once
 
 #include <Arduino.h>
 #include <Wire.h>
 
-/** extract signed 16 bit value from byte buffer */ 
+/** extract signed 16 bit value from byte buffer */
 #define WU_S16(data, offset) (int16_t)(data[offset + 1] << 8 | data[offset])
 
-/** extract unsigned 16 bit value from byte buffer */ 
+/** extract unsigned 16 bit value from byte buffer */
 #define WU_U16(data, offset) (uint16_t)(data[offset + 1] << 8 | data[offset])
 
 
-class WireUtils
-{
+class WireUtils {
 public:
   /** Helper function to inspect a data buffer by dumping in hexadecimal format. */
   static void dumpBuffer(uint8_t *data, uint8_t len);
@@ -38,20 +36,28 @@ public:
   /** check for a device on address */
   static bool exists(uint8_t address);
 
+  /** read a sequence of bytes from device into a buffer.
+   * @return number of register values read.
+   */
+  static uint8_t readBuffer(uint8_t address, uint8_t *data, uint8_t len);
+
+  /** write a sequence of bytes from buffer to device.
+   * @return 0 or error code
+   */
+  static uint8_t writeBuffer(uint8_t address, uint8_t *data, uint8_t len);
+
+
+
+
   /** read one byte register value */
   static uint8_t readRegister(uint8_t address, uint8_t reg);
 
   /** read a sequence of register values into a buffer.
    * @return number of register values read.
    */
-  static uint8_t readBuffer(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len, int delayMs = 0);
+  static uint8_t readBuffer(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
+
 
   static uint8_t write(uint8_t address, uint8_t reg);
   static uint8_t write(uint8_t address, uint8_t reg, uint8_t data);
-  static uint8_t write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
-
-  static uint8_t request(uint8_t address, uint8_t *data, uint8_t len);
-
 };
-
-#endif

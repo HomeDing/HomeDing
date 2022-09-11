@@ -39,7 +39,7 @@
 
 // #define DBG_GDB // start with debugger
 #define DBG_TRACE  // trace level for all elements
-// #define NET_DEBUG  // show network event in output
+#define NET_DEBUG  // show network event in output
 
 #ifdef DBG_GDB
 #include <GDBStub.h>
@@ -56,9 +56,14 @@
 
 // Enable some Sensor Elements
 #define HOMEDING_INCLUDE_DHT
-#define HOMEDING_INCLUDE_BME680
-#define HOMEDING_INCLUDE_DS18B20
+#define HOMEDING_INCLUDE_AM2320
 #define HOMEDING_INCLUDE_SHT20
+#define HOMEDING_INCLUDE_AHT20
+#define HOMEDING_INCLUDE_DALLAS
+#define HOMEDING_INCLUDE_BMP280
+#define HOMEDING_INCLUDE_BME680
+#define HOMEDING_INCLUDE_BH1750
+#define HOMEDING_INCLUDE_SCD4X
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -78,7 +83,10 @@
 #define HOMEDING_INCLUDE_DISPLAYSH1106
 #define HOMEDING_INCLUDE_DISPLAYST7789
 #define HOMEDING_INCLUDE_DISPLAYMAX7219
+
+// Enable simple display Elements
 #define HOMEDING_INCLUDE_TM1637
+#define HOMEDING_INCLUDE_MAX7219
 
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR
@@ -86,6 +94,8 @@
 #define HOMEDING_INCLUDE_NEOPIXEL
 #define HOMEDING_INCLUDE_MY9291
 
+// Network Services
+#define HOMEDING_INCLUDE_MQTT
 #define HOMEDING_INCLUDE_WEATHERFEED
 
 #include <Arduino.h>
@@ -123,6 +133,7 @@ void setup(void) {
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
   delay(3000);
+  Serial.println();
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif

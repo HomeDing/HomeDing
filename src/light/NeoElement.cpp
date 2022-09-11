@@ -20,16 +20,20 @@
 #include <light/NeoElement.h>
 
 
-void NeoElement::show(uint32_t color, int brightness) {
-  // TRACE("show(x%08x, %d)", color, brightness);
+void NeoElement::setColor(uint32_t color, int brightness) {
+  // TRACE("setColor(x%08x, %d)", color, brightness);
 
   // set _brightness and value of base class LightElement
-  LightElement::show(color, brightness);
+  LightElement::setColor(color, brightness);
+
+  if (!enabled) {
+    color = 0;
+  }
 
   _strip->setBrightness(_brightness * 255 / 100);
   _strip->fill(color);
   _strip->show();
-}  // show()
+}  // setColor()
 
 
 void NeoElement::_setColors(String colList) {
@@ -81,12 +85,10 @@ Element *NeoElement::create() {
 
 /** set initial/default values on properties. */
 void NeoElement::init(Board *board) {
-  Element::init(board);
+  LightElement::init(board);
 
   // set defaults:
-  _mode = Mode::color;
   value = "0";
-  _count = 8;
 }  // init()
 
 
@@ -95,7 +97,8 @@ void NeoElement::init(Board *board) {
  */
 bool NeoElement::set(const char *name, const char *pValue) {
   // TRACE("set %s=%s", name, value);
-  bool ret = LightElement::set(name, pValue);
+  bool ret1 = LightElement::set(name, pValue);
+  bool ret2 = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
     // saving to LightElement::value was handled in LightElement
@@ -104,19 +107,15 @@ bool NeoElement::set(const char *name, const char *pValue) {
       _setColors(value);
 
   } else if (_stricmp(name, "mode") == 0) {
-    if (_stricmp(pValue, "color") == 0)
-      _mode = Mode::color;
-    else if (_stricmp(pValue, "wheel") == 0)
-      _mode = Mode::wheel;
-    else if (_stricmp(pValue, "flow") == 0)
-      _mode = Mode::flow;
-    else if (_stricmp(pValue, "pulse") == 0)
-      _mode = Mode::pulse;
+    Mode m = (Mode)ListUtils::indexOf("color,wheel,flow,pulse", pValue);
+    if ((m >= Mode::_min) && (m <= Mode::_max)) {
+      _mode = m;
+    }  // if
+
     if (_strip) {
       _strip->setBrightness(_brightness * 255 / 100);
       needUpdate = true;
     }
-    ret = true;  // not handled in LightElement
 
   } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
     // saving to LightElement::brightness was handled in LightElement
@@ -126,14 +125,17 @@ bool NeoElement::set(const char *name, const char *pValue) {
     }
 
   } else if (_stricmp(name, "duration") == 0) {
-    duration = _atotime(pValue) * 1000;  // in msecs.
+    duration = _scanDuration(pValue);  // in msecs.
 
   } else if (_stricmp(name, "count") == 0) {
     _count = _atoi(pValue);
-    ret = true;  // not handled in LightElement
-  }              // if
 
-  return (ret);
+  } else {
+    ret2 = false;  // not handled
+
+  } // if
+
+  return (ret1 || ret2);
 }  // set()
 
 

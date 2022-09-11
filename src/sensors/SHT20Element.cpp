@@ -35,23 +35,26 @@ Element *SHT20Element::create() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool SHT20Element::set(const char *name, const char *value) {
-  bool ret = SensorElement::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
-    if (_stricmp(name, PROP_ADDRESS) == 0) {
-      _address = _atoi(value);
-      ret = true;
+  if (SensorElement::set(name, value)) {
+    // ok.
 
-    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
-      _temperatureAction = value;
-      ret = true;
+  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
+    _address = _atoi(value);
+    ret = true;
 
-    } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
-      _humidityAction = value;
-      ret = true;
+  } else if (_stricmp(name, "onTemperature") == 0) {
+    _actions[0] = value;
+    ret = true;
 
-    }  // if
-  }    // if
+  } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
+    _actions[1] = value;
+    ret = true;
+  } else {
+    ret = false;
+  }  // if
+
   return (ret);
 }  // set()
 
@@ -69,7 +72,7 @@ bool SHT20Element::set(const char *name, const char *value) {
 // calculate crc8 for data
 // assuming 0 as a crc start and POLYNOMIAL = 0x131;
 // See https://www.sensirion.com/ ... Sensirion_Humidity_Sensors_SHT2x_CRC_Calculation.pdf
-byte crc8(byte *data, int length) {
+uint8_t SHT20Element::_crc8(uint8_t *data, int length) {
   byte crc = 0;
 
   // calculates 8-Bit checksum with given polynomial
@@ -88,20 +91,16 @@ byte crc8(byte *data, int length) {
     data++;
   }
   return (crc);
-}  // crc8
+}  // _crc8
 
-
-void SHT20Element::_start(int cmd) {
-  WireUtils::write(_address, cmd, nullptr, 0);
-}
 
 uint16_t SHT20Element::_read() {
   uint16_t ret = 0;  // no value
   uint8_t data[3];
   int8_t readLen = 0;
 
-  readLen = WireUtils::request(_address, data, sizeof(data));
-  if ((readLen == sizeof(data)) && (data[2] == crc8(data, 2))) {
+  readLen = WireUtils::readBuffer(_address, data, sizeof(data));
+  if ((readLen == sizeof(data)) && (data[2] == SHT20Element::_crc8(data, 2))) {
     // good reading
     ret = ((uint16_t)(data[0]) << 8) + data[1];
   }  // if
@@ -127,6 +126,9 @@ void SHT20Element::start() {
 
     } else {
       SensorElement::start();
+      _valuesCount = 2;
+      _stateKeys = "temperature,humidity";
+
     }  // if
   }    // if
 }  // start()
@@ -150,7 +152,7 @@ bool SHT20Element::getProbe(String &values) {
 
   if (_state == 0) {
     _maxTime = now + 100;
-    _start(SHT20_START_TEMP);
+    WireUtils::write(_address, SHT20_START_TEMP);
     _state++;
 
   } else if (_state == 1) {
@@ -164,7 +166,7 @@ bool SHT20Element::getProbe(String &values) {
 
   } else if (_state == 2) {
     _maxTime = now + 50;
-    _start(SHT20_START_HUM);
+    WireUtils::write(_address, SHT20_START_HUM);
     _state++;
 
   } else if (_state == 3) {
@@ -177,33 +179,18 @@ bool SHT20Element::getProbe(String &values) {
     }
 
   } else if (_state == 4) {
-    newData = true;
     char buffer[32];
-    snprintf(buffer, sizeof(buffer), "%.2f,%.1f", _temperature, _humidity);
+    snprintf(buffer, sizeof(buffer), "%.2f,%.2f", _temperature, _humidity);
     values = buffer;
+    newData = true;
     _state = 0;
     // LOGGER_EINFO("values:%s", buffer);
 
   } else if (_state == 5) {
+    values.clear();
     newData = true;
-    values = "";
   }
   return (newData);
 }  // getProbe()
-
-
-void SHT20Element::sendData(String &values) {
-  // dispatch values.
-  _board->dispatchItem(_temperatureAction, values, 0);
-  _board->dispatchItem(_humidityAction, values, 1);
-}  // sendData()
-
-
-void SHT20Element::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  SensorElement::pushState(callback);
-  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
-  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
-}  // pushState()
 
 // End

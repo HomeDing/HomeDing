@@ -107,9 +107,6 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   _isWakeupStart = false;  // TODO:ESP32 ???
 #endif
 
-  deviceName = WiFi.getHostname();  // use mac based default device name
-  deviceName.replace("_", "");      // Underline in hostname is not conformant, see
-  // https://tools.ietf.org/html/rfc1123 952
   hd_yield();
 }  // init()
 
@@ -152,7 +149,6 @@ bool Board::isCaptiveMode() {
  * @brief
  */
 void Board::_checkNetState() {
-  hd_yield();
   wl_status_t newState = WiFi.status();
   if (newState != _wifi_status) {
     NETTRACE("netstate: %d", newState);
@@ -175,7 +171,7 @@ void Board::_addAllElements() {
   MicroJson *mj = new MicroJson(
     [this, &_lastElem](int level, char *path, char *value) {
       // TRACE("callback %d %s =%s", level, path, value ? value : "-");
-      _checkNetState();
+      hd_yield();
 
       if (level == 1) {
 
@@ -219,11 +215,11 @@ void Board::_addAllElements() {
   if (mj) {
     // config the thing to the local network
     mj->parseFile(fileSystem, ENV_FILENAME);
-    _checkNetState();
+    hd_yield();
 
     // config the Elements of the device
     mj->parseFile(fileSystem, CONF_FILENAME);
-    _checkNetState();
+    hd_yield();
   }  // if
 
   delete mj;
@@ -263,13 +259,17 @@ void Board::_newState(enum BOARDSTATE newState) {
 
 // loop next element, only one at a time!
 void Board::loop() {
-  unsigned long now = millis();
   static String netpass;
 
-  _checkNetState();
+  nowMillis = millis();
+
+  if (boardState != BOARDSTATE::RUN) {
+    _checkNetState();
+  }
 
   if (boardState == BOARDSTATE::RUN) {
     // Most common state first.
+
 #if defined(ESP8266)
     if (!_isWakeupStart) {
       MDNS.update();
@@ -330,7 +330,7 @@ void Board::loop() {
       _cntDeepSleep++;
 
       // deep sleep specified time.
-      if ((now > _deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
+      if ((nowMillis > _deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
         // all elements now had the chance to create and dispatch an event.
         LOGGER_INFO("sleep %d...", _deepSleepTime);
         Serial.flush();
@@ -340,6 +340,7 @@ void Board::loop() {
     }  // if
 
   } else if (boardState == BOARDSTATE::NONE) {
+    // load network connection details
     File f = fileSystem->open(NET_FILENAME, "r");
     if (f) {
       netpass = f.readString();
@@ -355,12 +356,15 @@ void Board::loop() {
       Logger::logger_level = LOGGER_LEVEL_TRACE;
       // no element defined, so allow configuration in any case.
       isSafeMode = false;
-      // start up ota
-      Element *e = ElementRegistry::createElement("ota");
-      add("ota/0", e);
+
+      // start up simple device and ota
+      add("device/0", ElementRegistry::createElement("device"));
+      add("ota/0", ElementRegistry::createElement("ota"));
     }
+    _checkNetState();
 
     if (state) {
+      // when a state element is configured: use it to load state
       state->load();
     }
 
@@ -398,9 +402,9 @@ void Board::loop() {
       digitalWrite(sysLED, HIGH);
     }
 
-    NETTRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
-    NETTRACE("$net=%s", netpass.substring(0, netpass.indexOf(',')).c_str());
-    NETTRACE("resetCount=%d", _resetCount);
+    LOGGER_TRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
+    LOGGER_TRACE("$net=%s", netpass.substring(0, netpass.indexOf(',')).c_str());
+    LOGGER_TRACE("resetCount=%d", _resetCount);
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
@@ -423,15 +427,26 @@ void Board::loop() {
     }
 
     // wait at least some seconds for offering config mode
-    configPhaseEnd = now + minConfigTime;
+    configPhaseEnd = nowMillis + minConfigTime;
 
 
   } else if (boardState == BOARDSTATE::CONNECT) {
-    // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  // required to set hostname properly
-    WiFi.setHostname(deviceName.c_str());  // for ESP32
-    WiFi.mode(WIFI_STA);
-    WiFi.setHostname(deviceName.c_str());  // for ESP8266
+    TRACE("connect...");
 
+#if defined(ESP8266)
+    // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  // required to set hostname properly
+    WiFi.mode(WIFI_STA);
+    if (!deviceName.isEmpty()) {
+      WiFi.setHostname(deviceName.c_str());
+    }
+#elif defined(ESP32)
+    WiFi.mode(WIFI_STA);
+    Serial.printf("Default hostname: %s\n", WiFi.getHostname());
+    if (!deviceName.isEmpty()) {
+      WiFi.setHostname(deviceName.c_str());  // for ESP32
+    }
+    Serial.printf("New hostname: %s\n", WiFi.getHostname());
+#endif
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
 
@@ -466,13 +481,13 @@ void Board::loop() {
     }  // if
 
     // wait some(12) seconds for connecting to the network
-    connectPhaseEnd = now + maxNetConnextTime;
+    connectPhaseEnd = nowMillis + maxNetConnextTime;
 
   } else if ((boardState == BOARDSTATE::WAITNET) || (boardState == BOARDSTATE::WAIT)) {
     // make sysLED blink.
     // short pulses for normal=safemode, long pulses for unsafemode.
     if (sysLED >= 0) {
-      digitalWrite(sysLED, (now % 700) > (isSafeMode ? 100 : 600) ? HIGH : LOW);
+      digitalWrite(sysLED, (nowMillis % 700) > (isSafeMode ? 100 : 600) ? HIGH : LOW);
     }  // if
 
     // check sysButton
@@ -487,11 +502,11 @@ void Board::loop() {
         _newState(BOARDSTATE::WAIT);
       }  // if
 
-      if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (now > connectPhaseEnd)) {
+      if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (nowMillis > connectPhaseEnd)) {
 
         if (!connectPhaseEnd) {
           // no TRACE;
-        } else if (now > connectPhaseEnd) {
+        } else if (nowMillis > connectPhaseEnd) {
           NETTRACE("timed out.");
         } else {
           NETTRACE("wifi status=(%d)", _wifi_status);
@@ -512,7 +527,7 @@ void Board::loop() {
     }      // if
 
     if (boardState == BOARDSTATE::WAIT) {
-      if (_isWakeupStart || (now >= configPhaseEnd)) {
+      if (_isWakeupStart || (nowMillis >= configPhaseEnd)) {
         _newState(BOARDSTATE::GREET);
       }
     }  // if
@@ -523,6 +538,12 @@ void Board::loop() {
     _resetCount = RTCVariables::setResetCounter(0);
 
     const char *name = WiFi.getHostname();
+
+    if (deviceName.isEmpty()) {
+      TRACE("no device name configured");
+      TRACE("hostname=%s", name);
+      deviceName = name;
+    }  // if
 
     displayInfo(name, WiFi.localIP().toString().c_str());
     LOGGER_JUSTINFO("connected to %s (%s mode)",
@@ -582,11 +603,15 @@ void Board::loop() {
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode
     if (!_isWakeupStart && (mDNS_sd)) {
+      TRACE("startup mdns... %s", deviceName.c_str());
 
 #if defined(ESP8266)
       MDNS.begin(deviceName.c_str());
       // include the data required for the portal implementation: Overview of existing devices
       MDNSResponder::hMDNSService serv;
+
+      serv = MDNS.addService(0, "http", "tcp", 80);
+      MDNS.addServiceTxt(serv, "path", homepage.c_str());
 
       serv = MDNS.addService(0, "homeding", "tcp", 80);
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
@@ -642,7 +667,7 @@ void Board::loop() {
     server->begin();
 
     _newState(BOARDSTATE::RUNCAPTIVE);
-    _captiveEnd = now + (5 * 60 * 1000);
+    _captiveEnd = nowMillis + (5 * 60 * 1000);
 
   } else if (boardState == BOARDSTATE::RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
@@ -650,10 +675,10 @@ void Board::loop() {
 
     // make sysLED blink 3 sec with a short flash.
     if (sysLED >= 0) {
-      digitalWrite(sysLED, ((now % 3000) > 120) ? HIGH : LOW);
+      digitalWrite(sysLED, ((nowMillis % 3000) > 120) ? HIGH : LOW);
     }  // if
 
-    if (now > _captiveEnd)
+    if (nowMillis > _captiveEnd)
       reboot(false);
   }  // if
 }  // loop()
@@ -875,11 +900,13 @@ time_t Board::getTime() {
 
 // return the seconds of today in localtime.
 time_t Board::getTimeOfDay() {
+  hd_yield();
   time_t ct = time(nullptr);
-  tm lt;
-  if (ct) {
-    localtime_r(&ct, &lt);
-    return ((lt.tm_hour * 60 * 60) + (lt.tm_min * 60) + lt.tm_sec);
+
+  if (ct > 0) {
+    struct tm *lt;
+    lt = localtime(&ct);
+    return ((lt->tm_hour * 60 * 60) + (lt->tm_min * 60) + lt->tm_sec);
   } else {
     return (0);
   }

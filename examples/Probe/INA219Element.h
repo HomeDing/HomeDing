@@ -1,23 +1,22 @@
 /**
  * @file INA219Element.h
  * @brief Element to control a INA219 power consumption chip.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD 3-Clause style license,
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 12.08.2020 created by Matthias Hertel
  * * 31.08.2021 finalized for power sensor example
  */
 
-#ifndef INA219ELEMENT_H
-#define INA219ELEMENT_H
+#pragma once
 
 #include <sensors/SensorElement.h>
 
@@ -27,8 +26,7 @@
  * @brief INA219Element implements reading data from an INA219 sensor.
  */
 
-class INA219Element : public SensorElement
-{
+class INA219Element : public SensorElement {
 public:
   /**
    * @brief Factory function to create a INA219Element.
@@ -45,12 +43,6 @@ public:
    * @brief Construct a new INA219Element
    */
   INA219Element();
-
-  /**
-   * @brief initialize a new Element.
-   * @param board The board reference.
-   */
-  virtual void init(Board *board) override;
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -78,7 +70,7 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
   // SensorElement functions
@@ -91,7 +83,7 @@ protected:
 
 private:
   /**
-   * Sensor specific data, declared in *.cpp 
+   * Sensor specific data, declared in *.cpp
    */
   INA219_WE *_sensor;
   INA219_PGAIN _gain;
@@ -106,5 +98,3 @@ private:
   String _currentAction;
   String _powerAction;
 };
-
-#endif

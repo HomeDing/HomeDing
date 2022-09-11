@@ -35,23 +35,22 @@ Element *BMP280Element::create() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool BMP280Element::set(const char *name, const char *value) {
-  bool ret = SensorElement::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
-    if (_stricmp(name, PROP_ADDRESS) == 0) {
-      _address = _atoi(value);
-      ret = true;
+  if (SensorElement::set(name, value)) {
+    // ok.
+  } else if (_stricmp(name, "address") == 0) {
+    _address = _atoi(value);
 
-    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
-      _temperatureAction = value;
-      ret = true;
+  } else if (_stricmp(name, "onTemperature") == 0) {
+    _actions[0] = value;
 
-    } else if (_stricmp(name, ACTION_ONPRESSURE) == 0) {
-      _pressureAction = value;
-      ret = true;
+  } else if (_stricmp(name, "onPressure") == 0) {
+    _actions[1] = value;
 
-    }  // if
-  }    // if
+  } else {
+    ret = false;
+  }  // if
   return (ret);
 }  // set()
 
@@ -149,7 +148,10 @@ void BMP280Element::start() {
     if (!WireUtils::exists(_address)) {
       LOGGER_EERR("not found");
       term();
+
     } else {
+      _valuesCount = 2;
+      _stateKeys = "temperature,pressure";
       SensorElement::start();
 
 #if defined(FORCED)
@@ -226,28 +228,14 @@ bool BMP280Element::getProbe(String &values) {
   float P = BMP280CompensatePressure(adc_P);
   // TRACE("raw_P %d => %.2f", adc_P, P);
 
-  newData = true;
   char buffer[32];
   snprintf(buffer, sizeof(buffer), "%.2f,%.0f", T, P);
-
   values = buffer;
+
+  newData = true;
 
   return (newData);
 }  // getProbe()
 
-
-void BMP280Element::sendData(String &values) {
-  // dispatch values.
-  _board->dispatchItem(_temperatureAction, values, 0);
-  _board->dispatchItem(_pressureAction, values, 1);
-}  // sendData()
-
-
-void BMP280Element::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  SensorElement::pushState(callback);
-  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
-  callback("pressure", Element::getItemValue(_lastValues, 1).c_str());
-}  // pushState()
 
 // End

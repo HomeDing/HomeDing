@@ -15,22 +15,22 @@
  * Changelog: see BoardServer.h
  */
 
-// http://nodeding/api/sysinfo
-// http://nodeding/api/elements
-// http://nodeding/api/list
-// http://nodeding/api/state
-// http://nodeding/api/state/device/0
-// http://nodeding/api/state/device/0?title=over
+// http://homeding/api/sysinfo
+// http://homeding/api/elements
+// http://homeding/api/list
+// http://homeding/api/state
+// http://homeding/api/state/device/0
+// http://homeding/api/state/device/0?title=over
 
-// http://nodeding/api/reboot
-// http://nodeding/api/-reset
-// http://nodeding/api/-resetall
-// http://nodeding/api/-cleanweb
+// http://homeding/api/reboot
+// http://homeding/api/-reset
+// http://homeding/api/-resetall
+// http://homeding/api/-cleanweb
 
-// http://nodeding/api/scan
-// http://nodeding/api/connect?n=netname&p=passwd
+// http://homeding/api/scan
+// http://homeding/api/connect?n=netname&p=passwd
 
-// http://nodeding/ // redirect to defined start page
+// http://homeding/ // redirect to defined start page
 
 
 #include <Arduino.h>
@@ -49,7 +49,7 @@
 #define API_ROUTE "/api/"
 
 // integrated htm files
-#define PAGE_UPDATE_VERS "/$update.htm#v03"
+#define PAGE_UPDATE_VERS "/$update.htm#v09"
 
 // Content types for http results
 #define TEXT_JSON "application/json; charset=utf-8"  // Content type for JSON.
@@ -178,10 +178,13 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 #endif
 {
+  // LOGGER_JUSTINFO("HTTP: > %s", requestUri.c_str());
   bool can = ((requestMethod == HTTP_GET)              // only GET requests in the API
               && (requestUri.startsWith(SVC_ANY)       // old api entries
                   || requestUri.startsWith(API_ROUTE)  // new api entries
-                  || (requestUri == "/")));            // handle redirect
+                  || (requestUri == "/")               // handle redirect
+                  || (_board->isCaptiveMode())));      // capt
+
   return (can);
 }  // canHandle
 
@@ -257,12 +260,14 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     jc.addProperty("flashSize", ESP.getFlashChipSize());
     jc.addProperty("coreVersion", String(_board->version));
     jc.addProperty("coreBuild", String(_board->build));
+    jc.addProperty("mac", WiFi.macAddress().c_str());
 
 #if defined(ESP8266)
     FSInfo fs_info;
     fs->info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
+
 #elif defined(ESP32)
     jc.addProperty("fsTotalBytes", fs->totalBytes());
     jc.addProperty("fsUsedBytes", fs->usedBytes());
@@ -319,41 +324,41 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     output = ElementRegistry::list();
     output_type = TEXT_JSON;
 
-  } else if (uri == "/") {
+  } else if ((uri == "/") && (!_board->isCaptiveMode())) {
     // handle a redirect to the defined homepage or system system / update
-    TRACE("Redirect...");
-    String url;
-
-    if (_board->isCaptiveMode()) {
-      url = "http://";
-      url.concat(WiFi.softAPIP().toString());  // _board->deviceName
-      url.concat("/$setup");
-
-    } else {
-      url = _board->homepage;
+    LOGGER_JUSTINFO("Redirect...");
+    String url = _board->homepage;
 
 #if defined(ESP8266)
-      FSInfo fsi;
-      fs->info(fsi);
-      if (fsi.usedBytes < 18000) {
-        // assuming UI files not installed
-        url = PAGE_UPDATE_VERS;
-        if (fsi.totalBytes < 500000) {
-          // small file system
-          url.concat('m');
-        }
+    FSInfo fsi;
+    fs->info(fsi);
+    if (fsi.usedBytes < 18000) {
+      // assuming UI files not installed
+      url = PAGE_UPDATE_VERS;
+      if (fsi.totalBytes < 500000) {
+        // small file system
+        url.concat('m');
       }
+    }
 
 #elif defined(ESP32)
-      if (fs->usedBytes() < 18000) {
-        // assuming UI files not installed
-        url = PAGE_UPDATE_VERS;
-      }
+    if (fs->usedBytes() < 18000) {
+      // assuming UI files not installed
+      url = PAGE_UPDATE_VERS;
+    }
 #endif
 
-    }  // if
     server.sendHeader("Location", url, true);
     server.send(302);
+
+  } else if (_board->isCaptiveMode()) {
+    // Handle Redirect in Captive Portal Mode
+    // redirect requests like "/generate_204", "/gen_204", "/chat", /connecttest.txt
+    // to WIFI setup dialog /$setup
+
+    String url = "/$setup";
+    server.sendHeader("Location", url, true);
+    server.send(302);  // Found
 
   } else {
     TRACE("uri:%s", uri.c_str());
@@ -384,7 +389,7 @@ void listDirectory(MicroJsonComposer &jc, FILESYSTEM *fs, String path, Dir dir) 
       listDirectory(jc, fs, path + name + "/", subDir);
 
     } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
-      // do not report as file
+      // do not report as a file
 
     } else {
       jc.openObject();
@@ -418,13 +423,9 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
     String name = path + entry.name();
 
     if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
-      // do not report as file
+      // do not report as a file
 
     } else if (entry.isDirectory()) {
-      // jc.openObject();
-      // jc.addProperty("type", "dir");
-      // jc.addProperty("name", name);
-      // jc.closeObject();
       handleListFiles(jc, name + "/");
 
     } else {
@@ -442,21 +443,28 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
 
 
 void BoardHandler::handleCleanWeb(String path) {
+  TRACE("handleCleanWeb(%s)", path.c_str());
   FILESYSTEM *fSys = _board->fileSystem;
-  LOGGER_JUSTINFO("handleCleanWeb(%s)", path.c_str());
   // ASSERT: last char of path = '/'
 
   fs::File dir = fSys->open(path, "r");
   while (File entry = dir.openNextFile()) {
     String name = path + entry.name();
-    LOGGER_JUSTINFO("is: %s", name.c_str());
+    TRACE("is: %s", name.c_str());
 
     if (entry.isDirectory()) {
-      LOGGER_JUSTINFO("isDir.");
+      TRACE("isDir.");
       handleCleanWeb((name + "/"));
+
+    } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
+      TRACE("isSecret.");
+
+    } else if (name.indexOf(".json") >= 0) {
+      TRACE("isConfig.");
+
     } else {
-      LOGGER_JUSTINFO("isFile.");
-      // fSys->remove(name);
+      TRACE("isFile.");
+      fSys->remove(name);
     }  // if
   }    // while
 }  // handleCleanWeb()

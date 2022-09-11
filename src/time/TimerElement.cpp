@@ -67,7 +67,7 @@ bool TimerElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "next") == 0) {
     if (_mode == Mode::TIMER) {
-      // time from start in seconds
+      // time from start in milliseconds
       unsigned long tfs = now - _startTime;
 
       if (tfs < _waitTime) {
@@ -138,9 +138,9 @@ void TimerElement::loop() {
     newValue = false;
 
   } else if (_mode == Mode::TIMER) {
-    unsigned long now = millis();
+    unsigned long now = _board->nowMillis;
 
-    // time from start in seconds
+    // time from start in milliseconds
     unsigned long tfs = now - _startTime;
 
     if (tfs < _waitTime) {
@@ -191,7 +191,7 @@ void TimerElement::pushState(
   if (_mode != Mode::TIMER) {
     callback("time", "0");
   } else {
-    callback("time", String(now - _startTime).c_str());
+    callback("time", String((now - _startTime) / 1000).c_str());
   }
   callback(PROP_VALUE, _value ? "1" : "0");
 }  // pushState()

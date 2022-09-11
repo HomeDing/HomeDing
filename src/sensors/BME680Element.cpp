@@ -38,7 +38,10 @@ static int8_t i2c_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint
 }
 
 static int8_t i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len) {
-  WireUtils::write(dev_id, reg_addr, reg_data, len);
+  uint8_t tmp[44];
+  tmp[0] = reg_addr;
+  memcpy(tmp + 1, reg_data, len);
+  WireUtils::writeBuffer(dev_id, tmp, len + 1);
   return (0);
 }
 

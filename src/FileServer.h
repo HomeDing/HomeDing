@@ -86,7 +86,7 @@ public:
 
     // LOGGER_RAW("File:handle(%s)", fName.c_str());
     if (requestMethod == HTTP_POST) {
-      server.send(200); // all done in upload. no other forms.
+      // all done in upload. no other forms.
 
     } else if (requestMethod == HTTP_DELETE) {
       TRACE("Delete %d", _fs.exists(fName));

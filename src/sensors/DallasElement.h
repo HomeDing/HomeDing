@@ -1,8 +1,9 @@
 /**
- * @file DS18B20Element .h
- * 
- * @brief Optional Input Element for the HomeDing Library to read DS18B20 sensors and create actions.
- * 
+ * @file DallasElement .h
+ *
+ * @brief Sensor Element for the HomeDing Library to read DS18B20 and other OneLine sensors supported 
+ * by the DallasTemperature library and create actions.
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -14,25 +15,24 @@
  *
  * Changelog:
  * * 14.02.2020 created by Matthias Hertel
+ * * 07.05.2022 can read more Dallas Temp Sensors using DallasTemperature library.
+ *              renamed from DS18B20Element to DallasElement.
  */
 
-#ifndef DS18B20ELEMENT_H
-#define DS18B20ELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
-#include <OneWire.h>
-
 /**
- * @brief The DS18B20Element  is an special Element that creates actions based on a
+ * @brief The DallasElement  is an special Element that creates actions based on a
  * digital IO signal.
  */
-class DS18B20Element : public SensorElement
-{
+class DallasElement : public SensorElement {
+
 public:
   /**
-   * @brief Factory function to create a DS18B20Element .
+   * @brief Factory function to create a DallasElement .
    * @return Element*
    */
   static Element *create();
@@ -42,6 +42,10 @@ public:
    */
   static bool registered;
 
+  /**
+   * @brief Construct a new DallasElement
+   */
+  DallasElement();
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -53,7 +57,7 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
-   * @brief Activate the DS18B20Element .
+   * @brief Activate the DallasElement .
    * @return true when activation was good.
    * @return false when activation failed.
    */
@@ -64,33 +68,20 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
   virtual bool getProbe(String &values);
   virtual void sendData(String &values);
 
 private:
-  int _pin = -1;
-  OneWire *_oneWire;
-  uint8_t _addr[8];
-
-  /** time in msecs when data is ready */
-  unsigned long _isReady;
-
-  /**
-   * @brief The _tempAction is emitted when a new temp was read from the DHT
-   * sensor.
-   */
-  String _tempAction;
+  // implementation details
+  class DallasElementImpl *_impl;
 };
 
 
 #ifdef HOMEDING_REGISTER
-// Register the DS18B20Element  in the ElementRegistry.
-bool DS18B20Element ::registered =
-    ElementRegistry::registerElement("ds18b20", DS18B20Element ::create);
+// Register the DallasElement  in the ElementRegistry.
+bool DallasElement ::registered =
+  ElementRegistry::registerElement("dallas", DallasElement ::create);
 #endif
-
-
-#endif // DS18B20ELEMENT_H

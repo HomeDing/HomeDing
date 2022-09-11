@@ -42,8 +42,8 @@ int RTCVariables::setResetCounter(int cnt)
   // that is stored in the lowest byte of the 32-bit value.
   // The higher 3 bytes are used to check for a valid entry.
   cnt = constrain(cnt, 0, 255);
-  uint32_t memData = (NETRESET_MAGIC + cnt);
 #if defined(ESP8266)
+  uint32_t memData = (NETRESET_MAGIC + cnt);
   ESP.rtcUserMemoryWrite(NETRESET_OFFSET, &memData, sizeof(memData));
 #elif defined(ESP32)
   // TODO:ESP32 implementation
@@ -58,9 +58,9 @@ int RTCVariables::setResetCounter(int cnt)
 int RTCVariables::getResetCounter()
 {
   int cnt = 0;
-  uint32_t memData;
 
 #if defined(ESP8266)
+  uint32_t memData;
   ESP.rtcUserMemoryRead(NETRESET_OFFSET, &memData, sizeof(memData));
   if ((memData & NETRESET_MASK) == NETRESET_MAGIC) {
     cnt = (memData & 0x000000FF);
@@ -97,9 +97,9 @@ void RTCVariables::setStateString(String &state)
 String RTCVariables::getStateString()
 {
   String state;
-  uint32_t memMagic;
 
 #if defined(ESP8266)
+  uint32_t memMagic;
   ESP.rtcUserMemoryRead(STATE_OFFSET, &memMagic, sizeof(memMagic));
   if (memMagic == STATE_MAGIC) {
     char mem[STATE_SIZE];

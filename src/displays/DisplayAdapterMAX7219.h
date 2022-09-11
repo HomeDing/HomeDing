@@ -25,25 +25,30 @@
 #define REG_SHUTDOWN 0x0C
 #define REG_DISPLAYTEST 0x0F
 
+// use TRACE for compiling with detailed TRACE output.
+#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 class DisplayAdapterMAX7219 : public DisplayAdapterGFX {
 public:
   ~DisplayAdapterMAX7219() = default;
 
   bool start() override {
-    // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
-    // LOGGER_JUSTINFO("  pins: l:%d, r:%d", conf->lightPin, conf->resetPin);
-    // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
-    // LOGGER_JUSTINFO("   spi: cs:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiMOSI, conf->spiCLK);
+    TRACE("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
+    TRACE("   spi: cs:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiMOSI, conf->spiCLK);
 
-    int bytes = conf->width * conf->height;
     _csPin = conf->spiCS;
+
+    // adjust false height and width (must be *8)
+    _hPanels = (conf->height + 7) / 8;
+    _wPanels = (conf->width + 7) / 8;
+
+    int bytes = _hPanels * 8 * _wPanels * 8;
 
     if (bytes == 0 || bytes > 10 * 1024) {
       LOGGER_ERR("display dimensions ?");
       return (false);
     }
-    display = new (std::nothrow) GFXcanvas1(conf->width, conf->height);
+    display = new (std::nothrow) GFXcanvas1(_wPanels * 8, _hPanels * 8);
 
     if (!display) {
       LOGGER_ERR("not found");
@@ -63,12 +68,12 @@ public:
       _writeAll(REG_SCANLIMIT, 0x07);  // all digits
       _writeAll(REG_DECODEMODE, 0);    // no decode
       _writeAll(REG_SHUTDOWN, 1);      // enable
-      setBrightness(20);
+      setBrightness(conf->brightness);
       display->fillScreen(backColor565);
       flush();
     }  // if
     return (true);
-  };  // init()
+  };  // start()
 
 
   /**
@@ -76,6 +81,8 @@ public:
    * @param brightness = 0...100
    */
   virtual void setBrightness(uint8_t brightness) override {
+    TRACE("brightness(%d)", brightness);
+
     int b = (brightness * 16) / 100;
 
     b = constrain(b, 0, 16);
@@ -108,24 +115,35 @@ public:
   };
 
 
+  // MAX7219 modules may be arranged like this:
+  //
+  // [00][01][02][03] <= data
+  //
+  // [00][01][02][03][04][05][06][07] <= data
+  // 
+  // not yet working:
+  // [00][01][02][03][04][05][06][07]
+  // [08][09][10][11][12][13][14][15] <= data
+
   /**
    * @brief send all pixels in the buffer to the attached display.
    */
   virtual void flush() override {
     // LOGGER_JUSTINFO("flush()");
 
-    int lineOffset = ((conf->width + 7) / 8);  ///< offset in buffer to 1 line down.
+    int lineOffset = _wPanels;  ///< offset in buffer to 1 line down.
     uint8_t *buffer = display->getBuffer();
 
-    // print buffer on Serial log
-    // for (int y = 0; y < conf->height; y++) {
+    // // print buffer on Serial log
+    // uint8_t *p = buffer;
+    // for (int l = 0; l < conf->height; l++) {
     //   uint8_t b = 0;
     //   for (int x = 0; x < conf->width; x++) {
     //     if ((x % 8) == 0) {
-    //       b = *buffer++;
+    //       b = *p++;
     //     }
     //     if (b & 0x80) {
-    //       Serial.print('*');
+    //       Serial.print('#');
     //     } else {
     //       Serial.print('.');
     //     }
@@ -134,16 +152,18 @@ public:
     //   Serial.println();
     // }
     // Serial.println();
-    // buffer = display->getBuffer();
 
     // shift to display !
     SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
-    for (int y = 0; y < 8; y++) {
+
+    // 8 SPI transfers for 8 lines in the modules
+    for (int l = 0; l < 8; l++) {
+
       // transfer all data from one horizontal line into daisychained buffers.
       digitalWrite(_csPin, LOW);
-      for (int x = 0; x < 4; x++) {
-        uint8_t d = buffer[x + y * lineOffset];
-        SPI.transfer(y + 1);
+      for (int x = 0; x < _wPanels; x++) {
+        uint8_t d = buffer[x + l * lineOffset];
+        SPI.transfer(l + 1);
         SPI.transfer(d);
       }  // for
       // save data into display.
@@ -159,6 +179,8 @@ private:
   GFXcanvas1 *display = nullptr;
 
   uint8_t _csPin;
+  uint8_t _hPanels;
+  uint8_t _wPanels;
 
   /**
    * @brief Write data to all modules of the display
@@ -166,7 +188,7 @@ private:
    * @param data
    */
   void _writeAll(byte address, byte data) {
-    int modules = (conf->width + 7) / 8;
+    int modules = _wPanels * _hPanels;
     digitalWrite(_csPin, LOW);
     while (modules) {
       SPI.transfer(address);

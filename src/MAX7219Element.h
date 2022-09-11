@@ -41,12 +41,6 @@ public:
 
 
   /**
-   * @brief initialize a new Element.
-   * @param board The board reference.
-   */
-  virtual void init(Board *board) override;
-
-  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.
@@ -84,7 +78,7 @@ private:
   /**
    * @brief Turn all leds off. brightness = 0 switches off;
    */
-  void _setBrightness(int level);
+  void _setBrightness();
 
   /**
    * @brief Send data for one line or segment or address.

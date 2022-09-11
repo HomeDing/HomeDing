@@ -140,7 +140,7 @@ class Board {
   enum BOARDSTATE : int {
     // ===== startup operation states
     NONE = 0,  // unspecified
-    LOAD = 1,  // load configurations and create elements. Start SYS
+    LOAD = 1,  // load configurations and create elements. Start SYS Elements
 
     CONNECT = 2,  // define how to connect, AUTO, PSK or PASSWD
     WAITNET = 3,  // Wait for network connectivity or configuration request.
@@ -160,12 +160,17 @@ class Board {
 
 public:
   // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
-  const char *version = "0.82";
+  const char *version = "0.90";
 
   // The build name defined by the main sketch e.g. "minimal", "standard", "radio"
   String build;
 
   // ----- Time functionality -----
+
+  /** The result of the millis() function at the start of loop().
+   * This can be used for all time / durtion calculations except high precission ones.
+   */
+  unsigned long nowMillis;
 
   /**
    * return the seconds since starting the device.

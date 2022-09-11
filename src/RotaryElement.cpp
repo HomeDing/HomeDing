@@ -30,11 +30,10 @@
 RotaryEncoder *__encoder;
 
 /**
- * @brief The interrupt service routine to check the signals from the rotary encoder 
+ * @brief The interrupt service routine to check the signals from the rotary encoder
  */
-IRAM_ATTR void __checkPosition()
-{
-  __encoder->tick(); // just call tick() to check the state.
+IRAM_ATTR void __checkPosition() {
+  __encoder->tick();  // just call tick() to check the state.
 }
 
 
@@ -44,10 +43,9 @@ IRAM_ATTR void __checkPosition()
  * @brief static factory function to create a new RotaryElement
  * @return RotaryElement* created element
  */
-Element *RotaryElement::create()
-{
+Element *RotaryElement::create() {
   return (new RotaryElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -55,11 +53,16 @@ Element *RotaryElement::create()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool RotaryElement::set(const char *name, const char *value)
-{
+bool RotaryElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "step") == 0) {
+  if (_stricmp(name, "value") == 0) {
+    _value = _atoi(value);
+    if (__encoder) {
+      __encoder->setPosition(_value);
+    }
+
+  } else if (_stricmp(name, "step") == 0) {
     _step = _atoi(value);
 
   } else if (_stricmp(name, "pin1") == 0) {
@@ -73,17 +76,16 @@ bool RotaryElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the RotaryElement.
  */
-void RotaryElement::start()
-{
+void RotaryElement::start() {
   // TRACE("start()");
 
   // Verify parameters
@@ -99,18 +101,17 @@ void RotaryElement::start()
       pinMode(_pin2, INPUT_PULLUP);
       attachInterrupt(_pin2, __checkPosition, CHANGE);
       Element::start();
-    } // if
-  } // if
-} // start()
+    }  // if
+  }    // if
+}  // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void RotaryElement::loop()
-{
+void RotaryElement::loop() {
   // do something
-  __encoder->tick(); // just call tick() to check the state.
+  __encoder->tick();  // just call tick() to check the state.
 
   long newPos = __encoder->getPosition();
   if (newPos != _value) {
@@ -118,17 +119,16 @@ void RotaryElement::loop()
     _board->dispatch(_valueAction, _step * (newPos - _value));
   }
   _value = newPos;
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void RotaryElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, String(_value).c_str());
-} // pushState()
+}  // pushState()
 
 // End

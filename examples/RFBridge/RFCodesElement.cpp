@@ -117,8 +117,6 @@ void RFCodesElement::start() {
  * @brief Give some processing time to the Element to check for next actions.
  */
 void RFCodesElement::loop() {
-  unsigned long now = millis();
-
   Element::loop();
   col.loop(); // process received bytes
 
@@ -134,13 +132,13 @@ void RFCodesElement::loop() {
     if (_receivedCode != _lastReceivedCode) {
       TRACE("process: [%s]", _receivedCode.c_str());
       _lastReceivedCode = _receivedCode;
-      _receivedMillis = now;
+      _receivedMillis = _board->nowMillis;
       _receivedTime = time(nullptr);
       _board->dispatch(_valueAction, _receivedCode);
     }
     _receivedCode = "";
 
-  } else if ((!_lastReceivedCode.isEmpty()) && (now > _receivedMillis + _clearTime)) {
+  } else if ((!_lastReceivedCode.isEmpty()) && (_board->nowMillis - _receivedMillis >  _clearTime)) {
     _lastReceivedCode.clear();
     _receivedTime = 0;
   }

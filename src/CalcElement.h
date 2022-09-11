@@ -15,12 +15,11 @@
  * * 10.10.2021 created by Matthias Hertel
  */
 
-#ifndef CALCELEMENT_H
-#define CALCELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 
-#define MAX_INPUTS 8
+#define CALCELEMENT_MAX_INPUTS 8
 
 class CalcElement : public Element {
 public:
@@ -65,10 +64,7 @@ protected:
   bool _needRecalc;
 
   /// current string based input values.
-  String _inStringValues[MAX_INPUTS];
-
-  // /// current integer based input values.
-  // int _inIntValues[MAX_INPUTS];
+  String _inStringValues[CALCELEMENT_MAX_INPUTS];
 
   /// current (formatted) output value.
   String _value;
@@ -83,5 +79,3 @@ protected:
 };
 
 /* ===== This Element will not be registered and configured. Use derived classes. ===== */
-
-#endif

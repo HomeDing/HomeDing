@@ -63,7 +63,7 @@ bool Element::set(const char *name, const char *value) {
 
 
 /**
- * @brief setup the element so it can be started ans stopped.
+ * @brief setup the element so it can be started and stopped.
  */
 void Element::setup() {}
 

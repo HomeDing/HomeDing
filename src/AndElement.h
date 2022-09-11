@@ -17,8 +17,7 @@
  * * 27.07.2021 allow up to 8 input values using array syntax: value[0..7] = 0/1
  */
 
-#ifndef ANDELEMENT_H
-#define ANDELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -38,9 +37,9 @@ public:
   static bool registered;
 
   /**
-   * @brief Activate the Element.
+   * @brief Construct a new AndElement.
    */
-  virtual void start();
+  AndElement();
 
 
 protected:
@@ -56,6 +55,4 @@ protected:
 // Register the AndElement onto the ElementRegistry.
 bool AndElement::registered =
     ElementRegistry::registerElement("and", AndElement::create);
-#endif
-
 #endif

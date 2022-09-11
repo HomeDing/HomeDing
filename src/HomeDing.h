@@ -2,8 +2,7 @@
 
 // default settings of the HomeDing CPP defines and Element registrations.
 
-#ifndef HOMEDING_H
-#define HOMEDING_H
+#pragma once
 
 #include <Board.h>            // Platform
 #include <Element.h>          // Abstract Elements
@@ -70,6 +69,7 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_Analog
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalSignal
+#define HOMEDING_INCLUDE_Touch
 #define HOMEDING_INCLUDE_DigitalOut
 #define HOMEDING_INCLUDE_PWMOut
 
@@ -186,6 +186,10 @@ extern Board homeding;
 #include <DigitalSignalElement.h>
 #endif
 
+#if defined(HOMEDING_INCLUDE_Touch) && defined(ESP32) 
+#include <TouchElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DigitalOut
 #include <DigitalOutElement.h>
 #endif
@@ -208,6 +212,10 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_REMOTE
 #include <RemoteElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_MQTT
+#include <MQTTElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_WEATHERFEED
@@ -281,6 +289,21 @@ extern Board homeding;
 #include <sensors/DHTElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_AM2320
+#include <sensors/AM2320Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_AHT20
+#include <sensors/AHT20Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_SHT20
+#include <sensors/SHT20Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_SCD4X
+#include <sensors/SCD4XElement.h>
+#endif
 
 #ifdef HOMEDING_INCLUDE_RFCODES
 #include <RFCodesElement.h>
@@ -290,8 +313,8 @@ extern Board homeding;
 #include <RotaryElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_DS18B20
-#include <sensors/DS18B20Element.h>
+#ifdef HOMEDING_INCLUDE_DALLAS
+#include <sensors/DallasElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_BMP280
@@ -302,12 +325,12 @@ extern Board homeding;
 #include <sensors/BME680Element.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_SHT20
-#include <sensors/SHT20Element.h>
-#endif
-
 #ifdef HOMEDING_INCLUDE_BL0937
 #include <BL0937Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_BH1750
+#include <sensors/BH1750Element.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_MAX7219
@@ -320,7 +343,4 @@ extern Board homeding;
 
 #if defined(HOMEDING_INCLUDE_SSDP)
 #include <core/SSDPElement.h>
-#endif
-
-
 #endif

@@ -67,18 +67,19 @@ void DSTimeElement::_getDSTime(int adr, struct tm *t) {
 
 // update time in the RTC chip
 void DSTimeElement::_setDSTime(int adr, struct tm *t) {
-  uint8_t data[8];
+  uint8_t data[12];
 
   // save time to registers 0-7
-  data[0] = dec2Bcd(t->tm_sec);
-  data[1] = dec2Bcd(t->tm_min);
-  data[2] = dec2Bcd(t->tm_hour);  // always using 24h mode.
-  data[3] = 0;                    // day of week not used.
-  data[4] = dec2Bcd(t->tm_mday);
-  data[5] = dec2Bcd(t->tm_mon);
-  data[6] = dec2Bcd(t->tm_year % 100);  // year is alwaysin the range of 20xx
+  data[0] = 0;
+  data[1] = dec2Bcd(t->tm_sec);
+  data[2] = dec2Bcd(t->tm_min);
+  data[3] = dec2Bcd(t->tm_hour);  // always using 24h mode.
+  data[4] = 0;                    // day of week not used.
+  data[5] = dec2Bcd(t->tm_mday);
+  data[6] = dec2Bcd(t->tm_mon);
+  data[7] = dec2Bcd(t->tm_year % 100);  // year is alwaysin the range of 20xx
 
-  WireUtils::write(adr, 0, data, 7);
+  WireUtils::writeBuffer(adr, data, 8);
 }  // _setDSTime()
 
 // http://lcddevice/$board/dstime/0?time=2019-01-19%2018:35:00

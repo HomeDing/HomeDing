@@ -72,10 +72,6 @@ void DisplayElement::init(Board *board) {
   // use system wide I2C by default
   config.i2cSDA = board->I2cSda;
   config.i2cSCL = board->I2cScl;
-
-  // use system wide SPI by default
-  // config.spiMISO = ;
-  // config.spiMOSI = ;
 }
 
 /**

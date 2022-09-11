@@ -16,8 +16,7 @@
  * * 26.01.2021 support WRGB mode (4 LEDs)
  */
 
-#ifndef LIGHTELEMENT_H
-#define LIGHTELEMENT_H
+#pragma once
 
 #include <Arduino.h>
 #include <HomeDing.h>
@@ -76,9 +75,14 @@ public:
       std::function<void(const char *pName, const char *eValue)> callback) override;
 
   /**
-   * @brief direct function to show a color and brightness.
+   * @brief direct function for Light Elements to show a color and brightness.
    */
-  virtual void show(uint32_t color, int brightness);
+  virtual void setColor(uint32_t color, int brightness);
+
+  /**
+   * @brief direct function for Light Elements to show a color series and brightness.
+   */
+  virtual void setColors(uint32_t *color, int brightness);
 
 protected:
   /**
@@ -125,7 +129,4 @@ private:
 // Register the LightElement onto the ElementRegistry.
 bool LightElement::registered =
     ElementRegistry::registerElement("light", LightElement::create);
-#endif
-
-
 #endif

@@ -125,21 +125,11 @@ bool ColorElement::set(const char *name, const char *value) {
 
 
   } else if (_stricmp(name, "mode") == 0) {
-    if (_stricmp(value, "fade") == 0) {
-      _mode = Mode::fade;
-      _toValue = _value;  // do not start fading without a new value
-
-    } else if (_stricmp(value, "wheel") == 0) {
-      _mode = Mode::wheel;
-
-    } else if (_stricmp(value, "pulse") == 0) {
-      _mode = Mode::pulse;
+    Mode m = (Mode)ListUtils::indexOf("fix,fade,wheel,pulse", value);
+    if ((m >= Mode::_min) && (m <= Mode::_max)) {
+      _mode = m;
       _toValue = _value;
       _startTime = now;
-
-    } else {
-      _mode = Mode::fix;
-      _toValue = _value;
     }  // if
 
   } else if (_stricmp(name, "duration") == 0) {
@@ -147,7 +137,15 @@ bool ColorElement::set(const char *name, const char *value) {
     _duration = _scanDuration(value);
 
   } else if (_stristartswith(name, "elements[")) {
-    // direct linked element
+    // TODO: remove deprecated property in favor of "connect"
+
+    Element *e = _board->getElementById(value);
+    if (e) {
+      _lightElements.push_back(static_cast<LightElement *>(e));
+    }
+
+  } else if (_stristartswith(name, "connect[")) {
+    // direct connected element
 
     Element *e = _board->getElementById(value);
     if (e) {
@@ -261,7 +259,7 @@ void ColorElement::loop() {
     // send to linked light elements
     int num = _lightElements.size();
     for (int n = 0; n < num; n++) {
-      _lightElements[n]->show(nextValue, _brightness);
+      _lightElements[n]->setColor(nextValue, _brightness);
     }
 
     // dispatch as action
@@ -289,11 +287,11 @@ void ColorElement::pushState(
 
   if (_mode != Mode::wheel) {
     sprintf(sColor, "x%08x", _toValue);  // do not report fading and interim colors
-    callback(PROP_VALUE, sColor);
+    callback("value", sColor);
   }
 
-  callback("duration", String(_duration).c_str());
-  callback(PROP_BRIGHTNESS, String(_brightness).c_str());
+  callback("duration", _printInteger(_duration));
+  callback("brightness", _printInteger(_brightness));
 }  // pushState()
 
 

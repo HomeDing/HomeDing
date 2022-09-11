@@ -17,8 +17,7 @@
  * * 13.02.2022 pass through brightness.
  */
 
-#ifndef COLORELEMENT_H
-#define COLORELEMENT_H
+#pragma once
 
 #include <vector>
 
@@ -73,11 +72,15 @@ public:
 
 private:
   enum class Mode {
-    fix = 0,    // take inbound value for output
-    fade = 1,   // fade to inbound value from current value
-    wheel = 2,  // single color output cycling through whole hue cycle
-    pulse = 4,
-    more
+    _min = 0,      // minimum value
+    _default = 0,  // default value
+
+    fix = 0,       // take inbound value for output
+    fade = 1,      // fade to inbound value from current value
+    wheel = 2,     // single color output cycling through whole hue cycle
+    pulse = 3,
+
+    _max = 3  // maximum value
   };
 
 
@@ -114,7 +117,7 @@ private:
   /**
    * @brief The duration of one animation cycle or transition in milliSeconds.
    */
-  Mode _mode = Mode::fix;
+  Mode _mode = Mode::_default;
 
   /**
    * @brief The _valueAction holds the actions that is submitted when the color changes.
@@ -124,7 +127,7 @@ private:
   /**
    * @brief linked elements
    */
-  std::vector<LightElement *> _lightElements; // direct linked elements
+  std::vector<LightElement *> _lightElements;  // direct linked elements
 
   /**
    * @brief The _brightnessAction holds the actions that is submitted when the brightness changes.
@@ -136,7 +139,4 @@ private:
 // Register the ColorElement in the ElementRegistry.
 bool ColorElement::registered =
   ElementRegistry::registerElement("color", ColorElement::create);
-#endif
-
-
 #endif

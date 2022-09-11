@@ -19,8 +19,7 @@
  * * 24.01.2022 resolution increased. milliseconds as durations enabled.
  */
 
-#ifndef TIMERELEMENT_H
-#define TIMERELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -143,10 +142,9 @@ private:
 
   /**
    * @brief time between "on" and "off" action.
-   *
    * This variable corresponds to the "pulsetime" parameter.
    */
-  unsigned long _pulseTime = 0; // seconds of the pulsetime
+  unsigned long _pulseTime = 0; // duration of the pulsetime
 
   /**
    * @brief The _onAction holds the actions that is submitted when the pulse
@@ -172,7 +170,7 @@ private:
   String _endAction;
 
   /**
-   * @brief The effective time (in seconds) the timer has started.
+   * @brief The effective time (in milliseconds) the timer has started.
    */
   unsigned long _startTime;
 };
@@ -182,6 +180,4 @@ private:
 // Register the TimerElement onto the ElementRegistry.
 bool TimerElement::registered =
     ElementRegistry::registerElement("timer", TimerElement::create);
-#endif
-
 #endif

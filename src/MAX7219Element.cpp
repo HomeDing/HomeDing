@@ -19,7 +19,7 @@
 
 #include <MAX7219Element.h>
 
-#include "SPI.h"
+#include <SPI.h>
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
@@ -63,8 +63,7 @@ void MAX7219Element::_clear() {
 }  // _clear()
 
 
-void MAX7219Element::_setBrightness(int level) {
-  _brightness = constrain(level, 0, 16);
+void MAX7219Element::_setBrightness() {
   if (active) {
     if (_brightness == 0) {
       _write(REG_SHUTDOWN, 0);
@@ -146,31 +145,29 @@ void MAX7219Element::_writeM8X8(String value) {
 }  // _writeM8X8()
 
 
-void MAX7219Element::init(Board *board) {
-  TRACE("init()");
-  Element::init(board);
-  // do something here like initialization
-}  // init()
-
-
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool MAX7219Element::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+   if (Element::set(name, value)) {
+     // ok.
+
+  } else if (_stricmp(name, PROP_VALUE) == 0) {
     _value = value;
 
   } else if (_stricmp(name, "clear") == 0) {
     if (active)
       _clear();
 
+  } else if (_stricmp(name, "brightness") == 0) {
+    int b = _atoi(value);
+    _brightness = constrain(b, 0, 16);
+    _setBrightness();
+
   } else if (_stricmp(name, "cspin") == 0) {
     _csPin = _atopin(value);
-
-  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
-    _setBrightness(_atoi(value));
 
   } else if (_stricmp(name, "mode") == 0) {
     if (_stricmp(value, "numeric") == 0) {
@@ -180,7 +177,7 @@ bool MAX7219Element::set(const char *name, const char *value) {
     }
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
 
   return (ret);
@@ -197,20 +194,17 @@ void MAX7219Element::start() {
 
   // Verify parameters
   if ((_csPin >= 0) && (_mode != Mode::none)) {
+    Element::start();
 
     SPI.begin();
     pinMode(_csPin, OUTPUT);
     digitalWrite(_csPin, HIGH);
     _write(REG_DISPLAYTEST, 0);           // no test mode
     _write(REG_SCANLIMIT, 0x07);          // all digits
-    _write(REG_DECODEMODE, _decodeMode);  // no decode
-    _write(REG_SHUTDOWN, 1);              // enable
 
-    _write(REG_INTENSITY, _brightness);
+     _clear();
+    _setBrightness();
     _lastValue = "";
-    _clear();
-
-    Element::start();
   }  // if
 
 
@@ -240,8 +234,8 @@ void MAX7219Element::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback("mode", _mode == Mode::numeric ? "numeric" : "8x8");
-  callback(PROP_BRIGHTNESS, _printInteger(_brightness));
-  callback(PROP_VALUE, String(_value).c_str());
+  callback("brightness", _printInteger(_brightness));
+  callback("value", String(_value).c_str());
 }  // pushState()
 
 

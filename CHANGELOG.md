@@ -2,16 +2,55 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.8.3] - unreleased
+### Changes / Enhancements
+
+
+## [0.9.0] - 2022-08-22
 
 ### Changes / Enhancements
 
-New elements:
+* There are many enhancements and bug fixing in this release.
 
-* **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** -
+* The /api endpoints are now standard all $board services are deprecated and will be removed in version 1.0
+
+* **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** --
     supports sending values to MQTT servers based on actions.
 
+* **DallasElement** is an enhanced version of the former Ds18B20Element
+now supporting different sensors using the OneWire protocol.
 
+* **[BH1750 Element](https://homeding.github.io/elements/bh1750.htm)** --
+is supporting the BH1750 Light sensor.
+See now supporting different sensors using the OneWire protocol.
+
+* **[BH1750 Element](https://homeding.github.io/elements/am2320.htm)** --
+The AM2320Element allows retrieving temperature and humidity 
+values from AM2320 sensors and creates actions when new values are available.
+
+* **[AHT20 Element](https://homeding.github.io/elements/aht20.htm)** --
+The AHT20Element allows retrieving temperature and humidity 
+values from from the AHT20 sensors from aosong and creates actions when new values are available.
+
+* **[SDC4x Element]**
+A Element to create actions based on sensor values from a SCD4X Temperature and Humidity sensor.
+
+* **[Touch Element](https://homeding.github.io/elements/touch.htm)** --
+The TouchElement enables creating Actions by using touch input on the ESP32.
+
+* **[DisplayMAX7219 Element] to use more than 4 modules (WIP).
+
+* **SensorElement** is enhanced to support reporting the state and emitting actions for the sensor values
+  to simplify sensor implementations and save overall memory.
+
+* **[CalcElement](https://homeding.github.io/elements/calc.htm)** is used as a base class 
+for some elements with multiple input an calculated output.
+
+* There are **[CLI commands](https://homeding.github.io/dev/cli.htm)** available for updating and restoring device configurations
+  and uploading pre-build firmware.
+
+* much fixing, testing, documenation and cleanup  
+
+* much more support for ESP32.  
 
 ## [0.8.2] - 2022-03-28
 

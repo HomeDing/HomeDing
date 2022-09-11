@@ -23,6 +23,8 @@
 
 #include <dhtnew.h>
 
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+
 /**
  * @brief static factory function to create a new DHTElement
  * @return DHTElement* created element
@@ -36,42 +38,33 @@ Element *DHTElement::create() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DHTElement::set(const char *name, const char *value) {
-  bool ret = SensorElement::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
-    // Not handled by the SensorElement
-    ret = true;  // assume
-    if (_stricmp(name, "type") == 0) {
-      if (_stricmp(value, "DHT11") == 0) {
-        _type = 11;
-      } else if (_stricmp(value, "DHT22") == 0) {
-        _type = 22;
-      } else if (_stricmp(value, "AUTO") == 0) {
-        _type = 0;
-      }
+  if (SensorElement::set(name, value)) {
+    // done.
 
-    } else if (_stricmp(name, PROP_PIN) == 0) {
-      _pin = _atopin(value);
+  } else if (_stricmp(name, "pin") == 0) {
+    _pin = _atopin(value);
 
-    } else if (_stricmp(name, "powerpin") == 0) {
-      // the ouput pin to control powering the component
-      _powerpin = _atopin(value);
-      ret = true;
+  } else if (_stricmp(name, "powerpin") == 0) {
+    // the ouput pin to control powering the component
+    _powerpin = _atopin(value);
+    ret = true;
 
-    } else if (_stricmp(name, "powerinverse") == 0) {
-      _powerinverse = _atob(value);
-      ret = true;
+  } else if (_stricmp(name, "powerinverse") == 0) {
+    _powerinverse = _atob(value);
+    ret = true;
 
-    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
-      _tempAction = value;
+  } else if (_stricmp(name, "onTemperature") == 0) {
+    _actions[0] = value;
 
-    } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
-      _humAction = value;
+  } else if (_stricmp(name, "onHumidity") == 0) {
+    _actions[1] = value;
 
-    } else {
-      ret = false;
-    }  // if
-  }    // if
+  } else {
+    ret = false;
+
+  }  // if
   return (ret);
 }  // set()
 
@@ -86,6 +79,9 @@ void DHTElement::start() {
 
   } else {
     SensorElement::start();
+    _valuesCount = 2;
+    _stateKeys = "temperature,humidity";
+
     if (_powerpin >= 0) {
       pinMode(_powerpin, OUTPUT);
       int physLevel = (_powerinverse ? LOW : HIGH);
@@ -100,7 +96,7 @@ void DHTElement::start() {
  * @brief Deactivate the DHTElement.
  */
 void DHTElement::term() {
-  // TRACE("term()");
+  TRACE("term()");
   // no need to call _dht.anyfunc()
   if (_powerpin >= 0) {
     pinMode(_powerpin, OUTPUT);
@@ -115,36 +111,28 @@ void DHTElement::term() {
 
 bool DHTElement::getProbe(String &values) {
   bool newData = false;
-  char buffer[16];
 
   // TRACE("getProbe()");
   int ret = _dht->read();
 
-  if (ret == DHTLIB_OK) {
-    newData = true;
+  if (ret == DHTLIB_WAITING_FOR_READ) {
+    setWait(2000);
+
+  } else if (ret == DHTLIB_OK) {
+    char buffer[16];
     snprintf(buffer, sizeof(buffer), "%.2f,%.2f", _dht->getTemperature(), _dht->getHumidity());
     values = buffer;
+    newData = true;
 
-  } else if (ret != DHTLIB_WAITING_FOR_READ) {
+  } else if (ret == DHTLIB_ERROR_SENSOR_NOT_READY) {
+    LOGGER_ETRACE("not found");
+    term();
+
+  } else {
     LOGGER_EERR("dht err: %d", ret);
   }  // if
 
   return (newData);
 }  // getProbe()
-
-
-void DHTElement::sendData(String &values) {
-  _board->dispatchItem(_tempAction, values, 0);
-  _board->dispatchItem(_humAction, values, 1);
-}  // sendData()
-
-
-void DHTElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  SensorElement::pushState(callback);
-  callback("temperature", Element::getItemValue(_lastValues, 0).c_str());
-  callback("humidity", Element::getItemValue(_lastValues, 1).c_str());
-}  // pushState()
-
 
 // End

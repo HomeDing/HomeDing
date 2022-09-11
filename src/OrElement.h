@@ -15,8 +15,7 @@
  * * 27.07.2021 created by Matthias Hertel
  */
 
-#ifndef ORELEMENT_H
-#define ORELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -31,15 +30,14 @@ public:
   static Element *create();
 
   /**
+   * @brief Construct a new OrElement
+   */
+  OrElement();
+
+  /**
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
-
-  /**
-   * @brief Activate the Element.
-   */
-  virtual void start();
-
 
 protected:
   /**
@@ -54,6 +52,4 @@ protected:
 // Register the OrElement onto the ElementRegistry.
 bool OrElement::registered =
     ElementRegistry::registerElement("or", OrElement::create);
-#endif
-
 #endif

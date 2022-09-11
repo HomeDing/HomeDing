@@ -17,6 +17,7 @@
 
 #include <ArduinoOTA.h>
 
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -24,24 +25,21 @@
  * @brief static factory function to create a new OTAElement
  * @return OTAElement* created element
  */
-Element *OTAElement::create()
-{
+Element *OTAElement::create() {
   return (new OTAElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
-OTAElement::OTAElement()
-{
+OTAElement::OTAElement() {
   startupMode = Element_StartupMode::Network;
 }
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool OTAElement::set(const char *name, const char *value)
-{
+bool OTAElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, "port") == 0) {
@@ -52,28 +50,31 @@ bool OTAElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the OTAElement.
  */
-void OTAElement::start()
-{
-  // TRACE("start()");
+void OTAElement::start() {
+  TRACE("start()");
 
   ArduinoOTA.setHostname(_board->deviceName.c_str());
 
   if (!_board->isSafeMode) {
-    ArduinoOTA.setPort(_port); // defaults = 8266
+    ArduinoOTA.setPort(_port);  // defaults = 8266
     if (_passwd.length() > 0)
       ArduinoOTA.setPassword((const char *)_passwd.c_str());
 
-    ArduinoOTA.onStart([this]() { LOGGER_JUSTINFO("OTA starting..."); });
-    ArduinoOTA.onEnd([this]() { LOGGER_EINFO("done"); });
+    ArduinoOTA.onStart([this]() {
+      LOGGER_JUSTINFO("OTA starting...");
+    });
+    ArduinoOTA.onEnd([this]() {
+      LOGGER_EINFO("done");
+    });
 
     // The onProgress function is called very often. Only report progress on
     // full percentages.
@@ -101,35 +102,33 @@ void OTAElement::start()
       // else if (error == OTA_END_ERROR)
       //   LOGGER_EERR("End Failed");
     });
-    ArduinoOTA.begin(); // use mDNS is true by default.
+    ArduinoOTA.begin();  // use mDNS is true by default.
     Element::start();
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void OTAElement::loop()
-{
+void OTAElement::loop() {
   static int mod4 = 0;
   if (++mod4 % 4 == 0) {
     ArduinoOTA.handle();
   }
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void OTAElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-} // pushState()
+}  // pushState()
 
 // Register the OTAElement onto the ElementRegistry.
 bool OTAElement::registered =
-    ElementRegistry::registerElement("ota", OTAElement::create);
+  ElementRegistry::registerElement("ota", OTAElement::create);
 
 // End

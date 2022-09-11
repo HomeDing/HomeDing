@@ -20,69 +20,70 @@
 
 #include <sensors/SensorElement.h>
 
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
-SensorElement::SensorElement() {
-  _readTime = 60; // read from sensor once a minute
-  _resendTime = 0; // Not enabled resending probes.
-  _warmupTime = 3; // secs.
-  _restart = false;
-  _sensorWorkedOnce = false;
-  _isReading = false;
-} // SensorElement()
+#define STATE_OFF 0   // just got power on
+#define STATE_WAIT 1  // initialized, warmup or wait time beween probes
+#define STATE_READ 2  // Reading a value
+#define STATE_SEND 3  // Sending Data
 
+SensorElement::SensorElement() {}
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool SensorElement::set(const char *name, const char *value) {
-  bool ret = Element::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
-    ret = true;
-    if (_stricmp(name, "readtime") == 0) {
-      _readTime = _atotime(value);
-    } else if (_stricmp(name, "resendtime") == 0) {
-      _resendTime = _atotime(value);
-    } else if (_stricmp(name, "warmuptime") == 0) {
-      _warmupTime = _atotime(value);
-    } else if (_stricmp(name, "restart") == 0) {
-      _restart = _atob(value);
-    } else {
-      ret = false;
-    } // if
-  } // if
+  if (Element::set(name, value)) {
+    // done.
+  } else if (_stricmp(name, "readtime") == 0) {
+    _readTime = _scanDuration(value);
+
+  } else if (_stricmp(name, "resendtime") == 0) {
+    _resendTime = _scanDuration(value);
+
+  } else if (_stricmp(name, "warmuptime") == 0) {
+    _warmupTime = _scanDuration(value);
+
+  } else if (_stricmp(name, "restart") == 0) {
+    _restart = _atob(value);
+
+  } else {
+    ret = false;
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the SensorElement.
  */
 void SensorElement::start() {
+  TRACE("start()");
   unsigned int now = millis();
   Element::start();
 
-  _nextRead = now + _warmupTime * 1000; // now + some seconds. allowing the sensor to get values.
+  // _sensorWorkedOnce = false;
+  _state = STATE_WAIT;
+  _lastRead = now + _warmupTime - _readTime;  // now + some seconds. allowing the sensor to get values.
   _nextSend = 0;
-} // start()
+}  // start()
 
 
 /**
  * @brief Dectivate the SensorElement.
  * This method is called when the sensor stopped working.
- * It reactivates the element when specified by restart property. 
+ * It reactivates the element when specified by restart property.
  */
 void SensorElement::term() {
-  unsigned int now = millis();
+  TRACE("term()");
   Element::term();
-  if (_isReading && _sensorWorkedOnce && _restart) {
+  if (_state == STATE_READ && _sensorWorkedOnce && _restart) {
     // term() was initiated by sensor element and retry is configured.
     this->start();
-    _sensorWorkedOnce = false;
   }
-  _nextRead = now + _warmupTime * 1000; // now + some seconds. allowing the sensor to get values.
-  _nextSend = 0;
-} // start()
+}  // term()
 
 
 /**
@@ -90,52 +91,90 @@ void SensorElement::term() {
  * This method will not be called when the element is not active.
  */
 void SensorElement::loop() {
-  unsigned long now = millis();
+  unsigned long now = _board->nowMillis;
   String value;
 
-  if (_nextRead <= now) {
+  if (_waitStart) {
+    if ((now - _waitStart) >= _waitDuration) {
+      _waitStart = 0;  // stop waiting.
+    }
+
+  } else if (_state == STATE_WAIT) {
+    if ((now - _lastRead) < _readTime) {
+      // just wait on...
+
+    } else {
+      _state = STATE_READ;
+      _startTime = now;
+    }
+
+  } else if (_state == STATE_READ) {
     // time to get sensor data, repeat until returning true
     // TRACE("reading...");
-    _isReading = true;
-    bool done = getProbe(value);
-    _isReading = false;
 
-    if (done) {
+    if (getProbe(value)) {
       if (value.length() > 0) {
         // it's a valid value from the sensor
         _sensorWorkedOnce = true;
         if (!value.equals(_lastValues)) {
-          _nextSend = now; // enforce sending now
-        } // if
-        _lastValues = value;
-      } // if
-      _nextRead = now + _readTime * 1000;
-    } // if
+          _lastValues = value;
+          _nextSend = now;  // enforce sending now
+          _state = STATE_SEND;
+        }  // if
 
-  } else if (_nextSend && (_nextSend < now)) {
+      } else if (_nextSend && (_nextSend < now)) {
+        _state = STATE_SEND;
+
+      } else {
+        _lastRead = now;
+        _state = STATE_WAIT;
+      }  // if
+
+    }  // if
+
+  } else if (_state == STATE_SEND) {
+    // time to send sensor data
     // TRACE("sending...");
     if (!_lastValues.isEmpty())
       sendData(_lastValues);
-    _nextSend = _resendTime ? now + _resendTime * 1000 : 0;
-  } // if
-} // loop()
+
+    _lastRead = now;
+    _nextSend = (_resendTime ? now + _resendTime : 0);
+    _state = STATE_WAIT;
+  }  // if
+}  // loop()
 
 
 void SensorElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-} // pushState()
+  for (int n = 0; n < _valuesCount; n++) {
+    callback(
+      Element::getItemValue(_stateKeys, n).c_str(),
+      Element::getItemValue(_lastValues, n).c_str());
+  }
+}  // pushState()
 
 
-// ===== private functions =====
+// ===== protected functions =====
+
+void SensorElement::setWait(unsigned long waitMilliseconds) {
+  TRACE("setWait(%d)", waitMilliseconds);
+  _waitStart = millis();
+  _waitDuration = waitMilliseconds;
+}
 
 bool SensorElement::getProbe(UNUSED String &values) {
-  return (true); // always simulate data is fine
-} // getProbe()
+  return (true);  // always simulate data is fine
+}  // getProbe()
 
 
 void SensorElement::sendData(UNUSED String &values) {
-} // sendData()
+  TRACE("sendData()");
+  for (int n = 0; n < _valuesCount; n++) {
+    _board->dispatchItem(_actions[n], values, n);
+  }
+}  // sendData()
 
 
 // End

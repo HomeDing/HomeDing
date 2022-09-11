@@ -22,7 +22,9 @@
 
 #include <displays/DisplayAdapterMAX7219.h>
 
-#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
+#if !defined(TRACE)
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#endif
 
 /* ===== Static factory function ===== */
 

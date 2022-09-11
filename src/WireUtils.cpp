@@ -17,126 +17,100 @@
  */
 
 
-#include "WireUtils.h"
-#include "HardwareSerial.h"
+#include <Arduino.h>
+#include <WireUtils.h>
 
 // activate to get some debug output.
 // #define WIREDUMP
 
 /** Helper function to inspect a data buffer by dumping in hexadecimal format. */
-void WireUtils::dumpBuffer(uint8_t *data, uint8_t len)
-{
+void WireUtils::dumpBuffer(uint8_t *data, uint8_t len) {
   if (data) {
     while (len > 0) {
       Serial.printf(" %02x", *data++);
       len--;
-    } // while
+    }  // while
     Serial.println();
-  } // if
-} // dumpBuffer()
+  }  // if
+}  // dumpBuffer()
 
 
 /** check for a device on address */
-bool WireUtils::exists(uint8_t address)
-{
+bool WireUtils::exists(uint8_t address) {
   Wire.beginTransmission(address);
   uint8_t err = Wire.endTransmission();
   return (err == 0);
-} // exists()
-
-
-/** read one register value */
-uint8_t WireUtils::readRegister(uint8_t address, uint8_t reg)
-{
-  uint8_t data;
-  Wire.beginTransmission(address);
-  Wire.write(reg);
-  Wire.endTransmission();
-
-  Wire.requestFrom(address, (uint8_t)1);
-  data = (uint8_t)Wire.read();
-  return (data);
-} // read()
+}  // exists()
 
 
 /** read a sequence of register values into a buffer.
  * @return number of register values read.
  */
-uint8_t WireUtils::readBuffer(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len, int wait)
-{
+uint8_t WireUtils::readBuffer(uint8_t address, uint8_t *data, uint8_t len) {
   uint8_t *d = data;
-  uint8_t done = 0;
 
-  Wire.beginTransmission(address);
-  Wire.write(reg);
-  Wire.endTransmission();
-
-  delay(wait);
-
-  Wire.requestFrom(address, len);
-  while (Wire.available() && (done < len)) {
-    *d = (uint8_t)Wire.read();
-    done++;
-    d++;
+  uint8_t done = Wire.requestFrom(address, len);
+  for (int n = 0; n < done; n++) {
+    *d++ = (uint8_t)Wire.read();
   }
 
 #ifdef WIREDUMP
-  Serial.printf("i2c read 0x%02x:", reg);
+  Serial.printf("i2c <read: ");
   dumpBuffer(data, len);
 #endif
 
   return (done);
-} // read()
+}  // read()
 
 
-uint8_t WireUtils::write(uint8_t address, uint8_t reg) {
-  return (write(address, reg, nullptr, 0));
-}
-
-
-uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t data)
-{
-  return (write(address, reg, &data, 1));
-} // write()
-
-
-// read sequence of bytes to buffer
-uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len)
-{
+// write a sequence of bytes from buffer
+uint8_t WireUtils::writeBuffer(uint8_t address, uint8_t *data, uint8_t len) {
 #ifdef WIREDUMP
-  Serial.printf("i2c writ 0x%02x:", reg);
+  Serial.printf("i2c >writ: ");
   dumpBuffer(data, len);
 #endif
 
   Wire.beginTransmission(address);
-  Wire.write(reg);
   while (len) {
-    Wire.write(*data);
+    Wire.write(*data++);
     len--;
-    data++;
   }
   return (Wire.endTransmission());
-} // write()
+}  // writeBuffer()
 
 
-/** read a sequence of values from i2c device into a buffer.
+// === some useful functions
+
+// write one byte to device
+uint8_t WireUtils::write(uint8_t address, uint8_t reg) {
+  uint8_t tmp[1] = { reg };
+  return (writeBuffer(address, tmp, 1));
+}  // write()
+
+
+// write two bytes to device
+uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t data) {
+  uint8_t tmp[2] = { reg, data };
+  return (writeBuffer(address, tmp, 2));
+}  // write()
+
+
+/** read one register value */
+uint8_t WireUtils::readRegister(uint8_t address, uint8_t reg) {
+  uint8_t data;
+  write(address, reg);
+  readBuffer(address, &data, 1);
+  return (data);
+}  // readRegister()
+
+
+
+/** read a sequence of register values into a buffer.
  * @return number of register values read.
  */
-uint8_t WireUtils::request(uint8_t address, uint8_t *data, uint8_t len)
-{
-  uint8_t *d = data;
-  uint8_t done = Wire.requestFrom(address, len);
-  for (int n= 0; n < done; n++) {
-    *d++ = (uint8_t)Wire.read();
-  }  
-
-#ifdef WIREDUMP
-  Serial.printf("i2c request:");
-  dumpBuffer(data, done);
-#endif
-
-  return (done);
-} // read()
-
+uint8_t WireUtils::readBuffer(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len) {
+  write(address, reg);
+  return(readBuffer(address, data, len));
+}  // readBuffer()
 
 // End.

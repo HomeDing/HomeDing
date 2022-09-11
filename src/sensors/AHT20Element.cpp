@@ -122,7 +122,6 @@ void AHT20Element::start() {
  * */
 bool AHT20Element::getProbe(String &values) {
   bool newData = false;
-  unsigned long now = millis();
 
   if (_state == 0) {
     // trigger measurement
@@ -133,7 +132,7 @@ bool AHT20Element::getProbe(String &values) {
 
   } else if (_state == 1) {
     uint8_t data[1];
-    uint8_t readLen = WireUtils::readBuffer(_address, data, sizeof(data));
+    WireUtils::readBuffer(_address, data, sizeof(data));
 
     TRACE("state: %02x", data[0]);
     if (data[0] & 0x80) {
@@ -149,7 +148,7 @@ bool AHT20Element::getProbe(String &values) {
     uint32_t rawData;
     float hum, temp;
 
-    uint8_t readLen = WireUtils::readBuffer(_address, data, sizeof(data));
+    WireUtils::readBuffer(_address, data, sizeof(data));
     TRACE("data: %02x %02x %02x %02x %02x - %02x", data[1], data[2], data[3], data[4], data[5], data[6]);
 
     uint8_t c = AHT20Element::_crc8(data, 6);

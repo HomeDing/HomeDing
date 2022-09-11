@@ -123,7 +123,6 @@ void AM2320Element::start() {
  * */
 bool AM2320Element::getProbe(String &values) {
   bool done = false;
-  unsigned long now = millis();
 
   if (_state == 0) {
     // wake()

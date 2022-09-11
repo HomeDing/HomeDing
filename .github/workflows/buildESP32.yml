@@ -36,6 +36,7 @@ jobs:
             - name: "esp32:esp32"
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
               version: 2.0.4
+          cli-compile-flags: "compiler.cpp.extra_flags=-Wno-error=unused-variable"
           fqbn: esp32:esp32:esp32
           libraries: |
             - source-path: ./

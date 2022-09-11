@@ -171,9 +171,9 @@ bool SCD4XElement::getProbe(String &values) {
     uint8_t data[3];
 
     WireUtils::writeBuffer(_address, buf, 2);
-    uint8_t readLen = WireUtils::readBuffer(_address, data, sizeof(data));
+    WireUtils::readBuffer(_address, data, sizeof(data));
 
-    TRACE("state: %d, %02x %02x", readLen, data[0], data[1]);
+    TRACE("state: %02x %02x", data[0], data[1]);
     if ((data[0] << 8 | data[1]) & 0x07FF) {
       // data ready
       _state = 2;

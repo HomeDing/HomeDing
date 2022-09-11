@@ -15,6 +15,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # Build Examples for ESP32
   build-esp32:
     name: build examples on ESP32
     runs-on: ubuntu-latest
@@ -47,11 +48,11 @@ jobs:
             - name: Radio
             - name: RFCodes
             - name: LiquidCrystal_PCF8574
+            - name: Adafruit GFX Library
             - name: Adafruit NeoPixel
             - name: Adafruit ST7735 and ST7789 Library
             - name: Adafruit SH110X
             - name: Adafruit SSD1306
-            - name: Adafruit GFX Library
             - name: PubSubClient
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
           sketch-paths: |

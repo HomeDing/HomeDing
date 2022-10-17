@@ -80,6 +80,12 @@ void TouchElement::start() {
 }  // start()
 
 
+
+// in case there is no touchRead() available on ESP32 boards (e.g. C3)
+int __attribute__((weak)) touchRead(int _pin) {
+  return (0);
+};
+
 /**
  * @brief check the state of the input.
  */
@@ -104,7 +110,7 @@ void TouchElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
 #if defined(ESP32)
   Element::pushState(callback);
-  callback(PROP_VALUE, _printBoolean(_value));
+  callback("value", _printBoolean(_value));
 #endif
 }  // pushState()
 

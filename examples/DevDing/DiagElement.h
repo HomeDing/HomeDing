@@ -79,6 +79,7 @@ private:
   String _xAction;
 
   String _handleDiag();
+  void _logChipDetails();
 };
 
 #endif

@@ -390,8 +390,11 @@ void Board::loop() {
       l = l->next;
     }  // while
 
-    // setup system wide stuff
-    Wire.begin(I2cSda, I2cScl);
+    // setup I2C system wide when configured.
+    if ((I2cSda >= 0) && (I2cScl >= 0)) {
+      LOGGER_TRACE("I2C pins sda=%d scl=%d", I2cSda, I2cScl);
+      Wire.begin(I2cSda, I2cScl);
+    }
 
     start(Element_StartupMode::System);
     displayInfo(HOMEDING_GREETING);
@@ -441,11 +444,11 @@ void Board::loop() {
     }
 #elif defined(ESP32)
     WiFi.mode(WIFI_STA);
-    Serial.printf("Default hostname: %s\n", WiFi.getHostname());
+    // Serial.printf("Default hostname: %s\n", WiFi.getHostname());
     if (!deviceName.isEmpty()) {
       WiFi.setHostname(deviceName.c_str());  // for ESP32
     }
-    Serial.printf("New hostname: %s\n", WiFi.getHostname());
+    // Serial.printf("New hostname: %s\n", WiFi.getHostname());
 #endif
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);

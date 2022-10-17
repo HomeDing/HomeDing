@@ -41,9 +41,6 @@
 #include <LittleFS.h>
 #define FILESYSTEM fs::LittleFSFS
 
-#define PIN_WIRE_SDA 21
-#define PIN_WIRE_SCL 22
-
 #elif defined(ESP8266)
 #include <FS.h>
 #include <ESP8266WebServer.h>
@@ -347,8 +344,8 @@ public:
   /**
    * Common I2C settings.
    */
-  int I2cSda = PIN_WIRE_SDA;
-  int I2cScl = PIN_WIRE_SCL;
+  int I2cSda = -1;
+  int I2cScl = -1;
 
   /** Service discovery enabled */
   bool mDNS_sd = true;

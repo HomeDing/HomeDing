@@ -1,28 +1,26 @@
 /**
- * @file DisplayAdapterST7789.h
+ * @file DisplayST7735Adapter.h
  *
  * @brief DisplayAdapter implementation for the HomeDing library
- * adapting LCD displays using the HD44780 chip.
+ * adapting LCD displays using the ST7735 chip.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * -----
- * * 25.07.2018 created by Matthias Hertel
- * * 07.12.2020 no write text beyond textline end.
+ * * 21.10.2022 created by Matthias Hertel
  */
 
-#ifndef DisplayAdapterST7789_H
-#define DisplayAdapterST7789_H
+#pragma once
 
 #include <displays/DisplayAdapterGFX.h>
 
-#include <Adafruit_ST7789.h>  // Hardware-specific library for ST7789
+#include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
 #include <SPI.h>
 
-class DisplayAdapterST7789 : public DisplayAdapterGFX {
+class DisplayST7735Adapter : public DisplayAdapterGFX {
 public:
-  ~DisplayAdapterST7789() = default;
+  ~DisplayST7735Adapter() = default;
 
   bool start() override {
     // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
@@ -31,12 +29,12 @@ public:
     // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, miso:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiMISO, conf->spiCLK);
 
 #if defined(ESP8266)
-    display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->resetPin);
+    display = new (std::nothrow) Adafruit_ST7735(conf->spiCS, conf->spiDC, conf->resetPin);
 
 #elif defined(ESP32)
     SPI.begin(conf->spiCLK, conf->spiMISO, conf->spiMOSI);
-    // display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK, conf->resetPin);
-    display = new (std::nothrow) Adafruit_ST7789(&SPI, conf->spiCS, conf->spiDC, conf->resetPin);
+    // display = new (std::nothrow) Adafruit_ST7735(conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK, conf->resetPin);
+    display = new (std::nothrow) Adafruit_ST7735(&SPI, conf->spiCS, conf->spiDC, conf->resetPin);
 #endif
 
     if (!display) {
@@ -45,7 +43,8 @@ public:
 
     } else {
       gfxDisplay = (Adafruit_GFX *)display;
-      display->init(conf->width, conf->height, SPI_MODE0);
+      // display->init(conf->width, conf->height, SPI_MODE0);
+      display->initR(INITR_MINI160x80);
       display->setSPISpeed(40000000);
       display->invertDisplay(conf->invert);
       backColor565 = ST77XX_BLACK;
@@ -66,7 +65,5 @@ private:
   /**
    * @brief Reference to the used library object
    */
-  Adafruit_ST7789 *display = nullptr;
+  Adafruit_ST7735 *display = nullptr;
 };
-
-#endif  // DisplayAdapterST7789_H

@@ -245,6 +245,10 @@ extern Board homeding;
 #include <displays/DisplayST7789Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYST7735
+#include <displays/DisplayST7735Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DisplayText
 #include <DisplayTextElement.h>
 #endif

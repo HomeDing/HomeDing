@@ -1,6 +1,6 @@
 /**
- * @file DisplayST7789Element.h
- * @brief Display Element for ST7789 compatible TFT displays.
+ * @file DisplayST7735Element.h
+ * @brief Display Element for ST7735 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -20,16 +20,16 @@
 #include "DisplayElement.h"
 
 /**
- * @brief DisplayST7789Element implements creating an Display Adapter for a LCD
+ * @brief DisplayST7735Element implements creating an Display Adapter for a LCD
  * attached to the I2C bus.
  * @details
- * The DisplayAdapter Element includes the real functionality.
+ * The DisplayAdapterLCD Element includes the real functionality.
  */
 
-class DisplayST7789Element : public DisplayElement {
+class DisplayST7735Element : public DisplayElement {
 public:
   /**
-   * @brief Factory function to create a DisplayST7789Element.
+   * @brief Factory function to create a DisplayST7735Element.
    * @return Element*
    */
   static Element *create();
@@ -47,6 +47,6 @@ public:
 
 #ifdef HOMEDING_REGISTER
 // Register the DisplaySSD1306Element onto the ElementRegistry.
-bool DisplayST7789Element::registered =
-  ElementRegistry::registerElement("DisplayST7789", DisplayST7789Element::create);
+bool DisplayST7735Element::registered =
+  ElementRegistry::registerElement("DisplayST7735", DisplayST7735Element::create);
 #endif

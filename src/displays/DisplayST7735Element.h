@@ -23,7 +23,7 @@
  * @brief DisplayST7735Element implements creating an Display Adapter for a LCD
  * attached to the I2C bus.
  * @details
- * The DisplayAdapterLCD Element includes the real functionality.
+ * The DisplayST7735Adapter includes the real functionality.
  */
 
 class DisplayST7735Element : public DisplayElement {

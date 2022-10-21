@@ -1,5 +1,5 @@
 /**
- * @file DisplayAdapterLCD.h
+ * @file DisplayLCDAdapter.h
  *
  * @brief DisplayAdapter implementation for the HomeDing library
  * adapting LCD displays using the HD44780 chip.
@@ -12,13 +12,12 @@
  * * 07.12.2020 no write text beyond textline end.
  */
 
-#ifndef DisplayAdapterLCD_H
-#define DisplayAdapterLCD_H
+#pragma once
 
 #include <LiquidCrystal_PCF8574.h>
 #include <displays/DisplayAdapter.h>
 
-class DisplayAdapterLCD : public DisplayAdapter {
+class DisplayLCDAdapter : public DisplayAdapter {
 public:
   bool start() override {
     // test if a device is attached
@@ -117,5 +116,3 @@ private:
    */
   LiquidCrystal_PCF8574 *display = NULL;
 };
-
-#endif  // DisplayAdapterLCD_H

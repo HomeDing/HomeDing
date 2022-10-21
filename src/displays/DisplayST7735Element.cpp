@@ -44,12 +44,6 @@ Element *DisplayST7735Element::create() {
  */
 void DisplayST7735Element::start() {
   TRACE("start()");
-  // config.spiCS = 5;
-  // config.spiDC = 16;
-  // config.spiRST = 23;
-  // config.spiMOSI = 19;
-  // config.spiMISO = -1;
-  // config.spiCLK = 18;
 
   DisplayAdapter *d = new DisplayST7735Adapter();
   if (d->setup(_board, &config)) {

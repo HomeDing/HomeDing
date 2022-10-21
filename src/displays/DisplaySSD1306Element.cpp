@@ -1,6 +1,6 @@
 /**
  * @file DisplaySSD1306Element.cpp
- * @brief Display Element for HD44780 compatible LCD displays.
+ * @brief Display Element for SSD1306 compatible LCD displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

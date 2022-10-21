@@ -17,8 +17,7 @@
  * * 20.03.2022 Using Adafruit SSD1306 library
  */
 
-#ifndef DisplaySSD1306Element_H
-#define DisplaySSD1306Element_H
+#pragma once
 
 #include "DisplayElement.h"
 
@@ -26,7 +25,7 @@
  * @brief DisplaySSD1306Element implements creating an Display Adapter for a OLED
  * attached to the I2C bus.
  * @details
- * The DisplayAdapterLCD Element includes the real functionality.
+ * The DisplaySD1306Adapter includes the real functionality.
  */
 
 class DisplaySSD1306Element : public DisplayElement {
@@ -52,7 +51,4 @@ public:
 // Register the DisplaySSD1306Element onto the ElementRegistry.
 bool DisplaySSD1306Element::registered =
   ElementRegistry::registerElement("DisplaySSD1306", DisplaySSD1306Element::create);
-#endif
-
-
 #endif

@@ -55,11 +55,13 @@ public:
   };  // init()
 
 
-  // virtual void setBrightness(uint8_t bright) override {
-  //   display->drawBitmap((bright * 128) / 100);
-  // };
-
-  // no flush() required.
+  virtual void setColor(uint32_t col) override {
+    // swap RGB to BGR
+    col = ((col & 0x00FF0000) >> 16)
+          | (col & 0x0000FF00)
+          | ((col & 0x000000FF) << 16);
+    DisplayAdapterGFX::setColor(col);
+  };
 
 private:
   /**

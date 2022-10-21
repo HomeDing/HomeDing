@@ -1,6 +1,6 @@
 /**
  * @file DisplayMAX7219Element.cpp
- * @brief Display Element for HD44780 compatible LCD displays.
+ * @brief Display Element for LED Matrix displays using the MAX7219 chip.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -19,8 +19,7 @@
 #include <HomeDing.h>
 
 #include <displays/DisplayMAX7219Element.h>
-
-#include <displays/DisplayAdapterMAX7219.h>
+#include <displays/DisplayMAX7219Adapter.h>
 
 #if !defined(TRACE)
 #define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
@@ -48,7 +47,7 @@ Element *DisplayMAX7219Element::create() {
 void DisplayMAX7219Element::start() {
   TRACE("start()");
 
-  DisplayAdapter *d = new DisplayAdapterMAX7219();
+  DisplayAdapter *d = new DisplayMAX7219Adapter();
   if (d->setup(_board, &config)) {
     bool success = d->start();
     if (success) {

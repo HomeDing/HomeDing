@@ -152,6 +152,11 @@ bool DisplayElement::set(const char *name, const char *value) {
     r = constrain(r, 0, 3);
     config.rotation = r * 90;
 
+  // some RGB displays require setting rgb color modes.. (st7735 variants)
+  // } else if (_stricmp(name, "colormode") == 0) {
+  //   int _colormode = ListUtils::indexOf("rgb,bgr", value);
+  //   TRACE("set %s=%d", name, _colormode);
+
   } else {
     ret = Element::set(name, value);
   }  // if

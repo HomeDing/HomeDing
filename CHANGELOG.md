@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.x] - unreleased
+
+* LCD DISPLAY ST7735 Support
+* WebRadio example
+* updated Web UI
+
 ### Changes / Enhancements
 
 

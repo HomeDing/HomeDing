@@ -42,6 +42,33 @@ It supports:
 
 More documentation can be found in the  [HomeDing documentation site](https://homeding.github.io)
 
+## Supported CPUs
+
+The library supports the following CPUs:
+
+* **ESP8266** with boards of 1MB and 4MB flash memory
+* **ESP32** Wrover SoC
+* **ESP32** Wroom SoC with PSRAM for Audio processing
+* **ESP32-C3**
+
+More will follow as the library has no strong dependencies on the processor used.
+
+
+## Provided examples
+
+The HomeDing library can be used for a broad variety of IoT devices partially showen by the provided examples.
+
+**standard** -- Full featured firmware containing all most-used stable elements like standard I/O, sensors,
+light drivers and displays. Runs well on a 4MB Flash with all supported processors
+
+**minimal** -- A reduced set pf elements and a small footprint Web-UI for small devices and off-the-shell
+devices with custom firmware like swtiches, sensors and lights. Especially support for ESP8266 with 1MB Flash.
+
+**DevDing** -- A extended standard setup that includes hints and tools for development of new elements.
+
+**webradio** -- A examples especially for the ESP32 Wroover with PSRAM to build a Web Radio 
+by using a Aduio library. This Web Radio can be controlled through the embedded web interface.
+
 
 ## BSD License
 

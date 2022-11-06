@@ -102,7 +102,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <FS.h>        // File System for Web Server Files
+#include <FS.h>
 #include <LittleFS.h>  // File System for Web Server Files
 
 #include <BuiltinHandler.h>  // Serve Built-in files
@@ -204,7 +204,6 @@ void setup(void) {
   // homeding.add("my/2", new MyElement02());
 
   LOGGER_INFO("setup done.");
-
 }  // setup
 
 

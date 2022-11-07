@@ -21,3 +21,5 @@ There can only be one AudioElement created per device.
 * <https://homeding.github.io/boards/esp32/ttgogallery.htm>
 
 Find radio streams on <https://rrradio.de/radiosender/> and <https://wiki.ubuntuusers.de/Internetradio/Stationen/>
+
+* Other audio library: <https://github.com/pschatzmann/arduino-audio-tools>

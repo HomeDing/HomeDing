@@ -8,8 +8,26 @@ All notable changes to this project will be documented in this file.
 * WebRadio example
 * updated Web UI
 
+TODO: * [State implementation for Elements]()
+  new, to be documented.
+
+TODO: * [Color Element]
+  new, to be documented.
+
+* ESP32 Support
+
+* ESP32-C3 Support
+
+
 ### Changes / Enhancements
 
+* LCD DISPLAY ST7789 Support
+<!-- * **[Display ST7735 Element](https://homeding.github.io/displays/st7789.htm)** -->
+  is a color LCD display driver.
+
+* LCD DISPLAY ST7735 Support
+<!-- * **[Display ST7735 Element](https://homeding.github.io/displays/st7735.htm)** -->
+  is a color LCD display driver.
 
 ## [0.9.0] - 2022-08-22
 
@@ -19,15 +37,16 @@ All notable changes to this project will be documented in this file.
 
 * The /api endpoints are now standard all $board services are deprecated and will be removed in version 1.0
 
-* **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** --
-    supports sending values to MQTT servers based on actions.
+* **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** --  
+  supports sending values to MQTT servers based on actions.
 
-* **DallasElement** is an enhanced version of the former Ds18B20Element
-now supporting different sensors using the OneWire protocol.
+* **[DallasElement](https://homeding.github.io/elements/dallas.htm)** --  
+  is an enhanced version of the former Ds18B20Element  
+  now supporting different sensors using the OneWire protocol.
 
-* **[BH1750 Element](https://homeding.github.io/elements/bh1750.htm)** --
-is supporting the BH1750 Light sensor.
-See now supporting different sensors using the OneWire protocol.
+* **[BH1750 Element](https://homeding.github.io/elements/bh1750.htm)** --  
+  is supporting the BH1750 Light sensor.  
+  See now supporting different sensors using the OneWire protocol.
 
 * **[BH1750 Element](https://homeding.github.io/elements/am2320.htm)** --
 The AM2320Element allows retrieving temperature and humidity 

@@ -69,7 +69,7 @@
 
   "displayline": {
     "sys": "false",
-    "properties": ["page", "x0", "y0", "x1", "y1"],
+    "properties": ["page", "x", "y", "w", "h"],
     "events": ["redraw"]
   },
 

@@ -20,7 +20,7 @@
 
 #include <displays/DisplaySSD1306Element.h>
 
-#include <displays/DisplayAdapterSSD1306.h>
+#include <displays/DisplaySSD1306Adapter.h>
 
 #define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
 
@@ -46,7 +46,7 @@ Element *DisplaySSD1306Element::create() {
 void DisplaySSD1306Element::start() {
   TRACE("start()");
 
-  DisplayAdapter *d = new DisplayAdapterSSD1306();
+  DisplayAdapter *d = new DisplaySSD1306Adapter();
   if (d->setup(_board, &config)) {
     bool success = d->start();
     if (success) {

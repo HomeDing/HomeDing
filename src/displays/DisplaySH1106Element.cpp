@@ -20,7 +20,7 @@
 
 #include "DisplaySH1106Element.h"
 
-#include <displays/DisplayAdapterSH1106.h>
+#include <displays/DisplaySH1106Adapter.h>
 
 /* ===== Static factory function ===== */
 
@@ -45,7 +45,7 @@ void DisplaySH1106Element::start() {
   DisplayElement::start();
 
   // TRACE("start()");
-  DisplayAdapter *d = new DisplayAdapterSH1106();
+  DisplayAdapter *d = new DisplaySH1106Adapter();
 
   if (d->setup(_board, &config)) {
     if (d->start()) {

@@ -3,6 +3,9 @@
  *
  * @brief DisplayAdapter implementation for the HomeDing library
  * adapting LED Matrix displays using the MAX7219 chip.
+ * 
+ * It uses the GFX GFXcanvas1 to create a in-memory copy of the display
+ * that will be sent to the MAX7219 chips at once when calling flush().
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -32,9 +35,6 @@ public:
   ~DisplayMAX7219Adapter() = default;
 
   bool start() override {
-    TRACE("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
-    TRACE("   spi: cs:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiMOSI, conf->spiCLK);
-
     _csPin = conf->spiCS;
 
     // adjust false height and width (must be *8)

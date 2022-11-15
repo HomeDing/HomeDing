@@ -46,9 +46,12 @@ extern "C" {
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
-#define NetMode_PASS 1
-#define NetMode_PSK 2
-#define NetMode_AUTO 3
+// The captive Mode will stay for 5 min. and then restart.
+#define CAPTIVE_TIME (5 * 60 * 1000)
+
+#define NetMode_AUTO 3 // first try
+#define NetMode_PSK 2  // second try
+#define NetMode_PASS 1 // last try
 
 DNSServer dnsServer;
 IPAddress apIP(192, 168, 4, 1);
@@ -143,6 +146,16 @@ void Board::add(const char *id, Element *e) {
 bool Board::isCaptiveMode() {
   return ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE));
 }  // isCaptiveMode()
+
+
+/**
+ * @brief Continue the Captive Mode when activity is detected.
+ */
+void Board::keepCaptiveMode() {
+  if ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE)) {
+    _captiveEnd = nowMillis + CAPTIVE_TIME;
+  };
+}  // keepCaptiveMode()
 
 
 /**
@@ -411,7 +424,7 @@ void Board::loop() {
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
-      LOGGER_JUSTINFO("No Net Config");
+      LOGGER_JUSTINFO("no config");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
     } else if (_resetCount == 2) {
@@ -454,7 +467,7 @@ void Board::loop() {
     _newState(BOARDSTATE::WAITNET);
 
     if (netMode == NetMode_AUTO) {
-      // 1. priority:
+      // 1. try:
       // give autoconnect the chance to do it.
       // works only after a successfull network connection in the past.
       WiFi.setAutoConnect(true);
@@ -462,14 +475,14 @@ void Board::loop() {
       NETTRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
 
     } else if (netMode == NetMode_PSK) {
-      // 2. priority:
+      // 2. try:
       // connect with the saved network and password
       int off = netpass.indexOf(',');
       WiFi.begin(netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
       NETTRACE("NetMode_PSK <%s>,<%s>", netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
 
     } else if (netMode == NetMode_PASS) {
-      // 3. priority:
+      // 3. try:
       // use fixed network and passPhrase known at compile time.
       NETTRACE("NetMode_PASS: %s", ssid);
 
@@ -670,7 +683,7 @@ void Board::loop() {
     server->begin();
 
     _newState(BOARDSTATE::RUNCAPTIVE);
-    _captiveEnd = nowMillis + (5 * 60 * 1000);
+    keepCaptiveMode();
 
   } else if (boardState == BOARDSTATE::RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
@@ -681,8 +694,10 @@ void Board::loop() {
       digitalWrite(sysLED, ((nowMillis % 3000) > 120) ? HIGH : LOW);
     }  // if
 
-    if (nowMillis > _captiveEnd)
+    if (nowMillis > _captiveEnd) {
+      LOGGER_INFO("no config");
       reboot(false);
+    }
   }  // if
 }  // loop()
 

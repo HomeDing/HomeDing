@@ -200,10 +200,17 @@ public:
    */
   void add(const char *id, Element *e);
 
+
   // ===== Board state functionality =====
 
   /** Return true when board is runing in captive mode. */
   bool isCaptiveMode();
+
+  /** Continue the Captive Mode when activity is detected. */
+  void keepCaptiveMode();
+
+
+  // ===== Start Elements functionality =====
 
   /**
    * activate all the Elements by using start().

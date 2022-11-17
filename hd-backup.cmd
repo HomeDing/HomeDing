@@ -77,7 +77,7 @@ echo.
 
 
 echo [1mget sysinfo...[0m
-curl --get http://%devicename%/api/sysinfo --retry 1 --connect-timeout 1 -o %_conffolder%/%devicename%-sysinfo.json 2>nul:
+curl --get http://%devicename%/api/sysinfo --retry 1 --connect-timeout 3 -o %_conffolder%/%devicename%-sysinfo.json 2>nul:
 IF %ERRORLEVEL% GTR 0 (
   echo [31mDevice not found[30m 1>&2
   goto :end

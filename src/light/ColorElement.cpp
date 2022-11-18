@@ -103,22 +103,20 @@ bool ColorElement::set(const char *name, const char *value) {
   bool ret = true;
   unsigned long now = millis();
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
+    // set next value of color
     uint32_t colorValue = _atoColor(value);
 
     if (_mode == Mode::fade) {
       // setup fading range and time
       _fromValue = _value;
-      _toValue = colorValue;
       _startTime = now;
-
-    } else if ((_mode == Mode::fix) || (_mode == Mode::pulse)) {
-      _toValue = colorValue;
-      _needUpdate = true;
     }
+    _toValue = colorValue;
+    _needUpdate = true;
 
-  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
-    // pass through the brightness
+  } else if (_stricmp(name, "brightness") == 0) {
+    // set brightness: pass through to light elements
     int b = _atoi(value);
     _brightness = constrain(b, 0, 100);
     _needUpdate = true;
@@ -131,18 +129,11 @@ bool ColorElement::set(const char *name, const char *value) {
       _toValue = _value;
       _startTime = now;
     }  // if
+    _needUpdate = true;
 
   } else if (_stricmp(name, "duration") == 0) {
     // duration for wheel, pulse and fade effect
     _duration = _scanDuration(value);
-
-  } else if (_stristartswith(name, "elements[")) {
-    // TODO: remove deprecated property in favor of "connect"
-
-    Element *e = _board->getElementById(value);
-    if (e) {
-      _lightElements.push_back(static_cast<LightElement *>(e));
-    }
 
   } else if (_stristartswith(name, "connect[")) {
     // direct connected element
@@ -152,11 +143,11 @@ bool ColorElement::set(const char *name, const char *value) {
       _lightElements.push_back(static_cast<LightElement *>(e));
     }
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (_stricmp(name, "onvalue") == 0) {
     // save the actions
     _valueAction = value;
 
-  } else if (_stricmp(name, "onBrightness") == 0) {
+  } else if (_stricmp(name, "onbrightness") == 0) {
     // save the actions
     _brightnessAction = value;
 
@@ -264,7 +255,7 @@ void ColorElement::loop() {
 
     // dispatch as action
     _board->dispatch(_brightnessAction, _brightness);
-    if (_valueAction.length() > 0) {
+    if (!_valueAction.isEmpty()) {
       char sColor[38];
       sprintf(sColor, "x%08x", nextValue);
       _board->dispatch(_valueAction, sColor);

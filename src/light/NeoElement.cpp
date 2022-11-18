@@ -20,12 +20,14 @@
 #include <light/NeoElement.h>
 
 
+/** set a single color for all neopixels */
 void NeoElement::setColor(uint32_t color, int brightness) {
   // TRACE("setColor(x%08x, %d)", color, brightness);
 
   // set _brightness and value of base class LightElement
   LightElement::setColor(color, brightness);
 
+  _mode = Mode::fix; // turn off animations.
   if (!enabled) {
     color = 0;
   }
@@ -100,14 +102,14 @@ bool NeoElement::set(const char *name, const char *pValue) {
   bool ret1 = LightElement::set(name, pValue);
   bool ret2 = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     // saving to LightElement::value was handled in LightElement
-    _mode = Mode::color;
+    _mode = Mode::fix;
     if (_strip)
       _setColors(value);
 
   } else if (_stricmp(name, "mode") == 0) {
-    Mode m = (Mode)ListUtils::indexOf("color,wheel,flow,pulse", pValue);
+    Mode m = (Mode)ListUtils::indexOf("fix,flow", pValue);
     if ((m >= Mode::_min) && (m <= Mode::_max)) {
       _mode = m;
     }  // if
@@ -117,7 +119,7 @@ bool NeoElement::set(const char *name, const char *pValue) {
       needUpdate = true;
     }
 
-  } else if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
+  } else if (_stricmp(name, "brightness") == 0) {
     // saving to LightElement::brightness was handled in LightElement
     if (_strip) {
       _strip->setBrightness(_brightness * 255 / 100);  // convert to 0...255
@@ -133,7 +135,7 @@ bool NeoElement::set(const char *name, const char *pValue) {
   } else {
     ret2 = false;  // not handled
 
-  } // if
+  }  // if
 
   return (ret1 || ret2);
 }  // set()
@@ -163,7 +165,7 @@ void NeoElement::loop() {
     if (needUpdate) {
       // some settings have been changed
       if (enabled) {
-        if (_mode == Mode::color) {
+        if (_mode == Mode::fix) {
           _setColors(value);
         }
       } else {
@@ -172,28 +174,17 @@ void NeoElement::loop() {
       _strip->show();
       needUpdate = false;
 
-    } else if (enabled && (_mode != Mode::color) && (duration != 0)) {
+    } else if (enabled && (_mode != Mode::fix) && (duration != 0)) {
       // dynamic color patterns
       unsigned long now = millis();  // current (relative) time in msecs.
       unsigned int hue = (now % duration) * 65536L / duration;
 
-      if (_mode == Mode::wheel) {
-        _strip->fill(_strip->ColorHSV(hue));
-
-      } else if (_mode == Mode::flow) {
+      if (_mode == Mode::flow) {
         uint16_t pixels = _strip->numPixels();
 
         for (uint16_t i = 0; i < pixels; i++) {
           _strip->setPixelColor(i, _strip->ColorHSV((hue + i * 256 * 5) % 65536));
         }
-
-      } else if (_mode == Mode::pulse) {
-        // 0...255...1 = 256+254 = 510 steps
-        int b = (now % duration) * 510L / duration;
-        if (b > 255)
-          b = 510 - b;
-        _strip->setBrightness(b * _brightness / 100);
-        _setColors(value);
 
       }  // if
       needUpdate = true;

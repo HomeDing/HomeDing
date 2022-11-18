@@ -12,8 +12,7 @@
  * * 19.01.2022 finalized including delay
  */
 
-#ifndef SCENEELEMENT_H
-#define SCENEELEMENT_H
+#pragma once
 
 /**
  * @brief 
@@ -58,7 +57,7 @@ private:
   int _count;
 
   /**
-   * @brief The delay between executing the steps
+   * @brief The delay between executing the steps in msec
    */
   unsigned long _delay;
 
@@ -79,7 +78,4 @@ private:
 // Register the SceneElement onto the ElementRegistry.
 bool SceneElement::registered =
     ElementRegistry::registerElement("scene", SceneElement::create);
-#endif
-
-
 #endif

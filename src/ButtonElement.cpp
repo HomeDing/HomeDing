@@ -19,6 +19,7 @@
 
 #include <ButtonElement.h>
 
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 #define STATE_INIT 0 // waiting for input
 #define STATE_HIGH1 1 // got a first high
@@ -44,9 +45,9 @@ Element *ButtonElement::create()
 bool ButtonElement::set(const char *name, const char *value)
 {
   bool ret = true;
-  // TRACE("set %s=%s", name, value);
+  TRACE("set %s=%s", name, value);
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     _inputLevel = _atob(value);
 
   } else if (_stricmp(name, "action") == 0) {

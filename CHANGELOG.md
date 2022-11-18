@@ -11,9 +11,6 @@ All notable changes to this project will be documented in this file.
 TODO: * [State implementation for Elements]()
   new, to be documented.
 
-TODO: * [Color Element]
-  new, to be documented.
-
 * ESP32 Support
 
 * ESP32-C3 Support
@@ -28,6 +25,10 @@ TODO: * [Color Element]
 * LCD DISPLAY ST7735 Support
 <!-- * **[Display ST7735 Element](https://homeding.github.io/displays/st7735.htm)** -->
   is a color LCD display driver.
+
+* The Color and Light Elements have been refactored. Advanced control over light elements
+  should be done by the ColorElement.
+
 
 ## [0.9.0] - 2022-08-22
 
@@ -179,7 +180,10 @@ and is still more beta than ESP8266 board support.
 
 * [Color Element]
 
-  new, to be documented.
+  The [Color Element](https://homeding.github.io/elements/color.htm) allows
+  controlling a value for a light emitting element using the
+  color values in the xrrggbb or xwwrrggbb format and brightness 0..100.
+  A special Web UI is available.
 
 * [Timer Element](https://homeding.github.io/elements/timer.htm)
 

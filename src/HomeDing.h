@@ -14,7 +14,6 @@ extern const char *PROP_VALUE;
 extern const char *PROP_PIN;
 extern const char *PROP_ADDRESS;
 extern const char *PROP_INVERSE;
-extern const char *PROP_BRIGHTNESS;
 
 extern const char *ACTION_ONVALUE;
 extern const char *ACTION_ONTEMPERATURE;

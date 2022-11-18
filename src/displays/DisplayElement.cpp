@@ -20,7 +20,7 @@
 
 #include "DisplayElement.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Private functions ===== */
 
@@ -82,7 +82,7 @@ bool DisplayElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
   DisplayAdapter *da = _board->display;
 
-  if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
+  if (_stricmp(name, "brightness") == 0) {
     int b = _atoi(value);
     config.brightness = constrain(b, 0, 100);
     if (active && da) {
@@ -182,7 +182,7 @@ void DisplayElement::pushState(
   Element::pushState(callback);
   DisplayAdapter *da = _board->display;
   if (da) {
-    callback(PROP_BRIGHTNESS, String(config.brightness).c_str());
+    callback("brightness", String(config.brightness).c_str());
     callback("page", String(_board->display->page).c_str());
   }
 }  // pushState()

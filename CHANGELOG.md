@@ -4,31 +4,43 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.x] - unreleased
 
-* LCD DISPLAY ST7735 Support
-* WebRadio example
 * updated Web UI
 
-TODO: * [State implementation for Elements]()
-  new, to be documented.
-
-* ESP32 Support
-
-* ESP32-C3 Support
+* [State Elements](https://homeding.github.io/elements/state.htm) documentation added.
 
 
 ### Changes / Enhancements
 
-* LCD DISPLAY ST7789 Support
-<!-- * **[Display ST7735 Element](https://homeding.github.io/displays/st7789.htm)** -->
-  is a color LCD display driver.
+* ESP32-C3 Processor Support
 
-* LCD DISPLAY ST7735 Support
-<!-- * **[Display ST7735 Element](https://homeding.github.io/displays/st7735.htm)** -->
-  is a color LCD display driver.
+  The ESP32-C3 is positioned as a cost-effective RISC-V MCU
+  with Wi-Fi and Bluetooth 5 (LE) connectivity for secure IoT applications.
+  It is often seen as a replacement option for the ESP8266.
 
-* The Color and Light Elements have been refactored. Advanced control over light elements
+  The ESP32-C3 offers less IO pins that the ESP32 or ESP32-S3 chips and comes in a smaller 32 pin QFN32 package (5×5 mm).
+
+  See [ESP32-C3 Boards](https://homeding.github.io/boards/esp32/esp32c3.htm) documentation added.
+
+* [WebRadio example](https://github.com/HomeDing/HomeDing/tree/develop/examples/webradio)
+  
+  This example implements a audio streaming device for ESP32 based systems.
+* The [Display ST7789 Element](https://homeding.github.io/displays/st7789.htm)
+  supports color LCD displays using the ST7789 driver chip.
+
+* The [Display ST7735 Element](https://homeding.github.io/displays/ST7735.htm)
+  supports color LCD displays using the ST7735 driver chip.
+
+* The Color and Light Elements have been refactored.
+  Advanced control over light elements
   should be done by the ColorElement.
 
+* Completed ESP32 Support
+
+  The ESP32 processor is now fully supported.
+  Missing features have been implemented.
+  
+  Please note that caused by different processor functionality
+  not all features and elements are supported for all processors.
 
 ## [0.9.0] - 2022-08-22
 
@@ -174,9 +186,9 @@ and is still more beta than ESP8266 board support.
 
 * [BME680 Element](https://homeding.github.io/elements/bme680.htm) Bosch library updated to version 1.6.1480
 
-* [State implementation for Elements]()
+* [State Elements](https://homeding.github.io/elements/state.htm)
 
-  new, to be documented.
+  The [State Elements](https://homeding.github.io/elements/state.htm) allow saving current element values that will be restored after a reset or deep sleep without power loss.
 
 * [Color Element]
 

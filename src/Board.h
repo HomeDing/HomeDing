@@ -155,6 +155,13 @@ class Board {
   };
 
 
+  /** Startup Hints */
+  enum BOARDSTARTUP : int {
+    NORMAL = 0,     // normal startup after power loss or reset.
+    DEEPSLEEP = 1,  // startup after Deep Sleep
+    NO_MDNS = 2,    // startup without MDNS
+  };
+
 public:
   // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
   const char *version = "0.90";
@@ -355,7 +362,7 @@ public:
   int I2cScl = -1;
 
   /** Service discovery enabled */
-  bool mDNS_sd = true;
+  bool _mDnsEnabled = true;
 
   /** WebServer instance */
   WebServer *server;
@@ -436,14 +443,16 @@ public:
   String room;
 
 private:
-  /** Reset Counter to detect multiple hardware resets in a row. */
-  int _resetCount;
-
   /** current state of the board. */
   enum BOARDSTATE boardState;
 
-  /** This flag is set to true when restarting after a deep sleep allowing shortening wait times. */
-  bool _isWakeupStart;
+  /** startup mode of the board. */
+  enum BOARDSTARTUP _startup;
+
+  // ===== Deep Slwwp control =====
+
+  /** duration of deep sleep in milliseconds*/
+  unsigned long _deepSleepTime;
 
   /** if > 0; system goes to deep sleep at this millis() */
   unsigned long _deepSleepStart;
@@ -451,8 +460,8 @@ private:
   /** if true, no deep sleep will be performed. This allows using the Web UI until next reboot. */
   bool _deepSleepBlock;
 
-  /** time for deep sleep */
-  unsigned long _deepSleepTime;
+  /** counts loops without messages beeing passed to gracefully shut down */
+  int _DeepSleepCount;
 
 
   /**
@@ -504,9 +513,6 @@ private:
 
   /** net connection mode */
   int netMode;
-
-  /** counts loops without messages beeing passed to gracefully shut down */
-  int _cntDeepSleep;
 
   /** list of active elements */
   Element *_elementList;

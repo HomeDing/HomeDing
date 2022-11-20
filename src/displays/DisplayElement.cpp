@@ -24,18 +24,6 @@
 
 /* ===== Private functions ===== */
 
-void DisplayElement::_reset() {
-  // reset
-  // if (_resetpin >= 0) {
-  //   pinMode(_resetpin, OUTPUT);
-  //   digitalWrite(_resetpin, LOW);  // turn low to reset OLED
-  //   delay(250);
-  //   digitalWrite(_resetpin, HIGH);  // while OLED is running, must set high
-  //   delay(250);
-  // }  // if
-}  // _reset()
-
-
 void DisplayElement::_newPage(int page) {
   TRACE("newPage %d", page);
   DisplayAdapter *da = _board->display;
@@ -43,7 +31,6 @@ void DisplayElement::_newPage(int page) {
     int oldPage = da->page;
 
     da->page = constrain(page, 0, da->maxpage);
-    // _reset();
     da->start();
 
     // redraw all display elements
@@ -164,15 +151,6 @@ bool DisplayElement::set(const char *name, const char *value) {
   return (ret);
 }  // set()
 
-
-/**
- * @brief Activate the DisplayElement when a resetpin is given.
- */
-void DisplayElement::start() {
-  // TRACE("start()");
-  Element::start();
-  // _reset();
-}  // start()
 
 /**
  * @brief push the current value of all properties to the callback.

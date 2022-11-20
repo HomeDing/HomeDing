@@ -21,7 +21,7 @@
 
 #include <core/DeviceElement.h>
 
-#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -29,23 +29,21 @@
  * @brief static factory function to create a new DeviceElement.
  * @return DeviceElement* created element
  */
-Element *DeviceElement::create()
-{
+Element *DeviceElement::create() {
   return (new DeviceElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
 
 DeviceElement::DeviceElement()
-    : _rebootTime(0), _nextBoot(0) // default with no automatic reboot
+  : _rebootTime(0), _nextBoot(0)  // default with no automatic reboot
 {
   startupMode = Element_StartupMode::System;
 }
 
 
-bool DeviceElement::set(const char *name, const char *value)
-{
+bool DeviceElement::set(const char *name, const char *value) {
   bool ret = true;
   // LOGGER_EERR("set %s='%s'", name, value);
 
@@ -76,7 +74,7 @@ bool DeviceElement::set(const char *name, const char *value)
     _rebootTime = _atotime(value);
 
   } else if (_stricmp(name, "description") == 0) {
-    _description = value; // is used in SSDP
+    _description = value;  // is used in SSDP
 
   } else if (_stricmp(name, "loglevel") == 0) {
     // Set global logger loglevel
@@ -118,9 +116,10 @@ bool DeviceElement::set(const char *name, const char *value)
 
       // ===== Service Discovery =====
     } else if (_stricmp(name, "sd") == 0) {
-      _board->mDNS_sd = _atob(value);
+      _board->_mDnsEnabled = _atob(value);
 
       // ===== WiFi Manager =====
+
     } else if (_stricmp(name, "led") == 0) {
       _board->sysLED = _atopin(value);
 
@@ -128,42 +127,41 @@ bool DeviceElement::set(const char *name, const char *value)
       _board->sysButton = _atopin(value);
 
     } else if (_stricmp(name, "connecttime") == 0) {
-      _board->maxNetConnextTime = _atotime(value) * 1000;
+      _board->maxNetConnextTime = _scanDuration(value);
 
     } else if (_stricmp(name, "sleeptime") == 0) {
-      _board->setSleepTime(_atotime(value));
+      _board->setSleepTime(_scanDuration(value));
 
       // ===== I2C bus =====
+
     } else if (_stricmp(name, "i2c-sda") == 0) {
       _board->I2cSda = _atopin(value);
 
     } else if (_stricmp(name, "i2c-scl") == 0) {
       _board->I2cScl = _atopin(value);
 
-    } // if
-  }   // if (! active)
+    }  // if
+  }    // if (! active)
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the DeviceElement.
  */
-void DeviceElement::start()
-{
+void DeviceElement::start() {
   unsigned long now = _board->getSeconds();
 
   if (_rebootTime > 0) {
     _nextBoot = now + _rebootTime;
-  } // if
+  }  // if
 
   Element::start();
-} // start()
+}  // start()
 
 
-void DeviceElement::loop()
-{
+void DeviceElement::loop() {
   TRACE("loop()");
   unsigned long now = _board->getSeconds();
   if ((_rebootTime > 0) && (now > _nextBoot)) {
@@ -171,16 +169,15 @@ void DeviceElement::loop()
     delay(100);
     ESP.restart();
     delay(100);
-  } // if
-} // loop()
+  }  // if
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void DeviceElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   unsigned long now = _board->getSeconds();
 
   Element::pushState(callback);
@@ -188,13 +185,13 @@ void DeviceElement::pushState(
   callback("title", _board->title.c_str());
   callback("description", _description.c_str());
   callback("safemode", _printBoolean(_board->isSafeMode));
-  callback("sd", _printBoolean( _board->mDNS_sd));
+  callback("sd", _printBoolean(_board->_mDnsEnabled));
   callback("nextboot", _printInteger(_nextBoot - now));
-} // pushState()
+}  // pushState()
 
 
 // Always register the DeviceElement onto the ElementRegistry.
 bool DeviceElement::registered =
-    ElementRegistry::registerElement("device", DeviceElement::create);
+  ElementRegistry::registerElement("device", DeviceElement::create);
 
 // End

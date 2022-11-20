@@ -26,7 +26,7 @@
  */
 Element *SceneElement::create() {
   return (new SceneElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -35,7 +35,7 @@ SceneElement::SceneElement() {
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
   _count = -1;
-  _delay = 0;
+  _delay = 1;  // ms
 }
 
 
@@ -44,21 +44,43 @@ SceneElement::SceneElement() {
  */
 bool SceneElement::set(const char *name, const char *value) {
   bool ret = true;
+  int size = _steps.size();
 
   if (_stricmp(name, "start") == 0) {
     // start the scene
     _count = 0;
-    _nextStep = 0; // asap.
+    _nextStep = 1;  // asap.
+
+  } else if (_stricmp(name, "step") == 0) {
+    // start next step in in scene
+    if (_count < size) {
+      _nextStep = 1;  // asap.
+    } else {
+      _count = 0;
+      _nextStep = 1;  // asap.
+    }
+
+  } else if (_stricmp(name, "next") == 0) {
+    // start next step in in scene
+    if (_count < size) {
+      _nextStep = 1;  // asap.
+    } else {
+      _count = 0;
+      _nextStep = 1;  // asap.
+    }
+
 
   } else if (_stristartswith(name, "steps[")) {
-    size_t index = _atoi(name + 6); // number starts after "steps["
+    _steps.push_back(String(value));
 
-    if (index >= _steps.size()) {
-      // set default values for new index
-      _steps.resize(index + 1);
-      _steps[index] = value;
-      TRACE("new(%d):<%s>", index, value);
-    } // if
+    // int index = _atoi(name + 6);  // number starts after "steps["
+
+    // if (index >= size) {
+    //   // set default values for new index
+    //   _steps.resize(index + 1);
+    //   _steps[index] = value;
+    //   TRACE("new(%d):<%s>", index, value);
+    // }  // if
 
   } else if (_stricmp(name, "delay") == 0) {
     // delay between executing the steps
@@ -66,36 +88,38 @@ bool SceneElement::set(const char *name, const char *value) {
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
 void SceneElement::loop() {
-  if (_count >= 0) {
-    unsigned long now = millis(); // current (relative) time in msecs.
+  if ((_count >= 0) && (_nextStep > 0)) {
+    unsigned long now = millis();  // current (relative) time in msecs.
 
-    if ((now >= _nextStep) && (_board->queueIsEmpty())) {
+    TRACE("loop( %ld, %ld)", now, _nextStep);
+
+    if (_nextStep && (now >= _nextStep) && (_board->queueIsEmpty())) {
       // send next scene action
       int size = _steps.size();
       if (_count < size) {
         TRACE("send(%d):<%s>", _count, _steps[_count].c_str());
         _board->dispatch(_steps[_count]);
         _count++;
-        _nextStep = now + _delay;
+        _nextStep = ((_delay > 0) ? now + _delay : 0);
       }
 
       if (_count == size) {
         // all done.
         _count = -1;
       }
-    } // if()
-  } // if()
-} // loop()
+    }  // if()
+  }    // if()
+}  // loop()
 
 
 // End

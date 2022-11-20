@@ -53,7 +53,7 @@ extern "C" {
 #define NetMode_PSK 2   // second try
 #define NetMode_PASS 1  // last try
 
-DNSServer dnsServer;
+DNSServer *dnsServer;
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
 
@@ -70,6 +70,7 @@ static const char respond404[] PROGMEM =
 
 /** Reset Counter to detect multiple hardware resets in a row. */
 int _resetCount;
+bool _isWakeupStart = false;
 
 #elif defined(ESP32)
 
@@ -127,6 +128,10 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   // https://community.platformio.org/t/esp32-firebeetle-fast-boot-after-deep-sleep/13206
   // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-bootloader-skip-validate-in-deep-sleep
   // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
+
+  esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+  LOGGER_INFO("ESP32: deep sleep cause: %d", cause);
+
 
   _startup = (_isWakeupStart) ? BOARDSTARTUP::DEEPSLEEP : BOARDSTARTUP::NORMAL;
   _isWakeupStart = false;
@@ -309,7 +314,7 @@ void Board::loop() {
     // Most common state first.
 
 #if defined(ESP8266)
-    if (!_isWakeupStart) {
+    if (_startup == BOARDSTARTUP::NORMAL) {
       MDNS.update();
     }
 #endif
@@ -715,9 +720,10 @@ void Board::loop() {
     hd_yield();
     LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
-    dnsServer.setTTL(300);
-    dnsServer.setErrorReplyCode(DNSReplyCode::ServerFailure);
-    dnsServer.start(DNS_PORT, "*", apIP);
+    dnsServer = new DNSServer();
+    dnsServer->setTTL(300);
+    dnsServer->setErrorReplyCode(DNSReplyCode::ServerFailure);
+    dnsServer->start(DNS_PORT, "*", apIP);
 
     server->begin();
 
@@ -726,7 +732,7 @@ void Board::loop() {
 
   } else if (boardState == BOARDSTATE::RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
-    dnsServer.processNextRequest();
+    dnsServer->processNextRequest();
 
     // make sysLED blink 3 sec with a short flash.
     if (sysLED >= 0) {

@@ -32,13 +32,20 @@ Element *TouchElement::create() {
 }  // create()
 
 
+
+#if defined(ESP32)
+
+// in case there is no touchRead() available on ESP32 boards (e.g. C3)
+int __attribute__((weak)) touchRead(UNUSED int _pin) {
+  return (0);
+};
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool TouchElement::set(const char *name, const char *value) {
   bool ret = true;
 
-#if defined(ESP32)
   if (Element::set(name, value)) {
     // done.
 
@@ -60,7 +67,6 @@ bool TouchElement::set(const char *name, const char *value) {
   } else {
     ret = false;
   }  // if
-#endif
 
   return (ret);
 }  // set()
@@ -70,27 +76,18 @@ bool TouchElement::set(const char *name, const char *value) {
  * @brief Activate the TouchElement.
  */
 void TouchElement::start() {
-#if defined(ESP32)
   TRACE("start (%d)", _pin);
   // only start with valid pin as input.
   if (_pin >= 0) {
     Element::start();
   }  // if
-#endif
 }  // start()
 
-
-
-// in case there is no touchRead() available on ESP32 boards (e.g. C3)
-int __attribute__((weak)) touchRead(int _pin) {
-  return (0);
-};
 
 /**
  * @brief check the state of the input.
  */
 void TouchElement::loop() {
-#if defined(ESP32)
   int val = touchRead(_pin);
 
   // Serial.println(val);
@@ -102,16 +99,14 @@ void TouchElement::loop() {
     _board->dispatch(_valueAction, val ? "1" : "0");
     _value = val;
   }  // if
-#endif
 }  // loop()
 
 
 void TouchElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
-#if defined(ESP32)
   Element::pushState(callback);
   callback("value", _printBoolean(_value));
-#endif
 }  // pushState()
 
+#endif
 // End

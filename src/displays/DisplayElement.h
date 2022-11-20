@@ -84,11 +84,6 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
-   * @brief Activate the Element.
-   */
-  virtual void start() override;
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
@@ -104,8 +99,6 @@ protected:
   String _onPage;
 
 private:
-  void _reset();
-
   void _newPage(int page);
 };
 

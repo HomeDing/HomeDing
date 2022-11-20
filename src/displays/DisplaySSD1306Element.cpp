@@ -22,7 +22,7 @@
 
 #include <displays/DisplaySSD1306Adapter.h>
 
-#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 

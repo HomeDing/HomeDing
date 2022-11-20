@@ -21,7 +21,7 @@
 #include <displays/DisplayST7735Element.h>
 #include <displays/DisplayST7735Adapter.h>
 
-#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 

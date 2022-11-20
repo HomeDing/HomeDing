@@ -185,7 +185,9 @@ void BL0937Element::start() {
 
     Element::start();
 
-// TODO: remove debug entpoint...
+#if 0
+// Example on accessing the current data of an element
+// by url: http://<devicename>/bl
     _board->server->on("/bl", HTTP_GET, [this]() {
       String ret;
       ret += "time: " + String(time(nullptr)) + "\n";
@@ -194,6 +196,7 @@ void BL0937Element::start() {
       ret += "d: " + String(time(nullptr) - energyDate);
       _board->server->send(200, "text/plain", ret.c_str());
     });
+#endif
 
   }  // if
 }  // start()

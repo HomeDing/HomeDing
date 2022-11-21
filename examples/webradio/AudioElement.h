@@ -32,11 +32,6 @@ public:
   static bool registered;
 
   /**
-   * @brief Construct a new AudioElement
-   */
-  AudioElement();
-
-  /**
    * @brief initialize a new Element.
    * @param board The board reference.
    */
@@ -57,11 +52,6 @@ public:
    * @return false when parameters are not usable.
    */
   virtual void start() override;
-
-  /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop() override;
 
   /**
    * @brief stop all activities and go inactive.

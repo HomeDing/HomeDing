@@ -1,5 +1,11 @@
 /**
  * @file AudioElement.cpp
+ *
+ * @brief The AudioElement supports Audio streaming and audio processing in a background task
+ * used to build internet audio streaming devices.
+ * It requires 2 ESP32 or ESP32-S3 processor that supports multiple tasks
+ * and PSRAM for buffering audio data.
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -19,12 +25,6 @@
 
 #define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
 
-/* ===== Define local constants and often used strings ===== */
-
-// like:
-// #define ANYCONSTANT 1000
-
-
 /* ===== Static factory function ===== */
 
 /**
@@ -35,7 +35,7 @@ Element *AudioElement::create() {
   return (new AudioElement());
 }  // create()
 
-// static references
+// codes for sending commands into the audio task
 
 #define AUDIOCMD_NONE 0
 #define AUDIOCMD_URL 1
@@ -43,31 +43,32 @@ Element *AudioElement::create() {
 #define AUDIOCMD_BALANCE 3
 #define AUDIOCMD_TONE 4
 
-
 // These references are set in static variables to make it available in the background audio task.
 
 AudioElement *__element = nullptr;
 Board *__board = nullptr;
-QueueHandle_t __queue = nullptr;
 Audio *__audio = nullptr;
+uint32_t __cmd = AUDIOCMD_NONE;
 
-// Background task and events
+
+// ===== Background task for audio processing ======
 
 void audioTask(void *parameter) {
-  if (!__queue) {
-    LOGGER_ERR("not initialized...");
-    while (true) { ; }  // endless loop
-  }
-
   uint32_t cmd;
 
   while (true) {
-    if (xQueueReceive(__queue, &cmd, 1) == pdPASS) {
+
+    if (__cmd != AUDIOCMD_NONE) {
+      cmd = __cmd;
+      __cmd = AUDIOCMD_NONE;
 
       log_n(">> cmd %d\n", cmd);
       if (cmd == AUDIOCMD_URL) {
-          __audio->stopSong();
-        if (! __element->_url.isEmpty()) {
+        __audio->stopSong();
+        __board->dispatch(__element->_onStation, "");
+        __board->dispatch(__element->_onTitle, "");
+        if (!__element->_url.isEmpty()) {
+          log_n(".1 %s\n", __element->_url.c_str());
           __audio->connecttohost(__element->_url.c_str());
         }
 
@@ -84,7 +85,11 @@ void audioTask(void *parameter) {
       cmd = AUDIOCMD_NONE;
     }  // if
 
-    __audio->loop();
+    if (__audio->isRunning()) {
+      __audio->loop();
+    } else {
+      sleep(1);
+    }
   }
 }
 
@@ -103,18 +108,11 @@ void audio_showstreamtitle(const char *value) {
 
 /* ===== Element functions ===== */
 
-AudioElement::AudioElement() {
-  // adjust startupMode when Network (default) is not applicable.
-  // startupMode = Element_StartupMode::System;
-}
-
-
 void AudioElement::init(Board *board) {
   TRACE("init()");
   Element::init(board);
   // do something here like initialization
 
-  __queue = xQueueCreate(10, sizeof(uint32_t));
   __board = board;
   __element = this;
   _i2s_bclk = -1;
@@ -142,38 +140,32 @@ bool AudioElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "url") == 0) {
     _url = value;
-    uint32_t cmd = AUDIOCMD_URL;
-    xQueueSend(__queue, &cmd, portMAX_DELAY);
+    __cmd = AUDIOCMD_URL;
 
   } else if (_stricmp(name, "volume") == 0) {
     int v = _atoi(value);
     _volume = constrain(v, 0, 21);
-    uint32_t cmd = AUDIOCMD_VOLUME;
-    xQueueSend(__queue, &cmd, portMAX_DELAY);
+    __cmd = AUDIOCMD_VOLUME;
 
   } else if (_stricmp(name, "balance") == 0) {
     int v = _atoi(value);
     _balance = constrain(v, -16, 16);
-    uint32_t cmd = AUDIOCMD_BALANCE;
-    xQueueSend(__queue, &cmd, portMAX_DELAY);
+    __cmd = AUDIOCMD_BALANCE;
 
   } else if (_stricmp(name, "low") == 0) {
     int v = _atoi(value);
     _low = constrain(v, -20, 6);
-    uint32_t cmd = AUDIOCMD_TONE;
-    xQueueSend(__queue, &cmd, portMAX_DELAY);
+    __cmd = AUDIOCMD_TONE;
 
   } else if (_stricmp(name, "mid") == 0) {
     int v = _atoi(value);
     _mid = constrain(v, -20, 6);
-    uint32_t cmd = AUDIOCMD_TONE;
-    xQueueSend(__queue, &cmd, portMAX_DELAY);
+    __cmd = AUDIOCMD_TONE;
 
   } else if (_stricmp(name, "high") == 0) {
     int v = _atoi(value);
     _high = constrain(v, -20, 6);
-    uint32_t cmd = AUDIOCMD_TONE;
-    xQueueSend(__queue, &cmd, portMAX_DELAY);
+    __cmd = AUDIOCMD_TONE;
 
     // === Settings ===
 
@@ -213,7 +205,6 @@ void AudioElement::start() {
     Element::start();
 
     __audio = new Audio();
-
     __audio->setPinout(_i2s_bclk, _i2s_lrc, _i2s_dout);
     __audio->setVolume(_volume);
     __audio->setBalance(_balance);
@@ -239,14 +230,6 @@ void AudioElement::start() {
 
 
 /**
- * @brief Give some processing time to the Element to check for next actions.
- */
-void AudioElement::loop() {
-  // do something
-}  // loop()
-
-
-/**
  * @brief push the current value of all properties to the callback.
  */
 void AudioElement::pushState(
@@ -266,7 +249,6 @@ void AudioElement::term() {
     __audio->stopSong();
     delete __audio;
   }
-
   Element::term();
 }  // term()
 

@@ -5,10 +5,12 @@
  *
  * This example compiles a customized firmware from the HomeDing library
  * that supports a color graphic display, some elements to control parameters.
- * It runs only ona ESP32 Wroover based board with I2S Audio support (DAC Converter).
+ * It runs only on a ESP32 Wrover based board with PSRAM and with I2S Audio support (DAC Converter).
  *
- * Compile with
- * * Board: ESP32 Wroover Module
+ * Compile with:
+ * 
+ * * Board: ESP32 Wroover Kit
+ * * PSRAM: Enabled
  * * Partition Scheme: 4MB (1.2MB APP / 1.5MB SPIFS)
  *
  * @author Matthias Hertel, https://www.mathertel.de

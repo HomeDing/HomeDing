@@ -15,7 +15,7 @@
 
 #include "SceneElement.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 
 /* ===== Static factory function ===== */
@@ -62,25 +62,17 @@ bool SceneElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "next") == 0) {
     // start next step in in scene
-    if (_count < size) {
-      _nextStep = 1;  // asap.
-    } else {
+    TRACE("_next cnt=%d, size=%d", _count, size);
+    if ((_count < 0) || (_count >= size)) {
       _count = 0;
-      _nextStep = 1;  // asap.
     }
+    _nextStep = 1;  // asap.
 
 
   } else if (_stristartswith(name, "steps[")) {
-    _steps.push_back(String(value));
-
-    // int index = _atoi(name + 6);  // number starts after "steps["
-
-    // if (index >= size) {
-    //   // set default values for new index
-    //   _steps.resize(index + 1);
-    //   _steps[index] = value;
-    //   TRACE("new(%d):<%s>", index, value);
-    // }  // if
+    // _steps.push_back(String(value));
+    _steps.push_back(value);
+    TRACE("_steps cnt=%d", _steps.size());
 
   } else if (_stricmp(name, "delay") == 0) {
     // delay between executing the steps

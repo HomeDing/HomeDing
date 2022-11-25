@@ -23,7 +23,7 @@
 
 #include <Audio.h>
 
-#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 

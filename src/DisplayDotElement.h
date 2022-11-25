@@ -73,9 +73,6 @@ private:
    * @brief value to be displayed 
    */
   bool _value;
-
-  int _w = 11;
-  int _h = 11;
 };
 
 #ifdef HOMEDING_REGISTER

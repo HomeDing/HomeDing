@@ -65,8 +65,10 @@ public:
   virtual void pushState(
     std::function<void(const char *pName, const char *eValue)> callback) override;
 
-  String _url;    // Stream URL
-  int _volume;    // volume
+  String _url;      ///< Stream URL
+  String _station;  ///< station information in stream
+  String _title;    ///< title information in stream
+  int _volume;      ///< volume
   int _balance;
 
   int _low;

@@ -65,8 +65,9 @@ void audioTask(void *parameter) {
       log_n(">> cmd %d\n", cmd);
       if (cmd == AUDIOCMD_URL) {
         __audio->stopSong();
-        __board->dispatch(__element->_onStation, "");
-        __board->dispatch(__element->_onTitle, "");
+        audio_showstation("");
+        audio_showstreamtitle("");
+
         if (!__element->_url.isEmpty()) {
           log_n(".1 %s\n", __element->_url.c_str());
           __audio->connecttohost(__element->_url.c_str());
@@ -93,16 +94,19 @@ void audioTask(void *parameter) {
   }
 }
 
+// use some weak functions from audio library
+
 void audio_info(const char *info) {
   Logger::LoggerEPrint(__element, LOGGER_LEVEL_TRACE, info);
 }
 
-
 void audio_showstation(const char *value) {
+  __element->_station = value;
   __board->dispatch(__element->_onStation, value);
 }
 
 void audio_showstreamtitle(const char *value) {
+  __element->_title = value;
   __board->dispatch(__element->_onTitle, value);
 }
 
@@ -235,6 +239,9 @@ void AudioElement::start() {
 void AudioElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
+  callback("url", _url.c_str());
+  callback("station", _station.c_str());
+  callback("title", _title.c_str());
   callback("volume", _printInteger(_volume));
   callback("balance", _printInteger(_balance));
   callback("low", _printInteger(_low));

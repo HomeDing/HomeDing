@@ -60,11 +60,11 @@ protected:
   /**
    * @brief Page of the display where the element is placed.
    */
-  int _page = 1;  // Put on page 1 by default.
+  int _page = 1;  ///< Put on page 1 by default.
 
-  int _x;  ///< x-position
-  int _y;  ///< y-position
-  int _h;  ///< height & fontsize
+  int _x;       ///< x-position
+  int _y;       ///< y-position
+  int _h = 10;  ///< height & fontsize
 
   uint32_t _color = COLOR_UNDEFINED;  ///< element color
 

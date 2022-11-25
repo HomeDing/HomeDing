@@ -19,6 +19,8 @@
 
 #include <DisplayTextElement.h>
 
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+
 /**
  * @brief static factory function to create a new DisplayTextElement.
  * @return DisplayTextElement* as Element* created element

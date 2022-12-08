@@ -19,22 +19,21 @@
 
 #include <ButtonElement.h>
 
-#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
-#define STATE_INIT 0 // waiting for input
-#define STATE_HIGH1 1 // got a first high
-#define STATE_LOW1 2 // went low again
-#define STATE_HIGH2 3 // went up a second time shortly after the first
-#define STATE_PRESSHIGH 6 // is high since a long time.
+#define STATE_INIT 0       // waiting for input
+#define STATE_HIGH1 1      // got a first high
+#define STATE_LOW1 2       // went low again
+#define STATE_HIGH2 3      // went up a second time shortly after the first
+#define STATE_PRESSHIGH 6  // is high since a long time.
 
 /**
  * @brief static factory function to create a new ButtonElement.
  * @return ButtonElement* as Element* created element
  */
-Element *ButtonElement::create()
-{
+Element *ButtonElement::create() {
   return (new ButtonElement());
-} // create()
+}  // create()
 
 // http://lcddevice/$board/neo/d3?color=0
 // http://lcddevice/$board/button/on?action=click
@@ -42,8 +41,7 @@ Element *ButtonElement::create()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool ButtonElement::set(const char *name, const char *value)
-{
+bool ButtonElement::set(const char *name, const char *value) {
   bool ret = true;
   TRACE("set %s=%s", name, value);
 
@@ -80,38 +78,36 @@ bool ButtonElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief check the input level.
  */
-void ButtonElement::loop()
-{
-  unsigned long now = _board->nowMillis; // current (relative) time in msecs.
+void ButtonElement::loop() {
+  unsigned long now = _board->nowMillis;  // current (relative) time in msecs.
 
   // state machine
-  if (_state == STATE_INIT) { // waiting for menu pin being pressed.
+  if (_state == STATE_INIT) {  // waiting for menu pin being pressed.
 
     if (_inputLevel) {
-      _state = STATE_HIGH1; // step to state 1
-      _startTime = now; // remember starting time
-    } // if
+      _state = STATE_HIGH1;  // step to state 1
+      _startTime = now;      // remember starting time
+    }                        // if
 
-  } else if (_state == STATE_HIGH1) { // waiting for menu pin being released.
+  } else if (_state == STATE_HIGH1) {  // waiting for menu pin being released.
     if (!_inputLevel) {
       _state = STATE_LOW1;
 
-    } else if ((_inputLevel) &&
-               ((unsigned long)(now - _startTime) > _pressTicks)) {
+    } else if ((_inputLevel) && ((unsigned long)(now - _startTime) > _pressTicks)) {
       _send(ACTION_PRESS);
       _state = STATE_PRESSHIGH;
 
     } else {
       // wait. Stay in this state.
-    } // if
+    }  // if
 
   } else if (_state == STATE_LOW1) {
     // waiting for menu pin being pressed the second time or timeout.
@@ -120,38 +116,37 @@ void ButtonElement::loop()
     if ((unsigned long)(now - _startTime) > _clickTicks) {
       // this was only a single short click
       _send(ACTION_CLICK);
-      _state = STATE_INIT; // restart.
+      _state = STATE_INIT;  // restart.
 
     } else if (_inputLevel) {
       _state = STATE_HIGH2;
-    } // if
+    }  // if
 
-  } else if (_state == STATE_HIGH2) { // waiting for menu pin being released finally.
+  } else if (_state == STATE_HIGH2) {  // waiting for menu pin being released finally.
     if (!_inputLevel) {
       // this was a 2 click sequence.
       _send(ACTION_DOUBLECLICK);
       _state = STATE_INIT;
-    } // if
+    }  // if
 
   } else if (_state == STATE_PRESSHIGH) {
     // waiting for menu pin being release after long press.
     if (!_inputLevel) {
       _state = STATE_INIT;
-    } // if
-  } // if
+    }  // if
+  }    // if
 
-} // loop()
+}  // loop()
 
 
 void ButtonElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-} // pushState()
+}  // pushState()
 
 
-void ButtonElement::_send(ACTIONS action)
-{
+void ButtonElement::_send(ACTIONS action) {
+  TRACE("send %d", action);
   String a;
   const char *actionName = NULL;
 
@@ -172,6 +167,6 @@ void ButtonElement::_send(ACTIONS action)
     _board->dispatch(a);
   if (actionName)
     _board->dispatch(_actionAction, actionName);
-} // _send()
+}  // _send()
 
 // End

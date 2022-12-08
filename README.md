@@ -4,10 +4,8 @@ This is a Arduino library to build small IoT devices without the need for cloud 
 It includes capabilities that can be combined by configuration providing a flexible low code solution.
 
 [![Arduino Library Format Check](https://github.com/HomeDing/HomeDing/actions/workflows/checkLibraryFormat.yml/badge.svg)](https://github.com/HomeDing/HomeDing/actions/workflows/checkLibraryFormat.yml)
-[![Build Examples for ESP8266](https://github.com/HomeDing/HomeDing/actions/workflows/checks.yml/badge.svg)](https://github.com/HomeDing/HomeDing/actions/workflows/checks.yml)
 [![Build Examples for ESP32](https://github.com/HomeDing/HomeDing/actions/workflows/buildESP32.yml/badge.svg)](https://github.com/HomeDing/HomeDing/actions/workflows/buildESP32.yml)
 [![arduino-library-badge](https://www.ardu-badge.com/badge/HomeDing.svg?)](https://www.ardu-badge.com/HomeDing)
-[![GitLicense](https://gitlicense.com/badge/HomeDing/HomeDing)](https://gitlicense.com/license/HomeDing/HomeDing)
 
 The library includes a complete ecosystem to build a IoT device by combining IoT specific Elements that interact using events and actions.
 These elements and the data flow and activities between elements can be configured without compiling a new firmware.

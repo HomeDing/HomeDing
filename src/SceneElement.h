@@ -53,13 +53,13 @@ public:
   virtual void loop() override;
 
 private:
-  /** The next action to be sent. Will be set to -1 after all actions are done. */
-  int _count;
+  /** current step activated. */
+  int _step;
 
   /**
    * @brief The delay between executing the steps in msec
    */
-  unsigned long _delay;
+  long _delay;
 
   /**
    * @brief The time for the next step.

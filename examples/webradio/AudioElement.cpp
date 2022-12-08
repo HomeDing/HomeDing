@@ -37,11 +37,12 @@ Element *AudioElement::create() {
 
 // codes for sending commands into the audio task
 
-#define AUDIOCMD_NONE 0
-#define AUDIOCMD_URL 1
-#define AUDIOCMD_VOLUME 2
-#define AUDIOCMD_BALANCE 3
-#define AUDIOCMD_TONE 4
+#define AUDIOCMD_NONE 0x0000
+#define AUDIOCMD_VOLUME 0x0001
+#define AUDIOCMD_BALANCE 0x0002
+#define AUDIOCMD_TONE 0x0004
+#define AUDIOCMD_MONO 0x0008
+#define AUDIOCMD_URL 0x0100
 
 // These references are set in static variables to make it available in the background audio task.
 
@@ -54,16 +55,18 @@ uint32_t __cmd = AUDIOCMD_NONE;
 // ===== Background task for audio processing ======
 
 void audioTask(void *parameter) {
-  uint32_t cmd;
+
+  __audio->setVolume(__element->_volume);
+  __audio->setBalance(__element->_balance);
+  __audio->setTone(__element->_low, __element->_mid, __element->_high);
+  __audio->forceMono(__element->_mono);
 
   while (true) {
-
     if (__cmd != AUDIOCMD_NONE) {
-      cmd = __cmd;
+      uint32_t cmd = __cmd;
       __cmd = AUDIOCMD_NONE;
 
-      log_n(">> cmd %d\n", cmd);
-      if (cmd == AUDIOCMD_URL) {
+      if (cmd & AUDIOCMD_URL) {
         __audio->stopSong();
         audio_showstation("");
         audio_showstreamtitle("");
@@ -72,26 +75,18 @@ void audioTask(void *parameter) {
           log_n(".1 %s\n", __element->_url.c_str());
           __audio->connecttohost(__element->_url.c_str());
         }
+      }
 
-      } else if (cmd == AUDIOCMD_VOLUME) {
-        __audio->setVolume(__element->_volume);
-
-      } else if (cmd == AUDIOCMD_BALANCE) {
-        __audio->setBalance(__element->_balance);
-
-      } else if (cmd == AUDIOCMD_TONE) {
-        __audio->setTone(__element->_low, __element->_mid, __element->_high);
-
-      }  // if
-      cmd = AUDIOCMD_NONE;
+      if (cmd & AUDIOCMD_VOLUME) __audio->setVolume(__element->_volume);
+      if (cmd & AUDIOCMD_BALANCE) __audio->setBalance(__element->_balance);
+      if (cmd & AUDIOCMD_TONE) __audio->setTone(__element->_low, __element->_mid, __element->_high);
+      if (cmd & AUDIOCMD_MONO) __audio->forceMono(__element->_mono);
     }  // if
-
-    if (__audio->isRunning()) {
-      __audio->loop();
-    } else {
+    __audio->loop();
+    if (!__audio->isRunning()) {
       sleep(1);
     }
-  }
+  }  // while
 }
 
 // use some weak functions from audio library
@@ -144,32 +139,36 @@ bool AudioElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "url") == 0) {
     _url = value;
-    __cmd = AUDIOCMD_URL;
+    __cmd |= AUDIOCMD_URL;
 
   } else if (_stricmp(name, "volume") == 0) {
     int v = _atoi(value);
     _volume = constrain(v, 0, 21);
-    __cmd = AUDIOCMD_VOLUME;
+    __cmd |= AUDIOCMD_VOLUME;
 
   } else if (_stricmp(name, "balance") == 0) {
     int v = _atoi(value);
     _balance = constrain(v, -16, 16);
-    __cmd = AUDIOCMD_BALANCE;
+    __cmd |= AUDIOCMD_BALANCE;
 
   } else if (_stricmp(name, "low") == 0) {
     int v = _atoi(value);
     _low = constrain(v, -20, 6);
-    __cmd = AUDIOCMD_TONE;
+    __cmd |= AUDIOCMD_TONE;
 
   } else if (_stricmp(name, "mid") == 0) {
     int v = _atoi(value);
     _mid = constrain(v, -20, 6);
-    __cmd = AUDIOCMD_TONE;
+    __cmd |= AUDIOCMD_TONE;
 
   } else if (_stricmp(name, "high") == 0) {
     int v = _atoi(value);
     _high = constrain(v, -20, 6);
-    __cmd = AUDIOCMD_TONE;
+    __cmd |= AUDIOCMD_TONE;
+
+  } else if (_stricmp(name, "mono") == 0) {
+    _mono = _atob(value);
+    __cmd |= AUDIOCMD_MONO;
 
     // === Settings ===
 
@@ -210,15 +209,9 @@ void AudioElement::start() {
 
     __audio = new Audio();
     __audio->setPinout(_i2s_bclk, _i2s_lrc, _i2s_dout);
-    __audio->setVolume(_volume);
-    __audio->setBalance(_balance);
-    __audio->setTone(_low, _mid, _high);
+    __audio->setVolume(0);
 
-    if (_url.isEmpty()) {
-      __audio->stopSong();
-    } else {
-      __audio->connecttohost(_url.c_str());
-    }
+    __cmd |= AUDIOCMD_VOLUME | AUDIOCMD_BALANCE | AUDIOCMD_TONE | AUDIOCMD_MONO | AUDIOCMD_URL;
 
     xTaskCreatePinnedToCore(
       audioTask,             /* Function to implement the task */
@@ -241,12 +234,13 @@ void AudioElement::pushState(
   Element::pushState(callback);
   callback("url", _url.c_str());
   callback("station", _station.c_str());
-  callback("title", _title.c_str());
+  callback("streamtitle", _title.c_str());
   callback("volume", _printInteger(_volume));
   callback("balance", _printInteger(_balance));
   callback("low", _printInteger(_low));
   callback("mid", _printInteger(_mid));
   callback("high", _printInteger(_high));
+  callback("mono", _printBoolean(_mono));
 }  // pushState()
 
 

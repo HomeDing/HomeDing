@@ -74,6 +74,8 @@ public:
   int _low;
   int _mid;
   int _high;
+  
+  bool _mono;
 
   String _onStation;
   String _onTitle;

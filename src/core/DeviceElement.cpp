@@ -140,6 +140,9 @@ bool DeviceElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "i2c-scl") == 0) {
       _board->I2cScl = _atopin(value);
 
+    } else if (_stricmp(name, "i2c-frequency") == 0) {
+      _board->I2cFrequency = _atoi(value);
+
     }  // if
   }    // if (! active)
 

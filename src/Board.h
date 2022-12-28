@@ -360,6 +360,7 @@ public:
    */
   int I2cSda = -1;
   int I2cScl = -1;
+  int I2cFrequency = 0;
 
   /** Service discovery enabled */
   bool _mDnsEnabled = true;

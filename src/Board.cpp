@@ -445,6 +445,9 @@ void Board::loop() {
     if ((I2cSda >= 0) && (I2cScl >= 0)) {
       LOGGER_TRACE("I2C pins sda=%d scl=%d", I2cSda, I2cScl);
       Wire.begin(I2cSda, I2cScl);
+      if (I2cFrequency > 0) {
+        Wire.setClock(I2cFrequency);
+      }
     }
 
     start(Element_StartupMode::System);

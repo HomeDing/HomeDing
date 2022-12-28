@@ -101,7 +101,7 @@ void SceneElement::loop() {
       if (_delay >= 0) {
         // send next action after some time
         _step++;
-        if (_step < _steps.size()) {
+        if (_step < (int)(_steps.size())) {
           _nextStep = now + _delay;
         } else {
           // end is reached -> deactivate

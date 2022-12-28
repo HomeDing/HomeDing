@@ -85,10 +85,14 @@ private:
   /**
    * @brief The actual mode.
    */
-  Mode _mode = Mode::fix;
+  Mode _mode = Mode::_default;
 
   /** Number of pixels in the stripe */
   int _count = 8;
+
+  /** Config of pixels order */
+  int _config = NEO_GRB;
+
 
   /** Overall brightness in range 0...100 from LightElement */
 
@@ -98,9 +102,6 @@ private:
 
   /** duration of animation / transition in msecs */
   unsigned long duration = 4000;
-
-  /** set color pattern */
-  void _setColors(String colList);
 
   Adafruit_NeoPixel *_strip = (Adafruit_NeoPixel *)NULL;
 };

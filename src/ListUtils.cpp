@@ -61,6 +61,15 @@ int ListUtils::length(const char *list) {
   return (cnt);
 }  // length()
 
+/**
+ * @brief calculate length of the list by counting the separators.
+ * @param list A comma separated lists of strings.
+ * @return int Number of items in the list.
+ */
+int ListUtils::length(String &list) {
+  return (length(list.c_str()));
+}
+
 
 /**
  * @brief Return the item of the list at the index position.

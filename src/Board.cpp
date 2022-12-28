@@ -38,7 +38,7 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
 #define NETTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
@@ -623,7 +623,6 @@ void Board::loop() {
     // release sysLED
     if (sysLED >= 0) {
       digitalWrite(sysLED, HIGH);
-      pinMode(sysLED, INPUT);
     }
 
     server->begin();
@@ -845,13 +844,14 @@ void Board::dispatchAction(String action) {
         value = "";
       }
 
+      // also show action in log when target has trace loglevel
+      Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action(%s)", action.c_str());
+
       bool ret = target->set(name.c_str(), value.c_str());
 
-      // also show action in log when target has trace loglevel
-      Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action (%s)", action.c_str());
 
       if (!ret)
-        LOGGER_ERR("Event '%s' was not handled", action.c_str());
+        LOGGER_ERR("Action '%s' was not accepted.", action.c_str());
     }
   }
   // TRACE_END;

@@ -214,7 +214,7 @@
   },
 
   "log": {
-    "properties": ["filesize", "filename"],
+    "properties": ["filesize", "filename", "averagetime"],
     "events": ["value"]
   },
 

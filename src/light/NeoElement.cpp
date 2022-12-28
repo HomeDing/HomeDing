@@ -19,57 +19,26 @@
 
 #include <light/NeoElement.h>
 
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
-/** set a single color for all neopixels */
+/** set a single color for all neopixels.
+ * execute directly, don't wait for loop().
+ */
 void NeoElement::setColor(uint32_t color, int brightness) {
-  // TRACE("setColor(x%08x, %d)", color, brightness);
-
-  // set _brightness and value of base class LightElement
+  TRACE("setColor(x%08x, %d)", color, brightness);
   LightElement::setColor(color, brightness);
+  _mode = Mode::fix;  // turn off animations.
 
-  _mode = Mode::fix; // turn off animations.
-  if (!enabled) {
-    color = 0;
+  if (needUpdate) {
+    if (!enabled) {
+      color = 0;
+    }
+    _strip->setBrightness(_brightness * 255 / 100);
+    _strip->fill(color);
+    _strip->show();
+    needUpdate = false;
   }
-
-  _strip->setBrightness(_brightness * 255 / 100);
-  _strip->fill(color);
-  _strip->show();
 }  // setColor()
-
-
-void NeoElement::_setColors(String colList) {
-  uint16_t pixels = _strip->numPixels();
-
-  String sCol;
-  uint32_t col;
-  int n = 0;
-  int def = 0;  // defined colors
-
-  while ((colList.length() > 0) && (n < pixels)) {
-    int p = colList.indexOf(',');
-    if (p > 0) {
-      sCol = colList.substring(0, p);
-      colList.remove(0, p + 1);
-
-    } else {
-      sCol = colList;
-      colList = (const char *)NULL;
-    }  // if
-
-    col = _atoColor(sCol.c_str());
-    _strip->setPixelColor(n++, col);
-  }  // while
-
-  // at the end of the defined colors.
-  // now repeat until all PixelColors are set
-  def = n;
-  while (n < pixels) {
-    col = _strip->getPixelColor(n % def);
-    _strip->setPixelColor(n++, col);
-  }
-  needUpdate = true;
-}  // _setColors()
 
 
 /* ===== Static factory function ===== */
@@ -98,15 +67,13 @@ void NeoElement::init(Board *board) {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool NeoElement::set(const char *name, const char *pValue) {
-  // TRACE("set %s=%s", name, value);
+  TRACE("set %s=%s", name, pValue);
   bool ret1 = LightElement::set(name, pValue);
   bool ret2 = true;
 
   if (_stricmp(name, "value") == 0) {
     // saving to LightElement::value was handled in LightElement
     _mode = Mode::fix;
-    if (_strip)
-      _setColors(value);
 
   } else if (_stricmp(name, "mode") == 0) {
     Mode m = (Mode)ListUtils::indexOf("fix,flow", pValue);
@@ -129,8 +96,13 @@ bool NeoElement::set(const char *name, const char *pValue) {
   } else if (_stricmp(name, "duration") == 0) {
     duration = _scanDuration(pValue);  // in msecs.
 
-  } else if (_stricmp(name, "count") == 0) {
+  } else if ((!active) && (_stricmp(name, "count") == 0)) {
     _count = _atoi(pValue);
+
+  } else if ((!active) && (_stricmp(name, "config") == 0)) {
+    int n = ListUtils::indexOf("rgb,grb", pValue);
+    if (n == 0) { _config = NEO_RGB; }
+    if (n == 1) { _config = NEO_GRB; }
 
   } else {
     ret2 = false;  // not handled
@@ -140,6 +112,8 @@ bool NeoElement::set(const char *name, const char *pValue) {
   return (ret1 || ret2);
 }  // set()
 
+// Adafruit_NeoPixel spix = Adafruit_NeoPixel(32, D4, NEO_GRB + NEO_KHZ800);
+
 
 /**
  * @brief Activate the NeoElement.
@@ -147,13 +121,13 @@ bool NeoElement::set(const char *name, const char *pValue) {
 void NeoElement::start() {
   LightElement::start();
 
-  _strip = new (std::nothrow) Adafruit_NeoPixel(_count, _pins[0], NEO_GRB + NEO_KHZ800);
+  TRACE("start config=%04x count=%d pin=%d", _config, _count, _pins[0]);
+  _strip = new (std::nothrow) Adafruit_NeoPixel(_count, _pins[0], _config | NEO_KHZ800);
   if (_strip) {
     _strip->begin();
     _strip->setBrightness(_brightness);
-    _setColors(value);
   }  // if
-  // TRACE("start %d,%d", (_strip != nullptr), brightness);
+  TRACE("start %d,%d", (_strip != nullptr), _brightness);
 }  // start()
 
 
@@ -162,33 +136,31 @@ void NeoElement::start() {
  */
 void NeoElement::loop() {
   if (_strip) {
-    if (needUpdate) {
-      // some settings have been changed
-      if (enabled) {
-        if (_mode == Mode::fix) {
-          _setColors(value);
-        }
-      } else {
-        _strip->clear();
+    if ((needUpdate) && (_mode == Mode::fix)) {
+      int len = ListUtils::length(value);
+      uint32_t colors[len];
+
+      for (int n = 0; n < len; n++) {
+        colors[n] = _atoColor(ListUtils::at(value, n).c_str());
+      }
+
+      // set all PixelColors using pattern
+      for (int n = 0; n < _count; n++) {
+        _strip->setPixelColor(n, colors[n % len]);
       }
       _strip->show();
-      needUpdate = false;
 
-    } else if (enabled && (_mode != Mode::fix) && (duration != 0)) {
-      // dynamic color patterns
+    } else if (enabled && (duration != 0) && (_mode == Mode::flow)) {
+      // flowing color patterns
       unsigned long now = millis();  // current (relative) time in msecs.
       unsigned int hue = (now % duration) * 65536L / duration;
 
-      if (_mode == Mode::flow) {
-        uint16_t pixels = _strip->numPixels();
-
-        for (uint16_t i = 0; i < pixels; i++) {
-          _strip->setPixelColor(i, _strip->ColorHSV((hue + i * 256 * 5) % 65536));
-        }
-
-      }  // if
-      needUpdate = true;
+      for (uint16_t i = 0; i < _count; i++) {
+        _strip->setPixelColor(i, _strip->ColorHSV((hue + i * 256 * 5) % 65536));
+      }
+      _strip->show();
     }
+    needUpdate = false;
   }  // if
 }  // loop()
 

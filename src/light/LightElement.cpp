@@ -32,36 +32,30 @@ LightElement::LightElement() {
 void LightElement::setColors(uint32_t *color, int brightness) {
   // just take the first in the array as default.
   setColor(*color, brightness);
-} // setColors
+}  // setColors
 
 
 // set output
 void LightElement::setColor(uint32_t color, int brightness) {
-  TRACE("setColor(#%08x, %d)", color, brightness);
+  TRACE("L-setColor(#%08x, %d)", color, brightness);
   char colBuffer[16];
 
-  brightness = constrain(brightness, 0, 100);
-  _brightness = brightness;
-
-  snprintf(colBuffer, sizeof(colBuffer), "#%08x", color);
-  value = colBuffer;
-
-  if (!enabled) {
-    color = 0;
+  int b = constrain(brightness, 0, 100);
+  if (b != _brightness) {
+    _brightness = b;
+    needUpdate = true;
   }
 
-  for (int n = _count - 1; n >= 0; n--) {
-    int c = color & 0x00FF;
+  if (color != _outColor) {
+    snprintf(colBuffer, sizeof(colBuffer), "#%08x", color);
+    value = colBuffer;
+    _outColor = color;
+    needUpdate = true;
+  }
 
-#if defined(ESP8266)
-    analogWrite(_pins[n], c * brightness / 100);
-#elif (defined(ESP32))
-    ledcWrite(_channels[n], c * brightness / 100);
-#endif
-
-    TRACE("%d pin=%d value=%02x", n, _pins[n], c);
-    color = color >> 8;
-  }  // for
+  if (needUpdate && pwmMode) {
+    loop();
+  }
 }  // setColor()
 
 
@@ -83,20 +77,31 @@ Element *LightElement::create() {
  */
 bool LightElement::set(const char *name, const char *pValue) {
   bool ret = true;
-  TRACE("set %s=%s", name, pValue);
+  TRACE("L-set %s=%s", name, pValue);
 
   if (_stricmp(name, "value") == 0) {
-    value = pValue;
-    needUpdate = true;
+    if (_stricmp(value.c_str(), pValue)) {
+      value = pValue;
+      _outColor = _atoColor(pValue);
+      needUpdate = true;
+    }
 
   } else if (_stricmp(name, "enable") == 0) {
     enabled = _atob(pValue);
     needUpdate = true;
 
-  } else if (_stricmp(name, "brightness") == 0) {
-    _brightness = _atoi(pValue);
-    _brightness = constrain(_brightness, 0, 100);
+  } else if (_stricmp(name, "mode") == 0) {
+    if (_stricmp(pValue, "pwm") == 0)
+      pwmMode = true;
     needUpdate = true;
+
+  } else if (_stricmp(name, "brightness") == 0) {
+    int b = _atoi(pValue);
+    b = constrain(b, 0, 100);
+    if (_brightness != b) {
+      _brightness = b;
+      needUpdate = true;
+    }
 
   } else if (_stricmp(name, "pin") == 0) {
     _count = 0;
@@ -124,34 +129,54 @@ bool LightElement::set(const char *name, const char *pValue) {
 void LightElement::start() {
   Element::start();
 
+  if (pwmMode) {
 #if defined(ESP8266)
-  analogWriteRange(256);
+    analogWriteRange(256);
 #endif
 
-  for (int n = 0; n < _count; n++) {
+    for (int n = 0; n < _count; n++) {
 #if defined(ESP8266)
-    pinMode(_pins[n], OUTPUT);
+      pinMode(_pins[n], OUTPUT);
 #elif (defined(ESP32))
-    _channels[n] = _board->nextLedChannel++;
-    ledcSetup(_channels[n], 8000, 8);
-    ledcAttachPin(_pins[n], _channels[n]);
+      _channels[n] = _board->nextLedChannel++;
+      ledcSetup(_channels[n], 8000, 8);
+      ledcAttachPin(_pins[n], _channels[n]);
 #endif
-  }  // for
-
-  needUpdate = true;
-  loop();
+    }  // for
+    loop();
+    needUpdate = false;
+  } else {
+    needUpdate = true;
+  }
 }  // start()
 
 
 /**
- * @brief Give some processing time to the Element to check for next actions.
-_ */
+ * @brief Change color and brightness if needed.
+ */
 void LightElement::loop() {
-  if (needUpdate) {
-    uint32_t col = _atoColor(value.c_str());
-    setColor(col, _brightness);
-    needUpdate = false;
-  }  // if
+  if ((needUpdate) && (pwmMode)) {
+
+    if (!enabled) {
+      _outColor = 0;
+    }
+
+    uint32_t color = _outColor;
+
+    for (int n = _count - 1; n >= 0; n--) {
+      int c = color & 0x00FF;
+
+#if defined(ESP8266)
+      analogWrite(_pins[n], c * _brightness / 100);
+#elif (defined(ESP32))
+      ledcWrite(_channels[n], c * _brightness / 100);
+#endif
+
+      TRACE("L-set(%d) pin=%d value=%02x", n, _pins[n], c);
+      color = color >> 8;
+    }  // for
+  }    // if
+  needUpdate = false;
 }  // loop()
 
 

@@ -164,11 +164,11 @@ void setup(void) {
     Serial.println("WiFi Station DHCPTimeout.");
   });
 
-  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](const WiFiEventSoftAPModeStationConnected& event) {
+  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](UNUSED const WiFiEventSoftAPModeStationConnected& event) {
     Serial.println("WiFi AP Station connected.");
   });
 
-  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](const WiFiEventSoftAPModeProbeRequestReceived& event) {
+  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](UNUSED const WiFiEventSoftAPModeProbeRequestReceived& event) {
     Serial.println("WiFi AP Station probe.");
   });
 

@@ -19,10 +19,7 @@
 
 #include <light/ColorElement.h>
 
-
-/* ===== Define local constants and often used strings ===== */
-
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  LOGGER_ETRACE(__VA_ARGS__)
 
 
 /* ===== Static factory function ===== */

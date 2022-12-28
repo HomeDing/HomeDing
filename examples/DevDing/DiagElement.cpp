@@ -162,13 +162,13 @@ String DiagElement::_handleDiag() {
 
 
 void DiagElement::_logChipDetails() {
-  const char *s;
-
   TRACE("Chip-Info:");
+
 #if defined(ESP8266)
   TRACE("  chip-id: 0x%08X", ESP.getChipId());
 
 #elif defined(ESP32)
+  const char *s;
   esp_chip_info_t chip_info;
   esp_chip_info(&chip_info);
 

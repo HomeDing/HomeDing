@@ -632,7 +632,7 @@ void Board::loop() {
     filesVersion = random(8000);  // will incremented on every file upload by file server
 
     if (cacheHeader == "etag") {
-#if defined(HOMEDING_SUPPORT_ETAG)
+#if defined(ESP8266)
       // enable eTags in results for static files
       // by setting "cache": "etag" inc env.json on the device element
 

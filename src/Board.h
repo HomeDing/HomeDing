@@ -27,6 +27,7 @@
  * * 03.09.2020 forEach iterator over all elements added.
  * * 09.03.2021 less sharing class members in favor to methods.
  * * 02.09.2021 advertise web server in mDNS.
+ * * 07.01.2023 ETAG support enabled permanently.
  */
 
 // The Board.h file also works as the base import file that contains some

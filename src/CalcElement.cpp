@@ -19,6 +19,7 @@
 
 #include <CalcElement.h>
 
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Element functions ===== */
 
@@ -32,10 +33,13 @@ void CalcElement::start() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool CalcElement::set(const char *name, const char *value) {
+  TRACE("set %s=%s", name, value);
   bool ret = true;
-  // LOGGER_EINFO("set %s = %s", name, value);
 
-  if (strstr(name, "value[") == name) {
+  if (Element::set(name, value)) {
+    // done
+
+  } else if (strstr(name, "value[") == name) {
     int indx = _atoi(name + 6);
 
     if ((indx >= 0) && (indx < CALCELEMENT_MAX_INPUTS)) {
@@ -59,10 +63,10 @@ bool CalcElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
     _valueAction = value;
-  } else {
-    ret = Element::set(name, value);
-  }  // if
 
+  } else {
+    ret = false;
+  }  // if
   return (ret);
 }  // set()
 

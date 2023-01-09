@@ -27,7 +27,10 @@ Element *DigitalOutElement::create() {
 bool DigitalOutElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (Element::set(name, value)) {
+    // done
+
+  } else if (_stricmp(name, PROP_VALUE) == 0) {
     _setLevel(_atob(value));
 
   } else if (_stricmp(name, PROP_PIN) == 0) {
@@ -43,7 +46,7 @@ bool DigitalOutElement::set(const char *name, const char *value) {
     _setLevel(false);
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
   return (ret);
 }  // set()

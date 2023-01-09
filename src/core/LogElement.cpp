@@ -72,10 +72,13 @@ void LogElement::init(Board *board) {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool LogElement::set(const char *name, const char *value) {
-  TRACE("set %s = %s", name, value);
+  TRACE("set %s=%s", name, value);
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (Element::set(name, value)) {
+    // done
+
+  } else if (_stricmp(name, PROP_VALUE) == 0) {
     if (active) {
       loop(); // be sure the current average time-span is saved.
 
@@ -112,9 +115,8 @@ bool LogElement::set(const char *name, const char *value) {
     _logfileOldName.replace(".", "_old.");
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   } // if
-
   return (ret);
 } // set()
 

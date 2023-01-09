@@ -34,7 +34,10 @@ Element *DigitalInElement::create() {
 bool DigitalInElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_PIN) == 0) {
+  if (Element::set(name, value)) {
+    // done
+
+  } else if (_stricmp(name, PROP_PIN) == 0) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, PROP_INVERSE) == 0) {
@@ -53,7 +56,7 @@ bool DigitalInElement::set(const char *name, const char *value) {
     _valueAction = value;
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
   return (ret);
 }  // set()

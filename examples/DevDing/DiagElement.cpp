@@ -122,6 +122,8 @@ String DiagElement::_handleDiag() {
 
       if (adr == 0x11) {
         desc = "SI4721";
+      } else if (adr == (0x14)) {
+        desc = "GT911";
       } else if (adr == 0x27) {
         desc = "LCD,PCF8574";
       } else if (adr == 0x38) {
@@ -134,6 +136,8 @@ String DiagElement::_handleDiag() {
         desc = "RTC,PCF8563";
       } else if (adr == (0x5c)) {
         desc = "AM2320";
+      } else if (adr == (0x5d)) {
+        desc = "GT911";
       } else if (adr == 0x62) {
         desc = "SCD-4x";
       } else if (adr == 0x63) {

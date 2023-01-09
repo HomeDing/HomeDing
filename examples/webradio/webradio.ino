@@ -9,7 +9,7 @@
  *
  * Compile with:
  * 
- * * Board: ESP32 Wroover Kit
+ * * Board: ESP32 Wrover Kit
  * * PSRAM: Enabled
  * * Partition Scheme: 4MB (1.2MB APP / 1.5MB SPIFS)
  *
@@ -30,7 +30,6 @@
 // ----- activatable debug options
 
 #define DBG_TRACE  // trace level for all elements
-#define NET_DEBUG  // show network event in output
 
 // ===== HomeDing Configuration : Enable Elements for the firmware
 
@@ -90,12 +89,6 @@ void setup(void) {
   Serial.println();
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
-#endif
-
-#if defined(NET_DEBUG)
-  Serial.setDebugOutput(true);
-#else
-  Serial.setDebugOutput(false);
 #endif
 
   // ----- setup the platform with webserver and file system -----

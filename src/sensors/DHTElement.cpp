@@ -125,7 +125,7 @@ bool DHTElement::getProbe(String &values) {
     newData = true;
 
   } else if (ret == DHTLIB_ERROR_SENSOR_NOT_READY) {
-    LOGGER_ETRACE("not found");
+    LOGGER_EERR("not found");
     term();
 
   } else {

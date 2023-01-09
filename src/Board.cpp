@@ -38,10 +38,10 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#define NETTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -142,7 +142,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   _isWakeupStart = false;
 #endif
   if (_startup == BOARDSTARTUP::DEEPSLEEP) {
-    LOGGER_INFO("Reset from Deep Sleep mode.");
+    LOGGER_INFO("Reset from Deep Sleep mode");
   }
 
   hd_yield();
@@ -637,7 +637,7 @@ void Board::loop() {
     filesVersion = random(8000);  // will incremented on every file upload by file server
 
     if (cacheHeader == "etag") {
-      // #if defined(ESP8266)
+#if defined(ESP8266)
       // enable eTags in results for static files
       // by setting "cache": "etag" inc env.json on the device element
 
@@ -655,7 +655,7 @@ void Board::loop() {
         }
         return (eTag);
       });
-      // #endif
+#endif
       cacheHeader = "";  // do not pass this cache header
     }
 

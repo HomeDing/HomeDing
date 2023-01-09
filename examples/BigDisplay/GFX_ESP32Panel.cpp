@@ -115,16 +115,7 @@ esp_lcd_rgb_panel_config_t panelConfig = {
 };
 
 esp_lcd_panel_handle_t panelHandle = nullptr;
-
 esp_rgb_panel_t *_rgbPanel = nullptr;
-// uint16_t *frameBuffer = nullptr;
-
-void PannelOnOff(bool turnOff) {
-  if (panelHandle) {
-    esp_lcd_panel_disp_off(panelHandle, turnOff);
-    // esp_lcd_rgb_panel_refresh()
-  }
-}
 
 /**************************************************************************/
 /*!

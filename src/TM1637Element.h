@@ -1,6 +1,6 @@
 /**
  * @file TM1637Element.h
- * @brief The TM1637Element implements communication with TM1637 LED driver chips.
+ * @brief The TM1637Element implements communication with TM1637 LED driver chips to implement 7 segment LED display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

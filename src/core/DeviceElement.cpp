@@ -168,7 +168,7 @@ void DeviceElement::loop() {
   TRACE("loop()");
   unsigned long now = _board->getSeconds();
   if ((_rebootTime > 0) && (now > _nextBoot)) {
-    LOGGER_EINFO("device restart initiated.");
+    LOGGER_EINFO("restart initiated");
     delay(100);
     ESP.restart();
     delay(100);

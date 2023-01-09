@@ -90,7 +90,7 @@ void RotaryElement::start() {
 
   // Verify parameters
   if ((_pin1 < 0) || (_pin2 < 0)) {
-    LOGGER_EERR("pin values are required.");
+    LOGGER_EERR("no pin");
 
   } else {
     // TRACE("connect %d %d\n", _pin1, _pin2);

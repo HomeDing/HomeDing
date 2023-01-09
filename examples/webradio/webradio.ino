@@ -105,7 +105,7 @@ void setup(void) {
   // UPLOAD and DELETE of static files in the file system.
   server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 }  // setup
 
 

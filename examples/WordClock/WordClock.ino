@@ -119,7 +119,7 @@ void setup(void) {
     }
   });
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 } // setup
 
 

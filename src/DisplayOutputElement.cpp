@@ -61,7 +61,7 @@ void DisplayOutputElement::start() {
   DisplayAdapter *d = _board->display;
 
   if (d == NULL) {
-    LOGGER_EERR("no display defined");
+    LOGGER_EERR("no display found");
 
   } else {
     if (_color == COLOR_UNDEFINED) {

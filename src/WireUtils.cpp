@@ -25,6 +25,7 @@
 
 /** Helper function to inspect a data buffer by dumping in hexadecimal format. */
 void WireUtils::dumpBuffer(uint8_t *data, uint8_t len) {
+#ifdef WIREDUMP
   if (data) {
     while (len > 0) {
       Serial.printf(" %02x", *data++);
@@ -32,6 +33,7 @@ void WireUtils::dumpBuffer(uint8_t *data, uint8_t len) {
     }  // while
     Serial.println();
   }  // if
+#endif
 }  // dumpBuffer()
 
 
@@ -110,7 +112,7 @@ uint8_t WireUtils::readRegister(uint8_t address, uint8_t reg) {
  */
 uint8_t WireUtils::readBuffer(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len) {
   write(address, reg);
-  return(readBuffer(address, data, len));
+  return (readBuffer(address, data, len));
 }  // readBuffer()
 
 // End.

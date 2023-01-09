@@ -126,7 +126,7 @@ void setup(void) {
   // pinMode(2, OUTPUT);
   // digitalWrite(2, HIGH);
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 }  // setup
 
 

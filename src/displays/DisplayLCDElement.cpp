@@ -58,7 +58,7 @@ void DisplayLCDElement::start() {
       DisplayElement::start();
 
     } else {
-      LOGGER_EERR("no display found.");
+      LOGGER_EERR("no display found");
       delete d;
     }  // if
   }    // if

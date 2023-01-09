@@ -203,7 +203,7 @@ void setup(void) {
   // homeding.add("my/1", new MyElement01());
   // homeding.add("my/2", new MyElement02());
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 }  // setup
 
 

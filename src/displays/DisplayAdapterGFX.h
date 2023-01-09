@@ -64,7 +64,7 @@ public:
       gfxDisplay->setTextWrap(false);
       gfxDisplay->cp437(true);
       gfxDisplay->setRotation((conf->rotation / 90) % 4);
-      _setTextHeight(8);
+      _setTextHeight(conf->height > 64 ? 16 : 8);
       backColor565 = COL565_BLACK;
       drawColor565 = COL565_WHITE;
       clear();
@@ -74,16 +74,11 @@ public:
   };  // init()
 
 
-  // virtual void setBrightness(uint8_t bright) override {
-  //   gfxDisplaydrawBitmap((bright * 128) / 100);
-  // };
-
-
   /**
    * @brief Clear all displayed information from the display.
    */
   void clear() override {
-    // LOGGER_JUSTINFO("clear.");
+    // LOGGER_JUSTINFO("clear");
     gfxDisplay->fillScreen(backColor565);
   };  // clear()
 

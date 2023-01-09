@@ -52,7 +52,7 @@ void DisplaySH1106Element::start() {
       _board->display = d;
 
     } else {
-      LOGGER_EERR("no display found.");
+      LOGGER_EERR("no display found");
       delete d;
       active = false;
     }  // if

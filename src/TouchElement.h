@@ -38,6 +38,7 @@ public:
    */
   static bool registered;
 
+#if defined(ESP32)
   /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
@@ -61,6 +62,7 @@ public:
    */
   virtual void pushState(
     std::function<void(const char *pName, const char *eValue)> callback) override;
+#endif
 
 private:
   /**

@@ -114,7 +114,7 @@ WebServer server(80);
 void setup(void) {
   Serial.begin(115200);
 
-#ifdef NET_DEBUG
+#if defined(NET_DEBUG)
   Serial.setDebugOutput(true);
 #else
   Serial.setDebugOutput(false);

@@ -39,7 +39,8 @@ bool DisplayDotElement::set(const char *name, const char *value) {
 
   if (DisplayOutputElement::set(name, value)) {
     // done
-  } else if (_stricmp(name, PROP_VALUE) == 0) {
+
+  } else if (_stricmp(name, "value") == 0) {
     _value = _atob(value);
     _neededraw = true;
 
@@ -61,7 +62,7 @@ bool DisplayDotElement::set(const char *name, const char *value) {
  */
 void DisplayDotElement::draw() {
   DisplayOutputElement::draw();
-  _display->clear(_x, _y, _w, _h);
+  _display->clear(_x, _y, _h, _h);
   _display->drawDot(_x, _y, _h, _value);
 }
 
@@ -71,7 +72,7 @@ void DisplayDotElement::draw() {
 void DisplayDotElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _value ? "1" : "0");
+  callback("value", _value ? "1" : "0");
 }  // pushState()
 
 // End

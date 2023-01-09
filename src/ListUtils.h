@@ -32,6 +32,13 @@ public:
   static int length(const char *list);
 
   /**
+   * @brief calculate length of the list by counting the separators.
+   * @param list A comma separated lists of strings.
+   * @return int Number of items in the list.
+   */
+  static int length(String &list);
+
+  /**
    * @brief Return the item of the list at the index position.
    * @param list A comma separated lists of strings.
    * @param index The index (position) of the array element to be returned.

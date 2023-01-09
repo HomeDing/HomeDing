@@ -1,8 +1,8 @@
 /**
- * @file DisplayAdapterST7789.h
+ * @file DisplayST7789Adapter.h
  *
  * @brief DisplayAdapter implementation for the HomeDing library
- * adapting LCD displays using the HD44780 chip.
+ * adapting TFT displays using the ST7789 chip.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -12,17 +12,16 @@
  * * 07.12.2020 no write text beyond textline end.
  */
 
-#ifndef DisplayAdapterST7789_H
-#define DisplayAdapterST7789_H
+#pragma once
 
 #include <displays/DisplayAdapterGFX.h>
 
 #include <Adafruit_ST7789.h>  // Hardware-specific library for ST7789
 #include <SPI.h>
 
-class DisplayAdapterST7789 : public DisplayAdapterGFX {
+class DisplayST7789Adapter : public DisplayAdapterGFX {
 public:
-  ~DisplayAdapterST7789() = default;
+  ~DisplayST7789Adapter() = default;
 
   bool start() override {
     // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
@@ -68,5 +67,3 @@ private:
    */
   Adafruit_ST7789 *display = nullptr;
 };
-
-#endif  // DisplayAdapterST7789_H

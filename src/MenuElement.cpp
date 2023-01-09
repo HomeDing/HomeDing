@@ -26,10 +26,9 @@
  * @brief static factory function to create a new MenuElement
  * @return MenuElement* created element
  */
-Element *MenuElement::create()
-{
+Element *MenuElement::create() {
   return (new MenuElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -37,8 +36,7 @@ Element *MenuElement::create()
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool MenuElement::set(const char *name, const char *value)
-{
+bool MenuElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, PROP_VALUE) == 0) {
@@ -50,7 +48,7 @@ bool MenuElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "select") == 0) {
     // switch to next value in list..
     if (_count > 0) {
-      _active = (_active + 1) % _count; // 2 value elements in list
+      _active = (_active + 1) % _count;  // 2 value elements in list
       _updateM = _updateV = true;
     }
 
@@ -70,6 +68,33 @@ bool MenuElement::set(const char *name, const char *value)
       }
     }
 
+    // TODO: "connect": ["value/0", "switch/on"] / use array for specifying the connected valueElements
+    // } else if (_stristartswith(name, "connect[")) {
+    //   size_t index = _atoi(name + 6); // number starts after "connect["
+    //   _board->getElement("value", name.c_str());
+
+    // if (index >= _steps.size()) {
+    //   // set default values for new index
+    //   _steps.resize(index + 1);
+    //   _steps[index] = value;
+    //   TRACE("new(%d):<%s>", index, value);
+    // } // if
+
+    //   int n = 0;
+    //   while (1) {
+    //     String name = getItemValue(value, n++);
+    //     if (name.length() > 0) {
+    //       ValueElement *v = static_cast<ValueElement *>(_board->getElement("value", name.c_str()));
+    //       if (!v)
+    //         v = static_cast<ValueElement *>(_board->getElement("switch", name.c_str()));
+    //       if ((v) && _count < MAXMENUVALUES) {
+    //         valueList[_count++] = v;
+    //       }
+    //     } else {
+    //       break;
+    //     }
+    //   }
+
   } else if (_stricmp(name, "onDisplay") == 0) {
     _displayAction = value;
 
@@ -81,17 +106,16 @@ bool MenuElement::set(const char *name, const char *value)
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
-void MenuElement::loop()
-{
+void MenuElement::loop() {
   if (_updateM) {
     _board->dispatch(_menuAction, valueList[_active]->getLabel());
   }
@@ -107,7 +131,7 @@ void MenuElement::loop()
     _board->dispatch(_displayAction, v);
   }
 
-  _updateM =_updateV = false;
-} // loop()
+  _updateM = _updateV = false;
+}  // loop()
 
 // End

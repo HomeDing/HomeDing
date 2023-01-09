@@ -12,8 +12,7 @@
  * * 19.01.2022 finalized including delay
  */
 
-#ifndef SCENEELEMENT_H
-#define SCENEELEMENT_H
+#pragma once
 
 /**
  * @brief 
@@ -54,13 +53,13 @@ public:
   virtual void loop() override;
 
 private:
-  /** The next action to be sent. Will be set to -1 after all actions are done. */
-  int _count;
+  /** current step activated. */
+  int _step;
 
   /**
-   * @brief The delay between executing the steps
+   * @brief The delay between executing the steps in msec
    */
-  unsigned long _delay;
+  long _delay;
 
   /**
    * @brief The time for the next step.
@@ -79,7 +78,4 @@ private:
 // Register the SceneElement onto the ElementRegistry.
 bool SceneElement::registered =
     ElementRegistry::registerElement("scene", SceneElement::create);
-#endif
-
-
 #endif

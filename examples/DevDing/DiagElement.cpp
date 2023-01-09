@@ -92,7 +92,9 @@ String DiagElement::_handleDiag() {
   unsigned long tStart = millis();
 
   out += "**Info**\n";
-  out += "DeviceName: "; out += _board->deviceName; out += '\n';
+  out += "DeviceName: ";
+  out += _board->deviceName;
+  out += '\n';
   out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n";
   out += "\n";
 
@@ -106,7 +108,6 @@ String DiagElement::_handleDiag() {
 
     // The i2c scanner uses the return value of Write.endTransmission
     // to find a device that acknowledged to the address.
-    LOGGER_ETRACE("s=%02x", adr);
     Wire.beginTransmission(adr);
     int error = Wire.endTransmission();
 
@@ -121,6 +122,8 @@ String DiagElement::_handleDiag() {
 
       if (adr == 0x11) {
         desc = "SI4721";
+      } else if (adr == (0x14)) {
+        desc = "GT911";
       } else if (adr == 0x27) {
         desc = "LCD,PCF8574";
       } else if (adr == 0x38) {
@@ -133,6 +136,8 @@ String DiagElement::_handleDiag() {
         desc = "RTC,PCF8563";
       } else if (adr == (0x5c)) {
         desc = "AM2320";
+      } else if (adr == (0x5d)) {
+        desc = "GT911";
       } else if (adr == 0x62) {
         desc = "SCD-4x";
       } else if (adr == 0x63) {
@@ -159,6 +164,58 @@ String DiagElement::_handleDiag() {
 }  // _handleDiag
 
 
+
+void DiagElement::_logChipDetails() {
+  TRACE("Chip-Info:");
+
+#if defined(ESP8266)
+  TRACE("  chip-id: 0x%08X", ESP.getChipId());
+
+#elif defined(ESP32)
+  const char *s;
+  esp_chip_info_t chip_info;
+  esp_chip_info(&chip_info);
+
+  esp_chip_model_t model = chip_info.model;
+  s = "unknown";
+  if (model == CHIP_ESP32) { s = "ESP32"; };
+  if (model == CHIP_ESP32S2) { s = "ESP32-S2"; };
+  if (model == CHIP_ESP32S3) { s = "ESP32-S3"; };
+  if (model == CHIP_ESP32C3) { s = "ESP32-C3"; };
+  if (model == CHIP_ESP32H2) { s = "ESP32-H2"; };
+  TRACE("  model: %s(%d)", s, model);
+
+  uint32_t features = chip_info.features;
+  TRACE("  features: %08x", features);
+  if (features & CHIP_FEATURE_EMB_FLASH) { TRACE("    embedded flash memory"); };
+  if (features & CHIP_FEATURE_WIFI_BGN) { TRACE("    2.4GHz WiFi"); };
+  if (features & CHIP_FEATURE_BLE) { TRACE("    Bluetooth LE"); };
+  if (features & CHIP_FEATURE_BT) { TRACE("    Bluetooth Classic"); };
+  if (features & CHIP_FEATURE_IEEE802154) { TRACE("    IEEE 802.15.4"); };
+  if (features & CHIP_FEATURE_EMB_PSRAM) { TRACE("    embedded psram"); };
+
+  TRACE("  cores: %d", chip_info.cores);
+  TRACE("  revision: %d", chip_info.revision);
+
+  TRACE("ChipModel: %s", ESP.getChipModel());
+
+  TRACE("Flash:");
+  TRACE("  Size: %d", ESP.getFlashChipSize());
+
+  FlashMode_t flashMode = ESP.getFlashChipMode();
+  s = "unknown";
+  if (flashMode == FM_QIO) { s = "QIO"; };
+  if (flashMode == FM_QOUT) { s = "QOUT"; };
+  if (flashMode == FM_DIO) { s = "DIO"; };
+  if (flashMode == FM_DOUT) { s = "DOUT"; };
+  if (flashMode == FM_FAST_READ) { s = "FAST_READ"; };
+  if (flashMode == FM_SLOW_READ) { s = "SLOW_READ"; };
+  TRACE("  Mode: %s(%d)", s, flashMode);
+
+  TRACE("  Speed: %d", ESP.getFlashChipSpeed());
+#endif
+}
+
 /**
  * @brief Activate the DiagElement.
  */
@@ -171,18 +228,19 @@ void DiagElement::start() {
     _board->server->send(200, "text/plain", _handleDiag());
   });
 
+  TRACE("I2C pins sda=%d scl=%d", _board->I2cSda, _board->I2cScl);
 
 #if defined(ESP8266)
   TRACE("Reset Reason: %s", ESP.getResetReason().c_str());
-  TRACE("     Chip-Id: 0x%08X", ESP.getChipId());
 #elif defined(ESP32)
   // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
   TRACE("Reset Reason: %d", rtc_get_reset_reason(0));
 #endif
 
-  TRACE(" Free Memory: %d", ESP.getFreeHeap());
+  TRACE(" Free Heap: %d", ESP.getFreeHeap());
   TRACE(" Mac-address: %s", WiFi.macAddress().c_str());
 
+  _logChipDetails();
 }  // start()
 
 

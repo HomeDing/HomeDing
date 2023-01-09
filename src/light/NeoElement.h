@@ -72,24 +72,27 @@ public:
     _min = 0,      // minimum value
     _default = 0,  // default value
 
-    color = 0,       // take inbound value for output
-    wheel = 2,     // single color output cycling through whole hue cycle
-    flow = 2,      // rainbow colors flowing
-    pulse = 3,
+    fix = 0,       // take inbound value for output
+    flow = 1,      // rainbow colors flowing
 
-    _max = 3  // maximum value
+    _max = 1  // maximum value
   };
 
+  /** set a single color for all neopixels */
   virtual void setColor(uint32_t color, int brightness) override;
 
 private:
   /**
    * @brief The actual mode.
    */
-  Mode _mode = Mode::color;
+  Mode _mode = Mode::_default;
 
   /** Number of pixels in the stripe */
   int _count = 8;
+
+  /** Config of pixels order */
+  int _config = NEO_GRB;
+
 
   /** Overall brightness in range 0...100 from LightElement */
 
@@ -99,9 +102,6 @@ private:
 
   /** duration of animation / transition in msecs */
   unsigned long duration = 4000;
-
-  /** set color pattern */
-  void _setColors(String colList);
 
   Adafruit_NeoPixel *_strip = (Adafruit_NeoPixel *)NULL;
 };

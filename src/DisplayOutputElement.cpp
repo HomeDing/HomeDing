@@ -24,28 +24,31 @@
  */
 bool DisplayOutputElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
-  bool ret = Element::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
+  if (Element::set(name, value)) {
+    // done
 
-    if (_stricmp(name, "redraw") == 0) {
-      this->draw();
+  } else if (_stricmp(name, "redraw") == 0) {
+    this->draw();
 
-    } else if (_stricmp(name, "page") == 0) {
-      _page = _atoi(value);
+  } else if (_stricmp(name, "page") == 0) {
+    _page = _atoi(value);
 
-    } else if (_stricmp(name, "x") == 0) {
-      _x = _atoi(value);
+  } else if (_stricmp(name, "x") == 0) {
+    _x = _atoi(value);
 
-    } else if (_stricmp(name, "y") == 0) {
-      _y = _atoi(value);
+  } else if (_stricmp(name, "y") == 0) {
+    _y = _atoi(value);
 
-    } else if (_stricmp(name, "color") == 0) {
-      _color = _atoColor(value);
+  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "fontsize") == 0)) {
+    _h = _atoi(value);
 
-    } else {
-      ret = false;
-    }
+  } else if (_stricmp(name, "color") == 0) {
+    _color = _atoColor(value);
+
+  } else {
+    ret = false;
   }  // if
   return (ret);
 }  // set()
@@ -62,7 +65,7 @@ void DisplayOutputElement::start() {
 
   } else {
     if (_color == COLOR_UNDEFINED) {
-      _color = d->getColor(); // get standard draw/text color from display.
+      _color = d->getColor();  // get standard draw/text color from display.
     }
     _display = d;
     if (_page > d->maxpage) {

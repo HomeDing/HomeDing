@@ -1,0 +1,36 @@
+{
+  "device": {
+    "0": {
+      "name": "panel",
+      "reboottime": "24h",
+      "description": "Panel HomeDing",
+      "logfile": 1,
+      "loglevel": 2,
+      "xled": "D0",
+      "xbutton": "D4",
+      "safemode": "false",
+      "xi2c-scl": "D2",
+      "xi2c-sda": "D1"
+    }
+  },
+  "ota": {
+    "0": {
+      "port": 8266,
+      "passwd": "123",
+      "description": "Listen for 'over the air' OTA Updates"
+    }
+  },
+  "ntptime": {
+    "0": {
+      "zone": "CET-1CEST,M3.5.0,M10.5.0/3"
+    }
+  },
+  "displaypanel": {
+    "0": {
+      "width": 800,
+      "height": 480,
+      "lightPin": 2,
+      "rotation": 0
+    }
+  }
+}

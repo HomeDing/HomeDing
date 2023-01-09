@@ -11,8 +11,7 @@
  * * 18.03.2022 created by Matthias Hertel
  */
 
-#ifndef DisplayAdapterGFX_H
-#define DisplayAdapterGFX_H
+#pragma once
 
 #include <Adafruit_GFX.h>  // Core graphics library
 
@@ -24,7 +23,6 @@
 
 class DisplayAdapterGFX : public DisplayAdapter {
 public:
-
   ~DisplayAdapterGFX() = default;
 
   bool start() override {
@@ -133,6 +131,42 @@ public:
     gfxDisplay->drawLine(x0, y0, x1, y1, drawColor565);
   }  // drawLine()
 
+
+  // load a builtin font
+  void loadFont(int16_t height, int8_t factor = 1) {
+
+    if (height <= 8) {
+      gfxDisplay->setFont();  // builtin 8pt font
+      lineHeight = 8;
+      baseLine = 0;
+      charWidth = 6;
+
+    } else if (height <= 10) {
+      gfxDisplay->setFont(&Font_10);
+      lineHeight = 10;
+      baseLine = 7;
+      charWidth = 8;
+
+    } else if (height <= 16) {
+      gfxDisplay->setFont(&Font_16);
+      lineHeight = 16;
+      baseLine = 12;
+      charWidth = 11;
+
+    } else if (height <= 24) {
+      gfxDisplay->setFont(&Font_24);
+      lineHeight = 24;  // 20+4
+      baseLine = 19;
+      charWidth = 14;
+    }  // if
+
+    gfxDisplay->setTextSize(factor);
+    lineHeight *= factor;
+    baseLine *= factor;
+    charWidth *= factor;
+  }  // loadFont()
+
+
   virtual void setColor(uint32_t col) override {
     DisplayAdapter::setColor(col);
     drawColor565 = col565(col);
@@ -160,51 +194,29 @@ protected:
 
   /** Set max. height of text in a box */
   void _setTextHeight(int16_t h) {
-    // LOGGER_JUSTINFO("textHeight: %d", h);
-
+ 
     if (h == 0) {
       // keep
     } else if (h <= 8) {
-      gfxDisplay->setFont();
-      gfxDisplay->setTextSize(1);
-      lineHeight = 8;
-      baseLine = 0;
-      charWidth = 6;
+      loadFont(8);
 
     } else if (h <= 10) {
-      gfxDisplay->setFont(&Font_10);
-      gfxDisplay->setTextSize(1);
-      lineHeight = 10;
-      baseLine = 7;
-      charWidth = 8;
+      loadFont(10);
 
     } else if (h <= 16) {
-      gfxDisplay->setFont(&Font_16);
-      gfxDisplay->setTextSize(1);
-      lineHeight = 16;
-      baseLine = 12;
-      charWidth = 11;
+      loadFont(16);
 
     } else if (h <= 20) {
-      gfxDisplay->setFont(&Font_10);
-      gfxDisplay->setTextSize(2);
-      lineHeight = 20;
-      baseLine = 14;
-      charWidth = 16;
+      loadFont(10, 2);
 
     } else if (h <= 24) {
-      gfxDisplay->setFont(&Font_24);
-      gfxDisplay->setTextSize(1);
-      lineHeight = 24;  // 20+4
-      baseLine = 19;
-      charWidth = 14;
+      loadFont(24);
 
     } else if (h <= 32) {
-      gfxDisplay->setFont(&Font_16);
-      gfxDisplay->setTextSize(2);
-      lineHeight = 32;
-      baseLine = 24;
-      charWidth = 22;
+      loadFont(16, 2);
+
+    } else if (h <= 48) {
+      loadFont(24, 2);
     }
   }
 
@@ -212,5 +224,3 @@ protected:
   uint16_t backColor565;
   uint16_t drawColor565;
 };
-
-#endif  // DisplayAdapterGFX_H

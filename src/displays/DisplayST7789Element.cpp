@@ -1,6 +1,6 @@
 /**
  * @file DisplayST7789Element.cpp
- * @brief Display Element for HD44780 compatible LCD displays.
+ * @brief Display Element for ST7789 compatible TFT displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -19,10 +19,9 @@
 #include <HomeDing.h>
 
 #include <displays/DisplayST7789Element.h>
+#include <displays/DisplayST7789Adapter.h>
 
-#include <displays/DisplayAdapterST7789.h>
-
-#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -52,7 +51,7 @@ void DisplayST7789Element::start() {
   // config.spiMISO = -1;
   // config.spiCLK = 18;
 
-  DisplayAdapter *d = new DisplayAdapterST7789();
+  DisplayAdapter *d = new DisplayST7789Adapter();
   if (d->setup(_board, &config)) {
     bool success = d->start();
     if (success) {

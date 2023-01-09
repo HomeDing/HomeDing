@@ -4,10 +4,8 @@ This is a Arduino library to build small IoT devices without the need for cloud 
 It includes capabilities that can be combined by configuration providing a flexible low code solution.
 
 [![Arduino Library Format Check](https://github.com/HomeDing/HomeDing/actions/workflows/checkLibraryFormat.yml/badge.svg)](https://github.com/HomeDing/HomeDing/actions/workflows/checkLibraryFormat.yml)
-[![Build Examples for ESP8266](https://github.com/HomeDing/HomeDing/actions/workflows/checks.yml/badge.svg)](https://github.com/HomeDing/HomeDing/actions/workflows/checks.yml)
 [![Build Examples for ESP32](https://github.com/HomeDing/HomeDing/actions/workflows/buildESP32.yml/badge.svg)](https://github.com/HomeDing/HomeDing/actions/workflows/buildESP32.yml)
 [![arduino-library-badge](https://www.ardu-badge.com/badge/HomeDing.svg?)](https://www.ardu-badge.com/HomeDing)
-[![GitLicense](https://gitlicense.com/badge/HomeDing/HomeDing)](https://gitlicense.com/license/HomeDing/HomeDing)
 
 The library includes a complete ecosystem to build a IoT device by combining IoT specific Elements that interact using events and actions.
 These elements and the data flow and activities between elements can be configured without compiling a new firmware.
@@ -42,6 +40,46 @@ It supports:
 
 More documentation can be found in the  [HomeDing documentation site](https://homeding.github.io)
 
+## Supported CPUs
+
+The library supports the following CPUs:
+
+* **ESP8266** with boards of 1MB and 4MB flash memory
+* **ESP32** Wrover SoC
+* **ESP32** Wroom SoC with PSRAM for Audio processing
+* **ESP32-C3**
+
+More will follow as the library has no strong dependencies on the processor used.
+
+
+## Provided examples
+
+The HomeDing library can be used for a broad variety of IoT devices partially showen by the provided examples.
+
+**standard** -- Full featured firmware containing all most-used stable elements like standard I/O, sensors,
+light drivers and displays. Runs well on a 4MB Flash with all supported processors
+
+**minimal** -- 
+The [minimal Example](https://github.com/HomeDing/HomeDing/tree/develop/examples/minimal)
+is implemented to support ESP8266 based devices with 1MB Flash
+like swtiches, sensors and lights.
+It contains a reduced set of elements and a small footprint Web-UI for small self-made and and off-the-shell devices.
+
+**DevDing** -- A extended standard setup that includes hints and tools for development of new elements.
+
+**webradio** --
+The [WebRadio example](https://github.com/HomeDing/HomeDing/tree/develop/examples/webradio)
+is implemented especially for the ESP32 Wroover with PSRAM to build a Web Radio
+by using an Aduio library. This Web Radio can be controlled through the embedded web interface.
+
+<!--
+DashButton
+micro
+Probe
+radio
+RFBridge
+WordClock
+-->
 
 ## BSD License
 

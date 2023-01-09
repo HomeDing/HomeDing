@@ -20,21 +20,9 @@
 
 #include "DisplayElement.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Private functions ===== */
-
-void DisplayElement::_reset() {
-  // reset
-  // if (_resetpin >= 0) {
-  //   pinMode(_resetpin, OUTPUT);
-  //   digitalWrite(_resetpin, LOW);  // turn low to reset OLED
-  //   delay(250);
-  //   digitalWrite(_resetpin, HIGH);  // while OLED is running, must set high
-  //   delay(250);
-  // }  // if
-}  // _reset()
-
 
 void DisplayElement::_newPage(int page) {
   TRACE("newPage %d", page);
@@ -43,7 +31,6 @@ void DisplayElement::_newPage(int page) {
     int oldPage = da->page;
 
     da->page = constrain(page, 0, da->maxpage);
-    // _reset();
     da->start();
 
     // redraw all display elements
@@ -82,7 +69,7 @@ bool DisplayElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
   DisplayAdapter *da = _board->display;
 
-  if (_stricmp(name, PROP_BRIGHTNESS) == 0) {
+  if (_stricmp(name, "brightness") == 0) {
     int b = _atoi(value);
     config.brightness = constrain(b, 0, 100);
     if (active && da) {
@@ -152,6 +139,11 @@ bool DisplayElement::set(const char *name, const char *value) {
     r = constrain(r, 0, 3);
     config.rotation = r * 90;
 
+  // some RGB displays require setting rgb color modes.. (st7735 variants)
+  // } else if (_stricmp(name, "colormode") == 0) {
+  //   int _colormode = ListUtils::indexOf("rgb,bgr", value);
+  //   TRACE("set %s=%d", name, _colormode);
+
   } else {
     ret = Element::set(name, value);
   }  // if
@@ -161,15 +153,6 @@ bool DisplayElement::set(const char *name, const char *value) {
 
 
 /**
- * @brief Activate the DisplayElement when a resetpin is given.
- */
-void DisplayElement::start() {
-  // TRACE("start()");
-  Element::start();
-  // _reset();
-}  // start()
-
-/**
  * @brief push the current value of all properties to the callback.
  */
 void DisplayElement::pushState(
@@ -177,7 +160,7 @@ void DisplayElement::pushState(
   Element::pushState(callback);
   DisplayAdapter *da = _board->display;
   if (da) {
-    callback(PROP_BRIGHTNESS, String(config.brightness).c_str());
+    callback("brightness", String(config.brightness).c_str());
     callback("page", String(_board->display->page).c_str());
   }
 }  // pushState()

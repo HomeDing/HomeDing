@@ -20,7 +20,7 @@
 
 #include <displays/DisplayLCDElement.h>
 
-#include <displays/DisplayAdapterLCD.h>
+#include <displays/DisplayLCDAdapter.h>
 
 /* ===== Static factory function ===== */
 
@@ -49,7 +49,7 @@ DisplayLCDElement::DisplayLCDElement() {
  */
 void DisplayLCDElement::start() {
   // TRACE("start()");
-  DisplayAdapter *d = new DisplayAdapterLCD();
+  DisplayAdapter *d = new DisplayLCDAdapter();
 
   if (d->setup(_board, &config)) {
     bool success = d->start();

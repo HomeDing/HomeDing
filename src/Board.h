@@ -27,6 +27,7 @@
  * * 03.09.2020 forEach iterator over all elements added.
  * * 09.03.2021 less sharing class members in favor to methods.
  * * 02.09.2021 advertise web server in mDNS.
+ * * 07.01.2023 ETAG support enabled permanently.
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -40,9 +41,6 @@
 #include <WiFi.h>
 #include <LittleFS.h>
 #define FILESYSTEM fs::LittleFSFS
-
-#define PIN_WIRE_SDA 21
-#define PIN_WIRE_SCL 22
 
 #elif defined(ESP8266)
 #include <FS.h>
@@ -158,6 +156,13 @@ class Board {
   };
 
 
+  /** Startup Hints */
+  enum BOARDSTARTUP : int {
+    NORMAL = 0,     // normal startup after power loss or reset.
+    DEEPSLEEP = 1,  // startup after Deep Sleep
+    NO_MDNS = 2,    // startup without MDNS
+  };
+
 public:
   // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
   const char *version = "0.90";
@@ -203,10 +208,17 @@ public:
    */
   void add(const char *id, Element *e);
 
+
   // ===== Board state functionality =====
 
   /** Return true when board is runing in captive mode. */
   bool isCaptiveMode();
+
+  /** Continue the Captive Mode when activity is detected. */
+  void keepCaptiveMode();
+
+
+  // ===== Start Elements functionality =====
 
   /**
    * activate all the Elements by using start().
@@ -347,11 +359,12 @@ public:
   /**
    * Common I2C settings.
    */
-  int I2cSda = PIN_WIRE_SDA;
-  int I2cScl = PIN_WIRE_SCL;
+  int I2cSda = -1;
+  int I2cScl = -1;
+  int I2cFrequency = 0;
 
   /** Service discovery enabled */
-  bool mDNS_sd = true;
+  bool _mDnsEnabled = true;
 
   /** WebServer instance */
   WebServer *server;
@@ -432,14 +445,16 @@ public:
   String room;
 
 private:
-  /** Reset Counter to detect multiple hardware resets in a row. */
-  int _resetCount;
-
   /** current state of the board. */
   enum BOARDSTATE boardState;
 
-  /** This flag is set to true when restarting after a deep sleep allowing shortening wait times. */
-  bool _isWakeupStart;
+  /** startup mode of the board. */
+  enum BOARDSTARTUP _startup;
+
+  // ===== Deep Slwwp control =====
+
+  /** duration of deep sleep in milliseconds*/
+  unsigned long _deepSleepTime;
 
   /** if > 0; system goes to deep sleep at this millis() */
   unsigned long _deepSleepStart;
@@ -447,8 +462,8 @@ private:
   /** if true, no deep sleep will be performed. This allows using the Web UI until next reboot. */
   bool _deepSleepBlock;
 
-  /** time for deep sleep */
-  unsigned long _deepSleepTime;
+  /** counts loops without messages beeing passed to gracefully shut down */
+  int _DeepSleepCount;
 
 
   /**
@@ -500,9 +515,6 @@ private:
 
   /** net connection mode */
   int netMode;
-
-  /** counts loops without messages beeing passed to gracefully shut down */
-  int _cntDeepSleep;
 
   /** list of active elements */
   Element *_elementList;

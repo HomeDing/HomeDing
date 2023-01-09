@@ -23,7 +23,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Run Arduino Compiler
       # see https://github.com/arduino/compile-sketches
@@ -56,5 +56,7 @@ jobs:
             - name: Adafruit SSD1306
             - name: PubSubClient
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
+            - source-url: "https://github.com/schreibfaul1/ESP32-audioI2S.git"
           sketch-paths: |
             - 'examples/standard'
+            - 'examples/webradio'

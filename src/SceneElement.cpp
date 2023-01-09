@@ -15,7 +15,7 @@
 
 #include "SceneElement.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 
 /* ===== Static factory function ===== */
@@ -26,7 +26,7 @@
  */
 Element *SceneElement::create() {
   return (new SceneElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -34,8 +34,8 @@ Element *SceneElement::create() {
 SceneElement::SceneElement() {
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
-  _count = -1;
-  _delay = 0;
+  _delay = -1;  // manual stepping
+  _step = -1;   // no current step
 }
 
 
@@ -44,21 +44,33 @@ SceneElement::SceneElement() {
  */
 bool SceneElement::set(const char *name, const char *value) {
   bool ret = true;
+  int size = _steps.size();
 
   if (_stricmp(name, "start") == 0) {
-    // start the scene
-    _count = 0;
-    _nextStep = 0; // asap.
+    // start the scene at step[0]
+    _step = 0;
+    _nextStep = 1;  // asap.
+
+  } else if (_stricmp(name, "next") == 0) {
+    // start next step in in scene
+    TRACE("_next cnt=%d, size=%d", _step, size);
+    if (_step < size) {
+      _step++;
+      _nextStep = 1;  // asap.
+    }
+
+  } else if (_stricmp(name, "prev") == 0) {
+    // start previous step in in scene
+    TRACE("_next cnt=%d, size=%d", _step, size);
+    if (_step > 0) {
+      _step--;
+      _nextStep = 1;  // asap.
+    }
 
   } else if (_stristartswith(name, "steps[")) {
-    size_t index = _atoi(name + 6); // number starts after "steps["
-
-    if (index >= _steps.size()) {
-      // set default values for new index
-      _steps.resize(index + 1);
-      _steps[index] = value;
-      TRACE("new(%d):<%s>", index, value);
-    } // if
+    // _steps.push_back(String(value));
+    _steps.push_back(value);
+    TRACE("_steps.size=%d", _steps.size());
 
   } else if (_stricmp(name, "delay") == 0) {
     // delay between executing the steps
@@ -66,36 +78,39 @@ bool SceneElement::set(const char *name, const char *value) {
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Give some processing time to the Element to check for next actions.
  */
 void SceneElement::loop() {
-  if (_count >= 0) {
-    unsigned long now = millis(); // current (relative) time in msecs.
+  if (_nextStep > 0) {
+    // some outgoing actions should be sent
+    unsigned long now = millis();  // current (relative) time in msecs.
+    TRACE("loop( %ld, %ld)", now, _nextStep);
 
     if ((now >= _nextStep) && (_board->queueIsEmpty())) {
-      // send next scene action
-      int size = _steps.size();
-      if (_count < size) {
-        TRACE("send(%d):<%s>", _count, _steps[_count].c_str());
-        _board->dispatch(_steps[_count]);
-        _count++;
-        _nextStep = now + _delay;
-      }
+      TRACE("send(%d):<%s>", _step, _steps[_step].c_str());
+      _board->dispatch(_steps[_step]);
+      _nextStep = 0;
 
-      if (_count == size) {
-        // all done.
-        _count = -1;
+      if (_delay >= 0) {
+        // send next action after some time
+        _step++;
+        if (_step < (int)(_steps.size())) {
+          _nextStep = now + _delay;
+        } else {
+          // end is reached -> deactivate
+          _step = -1;
+        }
       }
-    } // if()
-  } // if()
-} // loop()
+    }
+  }  // if()
+}  // loop()
 
 
 // End

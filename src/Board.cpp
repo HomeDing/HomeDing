@@ -38,7 +38,7 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
 #define NETTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
@@ -46,11 +46,14 @@ extern "C" {
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
-#define NetMode_PASS 1
-#define NetMode_PSK 2
-#define NetMode_AUTO 3
+// The captive Mode will stay for 5 min. and then restart.
+#define CAPTIVE_TIME (5 * 60 * 1000)
 
-DNSServer dnsServer;
+#define NetMode_AUTO 3  // first try
+#define NetMode_PSK 2   // second try
+#define NetMode_PASS 1  // last try
+
+DNSServer *dnsServer;
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
 
@@ -61,6 +64,27 @@ extern const char *passPhrase;
 
 static const char respond404[] PROGMEM =
   "<html><head><title>File not found</title></head><body>File not found</body></html>";
+
+
+#if defined(ESP8266)
+
+/** Reset Counter to detect multiple hardware resets in a row. */
+int _resetCount;
+bool _isWakeupStart = false;
+
+#elif defined(ESP32)
+
+// RTC Memory variables for counting boots in-a-row
+// and detect restart after deep sleep.
+RTC_DATA_ATTR int _resetCount = 0;
+RTC_DATA_ATTR bool _isWakeupStart = false;
+
+
+// https://community.platformio.org/t/esp32-firebeetle-fast-boot-after-deep-sleep/13206
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-bootloader-skip-validate-in-deep-sleep
+// CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
+
+#endif
 
 /**
  * @brief Initialize a blank board.
@@ -89,23 +113,32 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   cacheHeader = "no-cache";
 
   _newState(BOARDSTATE::NONE);
-  _deepSleepStart = 0;      // no deep sleep to be started
-  _deepSleepBlock = false;  // no deep sleep is blocked
-  _deepSleepTime = 60;      // one minute
-
-  _cntDeepSleep = 0;
+  _deepSleepStart = 0;         // no deep sleep to be started
+  _deepSleepBlock = false;     // no deep sleep is blocked
+  _deepSleepTime = 60 * 1000;  // one minute
+  _DeepSleepCount = 0;
 
 #if defined(ESP8266)
   rst_info *ri = ESP.getResetInfoPtr();
-  _isWakeupStart = (ri->reason == REASON_DEEP_SLEEP_AWAKE);
-  if (_isWakeupStart) {
-    LOGGER_INFO("Reset from Deep Sleep mode.");
-  }
-  // enableWiFiAtBootTime();
+  _startup = (ri->reason == REASON_DEEP_SLEEP_AWAKE) ? BOARDSTARTUP::DEEPSLEEP : BOARDSTARTUP::NORMAL;
 
 #elif defined(ESP32)
-  _isWakeupStart = false;  // TODO:ESP32 ???
+  // RTC_DATA_ATTR int bootCount = 0;
+
+  // https://community.platformio.org/t/esp32-firebeetle-fast-boot-after-deep-sleep/13206
+  // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-bootloader-skip-validate-in-deep-sleep
+  // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
+
+  esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+  LOGGER_INFO("ESP32: deep sleep cause: %d", cause);
+
+
+  _startup = (_isWakeupStart) ? BOARDSTARTUP::DEEPSLEEP : BOARDSTARTUP::NORMAL;
+  _isWakeupStart = false;
 #endif
+  if (_startup == BOARDSTARTUP::DEEPSLEEP) {
+    LOGGER_INFO("Reset from Deep Sleep mode.");
+  }
 
   hd_yield();
 }  // init()
@@ -143,6 +176,16 @@ void Board::add(const char *id, Element *e) {
 bool Board::isCaptiveMode() {
   return ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE));
 }  // isCaptiveMode()
+
+
+/**
+ * @brief Continue the Captive Mode when activity is detected.
+ */
+void Board::keepCaptiveMode() {
+  if ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE)) {
+    _captiveEnd = nowMillis + CAPTIVE_TIME;
+  };
+}  // keepCaptiveMode()
 
 
 /**
@@ -271,7 +314,7 @@ void Board::loop() {
     // Most common state first.
 
 #if defined(ESP8266)
-    if (!_isWakeupStart) {
+    if (_startup == BOARDSTARTUP::NORMAL) {
       MDNS.update();
     }
 #endif
@@ -296,7 +339,7 @@ void Board::loop() {
 
     // dispatch next action from _actionList if any
     if (_actionList.length() > 0) {
-      _cntDeepSleep = 0;
+      _DeepSleepCount = 0;
       String _lastAction;
 
       // extract first action
@@ -327,14 +370,18 @@ void Board::loop() {
     }  // if
 
     if ((!_deepSleepBlock) && (_deepSleepStart > 0)) {
-      _cntDeepSleep++;
+      _DeepSleepCount++;
 
       // deep sleep specified time.
-      if ((nowMillis > _deepSleepStart) && (_cntDeepSleep > _addedElements + 4)) {
+      if ((nowMillis > _deepSleepStart) && (_DeepSleepCount > _addedElements + 4)) {
         // all elements now had the chance to create and dispatch an event.
-        LOGGER_INFO("sleep %d...", _deepSleepTime);
+        LOGGER_INFO("sleep %ld msecs.", _deepSleepTime);
         Serial.flush();
-        ESP.deepSleep(_deepSleepTime * 1000 * 1000);
+#if defined(ESP32)
+        // remember there was deep sleep mode before reset.
+        _isWakeupStart = true;
+#endif
+        ESP.deepSleep(_deepSleepTime * 1000);
         _newState(BOARDSTATE::SLEEP);
       }
     }  // if
@@ -368,18 +415,22 @@ void Board::loop() {
       state->load();
     }
 
-    _resetCount = RTCVariables::getResetCounter();
-
     if (sysButton >= 0) {
       pinMode(sysButton, INPUT_PULLUP);
     }
 
+#if defined(ESP8266)
+    _resetCount = RTCVariables::getResetCounter();
+#endif
     if (_resetCount > 0) {
       // enforce un-safemode on double reset
       LOGGER_INFO("Reset #%d", _resetCount);
       isSafeMode = false;
     }  // if
-    _resetCount = RTCVariables::setResetCounter(_resetCount + 1);
+    _resetCount++;
+#if defined(ESP8266)
+    RTCVariables::setResetCounter(_resetCount);
+#endif
 
     // search any time requesting elements
     Element *l = _elementList;
@@ -390,8 +441,14 @@ void Board::loop() {
       l = l->next;
     }  // while
 
-    // setup system wide stuff
-    Wire.begin(I2cSda, I2cScl);
+    // setup I2C system wide when configured.
+    if ((I2cSda >= 0) && (I2cScl >= 0)) {
+      LOGGER_TRACE("I2C pins sda=%d scl=%d", I2cSda, I2cScl);
+      Wire.begin(I2cSda, I2cScl);
+      if (I2cFrequency > 0) {
+        Wire.setClock(I2cFrequency);
+      }
+    }
 
     start(Element_StartupMode::System);
     displayInfo(HOMEDING_GREETING);
@@ -408,8 +465,11 @@ void Board::loop() {
 
     // detect no configured network situation
     if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
-      LOGGER_JUSTINFO("No Net Config");
+      LOGGER_JUSTINFO("no config");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
+
+      // } else if (_resetCount == 1) {
+      //   // no safe mode
 
     } else if (_resetCount == 2) {
       LOGGER_JUSTINFO("Reset*2");
@@ -441,17 +501,17 @@ void Board::loop() {
     }
 #elif defined(ESP32)
     WiFi.mode(WIFI_STA);
-    Serial.printf("Default hostname: %s\n", WiFi.getHostname());
+    // Serial.printf("Default hostname: %s\n", WiFi.getHostname());
     if (!deviceName.isEmpty()) {
       WiFi.setHostname(deviceName.c_str());  // for ESP32
     }
-    Serial.printf("New hostname: %s\n", WiFi.getHostname());
+    // Serial.printf("New hostname: %s\n", WiFi.getHostname());
 #endif
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
 
     if (netMode == NetMode_AUTO) {
-      // 1. priority:
+      // 1. try:
       // give autoconnect the chance to do it.
       // works only after a successfull network connection in the past.
       WiFi.setAutoConnect(true);
@@ -459,14 +519,14 @@ void Board::loop() {
       NETTRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
 
     } else if (netMode == NetMode_PSK) {
-      // 2. priority:
+      // 2. try:
       // connect with the saved network and password
       int off = netpass.indexOf(',');
       WiFi.begin(netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
       NETTRACE("NetMode_PSK <%s>,<%s>", netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
 
     } else if (netMode == NetMode_PASS) {
-      // 3. priority:
+      // 3. try:
       // use fixed network and passPhrase known at compile time.
       NETTRACE("NetMode_PASS: %s", ssid);
 
@@ -527,7 +587,7 @@ void Board::loop() {
     }      // if
 
     if (boardState == BOARDSTATE::WAIT) {
-      if (_isWakeupStart || (nowMillis >= configPhaseEnd)) {
+      if ((_startup == BOARDSTARTUP::DEEPSLEEP) || (nowMillis >= configPhaseEnd)) {
         _newState(BOARDSTATE::GREET);
       }
     }  // if
@@ -540,7 +600,7 @@ void Board::loop() {
     const char *name = WiFi.getHostname();
 
     if (deviceName.isEmpty()) {
-      TRACE("no device name configured");
+      TRACE("no devicename configured");
       TRACE("hostname=%s", name);
       deviceName = name;
     }  // if
@@ -563,7 +623,6 @@ void Board::loop() {
     // release sysLED
     if (sysLED >= 0) {
       digitalWrite(sysLED, HIGH);
-      pinMode(sysLED, INPUT);
     }
 
     server->begin();
@@ -573,7 +632,7 @@ void Board::loop() {
     filesVersion = random(8000);  // will incremented on every file upload by file server
 
     if (cacheHeader == "etag") {
-#if defined(HOMEDING_SUPPORT_ETAG)
+#if defined(ESP8266)
       // enable eTags in results for static files
       // by setting "cache": "etag" inc env.json on the device element
 
@@ -602,7 +661,10 @@ void Board::loop() {
 
     // start mDNS service discovery for "_homeding._tcp"
     // but not when using deep sleep mode
-    if (!_isWakeupStart && (mDNS_sd)) {
+    if (_startup == BOARDSTARTUP::DEEPSLEEP) {
+      _mDnsEnabled = false;
+    }
+    if (_mDnsEnabled) {
       TRACE("startup mdns... %s", deviceName.c_str());
 
 #if defined(ESP8266)
@@ -660,36 +722,39 @@ void Board::loop() {
     hd_yield();
     LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
-    dnsServer.setTTL(300);
-    dnsServer.setErrorReplyCode(DNSReplyCode::ServerFailure);
-    dnsServer.start(DNS_PORT, "*", apIP);
+    dnsServer = new DNSServer();
+    dnsServer->setTTL(300);
+    dnsServer->setErrorReplyCode(DNSReplyCode::ServerFailure);
+    dnsServer->start(DNS_PORT, "*", apIP);
 
     server->begin();
 
     _newState(BOARDSTATE::RUNCAPTIVE);
-    _captiveEnd = nowMillis + (5 * 60 * 1000);
+    keepCaptiveMode();
 
   } else if (boardState == BOARDSTATE::RUNCAPTIVE) {
     // server.handleClient(); needs to be called in main loop.
-    dnsServer.processNextRequest();
+    dnsServer->processNextRequest();
 
     // make sysLED blink 3 sec with a short flash.
     if (sysLED >= 0) {
       digitalWrite(sysLED, ((nowMillis % 3000) > 120) ? HIGH : LOW);
     }  // if
 
-    if (nowMillis > _captiveEnd)
+    if (nowMillis > _captiveEnd) {
+      LOGGER_INFO("no config");
       reboot(false);
+    }
   }  // if
 }  // loop()
 
 
 // ===== set board behavior
 
-// start deep sleep mode when idle.
-void Board::setSleepTime(unsigned long secs) {
-  TRACE("setSleepTime(%d)", secs);
-  _deepSleepTime = secs;
+// start deep sleep mode for given duration when idle.
+void Board::setSleepTime(unsigned long milliSeconds) {
+  TRACE("setSleepTime(%d)", milliSeconds);
+  _deepSleepTime = milliSeconds;
 }  // setSleepTime()
 
 
@@ -697,7 +762,7 @@ void Board::setSleepTime(unsigned long secs) {
 void Board::startSleep() {
   TRACE("startSleep");
   _deepSleepStart = millis();
-  if (!_isWakeupStart) {
+  if (_startup == BOARDSTARTUP::NORMAL) {
     // give a minute time to block deep sleep mode
     _deepSleepStart += 60 * 1000;
   }
@@ -779,13 +844,14 @@ void Board::dispatchAction(String action) {
         value = "";
       }
 
+      // also show action in log when target has trace loglevel
+      Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action(%s)", action.c_str());
+
       bool ret = target->set(name.c_str(), value.c_str());
 
-      // also show action in log when target has trace loglevel
-      Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action (%s)", action.c_str());
 
       if (!ret)
-        LOGGER_ERR("Event '%s' was not handled", action.c_str());
+        LOGGER_ERR("Action '%s' was not accepted.", action.c_str());
     }
   }
   // TRACE_END;
@@ -838,7 +904,7 @@ void Board::dispatchItem(String &action, String &values, int n) {
  */
 void Board::deferSleepMode() {
   // reset the counter to ensure looping all active elements
-  _cntDeepSleep = 0;
+  _DeepSleepCount = 0;
 }  // deferSleepMode()
 
 

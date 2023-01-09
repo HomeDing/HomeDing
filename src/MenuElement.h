@@ -16,8 +16,7 @@
  * * 06.12.2020 some rework and doku.
  */
 
-#ifndef MENUELEMENT_H
-#define MENUELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 #include <ValueElement.h>
@@ -93,6 +92,4 @@ ValueElement *valueList[MAXMENUVALUES];
 // Register the MenuElement onto the ElementRegistry.
 bool MenuElement::registered =
     ElementRegistry::registerElement("menu", MenuElement::create);
-#endif
-
 #endif

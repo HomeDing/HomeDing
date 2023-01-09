@@ -1,6 +1,6 @@
 /**
  * @file DisplayST7789Element.h
- * @brief Display Element for HD44780 compatible LCD displays.
+ * @brief Display Element for ST7789 compatible TFT displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,8 +15,7 @@
  * * 18.09.2018 created by Matthias Hertel
  */
 
-#ifndef DISPLAYST7789ELEMENT_H
-#define DISPLAYST7789ELEMENT_H
+#pragma once
 
 #include "DisplayElement.h"
 
@@ -24,7 +23,7 @@
  * @brief DisplayST7789Element implements creating an Display Adapter for a LCD
  * attached to the I2C bus.
  * @details
- * The DisplayAdapterLCD Element includes the real functionality.
+ * The DisplayAdapter Element includes the real functionality.
  */
 
 class DisplayST7789Element : public DisplayElement {
@@ -50,7 +49,4 @@ public:
 // Register the DisplaySSD1306Element onto the ElementRegistry.
 bool DisplayST7789Element::registered =
   ElementRegistry::registerElement("DisplayST7789", DisplayST7789Element::create);
-#endif
-
-
 #endif

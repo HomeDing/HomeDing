@@ -88,12 +88,12 @@ protected:
   /**
    * @brief The actual / new value of the output value.
    */
-  String value;
+  bool enabled = true;
 
   /**
-   * @brief The last / old value of the output value.
+   * @brief The actual / new value of the output value.
    */
-  String oldValue;
+  String value;
 
   /** @brief Brightness level in percent. 
    * The Light element uses this property as a factor for all PWM output.
@@ -101,9 +101,9 @@ protected:
   int _brightness = 50; // percent
 
   /**
-   * @brief The actual / new value of the output value.
+   * @brief allow direct PWN output for driving LEDs.
    */
-  bool enabled = true;
+  bool pwmMode = false;
 
   /** data output pins (W,R,G,B) or pins[0] only. */
   int _pins[MAXPINS] = {0, 0, 0, 0}; //  = {D8, D6, D7, 0};
@@ -121,6 +121,11 @@ protected:
 private:
   /** Number of pixels in the stripe, set by the number of GPIO pins in then pin property. */
   int _count = 0;
+
+  /**
+   * @brief The actual output color as binary value.
+   */
+  uint32_t _outColor;
 };
 
 /* ===== Register the Element ===== */

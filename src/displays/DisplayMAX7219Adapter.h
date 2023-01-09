@@ -1,8 +1,11 @@
 /**
- * @file DisplayAdapterMAX7219.h
+ * @file DisplayMAX7219Adapter.h
  *
  * @brief DisplayAdapter implementation for the HomeDing library
- * adapting LCD displays using the HD44780 chip.
+ * adapting LED Matrix displays using the MAX7219 chip.
+ * 
+ * It uses the GFX GFXcanvas1 to create a in-memory copy of the display
+ * that will be sent to the MAX7219 chips at once when calling flush().
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -12,8 +15,7 @@
  * * 07.12.2020 no write text beyond textline end.
  */
 
-#ifndef DISPLAYADAPTERMAX7219_H
-#define DISPLAYADAPTERMAX7219_H
+#pragma once
 
 #include <displays/DisplayAdapterGFX.h>
 
@@ -28,14 +30,11 @@
 // use TRACE for compiling with detailed TRACE output.
 #define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
-class DisplayAdapterMAX7219 : public DisplayAdapterGFX {
+class DisplayMAX7219Adapter : public DisplayAdapterGFX {
 public:
-  ~DisplayAdapterMAX7219() = default;
+  ~DisplayMAX7219Adapter() = default;
 
   bool start() override {
-    TRACE("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
-    TRACE("   spi: cs:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiMOSI, conf->spiCLK);
-
     _csPin = conf->spiCS;
 
     // adjust false height and width (must be *8)
@@ -198,5 +197,3 @@ private:
     digitalWrite(_csPin, HIGH);
   }
 };
-
-#endif  // DISPLAYADAPTERMAX7219_H

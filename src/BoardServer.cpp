@@ -129,12 +129,19 @@ String BoardHandler::handleScan() {
   TRACE("handleScan");
   String result;
 
+  _board->keepCaptiveMode();
+  
   int8_t scanState = WiFi.scanComplete();
+  TRACE("handleScan state=%d"m scanState);
+
   if (scanState == WIFI_SCAN_FAILED) {
     // restart an async network scan
     WiFi.scanNetworks(true);
 
-  } else if (scanState != WIFI_SCAN_RUNNING) {
+  } else if (scanState == WIFI_SCAN_RUNNING) {
+    // nothing but waiting.
+
+  } else if (scanState > 0) {
     // return scan result
     MicroJsonComposer jc;
     jc.openArray();

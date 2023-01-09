@@ -2,8 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.x] - unreleased
+
+* updated Web UI
+
+* [State Elements](https://homeding.github.io/elements/state.htm) documentation added.
+
+
 ### Changes / Enhancements
 
+* ESP32-C3 Processor Support
+
+  The ESP32-C3 is positioned as a cost-effective RISC-V MCU
+  with Wi-Fi and Bluetooth 5 (LE) connectivity for secure IoT applications.
+  It is often seen as a replacement option for the ESP8266.
+
+  The ESP32-C3 offers less IO pins that the ESP32 or ESP32-S3 chips and comes in a smaller 32 pin QFN32 package (5×5 mm).
+
+  See [ESP32-C3 Boards](https://homeding.github.io/boards/esp32/esp32c3.htm) documentation added.
+
+* [WebRadio example](https://github.com/HomeDing/HomeDing/tree/develop/examples/webradio)
+  
+  This example implements a audio streaming device for ESP32 based systems.
+* The [Display ST7789 Element](https://homeding.github.io/displays/st7789.htm)
+  supports color LCD displays using the ST7789 driver chip.
+
+* The [Display ST7735 Element](https://homeding.github.io/displays/ST7735.htm)
+  supports color LCD displays using the ST7735 driver chip.
+
+* The Color and Light Elements have been refactored.
+  Advanced control over light elements
+  should be done by the ColorElement.
+
+* Completed ESP32 Support
+
+  The ESP32 processor is now fully supported.
+  Missing features have been implemented.
+  
+  Please note that caused by different processor functionality
+  not all features and elements are supported for all processors.
 
 ## [0.9.0] - 2022-08-22
 
@@ -13,15 +50,16 @@ All notable changes to this project will be documented in this file.
 
 * The /api endpoints are now standard all $board services are deprecated and will be removed in version 1.0
 
-* **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** --
-    supports sending values to MQTT servers based on actions.
+* **[MQTT Element](https://homeding.github.io/elements/mqtt.htm)** --  
+  supports sending values to MQTT servers based on actions.
 
-* **DallasElement** is an enhanced version of the former Ds18B20Element
-now supporting different sensors using the OneWire protocol.
+* **[DallasElement](https://homeding.github.io/elements/dallas.htm)** --  
+  is an enhanced version of the former Ds18B20Element  
+  now supporting different sensors using the OneWire protocol.
 
-* **[BH1750 Element](https://homeding.github.io/elements/bh1750.htm)** --
-is supporting the BH1750 Light sensor.
-See now supporting different sensors using the OneWire protocol.
+* **[BH1750 Element](https://homeding.github.io/elements/bh1750.htm)** --  
+  is supporting the BH1750 Light sensor.  
+  See now supporting different sensors using the OneWire protocol.
 
 * **[BH1750 Element](https://homeding.github.io/elements/am2320.htm)** --
 The AM2320Element allows retrieving temperature and humidity 
@@ -148,13 +186,16 @@ and is still more beta than ESP8266 board support.
 
 * [BME680 Element](https://homeding.github.io/elements/bme680.htm) Bosch library updated to version 1.6.1480
 
-* [State implementation for Elements]()
+* [State Elements](https://homeding.github.io/elements/state.htm)
 
-  new, to be documented.
+  The [State Elements](https://homeding.github.io/elements/state.htm) allow saving current element values that will be restored after a reset or deep sleep without power loss.
 
 * [Color Element]
 
-  new, to be documented.
+  The [Color Element](https://homeding.github.io/elements/color.htm) allows
+  controlling a value for a light emitting element using the
+  color values in the xrrggbb or xwwrrggbb format and brightness 0..100.
+  A special Web UI is available.
 
 * [Timer Element](https://homeding.github.io/elements/timer.htm)
 

@@ -1,6 +1,6 @@
 /**
  * @file DisplayMAX7219Element.h
- * @brief Display Element for HD44780 compatible LCD displays.
+ * @brief Display Element for MAX7219 compatible LED matrix displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -15,16 +15,15 @@
  * * 23.03.2022 created by Matthias Hertel
  */
 
-#ifndef DISPLAYMAX7219ELEMENT_H
-#define DISPLAYMAX7219ELEMENT_H
+#pragma once
 
 #include "DisplayElement.h"
 
 /**
- * @brief DisplayMAX7219Element implements creating an Display Adapter for a LCD
- * attached to the I2C bus.
+ * @brief DisplayMAX7219Element implements creating an Display Adapter for
+ * LED Matrix based on MAX7219 elements.
  * @details
- * The DisplayAdapterLCD Element includes the real functionality.
+ * The DisplayLCDAdapter Element includes the real functionality.
  */
 
 class DisplayMAX7219Element : public DisplayElement {
@@ -50,7 +49,4 @@ public:
 // Register the DisplaySSD1306Element onto the ElementRegistry.
 bool DisplayMAX7219Element::registered =
   ElementRegistry::registerElement("DisplayMAX7219", DisplayMAX7219Element::create);
-#endif
-
-
 #endif

@@ -14,7 +14,6 @@ extern const char *PROP_VALUE;
 extern const char *PROP_PIN;
 extern const char *PROP_ADDRESS;
 extern const char *PROP_INVERSE;
-extern const char *PROP_BRIGHTNESS;
 
 extern const char *ACTION_ONVALUE;
 extern const char *ACTION_ONTEMPERATURE;
@@ -243,6 +242,10 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_DISPLAYST7789
 #include <displays/DisplayST7789Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYST7735
+#include <displays/DisplayST7735Element.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayText

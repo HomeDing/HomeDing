@@ -19,6 +19,8 @@
 
 #include <DisplayTextElement.h>
 
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+
 /**
  * @brief static factory function to create a new DisplayTextElement.
  * @return DisplayTextElement* as Element* created element
@@ -37,7 +39,7 @@ bool DisplayTextElement::set(const char *name, const char *value) {
   if (DisplayOutputElement::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, PROP_VALUE) == 0) {
+  } else if (_stricmp(name, "value") == 0) {
     _value = value;
     _neededraw = true;
 
@@ -50,9 +52,6 @@ bool DisplayTextElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "postfix") == 0) {
     _postfix = value;
-
-  } else if (_stricmp(name, "fontsize") == 0) {
-    _fontsize = _atoi(value);
 
   } else {
     ret = false;
@@ -72,8 +71,8 @@ void DisplayTextElement::draw() {
     String msg(_prefix);
     msg.concat(_value);
     msg.concat(_postfix);
-    _w = _display->drawText(_x, _y, _fontsize, msg);
-    _h = _display->getLineHeight();
+    _w = _display->drawText(_x, _y, _h, msg); // remember width of drawn text
+    _h = _display->getLineHeight(); // adjust height
   }
 }  // draw
 

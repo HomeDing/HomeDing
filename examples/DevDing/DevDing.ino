@@ -82,6 +82,7 @@
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
 #define HOMEDING_INCLUDE_DISPLAYST7789
+#define HOMEDING_INCLUDE_DISPLAYST7735
 #define HOMEDING_INCLUDE_DISPLAYMAX7219
 
 // Enable simple display Elements
@@ -101,7 +102,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <FS.h>        // File System for Web Server Files
+#include <FS.h>
 #include <LittleFS.h>  // File System for Web Server Files
 
 #include <BuiltinHandler.h>  // Serve Built-in files
@@ -163,11 +164,11 @@ void setup(void) {
     Serial.println("WiFi Station DHCPTimeout.");
   });
 
-  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](const WiFiEventSoftAPModeStationConnected& event) {
+  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](UNUSED const WiFiEventSoftAPModeStationConnected& event) {
     Serial.println("WiFi AP Station connected.");
   });
 
-  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](const WiFiEventSoftAPModeProbeRequestReceived& event) {
+  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](UNUSED const WiFiEventSoftAPModeProbeRequestReceived& event) {
     Serial.println("WiFi AP Station probe.");
   });
 
@@ -203,7 +204,6 @@ void setup(void) {
   // homeding.add("my/2", new MyElement02());
 
   LOGGER_INFO("setup done.");
-
 }  // setup
 
 

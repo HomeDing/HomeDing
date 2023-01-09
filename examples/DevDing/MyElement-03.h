@@ -17,8 +17,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#if defined(ESP32)
-// ESP32 DEV boards do not have a builtin LED. Use Port 25.
+#if defined(ESP32) && ! defined(LED_BUILTIN)
+// ESP32 DEV boards may do not have a builtin LED. Use Port 25.
 #define LED_BUILTIN 25
 #endif
 

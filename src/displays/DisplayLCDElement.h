@@ -15,8 +15,7 @@
  * * 18.09.2018 created by Matthias Hertel
  */
 
-#ifndef DisplayLCDElement_H
-#define DisplayLCDElement_H
+#pragma once
 
 #include "DisplayElement.h"
 
@@ -24,7 +23,7 @@
  * @brief DisplayLCDElement implements creating an Display Adapter for a LCD
  * attached to the I2C bus.
  * @details
- * The DisplayAdapterLCD Element includes the real functionality.
+ * The DisplayLCDAdapter Element includes the real functionality.
  */
 
 class DisplayLCDElement : public DisplayElement {
@@ -55,7 +54,4 @@ public:
 // Register the DisplaySSD1306Element onto the ElementRegistry.
 bool DisplayLCDElement::registered =
   ElementRegistry::registerElement("displayLCD", DisplayLCDElement::create);
-#endif
-
-
 #endif

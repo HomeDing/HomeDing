@@ -38,10 +38,10 @@ extern "C" {
 #include <DNSServer.h>
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define NETTRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -85,6 +85,11 @@ RTC_DATA_ATTR bool _isWakeupStart = false;
 // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
 
 #endif
+
+// add you wifi network name and PassPhrase or use WiFi Manager
+const __attribute__((weak)) char *ssid = "";
+const __attribute__((weak)) char *passPhrase = "";
+
 
 /**
  * @brief Initialize a blank board.
@@ -632,25 +637,25 @@ void Board::loop() {
     filesVersion = random(8000);  // will incremented on every file upload by file server
 
     if (cacheHeader == "etag") {
-#if defined(ESP8266)
+      // #if defined(ESP8266)
       // enable eTags in results for static files
       // by setting "cache": "etag" inc env.json on the device element
 
       // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
-      server->enableETag(true, [this](FILESYSTEM &, const String &path) -> String {
+      server->enableETag(true, [this](FS &fs, const String &path) -> String {
         String eTag;
         if (!path.endsWith(".txt")) {
           // txt files contain logs that must not be cached.
           // eTag = esp8266webserver::calcETag(fs, path);
-          // File f = fs.open(path, "r");
-          // eTag = f.getLastWrite()
-          // f.close();
+          File f = fs.open(path, "r");
+          eTag = String(f.getLastWrite(), 16);  // use file modification timestamp to create ETag
+          f.close();
           // use current counter
-          eTag = String(filesVersion, 16);  // f.getLastWrite()
+          // eTag = String(filesVersion, 16);  // f.getLastWrite()
         }
         return (eTag);
       });
-#endif
+      // #endif
       cacheHeader = "";  // do not pass this cache header
     }
 

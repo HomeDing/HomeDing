@@ -44,12 +44,6 @@ public:
   };  // init()
 
 
-  // virtual void setBrightness(uint8_t bright) override {
-  //   display->drawBitmap((bright * 128) / 100);
-  // };
-
-  // no flush() required.
-
 private:
   /**
    * @brief Reference to the used library object

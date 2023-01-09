@@ -91,12 +91,7 @@
 #include "GFX_ESP32Panel.h"
 #include "DisplayPanelElement.h"
 
-
 // ===== WLAN credentials =====
-
-// #include "secrets.h"
-const char *ssid = "KHMH";
-const char *passPhrase = "hk-2012FD2926";
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);

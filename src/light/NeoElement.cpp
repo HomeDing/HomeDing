@@ -19,7 +19,7 @@
 
 #include <light/NeoElement.h>
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /** set a single color for all neopixels.
  * execute directly, don't wait for loop().

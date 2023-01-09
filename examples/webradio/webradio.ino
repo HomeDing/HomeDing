@@ -37,8 +37,9 @@
 
 // Enable the following element groups of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
+#define HOMEDING_INCLUDE_RTCSTATE
+
 #define HOMEDING_INCLUDE_CORE
-#define HOMEDING_INCLUDE_FULL_SYSTEM
 
 // Enable some INPUT Elements
 #define HOMEDING_INCLUDE_ROTARY
@@ -69,8 +70,6 @@
 
 
 // ===== WLAN credentials =====
-
-#include "secrets.h"
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);

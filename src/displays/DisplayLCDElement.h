@@ -51,7 +51,7 @@ public:
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplaySSD1306Element onto the ElementRegistry.
+// Register the DisplayLCDElement onto the ElementRegistry.
 bool DisplayLCDElement::registered =
   ElementRegistry::registerElement("displayLCD", DisplayLCDElement::create);
 #endif

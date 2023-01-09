@@ -47,19 +47,10 @@ public:
       display->init(conf->width, conf->height, SPI_MODE0);
       display->setSPISpeed(40000000);
       display->invertDisplay(conf->invert);
-      backColor565 = ST77XX_BLACK;
-      drawColor565 = ST77XX_WHITE;
       DisplayAdapterGFX::start();
     }  // if
     return (true);
   };  // init()
-
-
-  // virtual void setBrightness(uint8_t bright) override {
-  //   display->drawBitmap((bright * 128) / 100);
-  // };
-
-  // no flush() required.
 
 private:
   /**

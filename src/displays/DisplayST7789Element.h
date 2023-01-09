@@ -46,7 +46,7 @@ public:
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplaySSD1306Element onto the ElementRegistry.
+// Register the DisplayST7789Element onto the ElementRegistry.
 bool DisplayST7789Element::registered =
   ElementRegistry::registerElement("DisplayST7789", DisplayST7789Element::create);
 #endif

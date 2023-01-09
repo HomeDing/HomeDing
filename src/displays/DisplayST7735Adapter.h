@@ -47,8 +47,6 @@ public:
       display->initR(INITR_MINI160x80);
       display->setSPISpeed(40000000);
       display->invertDisplay(conf->invert);
-      backColor565 = ST77XX_BLACK;
-      drawColor565 = ST77XX_WHITE;
       DisplayAdapterGFX::start();
     }  // if
     return (true);

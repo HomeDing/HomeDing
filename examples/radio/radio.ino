@@ -8,7 +8,7 @@
  *
  * Compile with
  * * Board: NodeMCU 1.0
- * * Flash Size: 4M (FS:2MB, OTA:~1019KB)
+ * * Flash Size: 4M (FS:2MB, OTA:~1019KB) 
  * * Debug Port: "Serial"
  * * Debug Level: "None"
  * * MMU: 32+32 balanced

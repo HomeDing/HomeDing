@@ -498,20 +498,16 @@ void Board::loop() {
   } else if (boardState == BOARDSTATE::CONNECT) {
     TRACE("connect...");
 
-#if defined(ESP8266)
-    // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  // required to set hostname properly
     WiFi.mode(WIFI_STA);
-    if (!deviceName.isEmpty()) {
+    if (deviceName.isEmpty()) {
+      TRACE("no devicename configured");
+    } else {
       WiFi.setHostname(deviceName.c_str());
     }
-#elif defined(ESP32)
-    WiFi.mode(WIFI_STA);
-    // Serial.printf("Default hostname: %s\n", WiFi.getHostname());
-    if (!deviceName.isEmpty()) {
-      WiFi.setHostname(deviceName.c_str());  // for ESP32
-    }
-    // Serial.printf("New hostname: %s\n", WiFi.getHostname());
-#endif
+    // get effective Hostname
+    deviceName = WiFi.getHostname();
+    TRACE("deviceName=%s", deviceName.c_str());
+
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
 
@@ -600,15 +596,10 @@ void Board::loop() {
 
 
   } else if (boardState == BOARDSTATE::GREET) {
+    // after network connection is done.
     _resetCount = RTCVariables::setResetCounter(0);
 
     const char *name = WiFi.getHostname();
-
-    if (deviceName.isEmpty()) {
-      TRACE("no devicename configured");
-      TRACE("hostname=%s", name);
-      deviceName = name;
-    }  // if
 
     displayInfo(name, WiFi.localIP().toString().c_str());
     LOGGER_JUSTINFO("connected to %s (%s mode)",

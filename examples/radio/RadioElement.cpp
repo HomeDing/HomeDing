@@ -25,19 +25,27 @@
 #include <radio.h>
 #include <si4703.h>
 #include <si47xx.h>
-// #include <RDA5807M.h>
+#include <RDA5807M.h>
 
 /* ===== Define local constants and often used strings ===== */
 
-#define FIX_BAND RADIO_BAND_FM  ///< The band that will be tuned by this sketch is FM.
-#define FIX_STATION 8930        ///< The station that will be tuned by this sketch is 89.30 MHz.
-#define FIX_VOLUME 4            ///< The volume that will be set by this sketch is level 4.
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
-// The radio library only supports one radio device so all references and data can be static.
+
+class RadioElementImpl {
+public:
+  RADIO_FREQ radioFreq = 0;
+};
+
+
+#define FIX_BAND RADIO_BAND_FM  ///< The band that will be tuned by this sketch is FM.
+
+// The radio library only supports one radio per device so all references and data can be static.
 // That simplifies the callback rds functions.
 
 // SI4703 radio;
-SI47xx radio;
+// SI47xx radio;
+RDA5807M radio;
 
 RDSParser rds;
 
@@ -48,16 +56,13 @@ String _rdsText;
 RADIO_INFO _ri;
 
 // candidates for class
-unsigned int _nextCheck = 0;
-
-
-// const RadioElement *__radioelement;
+unsigned long _nextInfoCheck = 0;
+unsigned long _nextRDSCheck = 0;
 
 void RDS_process(uint16_t block1, uint16_t block2, uint16_t block3, uint16_t block4) {
   // LOGGER_RAW("RDS %d %d %d %d", block1, block2, block3,  block4);
   rds.processData(block1, block2, block3, block4);
 }
-
 
 /* ===== Static factory function ===== */
 
@@ -72,58 +77,75 @@ Element *RadioElement::create() {
 
 /* ===== Element functions ===== */
 
+/**
+ * @brief Construct a new RadioElement
+ */
 RadioElement::RadioElement() {
-  startupMode = Element_StartupMode::System;
+  _impl = new RadioElementImpl();
+  // startupMode = Element_StartupMode::System;
 }
+
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool RadioElement::set(const char *name, const char *value) {
-  bool ret = true;
-  int v;
+  TRACE("set %s=%s", name, value);
 
-  if (_stricmp(name, "volume") == 0) {
-    v = _atoi(value);
+  bool ret = true;
+
+  if (Element::set(name, value)) {
+    // ok.
+
+  } else if (_stricmp(name, "volume") == 0) {
+    int v = _atoi(value);
     if (active && v != _volume) {
-      _volume = v;
       radio.setVolume(v);
       radio.setMute(_mute || (v == 0));
-      _board->dispatch(_volumeAction, v);
     }
+    _volume = v;
 
   } else if (_stricmp(name, "frequency") == 0) {
-    v = _atoi(value);
-    if (active && v != _freq) {
+    int v = _atoi(value);
+    if (active && v != _impl->radioFreq) {
       radio.setFrequency(v);
       _board->dispatch(_frequencyAction, v);
     }
-    _freq = _atoi(value);
+    _impl->radioFreq = v;
 
   } else if (_stricmp(name, "mono") == 0) {
+    _mono = _atob(value);
     if (active) {
-      radio.setMono(_atob(value));
+      radio.setMono(_mono);
+    }
+
+  } else if (_stricmp(name, "seek") == 0) {
+    if (active) {
+      if (_atob(value))
+        radio.seekUp(true);
+      else
+        radio.seekDown(true);
     }
 
   } else if (_stricmp(name, "mute") == 0) {
+    _mute = _atob(value);
     if (active) {
-      _mute = _atob(value);
       radio.setMute(_mute || (_volume == 0));
     }
 
   } else if (_stricmp(name, "softmute") == 0) {
+    _softMute = _atob(value);
     if (active) {
-      radio.setSoftMute(_atob(value));
+      radio.setSoftMute(_softMute);
     }
 
   } else if (_stricmp(name, "bassboost") == 0) {
+    _bassBoost = _atob(value);
     if (active) {
-      radio.setBassBoost(_atob(value));
+      radio.setBassBoost(_bassBoost);
     }
 
-  } else if (_stricmp(name, "antenna") == 0) {
-    _antenna = _atoi(value);
-    // set in start() only
+    // setup properties
 
   } else if (_stricmp(name, "onStationName") == 0) {
     _stationAction = value;
@@ -134,20 +156,17 @@ bool RadioElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onFrequency") == 0) {
     _frequencyAction = value;
 
-  } else if (_stricmp(name, "onVolume") == 0) {
-    _volumeAction = value;
+  } else if (_stricmp(name, "address") == 0) {
+    _address = _atoi(value);
 
-  } else if (_stricmp(name, "onRSSI") == 0) {
-    _rssiAction = value;
-
-  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
-    // _resetpin = _atopin(value);
+  } else if (_stricmp(name, "antenna") == 0) {
+    _antenna = _atoi(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {
     _resetpin = _atopin(value);
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
 
   return (ret);
@@ -159,7 +178,7 @@ bool RadioElement::set(const char *name, const char *value) {
  * @brief Activate the RadioElement.
  */
 void RadioElement::start() {
-  LOGGER_ETRACE("start()");
+  TRACE("start()");
 
   // Verify parameters
   // __radioelement = this;
@@ -171,6 +190,7 @@ void RadioElement::start() {
 
   if (!_found) {
     LOGGER_EERR("not found");
+
   } else {
     // Initialize the Radio
     radio.setup(RADIO_RESETPIN, _resetpin);
@@ -181,20 +201,19 @@ void RadioElement::start() {
     }
 
     // Set all radio setting to the fixed values.
-    radio.setBandFrequency(FIX_BAND, FIX_STATION);
+    radio.setBandFrequency(FIX_BAND, _impl->radioFreq);
     radio.setVolume(_volume);
-    radio.setMono(false);
+    radio.setMono(_mono);
     radio.setMute(_mute || (_volume == 0));
 
-    // if (parameters ok) {
     Element::start();
+    _board->dispatch(_frequencyAction, _impl->radioFreq);
 
-    LOGGER_RAW("SETUP RDS...");
-
+    TRACE("SETUP RDS...");
     // setup the information chain for RDS data.
     radio.attachReceiveRDS(RDS_process);
 
-    rds.attachServicenNameCallback([](const char *value) {
+    rds.attachServiceNameCallback([](const char *value) {
       LOGGER_RAW("STATION: %s", value);
       _stationName = value;
       _newSN = true;
@@ -217,10 +236,24 @@ void RadioElement::start() {
  */
 void RadioElement::loop() {
   // do something
+  unsigned long now = millis();
+
   if (_found) {
-    radio.checkRDS();
-    unsigned int now = _board->getSeconds();
-    RADIO_INFO newri;
+    if (now > _nextInfoCheck) {
+      RADIO_INFO newri;
+      radio.getRadioInfo(&newri);
+      memcpy(&_ri, &newri, sizeof(RADIO_INFO));
+
+      RADIO_FREQ f = radio.getFrequency();
+      if (f != _impl->radioFreq) { _board->dispatch(_frequencyAction, f); }
+      _impl->radioFreq = f;
+      _nextInfoCheck = now + _checkInfo;
+    }
+
+    if (now > _nextRDSCheck) {
+      radio.checkRDS();
+      _nextRDSCheck = now + _checkRDS;
+    }
 
     if (_newSN) {
       _board->dispatch(_stationAction, _stationName);
@@ -230,14 +263,6 @@ void RadioElement::loop() {
     if (_newR) {
       _board->dispatch(_rdsTextAction, _rdsText);
       _newR = false;
-    }
-
-    if (now > _nextCheck) {
-      radio.getRadioInfo(&newri);
-      if (newri.rssi != _ri.rssi)
-        _board->dispatch(_rssiAction, newri.rssi);
-      memcpy(&_ri, &newri, sizeof(RADIO_INFO));
-      _nextCheck = now + _checkInfo;
     }
   }
 }  // loop()
@@ -249,10 +274,11 @@ void RadioElement::loop() {
 void RadioElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("frequency", _printInteger(_freq));
+  callback("frequency", _printInteger(_impl->radioFreq));
   callback("volume", _printInteger(_volume));
-  callback("rssi", String(_ri.rssi).c_str());
-  callback("snr", String(_ri.snr).c_str());
+  callback("rssi", _printInteger(_ri.rssi));
+  callback("snr", _printInteger(_ri.snr));
+  callback("mono", _printBoolean(_ri.mono));
   callback("stationname", _stationName.c_str());
   callback("rdstext", _rdsText.c_str());
 }  // pushState()

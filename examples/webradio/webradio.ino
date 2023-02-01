@@ -11,7 +11,7 @@
  * 
  * * Board: ESP32 Wrover Kit
  * * PSRAM: Enabled
- * * Partition Scheme: 4MB (1.2MB APP / 1.5MB SPIFS)
+ * * Partition Scheme: No OTA (2MB APP/2MB SPIFFS)
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -85,7 +85,7 @@ void setup(void) {
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
   delay(3000);
-  Serial.println();
+  Serial.println("x");
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif

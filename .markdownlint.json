@@ -13,5 +13,6 @@
     "style": "asterisk"
   },
   "MD013": false,
+  "no-duplicate-heading": {"siblings_only": true},
   "no-inline-html": false
 }

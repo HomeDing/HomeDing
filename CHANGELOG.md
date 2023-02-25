@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file.
 * The [Display ST7789 Element](https://homeding.github.io/displays/st7789.htm)
   supports color LCD displays using the ST7789 driver chip.
 
-* The [Display ST7735 Element](https://homeding.github.io/displays/ST7735.htm)
+* The [Display ST7735 Element](https://homeding.github.io/displays/st7735.htm)
   supports color LCD displays using the ST7735 driver chip.
 
 * The Color and Light Elements have been refactored.
@@ -62,11 +62,11 @@ All notable changes to this project will be documented in this file.
   See now supporting different sensors using the OneWire protocol.
 
 * **[BH1750 Element](https://homeding.github.io/elements/am2320.htm)** --
-The AM2320Element allows retrieving temperature and humidity 
+The AM2320Element allows retrieving temperature and humidity
 values from AM2320 sensors and creates actions when new values are available.
 
 * **[AHT20 Element](https://homeding.github.io/elements/aht20.htm)** --
-The AHT20Element allows retrieving temperature and humidity 
+The AHT20Element allows retrieving temperature and humidity
 values from from the AHT20 sensors from aosong and creates actions when new values are available.
 
 * **[SDC4x Element]**
@@ -80,7 +80,7 @@ The TouchElement enables creating Actions by using touch input on the ESP32.
 * **SensorElement** is enhanced to support reporting the state and emitting actions for the sensor values
   to simplify sensor implementations and save overall memory.
 
-* **[CalcElement](https://homeding.github.io/elements/calc.htm)** is used as a base class 
+* **[CalcElement](https://homeding.github.io/elements/calc.htm)** is used as a base class
 for some elements with multiple input an calculated output.
 
 * There are **[CLI commands](https://homeding.github.io/dev/cli.htm)** available for updating and restoring device configurations

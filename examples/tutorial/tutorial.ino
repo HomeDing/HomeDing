@@ -1,14 +1,10 @@
 /**
- * @file DevDing.ino
- * @brief Experimental sketch that uses the HomeDing Library to implement Things attached the
+ * @file tutorial.ino
+ * @brief Tutorial sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
- * This sketch is also used as an incubator project for new and unfinished elements.
  *
- * The use-case covered with this Sketch is to compile a full featured firmware
- * with the most common and not too execeptional elements for a devices with 4MByte flash like
- * * full featured environment sensors
- * * ...
- * All elements from the minimal sketch are included by default.
+ * The tutorial documentation can be found at
+ * [How to create and extend a new Element](https://homeding.github.io/steps/newelement.md)
  *
  * Compile with
  * * Board: NodeMCU 1.0
@@ -27,24 +23,16 @@
  * https://www.mathertel.de/License.aspx.
  *
  * More information on https://www.mathertel.de/Arduino
- * and https://homeding.github.io/index.htm#page=/examples/develop.md.
+ * and https://homeding.github.io/index.htm#page=/examples/tutorial.md.
  *
  * Changelog:
- * * 12.11.2019 Standard Example created from development sketch.
- * * 15.04.2020 fixed library dependencies.
- * * 15.06.2021 usable with esp8266 board manager version >= 3.0.0
- * * 25.02.2023 template and example elements moved into the tutorial example.
+ * * 25.02.2023 Tutorial Example created from development sketch.
  */
 
 // ----- activatable debug options
 
-// #define DBG_GDB // start with debugger
 #define DBG_TRACE  // trace level for all elements
 #define NET_DEBUG  // show network event in output
-
-#ifdef DBG_GDB
-#include <GDBStub.h>
-#endif
 
 // ===== HomeDing Configuration : Enable Elements for the firmware
 
@@ -115,6 +103,9 @@
 
 #include "secrets.h"
 
+// #include "MyElement-01.h"
+// #include "MyElement-02.h"
+
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
 
@@ -125,9 +116,6 @@ WebServer server(80);
  */
 void setup(void) {
   Serial.begin(115200);
-#ifdef DBG_GDB
-  gdbstub_init();
-#endif
 
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
@@ -196,6 +184,10 @@ void setup(void) {
 
   // UPLOAD and DELETE of static files in the file system.
   server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
+
+  // enable initialization line to see MyElement working
+  // homeding.add("my/1", new MyElement01());
+  // homeding.add("my/2", new MyElement02());
 
   LOGGER_INFO("setup done");
 }  // setup

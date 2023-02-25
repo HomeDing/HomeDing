@@ -59,4 +59,5 @@ jobs:
             - source-url: "https://github.com/schreibfaul1/ESP32-audioI2S.git"
           sketch-paths: |
             - 'examples/standard'
+            - 'examples/tutorial'
             - 'examples/webradio'

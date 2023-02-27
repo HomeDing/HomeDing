@@ -1,5 +1,5 @@
 /**
- * @file boardServer.cpp
+ * @file BoardServer.cpp
  * @brief Implementation of a web server request hander to handle the IoT board
  * REST services.
  *
@@ -130,9 +130,9 @@ String BoardHandler::handleScan() {
   String result;
 
   _board->keepCaptiveMode();
-  
+
   int8_t scanState = WiFi.scanComplete();
-  TRACE("handleScan state=%d"m scanState);
+  TRACE("handleScan state=%d" m scanState);
 
   if (scanState == WIFI_SCAN_FAILED) {
     // restart an async network scan
@@ -311,9 +311,14 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   } else if (unSafeMode && (api == "list")) {
     // List files in filesystem
+    String p = server.arg("path");
+    LOGGER_JUSTINFO("path=%s", p.c_str());
+
+    if (!p.endsWith("/")) { p += '/'; }
+
     MicroJsonComposer jc;
     jc.openArray();
-    handleListFiles(jc, "/");
+    handleListFiles(jc, p);
     jc.closeArray();
     output = jc.stringify();
     output_type = TEXT_JSON;
@@ -419,28 +424,51 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
 
 #elif defined(ESP32)
 
-// list files in filesystem recursively.
+// list files in filesystem, one folder only.
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
-  FILESYSTEM *fs = _board->fileSystem;
-  File dir = fs->open(path, "r");
   TRACE("handleListFiles(%s)", path.c_str());
+
+  FS *fs;
+  File dir;
+
+  if (_board->sdFS && (path.startsWith(SD_MOUNTNAME_SLASH))) {
+    fs = _board->sdFS;
+    String sdDirName = path.substring(3);
+    if (sdDirName.length() > 1) sdDirName = sdDirName.substring(0, sdDirName.length()-1);
+    TRACE("  sd-open(%s)", sdDirName);
+    dir = fs->open(sdDirName, "r");
+  } else {
+    fs = _board->fileSystem;
+    TRACE("  open(%s)", path);
+    dir = fs->open(path, "r");
+  }
+
   // ASSERT: last char of path = '/'
 
-  while (File entry = dir.openNextFile()) {
-    String name = path + entry.name();
+  if (_board->sdFS && path.equals("/")) {
+    jc.openObject();
+    jc.addProperty("type", "dir");
+    jc.addProperty("name", SD_MOUNTNAME);
+    jc.closeObject();
+  }
 
-    if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
+  while (File entry = dir.openNextFile()) {
+    String longName = path + entry.name();
+    TRACE("  + %s", longName.c_str());
+
+    if ((longName.indexOf('#') >= 0) || (longName.indexOf('$') >= 0)) {
       // do not report as a file
 
     } else if (entry.isDirectory()) {
-      handleListFiles(jc, name + "/");
+      jc.openObject();
+      jc.addProperty("type", "dir");
+      jc.addProperty("name", longName);
+      jc.closeObject();
 
     } else {
       jc.openObject();
-      jc.addProperty("type", "file");
-      jc.addProperty("name", name);
+      jc.addProperty("name", longName);
       jc.addProperty("size", entry.size());
-      // jc.addProperty("time", entry.getLastWrite());
       jc.closeObject();
     }  // if
   }    // while

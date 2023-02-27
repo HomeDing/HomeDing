@@ -8,6 +8,14 @@ All notable changes to this project will be documented in this file.
 
 * [State Elements](https://homeding.github.io/elements/state.htm) documentation added.
 
+* ESP32-S3 Processor Support
+
+* The Examples on [How to create and extend a new Element](https://homeding.github.io/steps/newelement.htm)
+  have been moved into the [tutorial example](https://homeding.github.io/examples/tutorial.htm) folder.
+
+  Documentation has been updated.
+
+
 
 ### Changes / Enhancements
 
@@ -24,6 +32,7 @@ All notable changes to this project will be documented in this file.
 * [WebRadio example](https://github.com/HomeDing/HomeDing/tree/develop/examples/webradio)
   
   This example implements a audio streaming device for ESP32 based systems.
+
 * The [Display ST7789 Element](https://homeding.github.io/displays/st7789.htm)
   supports color LCD displays using the ST7789 driver chip.
 

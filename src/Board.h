@@ -106,6 +106,12 @@ class Board;
  */
 #define NET_FILENAME "/$net.txt"
 
+/**
+ * A SD or SD_MMC card can be mounted at /sd.
+ */
+#define SD_MOUNTNAME "/sd"
+#define SD_MOUNTNAME_SLASH "/sd/"
+
 
 /**
  * @brief iterator callback function.
@@ -369,8 +375,11 @@ public:
   /** WebServer instance */
   WebServer *server;
 
-  /** FileSystem instance */
+  /** root FileSystem instance */
   FILESYSTEM *fileSystem;
+
+  /** sd FileSystem instance (if present) */
+  FS *sdFS = nullptr;
 
   // a counter used as eTag that gets incremented when any file is changed.
   unsigned int filesVersion;

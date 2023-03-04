@@ -43,6 +43,7 @@ SceneElement::SceneElement() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool SceneElement::set(const char *name, const char *value) {
+  TRACE("set %s=%s", name, value);
   bool ret = true;
   int size = _steps.size();
 
@@ -68,9 +69,12 @@ bool SceneElement::set(const char *name, const char *value) {
     }
 
   } else if (_stristartswith(name, "steps[")) {
-    // _steps.push_back(String(value));
-    _steps.push_back(value);
-    TRACE("_steps.size=%d", _steps.size());
+    int i;
+    String iName;
+    _scanIndexParam(name, i, iName);
+    if (i >= _steps.size()) _steps.resize(i + 1);
+    _steps[i] = value;
+    TRACE("_steps.size=%d,%d", _steps.size(), _steps.capacity());
 
   } else if (_stricmp(name, "delay") == 0) {
     // delay between executing the steps
@@ -91,13 +95,14 @@ void SceneElement::loop() {
   if (_nextStep > 0) {
     // some outgoing actions should be sent
     unsigned long now = millis();  // current (relative) time in msecs.
-    TRACE("loop( %ld, %ld)", now, _nextStep);
+    TRACE("loop( %d, %d)", now, _nextStep);
 
     if ((now >= _nextStep) && (_board->queueIsEmpty())) {
-      TRACE("send(%d):<%s>", _step, _steps[_step].c_str());
-      _board->dispatch(_steps[_step]);
+      if (_step < _steps.size()) {
+        TRACE("send(%d):<%s>", _step, _steps[_step].c_str());
+        _board->dispatch(_steps[_step]);
+      }
       _nextStep = 0;
-
       if (_delay >= 0) {
         // send next action after some time
         _step++;

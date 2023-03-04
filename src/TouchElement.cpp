@@ -61,7 +61,7 @@ bool TouchElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onlow") == 0) {
     _lowAction = value;
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (_stricmp(name, "onvalue") == 0) {
     _valueAction = value;
 
   } else {

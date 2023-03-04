@@ -215,6 +215,24 @@ unsigned long Element::_scanDuration(const char *value) {
 }  // _scanDuration()
 
 
+bool Element::_scanIndexParam(const char *name, int &index, String &indexName) {
+  const char *p = name;
+
+  p = strchr(p, '[');
+  if (p) {
+    index = Element::_atoi(p + 1);
+    p = strchr(p, ']');
+  }
+  if (p) {
+    p = strchr(p, '/');
+  }
+  if (p) {
+    indexName = p + 1;
+  }
+  return (p);
+} // _scanIndexParam()
+
+
 /* Return a pin value from a string. */
 int Element::_atopin(const char *value) {
 #if defined(ESP8266)

@@ -272,7 +272,7 @@ bool MQTTElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "qos") == 0) {
     _impl->qos = _atoi(value);
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (_stricmp(name, "onvalue") == 0) {
     _impl->_valueAction = value;
 
   } else {

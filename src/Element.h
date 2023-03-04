@@ -240,6 +240,16 @@ public:
   uint32_t _atoColor(const char *value);
 
 
+  /**
+   * @brief extract index and property name from a configuration string
+   * with arrays like list[3]/property
+   * @param name Given indexed configuration "name" like "list[3]/property".
+   * @return index Reference to index variable, will contain the index (here 3)
+   * @return indexName Reference to indexName variable, will contain the index name (here "property")
+   * @return true, when scanning was complete
+   */
+  bool _scanIndexParam(const char *name, int &index, String &indexName);
+
   // ===== static value to string helper function ===== //
 
   static char *_printBoolean(bool b);

@@ -76,6 +76,7 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_OR
 #define HOMEDING_INCLUDE_ADD
 #define HOMEDING_INCLUDE_SCENE
+#define HOMEDING_INCLUDE_SELECT
 #define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
@@ -199,6 +200,10 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_SCENE
 #include <SceneElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_SELECT
+#include <SelectElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_LOG

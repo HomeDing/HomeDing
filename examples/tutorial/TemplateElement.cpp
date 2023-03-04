@@ -56,7 +56,10 @@ void TemplateElement::init(Board *board) {
 bool TemplateElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (Element::set(name, value)) {
+    // done.
+
+  } else if (_stricmp(name, PROP_VALUE) == 0) {
     _value = _atoi(value);
 
     // } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
@@ -67,7 +70,7 @@ bool TemplateElement::set(const char *name, const char *value) {
     // make something
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
 
   return (ret);

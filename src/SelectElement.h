@@ -16,7 +16,7 @@
 #include <HomeDing.h>
 
 /**
- * @brief
+ * @brief Element for selecting one of many options with key and value.
  */
 class SelectElement : public Element {
 public:
@@ -30,17 +30,6 @@ public:
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
-
-  /**
-   * @brief Construct a new SelectElement
-   */
-  SelectElement();
-
-  /**
-   * @brief initialize a new Element.
-   * @param board The board reference.
-   */
-  virtual void init(Board *board) override;
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -59,16 +48,6 @@ public:
   virtual void start() override;
 
   /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop() override;
-
-  /**
-   * @brief stop all activities and go inactive.
-   */
-  virtual void term() override;
-
-  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
@@ -76,21 +55,27 @@ public:
     std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
-
+  /**
+   * @brief select the option and dispatch all actions.
+   * @param n index of new option
+   */
   void _selectOption(int n);
 
   /**
-   * @brief The last selected index.
+   * @brief The current selected index.
    */
   int _selected = -1;
 
-  // List of keys.
+  /// @brief List of keys.
   std::vector<String> _keys;
 
-  // List of values.
+  /// @brief List of values.
   std::vector<String> _values;
 
+  /// @brief Action to be sent with key as a parameter
   String _keyAction;
+
+  /// @brief Action to be sent with value as a parameter
   String _valueAction;
 };
 
@@ -101,4 +86,3 @@ private:
 bool SelectElement::registered =
   ElementRegistry::registerElement("select", SelectElement::create);
 #endif
-

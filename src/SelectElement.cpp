@@ -41,19 +41,6 @@ Element *SelectElement::create() {
 
 /* ===== Element functions ===== */
 
-SelectElement::SelectElement() {
-  // adjust startupMode when Network (default) is not applicable.
-  // startupMode = Element_StartupMode::System;
-}
-
-
-void SelectElement::init(Board *board) {
-  TRACE("init()");
-  Element::init(board);
-  // do something here like initialization
-}  // init()
-
-
 bool SelectElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
   bool ret = true;
@@ -69,7 +56,7 @@ bool SelectElement::set(const char *name, const char *value) {
       }
     }
 
-  } else if (_stricmp(name, "value") == 0) {
+  } else if (_stricmp(name, "index") == 0) {
     int i = _atoi(value);
     if ((i >= 0) && (i < _values.size())) {
       _selectOption(i);
@@ -77,7 +64,7 @@ bool SelectElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "next") == 0) {
     // start next option
-    if (_selected < _values.size()-1) {
+    if (_selected < _values.size() - 1) {
       _selected++;
       _selectOption(_selected);
     }
@@ -111,9 +98,6 @@ bool SelectElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onvalue") == 0) {
     _valueAction = value;
 
-    // } else if (_stricmp(name, "doAction") == 0) {
-    // make something
-
   } else {
     ret = false;
   }  // if
@@ -141,25 +125,15 @@ void SelectElement::start() {
 
 
 /**
- * @brief Give some processing time to the Element to check for next actions.
- */
-void SelectElement::loop() {
-  // do something
-}  // loop()
-
-
-/**
  * @brief push the current value of all properties to the callback.
  */
 void SelectElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
+  callback("index", _printInteger(_selected));
+  callback("key", _keys[_selected].c_str());
+  callback("value", _values[_selected].c_str());
 }  // pushState()
 
-
-void SelectElement::term() {
-  TRACE("term()");
-  Element::term();
-}  // term()
 
 // End

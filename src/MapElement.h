@@ -16,9 +16,6 @@
  * * 06.06.2021 full implementation of rules.
  */
 
-#ifndef MAPELEMENT_H
-#define MAPELEMENT_H
-
 #include <vector>
 
 /**
@@ -103,6 +100,4 @@ private:
 // Register the MapElement onto the ElementRegistry.
 bool MapElement::registered =
     ElementRegistry::registerElement("map", MapElement::create);
-#endif
-
 #endif

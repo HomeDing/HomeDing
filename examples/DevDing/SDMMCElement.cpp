@@ -14,18 +14,14 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include "SDMMCElement.h"
 
 #include "SD_MMC.h"
 
 
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-
-/* ===== Define local constants and often used strings ===== */
-
-// like:
-// #define ANYCONSTANT 1000
-
 
 /* ===== Static factory function ===== */
 
@@ -133,5 +129,7 @@ void SDMMCElement::start() {
 bool SDMMCElement::registered =
   ElementRegistry::registerElement("sdmmc", SDMMCElement::create);
 // #endif
+
+#endif
 
 // End

@@ -14,8 +14,7 @@
  * * 29.04.2018 created by Matthias Hertel
  */
 
-#ifndef PWMOut_H
-#define PWMOut_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -80,6 +79,3 @@ private:
 bool PWMOutElement::registered =
     ElementRegistry::registerElement("pwmout", PWMOutElement::create);
 #endif
-
-
-#endif // PWMOut_H

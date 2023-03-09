@@ -20,8 +20,7 @@
  * * 24.01.2020 enable reboot via action
  */
 
-#ifndef DEVICEELEMENT_H
-#define DEVICEELEMENT_H
+#pragma once
 
 #include <HomeDing.h>
 
@@ -97,5 +96,3 @@ private:
    */
   unsigned long _nextBoot;
 };
-
-#endif // DEVICEELEMENT_H

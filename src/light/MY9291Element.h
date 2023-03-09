@@ -21,8 +21,7 @@
     // channel 3 is white
  */
 
-#ifndef MY9291ELEMENT_H
-#define MY9291ELEMENT_H
+#pragma once
 
 #if defined(ESP8266)
 
@@ -86,7 +85,5 @@ bool MY9291Element::registered =
 #elif defined(ESP32)
 // No ESP32 based devices known with this chip.
 #endif
-
-#endif // MY9291ELEMENT_H
 
 // End

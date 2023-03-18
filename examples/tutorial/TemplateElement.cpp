@@ -59,10 +59,10 @@ bool TemplateElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done.
 
-  } else if (_stricmp(name, PROP_VALUE) == 0) {
+  } else if (_stricmp(name, "value") == 0) {
     _value = _atoi(value);
 
-    // } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+    // } else if (_stricmp(name, "onvalue") == 0) {
     // save the actions
     // _xAction = value;
 

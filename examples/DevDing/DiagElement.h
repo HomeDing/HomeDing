@@ -16,8 +16,7 @@
  * * 30.07.2020 created by Matthias Hertel
  */
 
-#ifndef DIAGELEMENT_H
-#define DIAGELEMENT_H
+#pragma once
 
 /**
  * @brief DiagElement implements...
@@ -81,5 +80,3 @@ private:
   String _handleDiag();
   void _logChipDetails();
 };
-
-#endif

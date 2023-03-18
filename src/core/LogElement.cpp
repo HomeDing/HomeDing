@@ -19,7 +19,7 @@
 
 #include <core/LogElement.h>
 
-#include <FS.h>
+#include <hdfs.h>
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
@@ -44,14 +44,14 @@ LogElement::LogElement() {
 void LogElement::_logToFile() {
   TRACE("log(%lld,%s)", _timestamp, _value.c_str());
 
-  File f = _board->fileSystem->open(_logfileName, "a");
+  File f = HomeDingFS::open(_logfileName, "a");
 
   if (f.size() > _filesize) {
     // rename to LOGFILE_OLD_NAME
     f.close();
-    _board->fileSystem->remove(_logfileOldName);
-    _board->fileSystem->rename(_logfileName, _logfileOldName);
-    f = _board->fileSystem->open(_logfileName, "a");
+    HomeDingFS::remove(_logfileOldName);
+    HomeDingFS::rename(_logfileName, _logfileOldName);
+    f = HomeDingFS::open(_logfileName, "a");
   } // if
   f.print(_timestamp);
   f.print(',');

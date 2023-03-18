@@ -375,12 +375,6 @@ public:
   /** WebServer instance */
   WebServer *server;
 
-  /** root FileSystem instance */
-  FILESYSTEM *fileSystem;
-
-  /** sd FileSystem instance (if present) */
-  FS *sdFS = nullptr;
-
   // a counter used as eTag that gets incremented when any file is changed.
   unsigned int filesVersion;
 

@@ -19,7 +19,7 @@
 #include "SDMMCElement.h"
 
 #include "SD_MMC.h"
-
+#include <hdfs.h>
 
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
@@ -99,7 +99,9 @@ void SDMMCElement::start() {
 
   } else {
     Element::start();
-    _board->sdFS = &SD_MMC;
+
+    // mount the sd filesystem
+    HomeDingFS::sdFS = &SD_MMC;
 
     uint8_t cardType = SD_MMC.cardType();
     TRACE("Card Type: %d", cardType);

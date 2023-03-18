@@ -41,6 +41,7 @@
 #include <ElementRegistry.h>
 
 #include <MicroJsonComposer.h>
+#include <hdfs.h>
 
 // used for built-in files
 #define SVC_ANY "/$"
@@ -102,7 +103,7 @@ void BoardHandler::handleConnect(WebServer &server) {
       WiFi.persistent(true);
       _board->displayInfo("ok.");
 
-      File f = _board->fileSystem->open(NET_FILENAME, "w");
+      File f = HomeDingFS::open(NET_FILENAME, "w");
       if (f) {
         f.print(netName);
         f.print(',');
@@ -213,7 +214,6 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   TRACE("handle(%s)", requestUri2.c_str());
   String output;
   const char *output_type = nullptr;  // when output_type is set then send output as response.
-  FILESYSTEM *fs = _board->fileSystem;
 
   bool ret = true;
   bool unSafeMode = !_board->isSafeMode;
@@ -271,13 +271,13 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
 #if defined(ESP8266)
     FSInfo fs_info;
-    fs->info(fs_info);
+    LittleFS.info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
 
 #elif defined(ESP32)
-    jc.addProperty("fsTotalBytes", fs->totalBytes());
-    jc.addProperty("fsUsedBytes", fs->usedBytes());
+    jc.addProperty("fsTotalBytes", LittleFS.totalBytes());
+    jc.addProperty("fsUsedBytes", LittleFS.usedBytes());
 #endif
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);
@@ -300,7 +300,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   } else if (unSafeMode && (api == "resetall")) {
     // Reset file system, network parameters and reboot
-    fs->format();
+    LittleFS.format();
     handleReboot(server, true);
     output_type = TEXT_PLAIN;
 
@@ -312,7 +312,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   } else if (unSafeMode && (api == "list")) {
     // List files in filesystem
     String p = server.arg("path");
-    LOGGER_JUSTINFO("path=%s", p.c_str());
+    TRACE("path=%s", p.c_str());
 
     if (!p.endsWith("/")) { p += '/'; }
 
@@ -343,7 +343,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
 #if defined(ESP8266)
     FSInfo fsi;
-    fs->info(fsi);
+    LittleFS.info(fsi);
     if (fsi.usedBytes < 18000) {
       // assuming UI files not installed
       url = PAGE_UPDATE_VERS;
@@ -354,7 +354,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     }
 
 #elif defined(ESP32)
-    if (fs->usedBytes() < 18000) {
+    if (LittleFS.usedBytes() < 18000) {
       // assuming UI files not installed
       url = PAGE_UPDATE_VERS;
     }
@@ -387,65 +387,16 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 }  // handle()
 
 
-#if defined(ESP8266)  // && defined(SPIFFS)
-
-// ESP8266 SPIFFS implementation, compatible with LittleFS on ESP8266
-// list files in filesystem recursively.
-
-void listDirectory(MicroJsonComposer &jc, FILESYSTEM *fs, String path, Dir dir) {
-  while (dir.next()) {
-    String name = dir.fileName();
-
-    if (dir.isDirectory()) {
-      Dir subDir = fs->openDir(path + name);
-      listDirectory(jc, fs, path + name + "/", subDir);
-
-    } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
-      // do not report as a file
-
-    } else {
-      jc.openObject();
-      jc.addProperty("type", "file");
-      String longName = path + name;
-      longName.replace("//", "/");
-      jc.addProperty("name", longName);
-      jc.addProperty("size", dir.fileSize());
-      jc.closeObject();
-    }  // if
-  }    // while
-}
-
-void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
-  FILESYSTEM *fs = _board->fileSystem;
-  Dir dir = fs->openDir(path);
-  listDirectory(jc, fs, "/", dir);
-}
-
-
-#elif defined(ESP32)
-
 // list files in filesystem, one folder only.
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
   TRACE("handleListFiles(%s)", path.c_str());
 
-  FS *fs;
-  File dir;
+  // assert: last char of path = '/'
+  TRACE("  open(%s)", path.c_str());
+  File dir = HomeDingFS::open(path);
 
-  if (_board->sdFS && (path.startsWith(SD_MOUNTNAME_SLASH))) {
-    fs = _board->sdFS;
-    String sdDirName = path.substring(3);
-    if (sdDirName.length() > 1) sdDirName = sdDirName.substring(0, sdDirName.length()-1);
-    TRACE("  sd-open(%s)", sdDirName);
-    dir = fs->open(sdDirName, "r");
-  } else {
-    fs = _board->fileSystem;
-    TRACE("  open(%s)", path);
-    dir = fs->open(path, "r");
-  }
-
-  // ASSERT: last char of path = '/'
-
-  if (_board->sdFS && path.equals("/")) {
+  if (HomeDingFS::sdFS && path.equals("/")) {
+    // add the /sd mount folder to the list
     jc.openObject();
     jc.addProperty("type", "dir");
     jc.addProperty("name", SD_MOUNTNAME);
@@ -459,47 +410,43 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
     if ((longName.indexOf('#') >= 0) || (longName.indexOf('$') >= 0)) {
       // do not report as a file
 
-    } else if (entry.isDirectory()) {
-      jc.openObject();
-      jc.addProperty("type", "dir");
-      jc.addProperty("name", longName);
-      jc.closeObject();
-
     } else {
       jc.openObject();
       jc.addProperty("name", longName);
-      jc.addProperty("size", entry.size());
+
+      if (entry.isDirectory()) {
+        jc.addProperty("type", "dir");
+      } else {
+        jc.addProperty("size", entry.size());
+      }
       jc.closeObject();
     }  // if
   }    // while
 }  // handleListFiles()
 
-#endif
-
 
 void BoardHandler::handleCleanWeb(String path) {
   TRACE("handleCleanWeb(%s)", path.c_str());
-  FILESYSTEM *fSys = _board->fileSystem;
-  // ASSERT: last char of path = '/'
 
-  fs::File dir = fSys->open(path, "r");
+  File dir = HomeDingFS::open(path, "r");
+
   while (File entry = dir.openNextFile()) {
-    String name = path + entry.name();
-    TRACE("is: %s", name.c_str());
+    String longName = path + entry.name();
+    TRACE("is: %s", longName.c_str());
 
     if (entry.isDirectory()) {
       TRACE("isDir.");
-      handleCleanWeb((name + "/"));
+      handleCleanWeb((longName + "/"));
 
-    } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
+    } else if ((longName.indexOf('#') >= 0) || (longName.indexOf('$') >= 0)) {
       TRACE("isSecret.");
 
-    } else if (name.indexOf(".json") >= 0) {
+    } else if (longName.indexOf(".json") >= 0) {
       TRACE("isConfig.");
 
     } else {
       TRACE("isFile.");
-      fSys->remove(name);
+      HomeDingFS::remove(longName);
     }  // if
   }    // while
 }  // handleCleanWeb()

@@ -183,7 +183,7 @@ void setup(void) {
   server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
+  server.addHandler(new FileServerHandler(&homeding));
 
   // enable initialization line to see MyElement working
   // homeding.add("my/1", new MyElement01());

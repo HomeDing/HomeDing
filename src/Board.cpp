@@ -34,6 +34,7 @@ extern "C" {
 #include <ElementRegistry.h>
 
 #include "MicroJsonParser.h"
+#include "hdfs.h"
 
 #include <DNSServer.h>
 
@@ -64,6 +65,11 @@ extern const char *passPhrase;
 
 static const char respond404[] PROGMEM =
   "<html><head><title>File not found</title></head><body>File not found</body></html>";
+
+// define static variables for HomeDingFS here:
+
+FS *HomeDingFS::rootFS = nullptr;
+FS *HomeDingFS::sdFS = nullptr;
 
 
 #if defined(ESP8266)
@@ -100,16 +106,16 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   LOGGER_INFO("Device %s starting...", buildName);
 
   server = serv;
-  fileSystem = fs;
+  HomeDingFS::rootFS = fs;
   build = buildName;
 
-  bool mounted = fileSystem->begin();
+  bool mounted = fs->begin();
   if (!mounted) {
     LOGGER_INFO("formatting...");
-    fileSystem->format();
+    fs->format();
   }
 
-  Logger::init(fileSystem);
+  Logger::init(fs);
 
   // board parameters configured / overwritten by device element
   sysLED = -1;
@@ -262,11 +268,11 @@ void Board::_addAllElements() {
 
   if (mj) {
     // config the thing to the local network
-    mj->parseFile(fileSystem, ENV_FILENAME);
+    mj->parseFile(HomeDingFS::rootFS, ENV_FILENAME);
     hd_yield();
 
     // config the Elements of the device
-    mj->parseFile(fileSystem, CONF_FILENAME);
+    mj->parseFile(HomeDingFS::rootFS, CONF_FILENAME);
     hd_yield();
   }  // if
 
@@ -393,7 +399,7 @@ void Board::loop() {
 
   } else if (boardState == BOARDSTATE::NONE) {
     // load network connection details
-    File f = fileSystem->open(NET_FILENAME, "r");
+    File f = HomeDingFS::rootFS->open(NET_FILENAME, "r");
     if (f) {
       netpass = f.readString();
       f.close();
@@ -689,7 +695,7 @@ void Board::loop() {
     // ===== initialize network dependant services
 
     // start file server for static files in the file system.
-    server->serveStatic("/", *fileSystem, "/", cacheHeader.c_str());
+    server->serveStatic("/", *(HomeDingFS::rootFS), "/", cacheHeader.c_str());
 
     server->onNotFound([this]() {
       TRACE("notFound: %s", server->uri().c_str());

@@ -22,10 +22,24 @@
     "actions": ["onreference", "onhigh", "onlow"]
   },
 
+  "add": {
+    "sys": "false",
+    "properties": ["invert"],
+    "events": ["value[n]"],
+    "actions": ["onvalue"]
+  },
+
   "and": {
     "sys": "false",
     "properties": ["invert"],
-    "events": ["value01", "value02"],
+    "events": ["value[n]"],
+    "actions": ["onvalue"]
+  },
+
+  "or": {
+    "sys": "false",
+    "properties": ["invert"],
+    "events": ["value[n]"],
     "actions": ["onvalue"]
   },
 
@@ -57,19 +71,19 @@
 
   "displaydot": {
     "sys": "false",
-    "properties": ["page", "x", "y"],
+    "properties": ["page", "x", "y", "color"],
     "events": ["value", "clear", "redraw"]
   },
 
   "displaytext": {
     "sys": "false",
-    "properties": ["page", "x", "y", "fontsize", "prefix", "postfix"],
+    "properties": ["page", "x", "y", "color", "fontsize", "prefix", "postfix"],
     "events": ["value", "clear", "redraw"]
   },
 
   "displayline": {
     "sys": "false",
-    "properties": ["page", "x", "y", "w", "h"],
+    "properties": ["page", "x", "y", "w", "h", "color"],
     "events": ["redraw"]
   },
 
@@ -118,6 +132,12 @@
     "events": ["start"]
   },
 
+  "select": {
+    "properties": ["options"],
+    "events": ["key", "index", "next", "prev"],
+    "actions": ["onkey", "onvalue"]
+  },
+
   "ota": {
     "sys": "true",
     "properties": ["port", "passwd"]
@@ -159,6 +179,12 @@
   },  
 
   "ina219": {
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart",
+    "gain", "mode", "samples", "range"],
+    "actions": ["onvoltage", "oncurrent", "onpower"]
+  },  
+
+  "ina226": {
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart",
     "gain", "mode", "samples", "range"],
     "actions": ["onvoltage", "oncurrent", "onpower"]
@@ -225,7 +251,7 @@
   },
 
   "light": {
-    "properties": ["pin", "duration"],
+    "properties": ["pin", "duration", "mode"],
     "events": ["value", "enable", "brightness"]
   },
 

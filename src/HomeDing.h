@@ -345,6 +345,14 @@ extern Board homeding;
 #include <MAX7219Element.h>
 #endif
 
+#if defined(HOMEDING_INCLUDE_SDMMC) && defined(ESP32)
+#include <SDMMCElement.h>
+#endif
+
+// #if defined(HOMEDING_INCLUDE_SD)
+// #include <SDElement.h>
+// #endif
+
 #ifdef HOMEDING_INCLUDE_MENU
 #include <MenuElement.h>
 #endif

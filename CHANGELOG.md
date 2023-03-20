@@ -4,17 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.x] - unreleased
 
-* updated Web UI
+* updated Web UI files from Web project <https://github.com/HomeDing/WebFiles>.
 
 * [State Elements](https://homeding.github.io/elements/state.htm) documentation added.
+
+* [SDMMC Element](https://homeding.github.io/elements/sdmmc.htm) add files from sd card to web server.
 
 * ESP32-S3 Processor Support
 
 * The Examples on [How to create and extend a new Element](https://homeding.github.io/steps/newelement.htm)
   have been moved into the [tutorial example](https://homeding.github.io/examples/tutorial.htm) folder.
 
-  Documentation has been updated.
-
+  Documentation has been updated, see <https://homeding.github.io>.
 
 
 ### Changes / Enhancements

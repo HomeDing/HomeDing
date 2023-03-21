@@ -349,9 +349,9 @@ extern Board homeding;
 #include <SDMMCElement.h>
 #endif
 
-// #if defined(HOMEDING_INCLUDE_SD)
-// #include <SDElement.h>
-// #endif
+#if defined(HOMEDING_INCLUDE_SD)
+#include <SDElement.h>
+#endif
 
 #ifdef HOMEDING_INCLUDE_MENU
 #include <MenuElement.h>

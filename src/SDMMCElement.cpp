@@ -86,14 +86,22 @@ void SDMMCElement::start() {
 
   // Verify parameters
 
-  // for ESP-S3 the pins for SD_MMC can be defined.
-  // other boards ignore the settings, GPIO pins have to be used as defined by espressif
 #if ARDUINO_ESP32S3_DEV
+  // for ESP-S3 the pins for SD_MMC can be defined.
   if ((_mmc_clk_pin >= 0) && (_mmc_cmd_pin >= 0) && (_mmc_d0_pin >= 0)) {
     SD_MMC.setPins(_mmc_clk_pin, _mmc_cmd_pin, _mmc_d0_pin, _mmc_d1_pin, _mmc_d2_pin, _mmc_d3_pin);
   }
+#else
+  // other boards ignore the settings, GPIO pins have to be used as defined by espressif
+  // https://github.com/lewisxhe/TTGO-Time-Music-Box/blob/master/main/src/main.c
+  gpio_set_pull_mode(GPIO_NUM_15, GPIO_PULLUP_ONLY);
+  gpio_set_pull_mode(GPIO_NUM_2, GPIO_PULLUP_ONLY);
+  gpio_set_pull_mode(GPIO_NUM_4, GPIO_PULLUP_ONLY);
+  gpio_set_pull_mode(GPIO_NUM_12, GPIO_PULLUP_ONLY);
+  gpio_set_pull_mode(GPIO_NUM_13, GPIO_PULLUP_ONLY);
 #endif
 
+  SD_MMC.end();
   if (!SD_MMC.begin()) {
     TRACE("Card Mount Failed");
 

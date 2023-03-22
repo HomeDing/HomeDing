@@ -18,7 +18,10 @@
 
 #include "SPI.h"
 #include <SD.h>
+
+#if defined(ESP8266)
 #include <SDFS.h>
+#endif
 
 #include <hdfs.h>
 
@@ -71,13 +74,15 @@ void SDElement::start() {
   TRACE("start()");
 
   // Verify parameters
-  // _csPin >= 0;
+  if (_csPin < 0) {
+    LOGGER_EERR("cspin parameter is missing.");
+  }
 
-  // SD.end();
+#if defined(ESP8266)
+  // using the FS compartible SDFS class (not SD)
   SDFSConfig fileSystemConfig = SDFSConfig();
   fileSystemConfig.setCSPin(D4);
   fileSystemConfig.setAutoFormat(false);
-
   SDFS.setConfig(fileSystemConfig);
 
   // SPI.pins(D5, D6, D7, D4);
@@ -91,20 +96,33 @@ void SDElement::start() {
     // mount the sd filesystem
     HomeDingFS::sdFS = &SDFS;
 
-    // uint8_t cardType = SD.cardType();
-    // TRACE("Card Type: %d", cardType);
-
-    // uint32_t cardSize = SD.size64() / (1024 * 1024);
-
-    // TRACE("SD Card Size: %d MByte", SD.size64() / (1024 * 1024));
     FSInfo64 fsi;
     SDFS.info64(fsi);
-
-    TRACE(" Total: %d MByte", fsi.totalBytes / (1024 * 1024));
-    TRACE(" Used : %d MByte", fsi.usedBytes / (1024 * 1024));
+    TRACE(" Total: %ld MByte", fsi.totalBytes / (1024 * 1024));
+    TRACE(" Used : %ld MByte", fsi.usedBytes / (1024 * 1024));
   }
 
-  _board->server->serveStatic(HDFS_SD_MOUNTNAME, SDFS, "/", nullptr);
+
+#elif defined(ESP32)
+  if (!SD.begin()) {
+    TRACE("Card Mount Failed");
+
+  } else {
+    Element::start();
+
+    // mount the sd filesystem
+    HomeDingFS::sdFS = &SD;
+
+    uint8_t cardType = SD.cardType();
+    TRACE("Card Type: %d", cardType);
+    TRACE("SD Card Size: %llu MByte", SD.cardSize() / (1024 * 1024));
+    TRACE(" Total: %llu MByte", SD.totalBytes() / (1024 * 1024));
+    TRACE(" Used : %llu MByte", SD.usedBytes() / (1024 * 1024));
+  }
+#endif
+
+  _board->server->serveStatic(HDFS_SD_MOUNTNAME, *HomeDingFS::sdFS, "/", nullptr);
+
 }  // start()
 
 // End

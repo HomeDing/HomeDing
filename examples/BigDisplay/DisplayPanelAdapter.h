@@ -18,18 +18,18 @@
 
 #include "GFX_ESP32Panel.h"
 
+#if ! defined(ESP32)
+#error "GFX_ESP32Panel only supported by ESP32S3"
+
+#else
+
 class DisplayPanelAdapter : public DisplayAdapterGFX {
 public:
   ~DisplayPanelAdapter() = default;
 
   bool start() override {
 
-#if defined(ESP32)
     display = new (std::nothrow) GFX_ESP32Panel(conf->width, conf->height);
-
-#else
-#error "GFX_ESP32Panel only supported by ESP32S3"
-#endif
 
     if (!display) {
       LOGGER_ERR("not found");
@@ -50,3 +50,5 @@ private:
    */
   GFX_ESP32Panel *display = nullptr;
 };
+
+#endif

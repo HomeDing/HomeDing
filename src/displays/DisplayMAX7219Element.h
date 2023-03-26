@@ -46,7 +46,7 @@ public:
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplaySSD1306Element onto the ElementRegistry.
+// Register the DisplayMAX7219Element onto the ElementRegistry.
 bool DisplayMAX7219Element::registered =
   ElementRegistry::registerElement("DisplayMAX7219", DisplayMAX7219Element::create);
 #endif

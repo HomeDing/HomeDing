@@ -26,6 +26,7 @@ public:
   ~DisplaySSD1306Adapter() = default;
 
   bool start() override {
+    // LOGGER_JUSTINFO("DisplaySSD1306Adapter-start");
     display = new (std::nothrow) Adafruit_SSD1306(conf->width, conf->height, &Wire, conf->resetPin);
 
     if (!display) {
@@ -35,9 +36,9 @@ public:
     } else {
       gfxDisplay = (Adafruit_GFX *)display;
       display->begin(SSD1306_SWITCHCAPVCC, conf->i2cAddress);
+      DisplayAdapterGFX::start();
       backColor565 = SSD1306_BLACK;
       drawColor565 = SSD1306_WHITE;
-      DisplayAdapterGFX::start();
     }  // if
     return (true);
   };  // init()

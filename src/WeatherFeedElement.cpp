@@ -42,6 +42,7 @@ Element *WeatherFeedElement::create() {
  */
 bool WeatherFeedElement::set(const char *name, const char *value) {
   bool ret = true;
+  // TRACE("set: %s=%s", name, value);
 
   if (HttpClientElement::set(name, value)) {
     // host, url, loglevel, ...
@@ -69,7 +70,7 @@ bool WeatherFeedElement::set(const char *name, const char *value) {
       _paths[index] = value;
 
     } else if (iName.equalsIgnoreCase("onvalue")) {
-      if (index >= _paths.size()) _actions.resize(index + 1);
+      if (index >= _actions.size()) _actions.resize(index + 1);
       _actions[index] = value;
     }  // if
 

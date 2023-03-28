@@ -122,8 +122,12 @@ String DiagElement::_handleDiag() {
 
       if (adr == 0x11) {
         desc = "SI4721";
+      } else if (adr == (0x0e)) {
+        desc = "MAG3110";
       } else if (adr == (0x14)) {
         desc = "GT911";
+      } else if (adr == 0x23) {
+        desc = "BH1750";
       } else if (adr == 0x27) {
         desc = "LCD,PCF8574";
       } else if (adr == 0x38) {
@@ -138,12 +142,16 @@ String DiagElement::_handleDiag() {
         desc = "AM2320";
       } else if (adr == (0x5d)) {
         desc = "GT911";
+      } else if (adr == (0x5f)) {
+        desc = "HTS221";
       } else if (adr == 0x62) {
         desc = "SCD-4x";
       } else if (adr == 0x63) {
         desc = "Radio,SI4730";
       } else if (adr == (0x68)) {
-        desc = "RTC,DS1307";
+        desc = "RTC,DS1307,MPU-6050";
+      } else if (adr == 0x6D) {
+        desc = "FBM320";
       } else if (adr == 0x77) {
         desc = "BMP280";
       }

@@ -55,9 +55,9 @@ public:
 
     } else {
       gfxDisplay = (Adafruit_GFX *)display;
+      DisplayAdapterGFX::start();
       backColor565 = 0x0000;
       drawColor565 = 0xFFFF;
-      DisplayAdapterGFX::start();
 
       pinMode(_csPin, OUTPUT);
       digitalWrite(_csPin, HIGH);

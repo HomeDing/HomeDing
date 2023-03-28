@@ -33,9 +33,9 @@ public:
     } else {
       gfxDisplay = (Adafruit_GFX *)display;
       display->begin(conf->i2cAddress);
+      DisplayAdapterGFX::start();
       backColor565 = SH110X_BLACK;
       drawColor565 = SH110X_WHITE;
-      DisplayAdapterGFX::start();
     }  // if
     return (true);
   };  // init()

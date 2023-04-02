@@ -14,7 +14,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#if defined(ESP32)
+#if defined(ESP32) && (! ARDUINO_ESP32C3_DEV)
 
 #include "SDMMCElement.h"
 

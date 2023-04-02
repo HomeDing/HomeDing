@@ -22,8 +22,7 @@
 #include <HomeDing.h>
 #include <light/LightElement.h>
 
-// https://github.com/adafruit/Adafruit_NeoPixel
-#include <Adafruit_NeoPixel.h>
+class Adafruit_NeoPixel; // forward
 
 /**
  * @brief NeoElement implements an Element to drive LED stripes with the WS2812 LEDs.
@@ -88,11 +87,10 @@ private:
   Mode _mode = Mode::_default;
 
   /** Number of pixels in the stripe */
-  int _count = 8;
+  int _count = 1;
 
   /** Config of pixels order */
-  int _config = NEO_GRB;
-
+  int _config;
 
   /** Overall brightness in range 0...100 from LightElement */
 

@@ -19,6 +19,9 @@
 
 #include <light/NeoElement.h>
 
+// https://github.com/adafruit/Adafruit_NeoPixel
+#include <Adafruit_NeoPixel.h>
+
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /** set a single color for all neopixels.
@@ -59,6 +62,7 @@ void NeoElement::init(Board *board) {
   LightElement::init(board);
 
   // set defaults:
+  _config = NEO_GRB;
   value = "0";
 }  // init()
 

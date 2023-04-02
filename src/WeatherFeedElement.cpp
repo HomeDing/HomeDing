@@ -61,7 +61,7 @@ bool WeatherFeedElement::set(const char *name, const char *value) {
     _readTime = _atotime(value);
 
   } else if (_stristartswith(name, "actions[")) {
-    int index;
+    size_t index;
     String iName;
     _scanIndexParam(name, index, iName);
 

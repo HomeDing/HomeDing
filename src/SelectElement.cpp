@@ -77,7 +77,7 @@ bool SelectElement::set(const char *name, const char *value) {
     }
 
   } else if (_stristartswith(name, "options[")) {
-    int i;
+    size_t i;
     String iName;
     _scanIndexParam(name, i, iName);
 

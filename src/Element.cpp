@@ -215,12 +215,12 @@ unsigned long Element::_scanDuration(const char *value) {
 }  // _scanDuration()
 
 
-bool Element::_scanIndexParam(const char *name, int &index, String &indexName) {
+bool Element::_scanIndexParam(const char *name, size_t &index, String &indexName) {
   const char *p = name;
 
   p = strchr(p, '[');
   if (p) {
-    index = Element::_atoi(p + 1);
+    index = (size_t)strtoul(p+1, nullptr, 10);
     p = strchr(p, ']');
   }
   if (p) {

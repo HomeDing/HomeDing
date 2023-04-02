@@ -248,7 +248,7 @@ public:
    * @return indexName Reference to indexName variable, will contain the index name (here "property")
    * @return true, when scanning was complete
    */
-  bool _scanIndexParam(const char *name, int &index, String &indexName);
+  bool _scanIndexParam(const char *name, size_t &index, String &indexName);
 
   // ===== static value to string helper function ===== //
 

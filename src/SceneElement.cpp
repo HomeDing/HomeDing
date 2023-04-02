@@ -69,7 +69,7 @@ bool SceneElement::set(const char *name, const char *value) {
     }
 
   } else if (_stristartswith(name, "steps[")) {
-    int i;
+    size_t i;
     String iName;
     _scanIndexParam(name, i, iName);
     if (i >= _steps.size()) _steps.resize(i + 1);
@@ -98,7 +98,7 @@ void SceneElement::loop() {
     TRACE("loop( %d, %d)", now, _nextStep);
 
     if ((now >= _nextStep) && (_board->queueIsEmpty())) {
-      if (_step < _steps.size()) {
+      if ((_step >= 0) && (_step < _steps.size())) {
         TRACE("send(%d):<%s>", _step, _steps[_step].c_str());
         _board->dispatch(_steps[_step]);
       }

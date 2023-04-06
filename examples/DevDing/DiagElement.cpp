@@ -200,7 +200,9 @@ void DiagElement::_logChipDetails() {
   if (features & CHIP_FEATURE_BLE) { TRACE("    Bluetooth LE"); };
   if (features & CHIP_FEATURE_BT) { TRACE("    Bluetooth Classic"); };
   if (features & CHIP_FEATURE_IEEE802154) { TRACE("    IEEE 802.15.4"); };
+#if defined(CHIP_FEATURE_EMB_PSRAM)
   if (features & CHIP_FEATURE_EMB_PSRAM) { TRACE("    embedded psram"); };
+#endif
 
   TRACE("  cores: %d", chip_info.cores);
   TRACE("  revision: %d", chip_info.revision);

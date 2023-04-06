@@ -21,6 +21,11 @@
 
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
+
+#define DATA_PIN _pins[0]
+#define CLOCK_PIN _pins[1]
+
+
 /* ===== Static factory function ===== */
 
 /**
@@ -34,9 +39,63 @@ Element *APA102Element::create() {
 
 /* ===== Strip specific function ===== */
 
+void APA102Element::_sendByte(uint8_t b) {
+  uint8_t dataPin = DATA_PIN;
+  uint8_t clockPin = CLOCK_PIN;
+
+  digitalWrite(dataPin, (b & 0b10000000) > 0);
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(clockPin, LOW);
+  digitalWrite(dataPin, (b & 0b01000000) > 0);
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(clockPin, LOW);
+  digitalWrite(dataPin, (b & 0b00100000) > 0);
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(clockPin, LOW);
+  digitalWrite(dataPin, (b & 0b00010000) > 0);
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(clockPin, LOW);
+  digitalWrite(dataPin, (b & 0b00001000) > 0);
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(clockPin, LOW);
+  digitalWrite(dataPin, (b & 0b00000100) > 0);
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(clockPin, LOW);
+  digitalWrite(dataPin, (b & 0b00000010) > 0);
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(clockPin, LOW);
+  digitalWrite(dataPin, (b & 0b00000001) > 0);
+  digitalWrite(clockPin, HIGH);
+  digitalWrite(clockPin, LOW);
+}
+
+
 void APA102Element::show() {
   TRACE("show(%d)", _count);
   StripeElement::show();
+
+  // brightness byte
+  int b = 0xF0 + (_brightness * 32 / 100);
+
+  _sendByte(0);
+  _sendByte(0);
+  _sendByte(0);
+  _sendByte(0);
+
+  for (int i = 0; i < _count; i++) {
+    uint32_t col = pixels[i];
+    _sendByte(b);
+    _sendByte(col & 0x00FF);
+    _sendByte((col >> 8) & 0x00FF);
+    _sendByte((col >> 16) & 0x00FF);
+  }
+
+  _sendByte(0xFF);
+  _sendByte(0xFF);
+  _sendByte(0xFF);
+  _sendByte(0xFF);
+
+
 }  // show()
 
 
@@ -45,9 +104,21 @@ void APA102Element::show() {
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool APA102Element::set(const char *name, const char *pValue) {
-  TRACE("set %s=%s", name, pValue);
-  bool ret = StripeElement::set(name, pValue);
+bool APA102Element::set(const char *name, const char *value) {
+  TRACE("set %s=%s", name, value);
+  bool ret = true;
+
+  if (StripeElement::set(name, value)) {
+    // all done
+  } else if (_stricmp(name, "datapin") == 0) {
+    DATA_PIN = _atopin(value);
+
+  } else if (_stricmp(name, "clockpin") == 0) {
+    CLOCK_PIN = _atopin(value);
+
+  } else {
+    ret = false;
+  }  // if
 
   return (ret);
 }  // set()
@@ -58,6 +129,13 @@ bool APA102Element::set(const char *name, const char *pValue) {
  */
 void APA102Element::start() {
   StripeElement::start();
+  uint8_t dataPin = DATA_PIN;
+  uint8_t clockPin = CLOCK_PIN;
+
+  pinMode(dataPin, OUTPUT);
+  digitalWrite(dataPin, LOW);
+  pinMode(clockPin, OUTPUT);
+  digitalWrite(clockPin, LOW);
 }  // start()
 
 

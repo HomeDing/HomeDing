@@ -62,6 +62,8 @@ public:
   void show();
 
 private:
+  void _sendByte(uint8_t b);
+  
 };
 
 

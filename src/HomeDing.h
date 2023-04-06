@@ -283,6 +283,10 @@ extern Board homeding;
 #include <light/NeoElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_APA102
+#include <light/APA102Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_MY9291
 #include "light/MY9291Element.h"
 #endif

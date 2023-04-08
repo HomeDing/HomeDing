@@ -19,7 +19,7 @@
 
 #include <light/APA102Element.h>
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 
 #define DATA_PIN _pins[0]
@@ -42,6 +42,8 @@ Element *APA102Element::create() {
 void APA102Element::_sendByte(uint8_t b) {
   uint8_t dataPin = DATA_PIN;
   uint8_t clockPin = CLOCK_PIN;
+
+  // Serial.printf("%02x ", b);
 
   digitalWrite(dataPin, (b & 0b10000000) > 0);
   digitalWrite(clockPin, HIGH);
@@ -71,11 +73,11 @@ void APA102Element::_sendByte(uint8_t b) {
 
 
 void APA102Element::show() {
-  TRACE("show(%d)", _count);
+  TRACE("apa102:show(%d) %d", _count, _brightness);
   StripeElement::show();
 
-  // brightness byte
-  int b = 0xF0 + (_brightness * 32 / 100);
+  // brightness byte 0xE0 + 0..31
+  int b = 0xE0 | (_brightness * 31 / 100);
 
   _sendByte(0);
   _sendByte(0);
@@ -90,11 +92,13 @@ void APA102Element::show() {
     _sendByte((col >> 16) & 0x00FF);
   }
 
+  // _sendByte(0); _sendByte(0); _sendByte(0); _sendByte(0);
   _sendByte(0xFF);
   _sendByte(0xFF);
   _sendByte(0xFF);
   _sendByte(0xFF);
 
+  // Serial.println();
 
 }  // show()
 
@@ -105,7 +109,7 @@ void APA102Element::show() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool APA102Element::set(const char *name, const char *value) {
-  TRACE("set %s=%s", name, value);
+  TRACE("apa102::set %s=%s", name, value);
   bool ret = true;
 
   if (StripeElement::set(name, value)) {

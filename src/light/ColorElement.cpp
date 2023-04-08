@@ -48,7 +48,7 @@ Element *ColorElement::create() {
  * @param  hue 0...1535 (6 * 256).
  */
 // uint32_t hslColor(int hue, int saturation = 255, int lightness = 128) {
-uint32_t hslColor(int hue) {
+uint32_t ColorElement::hslColor(int hue) {
   hue = hue % MAX_HUE;
 
   // resulting colors
@@ -137,6 +137,7 @@ bool ColorElement::set(const char *name, const char *value) {
 
     Element *e = _board->getElementById(value);
     if (e) {
+      TRACE("  add(%s)", e->id);
       _lightElements.push_back(static_cast<LightElement *>(e));
     }
 
@@ -244,9 +245,11 @@ void ColorElement::loop() {
   }
 
   if ((nextValue != _value) || _needUpdate) {
-    // send to linked light elements
     int num = _lightElements.size();
+    // send to linked light elements
+    TRACE("update %d", num);
     for (int n = 0; n < num; n++) {
+      TRACE(" %d %s", n, _lightElements[n]->id);
       _lightElements[n]->setColor(nextValue, _brightness);
     }
 

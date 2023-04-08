@@ -48,6 +48,12 @@ public:
    */
   static bool registered;
 
+  static const int MAX_HUE = (6 * 256);
+
+  /// @brief calculate a color value by hue.
+  /// @param hue hue of the calculated value
+  /// @return color
+  static uint32_t hslColor(int hue);
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -75,9 +81,9 @@ private:
     _min = 0,      // minimum value
     _default = 0,  // default value
 
-    fix = 0,       // take inbound value for output
-    fade = 1,      // fade to inbound value from current value
-    wheel = 2,     // single color output cycling through whole hue cycle
+    fix = 0,    // take inbound value for output
+    fade = 1,   // fade to inbound value from current value
+    wheel = 2,  // single color output cycling through whole hue cycle
     pulse = 3,
 
     _max = 3  // maximum value

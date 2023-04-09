@@ -20,6 +20,10 @@
 #include <HomeDing.h>
 #include <light/LightElement.h>
 
+#define STRIPE_DATA_PIN _pins[0]
+#define STRIPE_CLOCK_PIN _pins[1]
+
+
 /**
  * @brief StripeElement implements an Element to drive LED stripes with the WS2812 LEDs.
  */
@@ -56,8 +60,11 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
+  /**
+   * @brief update stripe with brightnes and colors from pixel array.
+   */
   virtual void show();
 
   enum class Mode {
@@ -97,4 +104,3 @@ protected:
   /** duration of animation / transition in msecs */
   unsigned long duration = 4000;
 };
-

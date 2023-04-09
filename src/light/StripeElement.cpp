@@ -89,6 +89,12 @@ bool StripeElement::set(const char *name, const char *pValue) {
   } else if ((!active) && (_stricmp(name, "count") == 0)) {
     _count = _atoi(pValue);
 
+  } else if (_stricmp(name, "datapin") == 0) {
+    STRIPE_DATA_PIN = _atopin(pValue);
+
+  } else if (_stricmp(name, "clockpin") == 0) {
+    STRIPE_CLOCK_PIN = _atopin(pValue);
+
   } else {
     ret2 = false;  // not handled
 

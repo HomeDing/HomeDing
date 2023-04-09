@@ -15,20 +15,22 @@
  * * 30.07.2019 created by Matthias Hertel
  * * 15.11.2019 some more modes implemented
  * * 28.12.2019 less blocked time in loop()
+ * * 09.04.2023 based on StripeElement
  */
 
 #pragma once
 
 #include <HomeDing.h>
 #include <light/LightElement.h>
+#include <light/StripeElement.h>
 
-class Adafruit_NeoPixel; // forward
+class Adafruit_NeoPixel;  // forward
 
 /**
  * @brief NeoElement implements an Element to drive LED stripes with the WS2812 LEDs.
  */
 
-class NeoElement : public LightElement {
+class NeoElement : public StripeElement {
 public:
   /**
    * @brief Factory function to create a NeoElement.
@@ -62,44 +64,13 @@ public:
   virtual void start() override;
 
   /**
-   * @brief Give some processing time to the timer to check for next action.
+   * @brief update stripe with brightnes and colors from pixel array.
    */
-  virtual void loop() override;
-
-
-  enum class Mode {
-    _min = 0,      // minimum value
-    _default = 0,  // default value
-
-    fix = 0,       // take inbound value for output
-    flow = 1,      // rainbow colors flowing
-
-    _max = 1  // maximum value
-  };
-
-  /** set a single color for all neopixels */
-  virtual void setColor(uint32_t color, int brightness) override;
+  void show() override;
 
 private:
-  /**
-   * @brief The actual mode.
-   */
-  Mode _mode = Mode::_default;
-
-  /** Number of pixels in the stripe */
-  int _count = 1;
-
   /** Config of pixels order */
   int _config;
-
-  /** Overall brightness in range 0...100 from LightElement */
-
-  /** data output pin is taken from _pins[0]*/
-
-  /** actual colors are stored in LightElement::value */
-
-  /** duration of animation / transition in msecs */
-  unsigned long duration = 4000;
 
   Adafruit_NeoPixel *_strip = (Adafruit_NeoPixel *)NULL;
 };

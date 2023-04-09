@@ -22,10 +22,6 @@
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 
-#define DATA_PIN _pins[0]
-#define CLOCK_PIN _pins[1]
-
-
 /* ===== Static factory function ===== */
 
 /**
@@ -40,8 +36,8 @@ Element *APA102Element::create() {
 /* ===== Strip specific function ===== */
 
 void APA102Element::_sendByte(uint8_t b) {
-  uint8_t dataPin = DATA_PIN;
-  uint8_t clockPin = CLOCK_PIN;
+  uint8_t dataPin = STRIPE_DATA_PIN;
+  uint8_t clockPin = STRIPE_CLOCK_PIN;
 
   // Serial.printf("%02x ", b);
 
@@ -105,50 +101,20 @@ void APA102Element::show() {
 
 /* ===== Element functions ===== */
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
-bool APA102Element::set(const char *name, const char *value) {
-  TRACE("apa102::set %s=%s", name, value);
-  bool ret = true;
-
-  if (StripeElement::set(name, value)) {
-    // all done
-  } else if (_stricmp(name, "datapin") == 0) {
-    DATA_PIN = _atopin(value);
-
-  } else if (_stricmp(name, "clockpin") == 0) {
-    CLOCK_PIN = _atopin(value);
-
-  } else {
-    ret = false;
-  }  // if
-
-  return (ret);
-}  // set()
-
 
 /**
  * @brief Activate the APA102Element.
  */
 void APA102Element::start() {
   StripeElement::start();
-  uint8_t dataPin = DATA_PIN;
-  uint8_t clockPin = CLOCK_PIN;
+  uint8_t dataPin = STRIPE_DATA_PIN;
+  uint8_t clockPin = STRIPE_CLOCK_PIN;
 
   pinMode(dataPin, OUTPUT);
   digitalWrite(dataPin, LOW);
   pinMode(clockPin, OUTPUT);
   digitalWrite(clockPin, LOW);
 }  // start()
-
-
-/**
- * @brief Give some processing time to the Element to check for next actions.
- */
-void APA102Element::loop() {
-  StripeElement::loop();
-}  // loop()
 
 
 // End

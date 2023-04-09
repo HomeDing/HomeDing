@@ -37,7 +37,7 @@ jobs:
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
               # version: 2.0.4 doesn't work with CLI caused by issue https://github.com/espressif/arduino-esp32/pull/7060
               version: 2.0.2
-          fqbn: esp32:esp32:esp32
+          fqbn: esp32:esp32:esp32:PartitionScheme=huge_app
           libraries: |
             - source-path: ./
             - name: OneWire
@@ -53,7 +53,6 @@ jobs:
             - name: Adafruit NeoPixel
             - name: Adafruit ST7735 and ST7789 Library
             - name: Adafruit SH110X
-            - name: Adafruit SSD1306
             - name: PubSubClient
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
             - source-url: "https://github.com/schreibfaul1/ESP32-audioI2S.git"

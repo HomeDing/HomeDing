@@ -57,6 +57,7 @@
 // Network Services
 // #define HOMEDING_INCLUDE_MQTT
 // #define HOMEDING_INCLUDE_WEATHERFEED
+#define HOMEDING_INCLUDE_SDMMC
 
 #include <Arduino.h>
 #include <HomeDing.h>

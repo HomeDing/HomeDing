@@ -133,13 +133,9 @@ bool ColorElement::set(const char *name, const char *value) {
     _duration = _scanDuration(value);
 
   } else if (_stristartswith(name, "connect[")) {
-    // direct connected element
-
-    Element *e = _board->getElementById(value);
-    if (e) {
-      TRACE("  add(%s)", e->id);
-      _lightElements.push_back(static_cast<LightElement *>(e));
-    }
+    // save ID to
+    _lightElementIDs.push_back(String(value));
+    TRACE("  con(%s, %d)", value, _lightElementIDs.size());
 
   } else if (_stricmp(name, "onvalue") == 0) {
     // save the actions
@@ -155,6 +151,26 @@ bool ColorElement::set(const char *name, const char *value) {
 
   return (ret);
 }  // set()
+
+
+/**
+ * @brief Activate the LightElement.
+ */
+void ColorElement::start() {
+  TRACE("Color::start()");
+  Element::start();
+
+  for (int n = 0; n < _lightElementIDs.size(); n++) {
+    // connected elements
+    Element *e = _board->getElementById(_lightElementIDs[n].c_str());
+    if (e) {
+      TRACE("  add(%s)", e->id);
+      _lightElements.push_back(static_cast<LightElement *>(e));
+      _lightElementIDs[n].clear();
+    }
+    _lightElementIDs.clear();
+  }  // for
+}  // start()
 
 
 /*

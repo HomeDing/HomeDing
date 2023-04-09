@@ -65,6 +65,11 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
+   * @brief Activate the Element.
+   */
+  virtual void start() override;
+
+  /**
    * @brief Give some processing time to the timer to check for next action.
    */
   virtual void loop() override;
@@ -129,6 +134,11 @@ private:
    * @brief The _valueAction holds the actions that is submitted when the color changes.
    */
   String _valueAction;
+
+  /**
+   * @brief linked elements by ID
+   */
+  std::vector<String> _lightElementIDs;  // IDs of linked elements, to be _lightElements on start
 
   /**
    * @brief linked elements

@@ -20,7 +20,7 @@
 #include <light/StripeElement.h>
 #include <light/ColorElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /** set a single color for all pixels in the stripe
  * execute directly, don't wait for loop().
@@ -28,11 +28,11 @@
 void StripeElement::setColor(uint32_t color, int brightness) {
   TRACE("stripe:setColor(x%08x, %d)", color, brightness);
 
-  _mode = Mode::single;  // all pixels with the same color.
   for (int n = 0; n < _count; n++) {
     pixels[n] = color;
   }
   _brightness = brightness;
+  _mode = Mode::show;  // all pixels with the same color.
   show();
   needUpdate = false;
 }  // setColor()
@@ -77,7 +77,7 @@ bool StripeElement::set(const char *name, const char *pValue) {
     _mode = Mode::fix;
 
   } else if (_stricmp(name, "mode") == 0) {
-    Mode m = (Mode)ListUtils::indexOf("fix,single,flow", pValue);
+    Mode m = (Mode)ListUtils::indexOf(StripeElement_ModeList, pValue);
     if ((m >= Mode::_min) && (m <= Mode::_max)) {
       _mode = m;
     }  // if
@@ -85,6 +85,9 @@ bool StripeElement::set(const char *name, const char *pValue) {
 
   } else if (_stricmp(name, "duration") == 0) {
     duration = _scanDuration(pValue);  // in msecs.
+
+  } else if (_stricmp(name, "effectLength") == 0) {
+    effectLength = _atoi(pValue);
 
   } else if ((!active) && (_stricmp(name, "count") == 0)) {
     _count = _atoi(pValue);
@@ -110,7 +113,7 @@ bool StripeElement::set(const char *name, const char *pValue) {
 void StripeElement::start() {
   LightElement::start();
 
-  TRACE("start config=%04x count=%d pin=%d", _config, _count, _pins[0]);
+  TRACE("start count=%d", _count);
 
   pixels = (uint32_t *)malloc(sizeof(uint32_t) * _count);
   memset(pixels, 0, sizeof(uint32_t) * _count);
@@ -122,7 +125,13 @@ void StripeElement::start() {
  */
 void StripeElement::loop() {
   if (pixels && needUpdate) {
-    if (_mode == Mode::fix) {
+
+    if (_mode == Mode::show) {
+      // no color changes.
+      show();
+      needUpdate = false;
+
+    } else if (_mode == Mode::fix) {
       TRACE("fix...");
       // get colors from value
       int len = ListUtils::length(value);
@@ -142,20 +151,19 @@ void StripeElement::loop() {
     } else if (_mode == Mode::flow && (duration > 0)) {
       TRACE("flow...");
 
-      // flowing color patterns
-      unsigned long now = millis();  // current (relative) time in msecs.
-      unsigned int hue = (now % duration) * ColorElement::MAX_HUE / duration;
+      if (enabled) {
+        // flowing color patterns
+        unsigned long now = millis();  // current (relative) time in msecs.
+        unsigned int hue = (now % duration) * ColorElement::MAX_HUE / duration;
+        unsigned int delta = ColorElement::MAX_HUE / effectLength;
 
-      for (uint16_t i = 0; i < _count; i++) {
-        // pixels[i] = ColorHSV((hue + i * 256 * 5) % ColorElement::MAX_HUE);
-        pixels[i] = ColorElement::hslColor(hue + i * ColorElement::MAX_HUE / 32);
+        for (uint16_t i = 0; i < _count; i++) {
+          pixels[i] = ColorElement::hslColor(hue);
+          hue += delta;
+        }
+        show();
       }
-      show();
-      needUpdate = true;
-
-    } else if (_mode == Mode::single) {
-      // show(); was done.
-      needUpdate = false;
+      needUpdate = enabled;
     }
   }  // if
 }  // loop()
@@ -171,6 +179,8 @@ void StripeElement::pushState(std::function<void(const char *pName, const char *
   } else {
     callback("mode", "fix");
   }
+  callback("duration", _printInteger(duration));
+  callback("effectlength", _printInteger(effectLength));
 }  // pushState()
 
 

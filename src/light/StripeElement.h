@@ -67,16 +67,20 @@ public:
    */
   virtual void show();
 
+#define StripeElement_ModeList "show,fix,flow"
+
   enum class Mode {
     _min = 0,      // minimum value
-    _default = 0,  // default value
 
-    fix = 0,     // take inbound value for output
-    single = 1,  // use a single color.
+    _default = 1,  // default value = fix
+
+    show = 0,  // use a single color.
+    fix = 1,     // take inbound value for output
     flow = 2,    // rainbow colors flowing
 
     _max = 2  // maximum value
   };
+ 
 
   /** set a single color for all pixels in the stripe */
   virtual void setColor(uint32_t color, int brightness) override;
@@ -90,9 +94,6 @@ protected:
   /** Number of pixels in the stripe */
   int _count = 1;
 
-  /** Config of pixels order */
-  int _config;
-
   /** Overall brightness in range 0...100 from LightElement */
 
   /** data output pin is taken from _pins[0]*/
@@ -100,6 +101,9 @@ protected:
   /** actual colors are stored in LightElement::value */
 
   uint32_t *pixels;  // List of RGB or WRGB values for LEDs
+
+  /** Effect length */
+  int effectLength = 32;
 
   /** duration of animation / transition in msecs */
   unsigned long duration = 4000;

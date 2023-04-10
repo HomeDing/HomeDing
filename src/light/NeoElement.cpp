@@ -26,13 +26,18 @@
 
 void NeoElement::show() {
   TRACE("neo:show(%d) %d", _count, _brightness);
-  StripeElement::show();
+  // StripeElement::show();
 
-  _strip->setBrightness(_brightness * 255 / 100);
+  if (enabled) {
+    _strip->setBrightness(_brightness * 255 / 100);
 
-  // set all PixelColors using pattern
-  for (int n = 0; n < _count; n++) {
-    _strip->setPixelColor(n, pixels[n]);
+    // set all PixelColors using pattern
+    for (int n = 0; n < _count; n++) {
+      _strip->setPixelColor(n, pixels[n]);
+    }
+
+  } else {
+    _strip->fill(0);
   }
   _strip->show();
 }  // show()
@@ -77,7 +82,7 @@ bool NeoElement::set(const char *name, const char *pValue) {
 
   } else {
     ret = false;  // not handled
-  }  // if
+  }               // if
 
   return (ret);
 }  // set()

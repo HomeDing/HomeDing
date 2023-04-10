@@ -234,8 +234,8 @@ void ColorElement::loop() {
   if ((_mode == Mode::fix) && (_value != _toValue)) {
     nextValue = _toValue;
 
-  } else if (now < lastTime + 100) {
-    // no new automation step more often than 10 times per second.
+  } else if (now < lastTime + 50) {
+    // no new automation step more often than 20 times per second.
     return;
 
   } else if ((_mode == Mode::fade) && (_value != _toValue)) {

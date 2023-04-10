@@ -25,7 +25,7 @@
 
 #include <hdfs.h>
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -121,7 +121,10 @@ void SDElement::start() {
   }
 #endif
 
-  _board->server->serveStatic(HDFS_SD_MOUNTNAME, *HomeDingFS::sdFS, "/", nullptr);
+  if (active) {
+    TRACE("serve..");
+    _board->server->serveStatic(HDFS_SD_MOUNTNAME, *HomeDingFS::sdFS, "/", nullptr);
+  }
 
 }  // start()
 

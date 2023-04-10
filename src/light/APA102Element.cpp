@@ -19,7 +19,7 @@
 
 #include <light/APA102Element.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 
 /* ===== Static factory function ===== */
@@ -70,7 +70,7 @@ void APA102Element::_sendByte(uint8_t b) {
 
 void APA102Element::show() {
   TRACE("apa102:show(%d) %d", _count, _brightness);
-  StripeElement::show();
+  // StripeElement::show();
 
   // brightness byte 0xE0 + 0..31
   int b = 0xE0 | (_brightness * 31 / 100);
@@ -81,7 +81,7 @@ void APA102Element::show() {
   _sendByte(0);
 
   for (int i = 0; i < _count; i++) {
-    uint32_t col = pixels[i];
+    uint32_t col = enabled ? pixels[i] : 0;
     _sendByte(b);
     _sendByte(col & 0x00FF);
     _sendByte((col >> 8) & 0x00FF);
@@ -95,7 +95,6 @@ void APA102Element::show() {
   _sendByte(0xFF);
 
   // Serial.println();
-
 }  // show()
 
 

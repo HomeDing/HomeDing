@@ -54,7 +54,7 @@ public:
 
 private:
   /** current step activated. */
-  int _step;
+  int _currentStep;
 
   /**
    * @brief The delay between executing the steps in msec

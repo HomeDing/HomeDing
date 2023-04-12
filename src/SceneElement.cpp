@@ -35,7 +35,7 @@ SceneElement::SceneElement() {
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
   _delay = 100;  // fast stepping to the next action.
-  _step = -1;    // no current step
+  _currentStep = -1;    // no current step
 }
 
 
@@ -49,22 +49,22 @@ bool SceneElement::set(const char *name, const char *value) {
 
   if (_stricmp(name, "start") == 0) {
     // start the scene at step[0]
-    _step = 0;
+    _currentStep = 0;
     _nextStepTime = 1;  // asap.
 
   } else if (_stricmp(name, "next") == 0) {
     // start next step in in scene
-    TRACE("_next cnt=%d, size=%d", _step, size);
-    if (_step < size) {
-      _step++;
+    TRACE("_next cnt=%d, size=%d", _currentStep, size);
+    if (_currentStep < size) {
+      _currentStep++;
       _nextStepTime = 1;  // asap.
     }
 
   } else if (_stricmp(name, "prev") == 0) {
     // start previous step in in scene
-    TRACE("_next cnt=%d, size=%d", _step, size);
-    if (_step > 0) {
-      _step--;
+    TRACE("_next cnt=%d, size=%d", _currentStep, size);
+    if (_currentStep > 0) {
+      _currentStep--;
       _nextStepTime = 1;  // asap.
     }
 
@@ -98,19 +98,19 @@ void SceneElement::loop() {
     TRACE("loop( %d, %d)", now, _nextStepTime);
 
     if ((now >= _nextStepTime) && (_board->queueIsEmpty())) {
-      if ((_step >= 0) && (_step < _steps.size())) {
-        TRACE("send(%d):<%s>", _step, _steps[_step].c_str());
-        _board->dispatch(_steps[_step]);
+      if ((_currentStep >= 0) && (_currentStep < _steps.size())) {
+        TRACE("send(%d):<%s>", _currentStep, _steps[_currentStep].c_str());
+        _board->dispatch(_steps[_currentStep]);
       }
       _nextStepTime = 0;
       if (_delay >= 0) {
         // send next action after some time
-        _step++;
-        if (_step < (int)(_steps.size())) {
+        _currentStep++;
+        if (_currentStep < (int)(_steps.size())) {
           _nextStepTime = now + _delay;
         } else {
           // end is reached -> deactivate
-          _step = -1;
+          _currentStep = -1;
         }
       }
     }

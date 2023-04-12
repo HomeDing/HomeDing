@@ -64,7 +64,7 @@ private:
   /**
    * @brief The time for the next step.
    */
-  unsigned long _nextStep;
+  unsigned long _nextStepTime;
 
   /**
    * @brief The _steps hold a list of actions.

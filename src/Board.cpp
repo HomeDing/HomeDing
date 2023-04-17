@@ -130,6 +130,18 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   _DeepSleepCount = 0;
 
 #if defined(ESP8266)
+  uint8_t mac[6];
+  char ssid[64];
+
+  WiFi.macAddress(mac);
+  snprintf(ssid, sizeof(ssid), "ESP-%02X%02X%02X", mac[3], mac[4], mac[5]);
+  deviceName = ssid;
+#elif defined(ESP32)
+
+#endif
+
+
+#if defined(ESP8266)
   rst_info *ri = ESP.getResetInfoPtr();
   _startup = (ri->reason == REASON_DEEP_SLEEP_AWAKE) ? BOARDSTARTUP::DEEPSLEEP : BOARDSTARTUP::NORMAL;
 
@@ -506,7 +518,7 @@ void Board::loop() {
 
     WiFi.mode(WIFI_STA);
     if (deviceName.isEmpty()) {
-      TRACE("no devicename configured");
+      TRACE("no deviceName configured");
     } else {
       WiFi.setHostname(deviceName.c_str());
     }

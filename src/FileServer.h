@@ -26,7 +26,7 @@
 #include <HomeDing.h>
 #include <hdfs.h>
 
-#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define JINFO(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Request Handler implementation for static files in file system.
@@ -90,7 +90,7 @@ public:
       // all done in upload. no other forms.
 
     } else if (requestMethod == HTTP_DELETE) {
-      TRACE("Delete %s", fName.c_str());
+      JINFO("Delete %s", fName.c_str());
       if (HomeDingFS::exists(fName)) {
         HomeDingFS::remove(fName);
         _board->filesVersion++;
@@ -117,11 +117,11 @@ public:
       fName = "/" + fName;
     }
 
-    TRACE("upload...<%s>", fName.c_str());
+    JINFO("upload...<%s>", fName.c_str());
     if (fName.indexOf('#') >= 0) {
-      TRACE("no #...");
+      JINFO("no #...");
     } else if (fName.indexOf('$') >= 0) {
-      TRACE("no $...");
+      JINFO("no $...");
 
     } else if (upload.status == UPLOAD_FILE_START) {
       if (HomeDingFS::exists(fName)) {

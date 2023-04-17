@@ -20,7 +20,9 @@
 
 #include <sensors/SensorElement.h>
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#if ! defined(TRACE)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#endif
 
 #define STATE_OFF 0   // just got power on
 #define STATE_WAIT 1  // initialized, warmup or wait time beween probes

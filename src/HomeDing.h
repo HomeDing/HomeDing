@@ -8,6 +8,11 @@
 #include <Element.h>          // Abstract Elements
 #include <ElementRegistry.h>  // Element Registry
 
+#include <core/Logger.h>
+
+// enable all TRACE at once here
+// #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+
 // some common property names
 
 extern const char *PROP_VALUE;
@@ -106,8 +111,6 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_DisplayDot
 #define HOMEDING_INCLUDE_DisplayLine
 #endif
-
-#include <core/Logger.h>
 
 // Register the Elements by including the definition with defined HOMEDING_REGISTER
 

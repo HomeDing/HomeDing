@@ -24,7 +24,9 @@
 
 #include <WiFiClient.h>
 
+#if ! defined(TRACE)
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#endif
 
 #define MAX_WAIT_FOR_RESPONSE 20
 #define DNS_TIMEOUT (uint32_t)4
@@ -115,7 +117,7 @@ void HttpClientElement::loop()
     TRACE("start DNS...");
     WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
     if (_IPaddr) {
-      TRACE(".got %d %s", b, _IPaddr.toString().c_str());
+      TRACE(".got %s", _IPaddr.toString().c_str());
       NEWSTATE(STATE::SENDING);
     } else {
       if (!_errNoHostSent) {

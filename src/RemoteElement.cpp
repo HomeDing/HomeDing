@@ -24,6 +24,10 @@
 
 #include <WiFiClient.h>
 
+#if ! defined(TRACE)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#endif
+
 /**
  * @brief static factory function to create a new RemoteElement.
  * @return RemoteElement* as Element* created element

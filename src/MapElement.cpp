@@ -20,7 +20,9 @@
 #include "MapElement.h"
 #include "MicroJsonParser.h"
 
+#if ! defined(TRACE)
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#endif
 
 /* ===== Static factory function ===== */
 
@@ -106,7 +108,7 @@ bool MapElement::set(const char *name, const char *value) {
   TRACE("set '%s'='%s'", name, value);
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     // find the right map entry (first that matches)
     _mapValue(value);
 
@@ -114,10 +116,16 @@ bool MapElement::set(const char *name, const char *value) {
     if (_stricmp(value, "string") == 0)
       _isStringType = true;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (_stricmp(name, "onValue") == 0) {
     _valueAction = value;
 
   } else if (_stristartswith(name, "rules[")) {
+    size_t i;
+    String iName;
+    _scanIndexParam(name, i, iName);
+TRACE(" iName:%s", iName.c_str());
+TRACE(" i:%d", i);
+
     // save all values and actions in the vectors.
     size_t mapIndex = _atoi(name + 6); // number starts after "rules["
     char *mapName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;
@@ -142,10 +150,10 @@ bool MapElement::set(const char *name, const char *value) {
       _mMin[mapIndex] = value;
       _mMax[mapIndex] = value;
 
-    } else if (_stricmp(mapName, PROP_VALUE) == 0) {
+    } else if (_stricmp(mapName, "value") == 0) {
       _mValue[mapIndex] = value;
 
-    } else if (_stricmp(mapName, ACTION_ONVALUE) == 0) {
+    } else if (_stricmp(mapName, "onValue") == 0) {
       _mActions[mapIndex] = value;
     } // if
 

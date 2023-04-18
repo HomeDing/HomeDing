@@ -25,7 +25,9 @@
 #include <rom/rtc.h>
 #endif
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#if !defined(TRACE)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#endif
 
 /* ===== Static factory function ===== */
 
@@ -175,12 +177,13 @@ String DiagElement::_handleDiag() {
 
 void DiagElement::_logChipDetails() {
   TRACE("Chip-Info:");
+  const char *s;
 
 #if defined(ESP8266)
+  // about ESP8266 chip variants...
   TRACE("  chip-id: 0x%08X", ESP.getChipId());
-
 #elif defined(ESP32)
-  const char *s;
+  // about ESP32 chip variants...
   esp_chip_info_t chip_info;
   esp_chip_info(&chip_info);
 
@@ -208,9 +211,13 @@ void DiagElement::_logChipDetails() {
   TRACE("  revision: %d", chip_info.revision);
 
   TRACE("ChipModel: %s", ESP.getChipModel());
+#endif
 
   TRACE("Flash:");
-  TRACE("  Size: %d", ESP.getFlashChipSize());
+#if defined(ESP8266)
+  TRACE("  ID: 0x%08x", ESP.getFlashChipId());
+#endif
+  TRACE("  Size: %d kByte", ESP.getFlashChipSize() / 1024);
 
   FlashMode_t flashMode = ESP.getFlashChipMode();
   s = "unknown";
@@ -218,12 +225,10 @@ void DiagElement::_logChipDetails() {
   if (flashMode == FM_QOUT) { s = "QOUT"; };
   if (flashMode == FM_DIO) { s = "DIO"; };
   if (flashMode == FM_DOUT) { s = "DOUT"; };
-  if (flashMode == FM_FAST_READ) { s = "FAST_READ"; };
-  if (flashMode == FM_SLOW_READ) { s = "SLOW_READ"; };
+  // if (flashMode == FM_FAST_READ) { s = "FAST_READ"; };
+  // if (flashMode == FM_SLOW_READ) { s = "SLOW_READ"; };
   TRACE("  Mode: %s(%d)", s, flashMode);
-
   TRACE("  Speed: %d", ESP.getFlashChipSpeed());
-#endif
 }
 
 /**

@@ -28,6 +28,7 @@
  * * 09.03.2021 less sharing class members in favor to methods.
  * * 02.09.2021 advertise web server in mDNS.
  * * 07.01.2023 ETAG support enabled permanently.
+ * * 19.04.2023 send to remotes using the host:type/id?name=value syntax
  */
 
 // The Board.h file also works as the base import file that contains some

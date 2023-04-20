@@ -44,39 +44,7 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
-  virtual bool set(const char *name, const char *value) override;
-
-  /**
-   * @brief Activate the RemoteElement.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
-  virtual void start() override;
-
-  /**
-   * @brief check for completed remote actions.
-   */
-  virtual void loop() override;
-
-  // return value is ignored for remote actions
-  // virtual void processHeader(String &key, String &value);
-  // virtual void processBody(char *value);
-
-  // pushState is not required because no dynamic properties
-
-private:
-
-  // configuration
-  String _remoteId; /** type/id of element in remote device. */
-
-  String _action; // next action to be sent
+  void dispatchAction(String &targetId, String &name, String &value);
 };
 
 #ifdef HOMEDING_REGISTER

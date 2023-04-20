@@ -17,6 +17,8 @@
 //   (status) 1: no SSID, 3: CONNECTED, 4: FAILED, 6: PASSWORD WRONG, 7: DISCONNECTED
 
 #include <Arduino.h>
+#include <HomeDing.h>
+
 #include <Board.h>
 #include <Element.h>
 
@@ -33,13 +35,15 @@ extern "C" {
 
 #include <ElementRegistry.h>
 
+#include <RemoteElement.h>
+
 #include "MicroJsonParser.h"
 #include "hdfs.h"
 
 #include <DNSServer.h>
 
-// use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+// use DISPTRACE for compiling with detailed TRACE output.
+#define BOARDTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
 #define NETTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
@@ -168,7 +172,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
 
 void Board::add(const char *id, Element *e) {
-  TRACE("add(%s)", id);
+  BOARDTRACE("add(%s)", id);
   _addedElements++;
 
   strcpy(e->id, id);
@@ -231,19 +235,19 @@ void Board::_checkNetState() {
  * @brief Add and config the Elements defined in the config files.
  */
 void Board::_addAllElements() {
-  TRACE("addAllElements()");
+  BOARDTRACE("addAllElements()");
   Element *_lastElem = NULL;  // last created Element
 
   MicroJson *mj = new MicroJson(
     [this, &_lastElem](int level, char *path, char *value) {
-      // TRACE("callback %d %s =%s", level, path, value ? value : "-");
+      // BOARDTRACE("callback %d %s =%s", level, path, value ? value : "-");
       hd_yield();
 
       if (level == 1) {
 
       } else if (level == 2) {
         // create new element
-        TRACE("new %s", path);
+        BOARDTRACE("new %s", path);
         // extract type name
         char typeName[32];
 
@@ -272,7 +276,7 @@ void Board::_addAllElements() {
         // Search 2. slash as starting point for name to include 3. level
         char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
         name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
-        TRACE(" (%s) %s=%s", path, name, value ? value : "-");
+        BOARDTRACE(" (%s) %s=%s", path, name, value ? value : "-");
         // add a parameter to the last Element
         _lastElem->set(name, value);
       }  // if
@@ -293,7 +297,7 @@ void Board::_addAllElements() {
 
 
 void Board::start(Element_StartupMode startupMode) {
-  // TRACE("start(%d)", startupMode);
+  // BOARDTRACE("start(%d)", startupMode);
 
   // make elements active that match
   Element *l = _elementList;
@@ -301,7 +305,7 @@ void Board::start(Element_StartupMode startupMode) {
 
     if ((!l->active) && (l->startupMode <= startupMode)) {
       // start element when not already active
-      TRACE("starting %s...", l->id);
+      BOARDTRACE("starting %s...", l->id);
       l->setup();  // one-time initialization
       l->start();  // start...
       hd_yield();
@@ -421,7 +425,7 @@ void Board::loop() {
   } else if (boardState == BOARDSTATE::LOAD) {
     // load all config files and create+start elements
     _addAllElements();
-    TRACE("Elements created.");
+    BOARDTRACE("Elements created.");
     if (!_elementList) {
       Logger::logger_level = LOGGER_LEVEL_TRACE;
       // no element defined, so allow configuration in any case.
@@ -514,17 +518,17 @@ void Board::loop() {
 
 
   } else if (boardState == BOARDSTATE::CONNECT) {
-    TRACE("connect...");
+    BOARDTRACE("connect...");
 
     WiFi.mode(WIFI_STA);
     if (deviceName.isEmpty()) {
-      TRACE("no deviceName configured");
+      BOARDTRACE("no deviceName configured");
     } else {
       WiFi.setHostname(deviceName.c_str());
     }
     // get effective Hostname
     deviceName = WiFi.getHostname();
-    TRACE("deviceName=%s", deviceName.c_str());
+    BOARDTRACE("deviceName=%s", deviceName.c_str());
 
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
@@ -679,7 +683,7 @@ void Board::loop() {
       _mDnsEnabled = false;
     }
     if (_mDnsEnabled) {
-      TRACE("startup mdns... %s", deviceName.c_str());
+      BOARDTRACE("startup mdns... %s", deviceName.c_str());
 
 #if defined(ESP8266)
       MDNS.begin(deviceName.c_str());
@@ -710,7 +714,7 @@ void Board::loop() {
     server->serveStatic("/", *(HomeDingFS::rootFS), "/", cacheHeader.c_str());
 
     server->onNotFound([this]() {
-      TRACE("notFound: %s", server->uri().c_str());
+      BOARDTRACE("notFound: %s", server->uri().c_str());
       server->send(404, "text/html", FPSTR(respond404));
     });
 
@@ -767,14 +771,14 @@ void Board::loop() {
 
 // start deep sleep mode for given duration when idle.
 void Board::setSleepTime(unsigned long milliSeconds) {
-  TRACE("setSleepTime(%d)", milliSeconds);
+  BOARDTRACE("setSleepTime(%d)", milliSeconds);
   _deepSleepTime = milliSeconds;
 }  // setSleepTime()
 
 
 // start deep sleep mode when idle.
 void Board::startSleep() {
-  TRACE("startSleep");
+  BOARDTRACE("startSleep");
   _deepSleepStart = millis();
   if (_startup == BOARDSTARTUP::NORMAL) {
     // give a minute time to block deep sleep mode
@@ -785,7 +789,7 @@ void Board::startSleep() {
 
 // block any deep sleep until next reset.
 void Board::cancelSleep() {
-  TRACE("cancelSleep");
+  BOARDTRACE("cancelSleep");
   _deepSleepBlock = true;
 }  // cancelSleep()
 
@@ -795,12 +799,12 @@ Element *Board::findById(String &id) {
 }
 
 Element *Board::findById(const char *id) {
-  // TRACE("findById(%s)", id);
+  // BOARDTRACE("findById(%s)", id);
 
   Element *l = _elementList;
   while (l != NULL) {
     if (strcmp(l->id, id) == 0) {
-      // TRACE(" found:%s", l->id);
+      // BOARDTRACE(" found:%s", l->id);
       break;  // while
     }         // if
     l = l->next;
@@ -829,40 +833,61 @@ void Board::_queueAction(const String &action, const String &v) {
 
 // send a event out to the defined target.
 void Board::dispatchAction(String action) {
-  TRACE("dispatch %s", action.c_str());
+  BOARDTRACE("dispatch %s", action.c_str());
   // TRACE_START;
 
-  int pos1 = action.indexOf(ELEM_PARAMETER);
-  int pos2 = action.indexOf(ELEM_VALUE);
+  // [host:](type/id)?(param)[=val]
 
-  if (pos1 <= 0) {
-    LOGGER_ERR("No action given: %s", action.c_str());
+  int p;
+  String host, targetId, name, value;
 
+  p = action.indexOf(':');
+  if (p > 0) {
+    host = action.substring(0, p);
+    action.remove(0, p + 1);
+  }
+
+  int pParam = action.indexOf('?');
+  if (pParam > 0) {
+    targetId = action.substring(0, pParam);
+    targetId.toLowerCase();
   } else {
-    String targetName, name, value;
+    LOGGER_ERR("no action");
+    return;
+  }
 
-    targetName = action.substring(0, pos1);
-    targetName.toLowerCase();
+  int pValue = action.indexOf(ELEM_VALUE, pParam + 1);
+  if (pValue > 0) {
+    name = action.substring(pParam + 1, pValue);
+    value = action.substring(pValue + 1);
+  } else {
+    name = action.substring(pParam + 1);
+    value = "";
+  }
 
-    Element *target = findById(targetName);
+  if (!host.isEmpty()) {
+    // host:type/id?param=val
+    // send action over the network to host
+    String remoteID = "remote/" + host;
+    RemoteElement *target = (RemoteElement *)findById(remoteID);
 
     if (!target) {
-      LOGGER_ERR("dispatch target %s not found", targetName.c_str());
+      LOGGER_ERR("dispatch: %s not found", remoteID.c_str());
+    } else {
+      // also show action in log when target has trace loglevel
+      target->dispatchAction(targetId, name, value);
+    }
+
+  } else {
+    Element *target = findById(targetId);
+
+    if (!target) {
+      LOGGER_ERR("dispatch: %s not found", targetId.c_str());
 
     } else {
-      if (pos2 > 0) {
-        name = action.substring(pos1 + 1, pos2);
-        value = action.substring(pos2 + 1);
-      } else {
-        name = action.substring(pos1 + 1);
-        value = "";
-      }
-
       // also show action in log when target has trace loglevel
       Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action(%s)", action.c_str());
-
       bool ret = target->set(name.c_str(), value.c_str());
-
 
       if (!ret)
         LOGGER_ERR("Action '%s' was not accepted.", action.c_str());
@@ -923,19 +948,19 @@ void Board::deferSleepMode() {
 
 
 void Board::getState(String &out, const String &path) {
-  // TRACE("getState(%s)", path.c_str());
+  // BOARDTRACE("getState(%s)", path.c_str());
   String ret = "{";
   const char *cPath = path.c_str();
 
   Element *l = _elementList;
   while (l != NULL) {
-    // TRACE("  ->%s", l->id);
+    // BOARDTRACE("  ->%s", l->id);
     if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
       ret += '\"';
       ret += l->id;
       ret += "\":{";
       l->pushState([&ret](const char *name, const char *value) {
-        // TRACE("->%s=%s", name, value);
+        // BOARDTRACE("->%s=%s", name, value);
         ret.concat('\"');
         ret.concat(name);
         ret.concat("\":\"");
@@ -997,7 +1022,7 @@ time_t Board::getTimeOfDay() {
  * @brief Get a Element by typename. Returns the first found element.
  */
 Element *Board::getElement(const char *elementType) {
-  // TRACE("getElement(%s)", elementType);
+  // BOARDTRACE("getElement(%s)", elementType);
 
   String tn = elementType;
   tn.concat(ELEM_ID_SEPARATOR);
@@ -1010,7 +1035,7 @@ Element *Board::getElement(const char *elementType) {
     }         // if
     l = l->next;
   }  // while
-  // TRACE("found: %d", l);
+  // BOARDTRACE("found: %d", l);
   return (l);
 }  // getElement()
 
@@ -1019,14 +1044,14 @@ Element *Board::getElement(const char *elementType) {
  * @brief Get a Element by typename/id.
  */
 Element *Board::getElementById(const char *elementId) {
-  TRACE("getElementById(%s)", elementId);
+  BOARDTRACE("getElementById(%s)", elementId);
 
   Element *l = _elementList;
   while (l != NULL) {
     if (Element::_stricmp(l->id, elementId) == 0) { break; }
     l = l->next;
   }  // while
-  // TRACE("found: 0x%08x", l);
+  // BOARDTRACE("found: 0x%08x", l);
   return (l);
 }  // getElementById()
 

@@ -28,6 +28,9 @@
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 #endif
 
+// enable tracing the network activity
+#define NETTRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
 #define MAX_WAIT_FOR_RESPONSE 20
 #define DNS_TIMEOUT (uint32_t)4
 
@@ -96,7 +99,7 @@ void HttpClientElement::loop()
 
   if (_state == STATE::IDLE) {
     if (!_url.isEmpty()) {
-      // TRACE("new URL: %s", _url.c_str());
+      NETTRACE("new URL: %s", _url.c_str());
       NEWSTATE(STATE::GETIP);
     } // if
   } // if
@@ -114,10 +117,10 @@ void HttpClientElement::loop()
     _contentLength = 0;
 
     // ask for IP address
-    TRACE("start DNS...");
+    NETTRACE("start DNS...");
     WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
     if (_IPaddr) {
-      TRACE(".got %s", _IPaddr.toString().c_str());
+      NETTRACE(".got %s", _IPaddr.toString().c_str());
       NEWSTATE(STATE::SENDING);
     } else {
       if (!_errNoHostSent) {
@@ -138,7 +141,7 @@ void HttpClientElement::loop()
       request.replace("$1", _url);
       request.replace("$2", _host);
 
-      TRACE("request:\n%s", request.c_str());
+      NETTRACE("request:\n%s", request.c_str());
       _httpClient.write(request.c_str());
       _startTime = _board->getSeconds();
       NEWSTATE(STATE::CHECK);
@@ -165,7 +168,7 @@ void HttpClientElement::loop()
         break;
       }
       line.replace("\r", "");
-      // TRACE("raw: %s", line.c_str());
+      NETTRACE("head: %s", line.c_str());
 
       if (line.isEmpty()) {
         if (_contentLength) {
@@ -198,7 +201,7 @@ void HttpClientElement::loop()
       char *buffer = (char *)malloc(bufLen + 1);
       memset(buffer, 0, bufLen + 1);
       size_t r = _httpClient.readBytes(buffer, bufLen);
-      // TRACE("  body read %d from %d", r, bufLen);
+      // NETTRACE("  body read %d from %d", r, bufLen);
       _contentLength -= r;
       processBody(buffer);
       free(buffer);

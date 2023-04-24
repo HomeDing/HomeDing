@@ -70,9 +70,10 @@ bool DeviceElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "room") == 0) {
     _board->room = value;
 
+#if defined(ESP8266)
   } else if (_stricmp(name, "outputpower") == 0) {
-    // _board->outputPower = strtof(value, nullptr);
-    _board->outputPower = _atoi(value);
+    _board->outputPower = strtof(value, nullptr);
+#endif
 
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);

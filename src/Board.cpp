@@ -530,7 +530,9 @@ void Board::loop() {
     deviceName = WiFi.getHostname();
     BOARDTRACE("deviceName=%s", deviceName.c_str());
 
+#if defined(ESP8266)
     WiFi.setOutputPower(outputPower);
+#endif
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
 

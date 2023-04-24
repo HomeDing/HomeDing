@@ -52,6 +52,15 @@ All notable changes to this project will be documented in this file.
   Please note that caused by different processor functionality
   not all features and elements are supported for all processors.
 
+* The /$board endpoints have been removed.
+
+* **micro** example
+
+  This is not a real example but is used to flash small devices
+  with firmware for specific conditions.
+  See [micro example readme](/examples/micro/README.md)
+
+
 ## [0.9.0] - 2022-08-22
 
 ### Changes / Enhancements

@@ -429,8 +429,10 @@ public:
    */
   String deviceName;
 
+#if defined(ESP8266)
   /** Sending Power Level */
   float outputPower = 16.0;
+#endif
 
   /**
    * Start page of the device of no full UTL is given.

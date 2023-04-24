@@ -530,6 +530,7 @@ void Board::loop() {
     deviceName = WiFi.getHostname();
     BOARDTRACE("deviceName=%s", deviceName.c_str());
 
+    WiFi.setOutputPower(outputPower);
     WiFi.setAutoReconnect(true);
     _newState(BOARDSTATE::WAITNET);
 
@@ -627,6 +628,11 @@ void Board::loop() {
     LOGGER_JUSTINFO("connected to %s (%s mode)",
                     WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
     LOGGER_JUSTINFO("start http://%s/", name);
+
+    // Serial.println();
+    // WiFi.printDiag(Serial);
+    // NETTRACE("WiFi.RSSI: %d", WiFi.RSSI());
+    // Serial.println();
 
     if (WiFi.getMode() == WIFI_AP_STA) {
       WiFi.mode(WIFI_STA);  // after config mode, the AP needs to be closed down and Station Mode can start.

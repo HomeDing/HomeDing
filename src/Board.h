@@ -429,6 +429,9 @@ public:
    */
   String deviceName;
 
+  /** Sending Power Level */
+  float outputPower = 16.0;
+
   /**
    * Start page of the device of no full UTL is given.
    * Can be configured using the device element `homepage` property.

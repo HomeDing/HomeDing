@@ -43,9 +43,6 @@
 #include <MicroJsonComposer.h>
 #include <hdfs.h>
 
-// used for built-in files
-#define SVC_ANY "/$"
-
 // used for services
 #define API_ROUTE "/api/"
 
@@ -188,8 +185,7 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 {
   // LOGGER_JUSTINFO("HTTP: > %s", requestUri.c_str());
   bool can = ((requestMethod == HTTP_GET)              // only GET requests in the API
-              && (requestUri.startsWith(SVC_ANY)       // old api entries
-                  || requestUri.startsWith(API_ROUTE)  // new api entries
+              && (requestUri.startsWith(API_ROUTE)  // new api entries
                   || (requestUri == "/")               // handle redirect
                   || (_board->isCaptiveMode())));      // capt
 
@@ -223,10 +219,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   uri.toLowerCase();
   output.reserve(512);
 
-  if (uri.startsWith(SVC_ANY)) {
-    api = uri.substring(2);
-
-  } else if (uri.startsWith(API_ROUTE)) {
+  if (uri.startsWith(API_ROUTE)) {
     api = uri.substring(5);
   }
 

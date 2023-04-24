@@ -101,7 +101,8 @@ private:
   uint32_t _value = 0;
 
 
-  boolean _needUpdate = false;
+  boolean _needValueUpdate = false;
+  boolean _needBrightnessUpdate = false;
 
 
   /** @brief  The actual brightness output.

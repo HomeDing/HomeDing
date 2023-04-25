@@ -82,7 +82,7 @@ void DSTimeElement::_setDSTime(int adr, struct tm *t) {
   WireUtils::writeBuffer(adr, data, 8);
 }  // _setDSTime()
 
-// http://lcddevice/$board/dstime/0?time=2019-01-19%2018:35:00
+// http://lcddevice/api/state/dstime/0?time=2019-01-19%2018:35:00
 
 // set value using format "2019-02-19 15:13:31"
 void DSTimeElement::_setTime(const char *value) {

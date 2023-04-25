@@ -15,8 +15,9 @@
 
 #include "SelectElement.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-
+#if !defined(TRACE)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#endif
 
 // private functions
 

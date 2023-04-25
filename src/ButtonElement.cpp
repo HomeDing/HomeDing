@@ -35,8 +35,6 @@ Element *ButtonElement::create() {
   return (new ButtonElement());
 }  // create()
 
-// http://lcddevice/$board/neo/d3?color=0
-// http://lcddevice/$board/button/on?action=click
 
 /**
  * @brief Set a parameter or property to a new value or start an action.

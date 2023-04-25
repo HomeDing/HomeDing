@@ -54,7 +54,7 @@ bool DiagElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, "rtcmem") == 0) {
-    // log some heap information. using http://nodeding/$board/diag/0?rtcmem=1
+    // log some heap information. using http://nodeding/api/state/diag/0?rtcmem=1
 #if defined(ESP8266)
     // dump rtc Memory
     TRACE("===== RTCMEM =====");

@@ -194,7 +194,7 @@ void RadioElement::start() {
   } else {
     // Initialize the Radio
     radio.setup(RADIO_RESETPIN, _resetpin);
-    radio.setup(RADIO_SDAPIN, _board->I2cSda);  // SI4703 requires this, others ignore.
+    radio.setup(RADIO_MODEPIN, _board->I2cSda);  // SI4703 requires this, others ignore.
     radio.setup(RADIO_I2CADDRESS, 0);           //  use default or check some addresses
     if (_antenna) {
       radio.setup(RADIO_ANTENNA, _antenna);

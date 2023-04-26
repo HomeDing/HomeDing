@@ -140,7 +140,14 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   WiFi.macAddress(mac);
   snprintf(ssid, sizeof(ssid), "ESP-%02X%02X%02X", mac[3], mac[4], mac[5]);
   deviceName = ssid;
+
 #elif defined(ESP32)
+  uint8_t mac[6];
+  char ssid[64];
+
+  WiFi.macAddress(mac);
+  snprintf(ssid, sizeof(ssid), "esp32-%02x%02x%02x", mac[3], mac[4], mac[5]);
+  deviceName = ssid;
 
 #endif
 
@@ -845,17 +852,17 @@ void Board::dispatchAction(String action) {
   // TRACE_START;
 
   // [host:](type/id)?(param)[=val]
-
-  int p;
   String host, targetId, name, value;
 
-  p = action.indexOf(':');
-  if (p > 0) {
+  int p = action.indexOf(':');
+  int pParam = action.indexOf('?');
+
+  if ((p > 0) && (p < pParam)) {
     host = action.substring(0, p);
     action.remove(0, p + 1);
+    pParam -= (p + 1);
   }
 
-  int pParam = action.indexOf('?');
   if (pParam > 0) {
     targetId = action.substring(0, pParam);
     targetId.toLowerCase();

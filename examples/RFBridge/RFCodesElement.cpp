@@ -21,9 +21,9 @@
 
 #include <RFCodes.h>
 
+#if !defined(TRACE)
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
-
-/* ===== Define local constants and often used strings ===== */
+#endif
 
 
 /* ===== Define static class variables here. ====== */
@@ -35,6 +35,7 @@ String RFCodesElement::_receivedCode;
 
 bool RFCodesElement::_initialized = false;
 
+
 /* ===== Static factory function ===== */
 
 /**
@@ -43,11 +44,11 @@ bool RFCodesElement::_initialized = false;
  */
 Element *RFCodesElement::create() {
   return (new RFCodesElement());
-} // create()
+}  // create()
 
 
 RFCodesElement::RFCodesElement() {
-  _clearTime = 10 * 1000; // 10 seconds
+  _clearTime = 4 * 1000;  // 4 seconds
   _pinRx = NO_PIN;
   _pinTx = NO_PIN;
 }
@@ -65,10 +66,13 @@ void RFCodesElement::_receive(const char *newCode) {
 bool RFCodesElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
-    _sendValue = value; // will be sent in loop()
+  if (Element::set(name, value)) {
+    // ok.
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (_stricmp(name, "value") == 0) {
+    _sendValue = value;  // will be sent in loop()
+
+  } else if (_stricmp(name, "onValue") == 0) {
     _valueAction = value;
 
   } else if (_stricmp(name, "pinRx") == 0) {
@@ -77,18 +81,15 @@ bool RFCodesElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "pinTx") == 0) {
     _pinTx = _atopin(value);
 
-  } else if (_stricmp(name, "codeOn") == 0) {
-    _codeOn = value;
-
-  } else if (_stricmp(name, "codeOff") == 0) {
-    _codeOff = value;
+  } else if (_stricmp(name, "cleartime") == 0) {
+    _clearTime = _scanDuration(value);
 
   } else {
-    ret = Element::set(name, value);
-  } // if
+    ret = false;
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
@@ -101,16 +102,19 @@ void RFCodesElement::start() {
 
     sig.load(&RFCodes::it1);
     sig.load(&RFCodes::it2);
+    sig.load(&RFCodes::ev1527);
     // sig.load(&RFCodes::cw);
-    sig.dumpTable();
 
-    col.init(&sig, _pinRx, _pinTx); // input at D1 = pin #2 , output at D4, pin # 9
+    if (loglevel == LOGGER_LEVEL_TRACE)
+      sig.dumpTable();
+
+    col.init(&sig, _pinRx, _pinTx);  // inint protocos and pins
     sig.attachCallback(RFCodesElement::_receive);
     _initialized = true;
   }
 
   Element::start();
-} // start()
+}  // start()
 
 
 /**
@@ -118,7 +122,7 @@ void RFCodesElement::start() {
  */
 void RFCodesElement::loop() {
   Element::loop();
-  col.loop(); // process received bytes
+  col.loop();  // process received bytes, callback may occur
 
   if (!_sendValue.isEmpty()) {
     const char *v = _sendValue.c_str();
@@ -138,23 +142,24 @@ void RFCodesElement::loop() {
     }
     _receivedCode = "";
 
-  } else if ((!_lastReceivedCode.isEmpty()) && (_board->nowMillis - _receivedMillis >  _clearTime)) {
+  } else if ((!_lastReceivedCode.isEmpty()) && (_board->nowMillis - _receivedMillis > _clearTime)) {
+    TRACE("clear");
     _lastReceivedCode.clear();
     _receivedTime = 0;
   }
 
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void RFCodesElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _lastReceivedCode.c_str());
+  callback("value", _lastReceivedCode.c_str());
   callback("received", String(_receivedTime).c_str());
-} // pushState()
+}  // pushState()
 
 
 // End

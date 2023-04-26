@@ -58,12 +58,9 @@ WebServer server(80);
  */
 void setup(void) {
   Serial.begin(115200);
+  delay(3000);
 
-#ifdef NET_DEBUG
-  Serial.setDebugOutput(true);
-#else
   Serial.setDebugOutput(false);
-#endif
 
   // ----- setup the platform with webserver and file system -----
 

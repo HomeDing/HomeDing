@@ -18,6 +18,9 @@
  * * Debug Port: "Disabled"
  * * Debug Level: "None"
  * * MMU: 32+32 balanced
+ * * SSL Support: Basic SSL ciphers (lower ROM use)
+ * "board": "esp8266:esp8266:generic",
+ * "configuration": "xtal=80,vt=flash,exception=disabled,stacksmash=disabled,ssl=basic,mmu=3232,non32xfer=fast,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dout,eesz=1M128,led=2,sdk=nonosdk_190703,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=921600",
  *
  * There is minified WebUI available.
  *
@@ -49,6 +52,7 @@
 
 // Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
+#define HOMEDING_INCLUDE_REMOTE
 
 // Enable some Core Elements for small devices
 // This collection may be used in e.g. remote controllable plugs.
@@ -58,16 +62,16 @@
 #define HOMEDING_INCLUDE_DigitalIn
 #define HOMEDING_INCLUDE_DigitalOut
 
-#define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
-#define HOMEDING_INCLUDE_REMOTE
 #define HOMEDING_INCLUDE_RTCSTATE
 #define HOMEDING_INCLUDE_SCENE
+#define HOMEDING_INCLUDE_SELECT
 
 
 // Enable some Sensor Elements
+#define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_DHT
 #define HOMEDING_INCLUDE_BL0937
 

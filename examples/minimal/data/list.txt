@@ -1,9 +1,0 @@
-browserconfig.xml
-ding.htm
-favicon.svg
-icons.svg
-iotstyle.css
-micro.js
-microide.htm
-site.webmanifest
-updateicons.htm

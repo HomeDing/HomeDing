@@ -6,6 +6,15 @@
     "actions": ["onSysStart", "onStart"]
   },
 
+  "sdmmc": {
+    "sys": "true",
+    "properties": ["mmcD0", "mmcD1", "mmcD2", "mmcD3", "mmcCLK", "mmcCMD"]
+  },
+
+  "sd": {
+    "sys": "true"
+  },
+
   "element": {
     "properties": ["loglevel", "title", "description"],
     "events": ["start", "stop"]
@@ -94,8 +103,7 @@
 
   "remote": {
     "sys": "true",
-    "properties": ["host", "remoteid"],
-    "events": ["..."]
+    "properties": ["host"]
   },
 
   "rfcodes": {
@@ -228,6 +236,11 @@
     "actions": ["ontemperature", "onpressure"]
   },  
 
+  "bh1750": {
+    "properties": ["address", "mode", "factor", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["onvalue"]
+  },  
+
   "scd4x": {
     "icon": "dht",
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
@@ -245,7 +258,7 @@
   },
 
   "color": {
-    "properties": ["loglevel", "title", "description"],
+    "properties": [],
     "events": ["config", "value", "mode", "duration", "brightness"],
     "actions": ["onvalue", "onbrightness"]
   },
@@ -265,9 +278,14 @@
     "events": ["value", "enable", "brightness"]
   },
 
+  "apa102": {
+    "properties": ["datapin", "clockpin", "count"],
+    "events": ["value", "enable", "brightness", "duration", "effectlength"]
+  },
+
   "neo": {
-    "properties": ["pin", "duration", "count"],
-    "events": ["value", "enable", "mode", "brightness"]
+    "properties": ["datapin", "count"],
+    "events": ["value", "enable", "mode", "brightness", "duration", "effectlength"]
   },
 
   "alarm": {
@@ -297,7 +315,7 @@
 
   "time": {
     "sys": "true",
-    "properties": ["loglevel", "title", "description"],
+    "properties": [],
     "actions": ["onminute", "ontimestamp", "ontime", "ondate"]
   },
 
@@ -308,7 +326,7 @@
   },
 
   "serialcmd": {
-    "properties": ["description"],
+    "properties": [],
     "actions": ["preset0", "preset1", "preset2", "preset3"]
   },
 

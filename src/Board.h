@@ -172,7 +172,7 @@ class Board {
 
 public:
   // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
-  const char *version = "0.90";
+  const char *version = "0.9.5";
 
   // The build name defined by the main sketch e.g. "minimal", "standard", "radio"
   String build;

@@ -2,21 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.9.x] - unreleased
+<!-- ## [0.9.x] - unreleased -->
+
+## [0.9.7] - 2023-05-01 unreleased
 
 * updated Web UI files from Web project <https://github.com/HomeDing/WebFiles>.
 
 * [State Elements](https://homeding.github.io/elements/state.htm) documentation added.
 
-* [SDMMC Element](https://homeding.github.io/elements/sdmmc.htm) add files from sd card to web server.
+* [SDMMC Element](https://homeding.github.io/elements/sdmmc.htm) for ESP32 to add files from sd card to web server
+  using ESP32 specific sdmmc interface.
+  .
+* [SD Element](https://homeding.github.io/elements/sd.htm) add files from sd card to web server using the SPI interface.
 
 * ESP32-S3 Processor Support
+  
+  **Important** -- The SSDP discovery libraray for ESP32 must be installed manually
+  as it is not listed in the Arduino Library Manager.
+  It can be found at <https://github.com/luc-github/ESP32SSDP>
+  (download zip file and extract into the libraries folder or `git clone https://github.com/luc-github/ESP32SSDP`)
 
 * The Examples on [How to create and extend a new Element](https://homeding.github.io/steps/newelement.htm)
   have been moved into the [tutorial example](https://homeding.github.io/examples/tutorial.htm) folder.
 
   Documentation has been updated, see <https://homeding.github.io>.
-
 
 ### Changes / Enhancements
 
@@ -52,7 +61,7 @@ All notable changes to this project will be documented in this file.
   Please note that caused by different processor functionality
   not all features and elements are supported for all processors.
 
-* The /$board endpoints have been removed.
+* The /$board endpoints have been removed. Use the /api/** endpoints instead.
 
 * **micro** example
 

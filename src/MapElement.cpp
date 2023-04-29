@@ -20,8 +20,8 @@
 #include "MapElement.h"
 #include "MicroJsonParser.h"
 
-#if ! defined(TRACE)
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#if !defined(TRACE)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 #endif
 
 /* ===== Static factory function ===== */
@@ -32,7 +32,7 @@
  */
 Element *MapElement::create() {
   return (new MapElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -48,7 +48,7 @@ void MapElement::init(Board *board) {
   this->_mMax.reserve(2);
   this->_mValue.reserve(2);
   this->_mActions.reserve(2);
-} // init()
+}  // init()
 
 
 void MapElement::_mapValue(const char *value) {
@@ -58,15 +58,15 @@ void MapElement::_mapValue(const char *value) {
 
   // walk through the max values to find the last one that fits.
   for (int c = 0; c < mapSize; c++) {
-    bool ruleFits = true; // until we find it is not
+    bool ruleFits = true;  // until we find it is not
 
     // value lower than `min` ?
     if (_mMin[c].isEmpty()) {
       // value is always inside when no lower boundary is given
     } else if ((_isStringType) && _stricmp(value, _mMin[c].c_str()) < 0) {
-      ruleFits = false; // no match, value is too low
+      ruleFits = false;  // no match, value is too low
     } else if ((!_isStringType) && _atoi(value) < _mMin[c].toInt()) {
-      ruleFits = false; // no match, value is too low
+      ruleFits = false;  // no match, value is too low
     }
 
     // value higher than `max` ?
@@ -82,13 +82,13 @@ void MapElement::_mapValue(const char *value) {
       cFound = c;
       break;
     }
-  } // for
+  }  // for
 
   // TRACE("rule=%d", cFound);
 
   if (cFound < 0) {
     LOGGER_EERR("NO RULE FITS: '%s'", value);
-  } else if (cFound != _currentMapIndex) {
+  } else if ((cFound != _currentMapIndex) || (_resend)) {
     if (_mValue[cFound].isEmpty()) {
       _value = value;
     } else {
@@ -98,7 +98,7 @@ void MapElement::_mapValue(const char *value) {
     _currentMapIndex = cFound;
     _needUpdate = true;
   }
-} // _mapValue()
+}  // _mapValue()
 
 
 /**
@@ -112,22 +112,15 @@ bool MapElement::set(const char *name, const char *value) {
     // find the right map entry (first that matches)
     _mapValue(value);
 
-  } else if (_stricmp(name, "type") == 0) {
-    if (_stricmp(value, "string") == 0)
-      _isStringType = true;
-
-  } else if (_stricmp(name, "onValue") == 0) {
-    _valueAction = value;
-
   } else if (_stristartswith(name, "rules[")) {
     size_t i;
     String iName;
     _scanIndexParam(name, i, iName);
-TRACE(" iName:%s", iName.c_str());
-TRACE(" i:%d", i);
+    TRACE(" iName:%s", iName.c_str());
+    TRACE(" i:%d", i);
 
     // save all values and actions in the vectors.
-    size_t mapIndex = _atoi(name + 6); // number starts after "rules["
+    size_t mapIndex = _atoi(name + 6);  // number starts after "rules["
     char *mapName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;
 
     // LOGGER_EINFO("map[%d] '%s'='%s'", mapIndex, mapName, value);
@@ -138,7 +131,7 @@ TRACE(" i:%d", i);
       _mMax.resize(mapIndex + 2);
       _mValue.resize(mapIndex + 2);
       _mActions.resize(mapIndex + 2);
-    } // if
+    }  // if
 
     if (_stricmp(mapName, "min") == 0) {
       _mMin[mapIndex] = value;
@@ -155,14 +148,24 @@ TRACE(" i:%d", i);
 
     } else if (_stricmp(mapName, "onValue") == 0) {
       _mActions[mapIndex] = value;
-    } // if
+    }  // if
+
+  } else if (_stricmp(name, "type") == 0) {
+    if (_stricmp(value, "string") == 0)
+      _isStringType = true;
+
+  } else if (_stricmp(name, "onValue") == 0) {
+    _valueAction = value;
+
+  } else if (_stricmp(name, "resend") == 0) {
+    _resend = _atob(value);
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
@@ -174,16 +177,16 @@ void MapElement::loop() {
     _board->dispatch(_valueAction, _value);
     _needUpdate = false;
   }
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void MapElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, _value.c_str());
-} // pushState()
+}  // pushState()
 
 // End

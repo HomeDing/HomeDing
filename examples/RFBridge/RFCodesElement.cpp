@@ -22,7 +22,7 @@
 #include <RFCodes.h>
 
 #if !defined(TRACE)
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 #endif
 
 
@@ -144,7 +144,7 @@ void RFCodesElement::loop() {
 
   } else if ((!_lastReceivedCode.isEmpty()) && (_board->nowMillis - _receivedMillis > _clearTime)) {
     TRACE("clear");
-    _lastReceivedCode.clear();
+    _lastReceivedCode = "";
     _receivedTime = 0;
   }
 

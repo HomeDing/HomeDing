@@ -80,6 +80,9 @@ private:
 
   bool _isStringType;
 
+  // send out mapped value each time the same value is received.
+  bool _resend = true;
+
   // rules
   std::vector<String> _mMin;     // lower bound of the range (inclusive)
   std::vector<String> _mMax;     // higher bound of the range (inclusive)

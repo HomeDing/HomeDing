@@ -51,6 +51,11 @@ The library supports the following CPUs:
 
 More will follow as the library has no strong dependencies on the processor used.
 
+**Important** -- The SSDP discovery libraray for ESP32 must be installed manually
+as it is not listed in the Arduino Library Manager.
+It can be found at <https://github.com/luc-github/ESP32SSDP>
+(download zip file and extract into the libraries folder or `git clone https://github.com/luc-github/ESP32SSDP`)
+
 
 ## Provided examples
 
@@ -65,21 +70,30 @@ is implemented to support ESP8266 based devices with 1MB Flash
 like swtiches, sensors and lights.
 It contains a reduced set of elements and a small footprint Web-UI for small self-made and and off-the-shell devices.
 
-**DevDing** -- A extended standard setup that includes hints and tools for development of new elements.
+**DevDing** --
+An extended standard setup that includes hints and tools for development of new elements.
 
 **webradio** --
 The [WebRadio example](https://github.com/HomeDing/HomeDing/tree/develop/examples/webradio)
 is implemented especially for the ESP32 Wroover with PSRAM to build a Web Radio
 by using an Aduio library. This Web Radio can be controlled through the embedded web interface.
 
+**micro** --
+This is not a real example but is used to flash small devices
+with firmware for specific conditions.
+See [micro example readme](/examples/micro/README.md)
+
+**RFBridge** --
+The [RFBridge Example](https://homeding.github.io/examples/rfbridge.htm)** shows how
+to implement a RF433 bridge device sending and receiving 433MHz signals.
+
 <!--
 DashButton
-micro
 Probe
 radio
-RFBridge
 WordClock
 -->
+
 
 ## BSD License
 

@@ -82,9 +82,11 @@ bool BuiltinHandler::handle(WebServer &server, HTTPMethod requestMethod, String 
     // Bootstrap Page
     output = FPSTR(updateContent);
 
+#if ! defined(HD_MINIMAL)
   } else if (uri.startsWith("/$upload")) {
     // Bulk File Upload Page
     output = FPSTR(uploadContent);
+#endif
 
   } else {
     return(false);

@@ -257,10 +257,12 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     jc.addProperty("build", __DATE__);
     jc.addProperty("freeHeap", ESP.getFreeHeap());
 
+#if ! defined(HD_MINIMAL)
     jc.addProperty("flashSize", ESP.getFlashChipSize());
     jc.addProperty("coreVersion", String(_board->version));
     jc.addProperty("coreBuild", String(_board->build));
     jc.addProperty("mac", WiFi.macAddress().c_str());
+#endif
 
 #if defined(ESP8266)
     FSInfo fs_info;
@@ -275,8 +277,10 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);
 
+#if ! defined(HD_MINIMAL)
     // WIFI info
     jc.addProperty("ssid", WiFi.SSID());
+#endif
 
     jc.closeObject();
     output = jc.stringify();

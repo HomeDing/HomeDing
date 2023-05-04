@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-<!-- ## [0.9.x] - unreleased -->
+## [0.9.x] - unreleased
+
+The minimal and micro examples especially for ESP8266 based boards with 1 MByte Flash
+reduce buidling size by using the sketch.ino.globals.h fie to define a Marco "HD_MINIMAL".
+This is creating smaller bin files by removing some rarely needed functionality.
+
+
 
 ## [0.9.7] - 2023-05-01 unreleased
 

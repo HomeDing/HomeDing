@@ -59,12 +59,14 @@ private:
 
   // pin settings
 
+#if defined(ARDUINO_ESP32S3_DEV)
   int _mmc_d0_pin = -1;   // pin used for mmc data 0
   int _mmc_d1_pin = -1;   // pin used for mmc data 1
   int _mmc_d2_pin = -1;   // pin used for mmc data 2
   int _mmc_d3_pin = -1;   // pin used for mmc data 3
   int _mmc_clk_pin = -1;  // pin used for mmc spi clock
   int _mmc_cmd_pin = -1;  // pin used for mmc spi command
+#endif
 };
 
 /* ===== Register the Element ===== */

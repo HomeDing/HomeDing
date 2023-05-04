@@ -54,6 +54,7 @@ bool SDMMCElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done.
 
+#if defined(ARDUINO_ESP32S3_DEV)
   } else if (_stricmp(name, "mmcd0") == 0) {
     _mmc_d0_pin = _atopin(value);
 
@@ -71,6 +72,7 @@ bool SDMMCElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "mmccmd") == 0) {
     _mmc_cmd_pin = _atopin(value);
+#endif
 
   } else {
     ret = false;

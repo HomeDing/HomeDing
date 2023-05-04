@@ -81,7 +81,7 @@ void SDElement::start() {
 #if defined(ESP8266)
   // using the FS compartible SDFS class (not SD)
   SDFSConfig fileSystemConfig = SDFSConfig();
-  fileSystemConfig.setCSPin(D4);
+  fileSystemConfig.setCSPin(_csPin);
   fileSystemConfig.setAutoFormat(false);
   SDFS.setConfig(fileSystemConfig);
 
@@ -104,7 +104,7 @@ void SDElement::start() {
 
 
 #elif defined(ESP32)
-  if (!SD.begin()) {
+  if (!SD.begin(_csPin)) {
     TRACE("Card Mount Failed");
 
   } else {

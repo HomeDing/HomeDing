@@ -19,7 +19,7 @@
 
 #include <light/LightElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief Construct a new LightElement.
@@ -53,7 +53,7 @@ void LightElement::setColor(uint32_t color, int brightness) {
     needUpdate = true;
   }
 
-  if (needUpdate && pwmMode) {
+  if (needUpdate) {
     loop();
   }
 }  // setColor()
@@ -152,16 +152,12 @@ void LightElement::start() {
 
 
 /**
- * @brief Change color and brightness if needed.
+ * @brief Give some processing time for update of the output.
  */
 void LightElement::loop() {
   if ((needUpdate) && (pwmMode)) {
 
-    if (!enabled) {
-      _outColor = 0;
-    }
-
-    uint32_t color = _outColor;
+    uint32_t color = (enabled ? _outColor : 0);
 
     for (int n = _count - 1; n >= 0; n--) {
       int c = color & 0x00FF;

@@ -63,10 +63,7 @@ public:
    */
   virtual void start() override;
 
-  /**
-   * @brief direct function to show a color and brightness.
-   */
-  virtual void setColor(uint32_t color, int brightness);
+  virtual void loop() override;
 
 private:
     // _pins[0] is used as datapin

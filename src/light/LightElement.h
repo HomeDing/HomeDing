@@ -101,6 +101,11 @@ protected:
   int _brightness = 50; // percent
 
   /**
+   * @brief The actual output color as binary value.
+   */
+  uint32_t _outColor;
+
+  /**
    * @brief allow direct PWN output for driving LEDs.
    */
   bool pwmMode = false;
@@ -119,13 +124,9 @@ protected:
 
 
 private:
-  /** Number of pixels in the stripe, set by the number of GPIO pins in then pin property. */
+  /** Number of colors / pwm outputs, set by the number of GPIO pins in then pin property. */
   int _count = 0;
 
-  /**
-   * @brief The actual output color as binary value.
-   */
-  uint32_t _outColor;
 };
 
 /* ===== Register the Element ===== */

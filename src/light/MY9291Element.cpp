@@ -90,23 +90,27 @@ void MY9291Element::start() {
 }  // start()
 
 
-void MY9291Element::setColor(uint32_t color, int brightness) {
-  LightElement::setColor(color, brightness);
+/**
+ * @brief Give some processing time for update of the output.
+ */
+void MY9291Element::loop() {
+  if (needUpdate) {
+    uint32_t color = (enabled ? _outColor : 0);
 
-  if (!enabled) {
-    color = 0;
-  }
-  int white = (color & 0xFF000000) >> 24;
-  int red = (color & 0x00FF0000) >> 16;
-  int green = (color & 0x0000FF00) >> 8;
-  int blue = (color & 0x000000FF);
+    int white = (color & 0xFF000000) >> 24;
+    int red = (color & 0x00FF0000) >> 16;
+    int green = (color & 0x0000FF00) >> 8;
+    int blue = (color & 0x000000FF);
 
-  _my92xx->setState(true);
-  _my92xx->setChannel(0, red * _brightness / 100);
-  _my92xx->setChannel(1, green * _brightness / 100);
-  _my92xx->setChannel(2, blue * _brightness / 100);
-  _my92xx->setChannel(3, white);
-  _my92xx->update();
-}  // setOutput()
+    _my92xx->setState(true);
+    _my92xx->setChannel(0, red * _brightness / 100);
+    _my92xx->setChannel(1, green * _brightness / 100);
+    _my92xx->setChannel(2, blue * _brightness / 100);
+    _my92xx->setChannel(3, white);
+    _my92xx->update();
+  }  // if
+  LightElement::loop();
+  // needUpdate = false;
+}  // loop()
 
 #endif

@@ -57,7 +57,8 @@ jobs:
           sketch-paths: |
             - 'examples/standard'
             - 'examples/tutorial'
-            - 'examples/minimal'
+            - 'examples/plug'
+            - 'examples/bulb'
             - 'examples/RFBridge'
 
           # size-report-sketch: 'ConnectionHandlerDemo'

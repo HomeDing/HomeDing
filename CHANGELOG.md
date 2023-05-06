@@ -4,9 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.x] - unreleased
 
-The minimal and micro examples especially for ESP8266 based boards with 1 MByte Flash
-reduce buidling size by using the sketch.ino.globals.h fie to define a Marco "HD_MINIMAL".
-This is creating smaller bin files by removing some rarely needed functionality.
+The minimal example was split into **plug** and **bulb**.
+
+These [Minimal Examples](https://github.com/HomeDing/HomeDing/tree/develop/examples/minimal)
+are implemented to support ESP8266 based devices with 1MB Flash like swiches and lights.
+They contain a reduced set of elements for the specific use-case and a small footprint Web-UI.
+These work well with small self-made and and off-the-shell devices.
+
+The micro example is especially for ESP8266 based boards with 1 MByte Flash only
+to support a 2-step ´firmware update.
+It can be flashed on a devices even when memory is low for a regular update.
+After the micro example is flashed a bigger firmware can be flashed.
+
+Sime examples also have a \<sketch\>.ino.globals.h fie to define a Marco "HD_MINIMAL".
+This is causing smaller bin files by removing some rarely needed functionality.
 
 
 

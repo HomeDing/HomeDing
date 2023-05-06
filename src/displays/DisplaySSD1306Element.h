@@ -50,5 +50,5 @@ public:
 #ifdef HOMEDING_REGISTER
 // Register the DisplaySSD1306Element onto the ElementRegistry.
 bool DisplaySSD1306Element::registered =
-  ElementRegistry::registerElement("DisplaySSD1306", DisplaySSD1306Element::create);
+  ElementRegistry::registerElement("displaySSD1306", DisplaySSD1306Element::create);
 #endif

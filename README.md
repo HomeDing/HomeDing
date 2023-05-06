@@ -64,11 +64,11 @@ The HomeDing library can be used for a broad variety of IoT devices partially sh
 **standard** -- Full featured firmware containing all most-used stable elements like standard I/O, sensors,
 light drivers and displays. Runs well on a 4MB Flash with all supported processors
 
-**minimal** -- 
-The [minimal Example](https://github.com/HomeDing/HomeDing/tree/develop/examples/minimal)
-is implemented to support ESP8266 based devices with 1MB Flash
-like swtiches, sensors and lights.
-It contains a reduced set of elements and a small footprint Web-UI for small self-made and and off-the-shell devices.
+**plug** and **bulb** -- 
+These [Minimal Examples](https://github.com/HomeDing/HomeDing/tree/develop/examples/minimal)
+are implemented to support ESP8266 based devices with 1MB Flash like swiches and lights.
+They contain a reduced set of elements for the specific use-case and a small footprint Web-UI.
+These work well with small self-made and and off-the-shell devices.
 
 **DevDing** --
 An extended standard setup that includes hints and tools for development of new elements.

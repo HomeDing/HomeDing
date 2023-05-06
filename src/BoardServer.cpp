@@ -257,10 +257,10 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     jc.addProperty("build", __DATE__);
     jc.addProperty("freeHeap", ESP.getFreeHeap());
 
-#if ! defined(HD_MINIMAL)
     jc.addProperty("flashSize", ESP.getFlashChipSize());
     jc.addProperty("coreVersion", String(_board->version));
     jc.addProperty("coreBuild", String(_board->build));
+#if ! defined(HD_MINIMAL)
     jc.addProperty("mac", WiFi.macAddress().c_str());
 #endif
 

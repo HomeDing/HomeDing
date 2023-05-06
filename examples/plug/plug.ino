@@ -1,15 +1,11 @@
 /**
- * @file Minimal.ino
- * @brief Minimal Sketch that uses the HomeDing Library to implement Things attached the
- * Internet.
+ * @file Plug.ino
+ * @brief Minimal Sketch that uses the HomeDing Library to implement relay based switches and sockets
+ * based on the ESP8266 Processor.
  *
  * The use-case covered with this Sketch is to compile a small firmware
  * with the elements for a devices with 1MByte flash without displays like
  * * switchable plugs and sockets including capturing power consumption
- * * bulbs
- * * temperature sensors
- * * led stripe controllers with single color
- * * led stripe controllers with neopixel
  *
  * Compile with
  * * Board: Generic ESP8266 module
@@ -39,12 +35,8 @@
  * * 20.12.2019 updated from DevDing example
  * * 07.04.2019 updated from DevDing example, no sensor elements, no elements that need libraries.
  * * 10.02.2022 remove using SPIFFS in favour of LittleFS - saving code space.
+ * * 06.05.2023 specialized plug sketch derived from the former minimal example.
  */
-
-// ----- activatable debug options
-
-// #define DBG_TRACE // trace level for all elements
-// #define NET_DEBUG // show network event in output
 
 // ===== HomeDing Configuration : Enable Elements for the firmware
 
@@ -66,20 +58,9 @@
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
 #define HOMEDING_INCLUDE_RTCSTATE
-#define HOMEDING_INCLUDE_SCENE
-#define HOMEDING_INCLUDE_SELECT
 
-
-// Enable some Sensor Elements
-#define HOMEDING_INCLUDE_REFERENCE
-#define HOMEDING_INCLUDE_DHT
+// Enable Power meassurement elements
 #define HOMEDING_INCLUDE_BL0937
-
-// Enable Elements for LIGHT control
-#define HOMEDING_INCLUDE_COLOR
-#define HOMEDING_INCLUDE_LIGHT
-#define HOMEDING_INCLUDE_NEOPIXEL
-#define HOMEDING_INCLUDE_MY9291
 
 #include <Arduino.h>
 #include <HomeDing.h>
@@ -107,22 +88,9 @@ WebServer server(80);
 void setup(void) {
   Serial.begin(115200);
 
-#ifdef NET_DEBUG
-  Serial.setDebugOutput(true);
-#else
-  Serial.setDebugOutput(false);
-#endif
-
-#ifdef DBG_TRACE
-  // wait so the serial monitor can capture all output.
-  delay(3000);
-  // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
-#endif
-
   // ----- setup the platform with webserver and file system -----
 
-  homeding.init(&server, &LittleFS, "minimal");
+  homeding.init(&server, &LittleFS, "plug");
 
   // ----- adding web server handlers -----
 

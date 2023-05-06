@@ -1,11 +1,10 @@
 /**
  * @file bulb.ino
  * @brief Minimal Sketch that uses the HomeDing Library to implement WiFi bulbs
- * with the ESP8266 Processor.
+ * based on the ESP8266 Processor.
  *
  * The use-case covered with this Sketch is to compile a small firmware
  * with the elements for a devices with 1MByte flash without displays like
- * * switchable plugs and sockets including capturing power consumption
  * * bulbs
  * * led stripe controllers with single color
  * * led stripe controllers with neopixel
@@ -36,11 +35,6 @@
  * Changelog:
  * * 02.05.2023 bulb Example created from minimal sketch.
  */
-
-// ----- activatable debug options
-
-// #define DBG_TRACE // trace level for all elements
-// #define NET_DEBUG // show network event in output
 
 // ===== HomeDing Configuration : Enable Elements for the firmware
 
@@ -88,22 +82,9 @@ WebServer server(80);
 void setup(void) {
   Serial.begin(115200);
 
-#ifdef NET_DEBUG
-  Serial.setDebugOutput(true);
-#else
-  Serial.setDebugOutput(false);
-#endif
-
-#ifdef DBG_TRACE
-  // wait so the serial monitor can capture all output.
-  delay(3000);
-  // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
-  Logger::logger_level = LOGGER_LEVEL_TRACE;
-#endif
-
   // ----- setup the platform with webserver and file system -----
 
-  homeding.init(&server, &LittleFS, "minimal");
+  homeding.init(&server, &LittleFS, "bulb");
 
   // ----- adding web server handlers -----
 

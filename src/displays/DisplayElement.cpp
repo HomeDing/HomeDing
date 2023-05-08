@@ -20,7 +20,7 @@
 
 #include "DisplayElement.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Private functions ===== */
 
@@ -74,6 +74,12 @@ bool DisplayElement::set(const char *name, const char *value) {
     config.brightness = constrain(b, 0, 100);
     if (active && da) {
       da->setBrightness(config.brightness);
+    }
+
+  } else if (_stricmp(name, "background") == 0) {
+    config.backgroundColor = _atoColor(value);
+    if (active && da) {
+      da->setBackgroundColor(config.backgroundColor);
     }
 
   } else if (da) {
@@ -139,10 +145,10 @@ bool DisplayElement::set(const char *name, const char *value) {
     r = constrain(r, 0, 3);
     config.rotation = r * 90;
 
-  // some RGB displays require setting rgb color modes.. (st7735 variants)
-  // } else if (_stricmp(name, "colormode") == 0) {
-  //   int _colormode = ListUtils::indexOf("rgb,bgr", value);
-  //   TRACE("set %s=%d", name, _colormode);
+    // some RGB displays require setting rgb color modes.. (st7735 variants)
+    // } else if (_stricmp(name, "colormode") == 0) {
+    //   int _colormode = ListUtils::indexOf("rgb,bgr", value);
+    //   TRACE("set %s=%d", name, _colormode);
 
   } else {
     ret = Element::set(name, value);
@@ -150,6 +156,20 @@ bool DisplayElement::set(const char *name, const char *value) {
 
   return (ret);
 }  // set()
+
+
+/**
+ * @brief Activate the Element.
+ */
+void DisplayElement::start() {
+  Element::start();
+  DisplayAdapter *da = _board->display;
+
+  if (active && da) {
+    da->setBrightness(config.brightness);
+    da->setBackgroundColor(config.backgroundColor);
+  }
+}  // start()
 
 
 /**

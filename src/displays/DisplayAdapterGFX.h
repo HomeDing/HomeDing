@@ -9,6 +9,7 @@
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * -----
  * * 18.03.2022 created by Matthias Hertel
+ * * 08.05.2023 enable background color
  */
 
 #pragma once
@@ -34,6 +35,11 @@
 class DisplayAdapterGFX : public DisplayAdapter {
 public:
   ~DisplayAdapterGFX() = default;
+
+  DisplayAdapterGFX() {
+    backColor565 = COL565_BLACK;
+    drawColor565 = COL565_WHITE;
+  }
 
   bool start() override {
     // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
@@ -65,13 +71,11 @@ public:
       gfxDisplay->cp437(true);
       gfxDisplay->setRotation((conf->rotation / 90) % 4);
       _setTextHeight(conf->height > 64 ? 16 : 8);
-      backColor565 = COL565_BLACK;
-      drawColor565 = COL565_WHITE;
       clear();
       flush();
     }  // if
     return (true);
-  };  // init()
+  };   // init()
 
 
   /**
@@ -174,11 +178,19 @@ public:
   }  // loadFont()
 
 
-  virtual void setColor(uint32_t col) override {
+  virtual void setColor(const uint32_t col) override {
     DisplayAdapter::setColor(col);
     drawColor565 = col565(col);
-    // LOGGER_JUSTINFO("setColor: (%08x)=%08x", col, drawColor565);
+    LOGGER_JUSTINFO("setColor: (%08x)=%08x", col, drawColor565);
   };
+
+  virtual void setBackgroundColor(const uint32_t col) override {
+    DisplayAdapter::setBackgroundColor(col);
+    backColor565 = col565(col);
+    LOGGER_JUSTINFO("setBackgroundColor: (%08x)=%08x", col, backColor565);
+  };
+
+
 
 protected:
   /**

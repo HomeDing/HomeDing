@@ -66,7 +66,7 @@ public:
   virtual void setBrightness(UNUSED uint8_t bright){};
 
 
-  virtual void setColor(uint32_t col) {
+  virtual void setColor(const uint32_t col) {
     color = col;
   };
 
@@ -75,6 +75,7 @@ public:
     return (color);
   };
 
+  virtual void setBackgroundColor(const uint32_t col){};
 
   /**
    * @brief Clear a position or region.

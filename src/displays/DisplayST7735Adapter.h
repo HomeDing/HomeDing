@@ -48,17 +48,16 @@ public:
       display->setSPISpeed(40000000);
       display->invertDisplay(conf->invert);
       DisplayAdapterGFX::start();
+      display->invertDisplay(conf->invert);
     }  // if
     return (true);
-  };  // init()
+  };   // init()
 
 
-  virtual void setColor(uint32_t col) override {
+  virtual void setColor(const uint32_t col) override {
     // swap RGB to BGR
-    col = ((col & 0x00FF0000) >> 16)
-          | (col & 0x0000FF00)
-          | ((col & 0x000000FF) << 16);
-    DisplayAdapterGFX::setColor(col);
+    uint32_t col2 = ((col & 0x00FF0000) >> 16) | (col & 0x0000FF00) | ((col & 0x000000FF) << 16);
+    DisplayAdapterGFX::setColor(col2);
   };
 
 private:

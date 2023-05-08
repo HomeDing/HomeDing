@@ -143,7 +143,7 @@ public:
   };  // setBrightness
 
 
-  virtual void setColor(uint32_t UNUSED col) override{
+  virtual void setColor(const uint32_t UNUSED col) override{
     // LOGGER_JUSTINFO("no-setColor");
   };
 

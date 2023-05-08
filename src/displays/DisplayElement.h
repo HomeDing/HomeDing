@@ -31,6 +31,9 @@ struct DisplayConfig {
   /** Brightness of display 0...100 (percent) */
   int brightness = 80;
 
+  /** Background Color */
+  uint32_t backgroundColor = 0;
+
   /** Rotation of the display */
   int rotation = 0;
 
@@ -40,8 +43,8 @@ struct DisplayConfig {
   /** Pin to enable backlight etc. */
   int lightPin = -1;
 
-  /** Pin to reset the display chip */
-  bool invert = -false;
+  /** Pin to invert the display colors */
+  bool invert = false;
 
   /* ===== I2C interface ===== */
 
@@ -82,6 +85,11 @@ public:
    * could be executed.
    */
   virtual bool set(const char *name, const char *value) override;
+
+  /**
+   * @brief Activate the Element.
+   */
+  virtual void start() override;
 
   /**
    * @brief push the current value of all properties to the callback.

@@ -69,7 +69,7 @@ private:
   /**
    * @brief The _steps hold a list of actions.
    */
-  std::vector<String> _steps;
+  ArrayString _steps;
 };
 
 /* ===== Register the Element ===== */

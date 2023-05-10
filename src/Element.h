@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include <ListUtils.h>
+#include <ArrayString.h>
 
 // forward class declarations
 class Board;

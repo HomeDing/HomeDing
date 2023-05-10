@@ -66,12 +66,11 @@ bool WeatherFeedElement::set(const char *name, const char *value) {
     _scanIndexParam(name, index, iName);
 
     if (iName.equalsIgnoreCase("path")) {
-      if (index >= _paths.size()) _paths.resize(index + 1);
-      _paths[index] = value;
+      _paths.setAt(index, value);
 
     } else if (iName.equalsIgnoreCase("onvalue")) {
-      if (index >= _actions.size()) _actions.resize(index + 1);
-      _actions[index] = value;
+      _actions.setAt(index, value);
+
     }  // if
 
   } else {

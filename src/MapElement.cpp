@@ -42,12 +42,6 @@ Element *MapElement::create() {
 
 void MapElement::init(Board *board) {
   Element::init(board);
-
-  // create the map members with a reasonable size.
-  this->_mMin.reserve(2);
-  this->_mMax.reserve(2);
-  this->_mValue.reserve(2);
-  this->_mActions.reserve(2);
 }  // init()
 
 
@@ -61,20 +55,22 @@ void MapElement::_mapValue(const char *value) {
     bool ruleFits = true;  // until we find it is not
 
     // value lower than `min` ?
-    if (_mMin[c].isEmpty()) {
+    String v = _mMin[c];
+    if (v.isEmpty()) {
       // value is always inside when no lower boundary is given
-    } else if ((_isStringType) && _stricmp(value, _mMin[c].c_str()) < 0) {
+    } else if ((_isStringType) && _stricmp(value, v.c_str()) < 0) {
       ruleFits = false;  // no match, value is too low
-    } else if ((!_isStringType) && _atoi(value) < _mMin[c].toInt()) {
+    } else if ((!_isStringType) && _atoi(value) < v.toInt()) {
       ruleFits = false;  // no match, value is too low
     }
 
+    v = _mMax[c];
     // value higher than `max` ?
-    if (_mMax[c].isEmpty()) {
+    if (v.isEmpty()) {
       // value is always inside when no upper boundary is given
-    } else if ((_isStringType) && _stricmp(value, _mMax[c].c_str()) > 0) {
+    } else if ((_isStringType) && _stricmp(value, v.c_str()) > 0) {
       ruleFits = false;
-    } else if ((!_isStringType) && _atoi(value) > _mMax[c].toInt()) {
+    } else if ((!_isStringType) && _atoi(value) > v.toInt()) {
       ruleFits = false;
     }
 
@@ -88,11 +84,13 @@ void MapElement::_mapValue(const char *value) {
 
   if (cFound < 0) {
     LOGGER_EERR("NO RULE FITS: '%s'", value);
+
   } else if ((cFound != _currentMapIndex) || (_resend)) {
-    if (_mValue[cFound].isEmpty()) {
+    String v = _mValue[cFound];
+    if (v.isEmpty()) {
       _value = value;
     } else {
-      _value = _mValue[cFound];
+      _value = v;
     }
     TRACE("new Value=%s", _value.c_str());
     _currentMapIndex = cFound;
@@ -125,29 +123,22 @@ bool MapElement::set(const char *name, const char *value) {
 
     // LOGGER_EINFO("map[%d] '%s'='%s'", mapIndex, mapName, value);
 
-    if (mapIndex >= _mMax.size()) {
-      // request space for new index
-      _mMin.resize(mapIndex + 2);
-      _mMax.resize(mapIndex + 2);
-      _mValue.resize(mapIndex + 2);
-      _mActions.resize(mapIndex + 2);
-    }  // if
-
     if (_stricmp(mapName, "min") == 0) {
-      _mMin[mapIndex] = value;
+      _mMin.setAt(mapIndex, value);
 
     } else if (_stricmp(mapName, "max") == 0) {
-      _mMax[mapIndex] = value;
+      _mMax.setAt(mapIndex, value);
 
     } else if (_stricmp(mapName, "equal") == 0) {
-      _mMin[mapIndex] = value;
-      _mMax[mapIndex] = value;
+      _mMin.setAt(mapIndex, value);
+      _mMax.setAt(mapIndex, value);
 
     } else if (_stricmp(mapName, "value") == 0) {
-      _mValue[mapIndex] = value;
+      _mValue.setAt(mapIndex, value);
 
     } else if (_stricmp(mapName, "onValue") == 0) {
-      _mActions[mapIndex] = value;
+      _mActions.setAt(mapIndex, value);
+
     }  // if
 
   } else if (_stricmp(name, "type") == 0) {

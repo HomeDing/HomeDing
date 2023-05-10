@@ -16,8 +16,6 @@
  * * 06.06.2021 full implementation of rules.
  */
 
-#include <vector>
-
 /**
  * @brief MapElement implements...
  * @details
@@ -84,10 +82,10 @@ private:
   bool _resend = true;
 
   // rules
-  std::vector<String> _mMin;     // lower bound of the range (inclusive)
-  std::vector<String> _mMax;     // higher bound of the range (inclusive)
-  std::vector<String> _mValue;   // new value when rule is choosen
-  std::vector<String> _mActions; // actions when rule is choosen
+  ArrayString _mMin;     // lower bound of the range (inclusive)
+  ArrayString _mMax;     // higher bound of the range (inclusive)
+  ArrayString _mValue;   // new value when rule is choosen
+  ArrayString _mActions; // actions when rule is choosen
 
   /**
    * @brief The _valueAction holds the actions that is submitted when ...

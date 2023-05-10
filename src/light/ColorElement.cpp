@@ -137,7 +137,7 @@ bool ColorElement::set(const char *name, const char *value) {
 
   } else if (_stristartswith(name, "connect[")) {
     // save ID to
-    _lightElementIDs.push_back(String(value));
+    _lightElementIDs.push(value);
     TRACE("  con(%s, %d)", value, _lightElementIDs.size());
 
   } else if (_stricmp(name, "onvalue") == 0) {
@@ -160,19 +160,24 @@ bool ColorElement::set(const char *name, const char *value) {
  * @brief Activate the LightElement.
  */
 void ColorElement::start() {
-  TRACE("Color::start()");
+  TRACE("Color::start(%d)", _lightElementIDs.size());
   Element::start();
 
-  for (int n = 0; n < _lightElementIDs.size(); n++) {
+  uint16_t leSize = _lightElementIDs.size();
+  _lightElementsCount = 0;
+
+  _lightElements = (LightElement **)malloc(leSize * sizeof(LightElement *));
+
+  for (int n = 0; n < leSize; n++) {
     // connected elements
     Element *e = _board->getElementById(_lightElementIDs[n].c_str());
     if (e) {
       TRACE("  add(%s)", e->id);
-      _lightElements.push_back(static_cast<LightElement *>(e));
-      _lightElementIDs[n].clear();
+      _lightElements[_lightElementsCount++] = static_cast<LightElement *>(e);
     }
-    _lightElementIDs.clear();
   }  // for
+
+  _lightElementIDs.clear();
 }  // start()
 
 
@@ -267,10 +272,8 @@ void ColorElement::loop() {
   }
 
   if (_needValueUpdate || _needBrightnessUpdate) {
-    int num = _lightElements.size();
     // send to linked light elements
-    TRACE("update %d", num);
-    for (int n = 0; n < num; n++) {
+    for (int n = 0; n < _lightElementsCount; n++) {
       TRACE(" %d %s", n, _lightElements[n]->id);
       _lightElements[n]->setColor(nextValue, _brightness);
     }
@@ -285,8 +288,8 @@ void ColorElement::loop() {
       char sColor[38];
       sprintf(sColor, "x%08x", nextValue);
       _board->dispatch(_valueAction, sColor);
-      _needValueUpdate = false;
     }
+    _needValueUpdate = false;
     _value = nextValue;
   }
   lastTime = now;

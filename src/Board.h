@@ -531,7 +531,7 @@ private:
   /** next element that will be used in loop() */
   Element *_nextElement;
 
-  String _actionList;
+  ArrayString _actions;
 
   static Element *_registered;
 };

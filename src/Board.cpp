@@ -42,7 +42,7 @@ extern "C" {
 
 #include <DNSServer.h>
 
-// use DISPTRACE for compiling with detailed TRACE output.
+// use BOARDTRACE for compiling with detailed TRACE output.
 #define BOARDTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
@@ -62,10 +62,16 @@ DNSServer *dnsServer;
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
 
-const byte DNS_PORT = 53;
+// add you wifi network name and PassPhrase in the sketch or use WiFi Manager
 
 extern const char *ssid;
 extern const char *passPhrase;
+
+// week definitions when not defined aqnywhere else.
+const __attribute__((weak)) char *ssid = "";
+const __attribute__((weak)) char *passPhrase = "";
+
+// ---
 
 static const char respond404[] PROGMEM =
   "<html><head><title>File not found</title></head><body>File not found</body></html>";
@@ -95,11 +101,6 @@ RTC_DATA_ATTR bool _isWakeupStart = false;
 // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
 
 #endif
-
-// add you wifi network name and PassPhrase or use WiFi Manager
-const __attribute__((weak)) char *ssid = "";
-const __attribute__((weak)) char *passPhrase = "";
-
 
 /**
  * @brief Initialize a blank board.
@@ -371,22 +372,15 @@ void Board::loop() {
       }
     }  // if ! startComplete
 
-    // dispatch next action from _actionList if any
-    if (_actionList.length() > 0) {
+    // dispatch next action from _actions if any
+    if (!_actions.empty()) {
       _DeepSleepCount = 0;
-      String _lastAction;
-
-      // extract first action
-      int pos = _actionList.indexOf(ACTION_SEPARATOR);
-      if (pos > 0) {
-        _lastAction = _actionList.substring(0, pos);
-        _actionList.remove(0, pos + 1);
-      } else {
-        _lastAction = _actionList;
-        _actionList = (const char *)NULL;
-      }  // if
-      dispatchAction(_lastAction);
+      String a = _actions.pop();
+      BOARDTRACE("popped %s", a.c_str());
+      dispatchAction(a);
+      _actions.dump();
       return;
+    } else {
     }  // if
 
     // give some time to next active element
@@ -395,6 +389,7 @@ void Board::loop() {
     }  // if
     if (_nextElement) {
       if (_nextElement->active) {
+        // BOARDTRACE("loop %s", _nextElement->id);
         TRACE_START;
         _nextElement->loop();
         TRACE_END;
@@ -755,10 +750,11 @@ void Board::loop() {
     hd_yield();
     LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
+    // setup dns server using standard port
     dnsServer = new DNSServer();
     dnsServer->setTTL(300);
     dnsServer->setErrorReplyCode(DNSReplyCode::ServerFailure);
-    dnsServer->start(DNS_PORT, "*", apIP);
+    dnsServer->start(0, "*", apIP);
 
     server->begin();
 
@@ -831,7 +827,7 @@ Element *Board::findById(const char *id) {
 // ===== queue / process / dispatch actions =====
 
 bool Board::queueIsEmpty() {
-  return (_actionList.length() == 0);
+  return (_actions.empty());
 }
 
 
@@ -839,10 +835,8 @@ bool Board::queueIsEmpty() {
 void Board::_queueAction(const String &action, const String &v) {
   String tmp = action;
   tmp.replace("$v", v);
-
-  if (_actionList.length() > 0)
-    _actionList.concat(ACTION_SEPARATOR);
-  _actionList.concat(tmp);
+  BOARDTRACE("_queueAction %s", tmp.c_str());
+  _actions.push(tmp);
 }  // _queueAction
 
 

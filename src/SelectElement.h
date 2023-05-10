@@ -67,10 +67,10 @@ private:
   int _selected = -1;
 
   /// @brief List of keys.
-  std::vector<String> _keys;
+  ArrayString _keys;
 
   /// @brief List of values.
-  std::vector<String> _values;
+  ArrayString _values;
 
   /// @brief Action to be sent with key as a parameter
   String _keyAction;

@@ -34,8 +34,8 @@ Element *SceneElement::create() {
 SceneElement::SceneElement() {
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
-  _delay = 100;  // fast stepping to the next action.
-  _currentStep = -1;    // no current step
+  _delay = 100;       // fast stepping to the next action.
+  _currentStep = -1;  // no current step
 }
 
 
@@ -72,9 +72,7 @@ bool SceneElement::set(const char *name, const char *value) {
     size_t i;
     String iName;
     _scanIndexParam(name, i, iName);
-    if (i >= _steps.size()) _steps.resize(i + 1);
-    _steps[i] = value;
-    TRACE("_steps.size=%d,%d", _steps.size(), _steps.capacity());
+    _steps.setAt(i, value);
 
   } else if (_stricmp(name, "delay") == 0) {
     // delay between executing the steps
@@ -99,8 +97,9 @@ void SceneElement::loop() {
 
     if ((now >= _nextStepTime) && (_board->queueIsEmpty())) {
       if ((_currentStep >= 0) && (_currentStep < _steps.size())) {
-        TRACE("send(%d):<%s>", _currentStep, _steps[_currentStep].c_str());
-        _board->dispatch(_steps[_currentStep]);
+        String actions = _steps[_currentStep];
+        TRACE("send(%d):<%s>", _currentStep, actions.c_str());
+        _board->dispatch(actions);
       }
       _nextStepTime = 0;
       if (_delay >= 0) {

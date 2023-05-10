@@ -1,0 +1,87 @@
+/**
+ * @file ArrayString.h
+ *
+ * @brief Array of Strings, stored by using minimal heap consumption in c-style.
+ * With operators for array and queues.
+ *
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license,
+ * https://www.mathertel.de/License.aspx.
+ *
+ * More information on https://www.mathertel.de/Arduino.
+ *
+ * 10.05.2023 created.
+ */
+
+
+#pragma once
+
+#include <Arduino.h>
+
+class ArrayString {
+
+public:
+  ArrayString(){};
+  ~ArrayString(){};
+
+  void reserve(uint16_t num);
+
+  boolean empty() {
+    return (_used == 0);
+  }
+
+  uint16_t size() {
+    return (_used);
+  }
+
+  // return String by Index
+  String at(uint16_t index);
+
+  // return String by index
+  String operator[](uint16_t index) {
+    return (at(index));
+  };
+
+  // return first String
+  String first() {
+    return (at(0));
+  };
+
+  // add a String at the given position
+  void setAt(uint16_t index, const char *s);
+
+  // add a String at the given position
+  void setAt(uint16_t index, String &s) {
+    setAt(index, s.c_str());
+  };
+
+  // add new String to the end of the array
+  uint16_t push(String &s) {
+    return (push(s.c_str()));
+  };
+
+  // add new String to the end of the array
+  uint16_t push(const char *s);
+
+  // remove first string from array and return it
+  String pop();
+
+  // deallocate all.
+  void clear();
+
+  void dump();
+
+private:
+  uint16_t _capacity = 0;
+  uint16_t _used = 0;
+
+  char **array = nullptr;  // array with pointers to C-type strings
+
+  // make sure that enough array pointers are given.
+  void _createCapacity(uint16_t num);
+};
+
+// End

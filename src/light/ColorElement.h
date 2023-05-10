@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include <HomeDing.h>
 #include <light/LightElement.h>
 
@@ -139,12 +137,15 @@ private:
   /**
    * @brief linked elements by ID
    */
-  std::vector<String> _lightElementIDs;  // IDs of linked elements, to be _lightElements on start
+  ArrayString _lightElementIDs;  // IDs of linked elements, to be created in _lightElements on start
+
+
+  uint16_t _lightElementsCount = 0;
 
   /**
    * @brief linked elements
    */
-  std::vector<LightElement *> _lightElements;  // direct linked elements
+  LightElement **_lightElements = nullptr;  // direct linked elements
 
   /**
    * @brief The _brightnessAction holds the actions that is submitted when the brightness changes.

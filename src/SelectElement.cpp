@@ -84,13 +84,11 @@ bool SelectElement::set(const char *name, const char *value) {
 
     if (iName.equalsIgnoreCase("key")) {
       TRACE("key[%d]=%s", i, value);
-      if (i >= _keys.size()) _keys.resize(i + 1);
-      _keys[i] = value;
+      _keys.setAt(i, value);
 
     } else if (iName.equalsIgnoreCase("value")) {
       TRACE("value[%d]=%s", i, value);
-      if (i >= _values.size()) _values.resize(i + 1);
-      _values[i] = String(value);
+      _values.setAt(i, value);
     }
 
   } else if (_stricmp(name, "onkey") == 0) {

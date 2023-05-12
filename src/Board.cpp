@@ -832,11 +832,20 @@ bool Board::queueIsEmpty() {
 
 
 /** Queue an action for later dispatching. */
-void Board::_queueAction(const String &action, const String &v) {
-  String tmp = action;
-  tmp.replace("$v", v);
-  BOARDTRACE("_queueAction %s", tmp.c_str());
-  _actions.push(tmp);
+void Board::_queueAction(const String &action, const String &v, boolean split) {
+  if (!action.isEmpty()) {
+    String tmp = action;
+    tmp.replace("$v", v);
+    BOARDTRACE("_queueAction %s", tmp.c_str());
+    if (split) {
+      int len = ListUtils::length(tmp);
+      for (int n = 0; n < len; n++) {
+        _actions.push(ListUtils::at(tmp, n).c_str());
+      }
+    } else {
+      _actions.push(tmp);
+    }
+  }
 }  // _queueAction
 
 
@@ -910,18 +919,16 @@ void Board::dispatchAction(String action) {
 /**
  * @brief Save an action to the _actionList.
  */
-void Board::dispatch(String &action, int value) {
-  if (!action.isEmpty())
-    _queueAction(action, String(value));
+void Board::dispatch(const String &action, int value) {
+  _queueAction(action, String(value));
 }  // dispatch
 
 
 /**
  * @brief Save an action to the _actionList.
  */
-void Board::dispatch(String &action, const char *value) {
-  if (!action.isEmpty())
-    _queueAction(action, String(value));
+void Board::dispatch(const String &action, const char *value) {
+  _queueAction(action, String(value));
 }  // dispatch
 
 
@@ -929,7 +936,6 @@ void Board::dispatch(String &action, const char *value) {
  * @brief Save an action to the _actionList.
  */
 void Board::dispatch(const String &action, const String &value) {
-  if (!action.isEmpty())
     _queueAction(action, value);
 }  // dispatch
 
@@ -937,7 +943,7 @@ void Board::dispatch(const String &action, const String &value) {
 /**
  * @brief Save an action to the _actionList using a item part of a value.
  */
-void Board::dispatchItem(String &action, String &values, int n) {
+void Board::dispatchItem(const String &action, const String &values, int n) {
   if (action && values) {
     String v = Element::getItemValue(values, n);
     if (v) _queueAction(action, v);

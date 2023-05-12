@@ -272,23 +272,15 @@ public:
    * send all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
-   * @param item use the n-th item of the value.
    */
-  void dispatchItem(String &action, String &values, int n);
+  void dispatch(const String &action, const char *value = nullptr);
 
   /**
    * send all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(String &action, const char *value = nullptr);
-
-  /**
-   * send all the actions to the right elements.
-   * @param action list of actions.
-   * @param value the value for $v placeholder.
-   */
-  void dispatch(String &action, int value);
+  void dispatch(const String &action, int value);
 
   /**
    * send all the actions to the right elements.
@@ -302,6 +294,14 @@ public:
    * @param action The action string.
    */
   void dispatchAction(String action);
+
+  /**
+   * send all the actions to the right elements.
+   * @param action list of actions.
+   * @param value the value for $v placeholder.
+   * @param item use the n-th item of the value.
+   */
+  void dispatchItem(const String &action, const String &values, int n);
 
 
   // ===== state of elements =====
@@ -499,7 +499,7 @@ private:
    * @param action action or property.
    * @param value the value
    */
-  void _queueAction(const String &action, const String &v);
+  void _queueAction(const String &action, const String &v, boolean split = true);
 
   int _addedElements = 0;
 

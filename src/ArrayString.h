@@ -16,7 +16,6 @@
  * 10.05.2023 created.
  */
 
-
 #pragma once
 
 #include <Arduino.h>
@@ -25,8 +24,12 @@ class ArrayString {
 
 public:
   ArrayString(){};
-  ~ArrayString(){};
 
+  ~ArrayString() {
+    clear();
+  };
+
+  // reserve at least [num] strings in the array
   void reserve(uint16_t num);
 
   boolean empty() {
@@ -54,17 +57,31 @@ public:
   void setAt(uint16_t index, const char *s);
 
   // add a String at the given position
-  void setAt(uint16_t index, String &s) {
+  void setAt(uint16_t index, const String &s) {
     setAt(index, s.c_str());
   };
 
   // add new String to the end of the array
-  uint16_t push(String &s) {
+  uint16_t push(const char *s) {
+    setAt(_used, s);
+    return (_used);
+  };  // push()
+
+  // add new String to the end of the array
+  uint16_t push(const String &s) {
     return (push(s.c_str()));
   };
 
-  // add new String to the end of the array
-  uint16_t push(const char *s);
+
+  void split(const char *s, char delim = ',');
+
+  void split(const String &s, char delim = ',') {
+    split(s.c_str(), delim);
+  }
+
+  // void split(String s, char delim = ',') {
+  //   split(s.c_str(), delim);
+  // }
 
   // remove first string from array and return it
   String pop();

@@ -44,12 +44,6 @@ void ArrayString::reserve(uint16_t num) {
   _createCapacity(num);
 };
 
-// add new String to the end of the array
-uint16_t ArrayString::push(const char *s) {
-  setAt(_used, s);
-  return (_used);
-}  // push()
-
 
 // return String by index
 String ArrayString::at(uint16_t index) {
@@ -81,7 +75,41 @@ void ArrayString::setAt(uint16_t index, const char *s) {
 };
 
 
-// remove first string from array and return it
+  void ArrayString::split(const char *s, char delim) {
+    CTRACE("AS: split <%s>\n", s);
+    clear();
+    uint16_t cnt = 0;
+
+    if (s && *s) {
+      // calculate number of items
+      cnt++;
+      const char *p = s;
+      while (*p) {
+        if (*p++ == delim) { cnt++; }
+      }
+      _createCapacity(cnt);
+
+      const char *pStart = s;
+      while ((*pStart) && (_used < cnt)) {
+        const char *pEnd = pStart;
+        while (*pEnd && *pEnd != delim) { pEnd++; }
+
+        // copy pStart .. pEnd-1
+        uint16_t rawlen = pEnd - pStart; // len without trailing '\0'
+
+        char *mem = (char *)malloc(rawlen + 1);
+        memcpy(mem, pStart, rawlen);
+        mem[rawlen] = '\0';
+
+        array[_used++] = mem;
+
+        pStart = pEnd + 1;
+      }
+    }  // if
+    // dump();
+  }
+  
+  // remove first string from array and return it
 String ArrayString::pop() {
   String ret;
 

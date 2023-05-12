@@ -10,6 +10,8 @@
  * Changelog:see ToneElement.h
  */
 
+#if defined(ESP8266)
+
 #include <Arduino.h>
 #include <HomeDing.h>
 
@@ -218,5 +220,7 @@ void ToneElement::loop() {
     }
   }
 }  // loop()
+
+#endif
 
 // End

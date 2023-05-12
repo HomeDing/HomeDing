@@ -13,6 +13,8 @@
 
 #pragma once
 
+#if defined(ESP8266)
+
 #include <HomeDing.h>
 
 /**
@@ -101,3 +103,4 @@ bool ToneElement::registered =
   ElementRegistry::registerElement("tone", ToneElement::create);
 #endif
 
+#endif

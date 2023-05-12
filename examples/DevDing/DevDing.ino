@@ -66,6 +66,8 @@
 #define HOMEDING_INCLUDE_BH1750
 #define HOMEDING_INCLUDE_SCD4X
 
+#define HOMEDING_INCLUDE_TONE
+
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
 // #define HOMEDING_INCLUDE_PMS

@@ -52,10 +52,8 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
-   * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
-   */
+   * @brief Start the Element.
+  */
   virtual void start() override;
 
   /**

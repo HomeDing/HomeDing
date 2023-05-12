@@ -298,6 +298,14 @@ extern Board homeding;
 #include "light/P9813Element.h"
 #endif
 
+
+// ===== OPTIONAL AUDIO ELEMENTS =====
+
+#ifdef HOMEDING_INCLUDE_TONE
+#include "audio/ToneElement.h"
+#endif
+
+
 // ===== OPTIONAL ELEMENTS =====
 
 #ifdef HOMEDING_INCLUDE_DHT

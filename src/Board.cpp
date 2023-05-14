@@ -935,8 +935,8 @@ void Board::dispatch(const String &action, const char *value) {
 /**
  * @brief Save an action to the _actionList.
  */
-void Board::dispatch(const String &action, const String &value) {
-    _queueAction(action, value);
+void Board::dispatch(const String &action, const String &value, boolean split) {
+    _queueAction(action, value, split);
 }  // dispatch
 
 

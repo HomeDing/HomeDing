@@ -223,12 +223,12 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     api = uri.substring(5);
   }
 
-  if ((api == "board") || (api == "state")) {
+  if (api == "state") {
     // most common request, return state of all elements
     _board->getState(output, String());
     output_type = TEXT_JSON;
 
-  } else if ((api.startsWith("state/")) || (api.startsWith("board/"))) {
+  } else if (api.startsWith("state/")) {
     // everything behind  "/api/state/" is used to address a specific element
     String id(api.substring(6));
 
@@ -240,10 +240,10 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
       _board->getState(output, id);
 
     } else {
-      // send all actions to the specified element per given argument
+      // send arguments as actions to the specified element per given argument
       for (int a = 0; a < argCount; a++) {
         String tmp = id + "?" + server.argName(a) + "=$v";
-        _board->dispatch(tmp, server.arg(a));
+        _board->dispatch(tmp, server.arg(a), false);
       }
     }  // if
     output_type = TEXT_JSON;
@@ -257,10 +257,10 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     jc.addProperty("build", __DATE__);
     jc.addProperty("freeHeap", ESP.getFreeHeap());
 
-    jc.addProperty("flashSize", ESP.getFlashChipSize());
     jc.addProperty("coreVersion", String(_board->version));
     jc.addProperty("coreBuild", String(_board->build));
 #if ! defined(HD_MINIMAL)
+    jc.addProperty("flashSize", ESP.getFlashChipSize());
     jc.addProperty("mac", WiFi.macAddress().c_str());
 #endif
 

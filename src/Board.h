@@ -287,7 +287,7 @@ public:
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(const String &action, const String &value);
+  void dispatch(const String &action, const String &value, boolean split = true);
 
   /**
    * @brief Dispatch an action without queueing it.

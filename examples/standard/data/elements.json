@@ -321,8 +321,14 @@
 
   "timer": {
     "properties": ["type", "waittime", "pulsetime", "cycletime"],
-    "events": ["start", "stop", "next"],
+    "events": ["next"],
     "actions": ["onon", "onoff", "onvalue"]
+  },
+
+  "tone": {
+    "sys": "true",
+    "properties": ["pin"],
+    "events": ["tones", "play"]
   },
 
   "serialcmd": {

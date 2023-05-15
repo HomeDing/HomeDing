@@ -309,8 +309,7 @@ void Board::start(Element_StartupMode startupMode) {
 
   // make elements active that match
   Element *l = _elementList;
-  while (l != NULL) {
-
+  while (l) {
     if ((!l->active) && (l->startupMode <= startupMode)) {
       // start element when not already active
       BOARDTRACE("starting %s...", l->id);
@@ -323,7 +322,8 @@ void Board::start(Element_StartupMode startupMode) {
   }  // while
 
   active = true;
-  _nextElement = NULL;
+  _nextElement = nullptr;
+  _activeElement = nullptr;
 }  // start()
 
 
@@ -391,7 +391,9 @@ void Board::loop() {
       if (_nextElement->active) {
         // BOARDTRACE("loop %s", _nextElement->id);
         TRACE_START;
+        _activeElement = _nextElement;
         _nextElement->loop();
+        _activeElement = nullptr;
         TRACE_END;
         TRACE_TIMEPRINT("loop", _nextElement->id, 5);
       }
@@ -489,7 +491,7 @@ void Board::loop() {
     }
 
     LOGGER_TRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
-    LOGGER_TRACE("$net=%s", netpass.substring(0, netpass.indexOf(',')).c_str());
+    LOGGER_TRACE("$net=%s", ListUtils::at(netpass, 0).c_str());
     LOGGER_TRACE("resetCount=%d", _resetCount);
 
     // detect no configured network situation
@@ -836,7 +838,7 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
   if (!action.isEmpty()) {
     String tmp = action;
     tmp.replace("$v", v);
-    BOARDTRACE("_queueAction %s", tmp.c_str());
+    LOGGER_INFO("(%s)=>(%s)", (_nextElement ? _nextElement->id : ""), tmp.c_str());
     if (split) {
       int len = ListUtils::length(tmp);
       for (int n = 0; n < len; n++) {

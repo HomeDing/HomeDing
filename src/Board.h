@@ -531,6 +531,9 @@ private:
   /** next element that will be used in loop() */
   Element *_nextElement;
 
+  /** element is executing a loop() */
+  Element *_activeElement;
+
   ArrayString _actions;
 
   static Element *_registered;

@@ -66,6 +66,9 @@ private:
    */
   int _selected = -1;
 
+  /// turn around at the end with next and prev
+  boolean _cycle = false;
+
   /// @brief List of keys.
   ArrayString _keys;
 

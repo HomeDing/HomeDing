@@ -93,6 +93,7 @@ extern Board homeding;
 #endif
 
 #ifdef HOMEDING_INCLUDE_SYSTEM
+// DeviceElement and OTAElement are included in any case.
 #define HOMEDING_INCLUDE_NTPTIME
 #define HOMEDING_INCLUDE_Time
 #endif

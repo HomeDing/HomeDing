@@ -16,16 +16,18 @@
 #include "SelectElement.h"
 
 #if !defined(TRACE)
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 #endif
 
 // private functions
 
 void SelectElement::_selectOption(int n) {
   TRACE("select(%d)", n);
-  _board->dispatch(_keyAction, _keys[n]);
-  _board->dispatch(_valueAction, _values[n]);
-  _selected = n;
+  if (_selected != n) {
+    _board->dispatch(_keyAction, _keys[n]);
+    _board->dispatch(_valueAction, _values[n]);
+    _selected = n;
+  }
 }
 
 
@@ -45,37 +47,40 @@ Element *SelectElement::create() {
 bool SelectElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
   bool ret = true;
+  uint16_t size = _keys.size();
 
   if (Element::set(name, value)) {
     // done.
+  } else if (active && size) {
+    if (_stricmp(name, "key") == 0) {
+      for (int i = 0; i < size; i++) {
+        if (_keys[i].equalsIgnoreCase(value)) {
+          _selectOption(i);
+          break;  // for
+        }
+      }
 
-  } else if (_stricmp(name, "key") == 0) {
-    for (int i = 0; i < _values.size(); i++) {
-      if (_keys[i].equalsIgnoreCase(value)) {
+    } else if (_stricmp(name, "index") == 0) {
+      int i = _atoi(value);
+      if ((i >= 0) && (i < size)) {
         _selectOption(i);
-        break;  // for
+      }
+
+    } else if (_stricmp(name, "next") == 0) {
+      // start next option
+      if (_cycle || (_selected + 1 < size)) {
+        _selectOption((_selected + 1) % size);
+      }
+
+    } else if (_stricmp(name, "prev") == 0) {
+      // start previous option
+      if (_cycle || (_selected > 0)) {
+        _selectOption((_selected - 1) % size);
       }
     }
 
-  } else if (_stricmp(name, "index") == 0) {
-    int i = _atoi(value);
-    if ((i >= 0) && (i < _values.size())) {
-      _selectOption(i);
-    }
-
-  } else if (_stricmp(name, "next") == 0) {
-    // start next option
-    if (_selected < _values.size() - 1) {
-      _selected++;
-      _selectOption(_selected);
-    }
-
-  } else if (_stricmp(name, "prev") == 0) {
-    // start previous option
-    if (_selected > 0) {
-      _selected--;
-      _selectOption(_selected);
-    }
+  } else if (_stricmp(name, "cycle") == 0) {
+    _cycle = _atob(value);
 
   } else if (_stristartswith(name, "options[")) {
     size_t i;

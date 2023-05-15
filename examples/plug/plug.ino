@@ -44,7 +44,6 @@
 
 // Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
-#define HOMEDING_INCLUDE_REMOTE
 
 // Enable some Core Elements for small devices
 // This collection may be used in e.g. remote controllable plugs.

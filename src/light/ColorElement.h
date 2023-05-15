@@ -109,10 +109,16 @@ private:
   int _brightness = 50;  // percent
 
   /**
-   * @brief The values for a transition.
+   * @brief The values for a color transition.
    */
   uint32_t _fromValue = 0;
   uint32_t _toValue = 0;
+
+  /**
+   * @brief The values for a brightness transition.
+   */
+  uint16_t _fromBrightness = 0;
+  uint16_t _toBrightness = 0;
 
   /**
    * @brief The duration of one animation cycle or transition in milliSeconds.

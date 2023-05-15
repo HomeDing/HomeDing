@@ -14,7 +14,7 @@
  * * Flash Size: 1M (FS:128kb, OTA:~438KB)
  * * Flash Mode: DOUT
  * * Debug Port: "Disabled"
- * * Debug Level: "None"
+ * * Debug Level: "None" or even "NoAssert-NDEBUG"
  * * MMU: 32+32 balanced
  * * SSL Support: Basic SSL ciphers (lower ROM use)
  * "board": "esp8266:esp8266:generic",
@@ -42,7 +42,6 @@
 
 // Enable the Core Elements of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
-#define HOMEDING_INCLUDE_REMOTE
 
 // Enable some Core Elements for small devices
 // This collection may be used in e.g. remote controllable plugs.

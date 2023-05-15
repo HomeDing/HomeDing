@@ -109,15 +109,19 @@ bool ColorElement::set(const char *name, const char *value) {
     if (_mode == Mode::fade) {
       // setup fading range and time
       _fromValue = _value;
+      _fromBrightness = _brightness;
       _startTime = now;
     }
     _toValue = colorValue;
+    _toBrightness = _brightness;
     _needValueUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
     // set brightness: pass through to light elements
     int b = _atoi(value);
-    _brightness = constrain(b, 0, 100);
+    _fromBrightness = _brightness;
+    _toBrightness = constrain(b, 0, 100);
+    _startTime = now;
     _needBrightnessUpdate = true;
 
 
@@ -238,6 +242,7 @@ void ColorElement::loop() {
   // dynamic color patterns
   unsigned long now = millis();  // current (relative) time in msecs.
   uint32_t nextValue = _toValue;
+  uint16_t nextBrightness = _toBrightness;
 
   if ((_mode == Mode::fix) && (_value != _toValue)) {
     _needValueUpdate = true;
@@ -246,15 +251,19 @@ void ColorElement::loop() {
     // no new automation step more often than 20 times per second.
     return;
 
-  } else if ((_mode == Mode::fade) && (_value != _toValue)) {
+  } else if ((_mode == Mode::fade) && ((_value != _toValue) || (_brightness != _toBrightness))) {
     unsigned long d = now - _startTime;  // duration up to now
     if (d >= _duration) {
-      nextValue = _toValue;
+      // nextValue = _toValue;
+      // nextBrightness = _toBrightness;
+
     } else {
       int p = (d * 255) / _duration;  // percentage of fade transition in / 0..255
       nextValue = fadeColor(_fromValue, _toValue, p);
+      nextBrightness = _fromBrightness + ((_toBrightness-_fromBrightness) * p / 255);
     }
     _needValueUpdate = true;
+    _needBrightnessUpdate = true;
 
   } else if (_mode == Mode::pulse) {
     // pulse brightness 0...255...1 = 256+254 = 510 steps

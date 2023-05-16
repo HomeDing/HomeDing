@@ -26,38 +26,38 @@
 #define LOGFILE_MAXSIZE (4 * 1024 - 200)
 
 // String constants, only once in Memory
-static const char *LOGGER_LEVELS = "eit"; // error, info, trace
+static const char *LOGGER_LEVELS = "eit";  // error, info, trace
+
+#if !defined(HD_MINIMAL)
 static const char *LOGFILE_NAME = "/log.txt";
 static const char *LOGFILE_OLD_NAME = "/log_old.txt";
+#endif
 
 // initialize file system for log file
-void Logger::init(FILESYSTEM *fs)
-{
+void Logger::init(FILESYSTEM *fs) {
   _fileSystem = fs;
-} // init()
+}  // init()
 
 
 // enable/disable log file
-void Logger::setLogFile(bool enable)
-{
+void Logger::setLogFile(bool enable) {
   _logFileEnabled = enable;
-} // setLogFile()
+}  // setLogFile()
 
 
 /**
  * @brief Print out logging information
  */
 void Logger::_print(const char *module, int level, const char *fmt,
-                    va_list args)
-{
+                    va_list args) {
   char buffer[200];
-  char *p = buffer; // end of string : next segment of logline
+  char *p = buffer;  // end of string : next segment of logline
 
   // timestamp into buffer, using millis() when no time is available
   time_t now = time(nullptr);
   if (!now)
     now = Board::getSeconds();
-  p += strftime(p, sizeof(buffer), "%H:%M:%S ", localtime(&now)); // %T
+  p += strftime(p, sizeof(buffer), "%H:%M:%S ", localtime(&now));  // %T
 
   if (module) {
     // add module and loglevel
@@ -82,41 +82,39 @@ void Logger::_print(const char *module, int level, const char *fmt,
   if ((module) && (_logFileEnabled) && (level < LOGGER_LEVEL_TRACE)) {
     _printToFile(buffer);
     hd_yield();
-  } // if
-} // _print
+  }  // if
+}  // _print
 
 /**
  * @brief Print Log entry from system (not element)
  */
-void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...)
-{
+void Logger::LoggerPrint(const char *module, int level, const char *fmt, ...) {
   if (level <= logger_level) {
     va_list args;
     va_start(args, fmt);
     Logger::_print(module, level, fmt, args);
     va_end(args);
-  } // if
+  }  // if
   hd_yield();
-} // LoggerPrint
+}  // LoggerPrint
 
 
 /**
  * @brief Print Log entry from element.
  */
-void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...)
-{
+void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...) {
   if ((level <= logger_level) || (level <= elem->loglevel)) {
     va_list args;
     va_start(args, fmt);
     Logger::_print(elem->id, level, fmt, args);
     va_end(args);
-  } // if
+  }  // if
   hd_yield();
-} // LoggerEPrint
+}  // LoggerEPrint
 
 
-void Logger::_printToFile(char *buffer)
-{
+void Logger::_printToFile(char *buffer) {
+#if !defined(HD_MINIMAL)
   if (_fileSystem) {
     File f = _fileSystem->open(LOGFILE_NAME, "a");
 
@@ -127,11 +125,12 @@ void Logger::_printToFile(char *buffer)
       _fileSystem->rename(LOGFILE_NAME, LOGFILE_OLD_NAME);
       hd_yield();
       f = _fileSystem->open(LOGFILE_NAME, "a");
-    } // if
+    }  // if
     f.println(buffer);
     f.close();
     hd_yield();
   }
+#endif
 };
 
 // Default: Log INFO and ERROR

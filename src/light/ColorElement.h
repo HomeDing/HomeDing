@@ -131,6 +131,11 @@ private:
   unsigned long _startTime;
 
   /**
+   * @brief The last time when color was updated.
+   */
+  // unsigned long _lastTime;
+
+  /**
    * @brief The duration of one animation cycle or transition in milliSeconds.
    */
   Mode _mode = Mode::_default;

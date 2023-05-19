@@ -238,8 +238,6 @@ uint32_t fadeColor(uint32_t startColor, uint32_t endColor, int factor) {
  * @brief Give some processing time to the Element to check for next actions.
  */
 void ColorElement::loop() {
-  static unsigned long lastTime = 0;
-  // dynamic color patterns
   unsigned long now = millis();  // current (relative) time in msecs.
   uint32_t nextValue = _toValue;
   uint16_t nextBrightness = _toBrightness;
@@ -247,9 +245,9 @@ void ColorElement::loop() {
   if ((_mode == Mode::fix) && (_value != _toValue)) {
     _needValueUpdate = true;
 
-  } else if (now < lastTime + 50) {
-    // no new automation step more often than 20 times per second.
-    return;
+  // } else if (now < _lastTime + 50) {
+  //   // no new automation step more often than 20 times per second.
+  //   return;
 
   } else if ((_mode == Mode::fade) && ((_value != _toValue) || (_brightness != _toBrightness))) {
     unsigned long d = now - _startTime;  // duration up to now
@@ -301,7 +299,7 @@ void ColorElement::loop() {
     _needValueUpdate = false;
     _value = nextValue;
   }
-  lastTime = now;
+  // _lastTime = now;
 }  // loop()
 
 

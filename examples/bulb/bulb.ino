@@ -52,8 +52,10 @@
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR
 #define HOMEDING_INCLUDE_LIGHT
-#define HOMEDING_INCLUDE_NEOPIXEL
 #define HOMEDING_INCLUDE_MY9291
+#define HOMEDING_INCLUDE_NEOPIXEL
+// #define HOMEDING_INCLUDE_APA102 // not found in a bulb yet
+// #define HOMEDING_INCLUDE_P9813 // not found in a bulb yet
 
 #include <Arduino.h>
 #include <HomeDing.h>

@@ -141,7 +141,7 @@
   },
 
   "select": {
-    "properties": ["options"],
+    "properties": ["cycle", "options"],
     "events": ["key", "index", "next", "prev"],
     "actions": ["onkey", "onvalue"]
   },
@@ -269,16 +269,19 @@
   },
 
   "my9291": {
+    "icon": "light",
     "properties": ["datapin", "clockpin"],
     "events": ["value", "enable", "brightness"]
   },
 
   "p9813": {
+    "icon": "light",
     "properties": ["datapin", "clockpin"],
     "events": ["value", "enable", "brightness"]
   },
 
   "apa102": {
+    "icon": "neo",
     "properties": ["datapin", "clockpin", "count"],
     "events": ["value", "enable", "brightness", "duration", "effectlength"]
   },

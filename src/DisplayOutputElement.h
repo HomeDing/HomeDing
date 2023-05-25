@@ -67,6 +67,7 @@ protected:
   int _h = 10;  ///< height & fontsize
 
   uint32_t _color = COLOR_UNDEFINED;  ///< element color
+  uint32_t _background = COLOR_UNDEFINED;  ///< element color
 
   // Reference to DisplayAdapter
   DisplayAdapter *_display = nullptr;

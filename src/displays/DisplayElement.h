@@ -21,6 +21,16 @@
 
 #include <functional>
 
+#define RGB_WHITE 0x00FFFFFF
+#define RGB_BLACK 0x00000000
+#define RGB_GRAY 0x00808080
+#define RGB_RED 0x00FF0000
+#define RGB_GREEN 0x0000FF00
+#define RGB_BLUE 0x000000FF
+#define RGB_YELLOW 0x00FFFF00
+#define RGB_ORANGE 0x00FFA500
+#define RGB_PURPLE 0x00800080
+
 struct DisplayConfig {
   /** Width of display */
   int width = 128;
@@ -31,8 +41,9 @@ struct DisplayConfig {
   /** Brightness of display 0...100 (percent) */
   int brightness = 80;
 
-  /** Background Color */
-  uint32_t backgroundColor = 0;
+  /** Default Draw & Background Color */
+  uint32_t drawColor = RGB_WHITE;
+  uint32_t backgroundColor = RGB_BLACK;
 
   /** Rotation of the display */
   int rotation = 0;

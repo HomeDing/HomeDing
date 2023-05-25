@@ -47,6 +47,9 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "color") == 0) {
     _color = _atoColor(value);
 
+  } else if (_stricmp(name, "background") == 0) {
+    _background = _atoColor(value);
+
   } else {
     ret = false;
   }  // if
@@ -97,6 +100,7 @@ void DisplayOutputElement::loop() {
 void DisplayOutputElement::draw() {
   if (_display) {
     _display->setColor(_color);
+    _display->setBackgroundColor(_background);
   }
 }
 

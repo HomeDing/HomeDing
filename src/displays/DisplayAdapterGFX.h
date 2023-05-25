@@ -75,7 +75,7 @@ public:
       flush();
     }  // if
     return (true);
-  };   // init()
+  };  // init()
 
 
   /**
@@ -198,8 +198,12 @@ protected:
    */
   Adafruit_GFX *gfxDisplay = nullptr;
 
-  // convert 32-bit color to 16-bit color
-  // 0x00RRGGBB to RRRRRGGGGGGBBBBB
+  /**
+   * @brief convert a 32-bit color value 0x00RRGGBB into the
+   *   565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
+   * @param color  24-bit color.
+   * @return 16-bit color in 565 format.
+   */
   uint16_t col565(uint32_t color) {
 
     uint16_t col =

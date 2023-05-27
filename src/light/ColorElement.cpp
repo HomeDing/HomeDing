@@ -282,12 +282,13 @@ void ColorElement::loop() {
     // send to linked light elements
     for (int n = 0; n < _lightElementsCount; n++) {
       TRACE(" %d %s", n, _lightElements[n]->id);
-      _lightElements[n]->setColor(nextValue, _brightness);
+      _lightElements[n]->setColor(nextValue, nextBrightness);
     }
 
     // dispatch as action
     if (_needBrightnessUpdate) {
-      _board->dispatch(_brightnessAction, _brightness);
+      _board->dispatch(_brightnessAction, nextBrightness);
+      _brightness = nextBrightness;
       _needBrightnessUpdate = false;
     }
 

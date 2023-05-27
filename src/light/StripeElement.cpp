@@ -126,9 +126,12 @@ void StripeElement::start() {
 void StripeElement::loop() {
   if (pixels && needUpdate) {
 
-    if (_mode == Mode::show) {
+    if (!enabled) {
+      setColor(RGB_BLACK, _brightness);
+      needUpdate = false;
+
+    } else if (_mode == Mode::show) {
       // no color changes.
-      show();
       needUpdate = false;
 
     } else if (_mode == Mode::fix) {
@@ -145,26 +148,22 @@ void StripeElement::loop() {
       for (int n = 0; n < _count; n++) {
         pixels[n] = colors[n % len];
       }
-      show();
       needUpdate = false;
 
     } else if (_mode == Mode::flow && (duration > 0)) {
       TRACE("flow...");
 
-      if (enabled) {
-        // flowing color patterns
-        unsigned long now = millis();  // current (relative) time in msecs.
-        unsigned int hue = (now % duration) * ColorElement::MAX_HUE / duration;
-        unsigned int delta = ColorElement::MAX_HUE / effectLength;
+      // flowing color patterns
+      unsigned long now = millis();  // current (relative) time in msecs.
+      unsigned int hue = (now % duration) * ColorElement::MAX_HUE / duration;
+      unsigned int delta = ColorElement::MAX_HUE / effectLength;
 
-        for (uint16_t i = 0; i < _count; i++) {
-          pixels[i] = ColorElement::hslColor(hue);
-          hue += delta;
-        }
-        show();
+      for (uint16_t i = 0; i < _count; i++) {
+        pixels[i] = ColorElement::hslColor(hue);
+        hue += delta;
       }
-      needUpdate = enabled;
     }
+    show();
   }  // if
 }  // loop()
 

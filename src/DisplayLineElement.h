@@ -64,8 +64,8 @@ private:
   /**
    * @brief This variable corresponds to the x0 parameter.
    */
-  uint8_t _x1 = 0;
-  uint8_t _y1 = 0;
+  uint16_t _x1 = 0;
+  uint16_t _y1 = 0;
 };
 
 #ifdef HOMEDING_REGISTER

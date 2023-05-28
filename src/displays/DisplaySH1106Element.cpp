@@ -15,7 +15,6 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include "DisplaySH1106Element.h"

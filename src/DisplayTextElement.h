@@ -84,8 +84,6 @@ private:
    * @brief displayed value
    */
   String _value;
-
-  int _w = 100;
 };
 
 #ifdef HOMEDING_REGISTER

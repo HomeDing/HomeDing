@@ -15,7 +15,6 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include <displays/DisplayMAX7219Element.h>

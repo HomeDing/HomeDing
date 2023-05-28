@@ -41,7 +41,10 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "y") == 0) {
     _y = _atoi(value);
 
-  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "fontsize") == 0)) {
+  } else if (_stricmp(name, "width") == 0) {
+    _w = _atoi(value);
+
+  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "height") == 0) ||(_stricmp(name, "fontsize") == 0)) {
     _h = _atoi(value);
 
   } else if (_stricmp(name, "color") == 0) {
@@ -70,6 +73,10 @@ void DisplayOutputElement::start() {
     if (_color == COLOR_UNDEFINED) {
       _color = d->getColor();  // get standard draw/text color from display.
     }
+    if (_background == COLOR_UNDEFINED) {
+      _background = d->getBackgroundColor();  // get standard draw/text color from display.
+    }
+
     _display = d;
     if (_page > d->maxpage) {
       d->maxpage = _page;

@@ -15,7 +15,6 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include "DisplayElement.h"
@@ -76,12 +75,6 @@ bool DisplayElement::set(const char *name, const char *value) {
       da->setBrightness(config.brightness);
     }
 
-  } else if (_stricmp(name, "background") == 0) {
-    config.backgroundColor = _atoColor(value);
-    if (active && da) {
-      da->setBackgroundColor(config.backgroundColor);
-    }
-
   } else if (da) {
     // these actions only work with existing display adapter
 
@@ -101,12 +94,18 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // === These properties can only be used during configuration:
 
-    // i2c bus
+  } else if (_stricmp(name, "color") == 0) {
+    config.drawColor = _atoColor(value);
+
+  } else if (_stricmp(name, "background") == 0) {
+    config.backgroundColor = _atoColor(value);
+
+    // ===== i2c bus
 
   } else if (_stricmp(name, "address") == 0) {
     config.i2cAddress = _atoi(value);
 
-    // spi bus
+    // ===== spi bus
 
   } else if (_stricmp(name, "spimosi") == 0) {
     config.spiMOSI = _atopin(value);

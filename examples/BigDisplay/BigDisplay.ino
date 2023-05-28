@@ -7,9 +7,22 @@
  *
  * Compile with
  * * Board: ESP32S3 Dev Module
- * * Flash Size: 8MB (64Mb)
- * * Partition Scheme: 8M with spoffs (3MB APP/1.5MB SPIFFS)
+ * * Hardware CDC and JTAG
+ * * CDC On Boot : "Disabled"
+ * * Firmware MSC on Boot: "Disabled"
+ * * DFU on Boot: "Disabled"
+ * * CPU Frequency 240 MHz (WiFi) 
+ * * Flash Mode: "QIO 80 MHz"
+ * * Flash Size: 16MB (128Mb)
  * * Core Debug Level: "None"
+ * * PSRAM : "OPI PSRAM"
+ * * Partition Scheme: 8M with spiffs (3MB APP/1.5MB SPIFFS)
+ * 
+  "board": "esp32:esp32:esp32s3",
+  "configuration": "JTAGAdapter=default,PSRAM=opi,FlashMode=qio,FlashSize=16M,LoopCore=1,EventsCore=1,USBMode=hwcdc,CDCOnBoot=cdc,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,PartitionScheme=huge_app,CPUFreq=240,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
+  "port": "COM6",
+  "output": ".\\build",
+  "sketch": "examples\\BigDisplay\\BigDisplay.ino"
  *
  * There is full featured WebUI from the standard example can be used.
  *
@@ -26,6 +39,8 @@
  * Changelog:
  * * 01.01.2021 created from standard sketch.
 */ 
+#define DBG_TRACE  // trace level for all elements
+
 // ===== HomeDing Configuration : Enable Elements for the firmware
 
 #define HOMEDING_REGISTER 1
@@ -35,16 +50,16 @@
 #define HOMEDING_INCLUDE_CORE
 #define HOMEDING_INCLUDE_FULL_SYSTEM
 
-// Enable some Common Sensor Elements
+// Enable some Sensor Elements
 #define HOMEDING_INCLUDE_DHT
-#define HOMEDING_INCLUDE_DALLAS
-
-// Enable / Disable some more Sensor Elements upon requirement
 #define HOMEDING_INCLUDE_AM2320
 #define HOMEDING_INCLUDE_SHT20
 #define HOMEDING_INCLUDE_AHT20
+#define HOMEDING_INCLUDE_DALLAS
+#define HOMEDING_INCLUDE_BMP280
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_BH1750
+#define HOMEDING_INCLUDE_SCD4X
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -58,29 +73,36 @@
 #define HOMEDING_INCLUDE_DSTIME
 
 // Enable Elements for Displays
-#define HOMEDING_INCLUDE_DISPLAY
-#define HOMEDING_INCLUDE_DISPLAYLCD
-#define HOMEDING_INCLUDE_DISPLAYSSD1306
-#define HOMEDING_INCLUDE_DISPLAYSH1106
+#define HOMEDING_INCLUDE_DISPLAY // all elements that can be displayed
+// #define HOMEDING_INCLUDE_DISPLAYLCD
+// #define HOMEDING_INCLUDE_DISPLAYSSD1306
+// #define HOMEDING_INCLUDE_DISPLAYSH1106
 // eneble these lines to get more displays supported
+#define HOMEDING_INCLUDE_DISPLAYST7796
 // #define HOMEDING_INCLUDE_DISPLAYST7789
+// #define HOMEDING_INCLUDE_DISPLAYST7735
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
+
+// Enable simple display Elements
 // #define HOMEDING_INCLUDE_TM1637
 
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR
 #define HOMEDING_INCLUDE_LIGHT
 #define HOMEDING_INCLUDE_NEOPIXEL
+#define HOMEDING_INCLUDE_APA102
 #define HOMEDING_INCLUDE_MY9291
 
 // Network Services
 #define HOMEDING_INCLUDE_MQTT
 #define HOMEDING_INCLUDE_WEATHERFEED
+#define HOMEDING_INCLUDE_SDMMC
+#define HOMEDING_INCLUDE_SD
 
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <FS.h>        // File System for Web Server Files
+#include <FS.h>
 #include <LittleFS.h>  // File System for Web Server Files
 
 #include <BuiltinHandler.h>  // Serve Built-in files
@@ -88,8 +110,11 @@
 #include <FileServer.h>      // Web Server Middleware for UI
 
 // Extra Display
-#include "GFX_ESP32Panel.h"
+#if defined(HOMEDING_INCLUDE_DISPLAYST7796)
 #include "DisplayPanelElement.h"
+#endif
+
+#include "DisplayTouchGT911Element.h"
 
 // ===== WLAN credentials =====
 
@@ -102,8 +127,15 @@ WebServer server(80);
  * Setup all components and Serial debugging helpers
  */
 void setup(void) {
-  delay(3000);
   Serial.begin(115200);
+#ifdef DBG_TRACE
+  // wait so the serial monitor can capture all output.
+  delay(3000);
+  Serial.println("xx");
+  // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
+  Logger::logger_level = LOGGER_LEVEL_TRACE;
+#endif
+
 
   Serial.setDebugOutput(false);
 
@@ -123,10 +155,13 @@ void setup(void) {
   server.addHandler(new FileServerHandler(&homeding));
 
   // Serial.println("Setup Backlight:");
-  // pinMode(2, OUTPUT);
-  // digitalWrite(2, HIGH);
+  // pinMode(27, OUTPUT);
+  // digitalWrite(27, HIGH);
 
   LOGGER_INFO("setup done");
+
+  homeding.add("touch/0", new DisplayTouchGT911Element());
+
 }  // setup
 
 

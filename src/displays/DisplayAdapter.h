@@ -33,7 +33,7 @@ public:
 
   DisplayAdapter() {
     color = 0x00FFFFFF;      // white
-    textColor = 0x00FFFFFF;      // white
+    textColor = 0x00FFFFFF;  // white
     backColor = 0x00000000;  // black
   }
 
@@ -66,16 +66,28 @@ public:
   virtual void setBrightness(UNUSED uint8_t bright){};
 
 
+  /// @brief Set default draw color
+  /// @param col The 32-bit draw color in 0x00rrggbb.
   virtual void setColor(const uint32_t col) {
     color = col;
   };
 
 
+  /// @brief Get default draw color.
+  /// @return The default draw color.
   virtual uint32_t getColor() {
     return (color);
   };
 
-  virtual void setBackgroundColor(const uint32_t col){};
+  /// @brief Set default background color
+  /// @param col The 32-bit background color in 0x00rrggbb.
+  virtual void setBackgroundColor(const uint32_t col) {
+    backColor = col;
+  };
+
+  virtual uint32_t getBackgroundColor() {
+    return (backColor);
+  };
 
   /**
    * @brief Clear a position or region.
@@ -95,6 +107,8 @@ public:
   };
 
   virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1){};
+
+  virtual void drawButton(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h, UNUSED const char *text, bool pressed = false){};
 
   virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill) {
     return (h);

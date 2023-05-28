@@ -69,26 +69,9 @@ class Board;
 #include <core/Logger.h>
 #include <core/RTCVariables.h>
 
+
 #define HOMEDING_GREETING "HomeDing"
 
-// ===== TIMING DEBUG OUTPUT HELPERs =====
-// can be controlled using the "Debug port" configuration setting. Set to none to remove TRACE calls.
-
-#ifdef DEBUG_ESP_PORT
-
-/** The TRACE Macros for creating output with timing hints: */
-#define TRACE_START                      // unsigned long __TRACE_START_TIME = millis();
-#define TRACE_END                        // unsigned long __TRACE_END_TIME = millis();
-#define TRACE_TIME                       // (__TRACE_END_TIME - __TRACE_START_TIME)
-#define TRACE_TIMEPRINT(topic, id, min)  // if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
-
-#else
-// #define TRACE(...)
-#define TRACE_START
-#define TRACE_END
-#define TRACE_TIME
-#define TRACE_TIMEPRINT(topic, id, min)
-#endif
 
 /**
  * The env.json file contains all the settings for registering the device

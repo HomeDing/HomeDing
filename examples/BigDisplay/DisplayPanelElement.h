@@ -39,6 +39,8 @@ public:
    */
   static bool registered;
 
+  virtual void init(Board *board) override;
+
   /**
    * @brief Activate the Element.
    */

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <hdtrace.h>
+
 #include <Board.h>            // Platform
 #include <Element.h>          // Abstract Elements
 #include <ElementRegistry.h>  // Element Registry
@@ -111,6 +113,7 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_DisplayText
 #define HOMEDING_INCLUDE_DisplayDot
 #define HOMEDING_INCLUDE_DisplayLine
+#define HOMEDING_INCLUDE_DisplayButton
 #endif
 
 // Register the Elements by including the definition with defined HOMEDING_REGISTER
@@ -267,6 +270,10 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_DisplayLine
 #include <DisplayLineElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DisplayButton
+#include <displays/DisplayButtonElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_TM1637

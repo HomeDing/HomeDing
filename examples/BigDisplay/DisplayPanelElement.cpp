@@ -15,13 +15,12 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include "DisplayPanelElement.h"
-#include "DisplayPanelAdapter.h"
+#include "DisplayAGFXAdapter.h"
 
-#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -36,6 +35,16 @@ Element *DisplayPanelElement::create() {
 
 /* ===== Element functions ===== */
 
+ void DisplayPanelElement::init(Board *board) {
+  TRACE("init()");
+  DisplayElement::init(board);
+  config.backgroundColor = 0;
+  config.drawColor = RGB_YELLOW;
+  config.width = 320;
+  config.height = 480;
+  config.rotation = 0;
+ }
+
 // All required parameters are handled by DisplayElement::set()
 
 /**
@@ -45,7 +54,8 @@ Element *DisplayPanelElement::create() {
 void DisplayPanelElement::start() {
   TRACE("start()");
 
-  DisplayAdapter *d = new DisplayPanelAdapter();
+  DisplayAdapter *d = new DisplayST7796Adapter();
+  
   if (d->setup(_board, &config)) {
     bool success = d->start();
     if (success) {

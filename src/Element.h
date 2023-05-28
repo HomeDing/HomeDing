@@ -80,18 +80,20 @@ class Element {
 public:
   // Datatype definitions for elements processing different types
   enum DATATYPE : int {
-    STRING = 0, // unspecified, all data can be presented as strings
-    BOOLEAN, // a boolean (stored as integer 0/1)
-    INTEGER, // a number without any decimals
-    FLOAT // a number with decimals
+    STRING = 0,  // unspecified, all data can be presented as strings
+    BOOLEAN,     // a boolean (stored as integer 0/1)
+    INTEGER,     // a number without any decimals
+    FLOAT        // a number with decimals
   };
 
   /**
    * @brief The id of the Element. Visible to anyone.
    */
-  char id[MAX_ID_LENGTH]; // TODO: convert to String
+  char id[MAX_ID_LENGTH];  // TODO: convert to String
 
   int loglevel = LOGGER_LEVEL_ERR;
+
+  TRACE_DATA;
 
   /**
    * @brief The Element will be marked active after passing valid parameters and
@@ -159,7 +161,7 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback);
+    std::function<void(const char *pName, const char *eValue)> callback);
 
 
   /**

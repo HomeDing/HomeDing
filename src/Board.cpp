@@ -390,12 +390,15 @@ void Board::loop() {
     if (_nextElement) {
       if (_nextElement->active) {
         // BOARDTRACE("loop %s", _nextElement->id);
-        TRACE_START;
+#if defined(HD_TRACE)
+        TRACE_START(_nextElement);
+#endif
         _activeElement = _nextElement;
         _nextElement->loop();
         _activeElement = nullptr;
-        TRACE_END;
-        TRACE_TIMEPRINT("loop", _nextElement->id, 5);
+#if defined(HD_TRACE)
+        TRACE_END(_nextElement);
+#endif
       }
       _nextElement = _nextElement->next;
     }  // if
@@ -938,7 +941,7 @@ void Board::dispatch(const String &action, const char *value) {
  * @brief Save an action to the _actionList.
  */
 void Board::dispatch(const String &action, const String &value, boolean split) {
-    _queueAction(action, value, split);
+  _queueAction(action, value, split);
 }  // dispatch
 
 

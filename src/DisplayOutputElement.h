@@ -39,11 +39,9 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Activate the DisplayTextElement.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
+  /// @brief Activate the DisplayOutputElement.
+  /// @return true when activation was good.
+  /// @return false when activation failed.
   virtual void start() override;
 
   /**
@@ -51,29 +49,34 @@ public:
    */
   virtual void loop() override;
 
-  /**
-   * @brief send element to display
-   */
+  /// @brief draw the element on the display adapter.
   virtual void draw();
 
 protected:
-  /**
-   * @brief Page of the display where the element is placed.
-   */
-  int _page = 1;  ///< Put on page 1 by default.
+  /// @brief Page of the display where the element is placed. Default on page 1.
+  int _page = 1;
 
-  int _x;       ///< x-position
-  int _y;       ///< y-position
-  int _h = 10;  ///< height & fontsize
+  /// @brief X-position ot the output element
+  uint16_t _x;
 
-  uint32_t _color = COLOR_UNDEFINED;  ///< element color
-  uint32_t _background = COLOR_UNDEFINED;  ///< element color
+  /// @brief Y-position ot the output element
+  uint16_t _y;
 
-  // Reference to DisplayAdapter
+  /// @brief Width ot the output element
+  uint16_t _w = 100;
+
+  /// @brief height and fontsize
+  uint16_t _h = 10;
+
+  /// @brief Draw color of the element
+  uint32_t _color = COLOR_UNDEFINED;
+
+  /// @brief Background color of the element
+  uint32_t _background = COLOR_UNDEFINED;
+
+  /// @brief Reference to DisplayAdapter
   DisplayAdapter *_display = nullptr;
 
-  /**
-   * @brief Redraw needed flag;
-   */
+  /// @brief Redraw needed flag;
   bool _neededraw = false;
 };

@@ -13,3 +13,6 @@ Plug in DisplayElement
 
 Plug in touch panel element
 
+<!-- <https://wiki.makerfabs.com/Sunton_ESP32_S3_4.3_inch_800x400_IPS_with_Touch.html> -->
+
+<!-- https://www.makerfabs.com/sunton-esp32-s3-4-3-inch-ips-with-touch.html -->

@@ -94,15 +94,12 @@ void TimeElement::start() {
 void TimeElement::loop() {
   time_t ct = time(nullptr);  // will not return 0, as a TIME element is started after localtime is available.
 
-  if (ct > 0) {
+  // check for time actions...
+  if ((ct > 0) && (_lastTimestamp != ct)) {
     struct tm *lt = localtime(&ct);
-
-    // check for time actions...
-    if (_lastTimestamp != ct) {
-      _sendAction(_timeAction, TIME_timeFmt, lt);
-      _sendAction(_timestampAction, TIME_timestampFmt, lt);
-      _lastTimestamp = ct;
-    }  // if
+    _sendAction(_timeAction, TIME_timeFmt, lt);
+    _sendAction(_timestampAction, TIME_timestampFmt, lt);
+    _lastTimestamp = ct;
 
     // ignore seconds
     ct -= (ct % 60);
@@ -117,7 +114,7 @@ void TimeElement::loop() {
       _sendAction(_dateAction, TIME_dateFmt, lt);
       _lastDate = ct;
     }  // if
-  }
+  }    // if
 }  // loop()
 
 

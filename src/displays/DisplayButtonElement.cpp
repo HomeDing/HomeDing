@@ -52,14 +52,14 @@ bool DisplayButtonElement::overlap(int16_t rx, int16_t ry, uint16_t rw, uint16_t
     _pressed = overlap(xPos, yPos);
     // LOGGER_EINFO("_pressed=%d", _pressed);
 
-    if (_pressed) _neededraw = true;
+    if (_pressed) _needredraw = true;
     return (_pressed);
   }
 
   void DisplayButtonElement::touchEnd(uint16_t xPos, uint16_t yPos) {
     // LOGGER_EINFO("touchEnd(%d/%d)", xPos, yPos);
     _pressed = false;
-    _neededraw = true;
+    _needredraw = true;
   }
 
 /**
@@ -74,7 +74,7 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "text") == 0) {
     _text = value;
-    _neededraw = true;
+    _needredraw = true;
 
   } else {
     ret = false;

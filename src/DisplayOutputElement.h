@@ -78,5 +78,5 @@ protected:
   DisplayAdapter *_display = nullptr;
 
   /// @brief Redraw needed flag;
-  bool _neededraw = false;
+  bool _needredraw = false;
 };

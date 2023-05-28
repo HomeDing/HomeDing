@@ -42,11 +42,11 @@ bool DisplayDotElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "value") == 0) {
     _value = _atob(value);
-    _neededraw = true;
+    _needredraw = true;
 
   } else if (_stricmp(name, "clear") == 0) {
     _value = false;
-    _neededraw = true;
+    _needredraw = true;
 
   } else {
     ret = false;

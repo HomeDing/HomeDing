@@ -82,7 +82,7 @@ void DisplayOutputElement::start() {
       d->maxpage = _page;
     }
     Element::start();
-    _neededraw = true;
+    _needredraw = true;
   }  // if
 }  // start()
 
@@ -91,12 +91,12 @@ void DisplayOutputElement::start() {
  * @brief check the state of the DHT values and eventually create actions.
  */
 void DisplayOutputElement::loop() {
-  if (_neededraw) {
+  if (_needredraw) {
     if (_display->page == _page) {
       draw();
       _display->flush();
     }
-    _neededraw = false;
+    _needredraw = false;
   }  // if
 }  // loop()
 

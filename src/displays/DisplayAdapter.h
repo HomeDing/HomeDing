@@ -33,7 +33,6 @@ public:
 
   DisplayAdapter() {
     color = 0x00FFFFFF;      // white
-    textColor = 0x00FFFFFF;  // white
     backColor = 0x00000000;  // black
   }
 
@@ -138,7 +137,6 @@ protected:
 
   uint32_t color;      ///< default draw color
   uint32_t backColor;  ///< default background color
-  uint32_t textColor;  ///< default color for text
 
   Board *board;
 };

@@ -14,6 +14,7 @@
  * Changelog:
  * * 10.03.2020 created by Matthias Hertel
  * * 26.01.2021 support WRGB mode (4 LEDs)
+ * * 29.05.2023 add invert PWM output
  */
 
 #pragma once
@@ -107,11 +108,14 @@ protected:
    */
   bool pwmMode = false;
 
+  /// @brief invert PWM signals.
+  bool invert = false;
+
   /** data output pins (W,R,G,B) or pins[0] only. */
   int _pins[MAXPINS] = {0, 0, 0, 0}; //  = {D8, D6, D7, 0};
 
 #if (defined(ESP32))
-  int _channels[MAXPINS] = {0, 0, 0, 0}; // led channels for ESP32
+  uint8_t _channels[MAXPINS] = {0, 0, 0, 0}; // led channels for ESP32
 #endif
 
   /**

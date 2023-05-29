@@ -91,8 +91,13 @@ bool LightElement::set(const char *name, const char *pValue) {
     needUpdate = true;
 
   } else if (_stricmp(name, "mode") == 0) {
-    if (_stricmp(pValue, "pwm") == 0)
+    if (_stricmp(pValue, "pwm") == 0) {
       pwmMode = true;
+      needUpdate = true;
+    }
+
+  } else if (_stricmp(name, "invert") == 0) {
+    invert = _atob(pValue);
     needUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
@@ -128,6 +133,7 @@ bool LightElement::set(const char *name, const char *pValue) {
  */
 void LightElement::start() {
   Element::start();
+  needUpdate = true;
 
   if (pwmMode) {
 #if defined(ESP8266)
@@ -145,8 +151,6 @@ void LightElement::start() {
     }  // for
     loop();
     needUpdate = false;
-  } else {
-    needUpdate = true;
   }
 }  // start()
 
@@ -162,13 +166,17 @@ void LightElement::loop() {
     for (int n = _count - 1; n >= 0; n--) {
       int c = color & 0x00FF;
 
+      int level = c * _brightness / 100;
+      if (invert) level = 0xFF - level;
+
 #if defined(ESP8266)
+      TRACE("L-set(%d) pin=%d 0x%02x", n, _pins[n], level);
       analogWrite(_pins[n], c * _brightness / 100);
 #elif (defined(ESP32))
-      ledcWrite(_channels[n], c * _brightness / 100);
+      TRACE("L-set(%d) ch=%d 0x%02x", n, level);
+      ledcWrite(_channels[n], level);
 #endif
 
-      TRACE("L-set(%d) pin=%d value=%02x", n, _pins[n], c);
       color = color >> 8;
     }  // for
   }    // if

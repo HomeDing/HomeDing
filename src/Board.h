@@ -342,7 +342,7 @@ public:
   /**
    * next free led channel to be used on ESP32
    */
-  int nextLedChannel = 0;
+  uint8_t nextLedChannel = 0;
 #endif
 
   /**

@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief RadioElement implements...
  * @details

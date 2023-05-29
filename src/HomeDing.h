@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <hdtrace.h>
+// #include <hdProfile.h>
 
 #include <Board.h>            // Platform
 #include <Element.h>          // Abstract Elements

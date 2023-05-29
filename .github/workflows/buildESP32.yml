@@ -54,6 +54,7 @@ jobs:
             - name: Adafruit ST7735 and ST7789 Library
             - name: Adafruit SH110X
             - name: PubSubClient
+            - name: GFX Library for Arduino
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
             - source-url: "https://github.com/schreibfaul1/ESP32-audioI2S.git"
           sketch-paths: |

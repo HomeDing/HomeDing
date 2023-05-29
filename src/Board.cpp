@@ -387,14 +387,14 @@ void Board::loop() {
     if (_nextElement) {
       if (_nextElement->active) {
         // BOARDTRACE("loop %s", _nextElement->id);
-#if defined(HD_TRACE)
-        TRACE_START(_nextElement);
+#if defined(HD_PROFILE)
+        PROFILE_START(_nextElement);
 #endif
         _activeElement = _nextElement;
         _nextElement->loop();
         _activeElement = nullptr;
-#if defined(HD_TRACE)
-        TRACE_END(_nextElement);
+#if defined(HD_PROFILE)
+        PROFILE_END(_nextElement);
 #endif
       }
       _nextElement = _nextElement->next;
@@ -854,7 +854,6 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
 // send a event out to the defined target.
 void Board::dispatchAction(String action) {
   BOARDTRACE("dispatch %s", action.c_str());
-  // TRACE_START;
 
   // [host:](type/id)?(param)[=val]
   String host, targetId, name, value;
@@ -913,8 +912,6 @@ void Board::dispatchAction(String action) {
         LOGGER_ERR("Action '%s' was not accepted.", action.c_str());
     }
   }
-  // TRACE_END;
-  // TRACE_TIMEPRINT("used time:", "", 25);
 }  // dispatchAction()
 
 

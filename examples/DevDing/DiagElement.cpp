@@ -174,7 +174,24 @@ String DiagElement::_handleDiag() {
 }  // _handleDiag
 
 
+String DiagElement::_handleProfile() {
+#if defined(HD_PROFILE)
+  String sOut;
 
+  sOut = "Loop-Times:\n";
+  _board->forEach("", [this, &sOut](Element *e) {
+    char buffer[128];
+    PROFILE_TIMEPRINTBUF(buffer, e, e->id);
+    sOut.concat(buffer);
+  });
+  return (sOut);
+#else
+  return ("");
+#endif
+}
+
+
+/// @brief Print some chip information on the Console.
 void DiagElement::_logChipDetails() {
   TRACE("Chip-Info:");
   const char *s;
@@ -243,6 +260,10 @@ void DiagElement::start() {
     _board->server->send(200, "text/plain", _handleDiag());
   });
 
+  _board->server->on("/profile", HTTP_GET, [this]() {
+    _board->server->send(200, "text/plain", _handleProfile());
+  });
+
   TRACE("I2C pins sda=%d scl=%d", _board->I2cSda, _board->I2cScl);
 
 #if defined(ESP8266)
@@ -257,15 +278,6 @@ void DiagElement::start() {
 
   _logChipDetails();
 }  // start()
-
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DiagElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-}  // pushState()
 
 
 /* ===== Register the Element ===== */

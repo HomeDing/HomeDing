@@ -18,7 +18,6 @@
 #include <HomeDing.h>
 
 #include "RadioElement.h"
-#include <ElementRegistry.h>
 
 #include <RDSParser.h>
 #include <Wire.h>

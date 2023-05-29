@@ -212,7 +212,7 @@ void loop(void) {
   static wl_status_t lastState = (wl_status_t)100;
   wl_status_t newState = WiFi.status();
   if (newState != lastState) {
-    Serial.printf("WiFi status: %d\n", newState);
+    Serial.printf("WiFi state: %d\n", newState);
     lastState = newState;
   }
 #endif

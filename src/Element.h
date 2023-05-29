@@ -92,7 +92,9 @@ public:
 
   int loglevel = LOGGER_LEVEL_ERR;
 
-  TRACE_DATA;
+#if defined(HD_PROFILE)
+  PROFILE_DATA;
+#endif
 
   /**
    * @brief The Element will be marked active after passing valid parameters and

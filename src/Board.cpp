@@ -19,9 +19,6 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <Board.h>
-#include <Element.h>
-
 #if defined(ESP8266)
 #include <ESP8266mDNS.h>
 extern "C" {

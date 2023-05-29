@@ -18,8 +18,7 @@
  * * 11.10.2019 created by Matthias Hertel
  */
 
-#ifndef MICROJSONC_H
-#define MICROJSONC_H
+#pragma once
 
 class MicroJsonComposer {
 public:
@@ -51,8 +50,5 @@ protected:
   // fresh is true when an object/array was just opened
   bool _fresh;
 };
-
-
-#endif
 
 // end.

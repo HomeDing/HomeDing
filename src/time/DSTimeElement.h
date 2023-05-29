@@ -17,8 +17,7 @@
  * * 19.01.2019 created by Matthias Hertel
  */
 
-#ifndef DSTIMEELEMENT_H
-#define DSTIMEELEMENT_H
+#pragma once
 
 #include <ElementRegistry.h>
 
@@ -105,5 +104,3 @@ private:
 bool DSTimeElement::registered =
     ElementRegistry::registerElement("dstime", DSTimeElement::create);
 #endif
-
-#endif // DSTIMEELEMENT_H

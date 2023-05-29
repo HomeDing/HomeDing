@@ -15,8 +15,7 @@
 // 15.05.2018 set = properties and action interface.
 // -----
 
-#ifndef ELEMENT_H
-#define ELEMENT_H
+#pragma once
 
 #include <cstdarg>
 #include <functional>
@@ -305,4 +304,4 @@ private:
   static char _convertBuffer[32];
 };
 
-#endif
+// End

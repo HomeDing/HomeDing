@@ -18,10 +18,8 @@
  * * 09.01.2029 created by Matthias Hertel
  */
 
-#ifndef WeatherFeed_H
-#define WeatherFeed_H
+#pragma once
 
-#include <HomeDing.h>
 #include <HttpClientElement.h>
 #include <WiFiClient.h>
 
@@ -96,5 +94,3 @@ bool WeatherFeedElement::registered =
     ElementRegistry::registerElement("weatherfeed", WeatherFeedElement::create);
 
 #endif
-
-#endif // WeatherFeed_H

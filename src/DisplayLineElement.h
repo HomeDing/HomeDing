@@ -18,11 +18,8 @@
  */
 
 
-#ifndef DISPLAYLINEELEMENT_H
-#define DISPLAYLINEELEMENT_H
+#pragma once
 
-#include <HomeDing.h>
-#include <displays/DisplayAdapter.h>
 #include <DisplayOutputElement.h>
 
 /**
@@ -73,5 +70,3 @@ private:
 bool DisplayLineElement::registered =
     ElementRegistry::registerElement("displayline", DisplayLineElement::create);
 #endif
-
-#endif // DISPLAYLINEELEMENT_H

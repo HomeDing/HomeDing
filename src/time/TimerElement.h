@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @details
 @verbatim

@@ -17,10 +17,6 @@
  * * 01.12.2019 use onValue not onChange (as usual)
  */
 
-#ifndef PMSELEMENT_H
-#define PMSELEMENT_H
-
-#include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
 #if defined(ESP8266)
@@ -107,8 +103,5 @@ bool PMSElement::registered =
 #elif defined(ESP32)
 // TODO:ESP32 implementation
 // #define SoftwareSerial Serial2
-
-#endif
-
 
 #endif

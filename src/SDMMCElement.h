@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 #if defined(ESP32) && (! ARDUINO_ESP32C3_DEV)
 
 /**

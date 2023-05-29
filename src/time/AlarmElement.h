@@ -15,8 +15,7 @@
  * * 20.11.2018 created by Matthias Hertel
  */
 
-#ifndef AlarmELEMENT_H
-#define AlarmELEMENT_H
+#pragma once
 
 #define TIME_T_NOT (48 * 60 * 60)
 
@@ -103,6 +102,4 @@ private:
 // Register the AlarmElement onto the ElementRegistry.
 bool AlarmElement::registered =
     ElementRegistry::registerElement("alarm", AlarmElement::create);
-#endif
-
 #endif

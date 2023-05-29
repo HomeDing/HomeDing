@@ -25,7 +25,6 @@
 
 #if defined(ESP8266)
 
-#include <HomeDing.h>
 #include <light/LightElement.h>
 
 class MY9291Element : public LightElement

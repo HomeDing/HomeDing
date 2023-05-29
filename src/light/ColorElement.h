@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
 #include <light/LightElement.h>
 
 /**

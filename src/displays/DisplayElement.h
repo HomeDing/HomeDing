@@ -16,8 +16,7 @@
  * * 17.03.2022 unified DisplayConfig
  */
 
-#ifndef DISPLAYELEMENT_H
-#define DISPLAYELEMENT_H
+#pragma once
 
 #include <functional>
 
@@ -122,5 +121,3 @@ private:
 };
 
 // This is a base class that will not be registered
-
-#endif  // DISPLAYELEMENT_H

@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 #include <CalcElement.h>
 
 class AndElement : public CalcElement {

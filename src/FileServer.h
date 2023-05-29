@@ -20,10 +20,8 @@
  * * 22.01.2022 delete folders enabled.
  */
 
-#ifndef FILESERVER_H
-#define FILESERVER_H
+#pragma once
 
-#include <HomeDing.h>
 #include <hdfs.h>
 
 #define JINFO(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
@@ -160,4 +158,3 @@ protected:
   Board *_board;
 };
 
-#endif

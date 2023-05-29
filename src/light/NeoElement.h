@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
 #include <light/LightElement.h>
 #include <light/StripeElement.h>
 

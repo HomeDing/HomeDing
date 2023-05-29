@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief The TimeElement is an special Element that creates actions based on
  * a digital IO signal.

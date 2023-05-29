@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 #include <displays/DisplayAdapter.h>
 
 #define COLOR_UNDEFINED 0xEE000000  //
@@ -52,7 +50,11 @@ public:
   /// @brief draw the element on the display adapter.
   virtual void draw();
 
+
 protected:
+  /// @brief return true when object is at the specified position or is overlapping with rectangle
+  bool overlap(int16_t rx, int16_t ry, uint16_t rw = 0, uint16_t rh = 0);
+
   /// @brief Page of the display where the element is placed. Default on page 1.
   int _page = 1;
 

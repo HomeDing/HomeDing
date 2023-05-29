@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
 /**

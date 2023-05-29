@@ -13,10 +13,7 @@
 // 23.01.2022 startup after network. 
 // -----
 
-#ifndef SSDPELEMENT_H
-#define SSDPELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief Element for enabling Element discovery using the SSDP protocol.
@@ -67,6 +64,4 @@ private:
 // Register the SSDPElement in the ElementRegistry
 bool SSDPElement::registered =
     ElementRegistry::registerElement("ssdp", SSDPElement::create);
-#endif
-
 #endif

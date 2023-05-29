@@ -19,6 +19,17 @@
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
+
+// ===== protected functions =====
+
+/// @brief return true when object is at the specified position or is overlapping with rectangle
+bool DisplayOutputElement::overlap(int16_t rx, int16_t ry, uint16_t rw, uint16_t rh) {
+  return ((rx + rw >= _x) && (rx < (_x + _w)) && (ry + rh >= _y) && (ry < (_y + _h)));
+}
+
+
+// ===== Element functions =====
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -41,10 +52,10 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "y") == 0) {
     _y = _atoi(value);
 
-  } else if (_stricmp(name, "width") == 0) {
+  } else if ((_stricmp(name, "w") == 0) || (_stricmp(name, "width") == 0)) {
     _w = _atoi(value);
 
-  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "height") == 0) ||(_stricmp(name, "fontsize") == 0)) {
+  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "height") == 0) || (_stricmp(name, "fontsize") == 0)) {
     _h = _atoi(value);
 
   } else if (_stricmp(name, "color") == 0) {

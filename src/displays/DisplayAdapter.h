@@ -16,8 +16,7 @@
  * 23.09.2018 flush() method added.
  */
 
-#ifndef DisplayAdapter_H
-#define DisplayAdapter_H
+#pragma once
 
 #include <Wire.h>
 #include <WireUtils.h>
@@ -140,5 +139,3 @@ protected:
 
   Board *board;
 };
-
-#endif  // DisplayAdapter_H

@@ -15,8 +15,6 @@
 
 #if defined(ESP8266)
 
-#include <HomeDing.h>
-
 /**
  * @brief
  */

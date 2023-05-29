@@ -19,11 +19,6 @@
  * * 05.01.2020 using HttpClientElement
  */
 
-#ifndef REMOTEELEMENT_H
-#define REMOTEELEMENT_H
-
-#include <HomeDing.h>
-
 #include <HttpClientElement.h>
 
 /**
@@ -52,5 +47,3 @@ public:
 bool RemoteElement::registered =
     ElementRegistry::registerElement("remote", RemoteElement::create);
 #endif
-
-#endif // REMOTEELEMENT_H

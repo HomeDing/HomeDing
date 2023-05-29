@@ -18,9 +18,6 @@
 
 #pragma once
 
-#include <Arduino.h>
-#include <HomeDing.h>
-
 /**
  * @brief LightElement implements an Element to drive a single LED.
  */

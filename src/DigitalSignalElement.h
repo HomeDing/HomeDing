@@ -18,10 +18,7 @@
  * * 30.10.2020 created by Matthias Hertel
  */
 
-#ifndef DIGITALSIGNAL_H
-#define DIGITALSIGNAL_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The DigitalSignalElement is an special Element that creates actions based
@@ -143,5 +140,3 @@ private:
 bool DigitalSignalElement::registered =
   ElementRegistry::registerElement("digitalsignal", DigitalSignalElement::create);
 #endif
-
-#endif  // DIGITALSIGNAL_H

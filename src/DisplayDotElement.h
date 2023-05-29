@@ -18,11 +18,8 @@
  */
 
 
-#ifndef DISPLAYDOTELEMENT_H
-#define DISPLAYDOTELEMENT_H
+#pragma once
 
-#include <HomeDing.h>
-#include <displays/DisplayAdapter.h>
 #include <DisplayOutputElement.h>
 
 /**
@@ -80,5 +77,3 @@ private:
 bool DisplayDotElement::registered =
     ElementRegistry::registerElement("displaydot", DisplayDotElement::create);
 #endif
-
-#endif // DISPLAYDOTELEMENT_H

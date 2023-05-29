@@ -18,10 +18,7 @@
  */
 
 
-#ifndef DisplayTextElement_H
-#define DisplayTextElement_H
-
-#include <HomeDing.h>
+#pragma once
 
 #include <displays/DisplayAdapter.h>
 #include <DisplayOutputElement.h>
@@ -91,5 +88,3 @@ private:
 bool DisplayTextElement::registered =
     ElementRegistry::registerElement("displaytext", DisplayTextElement::create);
 #endif
-
-#endif // DisplayTextElement_H

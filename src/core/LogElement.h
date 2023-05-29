@@ -16,10 +16,7 @@
  * * 10.04.2020 filesize property added.
  */
 
-#ifndef LOGELEMENT_H
-#define LOGELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief LogElement implements...
@@ -124,6 +121,4 @@ private:
 #ifdef HOMEDING_REGISTER
 bool LogElement::registered =
     ElementRegistry::registerElement("log", LogElement::create);
-#endif
-
 #endif

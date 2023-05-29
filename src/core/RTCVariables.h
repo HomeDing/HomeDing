@@ -14,9 +14,6 @@
  * * 21.04.2018 creation
  */
 
-#ifndef RTCVARIABLES_H
-#define RTCVARIABLES_H
-
 class RTCVariables
 {
 public:
@@ -45,7 +42,5 @@ public:
    */
   static String getStateString();
 }; // class
-
-#endif
 
 // end.

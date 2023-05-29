@@ -15,10 +15,7 @@
  * * 18.04.2021 created by Matthias Hertel
  */
 
-#ifndef STATEELEMENT_H
-#define STATEELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The StateElement class defines the extra virtual functions for any State Element. 
@@ -39,5 +36,3 @@ public:
    */
   virtual void load();
 };
-
-#endif // STATEELEMENT_H

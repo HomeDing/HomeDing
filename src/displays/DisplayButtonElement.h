@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-#include <displays/DisplayAdapter.h>
 #include <DisplayOutputElement.h>
 
 /**
@@ -66,26 +64,27 @@ public:
   virtual void pushState(
     std::function<void(const char *pName, const char *eValue)> callback) override;
 
-  /**
-   * @brief Draw this output element.
-   */
+  /// @brief Draw the button on display.
+  /// used by DisplayOutputElement.
   virtual void draw() override;
 
+  // ===== Touch supporting functions =====
 
-  // return true when object is at the specified position or is overlapping with rectangle
-  bool overlap(int16_t rx, int16_t ry, uint16_t rw = 0, uint16_t rh = 0);
-
-  /// @brief A touchStart elvent is given
+  /// @brief A touchStart event is given
   /// @param x X position of touch start event.
   /// @param y Y position of touch start event.
   /// @return true when button wants to participate in further actions.
   bool touchStart(uint16_t xPos, uint16_t yPos);
 
+  /// @brief A touchEnd event is given
   void touchEnd(uint16_t xPos, uint16_t yPos);
 
 private:
   /// @brief button is pressed.
   bool _pressed;
+
+  /// @brief button click event dispatched on button release.
+  String _clickAction;
 
   /**
    * @brief displayed value

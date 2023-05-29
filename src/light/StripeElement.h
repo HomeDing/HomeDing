@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
 #include <light/LightElement.h>
 
 #define STRIPE_DATA_PIN _pins[0]

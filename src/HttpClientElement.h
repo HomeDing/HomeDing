@@ -16,10 +16,7 @@
  * * 05.01.2020 created by Matthias Hertel
  */
 
-#ifndef HTTPCLIENTELEMENT_H
-#define HTTPCLIENTELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The RemoteElement is an special Element that creates actions based on
@@ -92,5 +89,3 @@ private:
 
   bool _errNoHostSent = false; // avoid sending this error all the time
 };
-
-#endif // HTTPCLIENTELEMENT_H

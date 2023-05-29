@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief Element for selecting one of many options with key and value.
  */

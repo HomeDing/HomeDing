@@ -23,8 +23,7 @@ This handler registers to http GET request for
 @endverbatim
  */
 
-#ifndef BUILTINSERVER_H
-#define BUILTINSERVER_H
+#pragma once
 
 #include <MicroJsonComposer.h>
 
@@ -72,5 +71,3 @@ private:
    */
   Board *_board;
 };
-
-#endif

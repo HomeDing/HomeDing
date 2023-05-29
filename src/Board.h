@@ -34,8 +34,7 @@
 // The Board.h file also works as the base import file that contains some
 // general definitions and SDK/processor specific includes.
 
-#ifndef BOARD_H
-#define BOARD_H
+#pragma once
 
 #if defined(ESP32)
 #include <WebServer.h>
@@ -521,5 +520,3 @@ private:
 
   static Element *_registered;
 };
-
-#endif

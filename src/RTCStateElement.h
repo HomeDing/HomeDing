@@ -11,9 +11,6 @@
  * * 30.07.2018 created by Matthias Hertel
  */
 
-#ifndef RTCSTATEEELEMENT_H
-#define RTCSTATEEELEMENT_H
-
 #include "StateElement.h"
 
 /**
@@ -89,6 +86,4 @@ private:
 // Register the RTCStateElement onto the ElementRegistry.
 bool RTCStateElement::registered =
     ElementRegistry::registerElement("rtcstate", RTCStateElement::create);
-#endif
-
 #endif

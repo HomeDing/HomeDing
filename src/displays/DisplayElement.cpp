@@ -21,7 +21,7 @@
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
-/* ===== Private functions ===== */
+// ===== private functions =====
 
 void DisplayElement::_newPage(int page) {
   TRACE("newPage %d", page);
@@ -43,7 +43,7 @@ void DisplayElement::_newPage(int page) {
 }  // _newPage()
 
 
-/* ===== Element functions ===== */
+// ===== Element functions =====
 
 /**
  * @brief Constructor of a new DisplayElement.

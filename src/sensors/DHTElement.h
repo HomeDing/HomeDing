@@ -18,10 +18,7 @@
  * * 12.02.2020 rebased on SensorElement.
  */
 
-#ifndef DHTELEMENT_H
-#define DHTELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 #include <sensors/SensorElement.h>
 
@@ -92,6 +89,3 @@ private:
 // Register the DHTElement in the ElementRegistry.
 bool DHTElement::registered = ElementRegistry::registerElement("dht", DHTElement::create);
 #endif
-
-
-#endif  // DHTELEMENT_H

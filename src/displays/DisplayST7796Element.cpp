@@ -1,5 +1,5 @@
 /**
- * @file DisplayPanelElement.cpp
+ * @file DisplayST7796Element.cpp
  * @brief Display Element for Panel compatible TFT displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -11,47 +11,47 @@
  *
  * More information on https://www.mathertel.de/Arduino
  *
- * Changelog:see DisplayPanelElement.h
+ * Changelog:see DisplayST7796Element.h
  */
 
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include "DisplayPanelElement.h"
-#include "DisplayAGFXAdapter.h"
+#include "displays/DisplayST7796Element.h"
 
-#define TRACE(...) LOGGER_EINFO(__VA_ARGS__)
+#include "displays/DisplayST7796Adapter.h"
+
+#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
 /**
- * @brief static factory function to create a new DisplayPanelElement
- * @return DisplayPanelElement* created element
+ * @brief static factory function to create a new DisplayST7796Element
+ * @return DisplayST7796Element* created element
  */
-Element *DisplayPanelElement::create() {
-  return (new DisplayPanelElement());
+Element *DisplayST7796Element::create() {
+  return (new DisplayST7796Element());
 }  // create()
 
 
 /* ===== Element functions ===== */
 
- void DisplayPanelElement::init(Board *board) {
+ void DisplayST7796Element::init(Board *board) {
   TRACE("init()");
   DisplayElement::init(board);
-  config.backgroundColor = 0;
-  config.drawColor = RGB_YELLOW;
+
+  // some default values for ST7796 displays
   config.width = 320;
   config.height = 480;
-  config.rotation = 0;
  }
 
 // All required parameters are handled by DisplayElement::set()
 
 /**
- * @brief Activate the DisplayPanelElement and register a Display Adapter to LCD
+ * @brief Activate the DisplayST7796Element and register a Display Adapter to LCD
  * in the board.
  */
-void DisplayPanelElement::start() {
+void DisplayST7796Element::start() {
   TRACE("start()");
 
   DisplayAdapter *d = new DisplayST7796Adapter();

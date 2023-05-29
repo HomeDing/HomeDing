@@ -1,5 +1,5 @@
 /**
- * @file DisplayPanelElement.h
+ * @file DisplayST7796Element.h
  * @brief Display Element for Panel compatible TFT displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -12,24 +12,18 @@
  * More information on https://www.mathertel.de/Arduino
  *
  * Changelog:
- * * 18.09.2018 created by Matthias Hertel
+ * * 27.05.2023 created by Matthias Hertel
  */
 
 #pragma once
 
 #include <displays/DisplayElement.h>
 
-/**
- * @brief DisplayPanelElement implements creating an Display Adapter for a LCD
- * attached to the RGB Panel bus on EPS32S3.
- * @details
- * The DisplayAdapter Element includes the real functionality.
- */
-
-class DisplayPanelElement : public DisplayElement {
+/// @brief DisplayST7796Element implements creating an Display Adapter for a ST7796 based LCD.
+class DisplayST7796Element : public DisplayElement {
 public:
   /**
-   * @brief Factory function to create a DisplayPanelElement.
+   * @brief Factory function to create a DisplayST7796Element.
    * @return Element*
    */
   static Element *create();
@@ -48,7 +42,7 @@ public:
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplayPanelElement onto the ElementRegistry.
-bool DisplayPanelElement::registered =
-  ElementRegistry::registerElement("DisplayPanel", DisplayPanelElement::create);
+// Register the DisplayST7796Element onto the ElementRegistry.
+bool DisplayST7796Element::registered =
+  ElementRegistry::registerElement("DisplayST7796", DisplayST7796Element::create);
 #endif

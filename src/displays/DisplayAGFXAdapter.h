@@ -2,14 +2,13 @@
  * @file DisplayAGFXAdapter.h
  *
  * @brief DisplayAdapter implementation for the HomeDing library
- * adapting TFT displays using the Panel chip.
+ * adapting TFT displays using the Arduino_GFX library.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * -----
- * * 25.07.2018 created by Matthias Hertel
- * * 07.12.2020 no write text beyond textline end.
+ * * 27.05.2023 created by Matthias Hertel
  */
 
 #pragma once
@@ -142,7 +141,7 @@ public:
   /// @param h
   /// @param text
   virtual void drawButton(int16_t x, int16_t y, int16_t w, int16_t h, const char *text, bool pressed = false) override {
-    PANELTRACE("drawButton: (%d,%d,%d,%d) <%s> %d\n", x, y, w, h, text, pressed);
+    // LOGGER_JUSTINFO("drawButton: (%d,%d,%d,%d) <%s> %d\n", x, y, w, h, text, pressed);
     const uint16_t paddingVertical = 4;
 
     // textbox dimensions
@@ -289,20 +288,3 @@ protected:
   uint16_t drawColor565;
 };
 
-
-class DisplayST7796Adapter : public DisplayAGFXAdapter {
-  bool start() override {
-    bus = new Arduino_ESP32SPI(2 /* DC */, 15 /* CS */, 14 /* SCK */, 13 /* MOSI */, 12 /* MISO */, HSPI /* spi_num */);
-
-    gfx = new Arduino_ST7796(
-      bus,
-      -1 /* RST */,
-      (conf->rotation / 90) /* rotation */,
-      false,
-      conf->width,
-      conf->height);
-
-    DisplayAGFXAdapter::start();
-    return (gfx != nullptr);
-  }
-};

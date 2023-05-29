@@ -77,6 +77,7 @@
 // #define HOMEDING_INCLUDE_DISPLAYLCD
 // #define HOMEDING_INCLUDE_DISPLAYSSD1306
 // #define HOMEDING_INCLUDE_DISPLAYSH1106
+
 // eneble these lines to get more displays supported
 #define HOMEDING_INCLUDE_DISPLAYST7796
 // #define HOMEDING_INCLUDE_DISPLAYST7789
@@ -109,10 +110,6 @@
 #include <BoardServer.h>     // Web Server Middleware for Elements
 #include <FileServer.h>      // Web Server Middleware for UI
 
-// Extra Display
-#if defined(HOMEDING_INCLUDE_DISPLAYST7796)
-#include "DisplayPanelElement.h"
-#endif
 
 #include "DisplayTouchGT911Element.h"
 
@@ -131,7 +128,6 @@ void setup(void) {
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
   delay(3000);
-  Serial.println("xx");
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
@@ -160,7 +156,7 @@ void setup(void) {
 
   LOGGER_INFO("setup done");
 
-  homeding.add("touch/0", new DisplayTouchGT911Element());
+  homeding.add("DisplayTouchGT911/0", new DisplayTouchGT911Element());
 
 }  // setup
 

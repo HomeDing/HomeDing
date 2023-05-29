@@ -40,43 +40,14 @@ class DisplayTouchGT911Element : public Element {
 private:
   TAMC_GT911 *tp = nullptr;
 
-  bool wasTouched = false;
-  uint16_t wasX, wasY;
+  uint16_t lastX, lastY;
   DisplayButtonElement *bFound;
 
   unsigned long nextRead;
 
-  // send a touchStart to all button elements until a resonsive button was found
-  void _sendTouchStart(uint16_t x, uint16_t y) {
-    // LOGGER_EINFO("_sendTouchStart(%d/%d)", x, y);
-    bFound = nullptr;
-
-    // redraw all display elements
-    _board->forEach("displaybutton", [this, x, y](Element *e) {
-      if (!bFound) {
-        DisplayButtonElement *be = (DisplayButtonElement *)e;
-        if (be->touchStart(x, y)) bFound = be;
-      }
-    });
-    if (bFound) {
-      // LOGGER_EINFO("btn (%s)", bFound->id);
-    }
-  } // _sendTouchStart
-
-
-  // call touchEnd to found button
-  void _sendTouchEnd(uint16_t x, uint16_t y) {
-    // LOGGER_EINFO("_sendTouchEnd(%d/%d)", x, y);
-    if (bFound) {
-      bFound->touchEnd(x, y);
-      bFound = nullptr;
-    }
-  }  // _sendTouchEnd
-
 public:
   /** setup the functionality. */
-  void
-  setup() override {
+  void setup() override {
     Element::setup();
     // set the digital pin as output:
     tp = new TAMC_GT911(TOUCH_SDA, TOUCH_SCL, TOUCH_INT, TOUCH_RST, TOUCH_WIDTH, TOUCH_HEIGHT);
@@ -95,32 +66,38 @@ public:
       tp->read();
 
       if (tp->isTouched) {
-        if (tp->touches > 8) {
-          Serial.printf("Touch-Reset\n");
-          tp->reset();
-        }
+        // TRACE("Touch %d/%d\n", tp->points[0].x, tp->points[0].y);
+        lastX = tp->points[0].x;
+        lastY = tp->points[0].y;
 
-        if (wasTouched) {
-          // maybe a gesture...
+        if (!bFound) {
+          // find displaybutton at x/y
+          _board->forEach("displaybutton", [this](Element *e) {
+            if (!bFound) {
+              DisplayButtonElement *be = (DisplayButtonElement *)e;
+              if (be->touchStart(lastX, lastY)) {
+                bFound = be;
+              }
+            }
+          });
 
         } else {
-          for (int i = 0; i < tp->touches; i++) {
-            // Serial.printf("Touch-%d %d/%d\n", i, tp->points[i].x, tp->points[i].y);
-            wasX = tp->points[i].x;
-            wasY = tp->points[i].y;
-            wasTouched = true;
-            _sendTouchStart(wasX, wasY);
+          bool over = bFound->touchStart(lastX, lastY);
+          if (!over) {
+            bFound = nullptr;
           }
         }
 
-      } else if (wasTouched) {
-        // touchEnd();
-        _sendTouchEnd(wasX, wasY);
-        wasTouched = false;
-      }
+      } else if (bFound) {
+        // call touchEnd to found button
+        bFound->touchEnd(lastX, lastY);
+        bFound = nullptr;
+
+      }  // if
+
       nextRead = millis() + 50;
     }
-  }
+  }  // loop()
 };
 
 // End

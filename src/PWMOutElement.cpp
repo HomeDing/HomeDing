@@ -27,13 +27,13 @@ Element *PWMOutElement::create() {
 bool PWMOutElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     _setValue(_atoi(value));
 
-  } else if (_stricmp(name, PROP_PIN) == 0) {
+  } else if (_stricmp(name, "pin") == 0) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, PROP_INVERSE) == 0) {
+  } else if (_stricmp(name, "invert") == 0) {
     _inverse = _atob(value);
 
   } else if (_stricmp(name, "range") == 0) {
@@ -76,7 +76,7 @@ void PWMOutElement::start() {
 void PWMOutElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _printInteger(_value));
+  callback("value", _printInteger(_value));
 }  // pushState()
 
 

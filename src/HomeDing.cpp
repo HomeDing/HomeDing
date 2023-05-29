@@ -9,7 +9,6 @@
 const char *PROP_VALUE = "value";
 const char *PROP_ADDRESS = "address";
 const char *PROP_PIN = "pin";
-const char *PROP_INVERSE = "inverse";
 
 const char *ACTION_ONVALUE = "onValue";
 const char *ACTION_ONTEMPERATURE = "onTemperature";

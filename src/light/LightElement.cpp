@@ -145,7 +145,7 @@ void LightElement::start() {
       pinMode(_pins[n], OUTPUT);
 #elif (defined(ESP32))
       _channels[n] = _board->nextLedChannel++;
-      ledcSetup(_channels[n], 8000, 8);
+      ledcSetup(_channels[n], 8000, 10);
       ledcAttachPin(_pins[n], _channels[n]);
 #endif
     }  // for
@@ -164,15 +164,18 @@ void LightElement::loop() {
     uint32_t color = (enabled ? _outColor : 0);
 
     for (int n = _count - 1; n >= 0; n--) {
-      int c = color & 0x00FF;
-
-      int level = c * _brightness / 100;
-      if (invert) level = 0xFF - level;
 
 #if defined(ESP8266)
+      int c = (color & 0x00FF);
+      int level = c * _brightness / 100;
+      if (invert) level = 0xFF - level;
       TRACE("L-set(%d) pin=%d 0x%02x", n, _pins[n], level);
       analogWrite(_pins[n], c * _brightness / 100);
+
 #elif (defined(ESP32))
+      int c = (color & 0x00FF) * 4;
+      int level = c * _brightness / 100;
+      if (invert) level = 0x03FF - level;
       TRACE("L-set(%d) ch=%d 0x%02x", n, level);
       ledcWrite(_channels[n], level);
 #endif

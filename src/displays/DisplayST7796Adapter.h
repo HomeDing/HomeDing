@@ -17,7 +17,12 @@
 
 class DisplayST7796Adapter : public DisplayAGFXAdapter {
   bool start() override {
+
+#if defined(ESP32)
     bus = new Arduino_ESP32SPI(2 /* DC */, 15 /* CS */, 14 /* SCK */, 13 /* MOSI */, 12 /* MISO */, HSPI /* spi_num */);
+#elif defined(ESP8266)
+    bus = new Arduino_ESP8266SPI(2 /* DC */, 15 /* CS */);
+#endif
 
     gfx = new Arduino_ST7796(
       bus,

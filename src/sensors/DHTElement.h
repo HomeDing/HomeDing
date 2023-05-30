@@ -79,7 +79,7 @@ private:
   /**
    * @brief Control level logic for power ouput to _powerpin. When true: Enable sensor by creating a physical LOW level.
    */
-  bool _powerinverse = false;
+  bool _powerinvert = false;
 
   DHTNEW *_dht;
 };  // class DHTElement

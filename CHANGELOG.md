@@ -358,7 +358,7 @@ These Elements are added to the [Development example](https://homeding.github.io
   * See story [Build a Weather forecast display](https://homeding.github.io/stories/story-weatherdisplay.htm).
 
 * **[DHT Element](https://homeding.github.io/elements/dht.htm)**
-  * **powerPin** and **powerInverse** - The DHT Element has support for a power controlling GPIO pin to reset the sensor when required.
+  * **powerPin** and **powerInvert** - The DHT Element has support for a power controlling GPIO pin to reset the sensor when required.
 
 * **[Sensor Elements](https://homeding.github.io/elements/sensors.htm)**
   * **warmupTime** - the time a sensor required to be usable for first data acquiring.

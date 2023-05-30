@@ -114,7 +114,7 @@ void BoardHandler::handleConnect(WebServer &server) {
       break;
     }  // if
 
-  }  // while
+  }    // while
   delay(400);
   _board->reboot(false);
 }  // handleConnect()
@@ -183,10 +183,10 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 #endif
 {
   // LOGGER_JUSTINFO("HTTP: > %s", requestUri.c_str());
-  bool can = ((requestMethod == HTTP_GET)              // only GET requests in the API
+  bool can = ((requestMethod == HTTP_GET)           // only GET requests in the API
               && (requestUri.startsWith(API_ROUTE)  // new api entries
-                  || (requestUri == "/")               // handle redirect
-                  || (_board->isCaptiveMode())));      // capt
+                  || (requestUri == "/")            // handle redirect
+                  || (_board->isCaptiveMode())));   // capt
 
   return (can);
 }  // canHandle
@@ -253,12 +253,28 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
     jc.openObject();
     jc.addProperty("devicename", _board->deviceName);
+    jc.addProperty("coreVersion", String(_board->version));
+    jc.addProperty("coreBuild", String(_board->build));
+
+#if defined(ESP8266)
+    jc.addProperty("core", "ESP8266");
+#elif defined(ESP32)
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+    esp_chip_model_t model = chip_info.model;
+    const char *s = "unknown";
+    if (model == CHIP_ESP32) { s = "ESP32"; };
+    // if (model == CHIP_ESP32S2) { s = "ESP32-S2"; };
+    if (model == CHIP_ESP32S3) { s = "ESP32-S3"; };
+    if (model == CHIP_ESP32C3) { s = "ESP32-C3"; };
+    // if (model == CHIP_ESP32H2) { s = "ESP32-H2"; };
+    jc.addProperty("core", s);
+#endif
+
     jc.addProperty("build", __DATE__);
     jc.addProperty("freeHeap", ESP.getFreeHeap());
 
-    jc.addProperty("coreVersion", String(_board->version));
-    jc.addProperty("coreBuild", String(_board->build));
-#if ! defined(HD_MINIMAL)
+#if !defined(HD_MINIMAL)
     jc.addProperty("flashSize", ESP.getFlashChipSize());
     jc.addProperty("mac", WiFi.macAddress().c_str());
 #endif
@@ -276,7 +292,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);
 
-#if ! defined(HD_MINIMAL)
+#if !defined(HD_MINIMAL)
     // WIFI info
     jc.addProperty("ssid", WiFi.SSID());
 #endif

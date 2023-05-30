@@ -51,8 +51,8 @@ bool DHTElement::set(const char *name, const char *value) {
     _powerpin = _atopin(value);
     ret = true;
 
-  } else if (_stricmp(name, "powerinverse") == 0) {
-    _powerinverse = _atob(value);
+  } else if (_stricmp(name, "powerInvert") == 0) {
+    _powerinvert = _atob(value);
     ret = true;
 
   } else if (_stricmp(name, "onTemperature") == 0) {
@@ -84,7 +84,7 @@ void DHTElement::start() {
 
     if (_powerpin >= 0) {
       pinMode(_powerpin, OUTPUT);
-      int physLevel = (_powerinverse ? LOW : HIGH);
+      int physLevel = (_powerinvert ? LOW : HIGH);
       digitalWrite(_powerpin, physLevel);
     }
     _dht = new DHTNEW(_pin);
@@ -100,7 +100,7 @@ void DHTElement::term() {
   // no need to call _dht.anyfunc()
   if (_powerpin >= 0) {
     pinMode(_powerpin, OUTPUT);
-    int physLevel = (_powerinverse ? HIGH : LOW);
+    int physLevel = (_powerinvert ? HIGH : LOW);
     digitalWrite(_powerpin, physLevel);
   }
   _dht->powerDown();

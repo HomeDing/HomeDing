@@ -70,7 +70,7 @@ private:
   int _pin = -1;  // pin must be configured
 #endif
 
-  // map() function just like the standard arduino map() function but with float and boundaries from configuration.
+  // map() function just like the standard Arduino map() function but with float and boundaries from configuration.
   int map(int value);
 
   // map factors

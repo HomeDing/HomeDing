@@ -30,7 +30,12 @@ Element *AnalogElement::create() {
 
 
 int AnalogElement::map(int value) {
-  return ((value - _inMin) * (_outMax - _outMin)) / (_inMax - _inMin) + _outMin;
+  int divisor = (_inMax - _inMin) + _outMin;
+  if (divisor == 0) {
+    return 0;  // better than exceptions !
+  } else {
+    return ((value - _inMin) * (_outMax - _outMin)) / divisor;
+  }
 }
 
 
@@ -119,7 +124,7 @@ bool AnalogElement::getProbe(UNUSED String &values) {
   if ((value >= _lastValue + _hysteresis) || (value <= _lastValue - _hysteresis)) {
     _lastValue = value;
     values = String(value) + ',' + (value < _reference ? "0" : "1");
-  }  // if
+  }               // if
 
   return (true);  // always simulate data is fine
 }  // getProbe()
@@ -136,7 +141,7 @@ void AnalogElement::sendData(UNUSED String &values) {
       _board->dispatch(_lowAction);
     }  // if
     _lastReference = r;
-  }  // if
+  }    // if
 
 }  // sendData()
 

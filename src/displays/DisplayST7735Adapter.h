@@ -35,11 +35,11 @@ public:
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
       bus = new Arduino_ESP32SPI(conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO, HSPI);
 #else
-  The ST7735 for ESP32 processor is not yet implemented.
+      bus = new Arduino_HWSPI(conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
 #endif
 
 #elif defined(ESP8266)
-  The ST7735 for ESPESP8266 processor is not yet implemented.
+      bus = new Arduino_HWSPI(conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
 #endif
     } else {
       // any bus but SPI is not implemented

@@ -68,7 +68,7 @@ public:
     display = new (std::nothrow) GFXcanvas1(h, w);  // switched w and h !
 
     // display parameter default values
-    uint8_t comPins;
+    uint8_t comPins = 0x12;
     _colStart = 0;
     _colEnd = w - 1;
 
@@ -110,23 +110,23 @@ public:
 #endif
 
       uint8_t init1[] = {
-        SSD1306_DISPLAYOFF,                // 0xAE
-        SSD1306_SETCONTRAST, _contrast,    // 0x81
-        SSD1306_NORMALDISPLAY,             // 0xA6
-        SSD1306_DEACTIVATE_SCROLL,         // 0x2E
-        SSD1306_MEMORYMODE, 0x00,          // 0x20 Horizontal addressing mode
-        SSD1306_SEGREMAPINV,               // 0xA1
-        SSD1306_SETMULTIPLEX, (h - 1),     // 0xA8
-        SSD1306_COMSCANDEC,                // 0xC8
-        SSD1306_SETDISPLAYOFFSET, 0x00,    // 0xD3, no offset
-        SSD1306_SETCOMPINS, comPins,       // 0xDA
-        SSD1306_SETDISPLAYCLOCKDIV, 0x80,  // 0xD5
-        SSD1306_SETPRECHARGE, 0x22,        // 0xd9
-        SSD1306_SETVCOMDETECT, 0x40,       // 0xDB
-        SSD1306_CHARGEPUMP, 0x14,          // 0x8D
-        SSD1306_SETSTARTLINE | 0x0,        // 0x40 line #0
-        SSD1306_DISPLAYALLON_RESUME,       // 0xA4
-        SSD1306_DISPLAYON                  // 0xAF
+        SSD1306_DISPLAYOFF,                      // 0xAE
+        SSD1306_SETCONTRAST, _contrast,          // 0x81
+        SSD1306_NORMALDISPLAY,                   // 0xA6
+        SSD1306_DEACTIVATE_SCROLL,               // 0x2E
+        SSD1306_MEMORYMODE, 0x00,                // 0x20 Horizontal addressing mode
+        SSD1306_SEGREMAPINV,                     // 0xA1
+        SSD1306_SETMULTIPLEX, (uint8_t)(h - 1),  // 0xA8
+        SSD1306_COMSCANDEC,                      // 0xC8
+        SSD1306_SETDISPLAYOFFSET, 0x00,          // 0xD3, no offset
+        SSD1306_SETCOMPINS, comPins,             // 0xDA
+        SSD1306_SETDISPLAYCLOCKDIV, 0x80,        // 0xD5
+        SSD1306_SETPRECHARGE, 0x22,              // 0xd9
+        SSD1306_SETVCOMDETECT, 0x40,             // 0xDB
+        SSD1306_CHARGEPUMP, 0x14,                // 0x8D
+        SSD1306_SETSTARTLINE | 0x0,              // 0x40 line #0
+        SSD1306_DISPLAYALLON_RESUME,             // 0xA4
+        SSD1306_DISPLAYON                        // 0xAF
       };
       _sendCommandList(init1, sizeof(init1));
 #if defined(ESP32)
@@ -134,7 +134,7 @@ public:
 #endif
     }  // if
     return (true);
-  };  // init()
+  };   // init()
 
 
   virtual void setBrightness(uint8_t bright) override {
@@ -203,7 +203,7 @@ public:
     };
     _sendCommandList(dlist1, sizeof(dlist1));
 
-    unsigned long ts = millis();
+    // unsigned long ts = millis();
     // buffer is rotated by +90° !
     uint16_t bytesOut = 0;
     int hb = h / 8;  // height-bytes

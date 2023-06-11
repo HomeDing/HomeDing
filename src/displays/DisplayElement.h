@@ -30,6 +30,12 @@
 #define RGB_ORANGE 0x00FFA500
 #define RGB_PURPLE 0x00800080
 
+
+#define BUSMODE_ANY 0x00
+#define BUSMODE_I2C 0x01
+#define BUSMODE_SPI 0x02
+
+
 struct DisplayConfig {
   /** Width of display */
   int width = 128;
@@ -47,6 +53,12 @@ struct DisplayConfig {
   /** Rotation of the display */
   int rotation = 0;
 
+  /// @brief Row-Offset in the display memory for the displayed part.
+  int rowOffset = 0;
+  
+  /// @brief Column-Offset in the display memory for the displayed part.
+  int colOffset = 0;
+
   /** Pin to reset the display chip */
   int resetPin = -1;
 
@@ -55,6 +67,8 @@ struct DisplayConfig {
 
   /** Pin to invert the display colors */
   bool invert = false;
+
+  int busmode = BUSMODE_ANY;
 
   /* ===== I2C interface ===== */
 

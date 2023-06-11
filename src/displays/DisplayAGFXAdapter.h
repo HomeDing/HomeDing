@@ -2,7 +2,7 @@
  * @file DisplayAGFXAdapter.h
  *
  * @brief DisplayAdapter implementation for the HomeDing library
- * adapting TFT displays using the Arduino_GFX library.
+ * for displays using the Arduino_GFX library.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -195,9 +195,10 @@ public:
 
 
 protected:
-  // convert 32-bit color to 16-bit color
-  // 0x00rrggbb to rrrrrggggggbbbbb
-  // use gfx->color565 ???
+
+  /// @brief convert a 32-bit color value 0x00RRGGBB into the 565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
+  /// @param color 24-bit color value
+  /// @return 16-bit color in 565 format.
   uint16_t col565(uint32_t color) {
 
     uint16_t col =
@@ -208,7 +209,8 @@ protected:
   }
 
 
-  /** Set max. height of text in a box */
+  /// @brief Set height of text in a box.
+  /// @param h max. resulting height
   void _setTextHeight(int16_t h) {
     // PANELTRACE("_setTextHeight(%d)\n", h);
     int16_t base, fit;

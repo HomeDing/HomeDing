@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.x] - unreleased
 
+### Display and Touch Driver updates
+
+There is support for displays in the HomeDing Library since a long time. With the ESP32 variants
+come some new opportunitites especially for larger and more colorful display like 480*320 px including touch controllers.
+This version has some major updates to support these devices.
+
+* Some Display Adapters are now impemented using the [Arduino_GFX
+  Library](https://github.com/moononournation/Arduino_GFX) that supports a long list of
+  interfaces called [Data bus](https://github.com/moononournation/Arduino_GFX/wiki/Data-Bus-Class)
+  and displays [Display Class](https://github.com/moononournation/Arduino_GFX/wiki/Display-Class).
+  Also many boards including displays are explained how to use.
+
+  This library is derived from the AdaFruit library and was extended to support more displays
+  than sold by AdaFruit.
+
+  A must recommend displays from AdaFruit as they take care about the quality of their items
+  (that is not always true when importing from china or buying from eBay).
+
+* The **DisplayTouchGT911** Element is the first implementation of a touch controller that comes
+  with displays. It captures click events and shares them with all available **DisplayButton**
+  Elements. Now you can add visual buttons on the display to start actions by click.
+
+* The **DisplayButtonElement** draws a button at the configured position where click events
+  should be captured.
+
+* The BigDisplay example is made for a display with integrated touch panel.
+
+-> story
+
+
+
+
+### Minimal Examples
+
 The minimal example was split into **plug** and **bulb**.
 
 These [Minimal Examples](https://github.com/HomeDing/HomeDing/tree/develop/examples/minimal)
@@ -16,7 +50,7 @@ to support a 2-step ´firmware update.
 It can be flashed on a devices even when memory is low for a regular update.
 After the micro example is flashed a bigger firmware can be flashed.
 
-Sime examples also have a \<sketch\>.ino.globals.h fie to define a Marco "HD_MINIMAL".
+Some examples also have a \<sketch\>.ino.globals.h file to define a Marco "HD_MINIMAL".
 This is causing smaller bin files by removing some rarely needed functionality.
 
 

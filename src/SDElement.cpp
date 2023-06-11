@@ -113,8 +113,7 @@ void SDElement::start() {
     // mount the sd filesystem
     HomeDingFS::sdFS = &SD;
 
-    uint8_t cardType = SD.cardType();
-    TRACE("Card Type: %d", cardType);
+    TRACE("Card Type: %d", SD.cardType());
     TRACE("SD Card Size: %llu MByte", SD.cardSize() / (1024 * 1024));
     TRACE(" Total: %llu MByte", SD.totalBytes() / (1024 * 1024));
     TRACE(" Used : %llu MByte", SD.usedBytes() / (1024 * 1024));

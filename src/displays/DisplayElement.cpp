@@ -100,12 +100,19 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "background") == 0) {
     config.backgroundColor = _atoColor(value);
 
-    // ===== i2c bus
+  } else if (_stricmp(name, "busmode") == 0) {
+    if (_stricmp(value, "spi") == 0) {
+      config.busmode = BUSMODE_SPI;
+    } else if (_stricmp(value, "i2c") == 0) {
+      config.busmode = BUSMODE_I2C;
+    }
+
+    // ===== i2c bus parameter
 
   } else if (_stricmp(name, "address") == 0) {
     config.i2cAddress = _atoi(value);
 
-    // ===== spi bus
+    // ===== spi bus parameter
 
   } else if (_stricmp(name, "spimosi") == 0) {
     config.spiMOSI = _atopin(value);
@@ -132,6 +139,8 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "lightpin") == 0) {
     config.lightPin = _atopin(value);
 
+    // ===== Display settings
+
   } else if (_stricmp(name, "width") == 0) {
     config.width = _atoi(value);
 
@@ -144,10 +153,11 @@ bool DisplayElement::set(const char *name, const char *value) {
     r = constrain(r, 0, 3);
     config.rotation = r * 90;
 
-    // some RGB displays require setting rgb color modes.. (st7735 variants)
-    // } else if (_stricmp(name, "colormode") == 0) {
-    //   int _colormode = ListUtils::indexOf("rgb,bgr", value);
-    //   TRACE("set %s=%d", name, _colormode);
+  } else if (_stricmp(name, "rowOffset") == 0) {
+    config.rowOffset = _atoi(value);
+
+  } else if (_stricmp(name, "colOffset") == 0) {
+    config.colOffset = _atoi(value);
 
   } else {
     ret = Element::set(name, value);

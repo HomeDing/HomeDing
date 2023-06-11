@@ -1,6 +1,6 @@
 /**
  * @file DisplayST7796Element.h
- * @brief Display Element for Panel compatible TFT displays.
+ * @brief Display Element for ST7796 compatible TFT displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

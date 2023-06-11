@@ -198,24 +198,21 @@ protected:
    */
   Adafruit_GFX *gfxDisplay = nullptr;
 
-  /**
-   * @brief convert a 32-bit color value 0x00RRGGBB into the
-   *   565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
-   * @param color  24-bit color.
-   * @return 16-bit color in 565 format.
-   */
+  /// @brief convert a 32-bit color value 0x00RRGGBB into the 565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
+  /// @param color 24-bit color value
+  /// @return 16-bit color in 565 format.
   uint16_t col565(uint32_t color) {
 
     uint16_t col =
       ((color & 0x00F80000) >> 8)
       | ((color & 0x0000FC00) >> 5)
       | ((color & 0x000000F8) >> 3);
-
     return (col);
   }
 
 
-  /** Set max. height of text in a box */
+  /// @brief Set height of text in a box.
+  /// @param h max. resulting height
   void _setTextHeight(int16_t h) {
     int16_t base, fit;
 

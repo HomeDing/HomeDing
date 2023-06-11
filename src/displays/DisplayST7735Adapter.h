@@ -39,7 +39,7 @@ public:
 #endif
 
 #elif defined(ESP8266)
-      bus = new Arduino_HWSPI(conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
+      bus = new Arduino_HWSPI(conf->spiDC, conf->spiCS);
 #endif
     } else {
       // any bus but SPI is not implemented

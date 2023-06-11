@@ -106,7 +106,7 @@ public:
 
   virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1){};
 
-  virtual void drawButton(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h, UNUSED const char *text, bool pressed = false){};
+  virtual void drawButton(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h, UNUSED const char *text, UNUSED bool pressed = false){};
 
   virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill) {
     return (h);

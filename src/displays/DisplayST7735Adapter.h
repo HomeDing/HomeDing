@@ -45,13 +45,6 @@ public:
       // any bus but SPI is not implemented
     }
 
-if (bus)
-  LOGGER_JUSTINFO("bus created.");
-
-#if defined(ESP8266)
-    The ST7735 for ESPESP8266 processor is not yet implemented.
-
-#elif defined(ESP32)
     gfx = new Arduino_ST7735(
       bus,                    // bus
       conf->resetPin,         // reset
@@ -64,10 +57,6 @@ if (bus)
       conf->colOffset,
       conf->rowOffset,
       true);  //  bgr mode
-#endif 
-
-if (gfx)
-  LOGGER_JUSTINFO("gfx created.");
 
     DisplayAGFXAdapter::start();
 

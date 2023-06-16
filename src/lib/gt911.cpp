@@ -80,8 +80,8 @@ void GT911::init(bool useAdr2) {
   }
   configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG] = (~checksum) + 1;
 
-  WireUtils::write3(addr, highByte(GT911_CONFIG_CHKSUM), lowByte(GT911_CONFIG_CHKSUM), configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG]);
-  WireUtils::write3(addr, highByte(GT911_CONFIG_FRESH), lowByte(GT911_CONFIG_FRESH), 1);
+  WireUtils::write(addr, highByte(GT911_CONFIG_CHKSUM), lowByte(GT911_CONFIG_CHKSUM), configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG]);
+  WireUtils::write(addr, highByte(GT911_CONFIG_FRESH), lowByte(GT911_CONFIG_FRESH), 1);
 }
 
 // void ARDUINO_ISR_ATTR GT911::onInterrupt() {
@@ -170,7 +170,7 @@ uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
     }
   }
   if (pointInfo != 0x00) {
-    WireUtils::write3(addr, highByte(GT911_TOUCHFLAGS), lowByte(GT911_TOUCHFLAGS), 0);
+    WireUtils::write(addr, highByte(GT911_TOUCHFLAGS), lowByte(GT911_TOUCHFLAGS), 0);
   }
   return (contacts);
 }  // getTouchPoints()

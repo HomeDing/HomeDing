@@ -78,11 +78,12 @@
 // #define HOMEDING_INCLUDE_DISPLAYSSD1306
 // #define HOMEDING_INCLUDE_DISPLAYSH1106
 
-// eneble these lines to get more displays supported
+// enable these lines to get more displays supported
 #define HOMEDING_INCLUDE_DISPLAYST7796
 // #define HOMEDING_INCLUDE_DISPLAYST7789
 // #define HOMEDING_INCLUDE_DISPLAYST7735
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
+#define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
 
 // Enable simple display Elements
 // #define HOMEDING_INCLUDE_TM1637
@@ -102,6 +103,7 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
+#include "DisplayTouchGT911Element.h"
 
 #include <FS.h>
 #include <LittleFS.h>  // File System for Web Server Files
@@ -155,9 +157,6 @@ void setup(void) {
   // digitalWrite(27, HIGH);
 
   LOGGER_INFO("setup done");
-
-  homeding.add("DisplayTouchGT911/0", new DisplayTouchGT911Element());
-
 }  // setup
 
 

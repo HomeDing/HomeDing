@@ -58,15 +58,18 @@ public:
    */
   static uint8_t readBuffer(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
 
-
+  /// send a single byte to i2c address
   static uint8_t write(uint8_t address, uint8_t reg);
+
+  /// send 2 bytes to i2c address
   static uint8_t write(uint8_t address, uint8_t data1, uint8_t data2);
-  static uint8_t write3(uint8_t address, uint8_t data1, uint8_t data2, uint8_t data3);
+
+  /// send 3 bytes to i2c address
+  static uint8_t write(uint8_t address, uint8_t data1, uint8_t data2, uint8_t data3);
 
   /// Send and receive sequence with buffers
   static uint8_t txrx(
     uint8_t address, 
     uint8_t *txBuffer, uint8_t txLen,
     uint8_t *rxBuffer, uint8_t rxLen);
-
 };

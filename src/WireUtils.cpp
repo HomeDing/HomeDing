@@ -98,7 +98,7 @@ uint8_t WireUtils::write(uint8_t address, uint8_t data1, uint8_t data2) {
 
 
 // write 3 bytes to device
-uint8_t WireUtils::write3(uint8_t address, uint8_t data1, uint8_t data2, uint8_t data3) {
+uint8_t WireUtils::write(uint8_t address, uint8_t data1, uint8_t data2, uint8_t data3) {
   uint8_t tmp[3] = { data1, data2, data3 };
   return (writeBuffer(address, tmp, 3));
 }  // write3()

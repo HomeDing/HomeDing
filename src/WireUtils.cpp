@@ -32,7 +32,7 @@ void WireUtils::dumpBuffer(uint8_t *data, uint8_t len) {
       len--;
     }  // while
     Serial.println();
-  }  // if
+  }    // if
 #endif
 }  // dumpBuffer()
 
@@ -91,10 +91,27 @@ uint8_t WireUtils::write(uint8_t address, uint8_t reg) {
 
 
 // write two bytes to device
-uint8_t WireUtils::write(uint8_t address, uint8_t reg, uint8_t data) {
-  uint8_t tmp[2] = { reg, data };
+uint8_t WireUtils::write(uint8_t address, uint8_t data1, uint8_t data2) {
+  uint8_t tmp[2] = { data1, data2 };
   return (writeBuffer(address, tmp, 2));
 }  // write()
+
+
+// write 3 bytes to device
+uint8_t WireUtils::write3(uint8_t address, uint8_t data1, uint8_t data2, uint8_t data3) {
+  uint8_t tmp[3] = { data1, data2, data3 };
+  return (writeBuffer(address, tmp, 3));
+}  // write3()
+
+
+uint8_t WireUtils::txrx(uint8_t address, uint8_t *txBuffer, uint8_t txLen, uint8_t *rxBuffer, uint8_t rxLen) {
+  uint8_t done = 0;
+  uint8_t err = writeBuffer(address, txBuffer, txLen);
+  if (!err) {
+    done = readBuffer(address, rxBuffer, rxLen);
+  }
+  return done;
+}  // txrx
 
 
 /** read one register value */

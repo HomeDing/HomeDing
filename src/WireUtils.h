@@ -13,6 +13,7 @@
  * More information on https://www.mathertel.de/Arduino.
  *
  * 05.03.2020 created.
+ * 16.06.2023 write/read
  */
 
 
@@ -59,5 +60,13 @@ public:
 
 
   static uint8_t write(uint8_t address, uint8_t reg);
-  static uint8_t write(uint8_t address, uint8_t reg, uint8_t data);
+  static uint8_t write(uint8_t address, uint8_t data1, uint8_t data2);
+  static uint8_t write3(uint8_t address, uint8_t data1, uint8_t data2, uint8_t data3);
+
+  /// Send and receive sequence with buffers
+  static uint8_t txrx(
+    uint8_t address, 
+    uint8_t *txBuffer, uint8_t txLen,
+    uint8_t *rxBuffer, uint8_t rxLen);
+
 };

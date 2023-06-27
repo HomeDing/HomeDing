@@ -791,7 +791,7 @@ void Board::setSleepTime(unsigned long milliSeconds) {
 
 // start deep sleep mode when idle.
 void Board::startSleep() {
-  BOARDTRACE("startSleep");
+  LOGGER_INFO("start sleep");
   _deepSleepStart = millis();
   if (_startup == BOARDSTARTUP::NORMAL) {
     // give a minute time to block deep sleep mode
@@ -802,7 +802,7 @@ void Board::startSleep() {
 
 // block any deep sleep until next reset.
 void Board::cancelSleep() {
-  BOARDTRACE("cancelSleep");
+  LOGGER_INFO("cancel sleep");
   _deepSleepBlock = true;
 }  // cancelSleep()
 

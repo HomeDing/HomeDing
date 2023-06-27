@@ -75,7 +75,8 @@
 #define HOMEDING_INCLUDE_DISPLAYLCD
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
-// eneble these lines to get more displays supported
+
+// enable these lines to get more displays supported
 // #define HOMEDING_INCLUDE_DISPLAYST7789
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
 // #define HOMEDING_INCLUDE_TM1637

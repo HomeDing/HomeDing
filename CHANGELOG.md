@@ -22,18 +22,18 @@ This version has some major updates to support these devices.
   A must recommend displays from AdaFruit as they take care about the quality of their items
   (that is not always true when importing from china or buying from eBay).
 
-* The **DisplayTouchGT911** Element is the first implementation of a touch controller that comes
-  with displays. It captures click events and shares them with all available **DisplayButton**
-  Elements. Now you can add visual buttons on the display to start actions by click.
+* The [Display Touch GT911 Element](https://homeding.github.io/elements/display/touchgt911.htm)
+  is the first implementation of a touch controller that comes with displays. It captures click
+  events and shares them with all available
+  [Display Button Elements](https://homeding.github.io/elements/display/button.htm).
+  Now you can add visual buttons on the display to start actions by click.
 
-* The **DisplayButtonElement** draws a button at the configured position where click events
-  should be captured.
+* The [Display Button Element](https://homeding.github.io/elements/display/button.htm) draws a
+  button at the configured position where click events should be captured.
 
 * The BigDisplay example is made for a display with integrated touch panel.
 
 -> story
-
-
 
 
 ### Minimal Examples
@@ -52,7 +52,6 @@ After the micro example is flashed a bigger firmware can be flashed.
 
 Some examples also have a \<sketch\>.ino.globals.h file to define a Marco "HD_MINIMAL".
 This is causing smaller bin files by removing some rarely needed functionality.
-
 
 
 ## [0.9.7] - 2023-05-01 unreleased

@@ -75,10 +75,8 @@ private:
    */
   String _xAction;
 
-  /// @brief Print some chip information on the Console.
-  void _logChipDetails();
-
   // Web Result Handlers
   String _handleDiag();
   String _handleProfile();
+  String _handleChipInfo();
 };

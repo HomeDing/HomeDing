@@ -61,13 +61,19 @@ public:
     setAt(index, s.c_str());
   };
 
-  // add new String to the end of the array
+
+  /// @brief Add new String to the end of the array
+  /// @param s new item 
+  /// @return size of the array.
   uint16_t push(const char *s) {
     setAt(_used, s);
     return (_used);
   };  // push()
 
-  // add new String to the end of the array
+  
+  /// @brief Add new String to the end of the array
+  /// @param s new item 
+  /// @return size of the array.
   uint16_t push(const String &s) {
     return (push(s.c_str()));
   };

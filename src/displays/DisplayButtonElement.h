@@ -57,16 +57,12 @@ public:
   virtual void init(Board *board) override;
 
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) override;
+  // ===== Display Output supporting functions =====
 
   /// @brief Draw the button on display.
   /// used by DisplayOutputElement.
   virtual void draw() override;
+
 
   // ===== Touch supporting functions =====
 

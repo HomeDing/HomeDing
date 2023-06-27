@@ -14,8 +14,9 @@
  * Changelog:see DiagElement.h
  */
 
-// open http://nodeding/diag
-
+// open http://corec3/diag
+// open http://corec3/profile
+// open http://corec3/chipinfo
 #include <Arduino.h>
 #include <HomeDing.h>
 
@@ -171,29 +172,30 @@ String DiagElement::_handleDiag() {
 
 
 String DiagElement::_handleProfile() {
-#if defined(HD_PROFILE)
   String sOut;
+  sOut = "Profile Loop-Times:\n";
 
-  sOut = "Loop-Times:\n";
+#if defined(HD_PROFILE)
   _board->forEach("", [this, &sOut](Element *e) {
     char buffer[128];
     PROFILE_TIMEPRINTBUF(buffer, e, e->id);
     sOut.concat(buffer);
   });
-  return (sOut);
-#else
-  return ("");
 #endif
+  return (sOut);
 }
 
+String DiagElement::_handleChipInfo() {
+  String sOut;
+  char buffer[128];
 
-/// @brief Print some chip information on the Console.
-void DiagElement::_logChipDetails() {
-  LOGGER_EINFO("Chip-Info:");
+  sOut = "Chip Infos:\n";
 
 #if defined(ESP8266)
   // about ESP8266 chip variants...
-  LOGGER_EINFO("  chip-id: 0x%08X", ESP.getChipId());
+  sprintf(buffer, "  chip-id: 0x%08X", ESP.getChipId());
+  sOut += buffer;
+
 #elif defined(ESP32)
   // about ESP32 chip variants...
   esp_chip_info_t chip_info;
@@ -206,30 +208,34 @@ void DiagElement::_logChipDetails() {
   if (model == CHIP_ESP32S3) { s = "ESP32-S3"; };
   if (model == CHIP_ESP32C3) { s = "ESP32-C3"; };
   if (model == CHIP_ESP32H2) { s = "ESP32-H2"; };
-  LOGGER_EINFO("  model: %s(%d)", s, model);
+  sprintf(buffer, "  model: %s(%d)\n", s, model);
+  sOut += buffer;
 
   uint32_t features = chip_info.features;
-  LOGGER_EINFO("  features: %08x", features);
-  if (features & CHIP_FEATURE_EMB_FLASH) { LOGGER_EINFO("    embedded flash memory"); };
-  if (features & CHIP_FEATURE_WIFI_BGN) { LOGGER_EINFO("    2.4GHz WiFi"); };
-  if (features & CHIP_FEATURE_BLE) { LOGGER_EINFO("    Bluetooth LE"); };
-  if (features & CHIP_FEATURE_BT) { LOGGER_EINFO("    Bluetooth Classic"); };
-  if (features & CHIP_FEATURE_IEEE802154) { LOGGER_EINFO("    IEEE 802.15.4"); };
+  sprintf(buffer, "  features: %08x\n", features);
+  sOut += buffer;
+
+  if (features & CHIP_FEATURE_EMB_FLASH) { sOut +="    embedded flash memory\n"; };
+  if (features & CHIP_FEATURE_WIFI_BGN) { sOut +="    2.4GHz WiFi\n"; };
+  if (features & CHIP_FEATURE_BLE) { sOut +="    Bluetooth LE\n"; };
+  if (features & CHIP_FEATURE_BT) { sOut +="    Bluetooth Classic\n"; };
+  if (features & CHIP_FEATURE_IEEE802154) { sOut +="    IEEE 802.15.4\n"; };
 #if defined(CHIP_FEATURE_EMB_PSRAM)
-  if (features & CHIP_FEATURE_EMB_PSRAM) { LOGGER_EINFO("    embedded psram"); };
+  if (features & CHIP_FEATURE_EMB_PSRAM) { sOut +="    embedded psram\n"; };
 #endif
 
-  LOGGER_EINFO("  cores: %d", chip_info.cores);
-  LOGGER_EINFO("  revision: %d", chip_info.revision);
+  sprintf(buffer, "  cores: %d\n", chip_info.cores); sOut += buffer;
+  sprintf(buffer, "  revision: %d\n", chip_info.revision); sOut += buffer;
+  sOut += "\n";
 
-  LOGGER_EINFO("ChipModel: %s", ESP.getChipModel());
-#endif
+  sprintf(buffer, "ChipModel: %s\n", ESP.getChipModel()); sOut += buffer;
+  sOut += "\n";
 
-  LOGGER_EINFO("Flash:");
+  sOut += "Flash:";
 #if defined(ESP8266)
-  LOGGER_EINFO("  ID: 0x%08x", ESP.getFlashChipId());
+  sprintf(buffer, "  ID: 0x%08x\n", ESP.getFlashChipId()); sOut += buffer;
 #endif
-  LOGGER_EINFO("  Size: %d kByte", ESP.getFlashChipSize() / 1024);
+  sprintf(buffer, "  Size: %d kByte\n", ESP.getFlashChipSize() / 1024); sOut += buffer;
 
   FlashMode_t flashMode = ESP.getFlashChipMode();
   s = "unknown";
@@ -239,8 +245,13 @@ void DiagElement::_logChipDetails() {
   if (flashMode == FM_DOUT) { s = "DOUT"; };
   // if (flashMode == FM_FAST_READ) { s = "FAST_READ"; };
   // if (flashMode == FM_SLOW_READ) { s = "SLOW_READ"; };
-  LOGGER_EINFO("  Mode: %s(%d)", s, flashMode);
-  LOGGER_EINFO("  Speed: %d", ESP.getFlashChipSpeed());
+  sprintf(buffer, "  Mode: %s(%d)\n", s, flashMode); sOut += buffer;
+  sprintf(buffer, "  Speed: %d\n", ESP.getFlashChipSpeed()); sOut += buffer;
+  sOut += "\n";
+
+#endif
+
+  return (sOut);
 }
 
 /**
@@ -259,6 +270,10 @@ void DiagElement::start() {
     _board->server->send(200, "text/plain", _handleProfile());
   });
 
+  _board->server->on("/chipinfo", HTTP_GET, [this]() {
+    _board->server->send(200, "text/plain", _handleChipInfo());
+  });
+
   LOGGER_EINFO("I2C pins sda=%d scl=%d", _board->I2cSda, _board->I2cScl);
 
 #if defined(ESP8266)
@@ -270,8 +285,6 @@ void DiagElement::start() {
 
   LOGGER_EINFO(" Free Heap: %d", ESP.getFreeHeap());
   LOGGER_EINFO(" Mac-address: %s", WiFi.macAddress().c_str());
-
-  _logChipDetails();
 }  // start()
 
 

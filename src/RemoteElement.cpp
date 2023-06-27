@@ -23,6 +23,7 @@
 #include <RemoteElement.h>
 
 #include <WiFiClient.h>
+#include <ArrayString.h>
 
 #if !defined(TRACE)
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
@@ -38,18 +39,32 @@ Element *RemoteElement::create() {
 
 
 void RemoteElement::dispatchAction(String &targetId, String &name, String &value) {
-  LOGGER_ETRACE("dispatch '%s?%s=%s", targetId.c_str(), name.c_str(), value.c_str());
+  TRACE("dispatch '%s?%s=%s", targetId.c_str(), name.c_str(), value.c_str());
+
+  String url = "/api/state/$1?$2=$3";
+  url.replace("$1", targetId);
+  url.replace("$2", name);
+  url.replace("$3", value);
 
   if (isActive()) {
-    LOGGER_EERR("Remote Element is busy. Action dropped.");
+    LOGGER_ETRACE("queued <%s>", url.c_str());
+    _queue.push(url);
+
   } else {
-    String url = "/api/state/$1?$2=$3";
-    url.replace("$1", targetId);
-    url.replace("$2", name);
-    url.replace("$3", value);
-    TRACE("url=%s", url.c_str());
+    TRACE("get %s", url.c_str());
     set("url", url.c_str());
   }  // if
+}
+
+
+void RemoteElement::loop() {
+  HttpClientElement::loop();
+  if ((!_queue.empty()) && (!isActive())) {
+    String url = _queue.pop();
+
+    TRACE("get %s", url.c_str());
+    set("url", url.c_str());
+  }
 }
 
 // End

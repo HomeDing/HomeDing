@@ -92,16 +92,8 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
 
 /// @brief Draw the button on display.
 void DisplayButtonElement::draw() {
-  DisplayOutputElement::draw();
+  DisplayOutputElement::draw(); // prepare colors
   _display->drawButton(_x, _y, _w, _h, _text.c_str(), _pressed);
 }
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DisplayButtonElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-}  // pushState()
 
 // End

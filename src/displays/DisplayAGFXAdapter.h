@@ -19,7 +19,7 @@
 #include <fonts/font16.h>
 #include <fonts/font24.h>
 
-#define PANELTRACE(...) // Serial.printf(__VA_ARGS__)
+#define PANELTRACE(...)  // Serial.printf(__VA_ARGS__)
 
 class DisplayAGFXAdapter : public DisplayAdapter {
 public:
@@ -150,7 +150,7 @@ public:
 
     _setTextHeight(h - (2 * paddingVertical));
     gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
-    // LOGGER_JUSTINFO("  b(%d,%d,%d,%d)", bx, by, bw, bh);
+    // LOGGER_JUSTINFO("  b %d/%d(%d) -> (%d,%d,%d,%d)", x, y, baseLine, bx, by, bw, bh);
 
     // calculate textbox offset
     int16_t dx = (w - bw) / 2;
@@ -173,8 +173,8 @@ public:
   /// @param x X Position
   /// @param y Y Position
   /// @param h Height of the indicator
-  /// @param fill 
-  /// @return 
+  /// @param fill
+  /// @return
   int drawDot(int16_t x, int16_t y, int16_t h, bool fill) override {
     // LOGGER_JUSTINFO("drawDot: (%d,%d)=%d", x, y, fill);
     int r = h / 2;
@@ -195,7 +195,6 @@ public:
 
 
 protected:
-
   /// @brief convert a 32-bit color value 0x00RRGGBB into the 565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
   /// @param color 24-bit color value
   /// @return 16-bit color in 565 format.
@@ -212,7 +211,7 @@ protected:
   /// @brief Set height of text in a box.
   /// @param h max. resulting height
   void _setTextHeight(int16_t h) {
-    // PANELTRACE("_setTextHeight(%d)\n", h);
+    // LOGGER_JUSTINFO("_setTextHeight(%d)", h);
     int16_t base, fit;
 
     // 8, 10, 16, 24
@@ -237,7 +236,7 @@ protected:
       }
 
       loadFont(base, h / base);
-      PANELTRACE(" >(%d,%d)\n", lineHeight, baseLine);
+      // LOGGER_JUSTINFO(" >(%d,%d)", lineHeight, baseLine);
     }
   }
 
@@ -248,19 +247,19 @@ protected:
 
     if (height <= 8) {
       // builtin 8pt font
-      lineHeight = 8;
+      lineHeight = 8;  // 8+0
       baseLine = 0;
       charWidth = 6;
 
     } else if (height <= 10) {
       font = &Font_10;
-      lineHeight = 10;
+      lineHeight = 10;  // 8 + 2
       baseLine = 7;
       charWidth = 8;
 
     } else if (height <= 16) {
       font = &Font_16;
-      lineHeight = 16;
+      lineHeight = 16;  // 13 + 3
       baseLine = 12;
       charWidth = 11;
 
@@ -289,4 +288,3 @@ protected:
   uint16_t backColor565;
   uint16_t drawColor565;
 };
-

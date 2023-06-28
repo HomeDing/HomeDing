@@ -16,11 +16,86 @@ It is verified with these boards
 
 **ESP32-3248S035** -- ESP32 with 480*320 LCD touch display.
 
+* Board: ESP32 Dev Module
+* PSRAM: disabled
+* CPU: 240 MHz
+* Flash Mode: DIO
+* Flash: 4MB
+
+
 IO34 = LCD
 SD Card via SPI
 RGB LED
 Touch (I2C)
 TFT (SPI)
+
+``` JSON
+{
+  "device": {
+    "0": {
+      "name": "panel480",
+      "title": "Panel480",
+      "description": "Panel with 480 px",
+      "loglevel": "2",
+      "xbutton": "D3",
+      "xled": "4",
+      "logfile": 1,
+      "safemode": "false",
+      "homepage": "/board.htm",
+      "cache": "max-age=600",
+      "i2c-SDA": "33",
+      "i2c-SCL": "32"
+    }
+  },
+  "ota": {
+    "0": {
+      "port": 8266,
+      "passwd": "123"
+    }
+  },
+  "ntptime": {
+    "on": {
+      "zone": "CET-1CEST,M3.5.0,M10.5.0/3"
+    }
+  },
+  "diag": {
+    "0": {}
+  },
+  "light": {
+    "l": {
+      "pin": "4,16,17",
+      "mode": "pwm",
+      "invert": "true",
+      "enable": "true"
+    }
+  },
+  "color": {
+    "l": {
+      "title": "RGB",
+      "loglevel": 2,
+      "config": "RGB",
+      "mode": "fix",
+      "duration": "4s",
+      "value": "x004466aa",
+      "brightness": "20",
+      "connect": [ "light/l" ]
+    }
+  },
+  "DisplayST7796": {
+    "0": {
+      "height": "480",
+      "width": "320",
+      "color": "x000000",
+      "background": "xccccff",
+      "lightpin": 27
+    }
+  },
+  "DisplayTouchGT911": {
+    "0": {
+"address": "0x5D"}
+  }
+}
+```
 
 **ESP32-8048S043** **C** -- ESP32S3 with 4.3 inch 800*480 LCD and capacitive touch display.
 

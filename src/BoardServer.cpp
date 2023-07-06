@@ -46,7 +46,7 @@
 #define API_ROUTE "/api/"
 
 // integrated htm files
-#define PAGE_UPDATE_VERS "/$update.htm#v09"
+#define PAGE_UPDATE "/$update.htm"
 
 // Content types for http results
 #define TEXT_JSON "application/json; charset=utf-8"  // Content type for JSON.
@@ -358,17 +358,13 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     LittleFS.info(fsi);
     if (fsi.usedBytes < 18000) {
       // assuming UI files not installed
-      url = PAGE_UPDATE_VERS;
-      if (fsi.totalBytes < 500000) {
-        // small file system
-        url.concat('m');
-      }
+      url = PAGE_UPDATE;
     }
 
 #elif defined(ESP32)
     if (LittleFS.usedBytes() < 18000) {
       // assuming UI files not installed
-      url = PAGE_UPDATE_VERS;
+      url = PAGE_UPDATE;
     }
 #endif
 

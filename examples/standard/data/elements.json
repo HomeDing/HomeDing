@@ -94,8 +94,15 @@
 
   "displayline": {
     "sys": "false",
-    "properties": ["page", "x", "y", "w", "h", "color"],
+    "properties": ["page", "x", "y", "x1", "y1", "color"],
     "events": ["redraw"]
+  },
+
+  "displaybutton": {
+    "sys": "false",
+    "properties": ["page", "x", "y", "color", "w", "h"],
+    "events": [],
+    "actions": ["onclick"]
   },
 
   "pwmout": {

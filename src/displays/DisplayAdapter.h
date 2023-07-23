@@ -1,8 +1,7 @@
 /**
  * @file DisplayAdapter.h
  *
- * @brief Abstract class, defining the functionlaity the HomeDing requires to be
- * implemented for a local attached display.
+ * @brief Implementing base functionaliy for Display Adapters.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -14,6 +13,8 @@
  * -----
  * 25.07.2018 created by Matthias Hertel
  * 23.09.2018 flush() method added.
+ * 22.07.2023 cpp file added (from DisplayAdapter.h).
+ *            handling lightPin and brightness.
  */
 
 #pragma once
@@ -30,25 +31,17 @@ class DisplayAdapter {
 public:
   virtual ~DisplayAdapter() = default;
 
-  DisplayAdapter() {
-    color = 0x00FFFFFF;      // white
-    backColor = 0x00000000;  // black
-  }
+  DisplayAdapter();
 
-  virtual bool setup(Board *b, struct DisplayConfig *c) {
-    board = b;
-    conf = c;
-    return (true);
-  }  // setup()
+  /// @brief setup a fresh Display Adapter
+  /// @param b Board Reference
+  /// @param c DisplayConfig Data
+  /// @return true
+  virtual bool setup(Board *b, struct DisplayConfig *c);
 
-  /**
-   * @brief start the display.
-   * @return true when display is ready for operation.
-   * @return false otherwise.
-   */
-  virtual bool start() {
-    return (true);
-  };
+  /// @brief Start the display.
+  /// @return true when the display is ready for operation. Otherwise false.
+  virtual bool start();
 
   /**
    * @brief Clear the complete display
@@ -61,7 +54,9 @@ public:
   };
 
 
-  virtual void setBrightness(UNUSED uint8_t bright){};
+  /// @brief set brightness for panel lightng.
+  /// @param bright new brightness in range 0...100
+  virtual void setBrightness(uint8_t bright);
 
 
   /// @brief Set default draw color
@@ -136,6 +131,8 @@ protected:
 
   uint32_t color;      ///< default draw color
   uint32_t backColor;  ///< default background color
+
+  uint8_t _lightChannel;
 
   Board *board;
 };

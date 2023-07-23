@@ -43,8 +43,8 @@ struct DisplayConfig {
   /** Height of display */
   int height = 64;
 
-  /** Brightness of display 0...100 (percent) */
-  int brightness = 80;
+  /// @brief Brightness of display 0...100 (percent)
+  int brightness = 50;
 
   /** Default Draw & Background Color */
   uint32_t drawColor = RGB_WHITE;

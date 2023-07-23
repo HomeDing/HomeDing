@@ -50,11 +50,6 @@ public:
 
       DisplayAdapter::start();
 
-      if (conf->lightPin >= 0) {
-        pinMode(conf->lightPin, OUTPUT);
-        digitalWrite(conf->lightPin, HIGH);
-      }  // if
-
       gfx->setTextWrap(false);
       setColor(conf->drawColor);
       setBackgroundColor(conf->backgroundColor);

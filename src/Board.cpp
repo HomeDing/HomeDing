@@ -524,12 +524,12 @@ void Board::loop() {
   } else if (boardState == BOARDSTATE::CONNECT) {
     BOARDTRACE("connect...");
 
-    WiFi.mode(WIFI_STA);
     if (deviceName.isEmpty()) {
       BOARDTRACE("no deviceName configured");
     } else {
       WiFi.setHostname(deviceName.c_str());
     }
+    WiFi.mode(WIFI_STA);
     // get effective Hostname
     deviceName = WiFi.getHostname();
     BOARDTRACE("deviceName=%s", deviceName.c_str());

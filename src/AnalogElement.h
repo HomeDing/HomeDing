@@ -60,8 +60,8 @@ public:
   /// retrieve values from a sensor
   bool getProbe(UNUSED String &values) override;
 
-  /// send data out by crating actions 
-  void sendData(UNUSED String &values) override ;
+  /// send data out by crating actions
+  void sendData(UNUSED String &values) override;
 
 private:
 #if defined ESP8266
@@ -76,6 +76,7 @@ private:
   // map factors
   bool _useMap = false;  // use map function when all 4 factors are given.
   int _inMin = 0, _inMax = 0, _outMin = 0, _outMax = 0;
+  bool _constrain = false;
 
   int _hysteresis = 10;
   int _reference = 500;

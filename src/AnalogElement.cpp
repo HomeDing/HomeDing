@@ -18,7 +18,7 @@
 
 #include <AnalogElement.h>
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new AnalogElement.
@@ -30,12 +30,18 @@ Element *AnalogElement::create() {
 
 
 int AnalogElement::map(int value) {
-  int divisor = (_inMax - _inMin) + _outMin;
-  if (divisor == 0) {
-    return 0;  // better than exceptions !
-  } else {
-    return ((value - _inMin) * (_outMax - _outMin)) / divisor;
+  int divisor = _inMax - _inMin;
+  int out = 0;  // better than exceptions !
+  if (divisor != 0) {
+    out = ((value - _inMin) * (_outMax - _outMin) / divisor) + _outMin;
   }
+  if (_constrain)
+    if (_outMin < _outMax)
+      out = constrain(out, _outMin, _outMax);
+    else
+      out = constrain(out, _outMax, _outMin);
+  TRACE("map(%d) %d", value, out);
+  return (out);
 }
 
 
@@ -68,6 +74,9 @@ bool AnalogElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "mapOutMax") == 0) {
     _outMax = _atoi(value);
+
+  } else if (_stricmp(name, "constrain") == 0) {
+    _constrain = _atob(value);
 
   } else if (_stricmp(name, "reference") == 0) {
     _reference = _atoi(value);
@@ -102,8 +111,17 @@ void AnalogElement::start() {
   _useMap = ((_inMin != _inMax) && (_outMin != _outMax));
 
   TRACE("pin=%d", _pin);
+  TRACE("useMap=%d", _useMap);
+  TRACE("map=%d...%d %d...%d", _inMin, _inMax, _outMin, _outMax);
+  TRACE("constrain=%d", _constrain);
 
   SensorElement::start();
+
+#if defined(ESP32)
+  // set the resolution to 12 bits (0-4096)
+  analogReadResolution(12);
+#endif
+
   _valuesCount = 2;
   _stateKeys = "value,reference";
 }  // start()
@@ -113,13 +131,13 @@ bool AnalogElement::getProbe(UNUSED String &values) {
   int rawValue = analogRead(_pin);
   int value;
 
+  TRACE("read(%d) %d", _pin, rawValue);
+
   if (_useMap) {
     value = map(rawValue);
   } else {
     value = rawValue;
   }
-
-  TRACE("read(%d=>%d)", rawValue, value);
 
   if ((value >= _lastValue + _hysteresis) || (value <= _lastValue - _hysteresis)) {
     _lastValue = value;

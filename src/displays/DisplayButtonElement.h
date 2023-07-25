@@ -1,5 +1,5 @@
 /**
- * @file DisplayButtonElement.h
+ * @file displays/DisplayButtonElement.h
  * @brief Output Element for displaying a button on a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <DisplayOutputElement.h>
+#include <displays/DisplayOutputElement.h>
 
 /**
  * @brief The DisplayButtonElement is an Element that allows to create information

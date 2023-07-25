@@ -17,7 +17,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <DisplayLineElement.h>
+#include <displays/DisplayLineElement.h>
 
 /**
  * @brief static factory function to create a new DisplayLineElement.

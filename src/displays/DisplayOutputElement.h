@@ -1,5 +1,5 @@
 /**
- * @file DisplayOutputElement.h
+ * @file displays/DisplayOutputElement.h
  * @brief Base Output Element for a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de

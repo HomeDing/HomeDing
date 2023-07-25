@@ -1,5 +1,5 @@
 /**
- * @file DisplayST7735Element.cpp
+ * @file displays/DisplayST7735Element.cpp
  * @brief Display Element for ST7735 compatible TFT displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -11,7 +11,7 @@
  *
  * More information on https://www.mathertel.de/Arduino
  *
- * Changelog:see <DisplayST7735Element.h>
+ * Changelog:see <displays/DisplayST7735Element.h>
  */
 
 #include <Arduino.h>

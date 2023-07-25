@@ -17,7 +17,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <DisplayDotElement.h>
+#include <displays/DisplayDotElement.h>
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 

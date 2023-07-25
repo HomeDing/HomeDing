@@ -21,7 +21,7 @@
 #pragma once
 
 #include <displays/DisplayAdapter.h>
-#include <DisplayOutputElement.h>
+#include <displays/DisplayOutputElement.h>
 
 /**
  * @brief The DisplayTextElement is an Element that allows to create information

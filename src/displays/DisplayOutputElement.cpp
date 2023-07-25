@@ -1,5 +1,5 @@
 /**
- * @file DisplayOutputElement.cpp
+ * @file displays/DisplayOutputElement.cpp
  * @brief Base Output Element for a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -15,7 +15,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <DisplayOutputElement.h>
+#include <displays/DisplayOutputElement.h>
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 

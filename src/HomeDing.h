@@ -264,15 +264,15 @@ extern Board homeding;
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayText
-#include <DisplayTextElement.h>
+#include <displays/DisplayTextElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayDot
-#include <DisplayDotElement.h>
+#include <displays/DisplayDotElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayLine
-#include <DisplayLineElement.h>
+#include <displays/DisplayLineElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayButton

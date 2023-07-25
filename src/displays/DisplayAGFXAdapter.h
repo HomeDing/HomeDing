@@ -47,6 +47,7 @@ public:
 
     } else {
       gfx->begin();
+      gfx->invertDisplay(conf->invert);
 
       DisplayAdapter::start();
 

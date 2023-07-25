@@ -1,5 +1,5 @@
 /**
- * @file DisplayDotElement.h
+ * @file DisplayLineElement.h
  * @brief Output Element for controlling a binary output on a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -20,15 +20,15 @@
 
 #pragma once
 
-#include <DisplayOutputElement.h>
+#include <displays/DisplayOutputElement.h>
 
 /**
- * @brief The DisplayDotElement is an Element that allows to create information
+ * @brief The DisplayLineElement is an Element that allows to create information
  * on the display based on actions.
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayDotElement : public DisplayOutputElement
+class DisplayLineElement : public DisplayOutputElement
 {
 public:
   /**
@@ -52,14 +52,6 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
-
   /**
    * @brief Draw this output element.
    */
@@ -67,13 +59,14 @@ public:
 
 private:
   /**
-   * @brief value to be displayed 
+   * @brief This variable corresponds to the x0 parameter.
    */
-  bool _value;
+  uint16_t _x1 = 0;
+  uint16_t _y1 = 0;
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplayDotElement onto the ElementRegistry.
-bool DisplayDotElement::registered =
-    ElementRegistry::registerElement("displaydot", DisplayDotElement::create);
+// Register the DisplayLineElement onto the ElementRegistry.
+bool DisplayLineElement::registered =
+    ElementRegistry::registerElement("displayline", DisplayLineElement::create);
 #endif

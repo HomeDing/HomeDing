@@ -1,5 +1,5 @@
 /**
- * @file DisplayButtonElement.cpp
+ * @file displays/DisplayButtonElement.cpp
  * @brief Output Element for displaying a button on a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de

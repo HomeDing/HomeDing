@@ -55,7 +55,7 @@ struct DisplayConfig {
 
   /// @brief Row-Offset in the display memory for the displayed part.
   int rowOffset = 0;
-  
+
   /// @brief Column-Offset in the display memory for the displayed part.
   int colOffset = 0;
 
@@ -67,6 +67,9 @@ struct DisplayConfig {
 
   /** Pin to invert the display colors */
   bool invert = false;
+
+  /// @brief TFT IPS panel in use.
+  bool ips = false;
 
   int busmode = BUSMODE_ANY;
 

@@ -29,11 +29,19 @@ public:
     if ((conf->busmode == BUSMODE_ANY) || (conf->busmode == BUSMODE_SPI)) {
 
 #if defined(ESP32)
+
 #if defined(CONFIG_IDF_TARGET_ESP32C3)
       bus = new Arduino_HWSPI(conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
 
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-      bus = new Arduino_ESP32SPI(conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO, HSPI);
+      bus = new Arduino_ESP32SPI(
+        conf->spiDC,
+        conf->spiCS,
+        conf->spiCLK,
+        conf->spiMOSI,
+        conf->spiMISO,
+        HSPI /* spi_num */
+      );
 #else
       bus = new Arduino_HWSPI(conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
 #endif

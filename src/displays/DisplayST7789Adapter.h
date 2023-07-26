@@ -14,47 +14,44 @@
 
 #pragma once
 
-#include <displays/DisplayAdapterGFX.h>
+#include <displays/DisplayAGFXAdapter.h>
 
-#include <Adafruit_ST7789.h>  // Hardware-specific library for ST7789
-#include <SPI.h>
-
-class DisplayST7789Adapter : public DisplayAdapterGFX {
-public:
-  ~DisplayST7789Adapter() = default;
+class DisplayST7789Adapter : public DisplayAGFXAdapter {
 
   bool start() override {
-    // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
-    // LOGGER_JUSTINFO("  pins: l:%d, r:%d", conf->lightPin, conf->resetPin);
-    // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
-    // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, miso:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiMISO, conf->spiCLK);
 
-#if defined(ESP8266)
-    display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->resetPin);
+    if ((conf->busmode == BUSMODE_ANY) || (conf->busmode == BUSMODE_SPI)) {
 
-#elif defined(ESP32)
-    SPI.begin(conf->spiCLK, conf->spiMISO, conf->spiMOSI);
-    // display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK, conf->resetPin);
-    display = new (std::nothrow) Adafruit_ST7789(&SPI, conf->spiCS, conf->spiDC, conf->resetPin);
+#if defined(ESP32)
+      bus = new Arduino_ESP32SPI(
+        conf->spiDC,
+        conf->spiCS,
+        conf->spiCLK,
+        conf->spiMOSI,
+        conf->spiMISO,
+        HSPI /* spi_num */
+      );
+
+#elif defined(ESP8266)
+      bus = new Arduino_ESP8266SPI(2 /* DC */, 15 /* CS */);
 #endif
+    }
 
-    if (!display) {
-      LOGGER_ERR("not found");
-      return (false);
+    gfx = new Arduino_ST7789(
+      bus,
+      conf->spiRST,
+      (conf->rotation / 90),
+      conf->ips,
+      conf->width,
+      conf->height,
+      conf->colOffset,
+      conf->rowOffset,
+      conf->colOffset,
+      conf->rowOffset
+    );
 
-    } else {
-      gfxDisplay = (Adafruit_GFX *)display;
-      display->init(conf->width, conf->height, SPI_MODE0);
-      display->setSPISpeed(40000000);
-      display->invertDisplay(conf->invert);
-      DisplayAdapterGFX::start();
-    }  // if
-    return (true);
-  };  // init()
+    DisplayAGFXAdapter::start();
 
-private:
-  /**
-   * @brief Reference to the used library object
-   */
-  Adafruit_ST7789 *display = nullptr;
+    return (gfx != nullptr);
+  };  // start()
 };

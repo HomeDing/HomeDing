@@ -19,7 +19,7 @@
 #include <fonts/font16.h>
 #include <fonts/font24.h>
 
-#define PANELTRACE(...)  // Serial.printf(__VA_ARGS__)
+#define PANELTRACE(...)  Serial.printf(__VA_ARGS__)
 
 class DisplayAGFXAdapter : public DisplayAdapter {
 public:
@@ -28,6 +28,7 @@ public:
   bool start() override {
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
     PANELTRACE(" col: #%08x / #%08x\n", conf->drawColor, conf->backgroundColor);
+    PANELTRACE(" invert: %d ips: %d\n", conf->invert, conf->ips);
     // LOGGER_JUSTINFO("  pins: l:%d, r:%d", conf->lightPin, conf->resetPin);
     // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
     // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK);

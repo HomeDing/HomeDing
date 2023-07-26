@@ -133,6 +133,9 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "invert") == 0) {
     config.invert = _atob(value);
 
+  } else if (_stricmp(name, "ips") == 0) {
+    config.ips = _atob(value);
+
   } else if (_stricmp(name, "resetpin") == 0) {
     config.resetPin = _atopin(value);
 

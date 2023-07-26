@@ -181,13 +181,13 @@ public:
   virtual void setColor(const uint32_t col) override {
     DisplayAdapter::setColor(col);
     drawColor565 = col565(col);
-    LOGGER_JUSTINFO("setColor: (%08x)=%08x", col, drawColor565);
+    // LOGGER_JUSTINFO("setColor: (%08x)=%08x", col, drawColor565);
   };
 
   virtual void setBackgroundColor(const uint32_t col) override {
     DisplayAdapter::setBackgroundColor(col);
     backColor565 = col565(col);
-    LOGGER_JUSTINFO("setBackgroundColor: (%08x)=%08x", col, backColor565);
+    // LOGGER_JUSTINFO("setBackgroundColor: (%08x)=%08x", col, backColor565);
   };
 
 

@@ -19,7 +19,7 @@
 #include <fonts/font16.h>
 #include <fonts/font24.h>
 
-#define PANELTRACE(...)  Serial.printf(__VA_ARGS__)
+#define PANELTRACE(...)  // Serial.printf(__VA_ARGS__)
 
 class DisplayAGFXAdapter : public DisplayAdapter {
 public:
@@ -29,8 +29,10 @@ public:
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
     PANELTRACE(" col: #%08x / #%08x\n", conf->drawColor, conf->backgroundColor);
     PANELTRACE(" invert: %d ips: %d\n", conf->invert, conf->ips);
-    // LOGGER_JUSTINFO("  pins: l:%d, r:%d", conf->lightPin, conf->resetPin);
+    PANELTRACE(" pins: light:%d, reset:%d", conf->lightPin, conf->resetPin);
+
     // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
+
     // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK);
 
     // LOGGER_JUSTINFO("Font_10: %d %d %d=%d", sizeof(Font_10), sizeof(Font_10Bitmaps), sizeof(Font_10Glyphs),
@@ -74,7 +76,7 @@ public:
   };
 
   virtual void setBackgroundColor(const uint32_t col) override {
-    PANELTRACE("setBackgroundColor #%08x\n", col);
+    // PANELTRACE("setBackgroundColor #%08x\n", col);
     DisplayAdapter::setBackgroundColor(col);
     backColor565 = col565(col);
   };
@@ -87,7 +89,7 @@ public:
    * @brief Clear all displayed information from the display.
    */
   void clear() override {
-    PANELTRACE("clear #%08x\n", conf->backgroundColor);
+    // PANELTRACE("clear #%08x\n", conf->backgroundColor);
     gfx->fillScreen(col565(conf->backgroundColor));
   };  // clear()
 
@@ -186,7 +188,7 @@ public:
 
 
   void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
-    PANELTRACE("drawLine(%d/%d - %d/%d)\n", x0, y0, x1, y1);
+    // PANELTRACE("drawLine(%d/%d - %d/%d)\n", x0, y0, x1, y1);
     gfx->drawLine(x0, y0, x1, y1, drawColor565);
   }  // drawLine()
 

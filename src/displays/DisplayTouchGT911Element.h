@@ -98,11 +98,16 @@ private:
   DisplayButtonElement *_bFound;
 
   unsigned long nextRead;
-
-
-
-  /**
-   * @brief The _xAction holds the actions that is submitted when ...
-   */
-  String _xAction;
 };
+
+/* ===== Register the Element ===== */
+
+// When transferred to the HomeDing library a #define like the
+// HOMEDING_INCLUDE_DISPLAYTOUCHGT911 should be used to allow the sketch to select the
+// available Elements. See <HomeDing.h> the move these lines to DisplayTouchGT911Element.h:
+
+ #ifdef HOMEDING_REGISTER
+// Register the DisplayTouchGT911Element onto the ElementRegistry.
+bool DisplayTouchGT911Element::registered =
+  ElementRegistry::registerElement("displaytouchgt911", DisplayTouchGT911Element::create);
+#endif

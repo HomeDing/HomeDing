@@ -20,7 +20,7 @@
 #include <Wire.h>
 
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -71,6 +71,12 @@ bool DisplayTouchGT911Element::set(const char *name, const char *value) {
   } else if (_stricmp(name, "rotation") == 0) {
     _rotation = _atoi(value);
 
+  } else if (_stricmp(name, "interruptpin") == 0) {
+    _interruptPin = _atopin(value);
+
+  } else if (_stricmp(name, "resetpin") == 0) {
+    _resetPin = _atopin(value);
+
     // } else if (_stricmp(name, "onvalue") == 0) {
     // save the actions
     // _xAction = value;
@@ -110,53 +116,6 @@ void DisplayTouchGT911Element::start() {
 
 
 /// @brief Poll the touch controller for touch points
-#if 0
-void DisplayTouchGT911Element::loop() {
-  Element::loop();
-  unsigned long now = millis();
-
-  uint8_t contacts;
-  GDTpoint_t points[5];
-
-  if (now > nextRead) {
-    contacts = touchDetector->getTouchPoints(points);
-
-    if (contacts > 0) {
-      TRACE("-touch: %d (%d/%d)", contacts, points[0].x, points[0].y);
-
-      lastX = points[0].x;
-      lastY = points[0].y;
-
-      if (!_bFound) {
-        // find displaybutton at x/y
-        _board->forEach("displaybutton", [this](Element *e) {
-          if (!_bFound) {
-            DisplayButtonElement *be = (DisplayButtonElement *)e;
-            if (be->touchStart(lastX, lastY)) {
-              _bFound = be;
-            }
-          }
-        });
-
-      } else {
-        bool over = _bFound->touchStart(lastX, lastY);
-        if (!over) {
-          _bFound = nullptr;
-        }
-      }
-    } else if (_bFound) {
-      TRACE("-end");
-      // call touchEnd to found button
-      _bFound->touchEnd(lastX, lastY);
-      _bFound = nullptr;
-
-    }  // if
-
-    nextRead = millis() + 50;
-  }
-}  // loop()
-#endif
-
 void DisplayTouchGT911Element::loop() {
   Element::loop();
   unsigned long now = millis();
@@ -217,20 +176,5 @@ void DisplayTouchGT911Element::term() {
   Element::term();
 }  // term()
 
-
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to DisplayTouchGT911Element.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the DisplayTouchGT911Element onto the ElementRegistry.
-bool DisplayTouchGT911Element::registered =
-  ElementRegistry::registerElement("displaytouchgt911", DisplayTouchGT911Element::create);
-// #endif
 
 // End

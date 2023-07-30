@@ -283,6 +283,10 @@ extern Board homeding;
 #include <TM1637Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYTOUCHGT911
+#include <displays/DisplayTouchGT911Element.h>
+#endif
+
 // ===== LIGHT ELEMENTS =====
 
 #ifdef HOMEDING_INCLUDE_LIGHT

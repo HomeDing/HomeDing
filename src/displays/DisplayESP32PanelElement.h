@@ -1,5 +1,5 @@
 /**
- * @file DisplayST7796Element.h
+ * @file DisplayESP32PanelElement.h
  * @brief Display Element for ST7796 compatible TFT displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -19,11 +19,11 @@
 
 #include <displays/DisplayElement.h>
 
-/// @brief DisplayST7796Element implements creating an Display Adapter for a ST7796 based LCD.
-class DisplayST7796Element : public DisplayElement {
+/// @brief DisplayESP32PanelElement implements creating an Display Adapter for a ST7796 based LCD.
+class DisplayESP32PanelElement : public DisplayElement {
 public:
   /**
-   * @brief Factory function to create a DisplayST7796Element.
+   * @brief Factory function to create a DisplayESP32PanelElement.
    * @return Element*
    */
   static Element *create();
@@ -42,7 +42,7 @@ public:
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplayST7796Element onto the ElementRegistry.
-bool DisplayST7796Element::registered =
-  ElementRegistry::registerElement("displayst7796", DisplayST7796Element::create);
+// Register the DisplayESP32PanelElement onto the ElementRegistry.
+bool DisplayESP32PanelElement::registered =
+  ElementRegistry::registerElement("displayesp32panel", DisplayESP32PanelElement::create);
 #endif

@@ -28,6 +28,7 @@ extern "C" {
 
 #elif defined(ESP32)
 #include <ESPmDNS.h>
+#include <rom/rtc.h>
 #endif
 
 #include <ElementRegistry.h>
@@ -39,7 +40,6 @@ extern "C" {
 
 #include <DNSServer.h>
 
-#include <rom/rtc.h>
 
 // use BOARDTRACE for compiling with detailed TRACE output.
 #define BOARDTRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)

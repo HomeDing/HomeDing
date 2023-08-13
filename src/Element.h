@@ -52,10 +52,10 @@ class Element;
  * starting/activating the element.
  */
 enum Element_StartupMode {
-  System = 1,  // right after loading the configurations.
-  Network = 2, // after a network connectivity in AP Mode was established.
-  Time = 3,    // after a valid local time was set.
-  Manual = 9   // manually started.
+  System = 1,   // right after loading the configurations.
+  Network = 2,  // after a network connectivity in AP Mode was established.
+  Time = 3,     // after a valid local time was set.
+  Manual = 9    // manually started.
 };
 
 #define ACTION_SEPARATOR ','
@@ -165,12 +165,16 @@ public:
     std::function<void(const char *pName, const char *eValue)> callback);
 
 
-  /**
-   * @brief save a local state to a state element.
-   * @param key The key of state variable.
-   * @param value The value of state variable.
-   */
+  /// @brief save a local state to a state element.
+  /// @param key The key of state variable.
+  /// @param value The value of state variable.
+  void saveState(const char *key, String value);
+
+  /// @brief save a local state to a state element.
+  /// @param key The key of state variable.
+  /// @param value The value of state variable.
   void saveState(const char *key, const char *value);
+
 
   // ===== static string to value helper function ===== //
 

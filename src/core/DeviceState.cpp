@@ -112,46 +112,45 @@ int DeviceState::setResetCounter(int cnt) {
 void DeviceState::setElementState(Element *e, const char *key, const char *value) {
   STATETRACE("setElementState(%s, %s, %s)", e->id, key, value);
 
-  // String entry = String(e->id) + "?" + key + "=";
+  String entry = String(e->id) + "?" + key + "=";
 
-  // int n = _stateList.indexOf(entry);
-  // entry.concat(value);
+  int n = _state.indexOf(entry);
+  entry.concat(value);
 
-  // if (n < 0) {
-  //   // add to the end
-  //   if (_stateList.length() > 0)
-  //     _stateList.concat(VALUE_SEPARATOR);
-  //   _stateList.concat(entry);
+  if (n < 0) {
+    // add to the end
+    if (_state.length() > 0)
+      _state.concat(VALUE_SEPARATOR);
+    _state.concat(entry);
 
-  // } else {
-  //   String tmp;
+  } else {
+    String tmp;
 
-  //   if (n > 0) {
-  //     tmp.concat(_stateList.substring(0, n)); // all actions before incl. VALUE_SEPARATOR
-  //   }
-  //   tmp.concat(entry);
+    if (n > 0) {
+      tmp = _state.substring(0, n); // all actions before incl. VALUE_SEPARATOR
+    }
+    tmp.concat(entry);
 
-  //   int e = _stateList.indexOf(VALUE_SEPARATOR, n);
-  //   if (e >= 0) {
-  //     tmp.concat(_stateList.substring(e));
-  //   }
-  //   _stateList = tmp;
-  // } // if
-  // _hasChanged = true;
+    int e = _state.indexOf(VALUE_SEPARATOR, n);
+    if (e >= 0) {
+      tmp.concat(_state.substring(e));
+    }
+    _state = tmp;
+  } // if
+  _lastChange = millis();
 }
 
 
 /// @brief Load all state information from RTC memory and dispatch them as actions.
-void DeviceState::loadElementState(){
+void DeviceState::loadElementState(Board *board){
   STATETRACE("loadElementState()");
 
-  // String loadState;
+  String loadState = _state;
 
-  // loadState = RTCVariables::getStateString();
-  // while (loadState.length() > 0) {
-  //   String a = popItemValue(loadState);
-  //   _board->dispatchAction(a);
-  // } // while
+  while (loadState.length() > 0) {
+    String a = Element::popItemValue(loadState);
+    // _board->dispatchAction(a);
+  } // while
 
 };
 

@@ -483,7 +483,7 @@ private:
   unsigned long configPhaseEnd;   // millis when current config mode (boardstate) is over, next mode
   unsigned long connectPhaseEnd;  // for waiting on net connection
   unsigned long _captiveEnd;      // terminate/reset captive portal mode after 5 minutes.
-  void _newState(enum BOARDSTATE newState);
+  void _newBoardState(enum BOARDSTATE newState);
 
   bool active = false;
 

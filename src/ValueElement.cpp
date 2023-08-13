@@ -40,7 +40,9 @@ bool ValueElement::_setValue(int newValue, bool forceAction) {
     ret = true;
   }  // if
   _value = newValue;
-  saveState(PROP_VALUE, String(_value).c_str());
+
+  saveState("value", String(_value));
+
   return (ret);
 }  // _setValue()
 
@@ -54,8 +56,9 @@ bool ValueElement::_setValue(const char *newValue, bool forceAction) {
     _board->dispatch(_valueAction, newValue);
     ret = true;
   }
+  
   _valueString = newValue;
-  saveState(PROP_VALUE, _valueString.c_str());
+  saveState("value", _valueString);
   return (ret);
 }  // _setValue()
 

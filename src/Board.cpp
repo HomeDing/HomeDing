@@ -42,10 +42,10 @@ extern "C" {
 
 
 // use BOARDTRACE for compiling with detailed TRACE output.
-#define BOARDTRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#define BOARDTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...)  LOGGER_JUSTINFO(__VA_ARGS__)
+#define NETTRACE(...) LOGGER_JUSTINFO(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -118,7 +118,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   homepage = "/index.htm";
   cacheHeader = "no-cache";
 
-  _newState(BOARDSTATE::NONE);
+  _newBoardState(BOARDSTATE::NONE);
   _deepSleepStart = 0;         // no deep sleep to be started
   _deepSleepBlock = false;     // no deep sleep is blocked
   _deepSleepTime = 60 * 1000;  // one minute
@@ -216,10 +216,10 @@ void Board::keepCaptiveMode() {
  * @brief
  */
 void Board::_checkNetState() {
-  wl_status_t newState = WiFi.status();
-  if (newState != _wifi_status) {
-    NETTRACE("netstate: %d", newState);
-    _wifi_status = newState;
+  wl_status_t thisState = WiFi.status();
+  if (thisState != _wifi_status) {
+    NETTRACE("netstate: %d", thisState);
+    _wifi_status = thisState;
   }
 }
 
@@ -305,7 +305,7 @@ void Board::start(Element_StartupMode startupMode) {
       l->setup();  // one-time initialization
       l->start();  // start...
       hd_yield();
-    }  // if
+    }              // if
 
     l = l->next;
   }  // while
@@ -317,9 +317,9 @@ void Board::start(Element_StartupMode startupMode) {
 
 
 // switch to a new state
-void Board::_newState(enum BOARDSTATE newState) {
+void Board::_newBoardState(enum BOARDSTATE newState) {
   hd_yield();
-  NETTRACE("WiFi state: %d", WiFi.status());
+  // NETTRACE("WiFi state: %d", WiFi.status());
   boardState = newState;
   BOARDTRACE("New State=%d", newState);
 }
@@ -359,7 +359,7 @@ void Board::loop() {
       if (startComplete) {
         dispatch(startAction);  // dispatched when all elements are active.
       }
-    }  // if ! startComplete
+    }                           // if ! startComplete
 
     // dispatch next action from _actions if any
     if (!_actions.empty()) {
@@ -367,7 +367,7 @@ void Board::loop() {
       String a = _actions.pop();
       BOARDTRACE("popped %s", a.c_str());
       dispatchAction(a);
-      _actions.dump();
+      // _actions.dump();
       return;
     } else {
     }  // if
@@ -405,7 +405,7 @@ void Board::loop() {
         _isWakeupStart = true;
 #endif
         ESP.deepSleep(_deepSleepTime * 1000);
-        _newState(BOARDSTATE::SLEEP);
+        _newBoardState(BOARDSTATE::SLEEP);
       }
     }  // if
 
@@ -417,7 +417,7 @@ void Board::loop() {
       f.close();
     }
     NETTRACE("$net=%s", ListUtils::at(netpass, 0).c_str());
-    _newState(BOARDSTATE::LOAD);
+    _newBoardState(BOARDSTATE::LOAD);
 
   } else if (boardState == BOARDSTATE::LOAD) {
     // load all config files and create+start elements
@@ -435,7 +435,7 @@ void Board::loop() {
     _checkNetState();
 
     // load state data and actions
-    DeviceState::loadElementState();
+    DeviceState::loadElementState(this);
 
     if (sysButton >= 0) {
       pinMode(sysButton, INPUT_PULLUP);
@@ -480,20 +480,20 @@ void Board::loop() {
     // detect no configured network situation
     if ((WiFi.SSID().isEmpty()) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
       LOGGER_JUSTINFO("no config");
-      _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
+      _newBoardState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
     } else if (_resetCount == 2) {
-      _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
+      _newBoardState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
     } else if (netpass.length()) {
       NETTRACE("PSK");
       netMode = NetMode_PSK;
-      _newState(BOARDSTATE::CONNECT);
+      _newBoardState(BOARDSTATE::CONNECT);
 
     } else {
       NETTRACE("Pass");
       netMode = NetMode_PASS;
-      _newState(BOARDSTATE::CONNECT);
+      _newBoardState(BOARDSTATE::CONNECT);
     }
 
     // wait at least some seconds for offering config mode
@@ -517,7 +517,7 @@ void Board::loop() {
     WiFi.setOutputPower(outputPower);
 #endif
     WiFi.setAutoReconnect(true);
-    _newState(BOARDSTATE::WAITNET);
+    _newBoardState(BOARDSTATE::WAITNET);
 
     if (netMode == NetMode_AUTO) {
       // 1. try:
@@ -526,7 +526,7 @@ void Board::loop() {
       WiFi.setAutoConnect(true);
       WiFi.begin();
       NETTRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
-      delay(500); 
+      delay(500);
 
     } else if (netMode == NetMode_PSK) {
       // 2. try:
@@ -534,7 +534,7 @@ void Board::loop() {
       int off = netpass.indexOf(',');
       NETTRACE("NetMode_PSK <%s>,<%s>", netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
       WiFi.begin(netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
-      delay(1000); 
+      delay(1000);
       _checkNetState();
 
     } else if (netMode == NetMode_PASS) {
@@ -565,17 +565,15 @@ void Board::loop() {
     // check sysButton
     if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
       LOGGER_JUSTINFO("sysbutton %d pressed %d", sysButton, digitalRead(sysButton));
-      _newState(BOARDSTATE::STARTCAPTIVE);
+      _newBoardState(BOARDSTATE::STARTCAPTIVE);
     }
 
     if (boardState == BOARDSTATE::WAITNET) {
       if (_wifi_status == WL_CONNECTED) {
         NETTRACE("connected.");
-        _newState(BOARDSTATE::WAIT);
-      }  // if
+        _newBoardState(BOARDSTATE::WAIT);
 
-      if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (nowMillis > connectPhaseEnd)) {
-
+      } else if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (nowMillis > connectPhaseEnd)) {
         if (!connectPhaseEnd) {
           // no TRACE;
         } else if (nowMillis > connectPhaseEnd) {
@@ -587,7 +585,7 @@ void Board::loop() {
         netMode -= 1;
         // NETTRACE("next connect method = %d\n", netMode);
         if (netMode) {
-          _newState(BOARDSTATE::CONNECT);  // try next mode
+          _newBoardState(BOARDSTATE::CONNECT);  // try next mode
         } else {
           LOGGER_INFO("no-net");
           DeviceState::setResetCounter(0);
@@ -596,11 +594,15 @@ void Board::loop() {
           ESP.restart();
         }  // if
       }    // if
-    }      // if
+
+    } else if (_wifi_status == WL_IDLE_STATUS) {
+      delay(100);
+
+    }  // if
 
     if (boardState == BOARDSTATE::WAIT) {
       if ((_startup == BOARDSTARTUP::DEEPSLEEP) || (nowMillis >= configPhaseEnd)) {
-        _newState(BOARDSTATE::GREET);
+        _newBoardState(BOARDSTATE::GREET);
       }
     }  // if
     hd_yield();
@@ -713,7 +715,7 @@ void Board::loop() {
       server->send(404, "text/html", FPSTR(respond404));
     });
 
-    _newState(BOARDSTATE::RUN);
+    _newBoardState(BOARDSTATE::RUN);
 
   } else if (boardState == BOARDSTATE::SLEEP) {
     // just wait.
@@ -743,7 +745,7 @@ void Board::loop() {
 
     server->begin();
 
-    _newState(BOARDSTATE::RUNCAPTIVE);
+    _newBoardState(BOARDSTATE::RUNCAPTIVE);
     keepCaptiveMode();
 
   } else if (boardState == BOARDSTATE::RUNCAPTIVE) {

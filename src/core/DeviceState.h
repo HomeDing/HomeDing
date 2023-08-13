@@ -59,7 +59,7 @@ public:
 
 
   /// @brief dispatch the saved state to the elements.
-  static void loadElementState();
+  static void loadElementState(Board *board);
 
 
   /// @brief return the time of last state changes.

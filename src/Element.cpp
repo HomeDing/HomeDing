@@ -91,11 +91,18 @@ void Element::pushState(
 }  // pushState()
 
 
-/**
- * @brief save a local state to a state element.
- * @param key The key of state variable.
- * @param value The value of state variable.
- */
+
+/// @brief save a local state to a state element.
+/// @param key The key of state variable.
+/// @param value The value of state variable.
+void Element::saveState(const char *key, String value) {
+  saveState(key, value.c_str());
+}
+
+
+/// @brief save a local state to a state element.
+/// @param key The key of state variable.
+/// @param value The value of state variable.
 void Element::saveState(const char *key, const char *value) {
   TRACE("saveState(%s=%s)", key, value);
   if (active && _useState) {
@@ -220,7 +227,7 @@ bool Element::_scanIndexParam(const char *name, size_t &index, String &indexName
 
   p = strchr(p, '[');
   if (p) {
-    index = (size_t)strtoul(p+1, nullptr, 10);
+    index = (size_t)strtoul(p + 1, nullptr, 10);
     p = strchr(p, ']');
   }
   if (p) {
@@ -230,7 +237,7 @@ bool Element::_scanIndexParam(const char *name, size_t &index, String &indexName
     indexName = p + 1;
   }
   return (p);
-} // _scanIndexParam()
+}  // _scanIndexParam()
 
 
 /* Return a pin value from a string. */

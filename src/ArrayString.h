@@ -63,16 +63,16 @@ public:
 
 
   /// @brief Add new String to the end of the array
-  /// @param s new item 
+  /// @param s new item
   /// @return size of the array.
   uint16_t push(const char *s) {
     setAt(_used, s);
     return (_used);
   };  // push()
 
-  
+
   /// @brief Add new String to the end of the array
-  /// @param s new item 
+  /// @param s new item
   /// @return size of the array.
   uint16_t push(const String &s) {
     return (push(s.c_str()));
@@ -92,9 +92,13 @@ public:
   // remove first string from array and return it
   String pop();
 
-  // deallocate all.
+  /// @brief deallocate all memory and empty array.
   void clear();
 
+  /// @brief Create a string with all array items separatend by delim.
+  String concat(char delim);
+
+  // send a dump of the object to Serial.
   void dump();
 
 private:

@@ -98,8 +98,8 @@ void Element::pushState(
  */
 void Element::saveState(const char *key, const char *value) {
   TRACE("saveState(%s=%s)", key, value);
-  if (active && _useState && _board->state) {
-    _board->state->save(this, key, value);
+  if (active && _useState) {
+    DeviceState::setElementState(this, key, value);
   }
 }  // saveState
 

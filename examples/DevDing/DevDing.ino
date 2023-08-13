@@ -209,15 +209,6 @@ void setup(void) {
 
 // handle all give time to all Elements and active components.
 void loop(void) {
-#ifdef NET_DEBUG
-  static wl_status_t lastState = (wl_status_t)100;
-  wl_status_t newState = WiFi.status();
-  if (newState != lastState) {
-    Serial.printf("WiFi state: %d\n", newState);
-    lastState = newState;
-  }
-#endif
-
   server.handleClient();
   homeding.loop();
 }  // loop()

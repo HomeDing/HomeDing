@@ -39,11 +39,13 @@ extern "C" {
 
 #include <DNSServer.h>
 
+#include <rom/rtc.h>
+
 // use BOARDTRACE for compiling with detailed TRACE output.
-#define BOARDTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define BOARDTRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define NETTRACE(...)  LOGGER_JUSTINFO(__VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -64,7 +66,7 @@ IPAddress netMsk(255, 255, 255, 0);
 extern const char *ssid;
 extern const char *passPhrase;
 
-// week definitions when not defined aqnywhere else.
+// week definitions when not defined anywhere else.
 const __attribute__((weak)) char *ssid = "";
 const __attribute__((weak)) char *passPhrase = "";
 
@@ -79,37 +81,28 @@ FS *HomeDingFS::rootFS = nullptr;
 FS *HomeDingFS::sdFS = nullptr;
 
 
-#if defined(ESP8266)
-
 /** Reset Counter to detect multiple hardware resets in a row. */
-int _resetCount;
 bool _isWakeupStart = false;
-
-#elif defined(ESP32)
-
-// RTC Memory variables for counting boots in-a-row
-// and detect restart after deep sleep.
-RTC_DATA_ATTR int _resetCount = 0;
-RTC_DATA_ATTR bool _isWakeupStart = false;
-
 
 // https://community.platformio.org/t/esp32-firebeetle-fast-boot-after-deep-sleep/13206
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-bootloader-skip-validate-in-deep-sleep
 // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
 
-#endif
-
 /**
  * @brief Initialize a blank board.
  */
 void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
-  WiFi.persistent(true);
-
-  LOGGER_INFO("Device %s starting...", buildName);
 
   server = serv;
   HomeDingFS::rootFS = fs;
   build = buildName;
+
+  Logger::init(fs);
+
+  WiFi.persistent(true);  // ??? too early ?
+
+  LOGGER_INFO("Device %s starting...", buildName);
+  LOGGER_TRACE("Reset Reasons: %d %d", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
 
   bool mounted = fs->begin();
   if (!mounted) {
@@ -117,7 +110,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
     fs->format();
   }
 
-  Logger::init(fs);
+  DeviceState::load();
 
   // board parameters configured / overwritten by device element
   sysLED = -1;
@@ -131,24 +124,22 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   _deepSleepTime = 60 * 1000;  // one minute
   _DeepSleepCount = 0;
 
+  // create a devicename from mac address
+  uint8_t mac[6];
+  char sMac[64];
+
+  WiFi.macAddress(mac);
+
 #if defined(ESP8266)
-  uint8_t mac[6];
-  char ssid[64];
-
-  WiFi.macAddress(mac);
-  snprintf(ssid, sizeof(ssid), "ESP-%02X%02X%02X", mac[3], mac[4], mac[5]);
-  deviceName = ssid;
-
+  snprintf(sMac, sizeof(sMac), "ESP-%02X%02X%02X", mac[3], mac[4], mac[5]);
 #elif defined(ESP32)
-  uint8_t mac[6];
-  char ssid[64];
-
-  WiFi.macAddress(mac);
-  snprintf(ssid, sizeof(ssid), "esp32-%02x%02x%02x", mac[3], mac[4], mac[5]);
-  deviceName = ssid;
-
+  snprintf(sMac, sizeof(sMac), "esp32-%02x%02x%02x", mac[3], mac[4], mac[5]);
 #endif
 
+  deviceName = sMac;
+
+
+  // check for deep sleep wakeup
 
 #if defined(ESP8266)
   rst_info *ri = ESP.getResetInfoPtr();
@@ -162,12 +153,13 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
 
   esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+  LOGGER_INFO("ws=%d", _isWakeupStart);
   LOGGER_INFO("ESP32: deep sleep cause: %d", cause);
-
 
   _startup = (_isWakeupStart) ? BOARDSTARTUP::DEEPSLEEP : BOARDSTARTUP::NORMAL;
   _isWakeupStart = false;
 #endif
+
   if (_startup == BOARDSTARTUP::DEEPSLEEP) {
     LOGGER_INFO("Reset from Deep Sleep mode");
   }
@@ -327,9 +319,9 @@ void Board::start(Element_StartupMode startupMode) {
 // switch to a new state
 void Board::_newState(enum BOARDSTATE newState) {
   hd_yield();
-  NETTRACE("WiFi: %d,%d", WiFi.getMode(), WiFi.status());
-  NETTRACE("New State=%d", newState);
+  NETTRACE("WiFi state: %d", WiFi.status());
   boardState = newState;
+  BOARDTRACE("New State=%d", newState);
 }
 
 // loop next element, only one at a time!
@@ -424,6 +416,7 @@ void Board::loop() {
       netpass = f.readString();
       f.close();
     }
+    NETTRACE("$net=%s", ListUtils::at(netpass, 0).c_str());
     _newState(BOARDSTATE::LOAD);
 
   } else if (boardState == BOARDSTATE::LOAD) {
@@ -441,74 +434,60 @@ void Board::loop() {
     }
     _checkNetState();
 
-    if (state) {
-      // when a state element is configured: use it to load state
-      state->load();
-    }
+    // load state data and actions
+    DeviceState::loadElementState();
 
     if (sysButton >= 0) {
       pinMode(sysButton, INPUT_PULLUP);
     }
 
-#if defined(ESP8266)
-    _resetCount = RTCVariables::getResetCounter();
-#endif
-    if (_resetCount > 0) {
+    int _resetCount = DeviceState::getResetCounter() + 1;
+    DeviceState::setResetCounter(_resetCount);
+
+    if (_resetCount > 1) {
       // enforce un-safemode on double reset
-      LOGGER_INFO("Reset #%d", _resetCount);
       isSafeMode = false;
     }  // if
-    _resetCount++;
-#if defined(ESP8266)
-    RTCVariables::setResetCounter(_resetCount);
-#endif
 
-    // search any time requesting elements
-    Element *l = _elementList;
-    while (l != nullptr) {
-      if (l->startupMode == Element_StartupMode::Time) {
-        hasTimeElements = true;
-      }  // if
-      l = l->next;
-    }  // while
+    if (_resetCount < 2) {
+      // search any time requesting elements
+      Element *l = _elementList;
+      while (l != nullptr) {
+        if (l->startupMode == Element_StartupMode::Time) {
+          hasTimeElements = true;
+        }  // if
+        l = l->next;
+      }    // while
 
-    // setup I2C system wide when configured.
-    if ((I2cSda >= 0) && (I2cScl >= 0)) {
-      LOGGER_TRACE("I2C pins sda=%d scl=%d", I2cSda, I2cScl);
-      Wire.begin(I2cSda, I2cScl);
-      if (I2cFrequency > 0) {
-        Wire.setClock(I2cFrequency);
+      // setup I2C system wide when configured.
+      if ((I2cSda >= 0) && (I2cScl >= 0)) {
+        LOGGER_TRACE("I2C pins sda=%d scl=%d", I2cSda, I2cScl);
+        Wire.begin(I2cSda, I2cScl);
+        if (I2cFrequency > 0) {
+          Wire.setClock(I2cFrequency);
+        }
+      }
+      start(Element_StartupMode::System);
+      displayInfo(HOMEDING_GREETING);
+
+      // Enable sysLED for blinking while waiting for network or config mode
+      if (sysLED >= 0) {
+        pinMode(sysLED, OUTPUT);
+        digitalWrite(sysLED, HIGH);
       }
     }
 
-    start(Element_StartupMode::System);
-    displayInfo(HOMEDING_GREETING);
-
-    // Enable sysLED for blinking while waiting for network or config mode
-    if (sysLED >= 0) {
-      pinMode(sysLED, OUTPUT);
-      digitalWrite(sysLED, HIGH);
-    }
-
-    LOGGER_TRACE("WiFi.SSID=%s", WiFi.SSID().c_str());
-    LOGGER_TRACE("$net=%s", ListUtils::at(netpass, 0).c_str());
-    LOGGER_TRACE("resetCount=%d", _resetCount);
-
     // detect no configured network situation
-    if ((WiFi.SSID().length() == 0) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
+    if ((WiFi.SSID().isEmpty()) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
       LOGGER_JUSTINFO("no config");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
-      // } else if (_resetCount == 1) {
-      //   // no safe mode
-
     } else if (_resetCount == 2) {
-      LOGGER_JUSTINFO("Reset*2");
       _newState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
 
-    } else if (WiFi.SSID().length() || netpass.length()) {
-      NETTRACE("Auto");
-      netMode = NetMode_AUTO;
+    } else if (netpass.length()) {
+      NETTRACE("PSK");
+      netMode = NetMode_PSK;
       _newState(BOARDSTATE::CONNECT);
 
     } else {
@@ -547,13 +526,16 @@ void Board::loop() {
       WiFi.setAutoConnect(true);
       WiFi.begin();
       NETTRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
+      delay(500); 
 
     } else if (netMode == NetMode_PSK) {
       // 2. try:
       // connect with the saved network and password
       int off = netpass.indexOf(',');
-      WiFi.begin(netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
       NETTRACE("NetMode_PSK <%s>,<%s>", netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
+      WiFi.begin(netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
+      delay(1000); 
+      _checkNetState();
 
     } else if (netMode == NetMode_PASS) {
       // 3. try:
@@ -608,7 +590,7 @@ void Board::loop() {
           _newState(BOARDSTATE::CONNECT);  // try next mode
         } else {
           LOGGER_INFO("no-net");
-          _resetCount = RTCVariables::setResetCounter(0);
+          DeviceState::setResetCounter(0);
 
           delay(500);
           ESP.restart();
@@ -625,8 +607,6 @@ void Board::loop() {
 
 
   } else if (boardState == BOARDSTATE::GREET) {
-    // after network connection is done.
-    _resetCount = RTCVariables::setResetCounter(0);
 
     const char *name = WiFi.getHostname();
 
@@ -634,6 +614,9 @@ void Board::loop() {
     LOGGER_JUSTINFO("connected to %s (%s mode)",
                     WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
     LOGGER_JUSTINFO("start http://%s/", name);
+
+    // after network connection is done.
+    DeviceState::setResetCounter(0);
 
     // Serial.println();
     // WiFi.printDiag(Serial);
@@ -739,7 +722,7 @@ void Board::loop() {
     uint8_t mac[6];
     char ssid[64];
 
-    _resetCount = RTCVariables::setResetCounter(0);
+    DeviceState::setResetCounter(0);
 
     WiFi.macAddress(mac);
     snprintf(ssid, sizeof(ssid), "%s%02X%02X%02X", HOMEDING_GREETING, mac[3], mac[4], mac[5]);
@@ -821,7 +804,7 @@ Element *Board::findById(const char *id) {
       break;  // while
     }         // if
     l = l->next;
-  }  // while
+  }           // while
   return (l);
 }  // findById
 
@@ -1048,7 +1031,7 @@ Element *Board::getElement(const char *elementType) {
       break;  // while
     }         // if
     l = l->next;
-  }  // while
+  }           // while
   // BOARDTRACE("found: %d", l);
   return (l);
 }  // getElement()
@@ -1081,7 +1064,7 @@ Element *Board::getElement(const char *elementType, const char *elementName) {
       break;
     }  // if
     l = l->next;
-  }  // while
+  }    // while
   return (l);
 
 }  // getElement()

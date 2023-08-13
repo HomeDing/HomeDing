@@ -102,7 +102,6 @@ extern Board homeding;
 // system elements only in full firmware
 #ifdef HOMEDING_INCLUDE_FULL_SYSTEM
 #define HOMEDING_INCLUDE_SSDP
-#define HOMEDING_INCLUDE_RTCSTATE
 #endif
 
 // Easy include of all elements for an attached display.
@@ -153,9 +152,6 @@ extern Board homeding;
 #include <MapElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_RTCSTATE
-#include <RTCStateElement.h>
-#endif
 
 // ===== Time related Elements =====
 

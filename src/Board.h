@@ -64,9 +64,8 @@ class Board;
 #include <displays/DisplayElement.h>
 #include <displays/DisplayAdapter.h>
 
-#include <StateElement.h>
 #include <core/Logger.h>
-#include <core/RTCVariables.h>
+#include <core/DeviceState.h>
 
 
 #define HOMEDING_GREETING "HomeDing"
@@ -300,12 +299,6 @@ public:
    * Display Adapter when a display is configured.
    */
   DisplayAdapter *display = NULL;
-
-
-  /**
-   * State Element to save state data.
-   */
-  StateElement *state = NULL;
 
 
   /**

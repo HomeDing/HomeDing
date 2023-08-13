@@ -1,38 +1,43 @@
 /**
  * @file StateElement.h
- * @author Matthias Hertel (https://www.mathertel.de)
- * 
+ * @brief The StateElement implements the configuration for saving the state of a device and its elements.
+ *
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
- * 
- * @brief State Element class
- * 
- * This class is a interface definition class for State Elements to save state information from Elements.
- * There is maximal 1 State Element registered in the Base class at a time.
- * Configuration is done via the Element configurations.
- * 
+ *
+ * More information on https://www.mathertel.de/Arduino
+ *
  * Changelog:
- * * 18.04.2021 created by Matthias Hertel
+ * * 12.08.2023 created by Matthias Hertel
  */
 
-#pragma once
 
-/**
- * @brief The StateElement class defines the extra virtual functions for any State Element. 
- */
+/// @brief The StateElement implements the configuration for saving the state of a device and its elements.
 class StateElement : public Element {
 public:
-  /**
-   * @brief The save function allows saving state information specific for an Element.
-   * 
-   * @param element The Element that needs the state support.
-   * @param key Then key of a state variable of the element.
-   * @param value The value of a state variable of the element.
-   */
-  virtual void save(Element *element, const char *key, const char *value);
+  /// @brief Factory function to create a StateElement.
+  /// @return Element*
+  static Element *create();
 
-  /**
-   * @brief Load all state information and dispatch them as actions.
-   */
-  virtual void load();
+  /// @brief static variable to ensure registering in static init phase.
+  static bool registered;
+
+
+  /* ===== Element functions ===== */
+
+
+  /// @brief Set a parameter or property to a new value or start an action.
+  /// @param name Name of property.
+  /// @param value Value of property.
+  /// @return true when property could be changed or the action could be executed.
+  virtual bool set(const char *name, const char *value) override;
+
+
+  /// @brief trigger saving the current state of the device.
+  virtual void loop() override;
+
+private:
+  unsigned long _saveDelay;
 };

@@ -56,7 +56,6 @@
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
 #define HOMEDING_INCLUDE_Alarm
-#define HOMEDING_INCLUDE_RTCSTATE
 
 // Enable Power meassurement elements
 #define HOMEDING_INCLUDE_BL0937

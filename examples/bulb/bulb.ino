@@ -46,7 +46,6 @@
 // Enable some Core Elements for small devices
 // This collection may be used in e.g. remote controllable plugs.
 #define HOMEDING_INCLUDE_Switch
-#define HOMEDING_INCLUDE_RTCSTATE
 #define HOMEDING_INCLUDE_SCENE
 
 // Enable Elements for LIGHT control

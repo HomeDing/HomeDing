@@ -94,8 +94,8 @@ String DiagElement::_handleDiag() {
   out += "DeviceName: ";
   out += _board->deviceName;
   out += '\n';
-  out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n";
-  out += "\n";
+  out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n\n";
+  out += "State: " + DeviceState::getStateString() + "\n\n";
 
   sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
   out += buffer;

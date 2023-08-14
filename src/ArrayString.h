@@ -29,29 +29,32 @@ public:
     clear();
   };
 
-  // reserve at least [num] strings in the array
-  void reserve(uint16_t num);
+  /// @brief reserve at least [num] strings in the array
+  /// @param num reserved entries minimum.
+  void reserve(uint16_t num = 8);
 
+
+  /// @brief return true if Array is empty.
+  /// @param num reserved entries minimum.
   boolean empty() {
     return (_used == 0);
-  }
+  }  // empty()
 
+
+  /// @brief return the number of used Strings in the Array.
+  /// @return Number of used Strings.
   uint16_t size() {
     return (_used);
-  }
+  };
 
-  // return String by Index
+  /// @brief return String by Index
   String at(uint16_t index);
 
-  // return String by index
+  /// @brief return String by Index
   String operator[](uint16_t index) {
     return (at(index));
   };
 
-  // return first String
-  String first() {
-    return (at(0));
-  };
 
   // add a String at the given position
   void setAt(uint16_t index, const char *s);
@@ -65,7 +68,7 @@ public:
   /// @brief Add new String to the end of the array
   /// @param s new item
   /// @return size of the array.
-  uint16_t push(const char *s) {
+  int16_t push(const char *s) {
     setAt(_used, s);
     return (_used);
   };  // push()
@@ -74,23 +77,35 @@ public:
   /// @brief Add new String to the end of the array
   /// @param s new item
   /// @return size of the array.
-  uint16_t push(const String &s) {
+  int16_t push(const String &s) {
     return (push(s.c_str()));
   };
 
 
+  /// @brief build the array by splitting a string into parts.
+  /// @param s String with input
+  /// @param delim Delimiter character to be used.
   void split(const char *s, char delim = ',');
 
+  /// @brief build the array by splitting a string into parts.
+  /// @param s String with input
+  /// @param delim Delimiter character to be used.
   void split(const String &s, char delim = ',') {
     split(s.c_str(), delim);
   }
 
-  // void split(String s, char delim = ',') {
-  //   split(s.c_str(), delim);
-  // }
 
-  // remove first string from array and return it
+  /// @brief Find an entry starting with the given string.
+  /// @param sFind string to be found
+  /// @return index of first found entry or -1 for not found.
+  int16_t findStartWith(const String &sFind);
+
+
+  /// @brief remove first string from array and return it
   String pop();
+
+  /// @brief remove n-th entry from array and return it
+  String remove(uint16_t n);
 
   /// @brief deallocate all memory and empty array.
   void clear();
@@ -98,16 +113,18 @@ public:
   /// @brief Create a string with all array items separatend by delim.
   String concat(char delim);
 
-  // send a dump of the object to Serial.
+  /// @brief send a textual dump of the object to Serial.
   void dump();
 
 private:
+  /// @brief allocated capacity for array intems (char* pointers).
   uint16_t _capacity = 0;
+  /// @brief number of used items [0...(_used-1)].
   uint16_t _used = 0;
 
   char **array = nullptr;  // array with pointers to C-type strings
 
-  // make sure that enough array pointers are given.
+  /// @brief make sure that enough array pointers are given.
   void _createCapacity(uint16_t num);
 };
 

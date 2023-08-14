@@ -16,15 +16,13 @@
 
 #include "StateElement.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 
 /* ===== Static factory function ===== */
 
-/**
- * @brief static factory function to create a new StateElement
- * @return StateElement* created element
- */
+/// @brief static factory function to create a new StateElement
+/// @return StateElement* created element
 Element *StateElement::create() {
   return (new StateElement());
 }  // create()
@@ -44,6 +42,9 @@ bool StateElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "savedelay") == 0) {
     // save state after a specific time only
     _saveDelay = _scanDuration(value);
+
+  } else if (_stricmp(name, "clear") == 0) {
+    DeviceState::clear();
 
   } else {
     ret = false;

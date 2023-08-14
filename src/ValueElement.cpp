@@ -39,9 +39,11 @@ bool ValueElement::_setValue(int newValue, bool forceAction) {
     _board->dispatch(_valueAction, newValue);
     ret = true;
   }  // if
-  _value = newValue;
-
-  saveState("value", String(_value));
+  
+  if (_value != newValue) {
+    _value = newValue;
+    saveState("value", String(_value));
+  }
 
   return (ret);
 }  // _setValue()
@@ -56,9 +58,12 @@ bool ValueElement::_setValue(const char *newValue, bool forceAction) {
     _board->dispatch(_valueAction, newValue);
     ret = true;
   }
-  
-  _valueString = newValue;
-  saveState("value", _valueString);
+
+  if (_valueString != newValue) {
+    _valueString = newValue;
+    saveState("value", _valueString);
+  }
+
   return (ret);
 }  // _setValue()
 

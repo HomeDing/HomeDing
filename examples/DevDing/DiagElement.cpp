@@ -89,79 +89,80 @@ String DiagElement::_handleDiag() {
   char buffer[128];
   const char *desc = nullptr;
   unsigned long tStart = millis();
+  int num = 0;
+  int adr = 0;
 
   out += "**Info**\n";
   out += "DeviceName: ";
   out += _board->deviceName;
   out += '\n';
   out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n\n";
-  out += "State: " + DeviceState::getStateString() + "\n\n";
+  out += "State: [" + DeviceState::getStateString() + "]\n\n";
 
   sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
   out += buffer;
 
-  int num = 0;
-  int adr = 1;
+  if ((_board->I2cSda >= 0) && (_board->I2cScl >= 0)) {
+    while ((millis() < tStart + 3000) && (adr < 127)) {
+      adr++;
 
-  while ((millis() < tStart + 3000) && (adr < 127)) {
-
-    // The i2c scanner uses the return value of Write.endTransmission
-    // to find a device that acknowledged to the address.
-    Wire.beginTransmission(adr);
-    int error = Wire.endTransmission();
-
-    if (error) {
-      // try again for some devices that need wakeup
+      // The i2c scanner uses the return value of Write.endTransmission
+      // to find a device that acknowledged to the address.
       Wire.beginTransmission(adr);
-      error = Wire.endTransmission();
-    }
+      int error = Wire.endTransmission();
 
-    if (error == 0) {
-      desc = nullptr;
-
-      if (adr == 0x11) {
-        desc = "SI4721";
-      } else if (adr == (0x0e)) {
-        desc = "MAG3110";
-      } else if (adr == (0x14)) {
-        desc = "GT911";
-      } else if (adr == 0x23) {
-        desc = "BH1750";
-      } else if (adr == 0x27) {
-        desc = "LCD,PCF8574";
-      } else if (adr == 0x38) {
-        desc = "AHT20";
-      } else if (adr == 0x3C) {
-        desc = "SH1106,SSD1306,SSD1309";
-      } else if (adr == 0x40) {
-        desc = "INA219,INA226";
-      } else if (adr == (0x51)) {
-        desc = "RTC,PCF8563";
-      } else if (adr == (0x5c)) {
-        desc = "AM2320";
-      } else if (adr == (0x5d)) {
-        desc = "GT911";
-      } else if (adr == (0x5f)) {
-        desc = "HTS221";
-      } else if (adr == 0x62) {
-        desc = "SCD-4x";
-      } else if (adr == 0x63) {
-        desc = "Radio,SI4730";
-      } else if (adr == (0x68)) {
-        desc = "RTC,DS1307,MPU-6050";
-      } else if (adr == 0x6D) {
-        desc = "FBM320";
-      } else if (adr == 0x77) {
-        desc = "BMP280";
+      if (error) {
+        // try again for some devices that need wakeup
+        Wire.beginTransmission(adr);
+        error = Wire.endTransmission();
       }
 
-      sprintf(buffer, "* 0x%02x: (%s)\n", adr, desc ? desc : "");
-      out += buffer;
-      yield();
-      num++;
-    }
-    adr++;
-  }  // while
+      if (error == 0) {
+        desc = nullptr;
+
+        if (adr == 0x11) {
+          desc = "SI4721";
+        } else if (adr == (0x0e)) {
+          desc = "MAG3110";
+        } else if (adr == (0x14)) {
+          desc = "GT911";
+        } else if (adr == 0x23) {
+          desc = "BH1750";
+        } else if (adr == 0x27) {
+          desc = "LCD,PCF8574";
+        } else if (adr == 0x38) {
+          desc = "AHT20";
+        } else if (adr == 0x3C) {
+          desc = "SH1106,SSD1306,SSD1309";
+        } else if (adr == 0x40) {
+          desc = "INA219,INA226";
+        } else if (adr == (0x51)) {
+          desc = "RTC,PCF8563";
+        } else if (adr == (0x5c)) {
+          desc = "AM2320";
+        } else if (adr == (0x5d)) {
+          desc = "GT911";
+        } else if (adr == (0x5f)) {
+          desc = "HTS221";
+        } else if (adr == 0x62) {
+          desc = "SCD-4x";
+        } else if (adr == 0x63) {
+          desc = "Radio,SI4730";
+        } else if (adr == (0x68)) {
+          desc = "RTC,DS1307,MPU-6050";
+        } else if (adr == 0x6D) {
+          desc = "FBM320";
+        } else if (adr == 0x77) {
+          desc = "BMP280";
+        }
+
+        sprintf(buffer, "* 0x%02x: (%s)\n", adr, desc ? desc : "");
+        out += buffer;
+        yield();
+        num++;
+      }
+    }  // while
+  }
 
   sprintf(buffer, "%3d adresses scanned.\n", adr);
   out += buffer;
@@ -215,27 +216,32 @@ String DiagElement::_handleChipInfo() {
   sprintf(buffer, "  features: %08x\n", features);
   sOut += buffer;
 
-  if (features & CHIP_FEATURE_EMB_FLASH) { sOut +="    embedded flash memory\n"; };
-  if (features & CHIP_FEATURE_WIFI_BGN) { sOut +="    2.4GHz WiFi\n"; };
-  if (features & CHIP_FEATURE_BLE) { sOut +="    Bluetooth LE\n"; };
-  if (features & CHIP_FEATURE_BT) { sOut +="    Bluetooth Classic\n"; };
-  if (features & CHIP_FEATURE_IEEE802154) { sOut +="    IEEE 802.15.4\n"; };
+  if (features & CHIP_FEATURE_EMB_FLASH) { sOut += "    embedded flash memory\n"; };
+  if (features & CHIP_FEATURE_WIFI_BGN) { sOut += "    2.4GHz WiFi\n"; };
+  if (features & CHIP_FEATURE_BLE) { sOut += "    Bluetooth LE\n"; };
+  if (features & CHIP_FEATURE_BT) { sOut += "    Bluetooth Classic\n"; };
+  if (features & CHIP_FEATURE_IEEE802154) { sOut += "    IEEE 802.15.4\n"; };
 #if defined(CHIP_FEATURE_EMB_PSRAM)
-  if (features & CHIP_FEATURE_EMB_PSRAM) { sOut +="    embedded psram\n"; };
+  if (features & CHIP_FEATURE_EMB_PSRAM) { sOut += "    embedded psram\n"; };
 #endif
 
-  sprintf(buffer, "  cores: %d\n", chip_info.cores); sOut += buffer;
-  sprintf(buffer, "  revision: %d\n", chip_info.revision); sOut += buffer;
+  sprintf(buffer, "  cores: %d\n", chip_info.cores);
+  sOut += buffer;
+  sprintf(buffer, "  revision: %d\n", chip_info.revision);
+  sOut += buffer;
   sOut += "\n";
 
-  sprintf(buffer, "ChipModel: %s\n", ESP.getChipModel()); sOut += buffer;
+  sprintf(buffer, "ChipModel: %s\n", ESP.getChipModel());
+  sOut += buffer;
   sOut += "\n";
 
   sOut += "Flash:";
 #if defined(ESP8266)
-  sprintf(buffer, "  ID: 0x%08x\n", ESP.getFlashChipId()); sOut += buffer;
+  sprintf(buffer, "  ID: 0x%08x\n", ESP.getFlashChipId());
+  sOut += buffer;
 #endif
-  sprintf(buffer, "  Size: %d kByte\n", ESP.getFlashChipSize() / 1024); sOut += buffer;
+  sprintf(buffer, "  Size: %d kByte\n", ESP.getFlashChipSize() / 1024);
+  sOut += buffer;
 
   FlashMode_t flashMode = ESP.getFlashChipMode();
   s = "unknown";
@@ -245,8 +251,10 @@ String DiagElement::_handleChipInfo() {
   if (flashMode == FM_DOUT) { s = "DOUT"; };
   // if (flashMode == FM_FAST_READ) { s = "FAST_READ"; };
   // if (flashMode == FM_SLOW_READ) { s = "SLOW_READ"; };
-  sprintf(buffer, "  Mode: %s(%d)\n", s, flashMode); sOut += buffer;
-  sprintf(buffer, "  Speed: %d\n", ESP.getFlashChipSpeed()); sOut += buffer;
+  sprintf(buffer, "  Mode: %s(%d)\n", s, flashMode);
+  sOut += buffer;
+  sprintf(buffer, "  Speed: %d\n", ESP.getFlashChipSpeed());
+  sOut += buffer;
   sOut += "\n";
 
 #endif

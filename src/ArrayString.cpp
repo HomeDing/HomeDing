@@ -18,7 +18,7 @@
 #include <Arduino.h>
 #include <ArrayString.h>
 
-#define CTRACE(...)  Serial.printf(__VA_ARGS__)
+#define CTRACE(...) // Serial.printf(__VA_ARGS__)
 
 void ArrayString::_createCapacity(uint16_t num) {
   CTRACE("_createCapacity(%d)\n", num);
@@ -40,12 +40,13 @@ void ArrayString::_createCapacity(uint16_t num) {
   }
 }  // _createCapacity()
 
+
 void ArrayString::reserve(uint16_t num) {
   _createCapacity(num);
 };
 
 
-// return String by index
+/// @brief return String by index
 String ArrayString::at(uint16_t index) {
   String ret;
 
@@ -56,7 +57,7 @@ String ArrayString::at(uint16_t index) {
 }
 
 
-// add a String at the given position
+/// @brief add a String at the given position
 void ArrayString::setAt(uint16_t index, const char *s) {
   CTRACE("setAt[%d]=<%s>\n", index, s);
   _createCapacity(index + 1);
@@ -94,6 +95,8 @@ void ArrayString::split(const char *s, char delim) {
       const char *pEnd = pStart;
       while (*pEnd && *pEnd != delim) { pEnd++; }
 
+      if (array[_used]) free(array[_used]);
+
       // copy pStart .. pEnd-1
       uint16_t rawlen = pEnd - pStart;  // len without trailing '\0'
 
@@ -108,6 +111,7 @@ void ArrayString::split(const char *s, char delim) {
   }  // if
   // dump();
 }
+
 
 /// @brief Create a string with all array items separatend by delim.
 String ArrayString::concat(char delim) {
@@ -145,6 +149,25 @@ String ArrayString::pop() {
   return (ret);
 }
 
+
+// remove a String Entry and return old entry as String
+String ArrayString::remove(uint16_t n) {
+  String ret;
+
+  if (n < _used) {
+    ret = array[n];
+    free(array[n]);
+
+    for (int n = 0; n < _capacity - 1; n++) {
+      array[n] = array[n + 1];
+    }
+    _used = _used - 1;
+    array[_capacity - 1] = nullptr;
+  }
+  return (ret);
+}  // remove()
+
+
 // deallocate all.
 void ArrayString::clear() {
   for (int n = 0; n < _used; n++) {
@@ -156,10 +179,26 @@ void ArrayString::clear() {
   array = nullptr;
 }
 
+
+/// @brief Find an entry starting with the given string.
+/// @param s String to be found.
+/// @return index of first found entry or -1 for not found.
+int16_t ArrayString::findStartWith(const String &sFind) {
+  CTRACE("AS: findStartWith(%s)\n", sFind.c_str());
+
+  const char *s = sFind.c_str();
+  for (int n = 0; n < _used; n++) {
+    CTRACE("  : (%s)=%08lx\n", array[n], strstr(array[n], s));
+    if (strstr(array[n], s)) { return (n); }
+  }
+  return (-1);
+}  // findStartWith()
+
+
 void ArrayString::dump() {
   CTRACE("_used: %d, _capacity: %d\n", _used, _capacity);
-  for (int n = 0; n < _capacity; n++) {
-    CTRACE("%d:%08x <%s>\n", n, array[n], ((n < _used) ? (array[n] ? array[n] : "-empty") : "-unused"));
+  for (int n = 0; n < _used; n++) {
+    CTRACE("%2d:%08x <%s>\n", n, array[n], array[n]);
   }
   CTRACE("\n");
 }  // dump()

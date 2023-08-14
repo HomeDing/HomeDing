@@ -17,10 +17,10 @@
 #define PREF_FILENAME "/$pref.txt"
 
 // use BOARDTRACE for compiling with detailed TRACE output.
-#define STATETRACE(...) LOGGER_TRACE(__VA_ARGS__)
+#define STATETRACE(...) // LOGGER_TRACE(__VA_ARGS__)
 
 /// @brief state was loaded from perm. memory.
-bool DeviceState::_isLoaded = false; 
+bool DeviceState::_isLoaded = false;
 
 /// @brief millis() of last change in state.
 unsigned long DeviceState::_lastChange = 0;
@@ -29,7 +29,8 @@ unsigned long DeviceState::_lastChange = 0;
 // default values used when no PREF file was found.
 int DeviceState::_bootCount = 0;
 int DeviceState::_resetCount = 0;
-String DeviceState::_state;
+
+ArrayString DeviceState::_states;
 
 
 /// @brief Initialize local static variables.
@@ -42,16 +43,17 @@ void DeviceState::load() {
       STATETRACE("no PREF File");
 
     } else {
-      String s = f.readStringUntil('\n');
-      _bootCount = s.toInt();
+      _bootCount = f.readStringUntil('\n').toInt();
       _bootCount++;
       _lastChange = millis();
 
-      s = f.readStringUntil('\n');
-      // STATETRACE("rc=<%s>", s.c_str());
-      _resetCount = s.toInt();
+      _resetCount = f.readStringUntil('\n').toInt();
 
-      _state = f.readStringUntil('\n');
+      _states.clear();
+      _states.reserve();
+      String s = f.readStringUntil('\n');
+      s.trim();
+      _states.split(s, VALUE_SEPARATOR);
 
       while (1) {
         s = f.readStringUntil('\n');
@@ -78,7 +80,7 @@ void DeviceState::save() {
     if (f) {
       f.println(_bootCount);
       f.println(_resetCount);
-      f.println(_state);
+      f.println(getStateString());
       f.close();
     }
 
@@ -114,44 +116,23 @@ void DeviceState::setElementState(Element *e, const char *key, const char *value
 
   String entry = String(e->id) + "?" + key + "=";
 
-  int n = _state.indexOf(entry);
+  int16_t idx = _states.findStartWith(entry);
+  _states.remove(idx);
   entry.concat(value);
+  _states.push(entry);
 
-  if (n < 0) {
-    // add to the end
-    if (_state.length() > 0)
-      _state.concat(VALUE_SEPARATOR);
-    _state.concat(entry);
-
-  } else {
-    String tmp;
-
-    if (n > 0) {
-      tmp = _state.substring(0, n); // all actions before incl. VALUE_SEPARATOR
-    }
-    tmp.concat(entry);
-
-    int e = _state.indexOf(VALUE_SEPARATOR, n);
-    if (e >= 0) {
-      tmp.concat(_state.substring(e));
-    }
-    _state = tmp;
-  } // if
+  // _states.dump();
   _lastChange = millis();
-}
+}  // setElementState()
 
 
 /// @brief Load all state information from RTC memory and dispatch them as actions.
-void DeviceState::loadElementState(Board *board){
+void DeviceState::loadElementState(Board *board) {
   STATETRACE("loadElementState()");
 
-  String loadState = _state;
-
-  while (loadState.length() > 0) {
-    String a = Element::popItemValue(loadState);
-    // _board->dispatchAction(a);
-  } // while
-
+  for (int n = 0; n < _states.size(); n++) {
+    board->dispatchAction(_states[n]);
+  }
 };
 
 // End.

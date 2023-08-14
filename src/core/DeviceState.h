@@ -31,7 +31,7 @@ public:
 
   /// @brief Set the Reset Counter object and save all state
   /// @param cnt The new counter value.
-  /// @param saveNow 
+  /// @param saveNow
   /// @return int The new counter value.
   static int setResetCounter(int cnt);
 
@@ -42,12 +42,17 @@ public:
   };
 
 
-  /**
-   * @brief Get the State String object
-   * @return String The actual state string
-   */
+  /// @brief Get the State String object
+  /// @return String The actual state string
   static String getStateString() {
-    return (_state);
+    return (_states.concat(VALUE_SEPARATOR));
+  };
+
+
+  /// @brief remove all state information for Elements.
+  static void clear() {
+    _states.clear();
+    _lastChange = millis();
   };
 
 
@@ -79,7 +84,9 @@ private:
 
   static int _bootCount;
   static int _resetCount;
-  static String _state;
+
+  // Array of current state properties of Elements.
+  static ArrayString _states;
 
 };  // class
 

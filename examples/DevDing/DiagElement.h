@@ -69,6 +69,8 @@ public:
    */
   virtual void start() override;
 
+  virtual void loop() override;
+
 private:
   /**
    * @brief The _xAction holds the actions that is submitted when ...

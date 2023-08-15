@@ -41,6 +41,7 @@ Element *DiagElement::create() {
 
 DiagElement::DiagElement() {
   startupMode = Element_StartupMode::System;
+  loglevel = LOGGER_LEVEL_TRACE;
 }
 
 
@@ -96,13 +97,18 @@ String DiagElement::_handleDiag() {
   out += "DeviceName: ";
   out += _board->deviceName;
   out += '\n';
-  out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n\n";
-  out += "State: [" + DeviceState::getStateString() + "]\n\n";
+  out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n";
+  out += "State: [" + DeviceState::getStateString() + "]\n";
+  out += "Mac-address: " + WiFi.macAddress() + "\n";
+  out += "\n";
 
-  sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
-  out += buffer;
+  if ((_board->I2cSda < 0) || (_board->I2cScl < 0)) {
+    out += "no i2c bus.\n";
 
-  if ((_board->I2cSda >= 0) && (_board->I2cScl >= 0)) {
+  } else {
+    sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
+    out += buffer;
+
     while ((millis() < tStart + 3000) && (adr < 127)) {
       adr++;
 
@@ -162,12 +168,12 @@ String DiagElement::_handleDiag() {
         num++;
       }
     }  // while
-  }
 
-  sprintf(buffer, "%3d adresses scanned.\n", adr);
-  out += buffer;
-  sprintf(buffer, "%3d devices found.\n", num);
-  out += buffer;
+    sprintf(buffer, "%3d adresses scanned.\n", adr);
+    out += buffer;
+    sprintf(buffer, "%3d devices found.\n", num);
+    out += buffer;
+  }
   return (out);
 }  // _handleDiag
 
@@ -290,11 +296,18 @@ void DiagElement::start() {
   // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
   LOGGER_EINFO("Reset Reason: %d", rtc_get_reset_reason(0));
 #endif
-
-  LOGGER_EINFO(" Free Heap: %d", ESP.getFreeHeap());
-  LOGGER_EINFO(" Mac-address: %s", WiFi.macAddress().c_str());
 }  // start()
 
+
+void DiagElement::loop() {
+  static wl_status_t lastState = WL_NO_SHIELD;
+
+  wl_status_t wifistate = WiFi.status();
+  if (lastState != wifistate) {
+    LOGGER_EINFO("new WiFi state: %d", wifistate);
+    lastState = wifistate;
+  }
+}
 
 /* ===== Register the Element ===== */
 

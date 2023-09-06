@@ -26,6 +26,9 @@
 #include <rom/rtc.h>
 #endif
 
+// use DIAG TRACE for sending detailed output for the Diag Element.
+#define DIAGTRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+
 /* ===== Static factory function ===== */
 
 /**
@@ -55,7 +58,7 @@ bool DiagElement::set(const char *name, const char *value) {
     // log some heap information. using http://nodeding/api/state/diag/0?rtcmem=1
 #if defined(ESP8266)
     // dump rtc Memory
-    LOGGER_EINFO("===== RTCMEM =====");
+    DIAGTRACE("===== RTCMEM =====");
     uint8_t rtcbuffer[16];
     for (unsigned int adr = 0; adr < (512); adr += sizeof(rtcbuffer)) {
       ESP.rtcUserMemoryRead(adr / 4, (uint32_t *)rtcbuffer, sizeof(rtcbuffer));
@@ -73,7 +76,7 @@ bool DiagElement::set(const char *name, const char *value) {
           chars.concat('.');
         }
       }
-      LOGGER_EINFO("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
+      DIAGTRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
     }  // for
 #endif
 
@@ -169,7 +172,7 @@ String DiagElement::_handleDiag() {
       }
     }  // while
 
-    sprintf(buffer, "%3d adresses scanned.\n", adr);
+    sprintf(buffer, "%3d addresses scanned.\n", adr);
     out += buffer;
     sprintf(buffer, "%3d devices found.\n", num);
     out += buffer;
@@ -180,7 +183,8 @@ String DiagElement::_handleDiag() {
 
 String DiagElement::_handleProfile() {
   String sOut;
-  sOut = "Profile Loop-Times:\n";
+  sOut += "Profile Loop-Times (usecs):\n";
+  sOut += "Element             | Average | Maximum | Count\n";
 
 #if defined(HD_PROFILE)
   _board->forEach("", [this, &sOut](Element *e) {
@@ -272,7 +276,7 @@ String DiagElement::_handleChipInfo() {
  * @brief Activate the DiagElement.
  */
 void DiagElement::start() {
-  LOGGER_EINFO("start()");
+  DIAGTRACE("start()");
   Element::start();
 
   // enable I2C scan output using http://nodeding/diag
@@ -288,25 +292,20 @@ void DiagElement::start() {
     _board->server->send(200, "text/plain", _handleChipInfo());
   });
 
-  LOGGER_EINFO("I2C pins sda=%d scl=%d", _board->I2cSda, _board->I2cScl);
+  DIAGTRACE("I2C pins sda=%d scl=%d", _board->I2cSda, _board->I2cScl);
 
 #if defined(ESP8266)
-  LOGGER_EINFO("Reset Reason: %s", ESP.getResetReason().c_str());
+  DIAGTRACE("Reset Reason: %s", ESP.getResetReason().c_str());
 #elif defined(ESP32)
   // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
-  LOGGER_EINFO("Reset Reason: %d", rtc_get_reset_reason(0));
+  DIAGTRACE("Reset Reason: %d", rtc_get_reset_reason(0));
 #endif
 }  // start()
 
 
 void DiagElement::loop() {
-  static wl_status_t lastState = WL_NO_SHIELD;
-
-  wl_status_t wifistate = WiFi.status();
-  if (lastState != wifistate) {
-    LOGGER_EINFO("new WiFi state: %d", wifistate);
-    lastState = wifistate;
-  }
+  // no use.
+  Element::loop();
 }
 
 /* ===== Register the Element ===== */

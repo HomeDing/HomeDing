@@ -1,7 +1,7 @@
 // hdProfile.h
-// 
+//
 // Include this file in element.h to add profiling information to elements
-// that allows detectonmg long-running lopp() functions of elements.
+// that allows detecting long-running loop() functions of elements.
 // Use the DiagElement to display current data in the browser.
 
 #pragma once
@@ -14,6 +14,7 @@
 struct hd_profiledata_t {
   unsigned long totalDuration = 0;
   unsigned long totalCount = 0;
+  unsigned long maxDuration = 0;
   unsigned long start;
 };
 
@@ -24,20 +25,18 @@ struct hd_profiledata_t {
 
 #define PROFILE_END(e) \
   { \
-    e->profile.totalDuration += (micros() - e->profile.start); \
+    unsigned long delta = micros() - e->profile.start; \
+    e->profile.totalDuration += delta; \
     e->profile.totalCount++; \
+    if (delta > e->profile.maxDuration) e->profile.maxDuration = delta; \
   }
 
-#define PROFILE_TIMEPRINT(e, topic) \
-  { Serial.printf("%-17s %5ldµsec (%4ld)\n", topic, (e->profile.totalDuration / e->profile.totalCount), e->profile.totalCount); }
-
 #define PROFILE_TIMEPRINTBUF(buffer, e, topic) \
-  { sprintf(buffer, " %-19s %7ld usec (%4ld)\n", topic, (e->profile.totalDuration / e->profile.totalCount), e->profile.totalCount); }
+  { sprintf(buffer, "%-19s | %7ld | %7ld | %6ld\n", topic, (e->profile.totalDuration / e->profile.totalCount), e->profile.maxDuration, e->profile.totalCount); }
 
 #else
 
 #define PROFILE_DATA
 #define PROFILE_START(obj)
 #define PROFILE_END(obj)
-#define PROFILE_TIMEPRINT(topic, id, min)
 #endif

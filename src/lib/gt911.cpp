@@ -30,7 +30,7 @@ GT911::GT911(uint8_t _int, uint8_t _rst, uint16_t _width, uint16_t _height)
 
 void GT911::init(bool useAdr2) {
   uint8_t regBuffer[2];
-  Serial.printf("init()\n");
+  // Serial.printf("init()\n");
 
   addr = useAdr2 ? GT911_I2CADDR_14 : GT911_I2CADDR_5D;
 

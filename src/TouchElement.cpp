@@ -35,10 +35,12 @@ Element *TouchElement::create() {
 
 #if defined(ESP32)
 
+#if ! defined (ARDUINO_NANO_ESP32)
 // in case there is no touchRead() available on ESP32 boards (e.g. C3)
 int __attribute__((weak)) touchRead(UNUSED int _pin) {
   return (0);
 };
+#endif
 
 /**
  * @brief Set a parameter or property to a new value or start an action.

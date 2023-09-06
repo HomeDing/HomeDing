@@ -14,7 +14,7 @@
 
 #pragma once
 
-#if defined(ESP32) && (! ARDUINO_ESP32C3_DEV)
+#if defined(ESP32) && (! ARDUINO_ESP32C3_DEV) && (! ARDUINO_XIAO_ESP32C3)
 
 /**
  * @brief

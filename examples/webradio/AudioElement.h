@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief
  */

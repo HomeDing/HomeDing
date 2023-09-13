@@ -1,7 +1,7 @@
 {
     "board": "esp32:esp32:esp32wrover",
-    "port": "COM9",
-    "configuration": "PartitionScheme=default,FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
+    "port": "COM6",
+    "configuration": "PartitionScheme=huge_app,FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
     "sketch": "./webradio.ino",
     "output": "./build"
 }

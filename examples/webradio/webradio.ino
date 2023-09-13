@@ -37,7 +37,6 @@
 
 // Enable the following element groups of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
-#define HOMEDING_INCLUDE_RTCSTATE
 
 #define HOMEDING_INCLUDE_CORE
 

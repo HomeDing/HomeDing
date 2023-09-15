@@ -29,7 +29,7 @@ public:
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
     PANELTRACE(" col: #%08x / #%08x\n", conf->drawColor, conf->backgroundColor);
     PANELTRACE(" invert: %d ips: %d\n", conf->invert, conf->ips);
-    PANELTRACE(" pins: light:%d, reset:%d", conf->lightPin, conf->resetPin);
+    PANELTRACE(" pins: light:%d, reset:%d\n", conf->lightPin, conf->resetPin);
 
     // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
 

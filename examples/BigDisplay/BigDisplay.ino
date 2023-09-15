@@ -7,22 +7,36 @@
  *
  * Compile with
  * * Board: ESP32S3 Dev Module
- * * Hardware CDC and JTAG
- * * CDC On Boot : "Disabled"
- * * Firmware MSC on Boot: "Disabled"
- * * DFU on Boot: "Disabled"
- * * CPU Frequency 240 MHz (WiFi) 
+ * * JTAG Adapter: Disabled
+ * * PSRAM : "OPI PSRAM"
  * * Flash Mode: "QIO 80 MHz"
  * * Flash Size: 16MB (128Mb)
- * * Core Debug Level: "None"
- * * PSRAM : "OPI PSRAM"
+ * * USB Mode: Hardware CDC and JTAG 
+ * * USB CDC On Boot : "Disabled"
+ * * USB Firmware MSC on Boot: "Disabled"
+ * * USB DFU on Boot: "Disabled"
+ * * Upload Mode: UART0 / Hardware CDC
  * * Partition Scheme: 8M with spiffs (3MB APP/1.5MB SPIFFS)
+ * * CPU Frequency 240 MHz (WiFi) 
+ * * Core Debug Level: "None"
+
  * 
   "board": "esp32:esp32:esp32s3",
   "configuration": "JTAGAdapter=default,PSRAM=opi,FlashMode=qio,FlashSize=16M,LoopCore=1,EventsCore=1,USBMode=hwcdc,CDCOnBoot=cdc,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,PartitionScheme=huge_app,CPUFreq=240,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
   "port": "COM6",
   "output": ".\\build",
   "sketch": "examples\\BigDisplay\\BigDisplay.ino"
+ 
+   with CH340 USB-Serial adapter
+ 
+ {
+    "board": "esp32:esp32:esp32s3",
+    "configuration": "JTAGAdapter=default,PSRAM=opi,FlashMode=qio,FlashSize=16M,LoopCore=1,EventsCore=1,USBMode=hwcdc,CDCOnBoot=default,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,PartitionScheme=default_8MB,CPUFreq=240,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
+    "port": "COM12",
+    "output": ".\\build",
+    "sketch": "examples\\BigDisplay\\BigDisplay.ino"
+}
+
  *
  * There is full featured WebUI from the standard example can be used.
  *
@@ -80,11 +94,12 @@
 
 // enable these lines to get more displays supported
 #define HOMEDING_INCLUDE_DISPLAYST7796
+#define HOMEDING_INCLUDE_DISPLAYESP32PANEL
+
 // #define HOMEDING_INCLUDE_DISPLAYST7789
 // #define HOMEDING_INCLUDE_DISPLAYST7735
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
 #define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
-
 // Enable simple display Elements
 // #define HOMEDING_INCLUDE_TM1637
 
@@ -103,7 +118,6 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
-#include "DisplayTouchGT911Element.h"
 
 #include <FS.h>
 #include <LittleFS.h>  // File System for Web Server Files
@@ -111,9 +125,6 @@
 #include <BuiltinHandler.h>  // Serve Built-in files
 #include <BoardServer.h>     // Web Server Middleware for Elements
 #include <FileServer.h>      // Web Server Middleware for UI
-
-
-#include "DisplayTouchGT911Element.h"
 
 // ===== WLAN credentials =====
 

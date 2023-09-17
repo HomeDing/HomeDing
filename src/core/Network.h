@@ -55,7 +55,7 @@ public:
     // Evil bad hack to get the hostname set up correctly
     WiFi.mode(WIFI_AP_STA);
     WiFi.mode(WIFI_STA);
-    WiFi.begin(nName, nPass);
+    WiFi.begin(nName.c_str(), nPass.c_str());
     delay(100);
     state = NETSTATE::CONNECTSTA;
   };

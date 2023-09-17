@@ -22,6 +22,7 @@
 #include <time.h>
 
 #include <core/Logger.h>
+#include "Logger.h"
 
 #define LOGFILE_MAXSIZE (4 * 1024 - 200)
 
@@ -85,6 +86,39 @@ void Logger::_print(const char *module, int level, const char *fmt,
   }  // if
 }  // _print
 
+
+void Logger::_printToFile(char *buffer) {
+#if !defined(HD_MINIMAL)
+  if (_fileSystem) {
+    File f = _fileSystem->open(LOGFILE_NAME, "a");
+
+    if (f.size() > LOGFILE_MAXSIZE) {
+      // rename to LOGFILE_OLD_NAME
+      f.close();
+      _fileSystem->remove(LOGFILE_OLD_NAME);
+      _fileSystem->rename(LOGFILE_NAME, LOGFILE_OLD_NAME);
+      hd_yield();
+      f = _fileSystem->open(LOGFILE_NAME, "a");
+    }  // if
+    f.println(buffer);
+    f.close();
+    hd_yield();
+  }
+#endif
+};
+
+
+  /// @brief Create Raw Log entry without prefix
+  /// @param fmt format string using printf syntax
+  /// @param parameters according printf
+void Logger::printf(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    Logger::_print(nullptr, LOGGER_LEVEL_INFO, fmt, args);
+    va_end(args);
+} // printf
+
+
 /**
  * @brief Print Log entry from system (not element)
  */
@@ -112,26 +146,6 @@ void Logger::LoggerEPrint(Element *elem, int level, const char *fmt, ...) {
   hd_yield();
 }  // LoggerEPrint
 
-
-void Logger::_printToFile(char *buffer) {
-#if !defined(HD_MINIMAL)
-  if (_fileSystem) {
-    File f = _fileSystem->open(LOGFILE_NAME, "a");
-
-    if (f.size() > LOGFILE_MAXSIZE) {
-      // rename to LOGFILE_OLD_NAME
-      f.close();
-      _fileSystem->remove(LOGFILE_OLD_NAME);
-      _fileSystem->rename(LOGFILE_NAME, LOGFILE_OLD_NAME);
-      hd_yield();
-      f = _fileSystem->open(LOGFILE_NAME, "a");
-    }  // if
-    f.println(buffer);
-    f.close();
-    hd_yield();
-  }
-#endif
-};
 
 // Default: Log INFO and ERROR
 int Logger::logger_level = LOGGER_LEVEL_INFO;

@@ -89,10 +89,6 @@ bool DeviceElement::set(const char *name, const char *value) {
     // enable/disable logfile feature
     Logger::setLogFile(_atob(value));
 
-  } else if (_stricmp(name, "reset") == 0) {
-    // reboot is called reset in ESP
-    _board->reboot(false);
-
   } else {
     ret = Element::set(name, value);
   }
@@ -125,14 +121,8 @@ bool DeviceElement::set(const char *name, const char *value) {
 
       // ===== WiFi Manager =====
 
-    } else if (_stricmp(name, "led") == 0) {
-      _board->sysLED = _atopin(value);
-
-    } else if (_stricmp(name, "button") == 0) {
-      _board->sysButton = _atopin(value);
-
     } else if (_stricmp(name, "connecttime") == 0) {
-      _board->maxNetConnextTime = _scanDuration(value);
+      _board->maxNetConnectTime = _scanDuration(value);
 
     } else if (_stricmp(name, "sleeptime") == 0) {
       _board->setSleepTime(_scanDuration(value));

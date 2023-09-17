@@ -57,8 +57,8 @@
 
 #define LOGGER_ALWAYS(...) Logger::LoggerPrint(NULL, -1, __VA_ARGS__)
 
-/** Send Information to Serial output only and always. */
-#define LOGGER_JUSTINFO(...) Logger::LoggerPrint(NULL, LOGGER_LEVEL_INFO, __VA_ARGS__)
+/** Create simple log entry to serial only. */
+#define LOGGER_JUSTINFO(...) Logger::printf(__VA_ARGS__)
 
 /** Send error to Logfile and serial output. */
 #define LOGGER_ERR(...) Logger::LoggerPrint("sys", LOGGER_LEVEL_ERR, __VA_ARGS__)
@@ -122,8 +122,25 @@ public:
    */
   static void setLogFile(bool enable);
 
+  /// @brief Create Raw Log entry without prefix
+  /// @param fmt format string using printf syntax
+  /// @param parameters according printf
+  static void printf(const char *fmt, ...);
+
+  /// @brief Create Log entry with module prefix
+  /// @param module module prefix as string
+  /// @param level log level
+  /// @param fmt format string using printf syntax
+  /// @param parameters according printf
   static void LoggerPrint(const char *module, int level, const char *fmt, ...);
+
+  /// @brief Create Log entry for Element
+  /// @param module related Element
+  /// @param level log level
+  /// @param fmt format string using printf syntax
+  /// @param parameters according printf
   static void LoggerEPrint(Element *module, int level, const char *fmt, ...);
+
 
 private:
   // File System for logging file

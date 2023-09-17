@@ -1,5 +1,5 @@
 /**
- * @file RTCVariables.cpp
+ * @file DeviceState.cpp
  * @author Matthias Hertel (https://www.mathertel.de)
  *
  * @brief This class implements some functions to access the variables in RTC Memory for ESP8266.
@@ -7,17 +7,20 @@
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
  *
- * Changelog: see RTCVariables.h
+ * Changelog: see DeviceState.h
  */
 
 #include <Arduino.h>
 #include <HomeDing.h>
+#include "DeviceState.h"
+
 #include "hdfs.h"
+
 
 #define PREF_FILENAME "/$pref.txt"
 
 // use BOARDTRACE for compiling with detailed TRACE output.
-#define STATETRACE(...) // LOGGER_TRACE(__VA_ARGS__)
+#define STATETRACE(...) Logger::LoggerPrint("State", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 /// @brief state was loaded from perm. memory.
 bool DeviceState::_isLoaded = false;
@@ -35,7 +38,7 @@ ArrayString DeviceState::_states;
 
 /// @brief Initialize local static variables.
 void DeviceState::load() {
-  STATETRACE("init()");
+  STATETRACE("load()");
   if (!_isLoaded) {
     File f = HomeDingFS::rootFS->open(PREF_FILENAME, "r");
 
@@ -55,12 +58,12 @@ void DeviceState::load() {
       s.trim();
       _states.split(s, VALUE_SEPARATOR);
 
-      while (1) {
-        s = f.readStringUntil('\n');
-        if (s.isEmpty()) break;
+      // while (1) {
+      //   s = f.readStringUntil('\n');
+      //   if (s.isEmpty()) break;
 
-        STATETRACE("+<%s>", s.c_str());
-      };
+      //   STATETRACE("+<%s>", s.c_str());
+      // };
 
       f.close();
     }
@@ -134,5 +137,6 @@ void DeviceState::loadElementState(Board *board) {
     board->dispatchAction(_states[n]);
   }
 };
+
 
 // End.

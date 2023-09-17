@@ -14,6 +14,8 @@
  * * 21.04.2018 creation
  */
 
+#pragma once
+
 class DeviceState {
 
 public:

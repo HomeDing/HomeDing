@@ -4,6 +4,7 @@
 
 #pragma once
 
+// to enable profiling the loop() times enable this include.
 // #include <hdProfile.h>
 
 #include <Board.h>            // Platform

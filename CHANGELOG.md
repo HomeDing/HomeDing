@@ -7,10 +7,10 @@ All notable changes to this project will be documented in this file.
 ### Display and Touch Driver updates
 
 There is support for displays in the HomeDing Library since a long time. With the ESP32 variants
-come some new opportunitites especially for larger and more colorful display like 480*320 px including touch controllers.
+come some new opportunities especially for larger and more colorful display like 480*320 px including touch controllers.
 This version has some major updates to support these devices.
 
-* Some Display Adapters are now impemented using the [Arduino_GFX
+* Some Display Adapters are now implemented using the [Arduino_GFX
   Library](https://github.com/moononournation/Arduino_GFX) that supports a long list of
   interfaces called [Data bus](https://github.com/moononournation/Arduino_GFX/wiki/Data-Bus-Class)
   and displays [Display Class](https://github.com/moononournation/Arduino_GFX/wiki/Display-Class).
@@ -32,8 +32,28 @@ This version has some major updates to support these devices.
   button at the configured position where click events should be captured.
 
 * The BigDisplay example is made for a display with integrated touch panel.
+<!-- -> story -->
 
--> story
+* Rewriting of the startup sequence to speed up startup and remove of sysLED and sysButton. See
+  [The Startup Sequence](https://homeding.github.io/dev/startup.md) and [Persisting Current
+  State of Elements](https://homeding.github.io/elements/state.md).
+
+* The **Diag Element** included in the DevDing example was extended with the endpoints:
+
+  * /diag (build info, state, i2c devices)
+  * /profile (profiling the loop() times of elements)
+  * /chipinfo (about the chip in use)
+
+  Some related code was removed from the board.cpp implementation.
+
+* Profiling the loop() times can be enabled by including the <hdProfile.h> in <homeding.h>
+  manually, recompile and upload the extended sketch.
+
+  This will result in recoding the time consumed by the loop() function of elements to identify
+  non-cooperative elements.
+
+  The [Diag Element](https://homeding.github.io/elements/diag.htm) provides a simple web page
+  showing the current recorded times using `http://devicename/profile`.
 
 
 ### Minimal Examples
@@ -41,7 +61,7 @@ This version has some major updates to support these devices.
 The minimal example was split into **plug** and **bulb**.
 
 These [Minimal Examples](https://github.com/HomeDing/HomeDing/tree/develop/examples/minimal)
-are implemented to support ESP8266 based devices with 1MB Flash like swiches and lights.
+are implemented to support ESP8266 based devices with 1MB Flash like switches and lights.
 They contain a reduced set of elements for the specific use-case and a small footprint Web-UI.
 These work well with small self-made and and off-the-shell devices.
 
@@ -164,7 +184,7 @@ for some elements with multiple input an calculated output.
 * There are **[CLI commands](https://homeding.github.io/dev/cli.htm)** available for updating and restoring device configurations
   and uploading pre-build firmware.
 
-* much fixing, testing, documenation and cleanup  
+* much fixing, testing, documentation and cleanup  
 
 * much more support for ESP32.  
 
@@ -181,7 +201,7 @@ With the 0.8.x version the SPIFFS filesystem is not supported any more
 resulting a a reformatted flash disk space when updating.
 
 * **LittleFS** -
-  LitteFS is now the default filesystem.
+  LittleFS is now the default filesystem.
   
   As the SPIFFS filesystem is deprecated the LittleFS filesystem is supported from now on.
 
@@ -200,7 +220,7 @@ resulting a a reformatted flash disk space when updating.
 * The API calls can be made on the /api/ url path in addition of using the $... paths
   that will be deprecated. /$... paths will stay for builtin files.
 * /$update.htm now served with version parameter based on flash disk size.
-* The display adapters and elements have beedn rewritten to use the Adafruit GFX library.
+* The display adapters and elements have been rewritten to use the Adafruit GFX library.
 
 * MUCH documentation at [github.io](https://homeding.github.io).
 

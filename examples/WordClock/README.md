@@ -18,7 +18,7 @@ This sketch creates the runtime environment and includes the helpful elements.
 The Arduino typical setup() and loop() approach can also be used but is better contained in a separate file.
 
 
-## Project specific code 
+## Project specific code
 
 Beside the functionality in the base sketch a new Element is implemented in the WordClock.cpp file
 that includes the specific code for this device. This element class is then plugged into the ecosystem of actions.
@@ -43,13 +43,13 @@ To send the bitmap away a action will be triggered when the time has changed.
 
 The 8*8 matrix needs to be connected to the EPS8266 board using the SPI bus:
 
-| pin        | function       | max7219        |
-| ---------- | -------------- | -------------- |
-| GPIO14(D5) | SPI-CLK        | Clock          |
-| GPIO13(D7) | SPI-MOSI       | Data to Matrix |
-| GPIO0(D3)  | CS for max7219 | Matrix Select  |
-| VCC        | +5V            | VCC from USB   |
-| GND        | GND            | Common Ground  |
+| signal                                 | ESP8266    | ESP32  | color  | max7219        |
+| -------------------------------------- | ---------- | ------ | ------ | -------------- |
+| <span class="gpio yellow">Clock</span> | GPIO14(D5) | GPIO18 | yellow | Clock          |
+| <span class="gpio blue">Data</span>    | GPIO13(D7) | GPIO23 | blue   | Data to Matrix |
+| CS                                     | GPIO0(D3)  | GPIO05 | orange | Matrix Select  |
+| <span class="gpio red">+5V</span>      | VCC        | VCC    | red    | VCC from USB   |
+| <span class="gpio black">GND</span>    | GND        | GND    | black  | Common Ground  |
 
 While GPIO14(D5) and GPIO13(D7) must be used because they correspond to the SPI bus implementation by hardware
 the GPIO0(D3) can be exchanged. It is configured in the config.json file.

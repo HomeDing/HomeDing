@@ -19,6 +19,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#include <core/Network.h>
+
 #if defined(ESP8266)
 #include <ESP8266mDNS.h>
 extern "C" {
@@ -42,10 +44,13 @@ extern "C" {
 
 
 // use BOARDTRACE for compiling with detailed TRACE output.
-#define BOARDTRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define BOARDTRACE(...)  // Logger::LoggerPrint("Board", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+
+// use ELEM-TRACE for compiling with detailed TRACE output for Element creation.
+#define ELEMTRACE(...)  // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...) LOGGER_JUSTINFO(__VA_ARGS__)
+#define NETTRACE(...)  // Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -53,13 +58,14 @@ extern "C" {
 // The captive Mode will stay for 5 min. and then restart.
 #define CAPTIVE_TIME (5 * 60 * 1000)
 
-#define NetMode_AUTO 3  // first try
 #define NetMode_PSK 2   // second try
 #define NetMode_PASS 1  // last try
 
 DNSServer *dnsServer;
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
+
+unsigned long saveWorkingState = 0;
 
 // add you wifi network name and PassPhrase in the sketch or use WiFi Manager
 
@@ -69,6 +75,8 @@ extern const char *passPhrase;
 // week definitions when not defined anywhere else.
 const __attribute__((weak)) char *ssid = "";
 const __attribute__((weak)) char *passPhrase = "";
+
+int _resetCount = 0;
 
 // ---
 
@@ -98,23 +106,24 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   build = buildName;
 
   Logger::init(fs);
+  Network::init();
 
   WiFi.persistent(true);  // ??? too early ?
 
-  LOGGER_INFO("Device %s starting...", buildName);
-  LOGGER_TRACE("Reset Reasons: %d %d", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
+  Logger::printf("Device %s starting...", buildName);
+  BOARDTRACE("Reset Reasons: %d %d", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
 
   bool mounted = fs->begin();
   if (!mounted) {
-    LOGGER_INFO("formatting...");
-    fs->format();
+    Logger::printf("formatting...");
+    if (!fs->format()) {
+      Logger::printf("  failed.");
+    }
   }
 
   DeviceState::load();
 
   // board parameters configured / overwritten by device element
-  sysLED = -1;
-  sysButton = -1;
   homepage = "/index.htm";
   cacheHeader = "no-cache";
 
@@ -153,8 +162,8 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
 
   esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
-  LOGGER_INFO("ws=%d", _isWakeupStart);
-  LOGGER_INFO("ESP32: deep sleep cause: %d", cause);
+  BOARDTRACE("ws=%d", _isWakeupStart);
+  BOARDTRACE("ESP32: deep sleep cause: %d", cause);
 
   _startup = (_isWakeupStart) ? BOARDSTARTUP::DEEPSLEEP : BOARDSTARTUP::NORMAL;
   _isWakeupStart = false;
@@ -169,7 +178,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
 
 void Board::add(const char *id, Element *e) {
-  BOARDTRACE("add(%s)", id);
+  ELEMTRACE("add(%s)", id);
   _addedElements++;
 
   strcpy(e->id, id);
@@ -189,14 +198,12 @@ void Board::add(const char *id, Element *e) {
   }  // if
   e->next = nullptr;
   e->init(this);
-}
+}  // add()
 
 
-/**
- * @brief Check the mode the device in running.
- * @return true when board is runing in captive mode.
- * @return false when board is runing in normal mode.
- */
+/// @brief Check the mode the device in running.
+/// @return true when board is runing in captive mode.
+/// @return false when board is runing in normal mode.
 bool Board::isCaptiveMode() {
   return ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE));
 }  // isCaptiveMode()
@@ -216,11 +223,7 @@ void Board::keepCaptiveMode() {
  * @brief
  */
 void Board::_checkNetState() {
-  wl_status_t thisState = WiFi.status();
-  if (thisState != _wifi_status) {
-    NETTRACE("netstate: %d", thisState);
-    _wifi_status = thisState;
-  }
+  Network::loop();
 }
 
 
@@ -244,8 +247,7 @@ void Board::_addAllElements() {
 
       } else if (level == 2) {
         // create new element
-        BOARDTRACE("new %s", path);
-        // extract type name
+
         char typeName[32];
 
         char *p = path;
@@ -273,7 +275,7 @@ void Board::_addAllElements() {
         // Search 2. slash as starting point for name to include 3. level
         char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
         name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
-        BOARDTRACE(" (%s) %s=%s", path, name, value ? value : "-");
+        ELEMTRACE(" (%s) %s=%s", path, name, value ? value : "-");
         // add a parameter to the last Element
         _lastElem->set(name, value);
       }  // if
@@ -305,7 +307,7 @@ void Board::start(Element_StartupMode startupMode) {
       l->setup();  // one-time initialization
       l->start();  // start...
       hd_yield();
-    }              // if
+    }  // if
 
     l = l->next;
   }  // while
@@ -326,6 +328,8 @@ void Board::_newBoardState(enum BOARDSTATE newState) {
 
 // loop next element, only one at a time!
 void Board::loop() {
+  Network::loop();
+
   static String netpass;
 
   nowMillis = millis();
@@ -346,8 +350,8 @@ void Board::loop() {
     if (!startComplete) {
       if (!hasTimeElements) {
         startComplete = true;
-      } else {
 
+      } else {
         // starting time depending elements
         // check if time is valid now -> start all elements with
         if (time(nullptr)) {
@@ -358,8 +362,18 @@ void Board::loop() {
 
       if (startComplete) {
         dispatch(startAction);  // dispatched when all elements are active.
+        saveWorkingState = nowMillis + (10 * 1000);
       }
-    }                           // if ! startComplete
+
+    } else if (saveWorkingState) {
+      if (saveWorkingState < nowMillis) {
+        BOARDTRACE("Device is up and running...");
+        // some time after startComplete has completed.
+        DeviceState::setResetCounter(0);
+        saveWorkingState = 0;
+      }
+    }  // if
+
 
     // dispatch next action from _actions if any
     if (!_actions.empty()) {
@@ -409,7 +423,13 @@ void Board::loop() {
       }
     }  // if
 
+
   } else if (boardState == BOARDSTATE::NONE) {
+    // load network connection details
+    _newBoardState(BOARDSTATE::LOAD);
+
+
+  } else if (boardState == BOARDSTATE::LOAD) {
     // load network connection details
     File f = HomeDingFS::rootFS->open(NET_FILENAME, "r");
     if (f) {
@@ -417,13 +437,43 @@ void Board::loop() {
       f.close();
     }
     NETTRACE("$net=%s", ListUtils::at(netpass, 0).c_str());
-    _newBoardState(BOARDSTATE::LOAD);
 
-  } else if (boardState == BOARDSTATE::LOAD) {
-    // load all config files and create+start elements
-    _addAllElements();
-    BOARDTRACE("Elements created.");
+    if (netpass.isEmpty() && (ssid) && (*ssid)) {
+      // use hard coded ssid+passPhrase
+      netpass = ssid;
+      netpass.concat(',');
+      if (passPhrase) netpass.concat(passPhrase);
+      NETTRACE("$net: use:%s", ssid);
+    }
+
+    // increment BootCount
+    _resetCount = DeviceState::getResetCounter() + 1;
+    DeviceState::setResetCounter(_resetCount);
+
+    if (_resetCount > 1)
+      Logger::printf("reset #%d", _resetCount);
+
+    if ((!netpass.isEmpty()) && (_resetCount <= 3))
+      _newBoardState(BOARDSTATE::SETUP);
+    else
+      _newBoardState(BOARDSTATE::STARTCAPTIVE);
+
+
+  } else if (boardState == BOARDSTATE::SETUP) {
+
+    // load all config files and create elements
+    if (_resetCount < 3) {
+      BOARDTRACE("Create Elements...");
+      _addAllElements();
+    }
+
+    if (_resetCount == 2) {
+      // enforce un-safemode on double reset
+      isSafeMode = false;
+    }
+
     if (!_elementList) {
+      BOARDTRACE("Create SYS-Elements...");
       Logger::logger_level = LOGGER_LEVEL_TRACE;
       // no element defined, so allow configuration in any case.
       isSafeMode = false;
@@ -432,24 +482,15 @@ void Board::loop() {
       add("device/0", ElementRegistry::createElement("device"));
       add("ota/0", ElementRegistry::createElement("ota"));
     }
+    BOARDTRACE("Create Elements done.");
+
     _checkNetState();
 
-    // load state data and actions
-    DeviceState::loadElementState(this);
+    // startup normal modes...
+    if (_resetCount < 3) {
+      // load state data and actions
+      DeviceState::loadElementState(this);
 
-    if (sysButton >= 0) {
-      pinMode(sysButton, INPUT_PULLUP);
-    }
-
-    int _resetCount = DeviceState::getResetCounter() + 1;
-    DeviceState::setResetCounter(_resetCount);
-
-    if (_resetCount > 1) {
-      // enforce un-safemode on double reset
-      isSafeMode = false;
-    }  // if
-
-    if (_resetCount < 2) {
       // search any time requesting elements
       Element *l = _elementList;
       while (l != nullptr) {
@@ -457,7 +498,7 @@ void Board::loop() {
           hasTimeElements = true;
         }  // if
         l = l->next;
-      }    // while
+      }  // while
 
       // setup I2C system wide when configured.
       if ((I2cSda >= 0) && (I2cScl >= 0)) {
@@ -467,48 +508,21 @@ void Board::loop() {
           Wire.setClock(I2cFrequency);
         }
       }
-      start(Element_StartupMode::System);
-      displayInfo(HOMEDING_GREETING);
-
-      // Enable sysLED for blinking while waiting for network or config mode
-      if (sysLED >= 0) {
-        pinMode(sysLED, OUTPUT);
-        digitalWrite(sysLED, HIGH);
-      }
     }
 
-    // detect no configured network situation
-    if ((WiFi.SSID().isEmpty()) && (strnlen(ssid, 2) == 0) && netpass.isEmpty()) {
-      LOGGER_JUSTINFO("no config");
-      _newBoardState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
+    start(Element_StartupMode::System);  // including displays !
+    displayInfo(HOMEDING_GREETING);
 
-    } else if (_resetCount == 2) {
-      _newBoardState(BOARDSTATE::STARTCAPTIVE);  // start hotspot right now.
-
-    } else if (netpass.length()) {
-      NETTRACE("PSK");
-      netMode = NetMode_PSK;
-      _newBoardState(BOARDSTATE::CONNECT);
-
-    } else {
-      NETTRACE("Pass");
-      netMode = NetMode_PASS;
-      _newBoardState(BOARDSTATE::CONNECT);
-    }
-
-    // wait at least some seconds for offering config mode
-    configPhaseEnd = nowMillis + minConfigTime;
-
+    _newBoardState(BOARDSTATE::CONNECT);
 
   } else if (boardState == BOARDSTATE::CONNECT) {
-    BOARDTRACE("connect...");
+    int off = netpass.indexOf(',');
+    String nName = netpass.substring(0, off);
+    String nPass = netpass.substring(off + 1);
 
-    if (deviceName.isEmpty()) {
-      BOARDTRACE("no deviceName configured");
-    } else {
-      WiFi.setHostname(deviceName.c_str());
-    }
-    WiFi.mode(WIFI_STA);
+    // connect to a network...
+    Network::connect(deviceName, nName, nPass);
+
     // get effective Hostname
     deviceName = WiFi.getHostname();
     BOARDTRACE("deviceName=%s", deviceName.c_str());
@@ -516,129 +530,58 @@ void Board::loop() {
 #if defined(ESP8266)
     WiFi.setOutputPower(outputPower);
 #endif
-    WiFi.setAutoReconnect(true);
+
+    _checkNetState();
+
     _newBoardState(BOARDSTATE::WAITNET);
 
-    if (netMode == NetMode_AUTO) {
-      // 1. try:
-      // give autoconnect the chance to do it.
-      // works only after a successfull network connection in the past.
-      WiFi.setAutoConnect(true);
-      WiFi.begin();
-      NETTRACE("NetMode_AUTO: %s", WiFi.SSID().c_str());
-      delay(500);
-
-    } else if (netMode == NetMode_PSK) {
-      // 2. try:
-      // connect with the saved network and password
-      int off = netpass.indexOf(',');
-      NETTRACE("NetMode_PSK <%s>,<%s>", netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
-      WiFi.begin(netpass.substring(0, off).c_str(), netpass.substring(off + 1).c_str());
-      delay(1000);
-      _checkNetState();
-
-    } else if (netMode == NetMode_PASS) {
-      // 3. try:
-      // use fixed network and passPhrase known at compile time.
-      NETTRACE("NetMode_PASS: %s", ssid);
-
-      if (!*ssid) {
-        NETTRACE("SKIP");
-        connectPhaseEnd = 0;
-        return;
-      } else {
-        WiFi.mode(WIFI_STA);
-        WiFi.begin(ssid, passPhrase);
-      }
-    }  // if
-
     // wait some(12) seconds for connecting to the network
-    connectPhaseEnd = nowMillis + maxNetConnextTime;
+    connectPhaseEnd = nowMillis + maxNetConnectTime;
 
-  } else if ((boardState == BOARDSTATE::WAITNET) || (boardState == BOARDSTATE::WAIT)) {
-    // make sysLED blink.
-    // short pulses for normal=safemode, long pulses for unsafemode.
-    if (sysLED >= 0) {
-      digitalWrite(sysLED, (nowMillis % 700) > (isSafeMode ? 100 : 600) ? HIGH : LOW);
-    }  // if
+  } else if (boardState == BOARDSTATE::WAITNET) {
+    bool needReset = false;
 
-    // check sysButton
-    if ((sysButton >= 0) && (digitalRead(sysButton) == LOW)) {
-      LOGGER_JUSTINFO("sysbutton %d pressed %d", sysButton, digitalRead(sysButton));
-      _newBoardState(BOARDSTATE::STARTCAPTIVE);
-    }
+    if (Network::state == Network::NETSTATE::CONNECTED) {
+      NETTRACE("connected.");
+      _newBoardState(BOARDSTATE::GREET);
 
-    if (boardState == BOARDSTATE::WAITNET) {
-      if (_wifi_status == WL_CONNECTED) {
-        NETTRACE("connected.");
-        _newBoardState(BOARDSTATE::WAIT);
+      // } else if (boardState == BOARDSTATE::WAITNET) {
 
-      } else if ((_wifi_status == WL_NO_SSID_AVAIL) || (_wifi_status == WL_CONNECT_FAILED) || (nowMillis > connectPhaseEnd)) {
-        if (!connectPhaseEnd) {
-          // no TRACE;
-        } else if (nowMillis > connectPhaseEnd) {
-          NETTRACE("timed out.");
-        } else {
-          NETTRACE("wifi status=(%d)", _wifi_status);
-        }  // if
-
-        netMode -= 1;
-        // NETTRACE("next connect method = %d\n", netMode);
-        if (netMode) {
-          _newBoardState(BOARDSTATE::CONNECT);  // try next mode
-        } else {
-          LOGGER_INFO("no-net");
-          DeviceState::setResetCounter(0);
-
-          delay(500);
-          ESP.restart();
-        }  // if
-      }    // if
-
-    } else if (_wifi_status == WL_IDLE_STATUS) {
+    } else if (Network::state == Network::NETSTATE::CONNECTSTA) {
+      // wait on...
       delay(100);
 
+    } else if (Network::state == Network::NETSTATE::FAILED) {
+      NETTRACE("connecting failed.");
+      needReset = true;
+
+    } else if (nowMillis > connectPhaseEnd) {
+      NETTRACE("connecting timed out.");
+      needReset = true;
     }  // if
 
-    if (boardState == BOARDSTATE::WAIT) {
-      if ((_startup == BOARDSTARTUP::DEEPSLEEP) || (nowMillis >= configPhaseEnd)) {
-        _newBoardState(BOARDSTATE::GREET);
-      }
+    if (needReset) {
+      Logger::printf("no-net restart");
+      DeviceState::setResetCounter(0);
+
+      delay(500);
+      ESP.restart();
     }  // if
     hd_yield();
 
-
   } else if (boardState == BOARDSTATE::GREET) {
-
     const char *name = WiFi.getHostname();
 
     displayInfo(name, WiFi.localIP().toString().c_str());
-    LOGGER_JUSTINFO("connected to %s (%s mode)",
+    Logger::printf("connected to %s (%s mode)",
                     WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
-    LOGGER_JUSTINFO("start http://%s/", name);
-
-    // after network connection is done.
-    DeviceState::setResetCounter(0);
-
-    // Serial.println();
-    // WiFi.printDiag(Serial);
-    // NETTRACE("WiFi.RSSI: %d", WiFi.RSSI());
-    // Serial.println();
-
-    if (WiFi.getMode() == WIFI_AP_STA) {
-      WiFi.mode(WIFI_STA);  // after config mode, the AP needs to be closed down and Station Mode can start.
-    }
+    Logger::printf("start http://%s/\n", name);
 
     if (display) {
       delay(1600);
       display->clear();
       display->flush();
     }  // if
-
-    // release sysLED
-    if (sysLED >= 0) {
-      digitalWrite(sysLED, HIGH);
-    }
 
     server->begin();
     server->enableCORS(true);
@@ -716,7 +659,6 @@ void Board::loop() {
     });
 
     _newBoardState(BOARDSTATE::RUN);
-
   } else if (boardState == BOARDSTATE::SLEEP) {
     // just wait.
 
@@ -729,19 +671,19 @@ void Board::loop() {
     WiFi.macAddress(mac);
     snprintf(ssid, sizeof(ssid), "%s%02X%02X%02X", HOMEDING_GREETING, mac[3], mac[4], mac[5]);
 
-    displayInfo("config..", ssid);
+    displayInfo("Captive Mode:", ssid);
 
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, netMsk);
     WiFi.softAP(ssid);
     hd_yield();
-    LOGGER_INFO(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
+    BOARDTRACE(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
     // setup dns server using standard port
     dnsServer = new DNSServer();
     dnsServer->setTTL(300);
-    dnsServer->setErrorReplyCode(DNSReplyCode::ServerFailure);
-    dnsServer->start(0, "*", apIP);
+    dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer->start(53, "*", apIP);
 
     server->begin();
 
@@ -752,13 +694,8 @@ void Board::loop() {
     // server.handleClient(); needs to be called in main loop.
     dnsServer->processNextRequest();
 
-    // make sysLED blink 3 sec with a short flash.
-    if (sysLED >= 0) {
-      digitalWrite(sysLED, ((nowMillis % 3000) > 120) ? HIGH : LOW);
-    }  // if
-
     if (nowMillis > _captiveEnd) {
-      LOGGER_INFO("no config");
+      Logger::printf("no config.");
       reboot(false);
     }
   }  // if
@@ -806,7 +743,7 @@ Element *Board::findById(const char *id) {
       break;  // while
     }         // if
     l = l->next;
-  }           // while
+  }  // while
   return (l);
 }  // findById
 
@@ -1033,7 +970,7 @@ Element *Board::getElement(const char *elementType) {
       break;  // while
     }         // if
     l = l->next;
-  }           // while
+  }  // while
   // BOARDTRACE("found: %d", l);
   return (l);
 }  // getElement()
@@ -1066,7 +1003,7 @@ Element *Board::getElement(const char *elementType, const char *elementName) {
       break;
     }  // if
     l = l->next;
-  }    // while
+  }  // while
   return (l);
 
 }  // getElement()
@@ -1091,7 +1028,7 @@ void Board::forEach(const char *prefix, ElementCallbackFn fCallback) {
  * @param wipe is set to true to disconnect from WiFi and forget saved network credentials.
  */
 void Board::reboot(bool wipe) {
-  LOGGER_INFO("reboot...");
+  Logger::printf("reboot...");
   if (wipe)
     WiFi.disconnect(true);
   delay(1000);
@@ -1104,7 +1041,7 @@ void Board::reboot(bool wipe) {
 
 
 void Board::displayInfo(const char *text1, const char *text2) {
-  LOGGER_ALWAYS("%s %s", text1, text2 ? text2 : "");
+  Logger::printf("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
     display->drawText(0, 0, 0, text1);

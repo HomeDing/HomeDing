@@ -29,6 +29,8 @@
  * * 02.09.2021 advertise web server in mDNS.
  * * 07.01.2023 ETAG support enabled permanently.
  * * 19.04.2023 send to remotes using the host:type/id?name=value syntax
+ * * 20.08.2023 remove AUTO connection mode
+ * * 30.08.2023 use static Network class as Network Manager for connection and state
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -125,12 +127,14 @@ class Board {
   /** States of the board */
   enum BOARDSTATE : int {
     // ===== startup operation states
-    NONE = 0,  // unspecified
-    LOAD = 1,  // load configurations and create elements. Start SYS Elements
+    NONE = 0,  // starting point
 
-    CONNECT = 2,  // define how to connect, AUTO, PSK or PASSWD
-    WAITNET = 3,  // Wait for network connectivity or configuration request.
-    WAIT = 5,     // network is connected but wait for configuration request.
+    LOAD = 1,  // load configurations, start CAPTIVE without configuration
+
+    SETUP = 2,  // create elements. Start SYS Elements
+
+    CONNECT = 3,  // define how to connect, AUTO, PSK or PASSWD
+    WAITNET = 4,  // Wait for network connectivity or configuration request.
 
     // ===== normal operation states
     GREET = 10,  // network established, start NET Elements
@@ -153,7 +157,7 @@ class Board {
 
 public:
   // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
-  const char *version = "0.9.7";
+  const char *version = "0.9.8";
 
   // The build name defined by the main sketch e.g. "minimal", "standard", "radio"
   String build;
@@ -161,7 +165,7 @@ public:
   // ----- Time functionality -----
 
   /** The result of the millis() function at the start of loop().
-   * This can be used for all time / durtion calculations except high precission ones.
+   * This can be used for all time / duration calculations except high precission ones.
    */
   unsigned long nowMillis;
 
@@ -302,34 +306,12 @@ public:
 
 
   /**
-   * System LED pin, will flash during config mode.
-   * Typical setting is GPIO2(D4) to use the blue LED on the EPS-12 boards.
-   */
-  int sysLED = -1;
-
-
-  /**
-   * System Button pin, can be used to enter the config mode during startup.
-   * Typical use is to use the GPIO0(D3) flash button.
-   */
-  int sysButton = 0;
-
-
-  /**
    * Safe Mode flag
    */
   bool isSafeMode;
 
-  /**
-   * Switch to next network connect mode in msec.
-   */
-  int maxNetConnextTime = 12 * 1000;
-
-  /**
-   * Min. time to wait for a configuration mode request.
-   */
-  int minConfigTime = 6 * 1000;
-
+  /// @brief Maximum time to wait for a network connection.
+  int maxNetConnectTime = 30 * 1000;
 
 #if defined(ESP32)
   /**
@@ -435,7 +417,7 @@ private:
   /** startup mode of the board. */
   enum BOARDSTARTUP _startup;
 
-  // ===== Deep Slwwp control =====
+  // ===== Deep Sleep control =====
 
   /** duration of deep sleep in milliseconds*/
   unsigned long _deepSleepTime;
@@ -480,9 +462,10 @@ private:
 
   // state and timing
 
-  unsigned long configPhaseEnd;   // millis when current config mode (boardstate) is over, next mode
   unsigned long connectPhaseEnd;  // for waiting on net connection
+
   unsigned long _captiveEnd;      // terminate/reset captive portal mode after 5 minutes.
+
   void _newBoardState(enum BOARDSTATE newState);
 
   bool active = false;
@@ -495,7 +478,7 @@ private:
 
   /** connection status */
   void _checkNetState();
-  wl_status_t _wifi_status;
+  // wl_status_t _wifi_status;
 
   /** net connection mode */
   int netMode;

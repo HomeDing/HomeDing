@@ -10,12 +10,16 @@
 #define GT911_CONTACT_SIZE 8  // 8 bytes of data per contact
 
 /// Config Registers (0x8047 - 0X80FF)
-#define GT911_CONFIG 0x8047      // 4 bytes x-low, x-high, y-low, y-high
-#define GT911_RESOLUTION 0x8048  // 4 bytes x-low, x-high, y-low, y-high
-
+#define GT911_CONFIG_START 0x8047  // 4 bytes x-low, x-high, y-low, y-high
+#define GT911_CONFIG_END 0X80FE
+#define GT911_CONFIG_ALL 0X8100
 #define GT911_CONFIG_CHKSUM (uint16_t)0X80FF
 #define GT911_CONFIG_FRESH (uint16_t)0X8100
 
+#define GT911_RESOLUTION 0x8048  // 4 bytes x-low, x-high, y-low, y-high
+
+
+#define TRACE(...)  // Serial.printf("GT911: " __VA_ARGS__)
 
 /// Register Address of the points
 
@@ -24,64 +28,75 @@
 #define GT911_POINTS 0x814F
 
 
-GT911::GT911(uint8_t _int, uint8_t _rst, uint16_t _width, uint16_t _height)
+GT911::GT911(int _int, int _rst, uint16_t _width, uint16_t _height)
   : pinInt(_int), pinRst(_rst), width(_width), height(_height) {
 }
 
-void GT911::init(bool useAdr2) {
-  uint8_t regBuffer[2];
-  // Serial.printf("init()\n");
+void GT911::init(int address) {
+  TRACE("init(0x%02x, rst=%d, int=%d)\n", address, pinRst, pinInt);
 
-  addr = useAdr2 ? GT911_I2CADDR_14 : GT911_I2CADDR_5D;
+  uint8_t regBuffer[2];
+  uint16_t configSize = GT911_CONFIG_ALL - GT911_CONFIG_START + 1;
+  uint8_t configBuf[configSize];
+
+  addr = address;
+  regBuffer[0] = highByte(GT911_CONFIG_START);
+  regBuffer[1] = lowByte(GT911_CONFIG_START);
 
   pinMode(pinRst, OUTPUT);
-  pinMode(pinInt, OUTPUT);
+  if (pinInt < 0) {
+    digitalWrite(pinRst, LOW);
+    delay(20);
+    digitalWrite(pinRst, HIGH);
 
-  // initialization sequence with reset and adress selection
-  digitalWrite(pinInt, LOW);
-  digitalWrite(pinRst, LOW);
-  delay(10);
-  digitalWrite(pinInt, useAdr2);
-  delay(1);
-  digitalWrite(pinRst, HIGH);
-  delay(5);
-  digitalWrite(pinInt, LOW);
+  } else {
+    pinMode(pinInt, OUTPUT);
+
+    // initialization sequence with reset and address selection
+    digitalWrite(pinInt, LOW);
+    digitalWrite(pinRst, LOW);
+    delay(10);
+    digitalWrite(pinInt, (address == GT911_I2CADDR_14));
+    delay(1);
+    digitalWrite(pinRst, HIGH);
+    delay(5);
+    digitalWrite(pinInt, LOW);
+    delay(50);
+
+    // enable interrupt
+    pinMode(pinInt, INPUT);
+    // attachInterrupt(pinInt, GT911::onInterrupt, RISING);
+  }
+
   delay(50);
 
-  // enable interrupt
-  pinMode(pinInt, INPUT);
-  // attachInterrupt(pinInt, GT911::onInterrupt, RISING);
-  delay(50);
+  Wire.setBufferSize(configSize + 4);
 
   // read current config.
-  regBuffer[0] = highByte(GT911_CONFIG);
-  regBuffer[1] = lowByte(GT911_CONFIG);
   WireUtils::txrx(
     addr,
     regBuffer, sizeof(regBuffer),
-    configBuf, GT911_CONFIG_SIZE);
+    configBuf, GT911_CONFIG_START - GT911_CONFIG_END + 1);
 
   // set resolution
-  configBuf[GT911_RESOLUTION - GT911_CONFIG + 0] = lowByte(width);
-  configBuf[GT911_RESOLUTION - GT911_CONFIG + 1] = highByte(width);
-  configBuf[GT911_RESOLUTION - GT911_CONFIG + 2] = lowByte(height);
-  configBuf[GT911_RESOLUTION - GT911_CONFIG + 3] = highByte(height);
+  configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 0] = lowByte(width);
+  configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 1] = highByte(width);
+  configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 2] = lowByte(height);
+  configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 3] = highByte(height);
 
-  regBuffer[0] = highByte(GT911_RESOLUTION);
-  regBuffer[1] = lowByte(GT911_RESOLUTION);
-  WireUtils::txrx(
-    addr,
-    regBuffer, sizeof(regBuffer),
-    &configBuf[GT911_RESOLUTION - GT911_CONFIG], 4);
-
+  // calc checksum
   uint8_t checksum = 0;
   for (uint8_t i = 0; i < GT911_CONFIG_SIZE; i++) {
     checksum += configBuf[i];
   }
-  configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG] = (~checksum) + 1;
+  checksum = (~checksum) + 1;
+  configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
+  configBuf[GT911_CONFIG_FRESH - GT911_CONFIG_START] = 1;
 
-  WireUtils::write(addr, highByte(GT911_CONFIG_CHKSUM), lowByte(GT911_CONFIG_CHKSUM), configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG]);
-  WireUtils::write(addr, highByte(GT911_CONFIG_FRESH), lowByte(GT911_CONFIG_FRESH), 1);
+  Wire.beginTransmission(addr);
+  Wire.write(regBuffer, sizeof(regBuffer));
+  Wire.write(configBuf, GT911_CONFIG_START - GT911_CONFIG_ALL + 1);
+  Wire.endTransmission();
 }
 
 // void ARDUINO_ISR_ATTR GT911::onInterrupt() {
@@ -115,14 +130,16 @@ uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
   // Serial.printf(" pointInfo: 0x%02x\n", pointInfo);
 
   if (pointInfo & 0x80) {
-    // read touch points
     contacts = pointInfo & 0xF;
-    // Serial.printf(" contacts: %d\n", contacts);
+    TRACE(" contacts: %d\n", contacts);
+  }
 
-    if (contacts > GT911_MAX_CONTACTS) {
-      init(addr == GT911_I2CADDR_14);
-      return (0);
-    }
+  if (contacts > GT911_MAX_CONTACTS) {
+    init(addr == GT911_I2CADDR_14);
+    return (0);
+
+  } else if (contacts > 0) {
+    // read touch points
 
     memset(points, 0, sizeof(GDTpoint_t) * GT911_MAX_CONTACTS);
 
@@ -166,7 +183,7 @@ uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
       points[i].x = x;
       points[i].y = y;
 
-      // Serial.printf("read: %d %d/%d\n", i, points[i].x, points[i].y);
+      // Serial.printf("read: %d: %d/%d\n", i, points[i].x, points[i].y);
     }
   }
   if (pointInfo != 0x00) {
@@ -174,4 +191,3 @@ uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
   }
   return (contacts);
 }  // getTouchPoints()
-

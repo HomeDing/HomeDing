@@ -31,9 +31,9 @@ struct GDTpoint_t {
 
 class GT911 {
   public:
-    GT911(uint8_t _int, uint8_t _rst, uint16_t _width, uint16_t _height);
+    GT911(int _int, int _rst, uint16_t _width, uint16_t _height);
 
-    void init(bool useAdr2 = false);
+    void init(int address = 0x5D);
     void setRotation(int rotation);
  
     // void setOnRead(void (*isr)());
@@ -52,11 +52,9 @@ class GT911 {
     // void (*onRead)();
     uint8_t _rotation = 0;
     uint8_t addr;
-    uint8_t pinInt;
-    uint8_t pinRst;
+    int pinInt;
+    int pinRst;
     uint16_t width;
     uint16_t height;
-    uint8_t configBuf[GT911_CONFIG_SIZE];
-    // uint8_t *configBuf;
 };
 

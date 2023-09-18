@@ -20,7 +20,7 @@
 #include <Wire.h>
 
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -100,18 +100,17 @@ void DisplayTouchGT911Element::start() {
 
   // Verify parameters
 
-  // if (parameters ok) {
-  Element::start();
-
   // // set the digital pin as output:
   tp = new GT911(_interruptPin, _resetPin, _width, _height);
 
-  tp->init(false);
-  tp->setRotation(_rotation);
-  nextRead = millis() + 50;
-  _bFound = nullptr;
+  if (tp) {
+    tp->init(_address);
+    tp->setRotation(_rotation);
+    Element::start();
+    nextRead = millis() + 50;
+    _bFound = nullptr;
+  }
 
-  // } // if
 }  // start()
 
 
@@ -126,7 +125,7 @@ void DisplayTouchGT911Element::loop() {
 
     if (count > 0) {
       // as of now only interested in the first.
-      TRACE("-touch %d/%d\n", points[0].x, points[0].y);
+      TRACE("-touch %d/%d", points[0].x, points[0].y);
       lastX = points[0].x;
       lastY = points[0].y;
 

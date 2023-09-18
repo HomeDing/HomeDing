@@ -105,6 +105,10 @@ uint8_t WireUtils::write(uint8_t address, uint8_t data1, uint8_t data2, uint8_t 
 
 
 uint8_t WireUtils::txrx(uint8_t address, uint8_t *txBuffer, uint8_t txLen, uint8_t *rxBuffer, uint8_t rxLen) {
+#ifdef WIREDUMP
+  Serial.printf("i2x txrx: 0x%02x %d %d\n", address, txLen, rxLen);
+#endif
+
   uint8_t done = 0;
   uint8_t err = writeBuffer(address, txBuffer, txLen);
   if (!err) {

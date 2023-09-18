@@ -303,7 +303,7 @@ void Board::start(Element_StartupMode startupMode) {
   while (l) {
     if ((!l->active) && (l->startupMode <= startupMode)) {
       // start element when not already active
-      BOARDTRACE("starting %s...", l->id);
+      ELEMTRACE("starting %s...", l->id);
       l->setup();  // one-time initialization
       l->start();  // start...
       hd_yield();

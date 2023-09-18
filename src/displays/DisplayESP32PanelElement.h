@@ -35,6 +35,12 @@ public:
 
   virtual void init(Board *board) override;
 
+  /// @brief Set a parameter or property to a new value or start an action.
+  /// @param name Name of property.
+  /// @param value Value of property.
+  /// @return true when property could be changed and the corresponding action could be executed.
+  virtual bool set(const char *name, const char *value) override;
+
   /**
    * @brief Activate the Element.
    */

@@ -23,7 +23,7 @@ class DisplayESP32PanelAdapter : public DisplayAGFXAdapter {
 
 #if defined(ARDUINO_ESP32S3_DEV)
 
-    // from: <https://github.com/moononournation/Arduino_GFX/wiki/Dev-Device-Declaration#esp32-8048s070>
+    // from: <https://github.com/moononournation/Arduino_GFX/wiki/Dev-Device-Declaration#esp32-8048s043>
     Arduino_ESP32RGBPanel *rgbpanel = new Arduino_ESP32RGBPanel(
       40 /* DE */, 41 /* VSYNC */, 39 /* HSYNC */, 42 /* PCLK */,
       45 /* R0 */, 48 /* R1 */, 47 /* R2 */, 21 /* R3 */, 14 /* R4 */,

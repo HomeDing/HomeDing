@@ -14,7 +14,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#if defined(ESP32) && (! ARDUINO_ESP32C3_DEV)  && (! ARDUINO_XIAO_ESP32C3)
+#if defined(ESP32) && (! CONFIG_IDF_TARGET_ESP32C3)
 
 #include "SDMMCElement.h"
 
@@ -54,7 +54,8 @@ bool SDMMCElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done.
 
-#if defined(ARDUINO_ESP32S3_DEV)
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+  // support of pin mapping for MMC cards
   } else if (_stricmp(name, "mmcd0") == 0) {
     _mmc_d0_pin = _atopin(value);
 
@@ -90,7 +91,7 @@ void SDMMCElement::start() {
 
   // Verify parameters
 
-#if ARDUINO_ESP32S3_DEV
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
   // for ESP-S3 the pins for SD_MMC can be defined.
   if ((_mmc_clk_pin >= 0) && (_mmc_cmd_pin >= 0) && (_mmc_d0_pin >= 0)) {
     SD_MMC.setPins(_mmc_clk_pin, _mmc_cmd_pin, _mmc_d0_pin, _mmc_d1_pin, _mmc_d2_pin, _mmc_d3_pin);

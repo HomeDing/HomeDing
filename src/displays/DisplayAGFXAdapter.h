@@ -81,6 +81,12 @@ public:
     backColor565 = col565(col);
   };
 
+  virtual void setBorderColor(const uint32_t col) override {
+    // PANELTRACE("setBorderColor #%08x\n", col);
+    DisplayAdapter::setBorderColor(col);
+    borderColor565 = col565(col);
+  };
+
   virtual uint16_t getBackgroundColor565() {
     return (backColor565);
   };
@@ -125,7 +131,7 @@ public:
     gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
     // PANELTRACE("     box: %d/%d w:%d h:%d", bx, by, bw, bh);
 
-    gfx->setTextColor(drawColor565, backColor565);
+    gfx->setTextColor(drawColor565);
     gfx->setCursor(x, y + baseLine);
     gfx->print(text);
 
@@ -149,24 +155,31 @@ public:
 
     _setTextHeight(h - (2 * paddingVertical));
     gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
-    // LOGGER_JUSTINFO("  b %d/%d(%d) -> (%d,%d,%d,%d)", x, y, baseLine, bx, by, bw, bh);
 
     // calculate textbox offset
     int16_t dx = (w - bw) / 2;
     int16_t dy = (h - lineHeight) / 2 - 1;
-    // LOGGER_JUSTINFO("  +(%d,%d)", dx, dy);
 
     uint16_t fCol = (pressed ? backColor565 : drawColor565);
     uint16_t bCol = (pressed ? drawColor565 : backColor565);
-    // LOGGER_JUSTINFO("  c(#%08x,#%08x)", fCol, bCol);
+    uint16_t r = (h / 2);
 
-    gfx->fillRoundRect(x, y, w, h, paddingVertical + 1, bCol);
-    gfx->drawRoundRect(x, y, w, h, paddingVertical + 1, fCol);
+    // draw the background
+    if (backColor != RGB_UNDEFINED) {
+      gfx->fillRoundRect(x, y, w, h, r, bCol);
+    }
 
-    gfx->setTextColor(fCol, bCol);
+    // draw the border
+    if (borderColor != RGB_UNDEFINED) {
+      gfx->drawRoundRect(x, y, w, h, r, borderColor565);
+    }
+
+    // draw the text
+    gfx->setTextColor(fCol);
     gfx->setCursor(x + dx, y + dy + baseLine);
     gfx->print(text);
-  };
+  }  // drawButton()
+
 
   /// @brief Draw a boolean indicator on/off
   /// @param x X Position
@@ -285,5 +298,6 @@ protected:
 
   int baseLine;  ///< baseline offset
   uint16_t backColor565;
+  uint16_t borderColor565;
   uint16_t drawColor565;
 };

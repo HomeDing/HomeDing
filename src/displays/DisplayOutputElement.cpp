@@ -62,7 +62,10 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     _color = _atoColor(value);
 
   } else if (_stricmp(name, "background") == 0) {
-    _background = _atoColor(value);
+    _backgroundColor = _atoColor(value);
+
+  } else if (_stricmp(name, "border") == 0) {
+    _borderColor = _atoColor(value);
 
   } else {
     ret = false;
@@ -81,11 +84,11 @@ void DisplayOutputElement::start() {
     LOGGER_EERR("no display found");
 
   } else {
-    if (_color == COLOR_UNDEFINED) {
+    if (_color == RGB_UNDEFINED) {
       _color = d->getColor();  // get standard draw/text color from display.
     }
-    if (_background == COLOR_UNDEFINED) {
-      _background = d->getBackgroundColor();  // get standard draw/text color from display.
+    if (_backgroundColor == RGB_UNDEFINED) {
+      _backgroundColor = d->getBackgroundColor();  // get standard draw/text color from display.
     }
 
     _display = d;
@@ -118,7 +121,8 @@ void DisplayOutputElement::loop() {
 void DisplayOutputElement::draw() {
   if (_display) {
     _display->setColor(_color);
-    _display->setBackgroundColor(_background);
+    _display->setBackgroundColor(_backgroundColor);
+    _display->setBorderColor(_borderColor);
   }
 }
 

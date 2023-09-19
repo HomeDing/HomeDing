@@ -21,7 +21,7 @@ class DisplayESP32PanelAdapter : public DisplayAGFXAdapter {
 
   bool start() override {
 
-#if defined(ARDUINO_ESP32S3_DEV)
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // from: <https://github.com/moononournation/Arduino_GFX/wiki/Dev-Device-Declaration#esp32-8048s043>
     Arduino_ESP32RGBPanel *rgbpanel = new Arduino_ESP32RGBPanel(

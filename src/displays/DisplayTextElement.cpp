@@ -67,12 +67,15 @@ bool DisplayTextElement::set(const char *name, const char *value) {
 void DisplayTextElement::draw() {
   DisplayOutputElement::draw();
   if (_display) {
-    if (_w && _h) { _display->clear(_x, _y, _w, _h); }
     String msg(_prefix);
     msg.concat(_value);
     msg.concat(_postfix);
-    _w = _display->drawText(_x, _y, _h, msg); // remember width of drawn text
-    _h = _display->getLineHeight(); // adjust height
+
+    if (_w && _h) {
+      _display->clear(_x, _y, _w, _h);
+    }
+    _w = _display->drawText(_x, _y, _h, msg);  // remember width of drawn text
+    _h = _display->getLineHeight();            // adjust height
   }
 }  // draw
 

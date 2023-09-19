@@ -78,6 +78,12 @@ public:
     backColor = col;
   };
 
+  /// @brief Set default border color
+  /// @param col The 32-bit border color in 0x00rrggbb.
+  virtual void setBorderColor(const uint32_t col) {
+    borderColor = col;
+  };
+
   virtual uint32_t getBackgroundColor() {
     return (backColor);
   };
@@ -131,6 +137,7 @@ protected:
 
   uint32_t color;      ///< default draw color
   uint32_t backColor;  ///< default background color
+  uint32_t borderColor;  ///< default border color
 
   uint8_t _lightChannel;
 

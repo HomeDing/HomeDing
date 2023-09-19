@@ -12,20 +12,28 @@
 /// Config Registers (0x8047 - 0X80FF)
 #define GT911_CONFIG_START 0x8047  // 4 bytes x-low, x-high, y-low, y-high
 #define GT911_CONFIG_END 0X80FE
+#define GT911_CONFIG_SIZE (uint16_t)(GT911_CONFIG_END - GT911_CONFIG_START + 1)
+
 #define GT911_CONFIG_ALL 0X8100
 #define GT911_CONFIG_CHKSUM (uint16_t)0X80FF
 #define GT911_CONFIG_FRESH (uint16_t)0X8100
 
+
+#define GT911_COMMAND (uint16_t)0x8040
+#define GT911_ESD_CHECK (uint16_t)0x8041
+#define GT911_COMMAND_CHECK (uint16_t)0x8046
 #define GT911_RESOLUTION 0x8048  // 4 bytes x-low, x-high, y-low, y-high
 
-
-#define TRACE(...)  // Serial.printf("GT911: " __VA_ARGS__)
-
-/// Register Address of the points
-
+/// Data Registers (0x81xx)
 
 #define GT911_TOUCHFLAGS 0X814E
 #define GT911_POINTS 0x814F
+
+// Real-time command (Write only)
+
+
+
+#define TRACE(...)  // Serial.printf("GT911: " __VA_ARGS__)
 
 
 GT911::GT911(int _int, int _rst, uint16_t _width, uint16_t _height)
@@ -67,10 +75,11 @@ void GT911::init(int address) {
     pinMode(pinInt, INPUT);
     // attachInterrupt(pinInt, GT911::onInterrupt, RISING);
   }
-
   delay(50);
 
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
   Wire.setBufferSize(configSize + 4);
+#endif
 
   // read current config.
   WireUtils::txrx(

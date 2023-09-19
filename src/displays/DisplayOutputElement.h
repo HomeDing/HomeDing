@@ -18,7 +18,7 @@
 
 #include <displays/DisplayAdapter.h>
 
-#define COLOR_UNDEFINED 0xEE000000  //
+#define COLOR_UNDEFINED RGB_UNDEFINED // 0xEE000000
 
 /**
  * @brief The DisplayTextElement is an Element that allows to create information
@@ -71,10 +71,13 @@ protected:
   uint16_t _h = 10;
 
   /// @brief Draw color of the element
-  uint32_t _color = COLOR_UNDEFINED;
+  uint32_t _color = RGB_UNDEFINED;
 
   /// @brief Background color of the element
-  uint32_t _background = COLOR_UNDEFINED;
+  uint32_t _backgroundColor = RGB_UNDEFINED;
+
+  /// @brief Border color of the element
+  uint32_t _borderColor = RGB_UNDEFINED;
 
   /// @brief Reference to DisplayAdapter
   DisplayAdapter *_display = nullptr;

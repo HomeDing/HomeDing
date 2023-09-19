@@ -30,6 +30,8 @@
 #define RGB_ORANGE 0x00FFA500
 #define RGB_PURPLE 0x00800080
 
+#define RGB_UNDEFINED 0xEE000000 // key color
+
 
 #define BUSMODE_ANY 0x00
 #define BUSMODE_I2C 0x01

@@ -14,7 +14,7 @@
 
 #pragma once
 
-#if defined(ESP32) && (! ARDUINO_ESP32C3_DEV) && (! ARDUINO_XIAO_ESP32C3)
+#if defined(ESP32) && (! CONFIG_IDF_TARGET_ESP32C3)
 
 /**
  * @brief
@@ -57,7 +57,7 @@ private:
 
   // pin settings
 
-#if defined(ARDUINO_ESP32S3_DEV)
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
   int _mmc_d0_pin = -1;   // pin used for mmc data 0
   int _mmc_d1_pin = -1;   // pin used for mmc data 1
   int _mmc_d2_pin = -1;   // pin used for mmc data 2

@@ -51,7 +51,6 @@ jobs:
             - name: LiquidCrystal_PCF8574
             - name: Adafruit GFX Library
             - name: Adafruit NeoPixel
-            - name: Adafruit ST7735 and ST7789 Library
             - name: Adafruit SH110X
             - name: PubSubClient
             - name: GFX Library for Arduino

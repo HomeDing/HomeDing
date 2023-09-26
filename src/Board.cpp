@@ -561,10 +561,10 @@ void Board::loop() {
     }  // if
 
     if (needReset) {
-      Logger::printf("no-net restart");
+      displayInfo("no-net restart");
       DeviceState::setResetCounter(0);
 
-      delay(500);
+      delay(250);
       ESP.restart();
     }  // if
     hd_yield();

@@ -18,8 +18,6 @@
 
 #include <displays/DisplayAdapter.h>
 
-#define COLOR_UNDEFINED RGB_UNDEFINED // 0xEE000000
-
 /**
  * @brief The DisplayTextElement is an Element that allows to create information
  * on the display based on actions.
@@ -28,13 +26,10 @@
  */
 class DisplayOutputElement : public Element {
 public:
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
+  /// @brief Set a parameter or property to a new value or start an action.
+  /// @param name Name of the property.
+  /// @param value Value of the property.
+  /// @return true when property was set or the action was received.
   virtual bool set(const char *name, const char *value) override;
 
   /// @brief Activate the DisplayOutputElement.

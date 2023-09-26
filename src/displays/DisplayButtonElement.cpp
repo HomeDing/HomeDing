@@ -33,7 +33,7 @@ Element *DisplayButtonElement::create() {
 
 // ===== DisplayButton functions =====
 
-/// @brief A touchStart elvent is given
+/// @brief A touchStart event is given
 /// @param x X position of touch start event.
 /// @param y y position of touch start event.
 /// @return true when button wants to participate in further actions.

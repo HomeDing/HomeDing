@@ -117,20 +117,15 @@ public:
 
   // ===== Livetime management =====
 
-  /**
-   * @brief initialize a new Element.
-   * @param board The board reference.
-   */
+  /// @brief initialize a new Element.
+  /// @param board The board reference.
   virtual void init(Board *board);
 
 
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
+  /// @brief Set a parameter or property to a new value or start an action.
+  /// @param name Name of the property.
+  /// @param value Value of the property.
+  /// @return true when property was set or the action was received.
   virtual bool set(const char *name, const char *value);
 
 
@@ -240,11 +235,9 @@ public:
   static int _atopin(const char *value);
 
 
-  /**
-   * @brief Return a color value as 32 bits: 0xWWRRGGBB from a string.
-   * @param value Given value as string.
-   * @return color value
-   */
+  /// @brief Return a color value as 32 bits: 0xWWRRGGBB from a string.
+  /// @param value Given value as string.
+  /// @return color value
   uint32_t _atoColor(const char *value);
 
 

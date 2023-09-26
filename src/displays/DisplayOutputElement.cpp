@@ -16,6 +16,7 @@
 #include <HomeDing.h>
 
 #include <displays/DisplayOutputElement.h>
+#include "DisplayOutputElement.h"
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
@@ -30,9 +31,7 @@ bool DisplayOutputElement::overlap(int16_t rx, int16_t ry, uint16_t rw, uint16_t
 
 // ===== Element functions =====
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
+/// @brief Set a parameter or property to a new value or start an action.
 bool DisplayOutputElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
   bool ret = true;
@@ -84,12 +83,17 @@ void DisplayOutputElement::start() {
     LOGGER_EERR("no display found");
 
   } else {
+    // get standard draw/text color from display when no color was set.
     if (_color == RGB_UNDEFINED) {
-      _color = d->getColor();  // get standard draw/text color from display.
+      _color = d->getColor();
     }
     if (_backgroundColor == RGB_UNDEFINED) {
-      _backgroundColor = d->getBackgroundColor();  // get standard draw/text color from display.
+      _backgroundColor = d->getBackgroundColor();
     }
+    if (_borderColor == RGB_UNDEFINED) {
+      _borderColor = d->getBorderColor();
+    }
+    TRACE("colors: #%08x / #%08x / #%08x", _color, _backgroundColor, _borderColor);
 
     _display = d;
     if (_page > d->maxpage) {

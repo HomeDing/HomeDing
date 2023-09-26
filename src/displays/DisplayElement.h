@@ -51,6 +51,7 @@ struct DisplayConfig {
   /** Default Draw & Background Color */
   uint32_t drawColor = RGB_WHITE;
   uint32_t backgroundColor = RGB_BLACK;
+  uint32_t borderColor = RGB_WHITE;
 
   /** Rotation of the display */
   int rotation = 0;

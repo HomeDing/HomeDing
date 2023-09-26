@@ -19,7 +19,7 @@
 #include <fonts/font16.h>
 #include <fonts/font24.h>
 
-#define PANELTRACE(...)  // Serial.printf(__VA_ARGS__)
+#define PANELTRACE(...)  // Serial.printf("Display::" __VA_ARGS__)
 
 class DisplayAGFXAdapter : public DisplayAdapter {
 public:
@@ -27,9 +27,9 @@ public:
 
   bool start() override {
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
-    PANELTRACE(" col: #%08x / #%08x\n", conf->drawColor, conf->backgroundColor);
+    PANELTRACE(" colors: #%08x / #%08x / #%08x\n", conf->drawColor, conf->backgroundColor, conf->borderColor);
     PANELTRACE(" invert: %d ips: %d\n", conf->invert, conf->ips);
-    PANELTRACE(" pins: light:%d, reset:%d\n", conf->lightPin, conf->resetPin);
+    PANELTRACE("   pins: light:%d, reset:%d\n", conf->lightPin, conf->resetPin);
 
     // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
 
@@ -57,6 +57,7 @@ public:
       gfx->setTextWrap(false);
       setColor(conf->drawColor);
       setBackgroundColor(conf->backgroundColor);
+      setBorderColor(conf->borderColor);
       _setTextHeight(conf->height > 64 ? 16 : 8);
       clear();
       flush();
@@ -71,29 +72,22 @@ public:
     drawColor565 = col565(col);
   };
 
-  virtual uint16_t getColor565() {
-    return (drawColor565);
-  };
 
   virtual void setBackgroundColor(const uint32_t col) override {
-    // PANELTRACE("setBackgroundColor #%08x\n", col);
+    PANELTRACE("setBackgroundColor #%08x\n", col);
     DisplayAdapter::setBackgroundColor(col);
     backColor565 = col565(col);
   };
 
+
   virtual void setBorderColor(const uint32_t col) override {
-    // PANELTRACE("setBorderColor #%08x\n", col);
+    PANELTRACE("setBorderColor #%08x\n", col);
     DisplayAdapter::setBorderColor(col);
     borderColor565 = col565(col);
   };
 
-  virtual uint16_t getBackgroundColor565() {
-    return (backColor565);
-  };
 
-  /**
-   * @brief Clear all displayed information from the display.
-   */
+  /// @brief Clear all displayed information from the display.
   void clear() override {
     // PANELTRACE("clear #%08x\n", conf->backgroundColor);
     gfx->fillScreen(col565(conf->backgroundColor));
@@ -140,11 +134,11 @@ public:
 
 
   /// @brief Draw a button
-  /// @param x
-  /// @param y
-  /// @param w
-  /// @param h
-  /// @param text
+  /// @param x x position of the button
+  /// @param y y position of the button
+  /// @param w width of the button
+  /// @param h height of the button
+  /// @param text caption on the button
   virtual void drawButton(int16_t x, int16_t y, int16_t w, int16_t h, const char *text, bool pressed = false) override {
     // LOGGER_JUSTINFO("drawButton: (%d,%d,%d,%d) <%s> %d\n", x, y, w, h, text, pressed);
     const uint16_t paddingVertical = 4;

@@ -78,15 +78,25 @@ public:
     backColor = col;
   };
 
+  /// @brief Get default background color
+  /// @return The 32-bit background color in 0x00rrggbb.
+  virtual uint32_t getBackgroundColor() {
+    return(backColor);
+  };
+
+
   /// @brief Set default border color
   /// @param col The 32-bit border color in 0x00rrggbb.
   virtual void setBorderColor(const uint32_t col) {
     borderColor = col;
   };
 
-  virtual uint32_t getBackgroundColor() {
-    return (backColor);
+  /// @brief Get default border color
+  /// @return The 32-bit border color in 0x00rrggbb.
+  virtual uint32_t getBorderColor() {
+    return(borderColor);
   };
+
 
   /**
    * @brief Clear a position or region.
@@ -130,6 +140,7 @@ public:
   int maxpage = 1;
 
 protected:
+  /// @brief initialization settings
   struct DisplayConfig *conf;
 
   int16_t lineHeight;  ///< total height of a text line

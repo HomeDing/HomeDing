@@ -100,6 +100,9 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "background") == 0) {
     config.backgroundColor = _atoColor(value);
 
+  } else if (_stricmp(name, "border") == 0) {
+    config.borderColor = _atoColor(value);
+
   } else if (_stricmp(name, "busmode") == 0) {
     if (_stricmp(value, "spi") == 0) {
       config.busmode = BUSMODE_SPI;

@@ -277,21 +277,25 @@ uint32_t Element::_atoColor(const char *value) {
 
     if ((ch0 == '#') || (ch0 == 'x')) {
       ret = strtoul(value + 1, nullptr, 16);
-    } else if ((ch0 >= '0') && (ch0 <= '9')) {
-      ret = _atoi(value);
+
     } else if (_stricmp(value, "black") == 0) {
-      ret = 0x00000000;
-    } else if (_stricmp(value, "red") == 0) {
-      ret = 0x00FF0000;
-    } else if (_stricmp(value, "green") == 0) {
-      ret = 0x0000FF00;
-    } else if (_stricmp(value, "blue") == 0) {
-      ret = 0x000000FF;
+      ret = RGB_BLACK;
+    } else if (_stricmp(value, "gray") == 0) {
+      ret = RGB_GRAY;
     } else if (_stricmp(value, "white") == 0) {
-      ret = 0xFFFFFFFF;
+      ret = RGB_WHITE;
+
+    } else if (_stricmp(value, "red") == 0) {
+      ret = RGB_RED;
+    } else if (_stricmp(value, "yellow") == 0) {
+      ret = RGB_YELLOW;
+    } else if (_stricmp(value, "green") == 0) {
+      ret = RGB_GREEN;
+    } else if (_stricmp(value, "blue") == 0) {
+      ret = RGB_BLUE;
     }
   }  // if
-  return ret;
+  return (ret);
 }  // _atoColor()
 
 

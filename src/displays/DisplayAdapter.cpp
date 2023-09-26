@@ -58,7 +58,7 @@ bool DisplayAdapter::start() {
 };
 
 
-/// @brief set brightness for panel lightng.
+/// @brief set brightness for panel lightning.
 /// @param bright new brightness in range 0...100
 void DisplayAdapter::setBrightness(uint8_t bright) {
   TRACE("setBrightness %d %d", conf->lightPin, bright);

@@ -54,7 +54,7 @@ void GT911::init(int address) {
   pinMode(pinRst, OUTPUT);
   if (pinInt < 0) {
     digitalWrite(pinRst, LOW);
-    delay(20);
+    delay(120);
     digitalWrite(pinRst, HIGH);
 
   } else {

@@ -25,7 +25,7 @@ class DisplayAGFXAdapter : public DisplayAdapter {
 public:
   ~DisplayAGFXAdapter() = default;
 
-  bool start() override {
+  virtual bool start() override {
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
     PANELTRACE(" colors: #%08x / #%08x / #%08x\n", conf->drawColor, conf->backgroundColor, conf->borderColor);
     PANELTRACE(" invert: %d ips: %d\n", conf->invert, conf->ips);

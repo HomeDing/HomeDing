@@ -24,20 +24,15 @@
  */
 class DisplayTouchGT911Element : public Element {
 public:
-  /**
-   * @brief Factory function to create a DisplayTouchGT911Element.
-   * @return Element*
-   */
+  /// @brief Factory function to create a DisplayTouchGT911Element.
+  /// @return Element*
   static Element *create();
 
-  /**
-   * @brief static variable to ensure registering in static init phase.
-   */
+  /// @brief static variable to ensure registering in static init phase.
   static bool registered;
 
-  /**
-   * @brief Construct a new DisplayTouchGT911Element
-   */
+
+  /// @brief Construct a new DisplayTouchGT911Element
   DisplayTouchGT911Element();
 
   /**
@@ -55,9 +50,7 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Start the Element.
-   */
+  /// @brief Start the Element.
   virtual void start() override;
 
   /**
@@ -80,12 +73,20 @@ public:
 private:
   // Configuration Properties
 
+  /// @brief width of the touch area - same as the display
   uint16_t _width = 320;
+
+  /// @brief height of the touch area - same as the display
   uint16_t _height = 480;
+
+  /// @brief rotation of the display
   int _rotation = 0;
 
-  int _interruptPin = 21;
-  int _resetPin = 25;
+  /// @brief pin for interrupt signal from the touch chip
+  int _interruptPin = -1; // must be configured
+
+  /// @brief reset pin for interrupt signal from the touch chip
+  int _resetPin = -1; // must be configured
   
   /// @brief The default I2C address for the touch controller.
   int _address = 0x5D; 

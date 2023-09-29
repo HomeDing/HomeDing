@@ -1,11 +1,13 @@
 // GT911 Touch Panel functions
 
-// configuration information is read and written to registers 0x8047 to 0x80FF alwasy at once
+// configuration information is read and written to registers 0x8047 to 0x80FF always at once
 // using the _config buffer.
 
-// https://www.goodix.com/en/product/touch/touch_screen_controller
-// https://github.com/goodix
-
+// The implementation was assembled using information from the data sheet and implementaton manual
+// as well as from various implementation found on github.
+// * https://www.goodix.com/en/product/touch/touch_screen_controller
+// * https://github.com/goodix/goodix_gt9xx_public
+// 
 // https://github.com/lvgl/lvgl_esp32_drivers/blob/master/lvgl_touch/gt911.h
 
 #include "Arduino.h"

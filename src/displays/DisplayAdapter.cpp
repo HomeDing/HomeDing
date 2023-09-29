@@ -1,7 +1,7 @@
 /**
  * @file DisplayAdapter.cpp
  *
- * @brief Implementing base functionaliy for Display Adapters.
+ * @brief Implementing base functionality for Display Adapters.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

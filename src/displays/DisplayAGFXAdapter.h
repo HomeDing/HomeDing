@@ -30,10 +30,9 @@ public:
     PANELTRACE(" colors: #%08x / #%08x / #%08x\n", conf->drawColor, conf->backgroundColor, conf->borderColor);
     PANELTRACE(" invert: %d ips: %d\n", conf->invert, conf->ips);
     PANELTRACE("   pins: light:%d, reset:%d\n", conf->lightPin, conf->resetPin);
+    PANELTRACE("   spi: cs:%d, dc:%d, mosi:%d, clk:%d\n", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK);
 
     // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
-
-    // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK);
 
     // LOGGER_JUSTINFO("Font_10: %d %d %d=%d", sizeof(Font_10), sizeof(Font_10Bitmaps), sizeof(Font_10Glyphs),
     //                 sizeof(Font_10) + sizeof(Font_10Bitmaps) + sizeof(Font_10Glyphs));

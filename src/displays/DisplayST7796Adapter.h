@@ -31,7 +31,9 @@ class DisplayST7796Adapter : public DisplayAGFXAdapter {
       );
 
 #elif defined(ESP8266)
-      bus = new Arduino_ESP8266SPI(2 /* DC */, 15 /* CS */);
+      // ESP8266 has pre-defined SPI pins
+      bus = new Arduino_ESP8266SPI(
+        conf->spiDC, conf->spiCS);
 #endif
 
     }

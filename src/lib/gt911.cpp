@@ -36,26 +36,48 @@
 #define TRACE(...)  // Serial.printf("GT911: " __VA_ARGS__)
 
 
+void GT911::setResolution(uint16_t _width, uint16_t _height) {
+  width = _width;
+  height = _height;
+
+  uint16_t w = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 0] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 1] << 8);
+  uint16_t h = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 2] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 3] << 8);
+
+  if ((w != _width) || (h != _height)) {
+    TRACE("reflash...\n");
+    configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 0] = lowByte(_width);
+    configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 1] = highByte(_width);
+    configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 2] = lowByte(_height);
+    configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 3] = highByte(_height);
+    needReflash = true;
+  }
+}
+
+
 GT911::GT911(int _int, int _rst, uint16_t _width, uint16_t _height)
-  : pinInt(_int), pinRst(_rst), width(_width), height(_height) {
+  : pinInt(_int), pinRst(_rst) {
 }
 
 void GT911::init(int address) {
   TRACE("init(0x%02x, rst=%d, int=%d)\n", address, pinRst, pinInt);
 
   uint8_t regBuffer[2];
-  uint16_t configSize = GT911_CONFIG_ALL - GT911_CONFIG_START + 1;
-  uint8_t configBuf[configSize];
 
   addr = address;
   regBuffer[0] = highByte(GT911_CONFIG_START);
   regBuffer[1] = lowByte(GT911_CONFIG_START);
 
   pinMode(pinRst, OUTPUT);
-  if (pinInt < 0) {
+  if ((pinInt < 0) || (!address)) {
     digitalWrite(pinRst, LOW);
     delay(120);
     digitalWrite(pinRst, HIGH);
+
+    if (WireUtils::exists(GT911_I2CADDR_14)) {
+      address = GT911_I2CADDR_14;
+    } else if (WireUtils::exists(GT911_I2CADDR_5D)) {
+      address = GT911_I2CADDR_5D;
+    }
 
   } else {
     pinMode(pinInt, OUTPUT);
@@ -78,6 +100,7 @@ void GT911::init(int address) {
   delay(50);
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
+  uint16_t configSize = GT911_CONFIG_ALL - GT911_CONFIG_START + 1;
   Wire.setBufferSize(configSize + 4);
 #endif
 
@@ -87,25 +110,22 @@ void GT911::init(int address) {
     regBuffer, sizeof(regBuffer),
     configBuf, GT911_CONFIG_START - GT911_CONFIG_END + 1);
 
-  // set resolution
-  configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 0] = lowByte(width);
-  configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 1] = highByte(width);
-  configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 2] = lowByte(height);
-  configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 3] = highByte(height);
+  width = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 0] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 1] << 8);
+  height = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 2] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 3] << 8);
 
-  // calc checksum
-  uint8_t checksum = 0;
-  for (uint8_t i = 0; i < GT911_CONFIG_SIZE; i++) {
-    checksum += configBuf[i];
-  }
-  checksum = (~checksum) + 1;
-  configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
-  configBuf[GT911_CONFIG_FRESH - GT911_CONFIG_START] = 1;
+  // // calc checksum
+  // uint8_t checksum = 0;
+  // for (uint8_t i = 0; i < GT911_CONFIG_SIZE; i++) {
+  //   checksum += configBuf[i];
+  // }
+  // checksum = (~checksum) + 1;
+  // configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
+  // configBuf[GT911_CONFIG_FRESH - GT911_CONFIG_START] = 1;
 
-  Wire.beginTransmission(addr);
-  Wire.write(regBuffer, sizeof(regBuffer));
-  Wire.write(configBuf, GT911_CONFIG_START - GT911_CONFIG_ALL + 1);
-  Wire.endTransmission();
+  // Wire.beginTransmission(addr);
+  // Wire.write(regBuffer, sizeof(regBuffer));
+  // Wire.write(configBuf, GT911_CONFIG_START - GT911_CONFIG_ALL + 1);
+  // Wire.endTransmission();
 }
 
 // void ARDUINO_ISR_ATTR GT911::onInterrupt() {

@@ -17,12 +17,13 @@
 
 #pragma once
 
+#include <displays/DisplayTouchElement.h>
 #include <lib/gt911.h>
 
 /**
  * @brief
  */
-class DisplayTouchGT911Element : public Element {
+class DisplayTouchGT911Element : public DisplayTouchElement {
 public:
   /// @brief Factory function to create a DisplayTouchGT911Element.
   /// @return Element*
@@ -32,73 +33,16 @@ public:
   static bool registered;
 
 
-  /// @brief Construct a new DisplayTouchGT911Element
-  DisplayTouchGT911Element();
-
-  /**
-   * @brief initialize a new Element.
-   * @param board The board reference.
-   */
-  virtual void init(Board *board) override;
-
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
-  virtual bool set(const char *name, const char *value) override;
+  virtual bool pullSensorData() override;
 
   /// @brief Start the Element.
   virtual void start() override;
 
-  /**
-   * @brief Give some processing time to the timer to check for next action.
-   */
-  virtual void loop() override;
-
-  /**
-   * @brief stop all activities and go inactive.
-   */
-  virtual void term() override;
-
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) override;
-
-private:
+ private:
   // Configuration Properties
-
-  /// @brief width of the touch area - same as the display
-  uint16_t _width = 320;
-
-  /// @brief height of the touch area - same as the display
-  uint16_t _height = 480;
-
-  /// @brief rotation of the display
-  int _rotation = 0;
-
-  /// @brief pin for interrupt signal from the touch chip
-  int _interruptPin = -1; // must be configured
-
-  /// @brief reset pin for interrupt signal from the touch chip
-  int _resetPin = -1; // must be configured
-  
-  /// @brief The default I2C address for the touch controller.
-  int _address = 0x5D; 
-
 
   GT911 *tp = nullptr;
 
-  // found button at first touch position
-  uint16_t lastX, lastY;
-  DisplayButtonElement *_bFound;
-
-  unsigned long nextRead;
 };
 
 /* ===== Register the Element ===== */

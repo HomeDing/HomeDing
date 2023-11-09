@@ -110,7 +110,7 @@ void DisplayOutputElement::start() {
  */
 void DisplayOutputElement::loop() {
   if (_needredraw) {
-    if (_display->page == _page) {
+    if (_display && (_display->page == _page)) {
       draw();
       _display->flush();
     }
@@ -123,11 +123,10 @@ void DisplayOutputElement::loop() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 void DisplayOutputElement::draw() {
-  if (_display) {
-    _display->setColor(_color);
-    _display->setBackgroundColor(_backgroundColor);
-    _display->setBorderColor(_borderColor);
-  }
+  TRACE("draw()");
+  _display->setColor(_color);
+  _display->setBackgroundColor(_backgroundColor);
+  _display->setBorderColor(_borderColor);
 }
 
 // End

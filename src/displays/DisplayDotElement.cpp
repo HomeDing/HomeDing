@@ -51,7 +51,6 @@ bool DisplayDotElement::set(const char *name, const char *value) {
   } else {
     ret = false;
   }  // if
-
   return (ret);
 }  // set()
 

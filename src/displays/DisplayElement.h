@@ -30,12 +30,14 @@
 #define RGB_ORANGE 0x00FFA500
 #define RGB_PURPLE 0x00800080
 
-#define RGB_UNDEFINED 0xEE000000 // key color
+#define RGB_UNDEFINED 0xEE000000  // key color
 
 
 #define BUSMODE_ANY 0x00
 #define BUSMODE_I2C 0x01
-#define BUSMODE_SPI 0x02
+#define BUSMODE_SPI 0x02   // standard SPI interface
+#define BUSMODE_HSPI 0x03  // high speed SPI interface on ESP32
+#define BUSMODE_LCD8 0x04
 
 
 struct DisplayConfig {
@@ -88,7 +90,6 @@ struct DisplayConfig {
   int spiCLK = -1;   ///< SPI interface clock CLK pin
   int spiCS = -1;    ///< SPI interface chip select CS pin
   int spiDC = -1;    ///< SPI interface Data-Command DC pin
-  int spiRST = -1;
 };
 
 

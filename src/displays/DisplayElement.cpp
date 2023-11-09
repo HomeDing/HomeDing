@@ -52,13 +52,22 @@ DisplayElement::DisplayElement() {
   startupMode = Element_StartupMode::System;
 }
 
+
 void DisplayElement::init(Board *board) {
   Element::init(board);
+
+  config.busmode = BUSMODE_SPI;
 
   // use system wide I2C by default
   config.i2cSDA = board->I2cSda;
   config.i2cSCL = board->I2cScl;
-}
+
+  // use system wide SPI by default
+  config.spiCLK = board->spiCLK;
+  config.spiMOSI = board->spiMOSI;
+  config.spiMISO = board->spiMISO;
+} // init()
+
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -103,11 +112,15 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "border") == 0) {
     config.borderColor = _atoColor(value);
 
-  } else if (_stricmp(name, "busmode") == 0) {
+  } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
     if (_stricmp(value, "spi") == 0) {
       config.busmode = BUSMODE_SPI;
+    } else if (_stricmp(value, "hspi") == 0) {
+      config.busmode = BUSMODE_HSPI;
     } else if (_stricmp(value, "i2c") == 0) {
       config.busmode = BUSMODE_I2C;
+    } else if (_stricmp(value, "lcd8") == 0) {
+      config.busmode = BUSMODE_LCD8;
     }
 
     // ===== i2c bus parameter
@@ -177,12 +190,14 @@ bool DisplayElement::set(const char *name, const char *value) {
  * @brief Activate the Element.
  */
 void DisplayElement::start() {
-  Element::start();
   DisplayAdapter *da = _board->display;
-
-  if (active && da) {
+  if (da) {
+    Element::start();
     da->setBrightness(config.brightness);
     da->setBackgroundColor(config.backgroundColor);
+
+  } else {
+    LOGGER_EERR("no display found");
   }
 }  // start()
 

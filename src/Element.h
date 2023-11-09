@@ -129,14 +129,10 @@ public:
   virtual bool set(const char *name, const char *value);
 
 
-  /**
-   * @brief setup the element so it can be started and stopped.
-   */
+  /// @brief setup the element so it can be started and stopped.
   virtual void setup();
 
-  /**
-   * @brief Activate the Element.
-   */
+  //// @brief Activate the Element.
   virtual void start();
 
 

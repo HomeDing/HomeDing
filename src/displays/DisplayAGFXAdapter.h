@@ -15,6 +15,19 @@
 
 #include <Arduino_GFX_Library.h>
 
+#include <displays/DisplayAdapter.h>
+
+#if defined(ESP8266)
+#include <pgmspace.h>
+#undef PROGMEM
+#define PROGMEM STORE_ATTR
+
+#elif !defined(PROGMEM)
+#define PROGMEM
+
+#endif
+
+
 #include <fonts/font10.h>
 #include <fonts/font16.h>
 #include <fonts/font24.h>
@@ -25,14 +38,79 @@ class DisplayAGFXAdapter : public DisplayAdapter {
 public:
   ~DisplayAGFXAdapter() = default;
 
+  Arduino_DataBus *getBus(DisplayConfig *conf) {
+    PANELTRACE("getbus: %d\n", conf->busmode);
+    PANELTRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d\n",
+               conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
+    PANELTRACE("   i2c: adr:%d, sda:%d, scl:%d\n", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
+
+    Arduino_DataBus *bus = nullptr;
+
+    if (conf->busmode == BUSMODE_ANY) {
+      if (conf->spiCS >= 0) {
+        conf->busmode == BUSMODE_SPI;
+      } else if (conf->i2cAddress)
+        conf->busmode == BUSMODE_I2C;
+    }
+
+
+#if defined(ESP32)
+    if (conf->busmode == BUSMODE_SPI) {
+      PANELTRACE("Use SPI\n");
+
+      Arduino_DataBus *bus = new Arduino_ESP32SPI(
+        conf->spiDC, conf->spiCS);
+
+    } else if (conf->busmode == BUSMODE_HSPI) {
+      PANELTRACE("Use HSPI\n");
+      bus = new Arduino_ESP32SPI(
+        conf->spiDC,
+        conf->spiCS,
+        conf->spiCLK,
+        conf->spiMOSI,
+        conf->spiMISO,
+        HSPI /* spi_num */
+      );
+
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+    } else if (conf->busmode == BUSMODE_LCD8) {
+      PANELTRACE("Use LCD8\n");
+      bus = new Arduino_ESP32LCD8(
+        0 /* DC */,
+        GFX_NOT_DEFINED /* CS */,
+        47 /* WR */,
+        GFX_NOT_DEFINED /* RD */,
+        9, 46, 3, 8, 18, 17, 16, 15  //  D0 - D7
+      );
+#endif
+
+    }  // if
+
+#elif defined(ESP8266)
+    if (conf->busmode == BUSMODE_I2C) {
+      PANELTRACE("Use I2C\n");
+      bus = new Arduino_Wire(conf->i2cAddress);
+
+    } else if (conf->busmode == BUSMODE_SPI) {
+      PANELTRACE("Use SPI\n");
+      // ESP8266 has pre-defined SPI pins
+      bus = new Arduino_ESP8266SPI(
+        conf->spiDC, conf->spiCS);
+    }  // if
+
+#endif
+    PANELTRACE("bus:%08lx\n", bus);
+
+    return (bus);
+  };
+
+
   virtual bool start() override {
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
     PANELTRACE(" colors: #%08x / #%08x / #%08x\n", conf->drawColor, conf->backgroundColor, conf->borderColor);
     PANELTRACE(" invert: %d ips: %d\n", conf->invert, conf->ips);
     PANELTRACE("   pins: light:%d, reset:%d\n", conf->lightPin, conf->resetPin);
-    PANELTRACE("   spi: cs:%d, dc:%d, mosi:%d, clk:%d\n", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK);
 
-    // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
 
     // LOGGER_JUSTINFO("Font_10: %d %d %d=%d", sizeof(Font_10), sizeof(Font_10Bitmaps), sizeof(Font_10Glyphs),
     //                 sizeof(Font_10) + sizeof(Font_10Bitmaps) + sizeof(Font_10Glyphs));
@@ -48,7 +126,7 @@ public:
       return (false);
 
     } else {
-      gfx->begin();
+      gfx->begin(conf->busSpeed);
       gfx->invertDisplay(conf->invert);
 
       DisplayAdapter::start();
@@ -67,6 +145,7 @@ public:
 
 
   virtual void setColor(const uint32_t col) override {
+    PANELTRACE("setColor #%08x\n", col);
     DisplayAdapter::setColor(col);
     drawColor565 = col565(col);
   };
@@ -113,18 +192,19 @@ public:
    * @param text the text.
    */
   int drawText(int16_t x, int16_t y, int16_t h, const char *text) override {
-    // PANELTRACE("drawText: %d/%d h:%d t:<%s>\n", x, y, h, text);
-    // PANELTRACE("  colors: %d on %d\n", drawColor565, backColor565);
+    PANELTRACE("drawText: %d/%d h:%d t:<%s>\n", x, y, h, text);
+    PANELTRACE("  colors: %d on %d\n", drawColor565, backColor565);
 
     // textbox dimensions
     int16_t bx, by;
     uint16_t bw, bh;
 
+    gfx->setTextBound(0, 0, 128, 64);
     _setTextHeight(h);
     gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
     // PANELTRACE("     box: %d/%d w:%d h:%d", bx, by, bw, bh);
 
-    gfx->setTextColor(drawColor565);
+    gfx->setTextColor(drawColor565, backColor565);
     gfx->setCursor(x, y + baseLine);
     gfx->print(text);
 
@@ -194,7 +274,7 @@ public:
 
 
   void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
-    // PANELTRACE("drawLine(%d/%d - %d/%d)\n", x0, y0, x1, y1);
+    PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, drawColor565);
     gfx->drawLine(x0, y0, x1, y1, drawColor565);
   }  // drawLine()
 
@@ -216,7 +296,7 @@ protected:
   /// @brief Set height of text in a box.
   /// @param h max. resulting height
   void _setTextHeight(int16_t h) {
-    // LOGGER_JUSTINFO("_setTextHeight(%d)", h);
+    PANELTRACE("setTextHeight(%d)\n", h);
     int16_t base, fit;
 
     // 8, 10, 16, 24
@@ -289,7 +369,7 @@ protected:
   Arduino_GFX *gfx = nullptr;
 
 
-  int baseLine;  ///< baseline offset
+  int baseLine;  // baseline offset
   uint16_t backColor565;
   uint16_t borderColor565;
   uint16_t drawColor565;

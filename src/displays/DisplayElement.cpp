@@ -66,7 +66,7 @@ void DisplayElement::init(Board *board) {
   config.spiCLK = board->spiCLK;
   config.spiMOSI = board->spiMOSI;
   config.spiMISO = board->spiMISO;
-} // init()
+}  // init()
 
 
 /**
@@ -122,6 +122,9 @@ bool DisplayElement::set(const char *name, const char *value) {
     } else if (_stricmp(value, "lcd8") == 0) {
       config.busmode = BUSMODE_LCD8;
     }
+
+  } else if (_stricmp(name, "busspeed") == 0) {
+    config.busSpeed = _atoi(value);
 
     // ===== i2c bus parameter
 

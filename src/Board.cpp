@@ -19,6 +19,9 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#include <Wire.h>
+#include <SPI.h>
+
 #include <core/Network.h>
 
 #if defined(ESP8266)
@@ -111,7 +114,9 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   WiFi.persistent(true);  // ??? too early ?
 
   Logger::printf("Device %s starting...", buildName);
+#if defined(ESP32)
   BOARDTRACE("Reset Reasons: %d %d", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
+#endif
 
   bool mounted = fs->begin();
   if (!mounted) {
@@ -508,6 +513,14 @@ void Board::loop() {
           Wire.setClock(I2cFrequency);
         }
       }
+
+#if defined(ESP32)
+      // setup SPI system wide when configured.
+      if (spiCLK >= 0) {
+        LOGGER_TRACE("SPI clk=%d miso=%d mosi=%d", spiCLK, spiMISO, spiMOSI);
+        SPI.begin(spiCLK, spiMISO, spiMOSI);
+      }
+#endif
     }
 
     start(Element_StartupMode::System);  // including displays !

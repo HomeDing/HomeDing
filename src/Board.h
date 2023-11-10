@@ -38,6 +38,8 @@
 
 #pragma once
 
+#include <Arduino.h>
+
 #if defined(ESP32)
 #include <WebServer.h>
 #include <WiFi.h>
@@ -326,6 +328,11 @@ public:
   int I2cSda = -1;
   int I2cScl = -1;
   int I2cFrequency = 0;
+
+  /// Common SPI settings
+  int spiCLK = -1;   ///< SPI interface clock CLK pin
+  int spiMISO = -1;  ///< SPI interface MISO pin
+  int spiMOSI = -1;  ///< SPI interface MOSI pin
 
   /** Service discovery enabled */
   bool _mDnsEnabled = true;

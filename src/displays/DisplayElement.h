@@ -78,11 +78,14 @@ struct DisplayConfig {
 
   int busmode = BUSMODE_ANY;
 
+  /// bus clock speed for any bus
+  int32_t busSpeed = -1;
+
   /* ===== I2C interface ===== */
 
-  int i2cAddress = 0;  ///< i2c address
-  int i2cSDA = 0;      ///< i2c data
-  int i2cSCL = 0;      ///< i2c clock
+  int i2cAddress = 0;    ///< i2c address
+  int i2cSDA = 0;        ///< i2c data pin
+  int i2cSCL = 0;        ///< i2c clock pin
 
   /* ===== SPI interface ===== */
   int spiMOSI = -1;  ///< SPI interface MOSI pin

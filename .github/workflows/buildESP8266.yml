@@ -52,7 +52,6 @@ jobs:
             - source-url: "https://github.com/moononournation/Arduino_GFX.git"
             - name: Adafruit GFX Library
             - name: Adafruit NeoPixel
-            - name: Adafruit SH110X
             - name: Adafruit SSD1306
             - name: PubSubClient
           sketch-paths: |

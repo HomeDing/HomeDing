@@ -65,7 +65,12 @@ void DisplayTouchFT6336Element::start() {
 
   // find chip on the i2c bus
   if (WireUtils::exists(I2C_ADDR)) {
-    TRACE("found!");
+    TRACE("FT6336U found!");
+
+    TRACE("Firmware Version: %d", WireUtils::readRegister(I2C_ADDR, 0xA6));
+    TRACE("Device Mode: %d", (WireUtils::readRegister(I2C_ADDR, 0x00) & 0x70) >> 4);
+    TRACE("Chip code: %d\n", WireUtils::readRegister(I2C_ADDR, 0xA0));
+
     DisplayTouchElement::start();
     _found = true;
   }

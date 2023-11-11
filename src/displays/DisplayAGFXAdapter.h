@@ -48,9 +48,9 @@ public:
 
     if (conf->busmode == BUSMODE_ANY) {
       if (conf->spiCS >= 0) {
-        conf->busmode == BUSMODE_SPI;
+        conf->busmode = BUSMODE_SPI;
       } else if (conf->i2cAddress)
-        conf->busmode == BUSMODE_I2C;
+        conf->busmode = BUSMODE_I2C;
     }
 
 

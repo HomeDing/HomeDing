@@ -138,6 +138,16 @@ bool DeviceElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "i2c-frequency") == 0) {
       _board->I2cFrequency = _atoi(value);
 
+      // ===== SPI bus =====
+    } else if (_stricmp(name, "spi-scl") == 0) {
+      _board->spiCLK = _atopin(value);
+
+    } else if (_stricmp(name, "spi-miso") == 0) {
+      _board->spiMISO = _atopin(value);
+
+    } else if (_stricmp(name, "spi-mosi") == 0) {
+      _board->spiMOSI = _atopin(value);
+
     }  // if
   }    // if (! active)
 

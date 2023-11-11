@@ -16,35 +16,19 @@
 #include <displays/DisplayAGFXAdapter.h>
 
 class DisplayST7796Adapter : public DisplayAGFXAdapter {
+
   bool start() override {
+    bus = getBus(conf);
 
-    if ((conf->busmode == BUSMODE_ANY) || (conf->busmode == BUSMODE_SPI)) {
-
-#if defined(ESP32)
-      bus = new Arduino_ESP32SPI(
-        conf->spiDC,
-        conf->spiCS,
-        conf->spiCLK,
-        conf->spiMOSI,
-        conf->spiMISO,
-        HSPI /* spi_num */
-      );
-
-#elif defined(ESP8266)
-      // ESP8266 has pre-defined SPI pins
-      bus = new Arduino_ESP8266SPI(
-        conf->spiDC, conf->spiCS);
-#endif
-
+    if (bus) {
+      gfx = new Arduino_ST7796(
+        bus,
+        conf->resetPin,
+        (conf->rotation / 90),
+        conf->ips,
+        conf->width,
+        conf->height);
     }
-
-    gfx = new Arduino_ST7796(
-      bus,
-      conf->spiRST,
-      (conf->rotation / 90),
-      conf->ips,
-      conf->width,
-      conf->height);
 
     DisplayAGFXAdapter::start();
 

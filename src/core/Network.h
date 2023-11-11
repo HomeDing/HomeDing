@@ -33,8 +33,8 @@ public:
     RECONNECT = 13,   // network is dropped, reconnect required.
     FAILED = 14,      // no network available to connect.
 
-    CREATEAP = 21,    // Wait for network connectivity or configuration request.
-    CAPTIVE = 22      // network is connected but wait for configuration request.
+    CREATEAP = 21,  // Wait for network connectivity or configuration request.
+    CAPTIVE = 22    // network is connected but wait for configuration request.
   };
 
   static NETSTATE state;  // current network state;
@@ -46,14 +46,18 @@ public:
   static void connect(String &deviceName, String &nName, String &nPass) {
     Logger::printf("connect as '%s' to WiFI %s...", deviceName.c_str(), nName.c_str());
 
+#if defined(ESP32)
     // https://stackoverflow.com/questions/54907985/esp32-fails-on-set-wifi-hostname
     WiFi.disconnect(true);
     WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
+#endif
 
     WiFi.hostname(deviceName);
 
     // Evil bad hack to get the hostname set up correctly
+#if defined(ESP32)
     WiFi.mode(WIFI_AP_STA);
+#endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(nName.c_str(), nPass.c_str());
     delay(100);

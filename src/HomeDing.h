@@ -240,6 +240,10 @@ extern Board homeding;
 #include <displays/DisplayMAX7219Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYGC9A01
+#include <displays/DisplayGC9A01Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DISPLAYSSD1306
 #include <displays/DisplaySSD1306Element.h>
 #endif
@@ -286,6 +290,10 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_DISPLAYTOUCHGT911
 #include <displays/DisplayTouchGT911Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
+#include <displays/DisplayTouchFT6336Element.h>
 #endif
 
 // ===== LIGHT ELEMENTS =====

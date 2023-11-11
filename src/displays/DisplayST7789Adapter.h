@@ -39,7 +39,7 @@ class DisplayST7789Adapter : public DisplayAGFXAdapter {
 
     gfx = new Arduino_ST7789(
       bus,
-      conf->spiRST,
+      conf->resetPin,
       (conf->rotation / 90),
       conf->ips,
       conf->width,

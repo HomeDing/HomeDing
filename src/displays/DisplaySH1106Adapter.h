@@ -28,11 +28,13 @@ public:
     bus = getBus(conf);
 
     if (bus) {
-      // Mono color Canvas
+      // Initialize the display using the physical parameters
+      // and use the Mono color Canvas for drawing
       Arduino_G *op = new Arduino_SH1106(bus, conf->resetPin, conf->width, conf->height);
       gfx = new Arduino_Canvas_Mono(conf->width, conf->height, op, 0, 0, true);
 
-      // gfx->setRotation(1);°
+      // set rotatation for drawing.
+      gfx->setRotation(conf->rotation / 90);
       // conf->rotation
     }
 

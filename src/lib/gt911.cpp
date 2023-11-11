@@ -12,7 +12,6 @@
 /// Config Registers (0x8047 - 0X80FF)
 #define GT911_CONFIG_START 0x8047  // 4 bytes x-low, x-high, y-low, y-high
 #define GT911_CONFIG_END 0X80FE
-#define GT911_CONFIG_SIZE (uint16_t)(GT911_CONFIG_END - GT911_CONFIG_START + 1)
 
 #define GT911_CONFIG_ALL 0X8100
 #define GT911_CONFIG_CHKSUM (uint16_t)0X80FF

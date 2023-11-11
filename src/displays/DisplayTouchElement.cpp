@@ -70,13 +70,6 @@ bool DisplayTouchElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "resetpin") == 0) {
     _resetPin = _atopin(value);
 
-    // } else if (_stricmp(name, "onvalue") == 0) {
-    // save the actions
-    // _xAction = value;
-
-    // } else if (_stricmp(name, "doAction") == 0) {
-    // make something
-
   } else {
     ret = false;
   }  // if

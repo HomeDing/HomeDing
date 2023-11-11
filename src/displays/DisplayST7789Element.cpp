@@ -43,24 +43,16 @@ Element *DisplayST7789Element::create() {
  */
 void DisplayST7789Element::start() {
   TRACE("start()");
-  // config.spiCS = 5;
-  // config.spiDC = 16;
-  // config.spiRST = 23;
-  // config.spiMOSI = 19;
-  // config.spiMISO = -1;
-  // config.spiCLK = 18;
 
   DisplayAdapter *d = new DisplayST7789Adapter();
   if (d->setup(_board, &config)) {
     bool success = d->start();
     if (success) {
       _board->display = d;
-      DisplayElement::start();
-
     } else {
-      LOGGER_EERR("no display found");
       delete d;
     }  // if
+    DisplayElement::start();
   }    // if
 }  // start()
 

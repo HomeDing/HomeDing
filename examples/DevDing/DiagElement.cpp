@@ -131,6 +131,8 @@ String DiagElement::_handleDiag() {
 
         if (adr == 0x11) {
           desc = "SI4721";
+        } else if (adr == (0x15)) {
+          desc = "CST816D";
         } else if (adr == (0x0e)) {
           desc = "MAG3110";
         } else if (adr == (0x14)) {
@@ -140,7 +142,7 @@ String DiagElement::_handleDiag() {
         } else if (adr == 0x27) {
           desc = "LCD,PCF8574";
         } else if (adr == 0x38) {
-          desc = "AHT20";
+          desc = "AHT20,FT6336";
         } else if (adr == 0x3C) {
           desc = "SH1106,SSD1306,SSD1309";
         } else if (adr == 0x40) {
@@ -199,6 +201,7 @@ String DiagElement::_handleProfile() {
 String DiagElement::_handleChipInfo() {
   String sOut;
   char buffer[128];
+  char *s = nullptr;
 
   sOut = "Chip Infos:\n";
 
@@ -213,13 +216,7 @@ String DiagElement::_handleChipInfo() {
   esp_chip_info(&chip_info);
 
   esp_chip_model_t model = chip_info.model;
-  const char *s = "unknown";
-  if (model == CHIP_ESP32) { s = "ESP32"; };
-  if (model == CHIP_ESP32S2) { s = "ESP32-S2"; };
-  if (model == CHIP_ESP32S3) { s = "ESP32-S3"; };
-  if (model == CHIP_ESP32C3) { s = "ESP32-C3"; };
-  if (model == CHIP_ESP32H2) { s = "ESP32-H2"; };
-  sprintf(buffer, "  model: %s(%d)\n", s, model);
+  sprintf(buffer, "  model: %s(%d)\n", CONFIG_IDF_TARGET, model);
   sOut += buffer;
 
   uint32_t features = chip_info.features;
@@ -238,10 +235,6 @@ String DiagElement::_handleChipInfo() {
   sprintf(buffer, "  cores: %d\n", chip_info.cores);
   sOut += buffer;
   sprintf(buffer, "  revision: %d\n", chip_info.revision);
-  sOut += buffer;
-  sOut += "\n";
-
-  sprintf(buffer, "ChipModel: %s\n", ESP.getChipModel());
   sOut += buffer;
   sOut += "\n";
 
@@ -266,6 +259,10 @@ String DiagElement::_handleChipInfo() {
   sprintf(buffer, "  Speed: %d\n", ESP.getFlashChipSpeed());
   sOut += buffer;
   sOut += "\n";
+
+  sOut += "PSRAM:";
+  sprintf(buffer, "  Size: %d kByte\n", ESP.getPsramSize() / 1024);
+  sOut += buffer;
 
 #endif
 

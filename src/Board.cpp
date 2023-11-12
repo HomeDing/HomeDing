@@ -386,15 +386,19 @@ void Board::loop() {
       String a = _actions.pop();
       BOARDTRACE("popped %s", a.c_str());
       dispatchAction(a);
-      // _actions.dump();
       return;
-    } else {
     }  // if
 
     // give some time to next active element
-    if (_nextElement == NULL) {
+    if (!_nextElement) {
       _nextElement = _elementList;
-    }  // if
+      if ((display) && (display->outOfSync())) {
+        // sync / flush display buffer
+        display->flush();
+        return;
+      }  // if
+    }    // if
+
     if (_nextElement) {
       if (_nextElement->active) {
         // BOARDTRACE("loop %s", _nextElement->id);
@@ -428,11 +432,9 @@ void Board::loop() {
       }
     }  // if
 
-
   } else if (boardState == BOARDSTATE::NONE) {
     // load network connection details
     _newBoardState(BOARDSTATE::LOAD);
-
 
   } else if (boardState == BOARDSTATE::LOAD) {
     // load network connection details
@@ -462,7 +464,6 @@ void Board::loop() {
       _newBoardState(BOARDSTATE::SETUP);
     else
       _newBoardState(BOARDSTATE::STARTCAPTIVE);
-
 
   } else if (boardState == BOARDSTATE::SETUP) {
 

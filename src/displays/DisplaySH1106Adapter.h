@@ -41,9 +41,4 @@ public:
     DisplayAGFXAdapter::start();
     return (gfx != nullptr);
   };  // start()
-
-  void flush() override {
-    PANELTRACE("flush()\n");
-    gfx->flush();
-  }
 };

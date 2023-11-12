@@ -24,16 +24,17 @@
 // ===== private functions =====
 
 void DisplayElement::_newPage(int page) {
-  TRACE("newPage %d", page);
+  LOGGER_ETRACE("newPage %d", page);
   DisplayAdapter *da = _board->display;
   if (da) {
     int oldPage = da->page;
 
     da->page = constrain(page, 0, da->maxpage);
-    da->start();
 
+    da->clear();
     // redraw all display elements
     _board->forEach("display", [this](Element *e) {
+      LOGGER_ETRACE("do %s", e->id);
       e->set("redraw", "1");
     });
     if (da->page != oldPage) {

@@ -43,11 +43,6 @@ public:
   /// @return true when the display is ready for operation. Otherwise false.
   virtual bool start();
 
-  /**
-   * @brief Clear the complete display
-   */
-  virtual void clear(){};
-
   /// get height of the last drawn textline. Depends on font and text height.
   virtual int16_t getLineHeight() {
     return (lineHeight);
@@ -81,7 +76,7 @@ public:
   /// @brief Get default background color
   /// @return The 32-bit background color in 0x00rrggbb.
   virtual uint32_t getBackgroundColor() {
-    return(backColor);
+    return (backColor);
   };
 
 
@@ -94,7 +89,13 @@ public:
   /// @brief Get default border color
   /// @return The 32-bit border color in 0x00rrggbb.
   virtual uint32_t getBorderColor() {
-    return(borderColor);
+    return (borderColor);
+  };
+
+
+  /// @brief Clear the complete display
+  virtual void clear() {
+    _needSync = true;
   };
 
 
@@ -105,38 +106,57 @@ public:
    * @param w
    * @param h
    */
-  virtual void clear(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h){};
+  virtual void clear(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h) {
+    _needSync = true;
+  };
 
   virtual int drawText(int16_t x, int16_t y, int16_t h, String &text) {
     return (drawText(x, y, h, text.c_str()));
   };
 
   virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text) {
+    _needSync = true;
     return (charWidth * strnlen(text, MAX_DISPLAY_STRING_LEN));
   };
 
-  virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1){};
+  virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1) {
+    _needSync = true;
+  };
 
-  virtual void drawButton(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h, UNUSED const char *text, UNUSED bool pressed = false){};
+  virtual void drawButton(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h, UNUSED const char *text, UNUSED bool pressed = false) {
+    _needSync = true;
+  };
 
   virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill) {
+    _needSync = true;
     return (h);
   };
 
-  /**
-   * @brief The flush method must be called after every output sequence to allow
-   * combined sending new information to the display.
-   */
-  virtual void flush(){};
 
-  /**
-   * @brief current displayed page
-   */
+  // @brief remember that flush is required after sequence.
+  virtual void setSyncRequired() {
+    // LOGGER_TRACE("setSyncRequired()");
+    _needSync = true;
+  };
+
+  virtual bool outOfSync() {
+    return (_needSync);
+  }
+
+  // @brief flush all buffered pixels to the display.
+  virtual void flush() {
+    // LOGGER_TRACE("flush()");
+    // if (! _needSync) {
+    //   LOGGER_TRACE("unnecessary flush() !!");
+    // }
+    _needSync = false;
+  };
+
+
+  /// * @brief current displayed page
   int page = 1;
 
-  /**
-   * @brief max used page
-   */
+  /// @brief max used page
   int maxpage = 1;
 
 protected:
@@ -146,11 +166,14 @@ protected:
   int16_t lineHeight;  ///< total height of a text line
   int16_t charWidth;   ///< width of a character
 
-  uint32_t color;      ///< default draw color
-  uint32_t backColor;  ///< default background color
+  uint32_t color;        ///< default draw color
+  uint32_t backColor;    ///< default background color
   uint32_t borderColor;  ///< default border color
 
   uint8_t _lightChannel;
+
+  /// @brief  the display buffer is not in sync with the display.
+  bool _needSync;
 
   Board *board;
 };

@@ -55,10 +55,7 @@ bool DisplayDotElement::set(const char *name, const char *value) {
 }  // set()
 
 
-/**
- * @brief Draw this output element.
- *
- */
+/// @brief Draw this output element.
 void DisplayDotElement::draw() {
   DisplayOutputElement::draw();
   _display->clear(_x, _y, _h, _h);

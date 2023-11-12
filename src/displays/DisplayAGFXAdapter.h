@@ -169,6 +169,7 @@ public:
   void clear() override {
     // PANELTRACE("clear #%08x\n", conf->backgroundColor);
     gfx->fillScreen(col565(conf->backgroundColor));
+    DisplayAdapter::clear();
   };  // clear()
 
 
@@ -182,6 +183,7 @@ public:
   void clear(int16_t x, int16_t y, int16_t w, int16_t h) override {
     // PANELTRACE("clear: %d %d %d %d\n", x, y, w, h);
     gfx->fillRect(x, y, w, h, backColor565);
+    DisplayAdapter::clear(x, y, w, h);
   };  // clear()
 
   /**
@@ -277,6 +279,13 @@ public:
     PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, drawColor565);
     gfx->drawLine(x0, y0, x1, y1, drawColor565);
   }  // drawLine()
+
+
+  /// @brief send all buffered pixels to display.
+  void flush() override {
+    gfx->flush();
+    DisplayAdapter::flush();
+  };  // flush()
 
 
 protected:

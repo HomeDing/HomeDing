@@ -40,7 +40,9 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     // done
 
   } else if (_stricmp(name, "redraw") == 0) {
-    this->draw();
+    if (_display && (_display->page == _page)) {
+      draw();  // only draw, no flush here
+    }
 
   } else if (_stricmp(name, "page") == 0) {
     _page = _atoi(value);
@@ -112,7 +114,6 @@ void DisplayOutputElement::loop() {
   if (_needredraw) {
     if (_display && (_display->page == _page)) {
       draw();
-      _display->flush();
     }
     _needredraw = false;
   }  // if
@@ -123,7 +124,7 @@ void DisplayOutputElement::loop() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 void DisplayOutputElement::draw() {
-  TRACE("draw()");
+  LOGGER_ETRACE("draw(%s) page=%d", id, _page);
   _display->setColor(_color);
   _display->setBackgroundColor(_backgroundColor);
   _display->setBorderColor(_borderColor);

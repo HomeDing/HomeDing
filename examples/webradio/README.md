@@ -9,7 +9,7 @@ This library is not available through the Arduino Library Manager
 so it must be installed by downloading or git-checkout directly from github.
 
 See [TTGO Gallery (T14) board](https://homeding.github.io/boards/esp32/ttgogallery.htm)
-for the default board that is supported by the env.json and config.json witin this folder.
+for the default board that is supported by the env.json and config.json within this folder.
 
 The AudioElement just adds a thin wrapper to configure and control the library.
 The Audio processing is moved to another ESP32 FreeRTOS Task and runs in the background.

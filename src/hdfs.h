@@ -9,7 +9,6 @@
 
 #include <FS.h>        // File System for Web Server Files
 #include <LittleFS.h>  // File System for Web Server Files
-#include <FFat.h>      // File System for Web Server Files
 
 /**
  * A SD or SD_MMC card can be mounted at /sd.

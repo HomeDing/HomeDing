@@ -44,7 +44,9 @@
 #include <WebServer.h>
 #include <WiFi.h>
 #include <LittleFS.h>
-#define FILESYSTEM fs::LittleFSFS
+#include <FFat.h>
+// #define FILESYSTEM fs::LittleFSFS
+#define FILESYSTEM fs::F_Fat
 
 #elif defined(ESP8266)
 #include <FS.h>

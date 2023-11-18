@@ -296,6 +296,10 @@ extern Board homeding;
 #include <displays/DisplayTouchFT6336Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYTOUCHCST816
+#include <displays/DisplayTouchCST816Element.h>
+#endif
+
 // ===== LIGHT ELEMENTS =====
 
 #ifdef HOMEDING_INCLUDE_LIGHT

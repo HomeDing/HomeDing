@@ -41,13 +41,13 @@ public:
   Arduino_DataBus *getBus(DisplayConfig *conf) {
     PANELTRACE("getbus: %d\n", conf->busmode);
     PANELTRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d\n",
-               conf->spiDC, conf->spiCS, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
+               conf->dcPin, conf->csPin, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
     PANELTRACE("   i2c: adr:%d, sda:%d, scl:%d\n", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
 
     Arduino_DataBus *bus = nullptr;
 
     if (conf->busmode == BUSMODE_ANY) {
-      if (conf->spiCS >= 0) {
+      if (conf->csPin >= 0) {
         conf->busmode = BUSMODE_SPI;
       } else if (conf->i2cAddress)
         conf->busmode = BUSMODE_I2C;
@@ -59,18 +59,44 @@ public:
       PANELTRACE("Use SPI\n");
 
       Arduino_DataBus *bus = new Arduino_ESP32SPI(
-        conf->spiDC, conf->spiCS);
+        conf->dcPin, conf->csPin);
 
     } else if (conf->busmode == BUSMODE_HSPI) {
       PANELTRACE("Use HSPI\n");
       bus = new Arduino_ESP32SPI(
-        conf->spiDC,
-        conf->spiCS,
+        conf->dcPin,
+        conf->csPin,
         conf->spiCLK,
         conf->spiMOSI,
         conf->spiMISO,
         HSPI /* spi_num */
       );
+
+    } else if (conf->busmode == BUSMODE_PAR8) {
+      PANELTRACE("Use PAR8\n");
+
+      int pinCount = ListUtils::length(conf->busPins);
+      int8_t pins[8];
+
+      if (pinCount != 8) {
+        LOGGER_ERR("ST7789 LCD8 bus requires 8 pin definitions");
+      } else {
+        for (int n = 0; n < 8; n++) {
+          pins[n] = Element::_atopin(ListUtils::at(conf->busPins, n).c_str());
+        }
+      }
+
+      Serial.printf("ST7789::pins %d %d %d %d %d %d %d %d\n",
+                    pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
+
+      Serial.printf("ST7789::pins %d %d %d %d\n",
+                    conf->dcPin, conf->csPin, conf->wrPin, conf->rdPin);
+
+      bus = new Arduino_ESP32PAR8Q(
+        conf->dcPin, conf->csPin, conf->wrPin, conf->rdPin,
+        pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
+
+
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
     } else if (conf->busmode == BUSMODE_LCD8) {
@@ -95,7 +121,7 @@ public:
       PANELTRACE("Use SPI\n");
       // ESP8266 has pre-defined SPI pins
       bus = new Arduino_ESP8266SPI(
-        conf->spiDC, conf->spiCS);
+        conf->dcPin, conf->csPin);
     }  // if
 
 #endif

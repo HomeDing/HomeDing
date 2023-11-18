@@ -20,22 +20,7 @@ class DisplayST7789Adapter : public DisplayAGFXAdapter {
 
   bool start() override {
 
-    if ((conf->busmode == BUSMODE_ANY) || (conf->busmode == BUSMODE_SPI)) {
-
-#if defined(ESP32)
-      bus = new Arduino_ESP32SPI(
-        conf->spiDC,
-        conf->spiCS,
-        conf->spiCLK,
-        conf->spiMOSI,
-        conf->spiMISO,
-        HSPI /* spi_num */
-      );
-
-#elif defined(ESP8266)
-      bus = new Arduino_ESP8266SPI(2 /* DC */, 15 /* CS */);
-#endif
-    }
+    bus = getBus(conf);
 
     gfx = new Arduino_ST7789(
       bus,
@@ -47,8 +32,7 @@ class DisplayST7789Adapter : public DisplayAGFXAdapter {
       conf->colOffset,
       conf->rowOffset,
       conf->colOffset,
-      conf->rowOffset
-    );
+      conf->rowOffset);
 
     DisplayAGFXAdapter::start();
 

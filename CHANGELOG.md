@@ -23,10 +23,18 @@ This version has some major updates to support these devices.
   (that is not always true when importing from china or buying from eBay).
 
 * The [Display Touch GT911 Element](https://homeding.github.io/elements/display/touchgt911.htm)
-  is the first implementation of a touch controller that comes with displays. It captures click
-  events and shares them with all available
-  [Display Button Elements](https://homeding.github.io/elements/display/button.htm).
-  Now you can add visual buttons on the display to start actions by click.
+  is the implementation of a touch controller that comes with displays.
+
+* The [Display Touch CST816 Element](https://homeding.github.io/elements/display/touchCST816.htm)
+  is the implementation of a touch controller that comes with displays.
+
+* The [Display Touch FT6336 Element](https://homeding.github.io/elements/display/touchft6336.htm)
+  is the implementation for the touch controller that comes with displays using the ft6336 chip.
+
+* The [Display Touch Element](https://homeding.github.io/elements/display/touch.htm) is the base
+  implementation for touch controllers that cannot be instantiated as an element. It handles
+  click events and shares them with the available
+  [Display Button Elements](https://homeding.github.io/elements/display/button.htm). Now you can add visual buttons on the display to start actions by click.
 
 * The [Display Button Element](https://homeding.github.io/elements/display/button.htm) draws a
   button at the configured position where click events should be captured.

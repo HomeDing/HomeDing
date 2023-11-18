@@ -11,9 +11,12 @@
  *
  * Changelog:
  * * 25.10.2023 created
+ * * 17.11.2023 rotation support 
  */
 
 #pragma once
+
+#include <displays/DisplayButtonElement.h>
 
 /**
  * @brief
@@ -49,18 +52,6 @@ public:
    * @brief Give some processing time to the timer to check for next action.
    */
   virtual void loop() override;
-
-  /**
-   * @brief stop all activities and go inactive.
-   */
-  virtual void term() override;
-
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 protected:
   // Configuration Properties

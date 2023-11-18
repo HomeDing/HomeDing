@@ -37,7 +37,8 @@
 #define BUSMODE_I2C 0x01
 #define BUSMODE_SPI 0x02   // standard SPI interface
 #define BUSMODE_HSPI 0x03  // high speed SPI interface on ESP32
-#define BUSMODE_LCD8 0x04
+#define BUSMODE_PAR8 0x04
+#define BUSMODE_LCD8 0x21
 
 
 struct DisplayConfig {
@@ -78,21 +79,27 @@ struct DisplayConfig {
 
   int busmode = BUSMODE_ANY;
 
-  /// bus clock speed for any bus
-  int32_t busSpeed = -1;
+  // bus configurations for any bus
+
+  int32_t busSpeed = -1;  // speed
+  int csPin = -1;         // chip select pin (SPI, lcd8, bus16)
+  int dcPin = -1;         // Data-Command pin (SPI, lcd8, bus16)
+  int wrPin = -1;         // write strobe pin (lcd8)
+  int rdPin = -1;         // read strobe pin (lcd8)
+
+  // GPIO pins used for the 8-bit and 16-bit busses
+  String busPins;
 
   /* ===== I2C interface ===== */
 
-  int i2cAddress = 0;    ///< i2c address
-  int i2cSDA = 0;        ///< i2c data pin
-  int i2cSCL = 0;        ///< i2c clock pin
+  int i2cAddress = 0;  ///< i2c address
+  int i2cSDA = 0;      ///< i2c data pin
+  int i2cSCL = 0;      ///< i2c clock pin
 
   /* ===== SPI interface ===== */
   int spiMOSI = -1;  ///< SPI interface MOSI pin
   int spiMISO = -1;  ///< SPI interface MISO pin
   int spiCLK = -1;   ///< SPI interface clock CLK pin
-  int spiCS = -1;    ///< SPI interface chip select CS pin
-  int spiDC = -1;    ///< SPI interface Data-Command DC pin
 };
 
 

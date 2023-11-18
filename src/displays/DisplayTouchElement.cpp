@@ -100,8 +100,30 @@ void DisplayTouchElement::loop() {
     if (pullSensorData()) {
       // got lastX and lastY
 
+      // rotate
+      if (_rotation == 0) {
+        // no turn required
+
+      } else if (_rotation == 90) {
+        // 90° to the right
+        uint16_t temp = lastX;
+        lastX = lastY;
+        lastY = _width - temp;
+
+      } else if (_rotation == 180) {
+        // 180°
+        lastX = _width - lastX;
+        lastY = _height - lastY;
+
+      } else if (_rotation == 270) {
+        // 90° to the left
+        uint16_t temp = lastX;
+        lastX = _height - lastY;
+        lastY = temp;
+      }
+
       // as of now only interested in the first.
-      TRACE("-touch %d/%d", lastX, lastY);
+      TRACE("%d/%d", lastX, lastY);
 
       if (!_bFound) {
         // find displaybutton at x/y
@@ -131,58 +153,6 @@ void DisplayTouchElement::loop() {
 
     nextRead = millis() + 50;
   }
-
-  //   GDTpoint_t points[GT911_MAX_CONTACTS];
-  //   uint8_t count = tp->getTouchPoints(points);
-
-  //   if (count > 0) {
-  //     // as of now only interested in the first.
-  //     TRACE("-touch %d/%d", points[0].x, points[0].y);
-
-  //     if (!_bFound) {
-  //       // find displaybutton at x/y
-  //       _board->forEach("displaybutton", [this](Element *e) {
-  //         if (!_bFound) {
-  //           DisplayButtonElement *be = (DisplayButtonElement *)e;
-  //           if (be->touchStart(lastX, lastY)) {
-  //             _bFound = be;
-  //           }
-  //         }
-  //       });
-
-  //     } else {
-  //       bool over = _bFound->touchStart(lastX, lastY);
-  //       if (!over) {
-  //         _bFound = nullptr;
-  //       }
-  //     }
-
-  //   } else if (_bFound) {
-  //     TRACE("-end");
-  //     // call touchEnd to found button
-  //     _bFound->touchEnd(lastX, lastY);
-  //     _bFound = nullptr;
-
-  //   }  // if
-
-  // }
 }  // loop()
-
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DisplayTouchElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-  // callback(PROP_VALUE, _printInteger(_value));
-}  // pushState()
-
-
-void DisplayTouchElement::term() {
-  TRACE("term()");
-  Element::term();
-}  // term()
-
 
 // End

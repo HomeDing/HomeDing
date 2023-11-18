@@ -107,38 +107,12 @@ void GT911::init(int address) {
   WireUtils::txrx(
     addr,
     regBuffer, sizeof(regBuffer),
-    configBuf, GT911_CONFIG_START - GT911_CONFIG_END + 1);
+    configBuf, GT911_CONFIG_END - GT911_CONFIG_START + 1);
 
   width = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 0] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 1] << 8);
   height = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 2] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 3] << 8);
-
-  // // calc checksum
-  // uint8_t checksum = 0;
-  // for (uint8_t i = 0; i < GT911_CONFIG_SIZE; i++) {
-  //   checksum += configBuf[i];
-  // }
-  // checksum = (~checksum) + 1;
-  // configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
-  // configBuf[GT911_CONFIG_FRESH - GT911_CONFIG_START] = 1;
-
-  // Wire.beginTransmission(addr);
-  // Wire.write(regBuffer, sizeof(regBuffer));
-  // Wire.write(configBuf, GT911_CONFIG_START - GT911_CONFIG_ALL + 1);
-  // Wire.endTransmission();
 }
 
-// void ARDUINO_ISR_ATTR GT911::onInterrupt() {
-//   read();
-//   GT911::onRead();
-// }
-
-void GT911::setRotation(int rotation) {
-  _rotation = (rotation / 90) % 4;
-}
-
-// void GT911::setOnRead(void (*isr)()) {
-//   onRead = isr;
-// }
 
 uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
   // Serial.println("GT911::getTouchPoints");
@@ -183,34 +157,9 @@ uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
       uint8_t *rawPoint = &rawData[GT911_CONTACT_SIZE * i];
 
       points[i].trackId = rawPoint[0];
-      uint16_t x = rawPoint[1] + (rawPoint[2] << 8);
-      uint16_t y = rawPoint[3] + (rawPoint[4] << 8);
+      points[i].x = rawPoint[1] + (rawPoint[2] << 8);
+      points[i].y = rawPoint[3] + (rawPoint[4] << 8);
       points[i].area = rawPoint[5] + (rawPoint[6] << 8);
-
-      uint16_t temp;
-      if (_rotation == 0) {
-        // no turn required
-
-      } else if (_rotation == 1) {
-        // 90° to the right
-        uint16_t temp = x;
-        x = y;
-        y = height - temp;
-
-      } else if (_rotation == 2) {
-        // 180°
-        x = width - x;
-        y = height - y;
-
-      } else if (_rotation == 3) {
-        // 270°
-        uint16_t temp = x;
-        x = width - y;
-        y = temp;
-      }
-      points[i].x = x;
-      points[i].y = y;
-
       // Serial.printf("read: %d: %d/%d\n", i, points[i].x, points[i].y);
     }
   }

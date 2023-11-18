@@ -40,7 +40,6 @@ bool DisplayTouchGT911Element::pullSensorData() {
 
   if (count > 0) {
     // as of now only interested in the first.
-    TRACE("-touch %d/%d", points[0].x, points[0].y);
     lastX = points[0].x;
     lastY = points[0].y;
     return (true);
@@ -63,7 +62,6 @@ void DisplayTouchGT911Element::start() {
 
   if (tp) {
     tp->init(_address);
-    tp->setRotation(_rotation);
     DisplayTouchElement::start();
   }
 }  // start()

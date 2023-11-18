@@ -114,7 +114,7 @@ void BoardHandler::handleConnect(WebServer &server) {
       break;
     }  // if
 
-  }    // while
+  }  // while
   delay(400);
   _board->reboot(false);
 }  // handleConnect()
@@ -280,14 +280,22 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 #endif
 
 #if defined(ESP8266)
+    // ESP32 supports LittleFS only
     FSInfo fs_info;
     LittleFS.info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
 
 #elif defined(ESP32)
-    jc.addProperty("fsTotalBytes", LittleFS.totalBytes());
-    jc.addProperty("fsUsedBytes", LittleFS.usedBytes());
+    // ESP32 supports FFat and LittleFS
+    if (HomeDingFS::rootFS == (fs::FS *)&FFat) {
+      jc.addProperty("fsTotalBytes", FFat.totalBytes());
+      jc.addProperty("fsUsedBytes", FFat.usedBytes());
+    } else {
+      jc.addProperty("fsTotalBytes", LittleFS.totalBytes());
+      jc.addProperty("fsUsedBytes", LittleFS.usedBytes());
+    }
+
 #endif
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);

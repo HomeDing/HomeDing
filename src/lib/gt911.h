@@ -40,7 +40,6 @@ public:
   // change configuration
 
   void setResolution(uint16_t _width, uint16_t _height);
-  void setRotation(int rotation);
 
   // void setOnRead(void (*isr)());
   // uint8_t getGesture(void);
@@ -55,7 +54,6 @@ public:
 private:
   // static void ARDUINO_ISR_ATTR onInterrupt();
   // void (*onRead)();
-  uint8_t _rotation = 0;
   uint8_t addr;
   int pinInt;
   int pinRst;

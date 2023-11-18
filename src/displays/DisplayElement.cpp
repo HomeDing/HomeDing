@@ -19,7 +19,7 @@
 
 #include "DisplayElement.h"
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 // ===== private functions =====
 
@@ -120,12 +120,34 @@ bool DisplayElement::set(const char *name, const char *value) {
       config.busmode = BUSMODE_HSPI;
     } else if (_stricmp(value, "i2c") == 0) {
       config.busmode = BUSMODE_I2C;
+    } else if (_stricmp(value, "par8") == 0) {
+      config.busmode = BUSMODE_PAR8;  // 8 bit parallel data
     } else if (_stricmp(value, "lcd8") == 0) {
       config.busmode = BUSMODE_LCD8;
     }
 
   } else if (_stricmp(name, "busspeed") == 0) {
     config.busSpeed = _atoi(value);
+
+
+    // ===== parallel busses configuration
+
+  } else if (_stricmp(name, "cspin") == 0) {
+    config.csPin = _atopin(value);
+
+  } else if (_stricmp(name, "dcpin") == 0) {
+    config.dcPin = _atopin(value);
+
+  } else if (_stricmp(name, "wrpin") == 0) {
+    config.wrPin = _atopin(value);
+
+  } else if (_stricmp(name, "rdpin") == 0) {
+    config.rdPin = _atopin(value);
+
+  } else if (_stricmp(name, "buspins") == 0) {
+    config.busPins = value;
+    config.busPins.replace(" ", "");
+
 
     // ===== i2c bus parameter
 
@@ -144,10 +166,10 @@ bool DisplayElement::set(const char *name, const char *value) {
     config.spiCLK = _atopin(value);
 
   } else if (_stricmp(name, "spics") == 0) {
-    config.spiCS = _atopin(value);
+    config.csPin = _atopin(value);  // please use csPin, deprecated
 
   } else if (_stricmp(name, "spidc") == 0) {
-    config.spiDC = _atopin(value);
+    config.dcPin = _atopin(value);  // please use dcPin, deprecated
 
 
   } else if (_stricmp(name, "invert") == 0) {

@@ -18,7 +18,7 @@
 
 #include "SDMMCElement.h"
 
-#include "SD_MMC.h"
+#include <SD_MMC.h>
 #include <hdfs.h>
 
 #if !defined(TRACE)

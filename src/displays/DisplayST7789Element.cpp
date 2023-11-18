@@ -20,7 +20,7 @@
 #include <displays/DisplayST7789Element.h>
 #include <displays/DisplayST7789Adapter.h>
 
-#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -37,10 +37,17 @@ Element *DisplayST7789Element::create() {
 
 // All required parameters are handled by DisplayElement::set()
 
-/**
- * @brief Activate the DisplayST7789Element and register a Display Adapter to LCD
- * in the board.
- */
+
+/// @brief Setup the element so it can be started and stopped.
+void DisplayST7789Element::setup() {
+  TRACE("setup()");
+  DisplayElement::setup();
+};
+
+
+
+/// @brief Activate the Element and register a Display Adapter
+/// in the board.
 void DisplayST7789Element::start() {
   TRACE("start()");
 
@@ -53,7 +60,7 @@ void DisplayST7789Element::start() {
       delete d;
     }  // if
     DisplayElement::start();
-  }    // if
+  }  // if
 }  // start()
 
 // End

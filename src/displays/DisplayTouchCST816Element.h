@@ -18,7 +18,7 @@
 #pragma once
 
 #include <displays/DisplayTouchElement.h>
-#include <lib\cst816.h>
+#include <lib/cst816.h>
 
 /**
  * @brief

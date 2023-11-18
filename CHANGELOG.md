@@ -25,7 +25,7 @@ This version has some major updates to support these devices.
 * The [Display Touch GT911 Element](https://homeding.github.io/elements/display/touchgt911.htm)
   is the implementation of a touch controller that comes with displays.
 
-* The [Display Touch CST816 Element](https://homeding.github.io/elements/display/touchCST816.htm)
+* The [Display Touch CST816 Element](https://homeding.github.io/elements/display/touchcst816.htm)
   is the implementation of a touch controller that comes with displays.
 
 * The [Display Touch FT6336 Element](https://homeding.github.io/elements/display/touchft6336.htm)

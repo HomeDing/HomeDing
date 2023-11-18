@@ -35,7 +35,7 @@ public:
   ~DisplayMAX7219Adapter() = default;
 
   bool start() override {
-    _csPin = conf->spiCS;
+    _csPin = conf->csPin;
 
     // adjust false height and width (must be *8)
     _hPanels = (conf->height + 7) / 8;

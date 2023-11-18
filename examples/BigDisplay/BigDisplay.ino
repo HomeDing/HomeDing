@@ -93,13 +93,16 @@
 // #define HOMEDING_INCLUDE_DISPLAYSH1106
 
 // enable these lines to get more displays supported
+#define HOMEDING_INCLUDE_DISPLAYGC9A01
 #define HOMEDING_INCLUDE_DISPLAYST7796
 #define HOMEDING_INCLUDE_DISPLAYESP32PANEL
+#define HOMEDING_INCLUDE_DISPLAYST7789
 
-// #define HOMEDING_INCLUDE_DISPLAYST7789
 // #define HOMEDING_INCLUDE_DISPLAYST7735
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
 #define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
+#define HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
+#define HOMEDING_INCLUDE_DISPLAYTOUCHCST816
 // Enable simple display Elements
 // #define HOMEDING_INCLUDE_TM1637
 
@@ -120,6 +123,7 @@
 #include <HomeDing.h>
 
 #include <FS.h>
+#include <FFat.h>  // File System for Web Server Files
 #include <LittleFS.h>  // File System for Web Server Files
 
 #include <BuiltinHandler.h>  // Serve Built-in files
@@ -138,6 +142,7 @@ WebServer server(80);
  */
 void setup(void) {
   Serial.begin(115200);
+
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
   delay(3000);
@@ -150,7 +155,8 @@ void setup(void) {
 
   // ----- setup the platform with webserver and file system -----
 
-  homeding.init(&server, &LittleFS, "BigDisplay");
+  // homeding.init(&server, &LittleFS, "BigDisplay");
+  homeding.init(&server, &FFat, "BigDisplay");
 
   // ----- adding web server handlers -----
 

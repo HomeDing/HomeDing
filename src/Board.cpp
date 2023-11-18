@@ -103,6 +103,7 @@ bool _isWakeupStart = false;
  * @brief Initialize a blank board.
  */
 void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
+  bool mounted = false;
 
   server = serv;
   HomeDingFS::rootFS = fs;
@@ -118,12 +119,19 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   BOARDTRACE("Reset Reasons: %d %d", rtc_get_reset_reason(0), rtc_get_reset_reason(1));
 #endif
 
-  bool mounted = fs->begin();
+#if defined(ESP8266)
+  mounted = LittleFS.begin(true);
+#elif defined(ESP32)
+  if (fs == (fs::FS *)&FFat) {
+    mounted = FFat.begin(true);
+
+  } else if (fs == (fs::FS *)&LittleFS) {
+    mounted = LittleFS.begin(true);
+  }
+#endif
+
   if (!mounted) {
-    Logger::printf("formatting...");
-    if (!fs->format()) {
-      Logger::printf("  failed.");
-    }
+    Logger::printf("FS failed.");
   }
 
   DeviceState::load();
@@ -588,7 +596,7 @@ void Board::loop() {
 
     displayInfo(name, WiFi.localIP().toString().c_str());
     Logger::printf("connected to %s (%s mode)",
-                    WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
+                   WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
     Logger::printf("start http://%s/\n", name);
 
     if (display) {

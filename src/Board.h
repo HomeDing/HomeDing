@@ -46,7 +46,8 @@
 #include <LittleFS.h>
 #include <FFat.h>
 // #define FILESYSTEM fs::LittleFSFS
-#define FILESYSTEM fs::F_Fat
+// #define FILESYSTEM fs::F_Fat
+#define FILESYSTEM FS
 
 #elif defined(ESP8266)
 #include <FS.h>

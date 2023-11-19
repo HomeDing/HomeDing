@@ -120,7 +120,12 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 #endif
 
 #if defined(ESP8266)
-  mounted = LittleFS.begin(true);
+  mounted = LittleFS.begin();
+  if (!mounted) {
+    Logger::printf("formatting...");
+    mounted = fs->format();
+  }
+
 #elif defined(ESP32)
   if (fs == (fs::FS *)&FFat) {
     mounted = FFat.begin(true);

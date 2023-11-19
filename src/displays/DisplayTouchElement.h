@@ -75,10 +75,9 @@ protected:
   int _address = 0x5D; 
 
   // position of last touch event
-  uint16_t xpointX, xpointY;
+  uint16_t lastX, lastY;
 
   // found button at first touch position
-  uint16_t lastX, lastY;
   DisplayButtonElement *_bFound;
 
   unsigned long nextRead;

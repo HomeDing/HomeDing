@@ -161,7 +161,7 @@ public:
 
 protected:
   /// @brief initialization settings
-  struct DisplayConfig *conf;
+  struct DisplayConfig *conf = nullptr;
 
   int16_t lineHeight;  ///< total height of a text line
   int16_t charWidth;   ///< width of a character

@@ -91,7 +91,7 @@ private:
   int _pinRx;
 
 
-  unsigned long _receivedMillis;
+  unsigned long _receivedMillis = 0;
 
   String _sendValue; // code to be sent (inbound value)
 

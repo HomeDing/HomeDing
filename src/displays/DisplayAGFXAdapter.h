@@ -54,8 +54,12 @@ public:
     }
 
 
+    if (conf->busmode == BUSMODE_I2C) {
+      PANELTRACE("Use I2C\n");
+      bus = new Arduino_Wire(conf->i2cAddress);
+
 #if defined(ESP32)
-    if (conf->busmode == BUSMODE_SPI) {
+    } else if (conf->busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
 
       Arduino_DataBus *bus = new Arduino_ESP32SPI(
@@ -114,10 +118,6 @@ public:
 
 
 #if defined(ESP8266)
-    } else if (conf->busmode == BUSMODE_I2C) {
-      PANELTRACE("Use I2C\n");
-      bus = new Arduino_Wire(conf->i2cAddress);
-
     } else if (conf->busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
       // ESP8266 has pre-defined SPI pins

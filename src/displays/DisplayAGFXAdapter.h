@@ -71,7 +71,9 @@ public:
         conf->spiMISO,
         HSPI /* spi_num */
       );
+#endif
 
+#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
     } else if (conf->busmode == BUSMODE_PAR8) {
       PANELTRACE("Use PAR8\n");
 
@@ -95,10 +97,10 @@ public:
       bus = new Arduino_ESP32PAR8Q(
         conf->dcPin, conf->csPin, conf->wrPin, conf->rdPin,
         pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
+#endif
 
 
-
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3)
     } else if (conf->busmode == BUSMODE_LCD8) {
       PANELTRACE("Use LCD8\n");
       bus = new Arduino_ESP32LCD8(
@@ -110,10 +112,9 @@ public:
       );
 #endif
 
-    }  // if
 
-#elif defined(ESP8266)
-    if (conf->busmode == BUSMODE_I2C) {
+#if defined(ESP8266)
+    } else if (conf->busmode == BUSMODE_I2C) {
       PANELTRACE("Use I2C\n");
       bus = new Arduino_Wire(conf->i2cAddress);
 
@@ -122,11 +123,9 @@ public:
       // ESP8266 has pre-defined SPI pins
       bus = new Arduino_ESP8266SPI(
         conf->dcPin, conf->csPin);
-    }  // if
-
 #endif
+    }  // if
     PANELTRACE("bus:%08lx\n", bus);
-
     return (bus);
   };
 

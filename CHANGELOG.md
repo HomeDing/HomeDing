@@ -40,7 +40,20 @@ This version has some major updates to support these devices.
   button at the configured position where click events should be captured.
 
 * The BigDisplay example is made for a display with integrated touch panel.
-<!-- -> story -->
+
+* The Tutorial example was extracted from the Devding Example.
+
+* The [Select Element](https://homeding.github.io/elements/select.htm) was added.
+
+* The [Tone Element](https://homeding.github.io/elements/tone.htm) was added.
+
+* Improvements for multi-color stripes
+
+* ESP8266 output-power option
+
+* Improved display and color display support
+
+* FAT support for root/Flash file system
 
 * Rewriting of the startup sequence to speed up startup and remove of sysLED and sysButton. See
   [The Startup Sequence](https://homeding.github.io/dev/startup.md) and [Persisting Current

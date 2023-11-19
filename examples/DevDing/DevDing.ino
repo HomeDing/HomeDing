@@ -131,6 +131,15 @@ WebServer server(80);
  */
 void setup(void) {
   Serial.begin(115200);
+
+#if ARDUINO_USB_CDC_ON_BOOT
+  Serial.setTxTimeoutMs(0);
+
+#else
+  while (!Serial)
+    yield();
+#endif
+
 #ifdef DBG_GDB
   gdbstub_init();
 #endif
@@ -143,7 +152,7 @@ void setup(void) {
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-#if defined(NET_DEBUG) && defined (ESP8266)
+#if defined(NET_DEBUG) && defined(ESP8266)
   Serial.setDebugOutput(true);
   // eSTAConnected = WiFi.onStationModeConnected(onSTAConnected);
   static WiFiEventHandler eSTAConnected =
@@ -203,7 +212,7 @@ void setup(void) {
   // UPLOAD and DELETE of static files in the file system.
   server.addHandler(new FileServerHandler(&homeding));
 
-  LOGGER_INFO("setup done");
+  LOGGER_JUSTINFO("setup done");
 }  // setup
 
 

@@ -105,7 +105,7 @@ void ScheduleElement::start()
   _init = false;
 
   if ((_startTime == TIME_T_NOT) && (_endTime == TIME_T_NOT)) {
-    LOGGER_EERR("no time span set.");
+    LOGGER_EERR("no time set");
   } else {
     Element::start();
   } // if

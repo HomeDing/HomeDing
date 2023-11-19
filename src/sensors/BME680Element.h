@@ -18,10 +18,8 @@
  *              no dependency on Adafruit Unified Sensor and Adafruit BME680 Library.
  */
 
-#ifndef BME680ELEMENT_H
-#define BME680ELEMENT_H
+#pragma once
 
-#include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
 /**
@@ -113,6 +111,4 @@ private:
 // Register the DHTElement in the ElementRegistry.
 bool BME680Element::registered =
     ElementRegistry::registerElement("bme680", BME680Element::create);
-#endif
-
 #endif

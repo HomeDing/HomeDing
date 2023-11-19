@@ -33,8 +33,6 @@ public:
 
   // parse the URI 
   void parse(const char *uri) {
-    Serial.print("--uri=");
-    Serial.println(uri);
     if ((uri) && (*uri)) {
       size_t len = strlen(uri);
       char *s = buffer = (char *)malloc(len + 1);  // current parsing pointer into buffer[];

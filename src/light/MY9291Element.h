@@ -21,12 +21,10 @@
     // channel 3 is white
  */
 
-#ifndef MY9291ELEMENT_H
-#define MY9291ELEMENT_H
+#pragma once
 
 #if defined(ESP8266)
 
-#include <HomeDing.h>
 #include <light/LightElement.h>
 
 class MY9291Element : public LightElement
@@ -64,10 +62,7 @@ public:
    */
   virtual void start() override;
 
-  /**
-   * @brief direct function to show a color and brightness.
-   */
-  virtual void setColor(uint32_t color, int brightness);
+  virtual void loop() override;
 
 private:
     // _pins[0] is used as datapin
@@ -86,7 +81,5 @@ bool MY9291Element::registered =
 #elif defined(ESP32)
 // No ESP32 based devices known with this chip.
 #endif
-
-#endif // MY9291ELEMENT_H
 
 // End

@@ -32,7 +32,7 @@ RotaryEncoder *__encoder;
 /**
  * @brief The interrupt service routine to check the signals from the rotary encoder
  */
-IRAM_ATTR void __checkPosition() {
+IRAM_ATTR void __checkPosition(void) {
   __encoder->tick();  // just call tick() to check the state.
 }
 
@@ -90,16 +90,17 @@ void RotaryElement::start() {
 
   // Verify parameters
   if ((_pin1 < 0) || (_pin2 < 0)) {
-    LOGGER_EERR("pin values are required.");
+    LOGGER_EERR("no pin");
 
   } else {
     // TRACE("connect %d %d\n", _pin1, _pin2);
     __encoder = new (std::nothrow) RotaryEncoder(_pin1, _pin2);
     if (__encoder) {
       pinMode(_pin1, INPUT_PULLUP);
-      attachInterrupt(_pin1, __checkPosition, CHANGE);
       pinMode(_pin2, INPUT_PULLUP);
-      attachInterrupt(_pin2, __checkPosition, CHANGE);
+      // delay(30);
+      // attachInterrupt(digitalPinToInterrupt(_pin1), __checkPosition, CHANGE);
+      // attachInterrupt(digitalPinToInterrupt(_pin2), __checkPosition, CHANGE);
       Element::start();
     }  // if
   }    // if

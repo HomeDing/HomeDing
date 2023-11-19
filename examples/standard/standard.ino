@@ -57,6 +57,8 @@
 #define HOMEDING_INCLUDE_BME680
 #define HOMEDING_INCLUDE_BH1750
 
+#define HOMEDING_INCLUDE_TONE
+
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
 // #define HOMEDING_INCLUDE_PMS
@@ -73,7 +75,8 @@
 #define HOMEDING_INCLUDE_DISPLAYLCD
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
-// eneble these lines to get more displays supported
+
+// enable these lines to get more displays supported
 // #define HOMEDING_INCLUDE_DISPLAYST7789
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
 // #define HOMEDING_INCLUDE_TM1637
@@ -133,9 +136,9 @@ void setup(void) {
   server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
+  server.addHandler(new FileServerHandler(&homeding));
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 }  // setup
 
 

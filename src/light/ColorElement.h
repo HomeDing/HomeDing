@@ -19,9 +19,6 @@
 
 #pragma once
 
-#include <vector>
-
-#include <HomeDing.h>
 #include <light/LightElement.h>
 
 /**
@@ -48,6 +45,12 @@ public:
    */
   static bool registered;
 
+  static const int MAX_HUE = (6 * 256);
+
+  /// @brief calculate a color value by hue.
+  /// @param hue hue of the calculated value
+  /// @return color
+  static uint32_t hslColor(int hue);
 
   /**
    * @brief Set a parameter or property to a new value or start an action.
@@ -57,6 +60,11 @@ public:
    * could be executed.
    */
   virtual bool set(const char *name, const char *value) override;
+
+  /**
+   * @brief Activate the Element.
+   */
+  virtual void start() override;
 
   /**
    * @brief Give some processing time to the timer to check for next action.
@@ -75,9 +83,9 @@ private:
     _min = 0,      // minimum value
     _default = 0,  // default value
 
-    fix = 0,       // take inbound value for output
-    fade = 1,      // fade to inbound value from current value
-    wheel = 2,     // single color output cycling through whole hue cycle
+    fix = 0,    // take inbound value for output
+    fade = 1,   // fade to inbound value from current value
+    wheel = 2,  // single color output cycling through whole hue cycle
     pulse = 3,
 
     _max = 3  // maximum value
@@ -90,7 +98,8 @@ private:
   uint32_t _value = 0;
 
 
-  boolean _needUpdate = false;
+  boolean _needValueUpdate = false;
+  boolean _needBrightnessUpdate = false;
 
 
   /** @brief  The actual brightness output.
@@ -99,10 +108,16 @@ private:
   int _brightness = 50;  // percent
 
   /**
-   * @brief The values for a transition.
+   * @brief The values for a color transition.
    */
   uint32_t _fromValue = 0;
   uint32_t _toValue = 0;
+
+  /**
+   * @brief The values for a brightness transition.
+   */
+  uint16_t _fromBrightness = 0;
+  uint16_t _toBrightness = 0;
 
   /**
    * @brief The duration of one animation cycle or transition in milliSeconds.
@@ -115,6 +130,11 @@ private:
   unsigned long _startTime;
 
   /**
+   * @brief The last time when color was updated.
+   */
+  // unsigned long _lastTime;
+
+  /**
    * @brief The duration of one animation cycle or transition in milliSeconds.
    */
   Mode _mode = Mode::_default;
@@ -125,9 +145,17 @@ private:
   String _valueAction;
 
   /**
+   * @brief linked elements by ID
+   */
+  ArrayString _lightElementIDs;  // IDs of linked elements, to be created in _lightElements on start
+
+
+  uint16_t _lightElementsCount = 0;
+
+  /**
    * @brief linked elements
    */
-  std::vector<LightElement *> _lightElements;  // direct linked elements
+  LightElement **_lightElements = nullptr;  // direct linked elements
 
   /**
    * @brief The _brightnessAction holds the actions that is submitted when the brightness changes.

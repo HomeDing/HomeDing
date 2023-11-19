@@ -16,8 +16,7 @@
  * * 24.11.2020 brightness=0 to switch off
 */
 
-#ifndef MAX7219ELEMENT_H
-#define MAX7219ELEMENT_H
+#pragma once
 
 class MAX7219Element : public Element
 {
@@ -119,7 +118,4 @@ private:
 // Register the MAX7219Element onto the ElementRegistry.
 bool MAX7219Element::registered =
     ElementRegistry::registerElement("max7219", MAX7219Element::create);
-#endif
-
-
 #endif

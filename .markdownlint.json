@@ -12,6 +12,12 @@
   "ul-style": {
     "style": "asterisk"
   },
-  "MD013": false,
-  "no-inline-html": false
+  "line-length": false,
+  "no-inline-html": false,
+  "code-block-style": {
+    "style": "fenced"
+  },
+  "no-duplicate-header": {
+    "allow_different_nesting": true
+  }
 }

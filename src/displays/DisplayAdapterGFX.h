@@ -9,6 +9,7 @@
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * -----
  * * 18.03.2022 created by Matthias Hertel
+ * * 08.05.2023 enable background color
  */
 
 #pragma once
@@ -21,9 +22,24 @@
 
 #include <displays/DisplayAdapter.h>
 
+#define COL565_BLACK 0x0000
+#define COL565_WHITE 0xFFFF
+#define COL565_RED 0xF800
+#define COL565_GREEN 0x07E0
+#define COL565_BLUE 0x001F
+#define COL565_CYAN 0x07FF
+#define COL565_MAGENTA 0xF81F
+#define COL565_YELLOW 0xFFE0
+#define COL565_ORANGE 0xFC00
+
 class DisplayAdapterGFX : public DisplayAdapter {
 public:
   ~DisplayAdapterGFX() = default;
+
+  DisplayAdapterGFX() {
+    backColor565 = COL565_BLACK;
+    drawColor565 = COL565_WHITE;
+  }
 
   bool start() override {
     // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
@@ -46,7 +62,7 @@ public:
     } else {
       DisplayAdapter::start();
 
-      if (conf->lightPin > 0) {
+      if (conf->lightPin >= 0) {
         pinMode(conf->lightPin, OUTPUT);
         digitalWrite(conf->lightPin, HIGH);
       }  // if
@@ -54,7 +70,7 @@ public:
       gfxDisplay->setTextWrap(false);
       gfxDisplay->cp437(true);
       gfxDisplay->setRotation((conf->rotation / 90) % 4);
-      _setTextHeight(8);
+      _setTextHeight(conf->height > 64 ? 16 : 8);
       clear();
       flush();
     }  // if
@@ -62,16 +78,11 @@ public:
   };  // init()
 
 
-  // virtual void setBrightness(uint8_t bright) override {
-  //   gfxDisplaydrawBitmap((bright * 128) / 100);
-  // };
-
-
   /**
    * @brief Clear all displayed information from the display.
    */
   void clear() override {
-    // LOGGER_JUSTINFO("clear.");
+    // LOGGER_JUSTINFO("clear");
     gfxDisplay->fillScreen(backColor565);
   };  // clear()
 
@@ -167,11 +178,19 @@ public:
   }  // loadFont()
 
 
-  virtual void setColor(uint32_t col) override {
+  virtual void setColor(const uint32_t col) override {
     DisplayAdapter::setColor(col);
     drawColor565 = col565(col);
     // LOGGER_JUSTINFO("setColor: (%08x)=%08x", col, drawColor565);
   };
+
+  virtual void setBackgroundColor(const uint32_t col) override {
+    DisplayAdapter::setBackgroundColor(col);
+    backColor565 = col565(col);
+    // LOGGER_JUSTINFO("setBackgroundColor: (%08x)=%08x", col, backColor565);
+  };
+
+
 
 protected:
   /**
@@ -179,44 +198,46 @@ protected:
    */
   Adafruit_GFX *gfxDisplay = nullptr;
 
-  // convert 32-bit color to 16-bit color
-  // 0x00RRGGBB to RRRRRGGGGGGBBBBB
+  /// @brief convert a 32-bit color value 0x00RRGGBB into the 565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
+  /// @param color 24-bit color value
+  /// @return 16-bit color in 565 format.
   uint16_t col565(uint32_t color) {
 
     uint16_t col =
       ((color & 0x00F80000) >> 8)
       | ((color & 0x0000FC00) >> 5)
       | ((color & 0x000000F8) >> 3);
-
     return (col);
   }
 
 
-  /** Set max. height of text in a box */
+  /// @brief Set height of text in a box.
+  /// @param h max. resulting height
   void _setTextHeight(int16_t h) {
- 
-    if (h == 0) {
-      // keep
-    } else if (h <= 8) {
-      loadFont(8);
+    int16_t base, fit;
 
-    } else if (h <= 10) {
-      loadFont(10);
+    // 8, 10, 16, 24
 
-    } else if (h <= 16) {
-      loadFont(16);
+    if (h > 0) {
+      base = 8;
+      fit = h % base;
 
-    } else if (h <= 20) {
-      loadFont(10, 2);
+      if ((h >= 10) && (h % 10 <= fit)) {
+        base = 10;
+        fit = h % base;
+      }
 
-    } else if (h <= 24) {
-      loadFont(24);
+      if ((h >= 16) && (h % 16 <= fit)) {
+        base = 16;
+        fit = h % base;
+      }
 
-    } else if (h <= 32) {
-      loadFont(16, 2);
+      if ((h >= 24) && (h % 24 <= fit)) {
+        base = 24;
+        fit = h % base;
+      }
 
-    } else if (h <= 48) {
-      loadFont(24, 2);
+      loadFont(base, h / base);
     }
   }
 

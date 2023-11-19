@@ -28,19 +28,26 @@
  * * 09.03.2021 less sharing class members in favor to methods.
  * * 02.09.2021 advertise web server in mDNS.
  * * 07.01.2023 ETAG support enabled permanently.
+ * * 19.04.2023 send to remotes using the host:type/id?name=value syntax
+ * * 20.08.2023 remove AUTO connection mode
+ * * 30.08.2023 use static Network class as Network Manager for connection and state
  */
 
 // The Board.h file also works as the base import file that contains some
 // general definitions and SDK/processor specific includes.
 
-#ifndef BOARD_H
-#define BOARD_H
+#pragma once
+
+#include <Arduino.h>
 
 #if defined(ESP32)
 #include <WebServer.h>
 #include <WiFi.h>
 #include <LittleFS.h>
-#define FILESYSTEM fs::LittleFSFS
+#include <FFat.h>
+// #define FILESYSTEM fs::LittleFSFS
+// #define FILESYSTEM fs::F_Fat
+#define FILESYSTEM FS
 
 #elif defined(ESP8266)
 #include <FS.h>
@@ -64,30 +71,12 @@ class Board;
 #include <displays/DisplayElement.h>
 #include <displays/DisplayAdapter.h>
 
-#include <StateElement.h>
 #include <core/Logger.h>
-#include <core/RTCVariables.h>
+#include <core/DeviceState.h>
+
 
 #define HOMEDING_GREETING "HomeDing"
 
-// ===== TIMING DEBUG OUTPUT HELPERs =====
-// can be controlled using the "Debug port" configuration setting. Set to none to remove TRACE calls.
-
-#ifdef DEBUG_ESP_PORT
-
-/** The TRACE Macros for creating output with timing hints: */
-#define TRACE_START                      // unsigned long __TRACE_START_TIME = millis();
-#define TRACE_END                        // unsigned long __TRACE_END_TIME = millis();
-#define TRACE_TIME                       // (__TRACE_END_TIME - __TRACE_START_TIME)
-#define TRACE_TIMEPRINT(topic, id, min)  // if (TRACE_TIME >= min) LOGGER_JUSTINFO(topic " %s (%dms)", id, TRACE_TIME);
-
-#else
-// #define TRACE(...)
-#define TRACE_START
-#define TRACE_END
-#define TRACE_TIME
-#define TRACE_TIMEPRINT(topic, id, min)
-#endif
 
 /**
  * The env.json file contains all the settings for registering the device
@@ -105,6 +94,12 @@ class Board;
  * The $net.txt file contains the configured network and credentials.
  */
 #define NET_FILENAME "/$net.txt"
+
+/**
+ * A SD or SD_MMC card can be mounted at /sd.
+ */
+#define SD_MOUNTNAME "/sd"
+#define SD_MOUNTNAME_SLASH "/sd/"
 
 
 /**
@@ -137,12 +132,14 @@ class Board {
   /** States of the board */
   enum BOARDSTATE : int {
     // ===== startup operation states
-    NONE = 0,  // unspecified
-    LOAD = 1,  // load configurations and create elements. Start SYS Elements
+    NONE = 0,  // starting point
 
-    CONNECT = 2,  // define how to connect, AUTO, PSK or PASSWD
-    WAITNET = 3,  // Wait for network connectivity or configuration request.
-    WAIT = 5,     // network is connected but wait for configuration request.
+    LOAD = 1,  // load configurations, start CAPTIVE without configuration
+
+    SETUP = 2,  // create elements. Start SYS Elements
+
+    CONNECT = 3,  // define how to connect, AUTO, PSK or PASSWD
+    WAITNET = 4,  // Wait for network connectivity or configuration request.
 
     // ===== normal operation states
     GREET = 10,  // network established, start NET Elements
@@ -165,7 +162,7 @@ class Board {
 
 public:
   // Major and minor version e.g. 1.00 in sync with version in Arduino library definition.
-  const char *version = "0.90";
+  const char *version = "0.9.8";
 
   // The build name defined by the main sketch e.g. "minimal", "standard", "radio"
   String build;
@@ -173,7 +170,7 @@ public:
   // ----- Time functionality -----
 
   /** The result of the millis() function at the start of loop().
-   * This can be used for all time / durtion calculations except high precission ones.
+   * This can be used for all time / duration calculations except high precission ones.
    */
   unsigned long nowMillis;
 
@@ -265,36 +262,36 @@ public:
    * send all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
-   * @param item use the n-th item of the value.
    */
-  void dispatchItem(String &action, String &values, int n);
+  void dispatch(const String &action, const char *value = nullptr);
 
   /**
    * send all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(String &action, const char *value = nullptr);
+  void dispatch(const String &action, int value);
 
   /**
    * send all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
-  void dispatch(String &action, int value);
-
-  /**
-   * send all the actions to the right elements.
-   * @param action list of actions.
-   * @param value the value for $v placeholder.
-   */
-  void dispatch(const String &action, const String &value);
+  void dispatch(const String &action, const String &value, boolean split = true);
 
   /**
    * @brief Dispatch an action without queueing it.
    * @param action The action string.
    */
   void dispatchAction(String action);
+
+  /**
+   * send all the actions to the right elements.
+   * @param action list of actions.
+   * @param value the value for $v placeholder.
+   * @param item use the n-th item of the value.
+   */
+  void dispatchItem(const String &action, const String &values, int n);
 
 
   // ===== state of elements =====
@@ -314,46 +311,18 @@ public:
 
 
   /**
-   * State Element to save state data.
-   */
-  StateElement *state = NULL;
-
-
-  /**
-   * System LED pin, will flash during config mode.
-   * Typical setting is GPIO2(D4) to use the blue LED on the EPS-12 boards.
-   */
-  int sysLED = -1;
-
-
-  /**
-   * System Button pin, can be used to enter the config mode during startup.
-   * Typical use is to use the GPIO0(D3) flash button.
-   */
-  int sysButton = 0;
-
-
-  /**
    * Safe Mode flag
    */
   bool isSafeMode;
 
-  /**
-   * Switch to next network connect mode in msec.
-   */
-  int maxNetConnextTime = 12 * 1000;
-
-  /**
-   * Min. time to wait for a configuration mode request.
-   */
-  int minConfigTime = 6 * 1000;
-
+  /// @brief Maximum time to wait for a network connection.
+  int maxNetConnectTime = 30 * 1000;
 
 #if defined(ESP32)
   /**
    * next free led channel to be used on ESP32
    */
-  int nextLedChannel = 0;
+  uint8_t nextLedChannel = 0;
 #endif
 
   /**
@@ -363,14 +332,16 @@ public:
   int I2cScl = -1;
   int I2cFrequency = 0;
 
+  /// Common SPI settings
+  int spiCLK = -1;   ///< SPI interface clock CLK pin
+  int spiMISO = -1;  ///< SPI interface MISO pin
+  int spiMOSI = -1;  ///< SPI interface MOSI pin
+
   /** Service discovery enabled */
   bool _mDnsEnabled = true;
 
   /** WebServer instance */
   WebServer *server;
-
-  /** FileSystem instance */
-  FILESYSTEM *fileSystem;
 
   // a counter used as eTag that gets incremented when any file is changed.
   unsigned int filesVersion;
@@ -425,6 +396,11 @@ public:
    */
   String deviceName;
 
+#if defined(ESP8266)
+  /** Sending Power Level */
+  float outputPower = 16.0;
+#endif
+
   /**
    * Start page of the device of no full UTL is given.
    * Can be configured using the device element `homepage` property.
@@ -451,7 +427,7 @@ private:
   /** startup mode of the board. */
   enum BOARDSTARTUP _startup;
 
-  // ===== Deep Slwwp control =====
+  // ===== Deep Sleep control =====
 
   /** duration of deep sleep in milliseconds*/
   unsigned long _deepSleepTime;
@@ -490,16 +466,17 @@ private:
    * @param action action or property.
    * @param value the value
    */
-  void _queueAction(const String &action, const String &v);
+  void _queueAction(const String &action, const String &v, boolean split = true);
 
   int _addedElements = 0;
 
   // state and timing
 
-  unsigned long configPhaseEnd;   // millis when current config mode (boardstate) is over, next mode
   unsigned long connectPhaseEnd;  // for waiting on net connection
+
   unsigned long _captiveEnd;      // terminate/reset captive portal mode after 5 minutes.
-  void _newState(enum BOARDSTATE newState);
+
+  void _newBoardState(enum BOARDSTATE newState);
 
   bool active = false;
 
@@ -511,7 +488,7 @@ private:
 
   /** connection status */
   void _checkNetState();
-  wl_status_t _wifi_status;
+  // wl_status_t _wifi_status;
 
   /** net connection mode */
   int netMode;
@@ -522,9 +499,10 @@ private:
   /** next element that will be used in loop() */
   Element *_nextElement;
 
-  String _actionList;
+  /** element is executing a loop() */
+  Element *_activeElement;
+
+  ArrayString _actions;
 
   static Element *_registered;
 };
-
-#endif

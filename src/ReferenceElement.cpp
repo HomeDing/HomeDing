@@ -42,7 +42,7 @@ bool ReferenceElement::set(const char *name, const char *value) {
 
   TRACE("set %s=%s", name, value);
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     gotNewValue = true;
     _incomingValue = atof(value);
     TRACE("new value =%f", _incomingValue);
@@ -52,7 +52,7 @@ bool ReferenceElement::set(const char *name, const char *value) {
     _refValue = atof(value);
     TRACE("new ref =%f", _refValue);
 
-  } else if (_stricmp(name, PROP_INVERSE) == 0) {
+  } else if (_stricmp(name, "invert") == 0) {
     _inverse = _atob(value);
 
   } else if (_stricmp(name, "onreference") == 0) {
@@ -103,7 +103,7 @@ void ReferenceElement::loop() {
 void ReferenceElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, (_value ? "1" : "0"));
+  callback("value", (_value ? "1" : "0"));
   callback("reference", String(_refValue).c_str());
 } // pushState()
 

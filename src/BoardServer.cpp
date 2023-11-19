@@ -1,5 +1,5 @@
 /**
- * @file boardServer.cpp
+ * @file BoardServer.cpp
  * @brief Implementation of a web server request hander to handle the IoT board
  * REST services.
  *
@@ -34,22 +34,19 @@
 
 
 #include <Arduino.h>
-#include <Board.h>
-#include <Element.h>
+#include <HomeDing.h>
 
 #include <BoardServer.h>
 #include <ElementRegistry.h>
 
 #include <MicroJsonComposer.h>
-
-// used for built-in files
-#define SVC_ANY "/$"
+#include <hdfs.h>
 
 // used for services
 #define API_ROUTE "/api/"
 
 // integrated htm files
-#define PAGE_UPDATE_VERS "/$update.htm#v09"
+#define PAGE_UPDATE "/$update.htm"
 
 // Content types for http results
 #define TEXT_JSON "application/json; charset=utf-8"  // Content type for JSON.
@@ -102,7 +99,7 @@ void BoardHandler::handleConnect(WebServer &server) {
       WiFi.persistent(true);
       _board->displayInfo("ok.");
 
-      File f = _board->fileSystem->open(NET_FILENAME, "w");
+      File f = HomeDingFS::open(NET_FILENAME, "w");
       if (f) {
         f.print(netName);
         f.print(',');
@@ -130,9 +127,9 @@ String BoardHandler::handleScan() {
   String result;
 
   _board->keepCaptiveMode();
-  
+
   int8_t scanState = WiFi.scanComplete();
-  TRACE("handleScan state=%d"m scanState);
+  TRACE("handleScan state=%d" m scanState);
 
   if (scanState == WIFI_SCAN_FAILED) {
     // restart an async network scan
@@ -186,11 +183,10 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
 #endif
 {
   // LOGGER_JUSTINFO("HTTP: > %s", requestUri.c_str());
-  bool can = ((requestMethod == HTTP_GET)              // only GET requests in the API
-              && (requestUri.startsWith(SVC_ANY)       // old api entries
-                  || requestUri.startsWith(API_ROUTE)  // new api entries
-                  || (requestUri == "/")               // handle redirect
-                  || (_board->isCaptiveMode())));      // capt
+  bool can = ((requestMethod == HTTP_GET)           // only GET requests in the API
+              && (requestUri.startsWith(API_ROUTE)  // new api entries
+                  || (requestUri == "/")            // handle redirect
+                  || (_board->isCaptiveMode())));   // capt
 
   return (can);
 }  // canHandle
@@ -213,7 +209,6 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   TRACE("handle(%s)", requestUri2.c_str());
   String output;
   const char *output_type = nullptr;  // when output_type is set then send output as response.
-  FILESYSTEM *fs = _board->fileSystem;
 
   bool ret = true;
   bool unSafeMode = !_board->isSafeMode;
@@ -223,19 +218,16 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
   uri.toLowerCase();
   output.reserve(512);
 
-  if (uri.startsWith(SVC_ANY)) {
-    api = uri.substring(2);
-
-  } else if (uri.startsWith(API_ROUTE)) {
+  if (uri.startsWith(API_ROUTE)) {
     api = uri.substring(5);
   }
 
-  if ((api == "board") || (api == "state")) {
+  if (api == "state") {
     // most common request, return state of all elements
     _board->getState(output, String());
     output_type = TEXT_JSON;
 
-  } else if ((api.startsWith("state/")) || (api.startsWith("board/"))) {
+  } else if (api.startsWith("state/")) {
     // everything behind  "/api/state/" is used to address a specific element
     String id(api.substring(6));
 
@@ -247,10 +239,10 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
       _board->getState(output, id);
 
     } else {
-      // send all actions to the specified element per given argument
+      // send arguments as actions to the specified element per given argument
       for (int a = 0; a < argCount; a++) {
         String tmp = id + "?" + server.argName(a) + "=$v";
-        _board->dispatch(tmp, server.arg(a));
+        _board->dispatch(tmp, server.arg(a), false);
       }
     }  // if
     output_type = TEXT_JSON;
@@ -261,29 +253,57 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
     jc.openObject();
     jc.addProperty("devicename", _board->deviceName);
+    jc.addProperty("coreVersion", String(_board->version));
+    jc.addProperty("coreBuild", String(_board->build));
+
+#if defined(ESP8266)
+    jc.addProperty("core", "ESP8266");
+#elif defined(ESP32)
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+    esp_chip_model_t model = chip_info.model;
+    const char *s = "unknown";
+    if (model == CHIP_ESP32) { s = "ESP32"; };
+    // if (model == CHIP_ESP32S2) { s = "ESP32-S2"; };
+    if (model == CHIP_ESP32S3) { s = "ESP32-S3"; };
+    if (model == CHIP_ESP32C3) { s = "ESP32-C3"; };
+    // if (model == CHIP_ESP32H2) { s = "ESP32-H2"; };
+    jc.addProperty("core", s);
+#endif
+
     jc.addProperty("build", __DATE__);
     jc.addProperty("freeHeap", ESP.getFreeHeap());
 
+#if !defined(HD_MINIMAL)
     jc.addProperty("flashSize", ESP.getFlashChipSize());
-    jc.addProperty("coreVersion", String(_board->version));
-    jc.addProperty("coreBuild", String(_board->build));
     jc.addProperty("mac", WiFi.macAddress().c_str());
+#endif
 
 #if defined(ESP8266)
+    // ESP32 supports LittleFS only
     FSInfo fs_info;
-    fs->info(fs_info);
+    LittleFS.info(fs_info);
     jc.addProperty("fsTotalBytes", fs_info.totalBytes);
     jc.addProperty("fsUsedBytes", fs_info.usedBytes);
 
 #elif defined(ESP32)
-    jc.addProperty("fsTotalBytes", fs->totalBytes());
-    jc.addProperty("fsUsedBytes", fs->usedBytes());
+    // ESP32 supports FFat and LittleFS
+    if (HomeDingFS::rootFS == (fs::FS *)&FFat) {
+      jc.addProperty("fsTotalBytes", FFat.totalBytes());
+      jc.addProperty("fsUsedBytes", FFat.usedBytes());
+    } else {
+      jc.addProperty("fsTotalBytes", LittleFS.totalBytes());
+      jc.addProperty("fsUsedBytes", LittleFS.usedBytes());
+    }
+
 #endif
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
     jc.addProperty("upTime", now / 1000);
 
+#if !defined(HD_MINIMAL)
     // WIFI info
     jc.addProperty("ssid", WiFi.SSID());
+#endif
 
     jc.closeObject();
     output = jc.stringify();
@@ -300,7 +320,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   } else if (unSafeMode && (api == "resetall")) {
     // Reset file system, network parameters and reboot
-    fs->format();
+    LittleFS.format();
     handleReboot(server, true);
     output_type = TEXT_PLAIN;
 
@@ -311,9 +331,14 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   } else if (unSafeMode && (api == "list")) {
     // List files in filesystem
+    String p = server.arg("path");
+    TRACE("path=%s", p.c_str());
+
+    if (!p.endsWith("/")) { p += '/'; }
+
     MicroJsonComposer jc;
     jc.openArray();
-    handleListFiles(jc, "/");
+    handleListFiles(jc, p);
     jc.closeArray();
     output = jc.stringify();
     output_type = TEXT_JSON;
@@ -338,20 +363,16 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
 #if defined(ESP8266)
     FSInfo fsi;
-    fs->info(fsi);
+    LittleFS.info(fsi);
     if (fsi.usedBytes < 18000) {
       // assuming UI files not installed
-      url = PAGE_UPDATE_VERS;
-      if (fsi.totalBytes < 500000) {
-        // small file system
-        url.concat('m');
-      }
+      url = PAGE_UPDATE;
     }
 
 #elif defined(ESP32)
-    if (fs->usedBytes() < 18000) {
+    if (LittleFS.usedBytes() < 18000) {
       // assuming UI files not installed
-      url = PAGE_UPDATE_VERS;
+      url = PAGE_UPDATE;
     }
 #endif
 
@@ -382,96 +403,66 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 }  // handle()
 
 
-#if defined(ESP8266)  // && defined(SPIFFS)
-
-// ESP8266 SPIFFS implementation, compatible with LittleFS on ESP8266
-// list files in filesystem recursively.
-
-void listDirectory(MicroJsonComposer &jc, FILESYSTEM *fs, String path, Dir dir) {
-  while (dir.next()) {
-    String name = dir.fileName();
-
-    if (dir.isDirectory()) {
-      Dir subDir = fs->openDir(path + name);
-      listDirectory(jc, fs, path + name + "/", subDir);
-
-    } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
-      // do not report as a file
-
-    } else {
-      jc.openObject();
-      jc.addProperty("type", "file");
-      String longName = path + name;
-      longName.replace("//", "/");
-      jc.addProperty("name", longName);
-      jc.addProperty("size", dir.fileSize());
-      jc.closeObject();
-    }  // if
-  }    // while
-}
-
+// list files in filesystem, one folder only.
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
-  FILESYSTEM *fs = _board->fileSystem;
-  Dir dir = fs->openDir(path);
-  listDirectory(jc, fs, "/", dir);
-}
-
-
-#elif defined(ESP32)
-
-// list files in filesystem recursively.
-void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
-  FILESYSTEM *fs = _board->fileSystem;
-  File dir = fs->open(path, "r");
   TRACE("handleListFiles(%s)", path.c_str());
-  // ASSERT: last char of path = '/'
+
+  // assert: last char of path = '/'
+  TRACE("  open(%s)", path.c_str());
+  File dir = HomeDingFS::open(path);
+
+  if (HomeDingFS::sdFS && path.equals("/")) {
+    // add the /sd mount folder to the list
+    jc.openObject();
+    jc.addProperty("type", "dir");
+    jc.addProperty("name", SD_MOUNTNAME);
+    jc.closeObject();
+  }
 
   while (File entry = dir.openNextFile()) {
-    String name = path + entry.name();
+    String longName = path + entry.name();
+    TRACE("  + %s", longName.c_str());
 
-    if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
+    if ((longName.indexOf('#') >= 0) || (longName.indexOf('$') >= 0)) {
       // do not report as a file
-
-    } else if (entry.isDirectory()) {
-      handleListFiles(jc, name + "/");
 
     } else {
       jc.openObject();
-      jc.addProperty("type", "file");
-      jc.addProperty("name", name);
-      jc.addProperty("size", entry.size());
-      // jc.addProperty("time", entry.getLastWrite());
+      jc.addProperty("name", longName);
+
+      if (entry.isDirectory()) {
+        jc.addProperty("type", "dir");
+      } else {
+        jc.addProperty("size", entry.size());
+      }
       jc.closeObject();
     }  // if
   }    // while
 }  // handleListFiles()
 
-#endif
-
 
 void BoardHandler::handleCleanWeb(String path) {
   TRACE("handleCleanWeb(%s)", path.c_str());
-  FILESYSTEM *fSys = _board->fileSystem;
-  // ASSERT: last char of path = '/'
 
-  fs::File dir = fSys->open(path, "r");
+  File dir = HomeDingFS::open(path, "r");
+
   while (File entry = dir.openNextFile()) {
-    String name = path + entry.name();
-    TRACE("is: %s", name.c_str());
+    String longName = path + entry.name();
+    TRACE("is: %s", longName.c_str());
 
     if (entry.isDirectory()) {
       TRACE("isDir.");
-      handleCleanWeb((name + "/"));
+      handleCleanWeb((longName + "/"));
 
-    } else if ((name.indexOf('#') >= 0) || (name.indexOf('$') >= 0)) {
+    } else if ((longName.indexOf('#') >= 0) || (longName.indexOf('$') >= 0)) {
       TRACE("isSecret.");
 
-    } else if (name.indexOf(".json") >= 0) {
+    } else if (longName.indexOf(".json") >= 0) {
       TRACE("isConfig.");
 
     } else {
       TRACE("isFile.");
-      fSys->remove(name);
+      HomeDingFS::remove(longName);
     }  // if
   }    // while
 }  // handleCleanWeb()

@@ -24,7 +24,12 @@
 
 #include <WiFiClient.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#if !defined(TRACE)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#endif
+
+// enable tracing the network activity
+#define NETTRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 #define MAX_WAIT_FOR_RESPONSE 20
 #define DNS_TIMEOUT (uint32_t)4
@@ -35,8 +40,7 @@
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
-bool HttpClientElement::set(const char *name, const char *value)
-{
+bool HttpClientElement::set(const char *name, const char *value) {
   bool ret = true;
 
   if (_stricmp(name, "host") == 0) {
@@ -49,55 +53,49 @@ bool HttpClientElement::set(const char *name, const char *value)
     ret = Element::set(name, value);
   }
   return (ret);
-} // set()
+}  // set()
 
 
 /**
  * @brief Activate the HttpClientElement.
  */
-void HttpClientElement::start()
-{
+void HttpClientElement::start() {
   if (_host.length() == 0) {
     LOGGER_EERR("no host configured");
   } else {
     Element::start();
-  } // if
-} // start()
+  }  // if
+}  // start()
 
 
-bool HttpClientElement::isActive()
-{
-  return (_state != STATE::IDLE);
+bool HttpClientElement::isActive() {
+  return ((_state != STATE::IDLE) || (!_url.isEmpty()));
 };
 
 
-void HttpClientElement::processHeader(String &key, String &value)
-{
+void HttpClientElement::processHeader(String &key, String &value) {
   // TRACE(" =<%s>:<%s>", key.c_str(), value.c_str());
   if (key.equalsIgnoreCase("Content-Length")) {
     _contentLength = _atoi(value.c_str());
   }
 };
 
-void HttpClientElement::processBody(UNUSED char *value)
-{
-};
+void HttpClientElement::processBody(UNUSED char *value){};
 
 /**
  * @brief check the state of the input.
  */
-void HttpClientElement::loop()
-{
+void HttpClientElement::loop() {
   if ((_state != STATE::IDLE) || (!_url.isEmpty())) {
     _board->deferSleepMode();
-  } // if
+  }  // if
 
   if (_state == STATE::IDLE) {
     if (!_url.isEmpty()) {
-      // TRACE("new URL: %s", _url.c_str());
+      TRACE("new URL: %s", _url.c_str());
       NEWSTATE(STATE::GETIP);
-    } // if
-  } // if
+    }  // if
+  }    // if
 
   if (_startTime && (_board->getSeconds() - _startTime > MAX_WAIT_FOR_RESPONSE)) {
     LOGGER_EERR("timeout");
@@ -105,17 +103,17 @@ void HttpClientElement::loop()
 
 
   } else if ((_state == STATE::GETIP) && (_IPaddr)) {
-    NEWSTATE(STATE::SENDING); // shortcut, reuse IP address.
+    NEWSTATE(STATE::SENDING);  // shortcut, reuse IP address.
 
   } else if (_state == STATE::GETIP) {
     // init result
     _contentLength = 0;
 
     // ask for IP address
-    TRACE("start DNS...");
-    WiFi.hostByName(_host.c_str(), _IPaddr); // , DNS_TIMEOUT);
+    NETTRACE("start DNS...");
+    WiFi.hostByName(_host.c_str(), _IPaddr);  // , DNS_TIMEOUT);
     if (_IPaddr) {
-      TRACE(".got %d %s", b, _IPaddr.toString().c_str());
+      NETTRACE(".got %s", _IPaddr.toString().c_str());
       NEWSTATE(STATE::SENDING);
     } else {
       if (!_errNoHostSent) {
@@ -136,11 +134,11 @@ void HttpClientElement::loop()
       request.replace("$1", _url);
       request.replace("$2", _host);
 
-      TRACE("request:\n%s", request.c_str());
+      NETTRACE("request:\n%s", request.c_str());
       _httpClient.write(request.c_str());
       _startTime = _board->getSeconds();
       NEWSTATE(STATE::CHECK);
-    } // if
+    }  // if
 
   } else if (_state == STATE::CHECK) {
     // see if an answer has come back
@@ -150,7 +148,7 @@ void HttpClientElement::loop()
     } else if (!_httpClient.connected()) {
       LOGGER_EERR("nocon");
       NEWSTATE(STATE::ABORT);
-    } // if
+    }  // if
 
   } else if (_state == STATE::HEADERS) {
     // Read the header lines of the reply from server
@@ -163,7 +161,7 @@ void HttpClientElement::loop()
         break;
       }
       line.replace("\r", "");
-      // TRACE("raw: %s", line.c_str());
+      NETTRACE("head: %s", line.c_str());
 
       if (line.isEmpty()) {
         if (_contentLength) {
@@ -186,7 +184,7 @@ void HttpClientElement::loop()
         }
       }
       hd_yield();
-    } // while available
+    }  // while available
 
   } else if (_state == STATE::BODY) {
     // TRACE("body-remaining: %d", _contentLength);
@@ -196,24 +194,24 @@ void HttpClientElement::loop()
       char *buffer = (char *)malloc(bufLen + 1);
       memset(buffer, 0, bufLen + 1);
       size_t r = _httpClient.readBytes(buffer, bufLen);
-      // TRACE("  body read %d from %d", r, bufLen);
+      // NETTRACE("  body read %d from %d", r, bufLen);
       _contentLength -= r;
       processBody(buffer);
       free(buffer);
     }
     if (_contentLength == 0) {
-      NEWSTATE(STATE::ABORT); // all done.
+      NEWSTATE(STATE::ABORT);  // all done.
     }
-  } // if
+  }                            // if
 
   if (_state == STATE::ABORT) {
-    processBody(nullptr); // body passed completely
+    processBody(nullptr);  // body passed completely
     _httpClient.stop();
     _url = "";
     _startTime = 0;
     NEWSTATE(STATE::IDLE);
-  } // if
+  }  // if
 
-} // loop()
+}  // loop()
 
 // End

@@ -24,8 +24,7 @@
  */
 
 
-#ifndef MICROJSON_H
-#define MICROJSON_H
+#pragma once
 
 #include <functional>
 #include <FS.h>
@@ -95,7 +94,5 @@ protected:
 
   MicroJsonCallbackFn _callbackFn;
 };
-
-#endif
 
 // end.

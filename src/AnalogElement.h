@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
 #include <sensors/SensorElement.h>
 
 /**
@@ -61,8 +60,8 @@ public:
   /// retrieve values from a sensor
   bool getProbe(UNUSED String &values) override;
 
-  /// send data out by crating actions 
-  void sendData(UNUSED String &values) override ;
+  /// send data out by crating actions
+  void sendData(UNUSED String &values) override;
 
 private:
 #if defined ESP8266
@@ -71,12 +70,13 @@ private:
   int _pin = -1;  // pin must be configured
 #endif
 
-  // map() function just like the standard arduino map() function but with float and boundaries from configuration.
+  // map() function just like the standard Arduino map() function but with float and boundaries from configuration.
   int map(int value);
 
   // map factors
   bool _useMap = false;  // use map function when all 4 factors are given.
   int _inMin = 0, _inMax = 0, _outMin = 0, _outMax = 0;
+  bool _constrain = false;
 
   int _hysteresis = 10;
   int _reference = 500;

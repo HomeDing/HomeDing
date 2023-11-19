@@ -14,10 +14,7 @@
  * * 29.04.2018 created by Matthias Hertel
  */
 
-#ifndef PWMOut_H
-#define PWMOut_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The PWMOutElement is an Element that creates an pwm digital output signal based on actions.
@@ -80,6 +77,3 @@ private:
 bool PWMOutElement::registered =
     ElementRegistry::registerElement("pwmout", PWMOutElement::create);
 #endif
-
-
-#endif // PWMOut_H

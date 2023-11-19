@@ -4,10 +4,119 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.x] - unreleased
 
-* updated Web UI
+### Display and Touch Driver updates
+
+There is support for displays in the HomeDing Library since a long time. With the ESP32 variants
+come some new opportunities especially for larger and more colorful display like 480*320 px including touch controllers.
+This version has some major updates to support these devices.
+
+* Some Display Adapters are now implemented using the [Arduino_GFX
+  Library](https://github.com/moononournation/Arduino_GFX) that supports a long list of
+  interfaces called [Data bus](https://github.com/moononournation/Arduino_GFX/wiki/Data-Bus-Class)
+  and displays [Display Class](https://github.com/moononournation/Arduino_GFX/wiki/Display-Class).
+  Also many boards including displays are explained how to use.
+
+  This library is derived from the AdaFruit library and was extended to support more displays
+  than sold by AdaFruit.
+
+  A must recommend displays from AdaFruit as they take care about the quality of their items
+  (that is not always true when importing from china or buying from eBay).
+
+* The [Display Touch GT911 Element](https://homeding.github.io/elements/display/touchgt911.htm)
+  is the implementation of a touch controller that comes with displays.
+
+* The [Display Touch CST816 Element](https://homeding.github.io/elements/display/touchcst816.htm)
+  is the implementation of a touch controller that comes with displays.
+
+* The [Display Touch FT6336 Element](https://homeding.github.io/elements/display/touchft6336.htm)
+  is the implementation for the touch controller that comes with displays using the ft6336 chip.
+
+* The [Display Touch Element](https://homeding.github.io/elements/display/touch.htm) is the base
+  implementation for touch controllers that cannot be instantiated as an element. It handles
+  click events and shares them with the available
+  [Display Button Elements](https://homeding.github.io/elements/display/button.htm). Now you can add visual buttons on the display to start actions by click.
+
+* The [Display Button Element](https://homeding.github.io/elements/display/button.htm) draws a
+  button at the configured position where click events should be captured.
+
+* The BigDisplay example is made for a display with integrated touch panel.
+
+* The Tutorial example was extracted from the Devding Example.
+
+* The [Select Element](https://homeding.github.io/elements/select.htm) was added.
+
+* The [Tone Element](https://homeding.github.io/elements/tone.htm) was added.
+
+* Improvements for multi-color stripes
+
+* ESP8266 output-power option
+
+* Improved display and color display support
+
+* FAT support for root/Flash file system
+
+* Rewriting of the startup sequence to speed up startup and remove of sysLED and sysButton. See
+  [The Startup Sequence](https://homeding.github.io/dev/startup.md) and [Persisting Current
+  State of Elements](https://homeding.github.io/elements/state.md).
+
+* The **Diag Element** included in the DevDing example was extended with the endpoints:
+
+  * /diag (build info, state, i2c devices)
+  * /profile (profiling the loop() times of elements)
+  * /chipinfo (about the chip in use)
+
+  Some related code was removed from the board.cpp implementation.
+
+* Profiling the loop() times can be enabled by including the <hdProfile.h> in <homeding.h>
+  manually, recompile and upload the extended sketch.
+
+  This will result in recoding the time consumed by the loop() function of elements to identify
+  non-cooperative elements.
+
+  The [Diag Element](https://homeding.github.io/elements/diag.htm) provides a simple web page
+  showing the current recorded times using `http://devicename/profile`.
+
+
+### Minimal Examples
+
+The minimal example was split into **plug** and **bulb**.
+
+These [Minimal Examples](https://github.com/HomeDing/HomeDing/tree/develop/examples/minimal)
+are implemented to support ESP8266 based devices with 1MB Flash like switches and lights.
+They contain a reduced set of elements for the specific use-case and a small footprint Web-UI.
+These work well with small self-made and and off-the-shell devices.
+
+The micro example is especially for ESP8266 based boards with 1 MByte Flash only
+to support a 2-step ´firmware update.
+It can be flashed on a devices even when memory is low for a regular update.
+After the micro example is flashed a bigger firmware can be flashed.
+
+Some examples also have a \<sketch\>.ino.globals.h file to define a Marco "HD_MINIMAL".
+This is causing smaller bin files by removing some rarely needed functionality.
+
+
+## [0.9.7] - 2023-05-01 unreleased
+
+* updated Web UI files from Web project <https://github.com/HomeDing/WebFiles>.
 
 * [State Elements](https://homeding.github.io/elements/state.htm) documentation added.
 
+* [SDMMC Element](https://homeding.github.io/elements/sdmmc.htm) for ESP32 to add files from sd card to web server
+  using ESP32 specific sdmmc interface.
+  .
+* [SD Element](https://homeding.github.io/elements/sd.htm) add files from sd card to web server using the SPI interface.
+
+* ESP32-S3 Processor Support
+  
+  **Important** -- The SSDP discovery libraray for ESP32 must be installed manually
+  as it is not listed in the Arduino Library Manager.
+  It can be found at <https://github.com/luc-github/ESP32SSDP>
+  (download zip file and extract into the libraries folder or `git clone https://github.com/luc-github/ESP32SSDP`)
+
+* The Examples on [How to create and extend a new Element](https://homeding.github.io/steps/newelement.htm)
+  have been moved into the [tutorial example](https://homeding.github.io/examples/tutorial.htm) folder.
+
+  Documentation has been updated, see <https://homeding.github.io>.
 
 ### Changes / Enhancements
 
@@ -24,10 +133,11 @@ All notable changes to this project will be documented in this file.
 * [WebRadio example](https://github.com/HomeDing/HomeDing/tree/develop/examples/webradio)
   
   This example implements a audio streaming device for ESP32 based systems.
+
 * The [Display ST7789 Element](https://homeding.github.io/displays/st7789.htm)
   supports color LCD displays using the ST7789 driver chip.
 
-* The [Display ST7735 Element](https://homeding.github.io/displays/ST7735.htm)
+* The [Display ST7735 Element](https://homeding.github.io/displays/st7735.htm)
   supports color LCD displays using the ST7735 driver chip.
 
 * The Color and Light Elements have been refactored.
@@ -41,6 +151,15 @@ All notable changes to this project will be documented in this file.
   
   Please note that caused by different processor functionality
   not all features and elements are supported for all processors.
+
+* The /$board endpoints have been removed. Use the /api/** endpoints instead.
+
+* **micro** example
+
+  This is not a real example but is used to flash small devices
+  with firmware for specific conditions.
+  See [micro example readme](/examples/micro/README.md)
+
 
 ## [0.9.0] - 2022-08-22
 
@@ -62,11 +181,11 @@ All notable changes to this project will be documented in this file.
   See now supporting different sensors using the OneWire protocol.
 
 * **[BH1750 Element](https://homeding.github.io/elements/am2320.htm)** --
-The AM2320Element allows retrieving temperature and humidity 
+The AM2320Element allows retrieving temperature and humidity
 values from AM2320 sensors and creates actions when new values are available.
 
 * **[AHT20 Element](https://homeding.github.io/elements/aht20.htm)** --
-The AHT20Element allows retrieving temperature and humidity 
+The AHT20Element allows retrieving temperature and humidity
 values from from the AHT20 sensors from aosong and creates actions when new values are available.
 
 * **[SDC4x Element]**
@@ -80,13 +199,13 @@ The TouchElement enables creating Actions by using touch input on the ESP32.
 * **SensorElement** is enhanced to support reporting the state and emitting actions for the sensor values
   to simplify sensor implementations and save overall memory.
 
-* **[CalcElement](https://homeding.github.io/elements/calc.htm)** is used as a base class 
+* **[CalcElement](https://homeding.github.io/elements/calc.htm)** is used as a base class
 for some elements with multiple input an calculated output.
 
 * There are **[CLI commands](https://homeding.github.io/dev/cli.htm)** available for updating and restoring device configurations
   and uploading pre-build firmware.
 
-* much fixing, testing, documenation and cleanup  
+* much fixing, testing, documentation and cleanup  
 
 * much more support for ESP32.  
 
@@ -103,7 +222,7 @@ With the 0.8.x version the SPIFFS filesystem is not supported any more
 resulting a a reformatted flash disk space when updating.
 
 * **LittleFS** -
-  LitteFS is now the default filesystem.
+  LittleFS is now the default filesystem.
   
   As the SPIFFS filesystem is deprecated the LittleFS filesystem is supported from now on.
 
@@ -122,7 +241,7 @@ resulting a a reformatted flash disk space when updating.
 * The API calls can be made on the /api/ url path in addition of using the $... paths
   that will be deprecated. /$... paths will stay for builtin files.
 * /$update.htm now served with version parameter based on flash disk size.
-* The display adapters and elements have beedn rewritten to use the Adafruit GFX library.
+* The display adapters and elements have been rewritten to use the Adafruit GFX library.
 
 * MUCH documentation at [github.io](https://homeding.github.io).
 
@@ -313,7 +432,7 @@ These Elements are added to the [Development example](https://homeding.github.io
   * See story [Build a Weather forecast display](https://homeding.github.io/stories/story-weatherdisplay.htm).
 
 * **[DHT Element](https://homeding.github.io/elements/dht.htm)**
-  * **powerPin** and **powerInverse** - The DHT Element has support for a power controlling GPIO pin to reset the sensor when required.
+  * **powerPin** and **powerInvert** - The DHT Element has support for a power controlling GPIO pin to reset the sensor when required.
 
 * **[Sensor Elements](https://homeding.github.io/elements/sensors.htm)**
   * **warmupTime** - the time a sensor required to be usable for first data acquiring.

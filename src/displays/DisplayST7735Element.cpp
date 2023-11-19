@@ -1,5 +1,5 @@
 /**
- * @file DisplayST7735Element.cpp
+ * @file displays/DisplayST7735Element.cpp
  * @brief Display Element for ST7735 compatible TFT displays.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -11,24 +11,21 @@
  *
  * More information on https://www.mathertel.de/Arduino
  *
- * Changelog:see DisplayST7735Element.h
+ * Changelog:see <displays/DisplayST7735Element.h>
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include <displays/DisplayST7735Element.h>
 #include <displays/DisplayST7735Adapter.h>
 
-#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...)  LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
-/**
- * @brief static factory function to create a new DisplayST7735Element
- * @return DisplayST7735Element* created element
- */
+  /// @brief Factory function to create a DisplayST7735Element.
+  /// @return created Element* 
 Element *DisplayST7735Element::create() {
   return (new DisplayST7735Element());
 }  // create()
@@ -38,10 +35,7 @@ Element *DisplayST7735Element::create() {
 
 // All required parameters are handled by DisplayElement::set()
 
-/**
- * @brief Activate the DisplayST7735Element and register a Display Adapter to LCD
- * in the board.
- */
+/// @brief Activate the Element and register a Display Adapter to LCD in the board.
 void DisplayST7735Element::start() {
   TRACE("start()");
 
@@ -53,7 +47,7 @@ void DisplayST7735Element::start() {
       DisplayElement::start();
 
     } else {
-      LOGGER_EERR("no display found.");
+      LOGGER_EERR("no display found");
       delete d;
     }  // if
   }    // if

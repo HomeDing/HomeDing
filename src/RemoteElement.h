@@ -1,9 +1,9 @@
 /**
  * @file RemoteElement.h
- * 
+ *
  * @brief System Element for the HomeDing Library to send actions to remote devices.
  * This allows starting a remote action on another HomeDing Library based device.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
@@ -17,12 +17,8 @@
  * * 22.04.2018 created by Matthias Hertel
  * * 17.03.2019 splitting connect into getHostByName and connect by IP.
  * * 05.01.2020 using HttpClientElement
+ * * 27.06.2023 queueing events to the same remote
  */
-
-#ifndef REMOTEELEMENT_H
-#define REMOTEELEMENT_H
-
-#include <HomeDing.h>
 
 #include <HttpClientElement.h>
 
@@ -30,8 +26,7 @@
  * @brief The RemoteElement is an special Element that creates actions based on
  * a digital IO signal.
  */
-class RemoteElement : public HttpClientElement
-{
+class RemoteElement : public HttpClientElement {
 public:
   /**
    * @brief Factory function to create a RemoteElement.
@@ -44,45 +39,24 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
-  virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Activate the RemoteElement.
-   * @return true when activation was good.
-   * @return false when activation failed.
-   */
-  virtual void start() override;
-
-  /**
-   * @brief check for completed remote actions.
-   */
+  /// @brief Give some processing time to the timer to check for next action.
   virtual void loop() override;
 
-  // return value is ignored for remote actions
-  // virtual void processHeader(String &key, String &value);
-  // virtual void processBody(char *value);
 
-  // pushState is not required because no dynamic properties
+  /// @brief Dispatch an actio to the remote device.
+  /// @param targetId element type and id in the remote device
+  /// @param name name of the property/action
+  /// @param value value of the property/action
+  void dispatchAction(String &targetId, String &name, String &value);
 
 private:
-
-  // configuration
-  String _remoteId; /** type/id of element in remote device. */
-
-  String _action; // next action to be sent
+  /// @brief queued actions
+  ArrayString _queue;
 };
 
 #ifdef HOMEDING_REGISTER
 // Register the RemoteElement in the ElementRegistry.
 bool RemoteElement::registered =
-    ElementRegistry::registerElement("remote", RemoteElement::create);
+  ElementRegistry::registerElement("remote", RemoteElement::create);
 #endif
-
-#endif // REMOTEELEMENT_H

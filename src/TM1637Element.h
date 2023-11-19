@@ -1,6 +1,6 @@
 /**
  * @file TM1637Element.h
- * @brief The TM1637Element implements communication with TM1637 LED driver chips.
+ * @brief The TM1637Element implements communication with TM1637 LED driver chips to implement 7 segment LED display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -16,10 +16,7 @@
  * * implementing a single chip only. chained chips not yet supported.
  */
 
-#ifndef TM1637ELEMENT_H
-#define TM1637ELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The TM1637Element implements communication with TM1637 LED driver chips.
@@ -106,7 +103,4 @@ private:
 // Register the TM1637Element onto the ElementRegistry.
 bool TM1637Element::registered =
   ElementRegistry::registerElement("tm1637", TM1637Element::create);
-#endif
-
-
 #endif

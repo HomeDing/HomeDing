@@ -15,10 +15,7 @@
  * * 24.08.2018 make level parameter availabe during setup.
  */
 
-#ifndef DIGITALOUT_H
-#define DIGITALOUT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The DigitalOutElement is an Element that creates an digital output
@@ -80,6 +77,3 @@ private:
 bool DigitalOutElement::registered =
     ElementRegistry::registerElement("digitalout", DigitalOutElement::create);
 #endif
-
-
-#endif // DIGITALOUT_H

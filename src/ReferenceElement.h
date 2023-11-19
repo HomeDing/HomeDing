@@ -16,9 +16,6 @@
  * * 02.12.2021 created by Matthias Hertel
  */
 
-#ifndef REFERENCEELEMENT_H
-#define REFERENCEELEMENT_H
-
 #include <cfloat>
 
 class ReferenceElement : public Element
@@ -87,6 +84,4 @@ private:
 // Register the ReferenceElement onto the ElementRegistry.
 bool ReferenceElement::registered =
     ElementRegistry::registerElement("reference", ReferenceElement::create);
-#endif
-
 #endif

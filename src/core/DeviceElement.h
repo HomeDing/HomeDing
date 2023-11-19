@@ -20,10 +20,7 @@
  * * 24.01.2020 enable reboot via action
  */
 
-#ifndef DEVICEELEMENT_H
-#define DEVICEELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The Device is an Element that offers some geeral and useful
@@ -97,5 +94,3 @@ private:
    */
   unsigned long _nextBoot;
 };
-
-#endif // DEVICEELEMENT_H

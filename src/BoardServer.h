@@ -17,7 +17,7 @@
  * * 30.05.2018 created by Matthias Hertel
  * * 21.12.2018 refactoring.
  * * 31.07.2021 include handling redirect on "/" request.
- * * deprecated: using the $board and other $xxx api calls will removed past version 0.9.0
+ * * 23.04.2023 using the $board for calling services is removed
  *   $xxx will only be used for files included in the firmware. 
  * @details
 

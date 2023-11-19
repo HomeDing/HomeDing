@@ -155,15 +155,13 @@ bool AHT20Element::getProbe(String &values) {
     TRACE("crc: %02x", c);
 
     if (c == data[6]) {
-      rawData = 0;
-      rawData = (rawData | data[1]) << 8;
+      rawData = data[1] << 8;
       rawData = (rawData | data[2]) << 8;
       rawData = (rawData | data[3]);
       rawData = rawData >> 4;
       hum = ((float)rawData * 100.0) / 0x100000;
 
-      rawData = 0;
-      rawData = (rawData | data[3]) << 8;
+      rawData = data[3] << 8;
       rawData = (rawData | data[4]) << 8;
       rawData = (rawData | data[5]);
       rawData = rawData & 0xfffff;

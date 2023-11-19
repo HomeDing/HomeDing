@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief The TouchElement is an special Element that creates actions based
  * on a digital IO signal.

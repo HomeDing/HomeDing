@@ -17,10 +17,7 @@
  * * 06.09.2019 derivation of switch element
  */
 
-#ifndef ValueELEMENT_H
-#define ValueELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief Timer Element that produces actions based on timing conditions.
@@ -107,6 +104,4 @@ private:
 // Register the ValueElement in the ElementRegistry.
 bool ValueElement::registered =
     ElementRegistry::registerElement("value", ValueElement::create);
-#endif
-
 #endif

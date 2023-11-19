@@ -10,15 +10,46 @@
  * -----
  * * 25.07.2018 created by Matthias Hertel
  * * 18.03.2022 based on Adafruit GFX driver
+ * * 02.04.2023 using GFX.canvas1 and sending out data in adapter.
  */
 
 #pragma once
 
 #include <displays/DisplayAdapterGFX.h>
-
-#include <Adafruit_SSD1306.h>  // Hardware-specific library for SSD1306
-#include <SPI.h>
 #include <Wire.h>
+
+// SSD1306 commands, See Datasheet
+#define SSD1306_MEMORYMODE 0x20
+#define SSD1306_COLUMNADDR 0x21
+#define SSD1306_PAGEADDR 0x22
+#define SSD1306_SETCONTRAST 0x81
+#define SSD1306_CHARGEPUMP 0x8D
+#define SSD1306_SEGREMAPINV 0xA1
+#define SSD1306_DISPLAYALLON_RESUME 0xA4
+#define SSD1306_NORMALDISPLAY 0xA6
+// #define SSD1306_INVERTDISPLAY 0xA7
+#define SSD1306_SETMULTIPLEX 0xA8
+#define SSD1306_DISPLAYOFF 0xAE
+#define SSD1306_DISPLAYON 0xAF
+// #define SSD1306_COMSCANINC 0xC0
+#define SSD1306_COMSCANDEC 0xC8
+#define SSD1306_SETDISPLAYOFFSET 0xD3
+#define SSD1306_SETDISPLAYCLOCKDIV 0xD5
+#define SSD1306_SETPRECHARGE 0xD9
+#define SSD1306_SETCOMPINS 0xDA
+#define SSD1306_SETVCOMDETECT 0xDB
+
+// #define SSD1306_SETLOWCOLUMN 0x00
+// #define SSD1306_SETHIGHCOLUMN 0x10
+#define SSD1306_SETSTARTLINE 0x40
+
+#define SSD1306_RIGHT_HORIZONTAL_SCROLL 0x26
+#define SSD1306_LEFT_HORIZONTAL_SCROLL 0x27
+#define SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL 0x29
+#define SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL 0x2A
+#define SSD1306_DEACTIVATE_SCROLL 0x2E
+#define SSD1306_ACTIVATE_SCROLL 0x2F
+#define SSD1306_SET_VERTICAL_SCROLL_AREA 0xA3
 
 
 class DisplaySSD1306Adapter : public DisplayAdapterGFX {
@@ -26,7 +57,38 @@ public:
   ~DisplaySSD1306Adapter() = default;
 
   bool start() override {
-    display = new (std::nothrow) Adafruit_SSD1306(conf->width, conf->height, &Wire, conf->resetPin);
+    LOGGER_JUSTINFO("DisplaySSD1306Adapter-start %d/%d", conf->width, conf->height);
+
+    int h = conf->height;
+    int w = conf->width;
+
+    // width, height and rotation is now fixed for this hardware setup.
+    // rotate +90° to adjust bytes in memory to bytes in display.
+    conf->rotation += 90;
+    display = new (std::nothrow) GFXcanvas1(h, w);  // switched w and h !
+
+    // display parameter default values
+    uint8_t comPins = 0x12;
+    _colStart = 0;
+    _colEnd = w - 1;
+
+    if ((w == 128) && (h == 32)) {
+      comPins = 0x02;
+      _contrast = 0x8F;
+    } else if ((w == 128) && (h == 64)) {
+      comPins = 0x12;
+      _contrast = 0x9F;
+    } else if ((w == 72) && (h == 40)) {
+      comPins = 0x12;
+      _contrast = 0x82;
+      _colStart = 28;
+      _colEnd = 28 + w - 1;
+    } else if ((w == 96) && (h == 16)) {
+      comPins = 0x2;
+      _contrast = 0x10;
+    } else {
+      // Other screen varieties -- TBD
+    }
 
     if (!display) {
       LOGGER_ERR("not found");
@@ -34,34 +96,148 @@ public:
 
     } else {
       gfxDisplay = (Adafruit_GFX *)display;
-      display->begin(SSD1306_SWITCHCAPVCC, conf->i2cAddress);
-      backColor565 = SSD1306_BLACK;
-      drawColor565 = SSD1306_WHITE;
       DisplayAdapterGFX::start();
+      // backColor565 = COL565_BLACK;
+      // drawColor565 = COL565_WHITE;
+
+      // Init sequence
+#if defined(ESP8266)
+      yield();
+      Wire.setClock(400000);
+#elif defined(ESP32)
+      uint32_t sysWireClock = Wire.getClock();
+      Wire.setClock(1000000);
+#endif
+
+      uint8_t init1[] = {
+        SSD1306_DISPLAYOFF,                      // 0xAE
+        SSD1306_SETCONTRAST, _contrast,          // 0x81
+        SSD1306_NORMALDISPLAY,                   // 0xA6
+        SSD1306_DEACTIVATE_SCROLL,               // 0x2E
+        SSD1306_MEMORYMODE, 0x00,                // 0x20 Horizontal addressing mode
+        SSD1306_SEGREMAPINV,                     // 0xA1
+        SSD1306_SETMULTIPLEX, (uint8_t)(h - 1),  // 0xA8
+        SSD1306_COMSCANDEC,                      // 0xC8
+        SSD1306_SETDISPLAYOFFSET, 0x00,          // 0xD3, no offset
+        SSD1306_SETCOMPINS, comPins,             // 0xDA
+        SSD1306_SETDISPLAYCLOCKDIV, 0x80,        // 0xD5
+        SSD1306_SETPRECHARGE, 0x22,              // 0xd9
+        SSD1306_SETVCOMDETECT, 0x40,             // 0xDB
+        SSD1306_CHARGEPUMP, 0x14,                // 0x8D
+        SSD1306_SETSTARTLINE | 0x0,              // 0x40 line #0
+        SSD1306_DISPLAYALLON_RESUME,             // 0xA4
+        SSD1306_DISPLAYON                        // 0xAF
+      };
+      _sendCommandList(init1, sizeof(init1));
+#if defined(ESP32)
+      Wire.setClock(sysWireClock);
+#endif
     }  // if
     return (true);
-  };  // init()
+  };   // init()
 
 
   virtual void setBrightness(uint8_t bright) override {
-    display->dim(bright < 50);
-  };
+    _sendCommand(SSD1306_SETCONTRAST);
+    _sendCommand((bright < 50) ? 0 : _contrast);
+  };  // setBrightness
 
-  virtual void setColor(uint32_t UNUSED col) override {
+
+  virtual void setColor(const uint32_t UNUSED col) override{
     // LOGGER_JUSTINFO("no-setColor");
   };
 
   virtual uint32_t getColor() override {
-    return(0x00FFFFFF); // white
+    return (0x00FFFFFF);  // white
   };
 
   /**
    * @brief The flush method must be called after every output sequence to allow
    * combined sending new information to the display.
    */
-  virtual void flush() override{
+  virtual void flush() override {
     // LOGGER_JUSTINFO("flush()");
-    display->display();
+
+    DisplayAdapterGFX::flush();
+    uint8_t *buffer = display->getBuffer();  // rotated by +90° !
+    int h = conf->height;
+    int w = conf->width;
+
+#if 0
+    // print buffer on Serial log
+    for (int y = 0; y < 128; y++) {
+      uint8_t b;
+      for (int x = 0; x < 64; x++) {
+        if ((x % 8) == 0) {
+          b = buffer[(x / 8) + y * (64 / 8)];
+        }
+        if (b & 0x80) {
+          Serial.print('#');
+        } else {
+          Serial.print('.');
+        }
+        b = b << 1;
+      }
+      Serial.println();
+    }
+    Serial.println();
+#endif
+
+
+#if defined(ESP8266)
+    yield();
+    Wire.setClock(400000);
+#elif defined(ESP32)
+    uint32_t sysWireClock = Wire.getClock();
+    Wire.setClock(1000000);
+#endif
+
+    uint8_t dlist1[] = {
+      SSD1306_PAGEADDR,
+      0,    // Page start address
+      0x7,  // Page end (not really, but works here)
+
+      SSD1306_COLUMNADDR,
+      _colStart,  // Column start address
+      _colEnd     // Column end address
+    };
+    _sendCommandList(dlist1, sizeof(dlist1));
+
+    // unsigned long ts = millis();
+    // buffer is rotated by +90° !
+    uint16_t bytesOut = 0;
+    int hb = h / 8;  // height-bytes
+
+    for (int y = 0; y < hb; y++) {
+      uint8_t *pptr = buffer + (hb - y - 1);  // page start pointer
+
+      for (int x = 0; x < w; x++) {
+        if (!bytesOut) {
+          Wire.beginTransmission(conf->i2cAddress);
+          Wire.write((uint8_t)0x40);
+          bytesOut = 1;
+        }
+
+        Wire.write(*pptr);
+        // Serial.printf("%02x ", *pptr);
+        pptr += hb;
+        bytesOut++;
+
+        if (bytesOut == I2C_BUFFER_LENGTH) {
+          Wire.endTransmission(true);
+          bytesOut = 0;
+        }
+      }
+      // Serial.println();
+    }
+    if (bytesOut) {
+      Wire.endTransmission(true);
+    }
+
+    // Serial.printf("dur= %ld millis\n", millis() - ts);
+#if defined(ESP32)
+    Wire.setClock(sysWireClock);
+#endif
   };
 
 
@@ -69,5 +245,24 @@ private:
   /**
    * @brief Reference to the used library object
    */
-  Adafruit_SSD1306 *display = nullptr;
+  GFXcanvas1 *display = nullptr;
+
+  uint8_t _contrast;
+  uint8_t _colStart;
+  uint8_t _colEnd;
+
+  void _sendCommandList(const uint8_t *c, uint8_t n) {
+    while (n--) {
+      // send one command at a time. some displays don't wotk with
+      // multiple commands in one transmission.
+      _sendCommand(*c++);
+    }
+  }  // _sendCommandList
+
+  void _sendCommand(const uint8_t cmd) {
+    Wire.beginTransmission(conf->i2cAddress);
+    Wire.write((uint8_t)0x00);  // One Comamnd
+    Wire.write(cmd);
+    Wire.endTransmission();
+  }  // _sendCommand
 };

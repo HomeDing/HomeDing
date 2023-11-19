@@ -160,7 +160,7 @@ void BL0937Element::start() {
   // TRACE("start()");
 
   if ((_pinSel < 0) || (_pinCF < 0) || (_pinCF1 < 0)) {
-    LOGGER_EERR("configuration incomplete.");
+    LOGGER_EERR("configuration incomplete");
 
   } else {
     unsigned long now = millis();

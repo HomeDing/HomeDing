@@ -33,6 +33,7 @@
  * * 12.11.2019 Standard Example created from development sketch.
  * * 15.04.2020 fixed library dependencies.
  * * 15.06.2021 usable with esp8266 board manager version >= 3.0.0
+ * * 25.02.2023 template and example elements moved into the tutorial example.
  */
 
 // ----- activatable debug options
@@ -65,6 +66,8 @@
 #define HOMEDING_INCLUDE_BH1750
 #define HOMEDING_INCLUDE_SCD4X
 
+#define HOMEDING_INCLUDE_TONE
+
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
 // #define HOMEDING_INCLUDE_PMS
@@ -82,6 +85,7 @@
 #define HOMEDING_INCLUDE_DISPLAYSSD1306
 #define HOMEDING_INCLUDE_DISPLAYSH1106
 #define HOMEDING_INCLUDE_DISPLAYST7789
+#define HOMEDING_INCLUDE_DISPLAYST7796
 #define HOMEDING_INCLUDE_DISPLAYST7735
 #define HOMEDING_INCLUDE_DISPLAYMAX7219
 
@@ -93,11 +97,14 @@
 #define HOMEDING_INCLUDE_COLOR
 #define HOMEDING_INCLUDE_LIGHT
 #define HOMEDING_INCLUDE_NEOPIXEL
+#define HOMEDING_INCLUDE_APA102
 #define HOMEDING_INCLUDE_MY9291
 
 // Network Services
 #define HOMEDING_INCLUDE_MQTT
 #define HOMEDING_INCLUDE_WEATHERFEED
+#define HOMEDING_INCLUDE_SDMMC
+#define HOMEDING_INCLUDE_SD
 
 #include <Arduino.h>
 #include <HomeDing.h>
@@ -114,9 +121,6 @@
 
 #include "secrets.h"
 
-// #include "MyElement-01.h"
-// #include "MyElement-02.h"
-
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
 
@@ -127,6 +131,15 @@ WebServer server(80);
  */
 void setup(void) {
   Serial.begin(115200);
+
+#if ARDUINO_USB_CDC_ON_BOOT
+  Serial.setTxTimeoutMs(0);
+
+#else
+  while (!Serial)
+    yield();
+#endif
+
 #ifdef DBG_GDB
   gdbstub_init();
 #endif
@@ -139,7 +152,7 @@ void setup(void) {
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-#if defined(NET_DEBUG) && defined (ESP8266)
+#if defined(NET_DEBUG) && defined(ESP8266)
   Serial.setDebugOutput(true);
   // eSTAConnected = WiFi.onStationModeConnected(onSTAConnected);
   static WiFiEventHandler eSTAConnected =
@@ -197,27 +210,14 @@ void setup(void) {
   server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
+  server.addHandler(new FileServerHandler(&homeding));
 
-  // enable initialization line to see MyElement working
-  // homeding.add("my/1", new MyElement01());
-  // homeding.add("my/2", new MyElement02());
-
-  LOGGER_INFO("setup done.");
+  LOGGER_JUSTINFO("setup done");
 }  // setup
 
 
 // handle all give time to all Elements and active components.
 void loop(void) {
-#ifdef NET_DEBUG
-  static wl_status_t lastState = (wl_status_t)100;
-  wl_status_t newState = WiFi.status();
-  if (newState != lastState) {
-    Serial.printf("WiFi status: %d\n", newState);
-    lastState = newState;
-  }
-#endif
-
   server.handleClient();
   homeding.loop();
 }  // loop()

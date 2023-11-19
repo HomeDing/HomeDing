@@ -18,14 +18,10 @@
  * * 09.01.2029 created by Matthias Hertel
  */
 
-#ifndef WeatherFeed_H
-#define WeatherFeed_H
+#pragma once
 
-#include <HomeDing.h>
 #include <HttpClientElement.h>
 #include <WiFiClient.h>
-
-#include <vector>
 
 /**
  * @brief The WeatherFeed is an special Element that creates actions based on
@@ -88,8 +84,8 @@ private:
 
   int _count; // correct configures paths and actions.
 
-  std::vector<String> _paths;
-  std::vector<String> _actions;
+  ArrayString _paths;
+  ArrayString _actions;
 };
 
 #ifdef HOMEDING_REGISTER
@@ -98,5 +94,3 @@ bool WeatherFeedElement::registered =
     ElementRegistry::registerElement("weatherfeed", WeatherFeedElement::create);
 
 #endif
-
-#endif // WeatherFeed_H

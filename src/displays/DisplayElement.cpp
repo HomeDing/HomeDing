@@ -15,26 +15,26 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include "DisplayElement.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
-/* ===== Private functions ===== */
+// ===== private functions =====
 
 void DisplayElement::_newPage(int page) {
-  TRACE("newPage %d", page);
+  LOGGER_ETRACE("newPage %d", page);
   DisplayAdapter *da = _board->display;
   if (da) {
     int oldPage = da->page;
 
     da->page = constrain(page, 0, da->maxpage);
-    da->start();
 
+    da->clear();
     // redraw all display elements
     _board->forEach("display", [this](Element *e) {
+      LOGGER_ETRACE("do %s", e->id);
       e->set("redraw", "1");
     });
     if (da->page != oldPage) {
@@ -44,7 +44,7 @@ void DisplayElement::_newPage(int page) {
 }  // _newPage()
 
 
-/* ===== Element functions ===== */
+// ===== Element functions =====
 
 /**
  * @brief Constructor of a new DisplayElement.
@@ -53,13 +53,22 @@ DisplayElement::DisplayElement() {
   startupMode = Element_StartupMode::System;
 }
 
+
 void DisplayElement::init(Board *board) {
   Element::init(board);
+
+  config.busmode = BUSMODE_SPI;
 
   // use system wide I2C by default
   config.i2cSDA = board->I2cSda;
   config.i2cSCL = board->I2cScl;
-}
+
+  // use system wide SPI by default
+  config.spiCLK = board->spiCLK;
+  config.spiMOSI = board->spiMOSI;
+  config.spiMISO = board->spiMISO;
+}  // init()
+
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -95,12 +104,57 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // === These properties can only be used during configuration:
 
-    // i2c bus
+  } else if (_stricmp(name, "color") == 0) {
+    config.drawColor = _atoColor(value);
+
+  } else if (_stricmp(name, "background") == 0) {
+    config.backgroundColor = _atoColor(value);
+
+  } else if (_stricmp(name, "border") == 0) {
+    config.borderColor = _atoColor(value);
+
+  } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
+    if (_stricmp(value, "spi") == 0) {
+      config.busmode = BUSMODE_SPI;
+    } else if (_stricmp(value, "hspi") == 0) {
+      config.busmode = BUSMODE_HSPI;
+    } else if (_stricmp(value, "i2c") == 0) {
+      config.busmode = BUSMODE_I2C;
+    } else if (_stricmp(value, "par8") == 0) {
+      config.busmode = BUSMODE_PAR8;  // 8 bit parallel data
+    } else if (_stricmp(value, "lcd8") == 0) {
+      config.busmode = BUSMODE_LCD8;
+    }
+
+  } else if (_stricmp(name, "busspeed") == 0) {
+    config.busSpeed = _atoi(value);
+
+
+    // ===== parallel busses configuration
+
+  } else if (_stricmp(name, "cspin") == 0) {
+    config.csPin = _atopin(value);
+
+  } else if (_stricmp(name, "dcpin") == 0) {
+    config.dcPin = _atopin(value);
+
+  } else if (_stricmp(name, "wrpin") == 0) {
+    config.wrPin = _atopin(value);
+
+  } else if (_stricmp(name, "rdpin") == 0) {
+    config.rdPin = _atopin(value);
+
+  } else if (_stricmp(name, "buspins") == 0) {
+    config.busPins = value;
+    config.busPins.replace(" ", "");
+
+
+    // ===== i2c bus parameter
 
   } else if (_stricmp(name, "address") == 0) {
     config.i2cAddress = _atoi(value);
 
-    // spi bus
+    // ===== spi bus parameter
 
   } else if (_stricmp(name, "spimosi") == 0) {
     config.spiMOSI = _atopin(value);
@@ -112,20 +166,25 @@ bool DisplayElement::set(const char *name, const char *value) {
     config.spiCLK = _atopin(value);
 
   } else if (_stricmp(name, "spics") == 0) {
-    config.spiCS = _atopin(value);
+    config.csPin = _atopin(value);  // please use csPin, deprecated
 
   } else if (_stricmp(name, "spidc") == 0) {
-    config.spiDC = _atopin(value);
+    config.dcPin = _atopin(value);  // please use dcPin, deprecated
 
 
   } else if (_stricmp(name, "invert") == 0) {
     config.invert = _atob(value);
+
+  } else if (_stricmp(name, "ips") == 0) {
+    config.ips = _atob(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {
     config.resetPin = _atopin(value);
 
   } else if (_stricmp(name, "lightpin") == 0) {
     config.lightPin = _atopin(value);
+
+    // ===== Display settings
 
   } else if (_stricmp(name, "width") == 0) {
     config.width = _atoi(value);
@@ -139,10 +198,11 @@ bool DisplayElement::set(const char *name, const char *value) {
     r = constrain(r, 0, 3);
     config.rotation = r * 90;
 
-  // some RGB displays require setting rgb color modes.. (st7735 variants)
-  // } else if (_stricmp(name, "colormode") == 0) {
-  //   int _colormode = ListUtils::indexOf("rgb,bgr", value);
-  //   TRACE("set %s=%d", name, _colormode);
+  } else if (_stricmp(name, "rowOffset") == 0) {
+    config.rowOffset = _atoi(value);
+
+  } else if (_stricmp(name, "colOffset") == 0) {
+    config.colOffset = _atoi(value);
 
   } else {
     ret = Element::set(name, value);
@@ -150,6 +210,22 @@ bool DisplayElement::set(const char *name, const char *value) {
 
   return (ret);
 }  // set()
+
+
+/**
+ * @brief Activate the Element.
+ */
+void DisplayElement::start() {
+  DisplayAdapter *da = _board->display;
+  if (da) {
+    Element::start();
+    da->setBrightness(config.brightness);
+    da->setBackgroundColor(config.backgroundColor);
+
+  } else {
+    LOGGER_EERR("no display found");
+  }
+}  // start()
 
 
 /**

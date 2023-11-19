@@ -8,7 +8,7 @@
  *
  * Compile with
  * * Board: NodeMCU 1.0
- * * Flash Size: 4M (FS:2MB, OTA:~1019KB)
+ * * Flash Size: 4M (FS:2MB, OTA:~1019KB) 
  * * Debug Port: "Serial"
  * * Debug Level: "None"
  * * MMU: 32+32 balanced
@@ -109,9 +109,9 @@ void setup(void) {
   server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
+  server.addHandler(new FileServerHandler(&homeding));
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 }  // setup
 
 

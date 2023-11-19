@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief The NTPTimeElement is an special Element that creates actions based on
  * a digital IO signal.

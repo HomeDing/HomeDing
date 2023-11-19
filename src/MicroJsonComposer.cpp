@@ -47,6 +47,7 @@ void MicroJsonComposer::closeArray() {
 
 // Create a property with String value
 void MicroJsonComposer::addProperty(const char *key, String value) {
+  _out.reserve(_out.length() + strlen(key) + value.length() + 64);
   if (!_fresh) _out.concat(',');
   value.replace("\"", "\\\"");
   _out.concat('\"');

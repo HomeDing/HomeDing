@@ -10,62 +10,35 @@
  * -----
  * * 25.07.2018 created by Matthias Hertel
  * * 18.03.2022 based on Adafruit GFX driver
+ * * 05.11.2023 reworked for Arduino_GFX compatible driver
+ * * 05.11.2023 Arduino_GFX compatible driver donated to https://github.com/moononournation/Arduino_GFX/pull/376
  */
 
 #pragma once
 
-#include <displays/DisplayAdapterGFX.h>
+#include <displays/DisplayAGFXAdapter.h>
 
-#include <Adafruit_SH110X.h>  // Hardware-specific library for SH1106
-#include <SPI.h>
-#include <Wire.h>
+class DisplaySH1106Adapter : public DisplayAGFXAdapter {
 
-
-class DisplaySH1106Adapter : public DisplayAdapterGFX {
 public:
   bool start() override {
-    display = new (std::nothrow) Adafruit_SH1106G(conf->width, conf->height, &Wire, conf->resetPin);
+    PANELTRACE("DisplaySH1106Adapter.start()\n");
 
-    if (!display) {
-      LOGGER_ERR("not found");
-      return (false);
+    conf->busmode = BUSMODE_I2C;
+    bus = getBus(conf);
 
-    } else {
-      gfxDisplay = (Adafruit_GFX *)display;
-      display->begin(conf->i2cAddress);
-      backColor565 = SH110X_BLACK;
-      drawColor565 = SH110X_WHITE;
-      DisplayAdapterGFX::start();
-    }  // if
-    return (true);
-  };  // init()
+    if (bus) {
+      // Initialize the display using the physical parameters
+      // and use the Mono color Canvas for drawing
+      Arduino_G *op = new Arduino_SH1106(bus, conf->resetPin, conf->width, conf->height);
+      gfx = new Arduino_Canvas_Mono(conf->width, conf->height, op, 0, 0, true);
 
+      // set rotatation for drawing.
+      gfx->setRotation(conf->rotation / 90);
+      // conf->rotation
+    }
 
-  virtual void setBrightness(uint8_t bright) override {
-    display->setContrast((bright * 255) / 100);
-  };
-
-  virtual void setColor(UNUSED uint32_t col) override {
-    // LOGGER_JUSTINFO("no-setColor");
-  };
-
-  virtual uint32_t getColor() override {
-    return(0x00FFFFFF); // white
-  };
-
-  /**
-   * @brief The flush method must be called after every output sequence to allow
-   * combined sending new information to the display.
-   */
-  virtual void flush() override{
-    // LOGGER_JUSTINFO("flush()");
-    display->display();
-  };
-
-
-private:
-  /**
-   * @brief Reference to the used library object
-   */
-  Adafruit_SH1106G *display = nullptr;
+    DisplayAGFXAdapter::start();
+    return (gfx != nullptr);
+  };  // start()
 };

@@ -4,16 +4,23 @@
 
 #pragma once
 
+// to enable profiling the loop() times enable this include.
+// #include <hdProfile.h>
+
 #include <Board.h>            // Platform
 #include <Element.h>          // Abstract Elements
 #include <ElementRegistry.h>  // Element Registry
+
+#include <core/Logger.h>
+
+// enable all TRACE at once here
+// #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 // some common property names
 
 extern const char *PROP_VALUE;
 extern const char *PROP_PIN;
 extern const char *PROP_ADDRESS;
-extern const char *PROP_INVERSE;
 
 extern const char *ACTION_ONVALUE;
 extern const char *ACTION_ONTEMPERATURE;
@@ -76,6 +83,7 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_OR
 #define HOMEDING_INCLUDE_ADD
 #define HOMEDING_INCLUDE_SCENE
+#define HOMEDING_INCLUDE_SELECT
 #define HOMEDING_INCLUDE_REFERENCE
 #define HOMEDING_INCLUDE_Timer
 #define HOMEDING_INCLUDE_Schedule
@@ -87,6 +95,7 @@ extern Board homeding;
 #endif
 
 #ifdef HOMEDING_INCLUDE_SYSTEM
+// DeviceElement and OTAElement are included in any case.
 #define HOMEDING_INCLUDE_NTPTIME
 #define HOMEDING_INCLUDE_Time
 #endif
@@ -94,7 +103,6 @@ extern Board homeding;
 // system elements only in full firmware
 #ifdef HOMEDING_INCLUDE_FULL_SYSTEM
 #define HOMEDING_INCLUDE_SSDP
-#define HOMEDING_INCLUDE_RTCSTATE
 #endif
 
 // Easy include of all elements for an attached display.
@@ -104,9 +112,8 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_DisplayText
 #define HOMEDING_INCLUDE_DisplayDot
 #define HOMEDING_INCLUDE_DisplayLine
+#define HOMEDING_INCLUDE_DisplayButton
 #endif
-
-#include <core/Logger.h>
 
 // Register the Elements by including the definition with defined HOMEDING_REGISTER
 
@@ -146,9 +153,6 @@ extern Board homeding;
 #include <MapElement.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_RTCSTATE
-#include <RTCStateElement.h>
-#endif
 
 // ===== Time related Elements =====
 
@@ -201,6 +205,10 @@ extern Board homeding;
 #include <SceneElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_SELECT
+#include <SelectElement.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_LOG
 #include <core/LogElement.h>
 #endif
@@ -232,6 +240,10 @@ extern Board homeding;
 #include <displays/DisplayMAX7219Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYGC9A01
+#include <displays/DisplayGC9A01Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DISPLAYSSD1306
 #include <displays/DisplaySSD1306Element.h>
 #endif
@@ -240,28 +252,52 @@ extern Board homeding;
 #include <displays/DisplaySH1106Element.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_DISPLAYST7789
-#include <displays/DisplayST7789Element.h>
-#endif
-
 #ifdef HOMEDING_INCLUDE_DISPLAYST7735
 #include <displays/DisplayST7735Element.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_DISPLAYST7789
+#include <displays/DisplayST7789Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYESP32PANEL
+#include <displays/DisplayESP32PanelElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYST7796
+#include <displays/DisplayST7796Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_DisplayText
-#include <DisplayTextElement.h>
+#include <displays/DisplayTextElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayDot
-#include <DisplayDotElement.h>
+#include <displays/DisplayDotElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayLine
-#include <DisplayLineElement.h>
+#include <displays/DisplayLineElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DisplayButton
+#include <displays/DisplayButtonElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_TM1637
 #include <TM1637Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYTOUCHGT911
+#include <displays/DisplayTouchGT911Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
+#include <displays/DisplayTouchFT6336Element.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DISPLAYTOUCHCST816
+#include <displays/DisplayTouchCST816Element.h>
 #endif
 
 // ===== LIGHT ELEMENTS =====
@@ -278,6 +314,10 @@ extern Board homeding;
 #include <light/NeoElement.h>
 #endif
 
+#ifdef HOMEDING_INCLUDE_APA102
+#include <light/APA102Element.h>
+#endif
+
 #ifdef HOMEDING_INCLUDE_MY9291
 #include "light/MY9291Element.h"
 #endif
@@ -285,6 +325,14 @@ extern Board homeding;
 #ifdef HOMEDING_INCLUDE_P9813
 #include "light/P9813Element.h"
 #endif
+
+
+// ===== OPTIONAL AUDIO ELEMENTS =====
+
+#ifdef HOMEDING_INCLUDE_TONE
+#include "audio/ToneElement.h"
+#endif
+
 
 // ===== OPTIONAL ELEMENTS =====
 
@@ -338,6 +386,14 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_MAX7219
 #include <MAX7219Element.h>
+#endif
+
+#if defined(HOMEDING_INCLUDE_SDMMC) && defined(ESP32)
+#include <SDMMCElement.h>
+#endif
+
+#if defined(HOMEDING_INCLUDE_SD)
+#include <SDElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_MENU

@@ -19,7 +19,9 @@
 
 #include <light/ColorElement.h>
 
-#define TRACE(...)  LOGGER_ETRACE(__VA_ARGS__)
+#if !defined(TRACE)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#endif
 
 
 /* ===== Static factory function ===== */
@@ -48,7 +50,7 @@ Element *ColorElement::create() {
  * @param  hue 0...1535 (6 * 256).
  */
 // uint32_t hslColor(int hue, int saturation = 255, int lightness = 128) {
-uint32_t hslColor(int hue) {
+uint32_t ColorElement::hslColor(int hue) {
   hue = hue % MAX_HUE;
 
   // resulting colors
@@ -107,16 +109,20 @@ bool ColorElement::set(const char *name, const char *value) {
     if (_mode == Mode::fade) {
       // setup fading range and time
       _fromValue = _value;
+      _fromBrightness = _brightness;
       _startTime = now;
     }
     _toValue = colorValue;
-    _needUpdate = true;
+    _toBrightness = _brightness;
+    _needValueUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
     // set brightness: pass through to light elements
     int b = _atoi(value);
-    _brightness = constrain(b, 0, 100);
-    _needUpdate = true;
+    _fromBrightness = _brightness;
+    _toBrightness = constrain(b, 0, 100);
+    _startTime = now;
+    _needBrightnessUpdate = true;
 
 
   } else if (_stricmp(name, "mode") == 0) {
@@ -126,19 +132,17 @@ bool ColorElement::set(const char *name, const char *value) {
       _toValue = _value;
       _startTime = now;
     }  // if
-    _needUpdate = true;
+    _needValueUpdate = true;
+    _needBrightnessUpdate = true;
 
   } else if (_stricmp(name, "duration") == 0) {
     // duration for wheel, pulse and fade effect
     _duration = _scanDuration(value);
 
   } else if (_stristartswith(name, "connect[")) {
-    // direct connected element
-
-    Element *e = _board->getElementById(value);
-    if (e) {
-      _lightElements.push_back(static_cast<LightElement *>(e));
-    }
+    // save ID to
+    _lightElementIDs.push(value);
+    TRACE("  con(%s, %d)", value, _lightElementIDs.size());
 
   } else if (_stricmp(name, "onvalue") == 0) {
     // save the actions
@@ -154,6 +158,31 @@ bool ColorElement::set(const char *name, const char *value) {
 
   return (ret);
 }  // set()
+
+
+/**
+ * @brief Activate the LightElement.
+ */
+void ColorElement::start() {
+  TRACE("Color::start(%d)", _lightElementIDs.size());
+  Element::start();
+
+  uint16_t leSize = _lightElementIDs.size();
+  _lightElementsCount = 0;
+
+  _lightElements = (LightElement **)malloc(leSize * sizeof(LightElement *));
+
+  for (int n = 0; n < leSize; n++) {
+    // connected elements
+    Element *e = _board->getElementById(_lightElementIDs[n].c_str());
+    if (e) {
+      TRACE("  add(%s)", e->id);
+      _lightElements[_lightElementsCount++] = static_cast<LightElement *>(e);
+    }
+  }  // for
+
+  _lightElementIDs.clear();
+}  // start()
 
 
 /*
@@ -209,26 +238,30 @@ uint32_t fadeColor(uint32_t startColor, uint32_t endColor, int factor) {
  * @brief Give some processing time to the Element to check for next actions.
  */
 void ColorElement::loop() {
-  static unsigned long lastTime = 0;
-  // dynamic color patterns
   unsigned long now = millis();  // current (relative) time in msecs.
-  uint32_t nextValue = _value;
+  uint32_t nextValue = _toValue;
+  uint16_t nextBrightness = _toBrightness;
 
   if ((_mode == Mode::fix) && (_value != _toValue)) {
-    nextValue = _toValue;
+    _needValueUpdate = true;
 
-  } else if (now < lastTime + 100) {
-    // no new automation step more often than 10 times per second.
-    return;
+  // } else if (now < _lastTime + 50) {
+  //   // no new automation step more often than 20 times per second.
+  //   return;
 
-  } else if ((_mode == Mode::fade) && (_value != _toValue)) {
+  } else if ((_mode == Mode::fade) && ((_value != _toValue) || (_brightness != _toBrightness))) {
     unsigned long d = now - _startTime;  // duration up to now
     if (d >= _duration) {
-      nextValue = _toValue;
+      // nextValue = _toValue;
+      // nextBrightness = _toBrightness;
+
     } else {
       int p = (d * 255) / _duration;  // percentage of fade transition in / 0..255
       nextValue = fadeColor(_fromValue, _toValue, p);
+      nextBrightness = _fromBrightness + ((_toBrightness-_fromBrightness) * p / 255);
     }
+    _needValueUpdate = true;
+    _needBrightnessUpdate = true;
 
   } else if (_mode == Mode::pulse) {
     // pulse brightness 0...255...1 = 256+254 = 510 steps
@@ -237,30 +270,37 @@ void ColorElement::loop() {
       bright = 510 - bright;
     }
     nextValue = fadeColor(0x00000000, _toValue, bright);
+    _needValueUpdate = true;
 
   } else if (_mode == Mode::wheel) {
     int hue = (now % _duration) * MAX_HUE / _duration;
     nextValue = hslColor(hue);
+    _needValueUpdate = true;
   }
 
-  if ((nextValue != _value) || _needUpdate) {
+  if (_needValueUpdate || _needBrightnessUpdate) {
     // send to linked light elements
-    int num = _lightElements.size();
-    for (int n = 0; n < num; n++) {
-      _lightElements[n]->setColor(nextValue, _brightness);
+    for (int n = 0; n < _lightElementsCount; n++) {
+      TRACE(" %d %s", n, _lightElements[n]->id);
+      _lightElements[n]->setColor(nextValue, nextBrightness);
     }
 
     // dispatch as action
-    _board->dispatch(_brightnessAction, _brightness);
-    if (!_valueAction.isEmpty()) {
+    if (_needBrightnessUpdate) {
+      _board->dispatch(_brightnessAction, nextBrightness);
+      _brightness = nextBrightness;
+      _needBrightnessUpdate = false;
+    }
+
+    if (_needValueUpdate && (!_valueAction.isEmpty())) {
       char sColor[38];
       sprintf(sColor, "x%08x", nextValue);
       _board->dispatch(_valueAction, sColor);
     }
+    _needValueUpdate = false;
     _value = nextValue;
-    _needUpdate = false;
   }
-  lastTime = now;
+  // _lastTime = now;
 }  // loop()
 
 

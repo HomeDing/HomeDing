@@ -13,11 +13,11 @@
  *
  * Changelog:see MicroJsonParser.h
  */
+
 #include <Arduino.h>
+#include <HomeDing.h>
+
 #include <MicroJsonParser.h>
-
-#include <core/Logger.h>
-
 #include <FS.h>
 
 // enable MJ_TRACEDETAILS to get some very detailled output on parsing
@@ -57,7 +57,10 @@
 #define MJ_OBJECTLEVEL (-1)
 #define MJ_ARRAYLEVEL (0)
 
+#if defined(LOGGER_ENABLED)
+
 #if defined(MJ_TRACEDETAILS)
+
 // DEBUG State transitions
 #define MJ_NEWSTATE(newState) (LOGGER_INFO("state %x %d:<%s>:", newState & 0xFF, _level, _path), delay(1), newState)
 #define MJ_TRACE(...) LOGGER_RAW(__VA_ARGS__)
@@ -67,6 +70,12 @@
 #endif
 
 #define MJ_ERROR(reason) (LOGGER_ERR(reason), MJ_STATE_ERROR)
+
+#else
+#define MJ_ERROR(reason) (MJ_STATE_ERROR)
+#define MJ_NEWSTATE(newState) (newState)
+#define MJ_TRACE(...)
+#endif
 
 
 MicroJson::MicroJson(MicroJsonCallbackFn callback)

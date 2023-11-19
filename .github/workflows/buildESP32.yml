@@ -8,7 +8,7 @@ on:
   push:
     branches: [develop]
   pull_request:
-    branches: [develop]
+    branches: [master,develop]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Run Arduino Compiler
       # see https://github.com/arduino/compile-sketches
@@ -37,7 +37,7 @@ jobs:
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
               # version: 2.0.4 doesn't work with CLI caused by issue https://github.com/espressif/arduino-esp32/pull/7060
               version: 2.0.2
-          fqbn: esp32:esp32:esp32
+          fqbn: esp32:esp32:esp32:PartitionScheme=huge_app
           libraries: |
             - source-path: ./
             - name: OneWire
@@ -51,12 +51,13 @@ jobs:
             - name: LiquidCrystal_PCF8574
             - name: Adafruit GFX Library
             - name: Adafruit NeoPixel
-            - name: Adafruit ST7735 and ST7789 Library
-            - name: Adafruit SH110X
-            - name: Adafruit SSD1306
             - name: PubSubClient
+            # - name: GFX Library for Arduino
+            - source-url: "https://github.com/moononournation/Arduino_GFX.git"
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
             - source-url: "https://github.com/schreibfaul1/ESP32-audioI2S.git"
           sketch-paths: |
             - 'examples/standard'
+            - 'examples/DevDing'
+            - 'examples/tutorial'
             - 'examples/webradio'

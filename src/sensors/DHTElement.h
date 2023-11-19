@@ -18,10 +18,7 @@
  * * 12.02.2020 rebased on SensorElement.
  */
 
-#ifndef DHTELEMENT_H
-#define DHTELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 #include <sensors/SensorElement.h>
 
@@ -82,7 +79,7 @@ private:
   /**
    * @brief Control level logic for power ouput to _powerpin. When true: Enable sensor by creating a physical LOW level.
    */
-  bool _powerinverse = false;
+  bool _powerinvert = false;
 
   DHTNEW *_dht;
 };  // class DHTElement
@@ -92,6 +89,3 @@ private:
 // Register the DHTElement in the ElementRegistry.
 bool DHTElement::registered = ElementRegistry::registerElement("dht", DHTElement::create);
 #endif
-
-
-#endif  // DHTELEMENT_H

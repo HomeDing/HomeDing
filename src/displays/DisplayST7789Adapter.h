@@ -14,56 +14,28 @@
 
 #pragma once
 
-#include <displays/DisplayAdapterGFX.h>
+#include <displays/DisplayAGFXAdapter.h>
 
-#include <Adafruit_ST7789.h>  // Hardware-specific library for ST7789
-#include <SPI.h>
-
-class DisplayST7789Adapter : public DisplayAdapterGFX {
-public:
-  ~DisplayST7789Adapter() = default;
+class DisplayST7789Adapter : public DisplayAGFXAdapter {
 
   bool start() override {
-    // LOGGER_JUSTINFO("init: w:%d, h:%d, r:%d", conf->width, conf->height, conf->rotation);
-    // LOGGER_JUSTINFO("  pins: l:%d, r:%d", conf->lightPin, conf->resetPin);
-    // LOGGER_JUSTINFO("   i2c: adr:%d, sda:%d, scl:%d", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
-    // LOGGER_JUSTINFO("   spi: cs:%d, dc:%d, mosi:%d, miso:%d, clk:%d", conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiMISO, conf->spiCLK);
 
-#if defined(ESP8266)
-    display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->resetPin);
+    bus = getBus(conf);
 
-#elif defined(ESP32)
-    SPI.begin(conf->spiCLK, conf->spiMISO, conf->spiMOSI);
-    // display = new (std::nothrow) Adafruit_ST7789(conf->spiCS, conf->spiDC, conf->spiMOSI, conf->spiCLK, conf->resetPin);
-    display = new (std::nothrow) Adafruit_ST7789(&SPI, conf->spiCS, conf->spiDC, conf->resetPin);
-#endif
+    gfx = new Arduino_ST7789(
+      bus,
+      conf->resetPin,
+      (conf->rotation / 90),
+      conf->ips,
+      conf->width,
+      conf->height,
+      conf->colOffset,
+      conf->rowOffset,
+      conf->colOffset,
+      conf->rowOffset);
 
-    if (!display) {
-      LOGGER_ERR("not found");
-      return (false);
+    DisplayAGFXAdapter::start();
 
-    } else {
-      gfxDisplay = (Adafruit_GFX *)display;
-      display->init(conf->width, conf->height, SPI_MODE0);
-      display->setSPISpeed(40000000);
-      display->invertDisplay(conf->invert);
-      backColor565 = ST77XX_BLACK;
-      drawColor565 = ST77XX_WHITE;
-      DisplayAdapterGFX::start();
-    }  // if
-    return (true);
-  };  // init()
-
-
-  // virtual void setBrightness(uint8_t bright) override {
-  //   display->drawBitmap((bright * 128) / 100);
-  // };
-
-  // no flush() required.
-
-private:
-  /**
-   * @brief Reference to the used library object
-   */
-  Adafruit_ST7789 *display = nullptr;
+    return (gfx != nullptr);
+  };  // start()
 };

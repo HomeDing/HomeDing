@@ -34,8 +34,8 @@ Element *SceneElement::create() {
 SceneElement::SceneElement() {
   // adjust startupMode when Network (default) is not applicable.
   // startupMode = Element_StartupMode::System;
-  _delay = -1;  // manual stepping
-  _step = -1;   // no current step
+  _delay = 100;       // fast stepping to the next action.
+  _currentStep = -1;  // no current step
 }
 
 
@@ -43,34 +43,36 @@ SceneElement::SceneElement() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool SceneElement::set(const char *name, const char *value) {
+  TRACE("set %s=%s", name, value);
   bool ret = true;
   int size = _steps.size();
 
   if (_stricmp(name, "start") == 0) {
     // start the scene at step[0]
-    _step = 0;
-    _nextStep = 1;  // asap.
+    _currentStep = 0;
+    _nextStepTime = 1;  // asap.
 
   } else if (_stricmp(name, "next") == 0) {
     // start next step in in scene
-    TRACE("_next cnt=%d, size=%d", _step, size);
-    if (_step < size) {
-      _step++;
-      _nextStep = 1;  // asap.
+    TRACE("_next cnt=%d, size=%d", _currentStep, size);
+    if (_currentStep < size) {
+      _currentStep++;
+      _nextStepTime = 1;  // asap.
     }
 
   } else if (_stricmp(name, "prev") == 0) {
     // start previous step in in scene
-    TRACE("_next cnt=%d, size=%d", _step, size);
-    if (_step > 0) {
-      _step--;
-      _nextStep = 1;  // asap.
+    TRACE("_next cnt=%d, size=%d", _currentStep, size);
+    if (_currentStep > 0) {
+      _currentStep--;
+      _nextStepTime = 1;  // asap.
     }
 
   } else if (_stristartswith(name, "steps[")) {
-    // _steps.push_back(String(value));
-    _steps.push_back(value);
-    TRACE("_steps.size=%d", _steps.size());
+    size_t i;
+    String iName;
+    _scanIndexParam(name, i, iName);
+    _steps.setAt(i, value);
 
   } else if (_stricmp(name, "delay") == 0) {
     // delay between executing the steps
@@ -88,24 +90,26 @@ bool SceneElement::set(const char *name, const char *value) {
  * @brief Give some processing time to the Element to check for next actions.
  */
 void SceneElement::loop() {
-  if (_nextStep > 0) {
+  if (_nextStepTime > 0) {
     // some outgoing actions should be sent
     unsigned long now = millis();  // current (relative) time in msecs.
-    TRACE("loop( %ld, %ld)", now, _nextStep);
+    TRACE("loop( %d, %d)", now, _nextStepTime);
 
-    if ((now >= _nextStep) && (_board->queueIsEmpty())) {
-      TRACE("send(%d):<%s>", _step, _steps[_step].c_str());
-      _board->dispatch(_steps[_step]);
-      _nextStep = 0;
-
+    if ((now >= _nextStepTime) && (_board->queueIsEmpty())) {
+      if ((_currentStep >= 0) && (_currentStep < _steps.size())) {
+        String actions = _steps[_currentStep];
+        TRACE("send(%d):<%s>", _currentStep, actions.c_str());
+        _board->dispatch(actions);
+      }
+      _nextStepTime = 0;
       if (_delay >= 0) {
         // send next action after some time
-        _step++;
-        if (_step < (int)(_steps.size())) {
-          _nextStep = now + _delay;
+        _currentStep++;
+        if (_currentStep < (int)(_steps.size())) {
+          _nextStepTime = now + _delay;
         } else {
           // end is reached -> deactivate
-          _step = -1;
+          _currentStep = -1;
         }
       }
     }

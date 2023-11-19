@@ -69,7 +69,11 @@ void SSDPElement::init(Board *board) {
 
     WebServer *server = board->server;
     server->on("/ssdp.xml", HTTP_GET, [server]() {
+#if defined(ESP8266)
       SSDP.schema(server->client());
+#elif defined(ESP32)
+      server->send(200, "text/plain", SSDP.getSchema());
+#endif
     });
   } // if
 

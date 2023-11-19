@@ -6,6 +6,15 @@
     "actions": ["onSysStart", "onStart"]
   },
 
+  "sdmmc": {
+    "sys": "true",
+    "properties": ["mmcD0", "mmcD1", "mmcD2", "mmcD3", "mmcCLK", "mmcCMD"]
+  },
+
+  "sd": {
+    "sys": "true"
+  },
+
   "element": {
     "properties": ["loglevel", "title", "description"],
     "events": ["start", "stop"]
@@ -17,15 +26,28 @@
   },
 
   "reference": {
-    "properties": ["reference", "inverse"],
+    "properties": ["reference", "invert"],
     "events": ["value"],
     "actions": ["onreference", "onhigh", "onlow"]
   },
 
-  "and": {
-    "sys": "false",
+  "add": {
     "properties": ["invert"],
-    "events": ["value01", "value02"],
+    "events": ["value[n]"],
+    "actions": ["onvalue"]
+  },
+
+  "and": {
+    "ui": "logic",
+    "properties": ["invert"],
+    "events": ["value[n]"],
+    "actions": ["onvalue"]
+  },
+
+  "or": {
+    "ui": "logic",
+    "properties": ["invert"],
+    "events": ["value[n]"],
     "actions": ["onvalue"]
   },
 
@@ -36,52 +58,61 @@
   },
 
   "digitalin": {
-    "properties": ["pin", "inverse", "pullup"],
+    "ui": "digitalvalue",
+    "properties": ["pin", "invert", "pullup"],
     "actions": ["onvalue", "onhigh", "onlow"]
+  },  
+  
+  "digitalout": {
+    "ui": "digitalvalue",
+    "properties": ["pin", "invert"],
+    "events": ["on", "off", "value"]
   },
-
+  
   "digitalsignal": {
     "properties": ["pin", "pullup"],
     "actions": ["onvalue", "onhigh", "onlow", "duration"]
   },
 
-  "digitalout": {
-    "properties": ["pin", "inverse"],
-    "events": ["on", "off", "value"]
-  },
-
   "touch": {
+    "ui": "digitalvalue",
     "properties": ["pin", "reference"],
     "actions": ["onvalue", "onhigh", "onlow"]
   },
 
   "displaydot": {
     "sys": "false",
-    "properties": ["page", "x", "y"],
+    "properties": ["page", "x", "y", "color"],
     "events": ["value", "clear", "redraw"]
   },
 
   "displaytext": {
     "sys": "false",
-    "properties": ["page", "x", "y", "fontsize", "prefix", "postfix"],
+    "properties": ["page", "x", "y", "color", "fontsize", "prefix", "postfix"],
     "events": ["value", "clear", "redraw"]
   },
 
   "displayline": {
     "sys": "false",
-    "properties": ["page", "x", "y", "w", "h"],
+    "properties": ["page", "x", "y", "x1", "y1", "color"],
     "events": ["redraw"]
   },
 
+  "displaybutton": {
+    "sys": "false",
+    "properties": ["page", "x", "y", "color", "w", "h"],
+    "events": [],
+    "actions": ["onclick"]
+  },
+
   "pwmout": {
-    "properties": ["range", "pin", "inverse"],
+    "properties": ["range", "pin", "invert"],
     "events": ["on", "off", "value"]
   },
 
   "remote": {
     "sys": "true",
-    "properties": ["host", "remoteid"],
-    "events": ["..."]
+    "properties": ["host"]
   },
 
   "rfcodes": {
@@ -118,6 +149,12 @@
     "events": ["start"]
   },
 
+  "select": {
+    "properties": ["cycle", "options"],
+    "events": ["key", "index", "next", "prev"],
+    "actions": ["onkey", "onvalue"]
+  },
+
   "ota": {
     "sys": "true",
     "properties": ["port", "passwd"]
@@ -137,11 +174,28 @@
     "actions": ["onpage"]
   },
 
+  "display":{
+    "ui": "display",
+    "properties": ["color", "background", "address", "spimosi", "spimiso", "spiclk", "spics", "spidc", "invert", "resetpin", "lightpin", "width", "height", "rotation"],
+    "actions" : ["brightness", "page", "addpage", "clear"],
+    "events": ["onpage"]
+
+
+  },
+
   "displaysh1106": {
+    "ui": "display",
     "properties": ["address", "readtime", "resetpin", "height", "brightness"],
     "events": ["page", "addpage", "clear"],
     "actions": ["onpage"]
   },
+
+  "displayssd1306":{ "ui": "display", "extends": "display"},
+
+  "displayst7735": { "extends": "display", "ui": "display" },
+  "displayst7789": { "extends": "display", "ui": "display" },
+  "displayst7796": { "extends": "display", "ui": "display" },
+  "displaypanel": { "extends": "display", "ui": "display" },
 
   "tm1637": {
     "properties": ["datapin", "clockpin"],
@@ -159,30 +213,39 @@
   },  
 
   "ina219": {
+    "ui": "ina2xx",
+    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart",
+    "gain", "mode", "samples", "range"],
+    "actions": ["onvoltage", "oncurrent", "onpower"]
+  },  
+
+  "ina226": {
+    "ui": "ina2xx",
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart",
     "gain", "mode", "samples", "range"],
     "actions": ["onvoltage", "oncurrent", "onpower"]
   },  
 
   "dht": {
+    "ui": "air",
     "properties": ["pin", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onhumidity"]
   },
 
   "aht20": {
-    "icon": "dht",
+    "icon": "dht", "ui": "air",
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onhumidity"]
   },
 
   "am2320": {
-    "icon": "dht",
+    "icon": "dht", "ui": "air",
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onhumidity"]
   },
 
   "sht20": {
-    "icon": "dht",
+    "icon": "dht", "ui": "air",
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onhumidity"]
   },
@@ -193,20 +256,27 @@
   },
 
   "bme680": {
+    "icon": "dht", "ui": "air",
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onhumidity", "onpressure", "ongas"]
   },  
 
   "bmp280": {
+    "icon": "dht", "ui": "air",
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onpressure"]
   },  
 
   "scd4x": {
-    "icon": "dht",
+    "icon": "dht", "ui": "air",
     "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
     "actions": ["ontemperature", "onhumidity", "onco2"]
   },
+  
+  "bh1750": {
+    "properties": ["address", "mode", "factor", "readtime", "warmuptime", "resendtime", "restart"],
+    "actions": ["onvalue"]
+  },  
 
   "pms": {
     "properties": ["pinrx", "pintx", "readtime", "warmuptime", "resendtime", "restart"],
@@ -219,29 +289,39 @@
   },
 
   "color": {
-    "properties": ["loglevel", "title", "description"],
+    "properties": [],
     "events": ["config", "value", "mode", "duration", "brightness"],
     "actions": ["onvalue", "onbrightness"]
   },
 
   "light": {
-    "properties": ["pin", "duration"],
+    "properties": ["pin", "duration", "mode"],
     "events": ["value", "enable", "brightness"]
   },
 
   "my9291": {
-    "properties": ["datapin", "clockpin"],
-    "events": ["value", "enable", "brightness"]
+    "icon": "light", "ui": "light", "extends": "light",
+    "properties": ["datapin", "clockpin"]
   },
 
   "p9813": {
-    "properties": ["datapin", "clockpin"],
-    "events": ["value", "enable", "brightness"]
+    "icon": "light", "extends": "light",
+    "properties": ["datapin", "clockpin"]
+  },
+
+  "stripe": {
+    "properties": ["count"],
+    "events": ["value", "enable", "mode", "brightness", "duration", "effectlength"]
+  },
+
+  "apa102": {
+    "icon": "neo", "ui": "stripe",  "extends": "stripe",
+    "properties": ["datapin", "clockpin"]
   },
 
   "neo": {
-    "properties": ["pin", "duration", "count"],
-    "events": ["value", "enable", "mode", "brightness"]
+    "icon": "neo", "ui": "stripe", "extends": "stripe",
+    "properties": ["datapin", "config"]
   },
 
   "alarm": {
@@ -271,18 +351,24 @@
 
   "time": {
     "sys": "true",
-    "properties": ["loglevel", "title", "description"],
+    "properties": [],
     "actions": ["onminute", "ontimestamp", "ontime", "ondate"]
   },
 
   "timer": {
     "properties": ["type", "waittime", "pulsetime", "cycletime"],
-    "events": ["start", "stop", "next"],
+    "events": ["next"],
     "actions": ["onon", "onoff", "onvalue"]
   },
 
+  "tone": {
+    "sys": "true",
+    "properties": ["pin"],
+    "events": ["tones", "play"]
+  },
+
   "serialcmd": {
-    "properties": ["description"],
+    "properties": [],
     "actions": ["preset0", "preset1", "preset2", "preset3"]
   },
 

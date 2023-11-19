@@ -8,7 +8,7 @@ on:
   push:
     branches: [develop]
   pull_request:
-    branches: [develop]
+    branches: [master,develop]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Run Arduino Compiler
       # see https://github.com/arduino/compile-sketches
@@ -48,15 +48,17 @@ jobs:
             - name: Radio
             - name: RFCodes
             - name: LiquidCrystal_PCF8574
+            # - name: GFX Library for Arduino
+            - source-url: "https://github.com/moononournation/Arduino_GFX.git"
             - name: Adafruit GFX Library
             - name: Adafruit NeoPixel
-            - name: Adafruit ST7735 and ST7789 Library
-            - name: Adafruit SH110X
             - name: Adafruit SSD1306
             - name: PubSubClient
           sketch-paths: |
             - 'examples/standard'
-            - 'examples/minimal'
+            - 'examples/tutorial'
+            - 'examples/plug'
+            - 'examples/bulb'
             - 'examples/RFBridge'
 
           # size-report-sketch: 'ConnectionHandlerDemo'

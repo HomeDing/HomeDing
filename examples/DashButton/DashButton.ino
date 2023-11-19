@@ -21,13 +21,13 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-// http://bulb03/$board/switch/en?toggle
+// http://bulb03/api/state/switch/en?toggle
 
 
 String ssid = "DevNet";
 String password = "pass-wd-here";
 String host = "bulb03";
-String url = "/$board/switch/en?toggle";
+String url = "/api/state/switch/en?toggle";
 
 IPAddress hostIPAddr; // ip address of the remote device
 

@@ -11,8 +11,7 @@
 // 31.05.2018 created by Matthias Hertel
 // -----
 
-#ifndef ELEMENTREGISTRY_H
-#define ELEMENTREGISTRY_H
+#pragma once
 
 #define REG_MAX_TYPES 64
 
@@ -50,6 +49,3 @@ private:
   static const char *_names[REG_MAX_TYPES];
   static CreateElementFn _func[REG_MAX_TYPES];
 };
-
-
-#endif

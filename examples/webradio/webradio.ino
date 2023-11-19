@@ -11,7 +11,7 @@
  * 
  * * Board: ESP32 Wrover Kit
  * * PSRAM: Enabled
- * * Partition Scheme: 4MB (1.2MB APP / 1.5MB SPIFS)
+ * * Partition Scheme: No OTA (2MB APP/2MB SPIFFS)
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -37,8 +37,8 @@
 
 // Enable the following element groups of the HomeDing Library
 #define HOMEDING_INCLUDE_SYSTEM
+
 #define HOMEDING_INCLUDE_CORE
-#define HOMEDING_INCLUDE_FULL_SYSTEM
 
 // Enable some INPUT Elements
 #define HOMEDING_INCLUDE_ROTARY
@@ -56,6 +56,7 @@
 // Network Services
 // #define HOMEDING_INCLUDE_MQTT
 // #define HOMEDING_INCLUDE_WEATHERFEED
+#define HOMEDING_INCLUDE_SDMMC
 
 #include <Arduino.h>
 #include <HomeDing.h>
@@ -69,8 +70,6 @@
 
 
 // ===== WLAN credentials =====
-
-#include "secrets.h"
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
@@ -86,7 +85,7 @@ void setup(void) {
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
   delay(3000);
-  Serial.println();
+  Serial.println("x");
   // sometimes configuring the logger_level in the configuration is too late. Then patch loglevel here:
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
@@ -104,9 +103,9 @@ void setup(void) {
   server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
+  server.addHandler(new FileServerHandler(&homeding));
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 }  // setup
 
 

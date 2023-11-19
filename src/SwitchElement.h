@@ -19,10 +19,8 @@
  * * 06.09.2019 derivation of switch element
  */
 
-#ifndef SWITCH_H
-#define SWITCH_H
+#pragma once
 
-#include <HomeDing.h>
 #include "ValueElement.h"
 
 /**
@@ -81,5 +79,3 @@ private:
 bool SwitchElement::registered =
     ElementRegistry::registerElement("switch", SwitchElement::create);
 #endif
-
-#endif // SWITCH_H

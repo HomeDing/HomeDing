@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 #include <CalcElement.h>
 
 class OrElement : public CalcElement {

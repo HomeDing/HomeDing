@@ -101,7 +101,7 @@ void setup(void) {
   server.addHandler(new BoardHandler(&mainBoard));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*mainBoard.fileSystem, &mainBoard));
+  server.addHandler(new FileServerHandler(&homeding));
   // GET static files is added after network connectivity is given.
 
   server.onNotFound([]() {
@@ -119,7 +119,7 @@ void setup(void) {
     }
   });
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 } // setup
 
 

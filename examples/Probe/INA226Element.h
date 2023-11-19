@@ -16,8 +16,7 @@
  * * 31.08.2021 finalized for power sensor example
  */
 
-#ifndef INA226ELEMENT_H
-#define INA226ELEMENT_H
+#pragma once
 
 #include <sensors/SensorElement.h>
 
@@ -103,5 +102,3 @@ private:
   String _currentAction;
   String _powerAction;
 };
-
-#endif

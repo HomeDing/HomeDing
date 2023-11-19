@@ -39,14 +39,18 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Activate the Element.
-   */
+
+  /// @brief Setup the element so it can be started and stopped.
+  virtual void setup() override;
+
+
+  /// @brief Activate the Element and register a Display Adapter
+  /// in the board.
   virtual void start() override;
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplaySSD1306Element onto the ElementRegistry.
+// Register the DisplayST7789Element onto the ElementRegistry.
 bool DisplayST7789Element::registered =
   ElementRegistry::registerElement("DisplayST7789", DisplayST7789Element::create);
 #endif

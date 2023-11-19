@@ -20,7 +20,9 @@
 #include "MapElement.h"
 #include "MicroJsonParser.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#if !defined(TRACE)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#endif
 
 /* ===== Static factory function ===== */
 
@@ -30,7 +32,7 @@
  */
 Element *MapElement::create() {
   return (new MapElement());
-} // create()
+}  // create()
 
 
 /* ===== Element functions ===== */
@@ -40,13 +42,7 @@ Element *MapElement::create() {
 
 void MapElement::init(Board *board) {
   Element::init(board);
-
-  // create the map members with a reasonable size.
-  this->_mMin.reserve(2);
-  this->_mMax.reserve(2);
-  this->_mValue.reserve(2);
-  this->_mActions.reserve(2);
-} // init()
+}  // init()
 
 
 void MapElement::_mapValue(const char *value) {
@@ -56,23 +52,25 @@ void MapElement::_mapValue(const char *value) {
 
   // walk through the max values to find the last one that fits.
   for (int c = 0; c < mapSize; c++) {
-    bool ruleFits = true; // until we find it is not
+    bool ruleFits = true;  // until we find it is not
 
     // value lower than `min` ?
-    if (_mMin[c].isEmpty()) {
+    String v = _mMin[c];
+    if (v.isEmpty()) {
       // value is always inside when no lower boundary is given
-    } else if ((_isStringType) && _stricmp(value, _mMin[c].c_str()) < 0) {
-      ruleFits = false; // no match, value is too low
-    } else if ((!_isStringType) && _atoi(value) < _mMin[c].toInt()) {
-      ruleFits = false; // no match, value is too low
+    } else if ((_isStringType) && _stricmp(value, v.c_str()) < 0) {
+      ruleFits = false;  // no match, value is too low
+    } else if ((!_isStringType) && _atoi(value) < v.toInt()) {
+      ruleFits = false;  // no match, value is too low
     }
 
+    v = _mMax[c];
     // value higher than `max` ?
-    if (_mMax[c].isEmpty()) {
+    if (v.isEmpty()) {
       // value is always inside when no upper boundary is given
-    } else if ((_isStringType) && _stricmp(value, _mMax[c].c_str()) > 0) {
+    } else if ((_isStringType) && _stricmp(value, v.c_str()) > 0) {
       ruleFits = false;
-    } else if ((!_isStringType) && _atoi(value) > _mMax[c].toInt()) {
+    } else if ((!_isStringType) && _atoi(value) > v.toInt()) {
       ruleFits = false;
     }
 
@@ -80,23 +78,25 @@ void MapElement::_mapValue(const char *value) {
       cFound = c;
       break;
     }
-  } // for
+  }  // for
 
   // TRACE("rule=%d", cFound);
 
   if (cFound < 0) {
     LOGGER_EERR("NO RULE FITS: '%s'", value);
-  } else if (cFound != _currentMapIndex) {
-    if (_mValue[cFound].isEmpty()) {
+
+  } else if ((cFound != _currentMapIndex) || (_resend)) {
+    String v = _mValue[cFound];
+    if (v.isEmpty()) {
       _value = value;
     } else {
-      _value = _mValue[cFound];
+      _value = v;
     }
     TRACE("new Value=%s", _value.c_str());
     _currentMapIndex = cFound;
     _needUpdate = true;
   }
-} // _mapValue()
+}  // _mapValue()
 
 
 /**
@@ -106,55 +106,57 @@ bool MapElement::set(const char *name, const char *value) {
   TRACE("set '%s'='%s'", name, value);
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (_stricmp(name, "value") == 0) {
     // find the right map entry (first that matches)
     _mapValue(value);
+
+  } else if (_stristartswith(name, "rules[")) {
+    size_t i;
+    String iName;
+    _scanIndexParam(name, i, iName);
+    TRACE(" iName:%s", iName.c_str());
+    TRACE(" i:%d", i);
+
+    // save all values and actions in the vectors.
+    size_t mapIndex = _atoi(name + 6);  // number starts after "rules["
+    char *mapName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;
+
+    // LOGGER_EINFO("map[%d] '%s'='%s'", mapIndex, mapName, value);
+
+    if (_stricmp(mapName, "min") == 0) {
+      _mMin.setAt(mapIndex, value);
+
+    } else if (_stricmp(mapName, "max") == 0) {
+      _mMax.setAt(mapIndex, value);
+
+    } else if (_stricmp(mapName, "equal") == 0) {
+      _mMin.setAt(mapIndex, value);
+      _mMax.setAt(mapIndex, value);
+
+    } else if (_stricmp(mapName, "value") == 0) {
+      _mValue.setAt(mapIndex, value);
+
+    } else if (_stricmp(mapName, "onValue") == 0) {
+      _mActions.setAt(mapIndex, value);
+
+    }  // if
 
   } else if (_stricmp(name, "type") == 0) {
     if (_stricmp(value, "string") == 0)
       _isStringType = true;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (_stricmp(name, "onValue") == 0) {
     _valueAction = value;
 
-  } else if (_stristartswith(name, "rules[")) {
-    // save all values and actions in the vectors.
-    size_t mapIndex = _atoi(name + 6); // number starts after "rules["
-    char *mapName = strrchr(name, MICROJSON_PATH_SEPARATOR) + 1;
-
-    // LOGGER_EINFO("map[%d] '%s'='%s'", mapIndex, mapName, value);
-
-    if (mapIndex >= _mMax.size()) {
-      // request space for new index
-      _mMin.resize(mapIndex + 2);
-      _mMax.resize(mapIndex + 2);
-      _mValue.resize(mapIndex + 2);
-      _mActions.resize(mapIndex + 2);
-    } // if
-
-    if (_stricmp(mapName, "min") == 0) {
-      _mMin[mapIndex] = value;
-
-    } else if (_stricmp(mapName, "max") == 0) {
-      _mMax[mapIndex] = value;
-
-    } else if (_stricmp(mapName, "equal") == 0) {
-      _mMin[mapIndex] = value;
-      _mMax[mapIndex] = value;
-
-    } else if (_stricmp(mapName, PROP_VALUE) == 0) {
-      _mValue[mapIndex] = value;
-
-    } else if (_stricmp(mapName, ACTION_ONVALUE) == 0) {
-      _mActions[mapIndex] = value;
-    } // if
+  } else if (_stricmp(name, "resend") == 0) {
+    _resend = _atob(value);
 
   } else {
     ret = Element::set(name, value);
-  } // if
+  }  // if
 
   return (ret);
-} // set()
+}  // set()
 
 
 /**
@@ -166,16 +168,16 @@ void MapElement::loop() {
     _board->dispatch(_valueAction, _value);
     _needUpdate = false;
   }
-} // loop()
+}  // loop()
 
 
 /**
  * @brief push the current value of all properties to the callback.
  */
 void MapElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback) {
+  std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
   callback(PROP_VALUE, _value.c_str());
-} // pushState()
+}  // pushState()
 
 // End

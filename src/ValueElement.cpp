@@ -28,7 +28,7 @@ Element *ValueElement::create() {
 }  // create()
 
 
-// set a new value, maybe adjust to range
+// set a new int-type value, maybe adjust to range
 bool ValueElement::_setValue(int newValue, bool forceAction) {
   bool ret = false;
   _isValid = true;
@@ -39,13 +39,17 @@ bool ValueElement::_setValue(int newValue, bool forceAction) {
     _board->dispatch(_valueAction, newValue);
     ret = true;
   }  // if
-  _value = newValue;
-  saveState(PROP_VALUE, String(_value).c_str());
+  
+  if (_value != newValue) {
+    _value = newValue;
+    saveState("value", String(_value));
+  }
+
   return (ret);
 }  // _setValue()
 
 
-// set a new value, maybe adjust to range
+// set a new string-type value
 bool ValueElement::_setValue(const char *newValue, bool forceAction) {
   bool ret = false;
   _isValid = true;
@@ -54,8 +58,12 @@ bool ValueElement::_setValue(const char *newValue, bool forceAction) {
     _board->dispatch(_valueAction, newValue);
     ret = true;
   }
-  _valueString = newValue;
-  saveState(PROP_VALUE, _valueString.c_str());
+
+  if (_valueString != newValue) {
+    _valueString = newValue;
+    saveState("value", _valueString);
+  }
+
   return (ret);
 }  // _setValue()
 
@@ -71,7 +79,10 @@ int ValueElement::_getValueInt() {
 bool ValueElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (Element::set(name, value)) {
+    // done
+
+  } else if (_stricmp(name, PROP_VALUE) == 0) {
     if (_isStringType)
       _setValue(value);
     else
@@ -103,7 +114,7 @@ bool ValueElement::set(const char *name, const char *value) {
     _valueAction = value;
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
 
   return (ret);

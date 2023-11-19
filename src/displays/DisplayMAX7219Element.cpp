@@ -15,7 +15,6 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include <displays/DisplayMAX7219Element.h>
@@ -55,7 +54,7 @@ void DisplayMAX7219Element::start() {
       DisplayElement::start();
 
     } else {
-      LOGGER_EERR("no display found.");
+      LOGGER_EERR("no display found");
       delete d;
     }  // if
   }    // if

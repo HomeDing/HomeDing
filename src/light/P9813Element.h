@@ -16,10 +16,8 @@
  * * implementing a single chip only. chained chips not yet supported. 
  */
 
-#ifndef P9813ELEMENT_H
-#define P9813ELEMENT_H
+#pragma once
 
-#include <HomeDing.h>
 #include <light/LightElement.h>
 
 /**
@@ -81,6 +79,4 @@ private:
 // Register the P9813Element onto the ElementRegistry.
 bool P9813Element::registered =
     ElementRegistry::registerElement("p9813", P9813Element::create);
-#endif
-
 #endif

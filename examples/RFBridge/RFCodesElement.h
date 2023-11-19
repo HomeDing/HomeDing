@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief RFSend Element that produces actions based on timing conditions.
  * @details
@@ -84,6 +82,8 @@ private:
 
   static String _receivedCode; // code just received, static to be used by the interrupt code
 
+  String _lastReceivedCode; // last processed code for detecting multiple times the same code arrives
+
   /** The GPIO pin used for the transmitter. */
   int _pinTx;
 
@@ -91,8 +91,7 @@ private:
   int _pinRx;
 
 
-  String _lastReceivedCode; // last processed code for detecting multiple times the same code arrives
-  unsigned long _receivedMillis;
+  unsigned long _receivedMillis = 0;
 
   String _sendValue; // code to be sent (inbound value)
 
@@ -104,16 +103,12 @@ private:
   /**
    * @brief The time where the same received code is detected as the same code. After this time the code is re-evaluated.
    */
-  unsigned long _clearTime; // no process codes in this time
-
-  String _valueAction;
+  unsigned long _clearTime; // no process same code in this time
 
   /**
-   * @brief The actual value.
+   * @brief action with received code.
    */
-  String _codeOn;
-  String _codeOff;
-  bool _lastValue;
+  String _valueAction;
 };
 
 

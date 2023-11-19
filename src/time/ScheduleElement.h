@@ -15,10 +15,7 @@
  * * 30.07.2018 created by Matthias Hertel
  */
 
-#ifndef ScheduleELEMENT_H
-#define ScheduleELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The ScheduleElement can trigger a ON and OFF action per day based on
@@ -120,6 +117,4 @@ private:
 // Register the ScheduleElement onto the ElementRegistry.
 bool ScheduleElement::registered =
     ElementRegistry::registerElement("schedule", ScheduleElement::create);
-#endif
-
 #endif

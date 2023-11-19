@@ -15,8 +15,7 @@
 // 15.05.2018 set = properties and action interface.
 // -----
 
-#ifndef ELEMENT_H
-#define ELEMENT_H
+#pragma once
 
 #include <cstdarg>
 #include <functional>
@@ -24,6 +23,7 @@
 #include <string.h>
 
 #include <ListUtils.h>
+#include <ArrayString.h>
 
 // forward class declarations
 class Board;
@@ -52,10 +52,10 @@ class Element;
  * starting/activating the element.
  */
 enum Element_StartupMode {
-  System = 1,  // right after loading the configurations.
-  Network = 2, // after a network connectivity in AP Mode was established.
-  Time = 3,    // after a valid local time was set.
-  Manual = 9   // manually started.
+  System = 1,   // right after loading the configurations.
+  Network = 2,  // after a network connectivity in AP Mode was established.
+  Time = 3,     // after a valid local time was set.
+  Manual = 9    // manually started.
 };
 
 #define ACTION_SEPARATOR ','
@@ -79,18 +79,22 @@ class Element {
 public:
   // Datatype definitions for elements processing different types
   enum DATATYPE : int {
-    STRING = 0, // unspecified, all data can be presented as strings
-    BOOLEAN, // a boolean (stored as integer 0/1)
-    INTEGER, // a number without any decimals
-    FLOAT // a number with decimals
+    STRING = 0,  // unspecified, all data can be presented as strings
+    BOOLEAN,     // a boolean (stored as integer 0/1)
+    INTEGER,     // a number without any decimals
+    FLOAT        // a number with decimals
   };
 
   /**
    * @brief The id of the Element. Visible to anyone.
    */
-  char id[MAX_ID_LENGTH]; // TODO: convert to String
+  char id[MAX_ID_LENGTH];  // TODO: convert to String
 
   int loglevel = LOGGER_LEVEL_ERR;
+
+#if defined(HD_PROFILE)
+  PROFILE_DATA;
+#endif
 
   /**
    * @brief The Element will be marked active after passing valid parameters and
@@ -113,31 +117,22 @@ public:
 
   // ===== Livetime management =====
 
-  /**
-   * @brief initialize a new Element.
-   * @param board The board reference.
-   */
+  /// @brief initialize a new Element.
+  /// @param board The board reference.
   virtual void init(Board *board);
 
 
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
+  /// @brief Set a parameter or property to a new value or start an action.
+  /// @param name Name of the property.
+  /// @param value Value of the property.
+  /// @return true when property was set or the action was received.
   virtual bool set(const char *name, const char *value);
 
 
-  /**
-   * @brief setup the element so it can be started and stopped.
-   */
+  /// @brief setup the element so it can be started and stopped.
   virtual void setup();
 
-  /**
-   * @brief Activate the Element.
-   */
+  //// @brief Activate the Element.
   virtual void start();
 
 
@@ -158,15 +153,19 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback);
+    std::function<void(const char *pName, const char *eValue)> callback);
 
 
-  /**
-   * @brief save a local state to a state element.
-   * @param key The key of state variable.
-   * @param value The value of state variable.
-   */
+  /// @brief save a local state to a state element.
+  /// @param key The key of state variable.
+  /// @param value The value of state variable.
+  void saveState(const char *key, String value);
+
+  /// @brief save a local state to a state element.
+  /// @param key The key of state variable.
+  /// @param value The value of state variable.
   void saveState(const char *key, const char *value);
+
 
   // ===== static string to value helper function ===== //
 
@@ -232,13 +231,21 @@ public:
   static int _atopin(const char *value);
 
 
-  /**
-   * @brief Return a color value as 32 bits: 0xWWRRGGBB from a string.
-   * @param value Given value as string.
-   * @return color value
-   */
+  /// @brief Return a color value as 32 bits: 0xWWRRGGBB from a string.
+  /// @param value Given value as string.
+  /// @return color value
   uint32_t _atoColor(const char *value);
 
+
+  /**
+   * @brief extract index and property name from a configuration string
+   * with arrays like list[3]/property
+   * @param name Given indexed configuration "name" like "list[3]/property".
+   * @return index Reference to index variable, will contain the index (here 3)
+   * @return indexName Reference to indexName variable, will contain the index name (here "property")
+   * @return true, when scanning was complete
+   */
+  bool _scanIndexParam(const char *name, size_t &index, String &indexName);
 
   // ===== static value to string helper function ===== //
 
@@ -292,4 +299,4 @@ private:
   static char _convertBuffer[32];
 };
 
-#endif
+// End

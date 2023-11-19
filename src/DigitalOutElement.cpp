@@ -27,13 +27,16 @@ Element *DigitalOutElement::create() {
 bool DigitalOutElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (Element::set(name, value)) {
+    // done
+
+  } else if (_stricmp(name, "value") == 0) {
     _setLevel(_atob(value));
 
-  } else if (_stricmp(name, PROP_PIN) == 0) {
+  } else if (_stricmp(name, "pin") == 0) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, PROP_INVERSE) == 0) {
+  } else if (_stricmp(name, "invert") == 0) {
     _inverse = _atob(value);
 
   } else if (_stricmp(name, "on") == 0) {
@@ -43,7 +46,7 @@ bool DigitalOutElement::set(const char *name, const char *value) {
     _setLevel(false);
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
   return (ret);
 }  // set()
@@ -71,7 +74,7 @@ void DigitalOutElement::start() {
 void DigitalOutElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _printBoolean(_lastValue));
+  callback("value", _printBoolean(_lastValue));
 }  // pushState()
 
 

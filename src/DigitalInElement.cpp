@@ -34,10 +34,13 @@ Element *DigitalInElement::create() {
 bool DigitalInElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_PIN) == 0) {
+  if (Element::set(name, value)) {
+    // done
+
+  } else if (_stricmp(name, "pin") == 0) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, PROP_INVERSE) == 0) {
+  } else if (_stricmp(name, "invert") == 0) {
     _inverse = _atob(value);
 
   } else if (_stricmp(name, "pullup") == 0) {
@@ -53,7 +56,7 @@ bool DigitalInElement::set(const char *name, const char *value) {
     _valueAction = value;
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
   return (ret);
 }  // set()
@@ -102,7 +105,7 @@ void DigitalInElement::loop() {
 void DigitalInElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _printBoolean(_lastInLevel));
+  callback("value", _printBoolean(_lastInLevel));
 }  // pushState()
 
 // End

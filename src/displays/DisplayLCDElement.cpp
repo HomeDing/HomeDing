@@ -15,7 +15,6 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include <displays/DisplayLCDElement.h>
@@ -58,7 +57,7 @@ void DisplayLCDElement::start() {
       DisplayElement::start();
 
     } else {
-      LOGGER_EERR("no display found.");
+      LOGGER_EERR("no display found");
       delete d;
     }  // if
   }    // if

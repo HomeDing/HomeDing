@@ -54,7 +54,7 @@ public:
 
 private:
   /** current step activated. */
-  int _step;
+  int _currentStep;
 
   /**
    * @brief The delay between executing the steps in msec
@@ -64,12 +64,12 @@ private:
   /**
    * @brief The time for the next step.
    */
-  unsigned long _nextStep;
+  unsigned long _nextStepTime;
 
   /**
    * @brief The _steps hold a list of actions.
    */
-  std::vector<String> _steps;
+  ArrayString _steps;
 };
 
 /* ===== Register the Element ===== */

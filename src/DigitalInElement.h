@@ -19,10 +19,7 @@
  * * 02.02.2018 refactored to digitalIn and switch.
  */
 
-#ifndef DIGITALIN_H
-#define DIGITALIN_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief The DigitalInElement is an special Element that creates actions based
@@ -110,5 +107,3 @@ private:
 bool DigitalInElement::registered =
   ElementRegistry::registerElement("digitalin", DigitalInElement::create);
 #endif
-
-#endif  // DIGITALIN_H

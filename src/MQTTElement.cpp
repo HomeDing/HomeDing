@@ -272,7 +272,7 @@ bool MQTTElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "qos") == 0) {
     _impl->qos = _atoi(value);
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (_stricmp(name, "onvalue") == 0) {
     _impl->_valueAction = value;
 
   } else {
@@ -295,10 +295,10 @@ void MQTTElement::start() {
 
   // Verify parameters
   if (_impl->uri.server == nullptr) {
-    LOGGER_EERR("missing `server` parameter.");
+    LOGGER_EERR("missing `server` parameter");
 
   } else if (_impl->publishTopic.isEmpty() && _impl->subscribeTopic.isEmpty()) {
-    LOGGER_EERR("missing a `topic` parameter.");
+    LOGGER_EERR("missing `topic` parameter");
 
   } else {
     Element::start();
@@ -364,7 +364,7 @@ void MQTTElement::loop() {
       bool done = client->publish(k.c_str(), v.c_str(), _impl->retain);
 
       if (!done) {
-        LOGGER_EERR("failed.");
+        LOGGER_EERR("failed");
         _impl->errCount++;
       } else {
 

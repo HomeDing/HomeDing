@@ -35,7 +35,7 @@ public:
   ~DisplayMAX7219Adapter() = default;
 
   bool start() override {
-    _csPin = conf->spiCS;
+    _csPin = conf->csPin;
 
     // adjust false height and width (must be *8)
     _hPanels = (conf->height + 7) / 8;
@@ -55,9 +55,9 @@ public:
 
     } else {
       gfxDisplay = (Adafruit_GFX *)display;
+      DisplayAdapterGFX::start();
       backColor565 = 0x0000;
       drawColor565 = 0xFFFF;
-      DisplayAdapterGFX::start();
 
       pinMode(_csPin, OUTPUT);
       digitalWrite(_csPin, HIGH);

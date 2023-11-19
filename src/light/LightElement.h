@@ -14,12 +14,10 @@
  * Changelog:
  * * 10.03.2020 created by Matthias Hertel
  * * 26.01.2021 support WRGB mode (4 LEDs)
+ * * 29.05.2023 add invert PWM output
  */
 
 #pragma once
-
-#include <Arduino.h>
-#include <HomeDing.h>
 
 /**
  * @brief LightElement implements an Element to drive a single LED.
@@ -101,15 +99,23 @@ protected:
   int _brightness = 50; // percent
 
   /**
+   * @brief The actual output color as binary value.
+   */
+  uint32_t _outColor;
+
+  /**
    * @brief allow direct PWN output for driving LEDs.
    */
   bool pwmMode = false;
+
+  /// @brief invert PWM signals.
+  bool invert = false;
 
   /** data output pins (W,R,G,B) or pins[0] only. */
   int _pins[MAXPINS] = {0, 0, 0, 0}; //  = {D8, D6, D7, 0};
 
 #if (defined(ESP32))
-  int _channels[MAXPINS] = {0, 0, 0, 0}; // led channels for ESP32
+  uint8_t _channels[MAXPINS] = {0, 0, 0, 0}; // led channels for ESP32
 #endif
 
   /**
@@ -119,13 +125,9 @@ protected:
 
 
 private:
-  /** Number of pixels in the stripe, set by the number of GPIO pins in then pin property. */
+  /** Number of colors / pwm outputs, set by the number of GPIO pins in then pin property. */
   int _count = 0;
 
-  /**
-   * @brief The actual output color as binary value.
-   */
-  uint32_t _outColor;
 };
 
 /* ===== Register the Element ===== */

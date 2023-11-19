@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief The SensorElement acts as the base class for sensor elements that need collecting sensor data on a regular basis.
  */

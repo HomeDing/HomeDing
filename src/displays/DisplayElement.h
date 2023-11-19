@@ -16,10 +16,30 @@
  * * 17.03.2022 unified DisplayConfig
  */
 
-#ifndef DISPLAYELEMENT_H
-#define DISPLAYELEMENT_H
+#pragma once
 
 #include <functional>
+
+#define RGB_WHITE 0x00FFFFFF
+#define RGB_BLACK 0x00000000
+#define RGB_GRAY 0x00808080
+#define RGB_RED 0x00FF0000
+#define RGB_GREEN 0x0000FF00
+#define RGB_BLUE 0x000000FF
+#define RGB_YELLOW 0x00FFFF00
+#define RGB_ORANGE 0x00FFA500
+#define RGB_PURPLE 0x00800080
+
+#define RGB_UNDEFINED 0xEE000000  // key color
+
+
+#define BUSMODE_ANY 0x00
+#define BUSMODE_I2C 0x01
+#define BUSMODE_SPI 0x02   // standard SPI interface
+#define BUSMODE_HSPI 0x03  // high speed SPI interface on ESP32
+#define BUSMODE_PAR8 0x04
+#define BUSMODE_LCD8 0x21
+
 
 struct DisplayConfig {
   /** Width of display */
@@ -28,11 +48,22 @@ struct DisplayConfig {
   /** Height of display */
   int height = 64;
 
-  /** Brightness of display 0...100 (percent) */
-  int brightness = 80;
+  /// @brief Brightness of display 0...100 (percent)
+  int brightness = 50;
+
+  /** Default Draw & Background Color */
+  uint32_t drawColor = RGB_WHITE;
+  uint32_t backgroundColor = RGB_BLACK;
+  uint32_t borderColor = RGB_WHITE;
 
   /** Rotation of the display */
   int rotation = 0;
+
+  /// @brief Row-Offset in the display memory for the displayed part.
+  int rowOffset = 0;
+
+  /// @brief Column-Offset in the display memory for the displayed part.
+  int colOffset = 0;
 
   /** Pin to reset the display chip */
   int resetPin = -1;
@@ -40,22 +71,35 @@ struct DisplayConfig {
   /** Pin to enable backlight etc. */
   int lightPin = -1;
 
-  /** Pin to reset the display chip */
-  bool invert = -false;
+  /** Pin to invert the display colors */
+  bool invert = false;
+
+  /// @brief TFT IPS panel in use.
+  bool ips = false;
+
+  int busmode = BUSMODE_ANY;
+
+  // bus configurations for any bus
+
+  int32_t busSpeed = -1;  // speed
+  int csPin = -1;         // chip select pin (SPI, lcd8, bus16)
+  int dcPin = -1;         // Data-Command pin (SPI, lcd8, bus16)
+  int wrPin = -1;         // write strobe pin (lcd8)
+  int rdPin = -1;         // read strobe pin (lcd8)
+
+  // GPIO pins used for the 8-bit and 16-bit busses
+  String busPins;
 
   /* ===== I2C interface ===== */
 
   int i2cAddress = 0;  ///< i2c address
-  int i2cSDA = 0;      ///< i2c data
-  int i2cSCL = 0;      ///< i2c clock
+  int i2cSDA = 0;      ///< i2c data pin
+  int i2cSCL = 0;      ///< i2c clock pin
 
   /* ===== SPI interface ===== */
   int spiMOSI = -1;  ///< SPI interface MOSI pin
   int spiMISO = -1;  ///< SPI interface MISO pin
   int spiCLK = -1;   ///< SPI interface clock CLK pin
-  int spiCS = -1;    ///< SPI interface chip select CS pin
-  int spiDC = -1;    ///< SPI interface Data-Command DC pin
-  int spiRST = -1;
 };
 
 
@@ -84,6 +128,11 @@ public:
   virtual bool set(const char *name, const char *value) override;
 
   /**
+   * @brief Activate the Element.
+   */
+  virtual void start() override;
+
+  /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
    */
@@ -103,5 +152,3 @@ private:
 };
 
 // This is a base class that will not be registered
-
-#endif  // DISPLAYELEMENT_H

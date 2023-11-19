@@ -20,12 +20,11 @@
  * * 22.01.2022 delete folders enabled.
  */
 
-#ifndef FILESERVER_H
-#define FILESERVER_H
+#pragma once
 
-#include <HomeDing.h>
+#include <hdfs.h>
 
-#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#define JINFO(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Request Handler implementation for static files in file system.
@@ -40,8 +39,8 @@ public:
    * Serving static data down and upload.
    * @param cache_header Cache Header to be used in replies.
    */
-  FileServerHandler(FILESYSTEM &fs, Board *board)
-      : _fs(fs), _board(board) {
+  FileServerHandler(Board *board)
+    : _board(board) {
   }
 
 
@@ -58,7 +57,7 @@ public:
 #endif
   {
     return ((!_board->isSafeMode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
-  } // canHandle()
+  }  // canHandle()
 
 
 #if defined(ESP8266)
@@ -69,7 +68,7 @@ public:
   {
     // only allow upload with POST on root fs level.
     return ((!_board->isSafeMode) && (uri == "/"));
-  } // canUpload()
+  }  // canUpload()
 
 
 #if defined(ESP8266)
@@ -89,26 +88,16 @@ public:
       // all done in upload. no other forms.
 
     } else if (requestMethod == HTTP_DELETE) {
-      TRACE("Delete %d", _fs.exists(fName));
-      if (_fs.exists(fName)) {
-#if defined(ESP8266)
-        _fs.remove(fName);
-#elif defined(ESP32)
-        File f = _fs.open(fName);
-        if (f.isDirectory()) {
-          _fs.rmdir(fName);
-        } else {
-          f.close();
-          _fs.remove(fName);
-        }
-#endif
+      JINFO("Delete %s", fName.c_str());
+      if (HomeDingFS::exists(fName)) {
+        HomeDingFS::remove(fName);
         _board->filesVersion++;
       }
+    }  // if
 
-    } // if
-    server.send(200); // all done.
+    server.send(200);  // all done.
     return (true);
-  } // handle()
+  }  // handle()
 
 
 // handle uploading of payload of a file.
@@ -126,29 +115,28 @@ public:
       fName = "/" + fName;
     }
 
-    TRACE("upload...<%s>", fName.c_str());
+    JINFO("upload...<%s>", fName.c_str());
     if (fName.indexOf('#') >= 0) {
-      TRACE("no #...");
+      JINFO("no #...");
     } else if (fName.indexOf('$') >= 0) {
-      TRACE("no $...");
+      JINFO("no $...");
 
     } else if (upload.status == UPLOAD_FILE_START) {
-      if (_fs.exists(fName)) {
-        TRACE("  ...remove");
-        _fs.remove(fName);
-      } // if
+      if (HomeDingFS::exists(fName)) {
+        HomeDingFS::remove(fName);
+      }  // if
 
 #if defined(ESP32)
       // create folder when required, LittleFS on ESP32 doesn't create folders automatically.
-      String folders = fName;
-      int n = folders.indexOf('/', 1);
-      while (n > 0) {
-        _fs.mkdir(folders.substring(0, n)); // no harm if folder exists.
-        n = folders.indexOf('/', n + 1);
-      };
+      // String folders = fName;
+      // int n = folders.indexOf('/', 1);
+      // while (n > 0) {
+      //   _fs.mkdir(folders.substring(0, n));  // no harm if folder exists.
+      //   n = folders.indexOf('/', n + 1);
+      // };
 #endif
 
-      _fsUploadFile = _fs.open(fName, "w");
+      _fsUploadFile = HomeDingFS::open(fName, "w");
       _board->filesVersion++;
 
     } else if (upload.status == UPLOAD_FILE_WRITE) {
@@ -161,14 +149,12 @@ public:
         _fsUploadFile.close();
         _board->filesVersion++;
       }
-    } // if
-  } // upload()
+    }  // if
+  }    // upload()
 
 
 protected:
-  FS _fs;
   File _fsUploadFile;
   Board *_board;
 };
 
-#endif

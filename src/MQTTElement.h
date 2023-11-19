@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 /**
  * @brief This Element enables communication to MQTT servers to publish a single topic.
  */

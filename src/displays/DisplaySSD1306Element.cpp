@@ -15,7 +15,6 @@
  */
 
 #include <Arduino.h>
-#include <Board.h>
 #include <HomeDing.h>
 
 #include <displays/DisplaySSD1306Element.h>
@@ -54,7 +53,7 @@ void DisplaySSD1306Element::start() {
       DisplayElement::start();
 
     } else {
-      LOGGER_EERR("no display found.");
+      LOGGER_EERR("no display found");
       delete d;
     }  // if
   }    // if

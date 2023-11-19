@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include <HomeDing.h>
-
 #define CALCELEMENT_MAX_INPUTS 8
 
 class CalcElement : public Element {

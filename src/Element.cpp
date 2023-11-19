@@ -91,15 +91,22 @@ void Element::pushState(
 }  // pushState()
 
 
-/**
- * @brief save a local state to a state element.
- * @param key The key of state variable.
- * @param value The value of state variable.
- */
+
+/// @brief save a local state to a state element.
+/// @param key The key of state variable.
+/// @param value The value of state variable.
+void Element::saveState(const char *key, String value) {
+  saveState(key, value.c_str());
+}
+
+
+/// @brief save a local state to a state element.
+/// @param key The key of state variable.
+/// @param value The value of state variable.
 void Element::saveState(const char *key, const char *value) {
   TRACE("saveState(%s=%s)", key, value);
-  if (active && _useState && _board->state) {
-    _board->state->save(this, key, value);
+  if (active && _useState) {
+    DeviceState::setElementState(this, key, value);
   }
 }  // saveState
 
@@ -215,6 +222,24 @@ unsigned long Element::_scanDuration(const char *value) {
 }  // _scanDuration()
 
 
+bool Element::_scanIndexParam(const char *name, size_t &index, String &indexName) {
+  const char *p = name;
+
+  p = strchr(p, '[');
+  if (p) {
+    index = (size_t)strtoul(p + 1, nullptr, 10);
+    p = strchr(p, ']');
+  }
+  if (p) {
+    p = strchr(p, '/');
+  }
+  if (p) {
+    indexName = p + 1;
+  }
+  return (p);
+}  // _scanIndexParam()
+
+
 /* Return a pin value from a string. */
 int Element::_atopin(const char *value) {
 #if defined(ESP8266)
@@ -252,21 +277,25 @@ uint32_t Element::_atoColor(const char *value) {
 
     if ((ch0 == '#') || (ch0 == 'x')) {
       ret = strtoul(value + 1, nullptr, 16);
-    } else if ((ch0 >= '0') && (ch0 <= '9')) {
-      ret = _atoi(value);
+
     } else if (_stricmp(value, "black") == 0) {
-      ret = 0x00000000;
-    } else if (_stricmp(value, "red") == 0) {
-      ret = 0x00FF0000;
-    } else if (_stricmp(value, "green") == 0) {
-      ret = 0x0000FF00;
-    } else if (_stricmp(value, "blue") == 0) {
-      ret = 0x000000FF;
+      ret = RGB_BLACK;
+    } else if (_stricmp(value, "gray") == 0) {
+      ret = RGB_GRAY;
     } else if (_stricmp(value, "white") == 0) {
-      ret = 0xFFFFFFFF;
+      ret = RGB_WHITE;
+
+    } else if (_stricmp(value, "red") == 0) {
+      ret = RGB_RED;
+    } else if (_stricmp(value, "yellow") == 0) {
+      ret = RGB_YELLOW;
+    } else if (_stricmp(value, "green") == 0) {
+      ret = RGB_GREEN;
+    } else if (_stricmp(value, "blue") == 0) {
+      ret = RGB_BLUE;
     }
   }  // if
-  return ret;
+  return (ret);
 }  // _atoColor()
 
 

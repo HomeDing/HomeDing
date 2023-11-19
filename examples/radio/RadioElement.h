@@ -1,24 +1,21 @@
 /**
  * @file RadioElement.h
  * @brief Element Template class.
- * 
+ *
  * @author Matthias Hertel, https://www.mathertel.de
  *
  * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  *
  * This work is licensed under a BSD style license.
  * https://www.mathertel.de/License.aspx.
- * 
+ *
  * More information on https://www.mathertel.de/Arduino
- * 
+ *
  * Changelog:
  * * 30.07.2018 created by Matthias Hertel
  */
 
-#ifndef RADIOELEMENT_H
-#define RADIOELEMENT_H
-
-#include <HomeDing.h>
+#pragma once
 
 /**
  * @brief RadioElement implements...
@@ -30,8 +27,7 @@ The RadioElement can ...
 @endverbatim
  */
 
-class RadioElement : public Element
-{
+class RadioElement : public Element {
 public:
   /**
    * @brief Factory function to create a RadioElement.
@@ -75,34 +71,32 @@ public:
    * @param callback callback function that is used for every property.
    */
   virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
+    std::function<void(const char *pName, const char *eValue)> callback) override;
 
 private:
-  /** * true when a radio chip was found in i2c . */
-  bool _found = 0;
+  int _address = 0;  ///< i2c address. 0 means the common i2c addresses are scanned by the chip specific implementation. */
+  bool _found = 0;   ///< true when a radio chip was found on i2c bus.
 
-  /** * @brief The actual volume. */
-  int _volume = 0;
-
-  /**
-   * @brief The actual frequency.
-   */
-  int _freq = 0;
-
-  bool _mute = false;
+  int _volume = 0;          ///< The current volume.
+  bool _mono = true;        ///< mono mode
+  bool _mute = false;       ///< muted mode
+  bool _softMute = false;   ///< automcatic mute mode
+  bool _bassBoost = false;  ///< bass boost mode
 
   /**
    * @brief The actions that are submitted when a station name is recognized through RDS...
    */
-  String _volumeAction;
-  String _frequencyAction;
-  String _stationAction;
-  String _rdsTextAction;
-  String _rssiAction;
+  String _frequencyAction;  ///< actions, when volume has changed
+  String _stationAction;    ///< actions, when station name from RDS was received
+  String _rdsTextAction;    ///< actions, when new text from rds was received
 
   int _resetpin = -1;
-  int _checkInfo = 5;
+  int _checkRDS = 500;
+  int _checkInfo = 800;
   int _antenna = 0;
-};
 
-#endif
+  private:
+  // implementation details
+  class RadioElementImpl *_impl;
+
+};

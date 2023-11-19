@@ -70,6 +70,11 @@ bool DeviceElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "room") == 0) {
     _board->room = value;
 
+#if defined(ESP8266)
+  } else if (_stricmp(name, "outputpower") == 0) {
+    _board->outputPower = strtof(value, nullptr);
+#endif
+
   } else if (_stricmp(name, "reboottime") == 0) {
     _rebootTime = _atotime(value);
 
@@ -83,10 +88,6 @@ bool DeviceElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "logfile") == 0) {
     // enable/disable logfile feature
     Logger::setLogFile(_atob(value));
-
-  } else if (_stricmp(name, "reset") == 0) {
-    // reboot is called reset in ESP
-    _board->reboot(false);
 
   } else {
     ret = Element::set(name, value);
@@ -120,14 +121,8 @@ bool DeviceElement::set(const char *name, const char *value) {
 
       // ===== WiFi Manager =====
 
-    } else if (_stricmp(name, "led") == 0) {
-      _board->sysLED = _atopin(value);
-
-    } else if (_stricmp(name, "button") == 0) {
-      _board->sysButton = _atopin(value);
-
     } else if (_stricmp(name, "connecttime") == 0) {
-      _board->maxNetConnextTime = _scanDuration(value);
+      _board->maxNetConnectTime = _scanDuration(value);
 
     } else if (_stricmp(name, "sleeptime") == 0) {
       _board->setSleepTime(_scanDuration(value));
@@ -142,6 +137,16 @@ bool DeviceElement::set(const char *name, const char *value) {
 
     } else if (_stricmp(name, "i2c-frequency") == 0) {
       _board->I2cFrequency = _atoi(value);
+
+      // ===== SPI bus =====
+    } else if (_stricmp(name, "spi-scl") == 0) {
+      _board->spiCLK = _atopin(value);
+
+    } else if (_stricmp(name, "spi-miso") == 0) {
+      _board->spiMISO = _atopin(value);
+
+    } else if (_stricmp(name, "spi-mosi") == 0) {
+      _board->spiMOSI = _atopin(value);
 
     }  // if
   }    // if (! active)
@@ -168,7 +173,7 @@ void DeviceElement::loop() {
   TRACE("loop()");
   unsigned long now = _board->getSeconds();
   if ((_rebootTime > 0) && (now > _nextBoot)) {
-    LOGGER_EINFO("device restart initiated.");
+    LOGGER_EINFO("restart initiated");
     delay(100);
     ESP.restart();
     delay(100);

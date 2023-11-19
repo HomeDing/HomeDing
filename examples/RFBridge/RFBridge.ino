@@ -58,12 +58,9 @@ WebServer server(80);
  */
 void setup(void) {
   Serial.begin(115200);
+  delay(3000);
 
-#ifdef NET_DEBUG
-  Serial.setDebugOutput(true);
-#else
   Serial.setDebugOutput(false);
-#endif
 
   // ----- setup the platform with webserver and file system -----
 
@@ -78,9 +75,9 @@ void setup(void) {
   server.addHandler(new BoardHandler(&homeding));
 
   // UPLOAD and DELETE of static files in the file system.
-  server.addHandler(new FileServerHandler(*homeding.fileSystem, &homeding));
+  server.addHandler(new FileServerHandler(&homeding));
 
-  LOGGER_INFO("setup done.");
+  LOGGER_INFO("setup done");
 }  // setup
 
 

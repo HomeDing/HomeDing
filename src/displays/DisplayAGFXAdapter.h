@@ -53,7 +53,6 @@ public:
         conf->busmode = BUSMODE_I2C;
     }
 
-
     if (conf->busmode == BUSMODE_I2C) {
       PANELTRACE("Use I2C\n");
       bus = new Arduino_Wire(conf->i2cAddress);
@@ -61,9 +60,7 @@ public:
 #if defined(ESP32)
     } else if (conf->busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
-
-      Arduino_DataBus *bus = new Arduino_ESP32SPI(
-        conf->dcPin, conf->csPin);
+      bus = new Arduino_ESP32SPI(conf->dcPin, conf->csPin);
 
     } else if (conf->busmode == BUSMODE_HSPI) {
       PANELTRACE("Use HSPI\n");
@@ -220,18 +217,19 @@ public:
    */
   int drawText(int16_t x, int16_t y, int16_t h, const char *text) override {
     PANELTRACE("drawText: %d/%d h:%d t:<%s>\n", x, y, h, text);
-    PANELTRACE("  colors: %d on %d\n", drawColor565, backColor565);
+    PANELTRACE("  colors: %04x on %04x\n", drawColor565, backColor565);
 
     // textbox dimensions
     int16_t bx, by;
     uint16_t bw, bh;
 
-    gfx->setTextBound(0, 0, 128, 64);
+    gfx->setTextBound(0, 0, conf->width, conf->height);
+
     _setTextHeight(h);
     gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
-    // PANELTRACE("     box: %d/%d w:%d h:%d", bx, by, bw, bh);
+    PANELTRACE("     box: %d/%d w:%d h:%d\n", bx, by, bw, bh);
 
-    gfx->setTextColor(drawColor565, backColor565);
+    gfx->setTextColor(drawColor565, drawColor565); // transparent background
     gfx->setCursor(x, y + baseLine);
     gfx->print(text);
 
@@ -246,7 +244,7 @@ public:
   /// @param h height of the button
   /// @param text caption on the button
   virtual void drawButton(int16_t x, int16_t y, int16_t w, int16_t h, const char *text, bool pressed = false) override {
-    // LOGGER_JUSTINFO("drawButton: (%d,%d,%d,%d) <%s> %d\n", x, y, w, h, text, pressed);
+    // LOGGER_JUSTINFO("drawButton: (%d,%d,%d,%d) <%s> %d", x, y, w, h, text, pressed);
     const uint16_t paddingVertical = 4;
 
     // textbox dimensions
@@ -275,6 +273,7 @@ public:
     }
 
     // draw the text
+    gfx->setTextBound(x, y, w, h);
     gfx->setTextColor(fCol);
     gfx->setCursor(x + dx, y + dy + baseLine);
     gfx->print(text);
@@ -361,7 +360,7 @@ protected:
 
   // load a builtin font
   void loadFont(int16_t height, int8_t factor = 1) {
-    // PANELTRACE("loadFont(%d, %d)\n", height, factor);
+    PANELTRACE("loadFont(%d, %d)\n", height, factor);
     const GFXfont *font = nullptr;
 
     if (height <= 8) {

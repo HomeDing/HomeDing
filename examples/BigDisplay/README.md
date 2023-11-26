@@ -1,6 +1,6 @@
 # The HomeDing BigDisplay Example
 
-There are some boards available that already combine display, touch screen and processor and
+There are some ESP32 / ESP32S3 boards available that already combine display, touch screen and processor and
 additional components. This example supports these devices and provides some initial
 configurations.
 
@@ -10,8 +10,18 @@ Boards that were used during development:
 * [ESP32-3248S035] -- ESP32 with 480*320 LCD touch display
 * [LilyGO-T-Display-S3] -- Small ESP32-S3 boards with 170*320 LCD touch display
 
+ESP8266 boards are not supported by this sketch.
+
 On the HomeDing web site you find more detailled documentation on these boards including
 configuration definitions.
+
+
+## FAT and LittleFS Filesystem support
+
+some ESP32 boards have a huge Flash memory chip where using the standard LilleFS filesystem is
+not appropriate. In this sketch the ESP32 partitions table is analyzed to check what filesystem
+is in use and starts with LilleFS or FAT.
+
 
 ## Displays and Display Touch controllers
 

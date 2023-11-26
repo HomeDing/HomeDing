@@ -19,7 +19,7 @@
  *
  * Changelog:
  * * 01.01.2021 created from standard sketch.
-*/ 
+ */
 
 #define DBG_TRACE  // trace level for all elements
 
@@ -90,8 +90,10 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#include "esp_partition.h"
+
 #include <FS.h>
-#include <FFat.h>  // File System for Web Server Files
+#include <FFat.h>      // File System for Web Server Files
 #include <LittleFS.h>  // File System for Web Server Files
 
 #include <BuiltinHandler.h>  // Serve Built-in files
@@ -109,6 +111,7 @@ WebServer server(80);
  * Setup all components and Serial debugging helpers
  */
 void setup(void) {
+  fs::FS *fs = nullptr;
   Serial.begin(115200);
 
 #ifdef DBG_TRACE
@@ -118,13 +121,22 @@ void setup(void) {
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-
   Serial.setDebugOutput(false);
 
-  // ----- setup the platform with webserver and file system -----
 
-  // homeding.init(&server, &LittleFS, "BigDisplay");
-  homeding.init(&server, &FFat, "BigDisplay");
+  // ----- check partitions for finding the fileystem type -----
+  esp_partition_iterator_t i;
+
+  if (i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, nullptr)) {
+    fs = &FFat;
+  } else if (i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr)) {
+    fs = &LittleFS;
+  }
+  esp_partition_iterator_release(i);
+
+
+  // ----- setup the platform with webserver and file system -----
+  homeding.init(&server, fs, "BigDisplay");
 
   // ----- adding web server handlers -----
 
@@ -136,10 +148,6 @@ void setup(void) {
 
   // UPLOAD and DELETE of static files in the file system.
   server.addHandler(new FileServerHandler(&homeding));
-
-  // Serial.println("Setup Backlight:");
-  // pinMode(27, OUTPUT);
-  // digitalWrite(27, HIGH);
 
   LOGGER_INFO("setup done");
 }  // setup

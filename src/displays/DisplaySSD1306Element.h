@@ -13,8 +13,7 @@
  *
  * Changelog:
  * * 18.09.2018 created by Matthias Hertel
- * * 29.08.2020 based on DisplayElement
- * * 20.03.2022 Using Adafruit SSD1306 library
+ * * 27.11.2023 Using GFX for Arduino Library
  */
 
 #pragma once
@@ -30,6 +29,8 @@
 
 class DisplaySSD1306Element : public DisplayElement {
 public:
+  /* ===== Static factory function ===== */
+
   /**
    * @brief Factory function to create a DisplaySSD1306Element.
    * @return Element*
@@ -40,6 +41,8 @@ public:
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;
+
+  /* ===== Element functions ===== */
 
   /**
    * @brief Activate the Element.

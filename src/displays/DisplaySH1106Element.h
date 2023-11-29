@@ -13,6 +13,7 @@
  *
  * Changelog:
  * * 18.09.2018 created by Matthias Hertel
+ * * 27.11.2023 Using GFX for Arduino Library
  */
 
 #pragma once

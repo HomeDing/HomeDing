@@ -232,6 +232,7 @@ public:
     gfx->setTextColor(drawColor565, drawColor565); // transparent background
     gfx->setCursor(x, y + baseLine);
     gfx->print(text);
+    _needSync = true;
 
     return ((bx - x) + bw);
   }  // drawText
@@ -277,6 +278,7 @@ public:
     gfx->setTextColor(fCol);
     gfx->setCursor(x + dx, y + dy + baseLine);
     gfx->print(text);
+    _needSync = true;
   }  // drawButton()
 
 
@@ -296,12 +298,14 @@ public:
       gfx->drawCircle(x + r, y + r, r, drawColor565);
     }
     return (1);
+    _needSync = true;
   };  // drawDot()
 
 
   void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
     PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, drawColor565);
     gfx->drawLine(x0, y0, x1, y1, drawColor565);
+    _needSync = true;
   }  // drawLine()
 
 

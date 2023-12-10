@@ -28,15 +28,12 @@ public:
     bus = getBus(conf);
 
     if (bus) {
-      // Initialize the display using the physical parameters
-      // and use the Mono color Canvas for drawing
+      // Initialize the display using the physical parameters and use the Mono color Canvas for drawing
       Arduino_G *op = new Arduino_SSD1306(bus, conf->resetPin, conf->width, conf->height);
-      gfx = new Arduino_Canvas_Mono(conf->width, conf->height, op, 0, 0, true);
+      gfx = new Arduino_Canvas_Mono(conf->width, conf->height, op, conf->colOffset, conf->rowOffset, true);
 
       // set rotatation for drawing.
       gfx->setRotation(conf->rotation / 90);
-      // gfx->setRotation(0);
-      // conf->rotation
     }
 
     DisplayAGFXAdapter::start();

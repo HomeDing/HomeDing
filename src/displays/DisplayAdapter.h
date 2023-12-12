@@ -49,7 +49,7 @@ public:
   };
 
 
-  /// @brief set brightness for panel lightng.
+  /// @brief set brightness for panel lightning.
   /// @param bright new brightness in range 0...100
   virtual void setBrightness(uint8_t bright);
 

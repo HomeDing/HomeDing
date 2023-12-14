@@ -111,6 +111,8 @@ void GT911::init(int address) {
 
   width = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 0] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 1] << 8);
   height = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 2] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 3] << 8);
+
+  WireUtils::write(addr, highByte(GT911_COMMAND), lowByte(GT911_COMMAND), 0);
 }
 
 

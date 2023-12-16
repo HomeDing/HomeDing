@@ -229,7 +229,7 @@ public:
     gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
     PANELTRACE("     box: %d/%d w:%d h:%d\n", bx, by, bw, bh);
 
-    gfx->setTextColor(drawColor565, drawColor565); // transparent background
+    gfx->setTextColor(drawColor565, drawColor565);  // transparent background
     gfx->setCursor(x, y + baseLine);
     gfx->print(text);
     _needSync = true;
@@ -308,6 +308,18 @@ public:
     _needSync = true;
   }  // drawLine()
 
+
+  void drawCircle(int16_t cx, int16_t cy, int16_t radius) override {
+    LOGGER_TRACE("drawCircle(%d/%d %d #%08x / #%08x)\n", cx, cy, radius, borderColor, backColor);
+
+    if (backColor != RGB_UNDEFINED) {
+      gfx->fillCircle(cx, cy, radius, backColor565);
+    }
+    if (borderColor != RGB_UNDEFINED) {
+      gfx->drawCircle(cx, cy, radius, borderColor565);
+    }
+    _needSync = true;
+  };
 
   /// @brief send all buffered pixels to display.
   void flush() override {

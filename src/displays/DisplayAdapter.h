@@ -132,6 +132,10 @@ public:
     return (h);
   };
 
+  virtual void drawCircle(UNUSED int16_t cx, UNUSED int16_t cy, UNUSED int16_t diameter) {
+    _needSync = true;
+  };
+
 
   // @brief remember that flush is required after sequence.
   virtual void setSyncRequired() {

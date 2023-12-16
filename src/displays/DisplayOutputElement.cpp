@@ -124,7 +124,7 @@ void DisplayOutputElement::loop() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 void DisplayOutputElement::draw() {
-  LOGGER_ETRACE("draw(%s) page=%d", id, _page);
+  // LOGGER_ETRACE("draw(%s) page=%d", id, _page);
   _display->setColor(_color);
   _display->setBackgroundColor(_backgroundColor);
   _display->setBorderColor(_borderColor);

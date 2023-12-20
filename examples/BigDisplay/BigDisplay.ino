@@ -124,6 +124,10 @@ void setup(void) {
   Serial.setDebugOutput(false);
 
 
+#if defined(ESP8266)
+  fs = &LittleFS;
+
+#elif defined(ESP32)
   // ----- check partitions for finding the fileystem type -----
   esp_partition_iterator_t i;
 
@@ -133,6 +137,7 @@ void setup(void) {
     fs = &LittleFS;
   }
   esp_partition_iterator_release(i);
+#endif
 
 
   // ----- setup the platform with webserver and file system -----

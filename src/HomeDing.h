@@ -260,7 +260,7 @@ extern Board homeding;
 #include <displays/DisplayST7789Element.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_DISPLAYESP32PANEL
+#if defined(HOMEDING_INCLUDE_DISPLAYESP32PANEL) && defined(CONFIG_IDF_TARGET_ESP32S3)
 #include <displays/DisplayESP32PanelElement.h>
 #endif
 

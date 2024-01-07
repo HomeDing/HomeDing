@@ -28,9 +28,8 @@
 #define HOMEDING_REGISTER 1
 
 // Enable the following element groups of the HomeDing Library
-#define HOMEDING_INCLUDE_SYSTEM
 #define HOMEDING_INCLUDE_CORE
-#define HOMEDING_INCLUDE_FULL_SYSTEM
+// #define HOMEDING_INCLUDE_SSDP
 
 // Enable some Sensor Elements
 #define HOMEDING_INCLUDE_DHT
@@ -38,10 +37,10 @@
 #define HOMEDING_INCLUDE_SHT20
 #define HOMEDING_INCLUDE_AHT20
 #define HOMEDING_INCLUDE_DALLAS
-#define HOMEDING_INCLUDE_BMP280
-#define HOMEDING_INCLUDE_BME680
-#define HOMEDING_INCLUDE_BH1750
-#define HOMEDING_INCLUDE_SCD4X
+// #define HOMEDING_INCLUDE_BMP280
+// #define HOMEDING_INCLUDE_BME680
+// #define HOMEDING_INCLUDE_BH1750
+// #define HOMEDING_INCLUDE_SCD4X
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -55,7 +54,7 @@
 #define HOMEDING_INCLUDE_DSTIME
 
 // Enable Elements for Displays
-#define HOMEDING_INCLUDE_DISPLAY // all elements that can be displayed
+#define HOMEDING_INCLUDE_DISPLAY  // all elements that can be displayed
 // #define HOMEDING_INCLUDE_DISPLAYLCD
 // #define HOMEDING_INCLUDE_DISPLAYSSD1306
 // #define HOMEDING_INCLUDE_DISPLAYSH1106
@@ -63,12 +62,12 @@
 // enable these lines to get more displays supported
 #define HOMEDING_INCLUDE_DISPLAYGC9A01
 #define HOMEDING_INCLUDE_DISPLAYST7796
-#define HOMEDING_INCLUDE_DISPLAYESP32PANEL
+// #define HOMEDING_INCLUDE_DISPLAYESP32PANEL
 #define HOMEDING_INCLUDE_DISPLAYST7789
 
 // #define HOMEDING_INCLUDE_DISPLAYST7735
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
-#define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
+// #define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
 #define HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
 #define HOMEDING_INCLUDE_DISPLAYTOUCHCST816
 // Enable simple display Elements
@@ -100,7 +99,7 @@
 #include <BoardServer.h>     // Web Server Middleware for Elements
 #include <FileServer.h>      // Web Server Middleware for UI
 
-// ===== WLAN credentials =====
+#include "src/AnalogClockElement.h"  // local element for Analog Clock
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
@@ -141,7 +140,7 @@ void setup(void) {
 
 
   // ----- setup the platform with webserver and file system -----
-  homeding.init(&server, fs, "BigDisplay");
+  homeding.init(&server, fs, "Display");
 
   // ----- adding web server handlers -----
 

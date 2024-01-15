@@ -282,7 +282,7 @@ void Board::_addAllElements() {
         } else {
           _lastElem = ElementRegistry::createElement(typeName);
           if (!_lastElem) {
-            LOGGER_ERR("Cannot create Element type %s", typeName);
+            LOGGER_ERR("No such Element: %s", typeName);
           } else {
             // add to the list of elements
             add(path, _lastElem);
@@ -703,7 +703,7 @@ void Board::loop() {
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, netMsk);
     WiFi.softAP(ssid);
-    hd_yield();
+    delay(100);
     BOARDTRACE(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
     // setup dns server using standard port

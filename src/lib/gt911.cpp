@@ -66,11 +66,17 @@ void GT911::init(int address) {
   regBuffer[0] = highByte(GT911_CONFIG_START);
   regBuffer[1] = lowByte(GT911_CONFIG_START);
 
-  pinMode(pinRst, OUTPUT);
-  if ((pinInt < 0) || (!address)) {
+  if (pinRst >= 0) { pinMode(pinRst, OUTPUT); }
+  if (pinInt >= 0) { pinMode(pinInt, OUTPUT); }
+
+  if ((pinInt < 0) && (pinRst < 0)) {
+    // nothing
+
+  } else if ((pinInt < 0) || (!address)) {
     digitalWrite(pinRst, LOW);
     delay(120);
     digitalWrite(pinRst, HIGH);
+    delay(50);
 
     if (WireUtils::exists(GT911_I2CADDR_14)) {
       address = GT911_I2CADDR_14;
@@ -96,7 +102,6 @@ void GT911::init(int address) {
     pinMode(pinInt, INPUT);
     // attachInterrupt(pinInt, GT911::onInterrupt, RISING);
   }
-  delay(50);
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
   uint16_t configSize = GT911_CONFIG_ALL - GT911_CONFIG_START + 1;

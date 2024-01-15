@@ -70,9 +70,7 @@ void DisplayElement::init(Board *board) {
 }  // init()
 
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
+///  @brief Set a parameter or property to a new value or start an action.
 bool DisplayElement::set(const char *name, const char *value) {
   bool ret = true;
   TRACE("set %s=%s", name, value);
@@ -124,6 +122,9 @@ bool DisplayElement::set(const char *name, const char *value) {
       config.busmode = BUSMODE_PAR8;  // 8 bit parallel data
     } else if (_stricmp(value, "lcd8") == 0) {
       config.busmode = BUSMODE_LCD8;
+
+    } else if (_stricmp(value, "panel") == 0) {
+      config.busmode = BUSMODE_PANEL;
     }
 
   } else if (_stricmp(name, "busspeed") == 0) {
@@ -223,9 +224,27 @@ void DisplayElement::start() {
     da->setBackgroundColor(config.backgroundColor);
 
   } else {
-    LOGGER_EERR("no display found");
+    LOGGER_EERR("start failed.");
   }
 }  // start()
+
+
+/// @brief Activate the Element using the given adapter.
+void DisplayElement::start(DisplayAdapter *displayAdapter) {
+  TRACE("start()");
+  if (displayAdapter) {
+    if (displayAdapter->setup(_board, &config)) {
+      bool success = displayAdapter->start();
+      if (success) {
+        _board->display = displayAdapter;
+
+      } else {
+        delete displayAdapter;
+      }
+    }
+  }
+  DisplayElement::start();
+}  // start(da)
 
 
 /**

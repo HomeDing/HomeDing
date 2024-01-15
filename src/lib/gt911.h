@@ -9,6 +9,10 @@
 // * https://github.com/goodix/goodix_gt9xx_public
 //
 // https://github.com/lvgl/lvgl_esp32_drivers/blob/master/lvgl_touch/gt911.h
+//
+// Changelog:
+// * 19.11.2023 created by Matthias Hertel
+// * 14.01.2024 supporting touch controllers with no Reset connection.
 
 #include "Arduino.h"
 #include <Wire.h>

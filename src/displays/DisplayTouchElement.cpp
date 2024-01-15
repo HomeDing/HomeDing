@@ -20,7 +20,7 @@
 #include <Wire.h>
 
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Private functions ===== */
 
@@ -76,6 +76,20 @@ bool DisplayTouchElement::set(const char *name, const char *value) {
 
   return (ret);
 }  // set()
+
+
+/// @brief setup the element so it can be started and stopped.
+void DisplayTouchElement::setup() {
+  TRACE("setup(%d %d)", _width, _height);
+
+  if (!_width) {
+    _width = _board->display->getWidth();
+  }
+  if (!_height) {
+    _height = _board->display->getHeight();
+  }
+  TRACE(">> setup(%d %d)", _width, _height);
+}
 
 
 /**

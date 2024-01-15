@@ -129,7 +129,7 @@ String BoardHandler::handleScan() {
   _board->keepCaptiveMode();
 
   int8_t scanState = WiFi.scanComplete();
-  TRACE("handleScan state=%d" m scanState);
+  TRACE("handleScan state=%d", scanState);
 
   if (scanState == WIFI_SCAN_FAILED) {
     // restart an async network scan

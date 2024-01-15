@@ -18,7 +18,7 @@
 
 #include <Wire.h>
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -55,11 +55,6 @@ bool DisplayTouchCST816Element::pullSensorData() {
  */
 void DisplayTouchCST816Element::start() {
   TRACE("CST816::start()");
-
-  // _interruptPin, _resetPin, _width, _height
-
-  pinMode(15, OUTPUT);  // TFT poweron
-  digitalWrite(15, HIGH);
 
   otp = new CST816(_interruptPin, _resetPin, _width, _height);
 

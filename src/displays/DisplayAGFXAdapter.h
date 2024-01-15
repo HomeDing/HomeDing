@@ -32,37 +32,38 @@
 #include <fonts/font16.h>
 #include <fonts/font24.h>
 
-#define PANELTRACE(...)  // Serial.printf("Display::" __VA_ARGS__)
+#define PANELTRACE(...)   Serial.printf("Display::" __VA_ARGS__)
 
 class DisplayAGFXAdapter : public DisplayAdapter {
 public:
   ~DisplayAGFXAdapter() = default;
 
-  Arduino_DataBus *getBus(DisplayConfig *conf) {
-    PANELTRACE("getbus: %d\n", conf->busmode);
+  Arduino_DataBus *getBus(int busmode, DisplayConfig *conf) {
+    PANELTRACE("getbus: %d\n", busmode);
     PANELTRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d\n",
                conf->dcPin, conf->csPin, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
     PANELTRACE("   i2c: adr:%d, sda:%d, scl:%d\n", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
 
     Arduino_DataBus *bus = nullptr;
 
-    if (conf->busmode == BUSMODE_ANY) {
+    if (busmode == BUSMODE_ANY) {
       if (conf->csPin >= 0) {
-        conf->busmode = BUSMODE_SPI;
+        busmode = BUSMODE_SPI;
       } else if (conf->i2cAddress)
-        conf->busmode = BUSMODE_I2C;
+        busmode = BUSMODE_I2C;
     }
 
-    if (conf->busmode == BUSMODE_I2C) {
+    if (busmode == BUSMODE_I2C) {
       PANELTRACE("Use I2C\n");
       bus = new Arduino_Wire(conf->i2cAddress);
 
 #if defined(ESP32)
-    } else if (conf->busmode == BUSMODE_SPI) {
+    } else if (busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
-      bus = new Arduino_ESP32SPI(conf->dcPin, conf->csPin);
+      bus = new Arduino_HWSPI(conf->dcPin, conf->csPin);
+      // bus = new Arduino_ESP32SPI(conf->dcPin, conf->csPin);
 
-    } else if (conf->busmode == BUSMODE_HSPI) {
+    } else if (busmode == BUSMODE_HSPI) {
       PANELTRACE("Use HSPI\n");
       bus = new Arduino_ESP32SPI(
         conf->dcPin,
@@ -75,7 +76,7 @@ public:
 #endif
 
 #if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
-    } else if (conf->busmode == BUSMODE_PAR8) {
+    } else if (busmode == BUSMODE_PAR8) {
       PANELTRACE("Use PAR8\n");
 
       int pinCount = ListUtils::length(conf->busPins);
@@ -102,7 +103,7 @@ public:
 
 
 #if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3)
-    } else if (conf->busmode == BUSMODE_LCD8) {
+    } else if (busmode == BUSMODE_LCD8) {
       PANELTRACE("Use LCD8\n");
       bus = new Arduino_ESP32LCD8(
         0 /* DC */,
@@ -115,18 +116,21 @@ public:
 
 
 #if defined(ESP8266)
-    } else if (conf->busmode == BUSMODE_SPI) {
+    } else if (busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
       // ESP8266 has pre-defined SPI pins
       bus = new Arduino_ESP8266SPI(
         conf->dcPin, conf->csPin);
 #endif
     }  // if
-    PANELTRACE("bus:%08lx\n", bus);
     return (bus);
   };
 
 
+  Arduino_DataBus *getBus(DisplayConfig *conf) {
+    return(getBus(conf->busmode, conf));
+  };
+  
   virtual bool start() override {
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
     PANELTRACE(" colors: #%08x / #%08x / #%08x\n", conf->drawColor, conf->backgroundColor, conf->borderColor);
@@ -302,7 +306,12 @@ public:
   };  // drawDot()
 
 
-  void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
+  virtual void drawPixel(UNUSED int16_t x, UNUSED int16_t y, UNUSED uint32_t color) override {
+    _needSync = true;
+    gfx->drawPixel(x, y, col565(color));
+  };
+
+  virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
     PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, drawColor565);
     gfx->drawLine(x0, y0, x1, y1, drawColor565);
     _needSync = true;

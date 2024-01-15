@@ -1,7 +1,7 @@
 /**
  * @file DisplayAdapter.h
  *
- * @brief Implementing base functionaliy for Display Adapters.
+ * @brief Implementing base functionality for Display Adapters.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -46,6 +46,18 @@ public:
   /// get height of the last drawn textline. Depends on font and text height.
   virtual int16_t getLineHeight() {
     return (lineHeight);
+  };
+
+
+  /// return the total width of the display.
+  virtual int16_t getWidth() {
+    return (conf->width);
+  };
+
+
+  /// return the total width of the display.
+  virtual int16_t getHeight() {
+    return (conf->height);
   };
 
 
@@ -117,6 +129,10 @@ public:
   virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text) {
     _needSync = true;
     return (charWidth * strnlen(text, MAX_DISPLAY_STRING_LEN));
+  };
+
+  virtual void drawPixel(UNUSED int16_t x, UNUSED int16_t y, UNUSED uint32_t color) {
+    _needSync = true;
   };
 
   virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1) {

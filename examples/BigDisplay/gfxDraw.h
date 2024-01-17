@@ -33,7 +33,12 @@
 #include <cstring>
 #include <cmath>
 
+// scaling: factors are in unit 100 (percent)
+
+#define GFXSCALE100(p, f100) (((int32_t)(p) * f100 + 50) / 100)
+
 namespace gfxDraw {
+
 
 
 #pragma pack(push, 1)
@@ -136,11 +141,13 @@ void cubicBezier(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int
 /// @param dx Position X coordinate for the path.
 /// @param dy Position Y coordinate for the path.
 /// @param cbDraw Callback with coordinates of line pixels.
-void path(std::vector<Segment> segments, int16_t dx, int16_t dy, fSetPixel cbDraw);
+void path(std::vector<Segment> &segments, int16_t dx, int16_t dy, fSetPixel cbDraw);
 
 
 /// @brief Draw a path with filling.
-void fillPath(std::vector<Segment> segments, int16_t dx, int16_t dy, fSetPixel cbBorder, fSetPixel cbFill = nullptr);
+void fillPath(std::vector<Segment> &segments, int16_t dx, int16_t dy, fSetPixel cbBorder, fSetPixel cbFill = nullptr);
+
+void scale(std::vector<Segment> &segments, int16_t f);
 
 
 /// @brief Scan a path using the svg/path/d syntax to create a vector(array) of Segments.
@@ -154,9 +161,11 @@ std::vector<Segment> parsePath(const char *pathText);
 /// @param path The path definition using SVG path syntax.
 /// @param x Starting Point X coordinate.
 /// @param y Starting Point Y coordinate.
+/// @param scale scaling factor * 100.
 /// @param cbBorder Draw function for border pixels. cbFill is used when cbBorder is null.
 /// @param cbFill Draw function for filling pixels.
-void pathByText(const char *pathText, int16_t x, int16_t y, fSetPixel cbBorder, fSetPixel cbFill = nullptr);
+void pathByText(const char *pathText, int16_t x, int16_t y, int16_t scale100, fSetPixel cbBorder, fSetPixel cbFill);
+
 
 }  // gfxDraw:: namespace
 
@@ -164,10 +173,10 @@ void pathByText(const char *pathText, int16_t x, int16_t y, fSetPixel cbBorder, 
 
 
 /// @brief A gfxDrawObject is used to define a stroke path and coloring of a graphical object.
-/// It supports creating paths by simple functions like lines and rectangles or by using the svg path notation (not fully supported) 
+/// It supports creating paths by simple functions like lines and rectangles or by using the svg path notation (not fully supported)
 /// The stroke color can be set.
 /// The fill color can be set to solid or gradient functions.
-/// TODO: collect the current colors from the canvas so the object can be "undrawn" later. 
+/// TODO: collect the current colors from the canvas so the object can be "undrawn" later.
 class gfxDrawObject {
 public:
   enum FillMode { None,
@@ -216,6 +225,11 @@ public:
   void setFillColor(gfxDraw::RGBA fill) {
     _fillMode = Solid;
     _fillColor1 = fill;
+  };
+
+  void scale(int16_t scale100) {
+    if (scale100 != 100)
+      gfxDraw::scale(_segments, scale100);
   };
 
   void setFillGradient(gfxDraw::RGBA fill1, int16_t x1, int16_t y1, gfxDraw::RGBA fill2, int16_t x2, int16_t y2) {
@@ -346,8 +360,8 @@ public:
     _yOffset = y;
     _fDraw = cbDraw;
 
-    // printf(" stroke = %02x.%02x.%02x\n", _stroke.Red, _stroke.Green, _stroke.Blue);
-    // printf(" fill   = %02x.%02x.%02x\n", _fillColor1.Red, _fillColor1.Green, _fillColor1.Blue);
+    printf(" stroke = %02x.%02x.%02x.%02x\n", _stroke.Alpha, _stroke.Red, _stroke.Green, _stroke.Blue);
+    printf(" fill   = %02x.%02x.%02x.%02x\n", _fillColor1.Alpha, _fillColor1.Red, _fillColor1.Green, _fillColor1.Blue);
 
     if (_fillColor1.Alpha == 0) {
       // need to draw the strike pixels only

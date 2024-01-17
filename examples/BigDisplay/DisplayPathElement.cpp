@@ -1,6 +1,6 @@
 /**
  * @file DisplayPathElement.cpp
- * @brief Output Element for controlling a binary output on a display.
+ * @brief Output Element for displaying 7 segment digits on a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -18,9 +18,9 @@
 #include <HomeDing.h>
 
 #include "DisplayPathElement.h"
-#include "drawAlgo.h"
+#include "gfxDraw.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new DisplayPathElement.
@@ -54,29 +54,19 @@ bool DisplayPathElement::set(const char *name, const char *value) {
 
 /// @brief Draw this output element.
 void DisplayPathElement::draw() {
-  TRACE("draw");
-  DisplayOutputElement::draw(); // set colors
+  DisplayOutputElement::draw();  // set colors
+  TRACE("draw border=%08lx back=%08lx", _borderColor, _backgroundColor);
 
-  DrawAlgo *da = new DrawAlgo();
+  gfxDrawObject *dObj = new gfxDrawObject(gfxDraw::RGBA(_borderColor), gfxDraw::RGBA(_backgroundColor) );
 
-  // da->rect(
-  //   _x, _y, 100, 40,
-  //   [&](int16_t x, int16_t y) {
-  //     _display->drawPixel(x, y, _borderColor);
-  //   },
-  //   [&](int16_t x, int16_t y) {
-  //     _display->drawPixel(x, y, _backgroundColor);
-  //   },
-  //   2);
+  dObj->setPath(_path);
+  // dObj->setFillGradient(gfxDraw::RED, 4, 6, gfxDraw::YELLOW, 10, 9);
 
-  da->path(
-    _path.c_str(), _x, _y,
-    [&](int16_t x, int16_t y) {
-      _display->drawPixel(x, y, _borderColor);
-    },
-    [&](int16_t x, int16_t y) {
-      _display->drawPixel(x, y, _backgroundColor);
-    });
+  dObj->draw(_x, _y, [&](int16_t x, int16_t y, gfxDraw::RGBA color) {
+    // printf("draw %02x %02x %02x %08lx\n", color.Red, color.Green, color.Blue, color.toColor24());
+    _display->drawPixel(x, y, color.toColor24());
+  });
+
 }
 
 /**

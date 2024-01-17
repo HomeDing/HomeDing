@@ -33,6 +33,7 @@ class DisplayAdapter;
 #define RGB_PURPLE 0x00800080
 
 #define RGB_UNDEFINED 0xEE000000  // key color
+#define RGB_TRANSPARENT 0xEF000000  // key color
 
 
 #define BUSMODE_ANY   0x00

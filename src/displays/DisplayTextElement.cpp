@@ -71,11 +71,11 @@ void DisplayTextElement::draw() {
     msg.concat(_value);
     msg.concat(_postfix);
 
-    if (_w && _h) {
-      _display->clear(_x, _y, _w, _h);
+    if (box_w && box_h) {
+      _display->clear(box_x, box_y, box_w, box_h);
     }
-    _w = _display->drawText(_x, _y, _h, msg);  // remember width of drawn text
-    _h = _display->getLineHeight();            // adjust height
+    box_w = _display->drawText(box_x, box_y, box_h, msg);  // remember width of drawn text
+    box_h = _display->getLineHeight();            // adjust height
   }
 }  // draw
 

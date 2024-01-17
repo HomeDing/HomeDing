@@ -1,8 +1,8 @@
 /**
  * @file DisplayESP32PanelElement.cpp
- * 
+ *
  * @brief Display Element for TFT displays using the ESP32-S3 specific
- * 16-bit Panel Data interface. 
+ * 16-bit Panel Data interface.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -28,10 +28,8 @@
 
 /* ===== Static factory function ===== */
 
-/**
- * @brief static factory function to create a new DisplayESP32PanelElement
- * @return DisplayESP32PanelElement* created element
- */
+/// @brief static factory function to create a new DisplayESP32PanelElement
+/// @return DisplayESP32PanelElement* created element
 Element *DisplayESP32PanelElement::create() {
   return (new DisplayESP32PanelElement());
 }  // create()

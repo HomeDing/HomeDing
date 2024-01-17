@@ -45,6 +45,11 @@ public:
   /// @brief draw the element on the display adapter.
   virtual void draw();
 
+  /// @brief Bounding Box
+  int16_t box_x;
+  int16_t box_y;
+  int16_t box_w;
+  int16_t box_h;
 
 protected:
   /// @brief return true when object is at the specified position or is overlapping with rectangle

@@ -81,10 +81,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
 void DisplayOutputElement::start() {
   DisplayAdapter *d = _board->display;
 
-  if (d == NULL) {
-    LOGGER_EERR("no display found");
-
-  } else {
+  if (d) {
     // get standard draw/text color from display when no color was set.
     if (_color == RGB_UNDEFINED) {
       _color = d->getColor();
@@ -101,7 +98,12 @@ void DisplayOutputElement::start() {
     if (_page > d->maxpage) {
       d->maxpage = _page;
     }
+
     Element::start();
+    box_x = _x;
+    box_y = _y;
+    box_w = 0;
+    box_h = 0;
     _needredraw = true;
   }  // if
 }  // start()

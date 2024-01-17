@@ -1,8 +1,8 @@
 /**
  * @file DisplayESP32PanelAdapter.h
  *
- * @brief DisplayAdapter implementation for the HomeDing library
- * adapting OLED displays using the SSD1306 chip.
+ * @brief Display Element for TFT displays using the ESP32-S3 specific
+ * 16-bit Panel Data interface.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

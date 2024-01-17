@@ -90,10 +90,50 @@ void _line1(int16_t x0, int16_t y0, int16_t x1, int16_t y1, fSetPixel cbDraw) {
   }
 };
 
+// Draw a path (no fill).
+
+/// @brief Scale the points of a path by factor
+/// @param segments 
+/// @param f100 
+void scale(std::vector<Segment> &segments, int16_t f100) {
+  if (f100 != 100)  {
+    for (Segment &pSeg : segments) {
+      switch (pSeg.type) {
+        case 'M':
+        case 'L':
+          pSeg.p[0] = GFXSCALE100(pSeg.p[0], f100);
+          pSeg.p[1] = GFXSCALE100(pSeg.p[1], f100);
+          break;
+
+        case 'c':
+          printf("scale 'c' not implemented! \n");
+          break;
+
+        case 'C':
+          pSeg.p[0] = GFXSCALE100(pSeg.p[0], f100);
+          pSeg.p[1] = GFXSCALE100(pSeg.p[1], f100);
+          pSeg.p[2] = GFXSCALE100(pSeg.p[2], f100);
+          pSeg.p[3] = GFXSCALE100(pSeg.p[3], f100);
+          pSeg.p[4] = GFXSCALE100(pSeg.p[4], f100);
+          pSeg.p[5] = GFXSCALE100(pSeg.p[5], f100);
+          break;
+
+        case 'z':
+        case 'Z':
+          break;
+
+        default:
+          printf("unknown segment-%c \n", pSeg.type);
+          break;
+      }
+    }  // for
+  }
+}
+
 // void simplify(int16_t dx, int16_t dy, fSetPixel cbDraw);
 
 // Draw a path (no fill).
-void path(std::vector<Segment> segments, int16_t dx, int16_t dy, fSetPixel cbDraw) {
+void path(std::vector<Segment> &segments, int16_t dx, int16_t dy, fSetPixel cbDraw) {
   TRACE("path()\n");
   int16_t startPosX = 0;
   int16_t startPosY = 0;
@@ -158,7 +198,7 @@ void path(std::vector<Segment> segments, int16_t dx, int16_t dy, fSetPixel cbDra
 
 
 /// @brief Draw a path with filling.
-void fillPath(std::vector<Segment> segments, int16_t dx, int16_t dy, fSetPixel cbBorder, fSetPixel cbFill) {
+void fillPath(std::vector<Segment> &segments, int16_t dx, int16_t dy, fSetPixel cbBorder, fSetPixel cbFill) {
   TRACE("fillPath()\n");
   std::vector<Point> borderPoints;
   fSetPixel cbStroke = cbBorder ? cbBorder : cbFill;  // use cbFill when no cbBorder is given.
@@ -263,10 +303,14 @@ void fillPath(std::vector<Segment> segments, int16_t dx, int16_t dy, fSetPixel c
 /// @param path The path definition using SVG path syntax.
 /// @param x Starting Point X coordinate.
 /// @param y Starting Point Y coordinate.
+/// @param scale scaling factor * 100.
 /// @param cbBorder Draw function for border pixels. cbFill is used when cbBorder is null.
 /// @param cbFill Draw function for filling pixels.
-void pathByText(const char *pathText, int16_t x, int16_t y, fSetPixel cbBorder, fSetPixel cbFill) {
+void pathByText(const char *pathText, int16_t x, int16_t y, int16_t scale100, fSetPixel cbBorder, fSetPixel cbFill) {
   std::vector<Segment> vSeg = parsePath(pathText);
+  if (scale100 != 100)
+    gfxDraw::scale(vSeg, scale100);
+
   if (cbFill) {
     fillPath(vSeg, x, y, cbBorder, cbFill);
   } else {
@@ -581,10 +625,10 @@ void cubicBezier2(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, in
 /// @return Vector with Segments.
 /// @example pathText="M4 8l12-6l10 10h-8v4h-6z"
 std::vector<Segment> parsePath(const char *pathText) {
-  char *path = (char *)pathText;
-  Point last(0, 0);
+  TRACE("parsePath: '%s'\n", pathText);
 
-  TRACE("Seg-Path: '%s'\n", path);
+  char *path = (char *)pathText;
+  int16_t lastX = 0, lastY = 0;
 
   /// A lambda function to parse a parameter from the inputText.
   auto getParam = [&]() {
@@ -608,16 +652,16 @@ std::vector<Segment> parsePath(const char *pathText) {
 
       case 'M':
       case 'L':
-        last.x = Seg.p[0] = getParam();
-        last.y = Seg.p[1] = getParam();
+        lastX = Seg.p[0] = getParam();
+        lastY = Seg.p[1] = getParam();
         parameters = 0;
         break;
 
       case 'm':
       case 'l':
         command = toUpperCase(command);  // absolute coordinates
-        last.x = Seg.p[0] = last.x + getParam();
-        last.y = Seg.p[1] = last.y + getParam();
+        lastX = Seg.p[0] = lastX + getParam();
+        lastY = Seg.p[1] = lastY + getParam();
         parameters = 0;
         break;
 
@@ -628,15 +672,15 @@ std::vector<Segment> parsePath(const char *pathText) {
 
       case 'h':
         command = 'L';
-        last.x = Seg.p[0] = last.x + getParam();
-        Seg.p[1] = last.y;  // stay;
+        lastX = Seg.p[0] = lastX + getParam();
+        Seg.p[1] = lastY;  // stay;
         parameters = 0;
         break;
 
       case 'v':
         command = 'L';
-        Seg.p[0] = last.x;  // stay;
-        last.y = Seg.p[1] = last.y + getParam();
+        Seg.p[0] = lastX;  // stay;
+        lastY = Seg.p[1] = lastY + getParam();
         parameters = 0;
         break;
 

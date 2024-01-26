@@ -11,6 +11,7 @@
  *
  * Changelog:
  * * 26.04.2021 created by Matthias Hertel
+ * * 26.01.2024 force redraw on attribute changes
  */
 
 

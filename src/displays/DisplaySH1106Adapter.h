@@ -25,6 +25,8 @@ public:
     PANELTRACE("DisplaySH1106Adapter.start()\n");
 
     conf->busmode = BUSMODE_I2C;
+    conf->i2cCommandPrefix = 0x00;
+    conf->i2cDataPrefix = 0x40;
     bus = getBus(conf);
 
     if (bus) {

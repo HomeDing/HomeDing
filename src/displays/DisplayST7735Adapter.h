@@ -57,7 +57,7 @@ public:
       bus,                    // bus
       conf->resetPin,         // reset
       (conf->rotation / 90),  // rotation
-      true,                   // ips
+      conf->ips,              // ips
       conf->width,            // width
       conf->height,           // height
       conf->colOffset,        // display offset in memory

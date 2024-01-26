@@ -24,7 +24,11 @@ public:
   bool start() override {
     PANELTRACE("DisplaySSD1306Adapter.start()\n");
 
-    conf->busmode = BUSMODE_I2C;
+    if (conf->busmode == BUSMODE_ANY) { conf->busmode = BUSMODE_I2C; }
+    if (conf->busmode == BUSMODE_I2C) {
+      conf->i2cCommandPrefix = 0x00;
+      conf->i2cDataPrefix = 0x40;
+    }
     bus = getBus(conf);
 
     if (bus) {
@@ -49,5 +53,4 @@ public:
 
 private:
   Arduino_SSD1306 *op = nullptr;
-
 };

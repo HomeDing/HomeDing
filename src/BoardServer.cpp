@@ -407,8 +407,9 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
   TRACE("handleListFiles(%s)", path.c_str());
 
-  // assert: last char of path = '/'
-  TRACE("  open(%s)", path.c_str());
+  if ((path.length() > 4) && (path.endsWith("/")))
+    path.remove(path.length()-1, 1); // last '/'
+
   File dir = HomeDingFS::open(path);
 
   if (HomeDingFS::sdFS && path.equals("/")) {

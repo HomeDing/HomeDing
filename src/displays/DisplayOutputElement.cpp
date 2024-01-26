@@ -39,38 +39,48 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
+ // these properties can be changed and redraw will happen
+
   } else if (_stricmp(name, "redraw") == 0) {
-    if (_display && (_display->page == _page)) {
-      draw();  // only draw, no flush here
-    }
+    _needredraw = true;
+
+  } else if (_stricmp(name, "x") == 0) {
+    _x = _atoi(value);
+    _needredraw = true;
+
+  } else if (_stricmp(name, "y") == 0) {
+    _y = _atoi(value);
+    _needredraw = true;
+
+  } else if ((_stricmp(name, "w") == 0) || (_stricmp(name, "width") == 0)) {
+    _w = _atoi(value);
+    _needredraw = true;
+
+  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "height") == 0) || (_stricmp(name, "fontsize") == 0)) {
+    _h = _atoi(value);
+    _needredraw = true;
+
+  } else if (_stricmp(name, "color") == 0) {
+    _color = _atoColor(value);
+    _needredraw = true;
+
+  } else if (_stricmp(name, "background") == 0) {
+    _backgroundColor = _atoColor(value);
+    _needredraw = true;
+
+  } else if (_stricmp(name, "border") == 0) {
+    _borderColor = _atoColor(value);
+    _needredraw = true;
+
+    // these properties can be used for configuration only.
 
   } else if (_stricmp(name, "page") == 0) {
     _page = _atoi(value);
 
-  } else if (_stricmp(name, "x") == 0) {
-    _x = _atoi(value);
-
-  } else if (_stricmp(name, "y") == 0) {
-    _y = _atoi(value);
-
-  } else if ((_stricmp(name, "w") == 0) || (_stricmp(name, "width") == 0)) {
-    _w = _atoi(value);
-
-  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "height") == 0) || (_stricmp(name, "fontsize") == 0)) {
-    _h = _atoi(value);
-
-  } else if (_stricmp(name, "color") == 0) {
-    _color = _atoColor(value);
-
-  } else if (_stricmp(name, "background") == 0) {
-    _backgroundColor = _atoColor(value);
-
-  } else if (_stricmp(name, "border") == 0) {
-    _borderColor = _atoColor(value);
-
   } else {
     ret = false;
   }  // if
+
   return (ret);
 }  // set()
 
@@ -114,7 +124,7 @@ void DisplayOutputElement::start() {
  */
 void DisplayOutputElement::loop() {
   if (_needredraw) {
-    if (_display && (_display->page == _page)) {
+    if (active && _display && (_display->page == _page)) {
       draw();
     }
     _needredraw = false;

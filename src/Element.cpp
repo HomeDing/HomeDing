@@ -282,6 +282,8 @@ uint32_t Element::_atoColor(const char *value) {
       ret = RGB_BLACK;
     } else if (_stricmp(value, "gray") == 0) {
       ret = RGB_GRAY;
+    } else if (_stricmp(value, "silver") == 0) {
+      ret = RGB_SILVER;
     } else if (_stricmp(value, "white") == 0) {
       ret = RGB_WHITE;
 
@@ -293,6 +295,9 @@ uint32_t Element::_atoColor(const char *value) {
       ret = RGB_GREEN;
     } else if (_stricmp(value, "blue") == 0) {
       ret = RGB_BLUE;
+
+    } else if ((_stricmp(value, "none") == 0) || (_stricmp(value, "transparent") == 0)) {
+      ret = RGB_TRANSPARENT;
     }
   }  // if
   return (ret);

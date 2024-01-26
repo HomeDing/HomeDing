@@ -15,6 +15,7 @@
  * * 29.04.2018 created by Matthias Hertel
  * * 24.06.2018 no problems when no display is available.
  * * 23.09.2018 support DisplayAdapter->flush()
+ * * 26.01.2024 force redraw on attribute changes
  */
 
 

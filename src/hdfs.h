@@ -20,10 +20,14 @@ class HomeDingFS {
 
 private:
   static FS *_prep(String &path) {
-    FS *efs = rootFS;
+    FS *efs;
     if (sdFS && path.startsWith(HDFS_SD_MOUNTNAME_SLASH)) {
+      // printf("use sdFS\n");
       efs = sdFS;
       path = path.substring(3);
+    } else {
+      // printf("use rootFS\n");
+      efs = rootFS;
     }
     return (efs);
   }
@@ -43,14 +47,6 @@ public:
 
   static File open(String path, const char *mode = FILE_READ, const bool create = false) {
     FS *efs = HomeDingFS::_prep(path);
-    // FS *efs = rootFS;
-
-    // if (sdFS && path.startsWith(HDFS_SD_MOUNTNAME_SLASH)) {
-    //   efs = sdFS;
-    //   path = path.substring(3);
-    // } else {
-    //   efs = rootFS;
-    // }
     return (efs->open(path, mode, create));
   };
 #endif

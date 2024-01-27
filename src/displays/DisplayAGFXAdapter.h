@@ -32,7 +32,7 @@
 #include <fonts/font16.h>
 #include <fonts/font24.h>
 
-#define PANELTRACE(...)   Serial.printf("Display::" __VA_ARGS__)
+#define PANELTRACE(...)  // Serial.printf("Display::" __VA_ARGS__)
 
 class DisplayAGFXAdapter : public DisplayAdapter {
 public:
@@ -55,7 +55,7 @@ public:
 
     if (busmode == BUSMODE_I2C) {
       PANELTRACE("Use I2C\n");
-      bus = new Arduino_Wire(conf->i2cAddress);
+      bus = new Arduino_Wire(conf->i2cAddress, conf->i2cCommandPrefix, conf->i2cDataPrefix);
 
 #if defined(ESP32)
     } else if (busmode == BUSMODE_SPI) {
@@ -227,7 +227,7 @@ public:
     int16_t bx, by;
     uint16_t bw, bh;
 
-    gfx->setTextBound(0, 0, conf->width, conf->height);
+    gfx->setTextBound(0, 0, gfx->width(), gfx->height());
 
     _setTextHeight(h);
     gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);

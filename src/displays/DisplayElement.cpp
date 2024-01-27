@@ -57,7 +57,7 @@ DisplayElement::DisplayElement() {
 void DisplayElement::init(Board *board) {
   Element::init(board);
 
-  config.busmode = BUSMODE_SPI;
+  config.busmode = BUSMODE_ANY;
 
   // use system wide I2C by default
   config.i2cSDA = board->I2cSda;

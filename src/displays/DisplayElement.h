@@ -25,6 +25,7 @@ class DisplayAdapter;
 #define RGB_WHITE 0x00FFFFFF
 #define RGB_BLACK 0x00000000
 #define RGB_GRAY 0x00808080
+#define RGB_SILVER 0x00C0C0C0
 #define RGB_RED 0x00FF0000
 #define RGB_GREEN 0x0000FF00
 #define RGB_BLUE 0x000000FF
@@ -99,6 +100,10 @@ struct DisplayConfig {
   int i2cAddress = 0;  ///< i2c address
   int i2cSDA = 0;      ///< i2c data pin
   int i2cSCL = 0;      ///< i2c clock pin
+
+  // prefix bytes for I2c bus
+  uint8_t i2cCommandPrefix;
+  uint8_t i2cDataPrefix;
 
   /* ===== SPI interface ===== */
   int spiMOSI = -1;  ///< SPI interface MOSI pin

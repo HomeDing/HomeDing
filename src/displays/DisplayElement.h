@@ -20,6 +20,8 @@
 
 #include <functional>
 
+#include <displays/BoundingBox.h>
+
 class DisplayAdapter;
 
 #define RGB_WHITE 0x00FFFFFF

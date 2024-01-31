@@ -18,15 +18,7 @@
 #include <displays/DisplayOutputElement.h>
 #include "DisplayOutputElement.h"
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
-
-
-// ===== protected functions =====
-
-/// @brief return true when object is at the specified position or is overlapping with rectangle
-bool DisplayOutputElement::overlap(int16_t rx, int16_t ry, uint16_t rw, uint16_t rh) {
-  return ((rx + rw >= _x) && (rx < (_x + _w)) && (ry + rh >= _y) && (ry < (_y + _h)));
-}
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 
 // ===== Element functions =====
@@ -39,25 +31,29 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
- // these properties can be changed and redraw will happen
+    // these properties can be changed and redraw will happen
 
   } else if (_stricmp(name, "redraw") == 0) {
     _needredraw = true;
 
   } else if (_stricmp(name, "x") == 0) {
-    _x = _atoi(value);
+    _x = box.x_min = _atoi(value);
+    box.x_max = _x + _w - 1;
     _needredraw = true;
 
   } else if (_stricmp(name, "y") == 0) {
-    _y = _atoi(value);
+    _y = box.y_min = _atoi(value);
+    box.y_max = _y + _h - 1;
     _needredraw = true;
 
   } else if ((_stricmp(name, "w") == 0) || (_stricmp(name, "width") == 0)) {
     _w = _atoi(value);
+    box.x_max = _x + _w - 1;
     _needredraw = true;
 
   } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "height") == 0) || (_stricmp(name, "fontsize") == 0)) {
     _h = _atoi(value);
+    box.y_max = _y + _h - 1;
     _needredraw = true;
 
   } else if (_stricmp(name, "color") == 0) {
@@ -110,10 +106,6 @@ void DisplayOutputElement::start() {
     }
 
     Element::start();
-    box_x = _x;
-    box_y = _y;
-    box_w = 0;
-    box_h = 0;
     _needredraw = true;
   }  // if
 }  // start()

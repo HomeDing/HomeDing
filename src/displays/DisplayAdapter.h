@@ -49,17 +49,20 @@ public:
   };
 
 
-  /// return the total width of the display.
-  virtual int16_t getWidth() {
+  /// return the physical total width of the display.
+  int16_t getConfWidth() {
     return (conf->width);
   };
 
 
-  /// return the total width of the display.
-  virtual int16_t getHeight() {
+  /// return the physical total height of the display.
+  int16_t getConfHeight() {
     return (conf->height);
   };
 
+
+  // Bounding box of the drawable area.
+  BoundingBox displayBox;
 
   /// @brief set brightness for panel lightning.
   /// @param bright new brightness in range 0...100

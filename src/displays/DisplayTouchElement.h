@@ -11,8 +11,8 @@
  *
  * Changelog:
  * * 25.10.2023 created
- * * 17.11.2023 rotation support 
- * * 14.01.2024 use default width and height from the display. 
+ * * 17.11.2023 rotation support
+ * * 14.01.2024 use default width and height from the display.
  */
 
 #pragma once
@@ -24,7 +24,6 @@
  */
 class DisplayTouchElement : public Element {
 public:
-
   /// @brief Construct a new DisplayTouchElement
   DisplayTouchElement();
 
@@ -61,25 +60,31 @@ protected:
   // Configuration Properties
 
   /// @brief width of the touch area - same as the display
-  uint16_t _width = 0;
+  int16_t _width = 0;
 
   /// @brief height of the touch area - same as the display
-  uint16_t _height = 0;
+  int16_t _height = 0;
 
   /// @brief rotation of the display
   int _rotation = 0;
 
   /// @brief pin for interrupt signal from the touch chip
-  int _interruptPin = -1; // must be configured
+  int _interruptPin = -1;  // must be configured
 
   /// @brief reset pin for interrupt signal from the touch chip
-  int _resetPin = -1; // must be configured
-  
+  int _resetPin = -1;  // must be configured
+
   /// @brief The default I2C address for the touch controller.
-  int _address = 0x5D; 
+  int _address = 0x5D;
 
   // position of last touch event
-  uint16_t lastX, lastY;
+  int16_t lastX, lastY;
+
+  /// Any touch event
+  bool _isTouched;
+
+  /// Any touch event
+  String _touchAction;
 
   // found button at first touch position
   DisplayButtonElement *_bFound;

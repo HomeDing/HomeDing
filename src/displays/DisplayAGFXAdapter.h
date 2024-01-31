@@ -90,12 +90,6 @@ public:
         }
       }
 
-      Serial.printf("ST7789::pins %d %d %d %d %d %d %d %d\n",
-                    pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
-
-      Serial.printf("ST7789::pins %d %d %d %d\n",
-                    conf->dcPin, conf->csPin, conf->wrPin, conf->rdPin);
-
       bus = new Arduino_ESP32PAR8Q(
         conf->dcPin, conf->csPin, conf->wrPin, conf->rdPin,
         pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
@@ -128,9 +122,9 @@ public:
 
 
   Arduino_DataBus *getBus(DisplayConfig *conf) {
-    return(getBus(conf->busmode, conf));
+    return (getBus(conf->busmode, conf));
   };
-  
+
   virtual bool start() override {
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
     PANELTRACE(" colors: #%08x / #%08x / #%08x\n", conf->drawColor, conf->backgroundColor, conf->borderColor);
@@ -223,22 +217,27 @@ public:
     PANELTRACE("drawText: %d/%d h:%d t:<%s>\n", x, y, h, text);
     PANELTRACE("  colors: %04x on %04x\n", drawColor565, backColor565);
 
-    // textbox dimensions
-    int16_t bx, by;
-    uint16_t bw, bh;
+    if (displayBox.contains(x, y)) {
+      // textbox dimensions
+      int16_t bx, by;
+      uint16_t bw, bh;
 
-    gfx->setTextBound(0, 0, gfx->width(), gfx->height());
+      gfx->setTextBound(0, 0, gfx->width(), gfx->height());
 
-    _setTextHeight(h);
-    gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
-    PANELTRACE("     box: %d/%d w:%d h:%d\n", bx, by, bw, bh);
+      _setTextHeight(h);
+      gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
+      PANELTRACE("     box: %d/%d w:%d h:%d\n", bx, by, bw, bh);
 
-    gfx->setTextColor(drawColor565, drawColor565);  // transparent background
-    gfx->setCursor(x, y + baseLine);
-    gfx->print(text);
-    _needSync = true;
+      gfx->setTextColor(drawColor565, drawColor565);  // transparent background
+      gfx->setCursor(x, y + baseLine);
+      gfx->print(text);
+      _needSync = true;
+      return ((bx - x) + bw);
 
-    return ((bx - x) + bw);
+    } else {
+      return (0);
+    }
+
   }  // drawText
 
 
@@ -250,39 +249,43 @@ public:
   /// @param text caption on the button
   virtual void drawButton(int16_t x, int16_t y, int16_t w, int16_t h, const char *text, bool pressed = false) override {
     // LOGGER_JUSTINFO("drawButton: (%d,%d,%d,%d) <%s> %d", x, y, w, h, text, pressed);
-    const uint16_t paddingVertical = 4;
 
-    // textbox dimensions
-    int16_t bx, by;
-    uint16_t bw, bh;
+    if (displayBox.overlaps(x, y, w, h)) {
+      const uint16_t paddingVertical = 4;
 
-    _setTextHeight(h - (2 * paddingVertical));
-    gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
+      // textbox dimensions
+      int16_t bx, by;
+      uint16_t bw, bh;
 
-    // calculate textbox offset
-    int16_t dx = (w - bw) / 2;
-    int16_t dy = (h - lineHeight) / 2 - 1;
+      _setTextHeight(h - (2 * paddingVertical));
+      gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
 
-    uint16_t fCol = (pressed ? backColor565 : drawColor565);
-    uint16_t bCol = (pressed ? drawColor565 : backColor565);
-    uint16_t r = (h / 2);
+      // calculate textbox offset
+      int16_t dx = (w - bw) / 2;
+      int16_t dy = (h - lineHeight) / 2 - 1;
 
-    // draw the background
-    if (backColor != RGB_UNDEFINED) {
-      gfx->fillRoundRect(x, y, w, h, r, bCol);
+      uint16_t fCol = (pressed ? backColor565 : drawColor565);
+      uint16_t bCol = (pressed ? drawColor565 : backColor565);
+      uint16_t r = (h / 2);
+
+      // draw the background
+      if (backColor != RGB_UNDEFINED) {
+        gfx->fillRoundRect(x, y, w, h, r, bCol);
+      }
+
+      // draw the border
+      if (borderColor != RGB_UNDEFINED) {
+        gfx->drawRoundRect(x, y, w, h, r, borderColor565);
+      }
+
+      // draw the text
+      gfx->setTextBound(x, y, w, h);
+      gfx->setTextColor(fCol);
+      gfx->setCursor(x + dx, y + dy + baseLine);
+      gfx->print(text);
+      _needSync = true;
     }
 
-    // draw the border
-    if (borderColor != RGB_UNDEFINED) {
-      gfx->drawRoundRect(x, y, w, h, r, borderColor565);
-    }
-
-    // draw the text
-    gfx->setTextBound(x, y, w, h);
-    gfx->setTextColor(fCol);
-    gfx->setCursor(x + dx, y + dy + baseLine);
-    gfx->print(text);
-    _needSync = true;
   }  // drawButton()
 
 
@@ -313,8 +316,11 @@ public:
 
   virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
     PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, drawColor565);
-    gfx->drawLine(x0, y0, x1, y1, drawColor565);
-    _needSync = true;
+
+    if (displayBox.overlaps(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1))) {
+      gfx->drawLine(x0, y0, x1, y1, drawColor565);
+      _needSync = true;
+    }
   }  // drawLine()
 
 

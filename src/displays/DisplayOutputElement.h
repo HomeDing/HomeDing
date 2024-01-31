@@ -47,29 +47,23 @@ public:
   virtual void draw();
 
   /// @brief Bounding Box
-  int16_t box_x;
-  int16_t box_y;
-  int16_t box_w;
-  int16_t box_h;
+  BoundingBox box;
 
 protected:
-  /// @brief return true when object is at the specified position or is overlapping with rectangle
-  bool overlap(int16_t rx, int16_t ry, uint16_t rw = 0, uint16_t rh = 0);
-
   /// @brief Page of the display where the element is placed. Default on page 1.
   int _page = 1;
 
   /// @brief X-position ot the output element
-  uint16_t _x;
+  int16_t _x;
 
   /// @brief Y-position ot the output element
-  uint16_t _y;
+  int16_t _y;
 
   /// @brief Width ot the output element
-  uint16_t _w = 100;
+  int16_t _w = 100;
 
   /// @brief height and fontsize
-  uint16_t _h = 10;
+  int16_t _h = 10;
 
   /// @brief Draw color of the element
   uint32_t _color = RGB_UNDEFINED;

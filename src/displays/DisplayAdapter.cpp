@@ -33,6 +33,16 @@ DisplayAdapter::DisplayAdapter() {
 bool DisplayAdapter::setup(Board *b, struct DisplayConfig *c) {
   board = b;
   conf = c;
+
+  displayBox.x_min = 0;
+  displayBox.y_min = 0;
+  if ((conf->rotation / 90) % 4 == 0) {
+    displayBox.x_max = c->width;
+    displayBox.y_max = c->height;
+  } else {
+    displayBox.x_max = c->height;
+    displayBox.y_max = c->width;
+  }
   return (true);
 }  // setup()
 

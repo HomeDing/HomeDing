@@ -19,7 +19,7 @@
 
 #include <displays/DisplayButtonElement.h>
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 
 // ===== Element Registry =====
@@ -37,17 +37,17 @@ Element *DisplayButtonElement::create() {
 /// @param x X position of touch start event.
 /// @param y y position of touch start event.
 /// @return true when button wants to participate in further actions.
-bool DisplayButtonElement::touchStart(uint16_t xPos, uint16_t yPos) {
+bool DisplayButtonElement::touchStart(int16_t xPos, int16_t yPos) {
   // TRACE("touchStart(%d/%d)", xPos, yPos);
-  bool over = overlap(xPos, yPos);
+  bool over = box.contains(xPos, yPos);
   if (over != _pressed) _needredraw = true;
   _pressed = over;
   return (over);
 }
 
-void DisplayButtonElement::touchEnd(uint16_t xPos, uint16_t yPos) {
+void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
   // TRACE("touchEnd(%d/%d)", xPos, yPos);
-  if (overlap(xPos, yPos)) {
+  if (box.contains(xPos, yPos)) {
     _board->dispatch(_clickAction);
   }
   _pressed = false;
@@ -92,8 +92,11 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
 
 /// @brief Draw the button on display.
 void DisplayButtonElement::draw() {
-  DisplayOutputElement::draw(); // prepare colors
-  _display->drawButton(_x, _y, _w, _h, _text.c_str(), _pressed);
+
+  TRACE("draw %d.%d.%d.%d", box.x_min, box.y_min, _w, _h);
+
+  DisplayOutputElement::draw();  // prepare colors
+  _display->drawButton(box.x_min, box.y_min, _w, _h, _text.c_str(), _pressed);
 }
 
 // End

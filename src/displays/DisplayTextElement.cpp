@@ -74,9 +74,10 @@ void DisplayTextElement::draw() {
     msg.concat(_postfix);
 
     if (_w && _h) {
-      _display->clear(box_x, box_y, _w, _h);
+      _display->clear(box.x_min, box.y_min, _w, _h);
     }
-    _w = _display->drawText(box_x, box_y, _h, msg);  // remember width of drawn text
+    _w = _display->drawText(box.x_min, box.y_min, _h, msg);  // remember width of drawn text
+    box.x_max = box.x_min + _w - 1;
     _h = _display->getLineHeight();            // adjust height
   }
 }  // draw

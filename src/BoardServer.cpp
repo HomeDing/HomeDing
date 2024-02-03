@@ -360,24 +360,27 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     // handle a redirect to the defined homepage or system system / update
     LOGGER_JUSTINFO("Redirect...");
     String url = _board->homepage;
+    size_t used = 0;
 
 #if defined(ESP8266)
     FSInfo fsi;
     LittleFS.info(fsi);
-    if (fsi.usedBytes < 18000) {
-      // assuming UI files not installed
-      url = PAGE_UPDATE;
-    }
+    used = fsi.usedBytes;
 
 #elif defined(ESP32)
-    if (LittleFS.usedBytes() < 18000) {
-      // assuming UI files not installed
-      url = PAGE_UPDATE;
+    // ESP32 supports FFat and LittleFS
+    if (HomeDingFS::rootFS == (fs::FS *)&FFat) {
+      used = FFat.usedBytes();
+    } else {
+      used = LittleFS.usedBytes();
     }
 #endif
-
+    if (used < 18000) {
+      url = PAGE_UPDATE;  // assuming UI files not installed
+    }
     server.sendHeader("Location", url, true);
     server.send(302);
+
 
   } else if (_board->isCaptiveMode()) {
     // Handle Redirect in Captive Portal Mode
@@ -408,7 +411,7 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
   TRACE("handleListFiles(%s)", path.c_str());
 
   if ((path.length() > 4) && (path.endsWith("/")))
-    path.remove(path.length()-1, 1); // last '/'
+    path.remove(path.length() - 1, 1);  // last '/'
 
   File dir = HomeDingFS::open(path);
 

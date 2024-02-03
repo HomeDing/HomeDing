@@ -100,6 +100,7 @@ bool TimerElement::set(const char *name, const char *value) {
     ret = Element::set(name, value);
   }  // if
 
+  _forceSendActions = true;
   return (ret);
 }  // set()
 
@@ -163,8 +164,9 @@ void TimerElement::loop() {
     }
   }  // if
 
-  if (newValue == _value) {
+  if (! _forceSendActions && (newValue == _value)) {
     // no need to send an action.
+
   } else if (newValue) {
     _board->dispatch(_onAction);
     _board->dispatch(_valueAction, "1");
@@ -173,6 +175,7 @@ void TimerElement::loop() {
     _board->dispatch(_offAction);
     _board->dispatch(_valueAction, "0");
   }  // if
+  _forceSendActions = false;
   _value = newValue;
 }  // loop()
 

@@ -36,14 +36,26 @@ public:
   static FS *rootFS;
   static FS *sdFS;
 
-
 #if defined(ESP8266)
+  static void format() {
+    LittleFS.format();
+  }
+
   static File open(String path, const char *mode = "r") {
     FS *efs = _prep(path);
     return (efs->open(path, mode));
   };
 
 #elif defined(ESP32)
+
+  static void format() {
+    // ESP32 supports FFat and LittleFS
+    if (rootFS == (fs::FS *)&FFat) {
+      FFat.format();
+    } else {
+      LittleFS.format();
+    }
+  }
 
   static File open(String path, const char *mode = FILE_READ, const bool create = false) {
     FS *efs = HomeDingFS::_prep(path);

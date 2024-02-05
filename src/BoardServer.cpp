@@ -75,6 +75,11 @@ void BoardHandler::handleConnect(WebServer &server) {
   String netName, netPass;
   server.send(200);
 
+  if (server.hasArg("f")) {
+    LOGGER_JUSTINFO("format...");
+    HomeDingFS::format();
+  }
+
   if (server.hasArg("n")) {
     // const char *netName = server.arg("n").c_str();
     netName = server.arg("n");
@@ -101,9 +106,7 @@ void BoardHandler::handleConnect(WebServer &server) {
 
       File f = HomeDingFS::open(NET_FILENAME, "w");
       if (f) {
-        f.print(netName);
-        f.print(',');
-        f.print(netPass);
+        f.printf("%s,%s", netName, netPass);
         f.close();
       }
       break;
@@ -320,7 +323,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   } else if (unSafeMode && (api == "resetall")) {
     // Reset file system, network parameters and reboot
-    LittleFS.format();
+    HomeDingFS::format();
     handleReboot(server, true);
     output_type = TEXT_PLAIN;
 

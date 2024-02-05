@@ -7,6 +7,7 @@ configurations.
 Boards that were used during development:
 
 * [ESP32-8048S043C] -- ESP32-S3 with 4.3 inch 800*480 LCD touch display
+* [ESP32-4848S050C] -- Wall panel ESP32-S3 with 4 inch 480*480 LCD touch display
 * [ESP32-3248S035] -- ESP32 with 480*320 LCD touch display
 * [LilyGO-T-Display-S3] -- Small ESP32-S3 boards with 170*320 LCD touch display
 
@@ -42,6 +43,7 @@ Most of the displays are supported by the [GFX library for Arduino](https://gith
 * <https://wiki.makerfabs.com/Sunton_ESP32_S3_4.3_inch_800x400_IPS_with_Touch.html>
 
 
-[ESP32-8048S043C]: https://homeding.github.io/boards/esp32/panel-8048S043.htm
+[ESP32-8048S043C]: https://homeding.github.io/boards/esp32s3/panel-8048S043.htm
 [ESP32-3248S035]: https://homeding.github.io/boards/esp32/panel-3248S035.htm
 [LilyGO-T-Display-S3]: https://homeding.github.io/boards/esp32s3\lilygo-t-display-s3.htm
+

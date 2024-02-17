@@ -53,7 +53,7 @@ extern "C" {
 #define ELEMTRACE(...)  // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...)  // Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define NETTRACE(...) Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -111,8 +111,6 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
   Logger::init(fs);
   Network::init();
-
-  WiFi.persistent(true);  // ??? too early ?
 
   Logger::printf("Device %s starting...", buildName);
 #if defined(ESP32)
@@ -450,21 +448,26 @@ void Board::loop() {
     _newBoardState(BOARDSTATE::LOAD);
 
   } else if (boardState == BOARDSTATE::LOAD) {
-    // load network connection details
-    File f = HomeDingFS::rootFS->open(NET_FILENAME, "r");
-    if (f) {
-      netpass = f.readString();
-      f.close();
-    }
-    NETTRACE("$net=%s", ListUtils::at(netpass, 0).c_str());
 
-    if (netpass.isEmpty() && (ssid) && (*ssid)) {
+    netpass = "";
+    if ((ssid) && (*ssid)) {
       // use hard coded ssid+passPhrase
+      LOGGER_TRACE("$net: use hard coded network.");
       netpass = ssid;
       netpass.concat(',');
       if (passPhrase) netpass.concat(passPhrase);
-      NETTRACE("$net: use:%s", ssid);
+
+    } else {
+      // load network connection details
+      File f = HomeDingFS::rootFS->open(NET_FILENAME, "r");
+      if (f) {
+        netpass = f.readString();
+        f.close();
+      }
     }
+
+    netpass.replace("\n", "");
+    NETTRACE("$net=<%s>", ListUtils::at(netpass, 0).c_str());
 
     // increment BootCount
     _resetCount = DeviceState::getResetCounter() + 1;
@@ -477,6 +480,7 @@ void Board::loop() {
       _newBoardState(BOARDSTATE::SETUP);
     else
       _newBoardState(BOARDSTATE::STARTCAPTIVE);
+
 
   } else if (boardState == BOARDSTATE::SETUP) {
 
@@ -552,7 +556,7 @@ void Board::loop() {
 
     // get effective Hostname
     deviceName = WiFi.getHostname();
-    BOARDTRACE("deviceName=%s", deviceName.c_str());
+    NETTRACE("deviceName=%s", deviceName.c_str());
 
 #if defined(ESP8266)
     WiFi.setOutputPower(outputPower);
@@ -572,12 +576,6 @@ void Board::loop() {
       NETTRACE("connected.");
       _newBoardState(BOARDSTATE::GREET);
 
-      // } else if (boardState == BOARDSTATE::WAITNET) {
-
-    } else if (Network::state == Network::NETSTATE::CONNECTSTA) {
-      // wait on...
-      delay(100);
-
     } else if (Network::state == Network::NETSTATE::FAILED) {
       NETTRACE("connecting failed.");
       needReset = true;
@@ -585,6 +583,11 @@ void Board::loop() {
     } else if (nowMillis > connectPhaseEnd) {
       NETTRACE("connecting timed out.");
       needReset = true;
+
+    } else if (Network::state == Network::NETSTATE::CONNECTSTA) {
+      // wait on...
+      delay(100);
+
     }  // if
 
     if (needReset) {

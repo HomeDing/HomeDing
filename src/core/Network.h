@@ -39,39 +39,40 @@ public:
 
   static NETSTATE state;  // current network state;
 
-  static void init(){
-    // state = NETSTATE::NONET;
+  static void init() {
+    state = NETSTATE::NONET;
+    WiFi.disconnect(true);
+    WiFi.persistent(false);
   };
 
   static void connect(String &deviceName, String &nName, String &nPass) {
     Logger::printf("connect as '%s' to WiFI %s...", deviceName.c_str(), nName.c_str());
 
-#if defined(ESP32)
-    // https://stackoverflow.com/questions/54907985/esp32-fails-on-set-wifi-hostname
-    WiFi.disconnect(true);
-    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
-#endif
-
-    WiFi.hostname(deviceName);
-
-    // Evil bad hack to get the hostname set up correctly
-#if defined(ESP32)
-    WiFi.mode(WIFI_AP_STA);
-#endif
     WiFi.mode(WIFI_STA);
+
+#if defined(ESP32)
+    WiFi.setHostname(deviceName.c_str());
+    delay(100);
+
+#elif defined(ESP8266)
+    WiFi.hostname(deviceName);
+#endif
+
     WiFi.begin(nName.c_str(), nPass.c_str());
     delay(100);
     state = NETSTATE::CONNECTSTA;
   };
 
-  static void loop() {
 
-    wl_status_t thisState = WiFi.status();
+  static void loop() {
     static wl_status_t _wifi_status = WL_NO_SHIELD;
 
-    if (thisState != _wifi_status) {
+    wl_status_t thisState = WiFi.status();
 
-      if ((state == NETSTATE::CONNECTSTA) && (thisState == WL_CONNECTED)) {
+    if (thisState != _wifi_status) {
+      NETWORKTRACE("raw: %d", thisState);
+
+      if ((state == NETSTATE::CONNECTSTA) && (thisState == wl_status_t::WL_CONNECTED)) {
         state = NETSTATE::CONNECTED;
         WiFi.setAutoReconnect(true);
 

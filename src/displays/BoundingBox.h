@@ -1,3 +1,5 @@
+// Bounding box class
+
 
 // outer bounds of a area or draw object
 class BoundingBox {
@@ -27,4 +29,17 @@ public:
   bool overlaps(int16_t x, int16_t y, int16_t w, int16_t h) {
     return ((x_max >= x) && (x_min <= x + w - 1) && (y_max >= y) && (y_min <= y + h - 1));
   }
+
+  bool isEmpty() {
+    return ((x_max < x_min) && (y_max < y_min));
+  }
+
+  void extend(BoundingBox &b) {
+    x_min = std::min(x_min, b.x_min);
+    y_min = std::min(y_min, b.y_min);
+    x_max = std::max(x_max, b.x_max);
+    y_max = std::max(y_max, b.y_max);
+  }
+
+  // void BoundingSphere::merge(const BoundingBox &box) {};
 };

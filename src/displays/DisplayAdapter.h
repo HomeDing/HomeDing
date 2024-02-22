@@ -15,6 +15,7 @@
  * 23.09.2018 flush() method added.
  * 22.07.2023 cpp file added (from DisplayAdapter.h).
  *            handling lightPin and brightness.
+ * 19.02.2024 startFlush(bool) method added.
  */
 
 #pragma once
@@ -64,6 +65,14 @@ public:
   // Bounding box of the drawable area.
   BoundingBox displayBox;
 
+
+  /// When the display supports overlapping elements the drawing must not be immediate.
+  /// The flush() command will start  drawing all elements ant the covered elements.
+  bool deferDrawing() {
+    return (true);
+  };
+
+
   /// @brief set brightness for panel lightning.
   /// @param bright new brightness in range 0...100
   virtual void setBrightness(uint8_t bright);
@@ -91,7 +100,7 @@ public:
   /// @brief Get default background color
   /// @return The 32-bit background color in 0x00rrggbb.
   virtual uint32_t getBackgroundColor() {
-    return (backColor);
+    return (conf->backgroundColor);
   };
 
 
@@ -110,19 +119,7 @@ public:
 
   /// @brief Clear the complete display
   virtual void clear() {
-    _needSync = true;
-  };
-
-
-  /**
-   * @brief Clear a position or region.
-   * @param x
-   * @param y
-   * @param w
-   * @param h
-   */
-  virtual void clear(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h) {
-    _needSync = true;
+    _needFlush = true;
   };
 
   virtual int drawText(int16_t x, int16_t y, int16_t h, String &text) {
@@ -130,50 +127,44 @@ public:
   };
 
   virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text) {
-    _needSync = true;
+    _needFlush = true;
     return (charWidth * strnlen(text, MAX_DISPLAY_STRING_LEN));
   };
 
   virtual void drawPixel(UNUSED int16_t x, UNUSED int16_t y, UNUSED uint32_t color) {
-    _needSync = true;
+    _needFlush = true;
   };
 
-  virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1) {
-    _needSync = true;
+  virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+    drawLine(x0, y0, x1, y1, color);
+  };
+
+  virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1, UNUSED uint32_t color) {
+    _needFlush = true;
   };
 
   virtual void drawButton(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h, UNUSED const char *text, UNUSED bool pressed = false) {
-    _needSync = true;
+    _needFlush = true;
   };
 
-  virtual int drawDot(UNUSED int16_t x, UNUSED int16_t y, int16_t h, UNUSED bool fill) {
-    _needSync = true;
-    return (h);
+  virtual void drawRectangle(UNUSED BoundingBox &box, UNUSED uint32_t borderColor, UNUSED uint32_t fillColor = RGB_UNDEFINED) {
+    _needFlush = true;
   };
 
-  virtual void drawCircle(UNUSED int16_t cx, UNUSED int16_t cy, UNUSED int16_t diameter) {
-    _needSync = true;
+  virtual void drawCircle(UNUSED BoundingBox &box, UNUSED uint32_t borderColor, UNUSED uint32_t fillColor = RGB_UNDEFINED) {
+    _needFlush = true;
   };
-
 
   // @brief remember that flush is required after sequence.
-  virtual void setSyncRequired() {
-    // LOGGER_TRACE("setSyncRequired()");
-    _needSync = true;
+  virtual void setFlush() {
+    // LOGGER_TRACE("setFlush()");
+    _needFlush = true;
   };
 
-  virtual bool outOfSync() {
-    return (_needSync);
-  }
 
-  // @brief flush all buffered pixels to the display.
-  virtual void flush() {
-    // LOGGER_TRACE("flush()");
-    // if (! _needSync) {
-    //   LOGGER_TRACE("unnecessary flush() !!");
-    // }
-    _needSync = false;
-  };
+  /// @brief draw all DisplayOutputElements, then
+  /// flush all buffered pixels to the display.
+  bool startFlush(bool force);
 
 
   /// * @brief current displayed page
@@ -196,7 +187,12 @@ protected:
   uint8_t _lightChannel;
 
   /// @brief  the display buffer is not in sync with the display.
-  bool _needSync;
+  bool _needFlush;
+
+  /// @brief after buffered pixels have been sent to the display, clear needSync flag.
+  virtual void flush() {
+    _needFlush = false;
+  };
 
   Board *board;
 };

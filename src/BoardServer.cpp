@@ -227,7 +227,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   if (api == "state") {
     // most common request, return state of all elements
-    _board->getState(output, String());
+    _board->getState(output);
     output_type = TEXT_JSON;
 
   } else if (api.startsWith("state/")) {
@@ -238,8 +238,8 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     int argCount = server.args();
 
     if (argCount == 0) {
-      // get status of all or the specified element
-      _board->getState(output, id);
+      // get status of the specified element
+      _board->getState(output, id.c_str());
 
     } else {
       // send arguments as actions to the specified element per given argument

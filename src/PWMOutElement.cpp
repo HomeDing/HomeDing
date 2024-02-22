@@ -20,7 +20,9 @@
  * @return PWMOutElement* as Element* created element
  */
 Element *PWMOutElement::create() {
-  return (new PWMOutElement());
+  PWMOutElement *e = new PWMOutElement();
+  e->category = CATEGORY::Standard; // no polling
+  return (e);
 }  // create()
 
 

@@ -1,5 +1,5 @@
 /**
- * @file DisplayDotElement.h
+ * @file DisplayRectElement.h
  * @brief Output Element for controlling a binary output on a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -12,9 +12,7 @@
  * More information on https://www.mathertel.de/Arduino.
  *
  * Changelog:
- * * 29.04.2018 created by Matthias Hertel
- * * 24.06.2018 no problems when no display is available.
- * * 23.09.2018 support DisplayAdapter->flush()
+ * * 15.02.2018 created by Matthias Hertel
  */
 
 
@@ -23,27 +21,29 @@
 #include <displays/DisplayOutputElement.h>
 
 /**
- * @brief The DisplayDotElement is an Element that allows to create information
+ * @brief The DisplayRectElement is an Element that allows to create information
  * on the display based on actions.
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayDotElement : public DisplayOutputElement {
+class DisplayRectElement : public DisplayOutputElement {
 public:
-  /// @brief Factory function to create a ButtonElement.
-  /// @return Element*
+  /// @brief static factory function to create a new DisplayRectElement.
+  /// @return DisplayRectElement* as Element* created element.
   static Element *create();
 
   /// @brief static variable to ensure registering in static init phase.
   static bool registered;
 
 
-  /// @brief Draw this output element.
+  /// @brief Draw a rectangle
   virtual void draw() override;
+
+private:
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplayDotElement onto the ElementRegistry.
-bool DisplayDotElement::registered =
-  ElementRegistry::registerElement("displaydot", DisplayDotElement::create);
+// Register the DisplayRectElement onto the ElementRegistry.
+bool DisplayRectElement::registered =
+  ElementRegistry::registerElement("displayrect", DisplayRectElement::create);
 #endif

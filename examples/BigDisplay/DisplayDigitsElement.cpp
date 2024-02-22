@@ -46,7 +46,7 @@ bool DisplayDigitsElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "value") == 0) {
     _value = value;
-    _needredraw = true;
+    needsDraw = true;
 
   } else {
     ret = false;
@@ -71,8 +71,6 @@ void DisplayDigitsElement::_drawDigit(const char *path, int16_t x, int16_t y) {
 
 void DisplayDigitsElement::_drawDigits7(char ch, int16_t x, int16_t y) {
   uint16_t drawSegments = 0b00000000;  // space and all unknown chars
-
-  _display->clear(x, y, GFXSCALE100(DIGITS_WIDTH, _scale), GFXSCALE100(DIGITS_HEIGHT, _scale));
 
   if (isDigit(ch)) {
     uint8_t SD[10] = {
@@ -100,7 +98,7 @@ void DisplayDigitsElement::_drawDigits7(char ch, int16_t x, int16_t y) {
     if (drawSegments & 0b00000001) _drawDigit("M1 0h14l-4 4h-6z", x, y);
     if (drawSegments & 0b00000010) _drawDigit("M0 1l4 4v6l-4 4z", x, y);
     if (drawSegments & 0b00000100) _drawDigit("M16 1v14l-4 -4v-6z", x, y);
-    if (drawSegments & 0b00001000) _drawDigit("M1 16l2 -2h10l2 2l-2 2h-9z", x, y);
+    if (drawSegments & 0b00001000) _drawDigit("M1 16l2 -2h10l2 2l-2 2h-10z", x, y);
     if (drawSegments & 0b00010000) _drawDigit("M0 17l4 4v6l-4 4z", x, y);
     if (drawSegments & 0b00100000) _drawDigit("M16 17v14l-4 -4v-6z", x, y);
     if (drawSegments & 0b01000000) _drawDigit("M1 32l4 -4h6l4 4z", x, y);
@@ -124,11 +122,7 @@ void DisplayDigitsElement::draw() {
   }
   _lastValue = _value;
 
-  box_x = _x;
-  box_y = _y;
-  box_w = x - _x;
-  box_h = _w;
-
+  box.x_max = x - GFXSCALE100(DIGITS_GAP, _scale);
 } // draw()
 
 

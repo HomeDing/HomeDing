@@ -9,13 +9,46 @@ public:
   int16_t x_max;
   int16_t y_max;
 
+  /// @brief constructor of an empty box.
+  BoundingBox() {
+    x_min = 0;
+    y_min = 0;
+    x_max = -1;
+    y_max = -1;
+  };
+
+  /// @brief copy constructor.
+  BoundingBox(const BoundingBox &other) {
+    x_min = other.x_min;
+    y_min = other.y_min;
+    x_max = other.x_max;
+    y_max = other.y_max;
+  };
+
+  /// @brief explicit constructor.
+  BoundingBox(int16_t xMin, int16_t yMin, int16_t xMax, int16_t yMax) {
+    x_min = xMin;
+    y_min = yMin;
+    x_max = xMax;
+    y_max = yMax;
+  };
+
+  /// @brief copy operator.
+  BoundingBox &operator=(const BoundingBox &other) {
+    x_min = other.x_min;
+    y_min = other.y_min;
+    x_max = other.x_max;
+    y_max = other.y_max;
+    return (*this);
+  };
+
   /// @brief check if the box contains the given point
   /// @param x x-coordinate of the point
   /// @param y y-coordinate of the point
   /// @return true when point is inside.
   bool contains(int16_t x, int16_t y) {
     return ((x >= x_min) && (x <= x_max) && (y >= y_min) && (y <= y_max));
-  }
+  };
 
 
   /// @brief check if the box overlaps the given box.
@@ -34,11 +67,19 @@ public:
     return ((x_max < x_min) && (y_max < y_min));
   }
 
-  void extend(BoundingBox &b) {
-    x_min = std::min(x_min, b.x_min);
-    y_min = std::min(y_min, b.y_min);
-    x_max = std::max(x_max, b.x_max);
-    y_max = std::max(y_max, b.y_max);
+  void extend(BoundingBox &other) {
+    if (isEmpty()) {
+      x_min = other.x_min;
+      y_min = other.y_min;
+      x_max = other.x_max;
+      y_max = other.y_max;
+
+    } else {
+      x_min = std::min(x_min, other.x_min);
+      y_min = std::min(y_min, other.y_min);
+      x_max = std::max(x_max, other.x_max);
+      y_max = std::max(y_max, other.y_max);
+    }
   }
 
   // void BoundingSphere::merge(const BoundingBox &box) {};

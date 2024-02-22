@@ -43,7 +43,7 @@ bool DisplayPathElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "path") == 0) {
     _path = value;
-    _needredraw = true;
+    needsDraw = true;
 
   } else {
     ret = false;

@@ -20,7 +20,9 @@
  * @return DigitalOutElement* as Element* created element
  */
 Element *DigitalOutElement::create() {
-  return (new DigitalOutElement());
+  DigitalOutElement *e = new DigitalOutElement();
+  e->category = CATEGORY::Standard; // no loop
+  return (e);
 }  // create()
 
 

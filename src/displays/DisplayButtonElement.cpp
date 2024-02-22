@@ -40,7 +40,7 @@ Element *DisplayButtonElement::create() {
 bool DisplayButtonElement::touchStart(int16_t xPos, int16_t yPos) {
   // TRACE("touchStart(%d/%d)", xPos, yPos);
   bool over = box.contains(xPos, yPos);
-  if (over != _pressed) _needredraw = true;
+  if (over != _pressed) needsDraw = true;
   _pressed = over;
   return (over);
 }
@@ -51,7 +51,7 @@ void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
     _board->dispatch(_clickAction);
   }
   _pressed = false;
-  _needredraw = true;
+  needsDraw = true;
 }
 
 
@@ -77,7 +77,7 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "text") == 0) {
     _text = value;
-    _needredraw = true;
+    needsDraw = true;
 
   } else if (_stricmp(name, "onclick") == 0) {
     _clickAction = value;

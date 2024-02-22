@@ -39,21 +39,13 @@ bool DisplayTextElement::set(const char *name, const char *value) {
   if (DisplayOutputElement::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, "value") == 0) {
-    _value = value;
-    _needredraw = true;
-
-  } else if (_stricmp(name, "clear") == 0) {
-    _value.clear();
-    _needredraw = true;
-
   } else if (_stricmp(name, "prefix") == 0) {
     _prefix = value;
-    _needredraw = true;
+    needsDraw = true;
 
   } else if (_stricmp(name, "postfix") == 0) {
     _postfix = value;
-    _needredraw = true;
+    needsDraw = true;
 
   } else {
     ret = false;
@@ -73,9 +65,6 @@ void DisplayTextElement::draw() {
     msg.concat(_value);
     msg.concat(_postfix);
 
-    if (_w && _h) {
-      _display->clear(box.x_min, box.y_min, _w, _h);
-    }
     _w = _display->drawText(box.x_min, box.y_min, _h, msg);  // remember width of drawn text
     box.x_max = box.x_min + _w - 1;
     _h = _display->getLineHeight();            // adjust height
@@ -89,7 +78,6 @@ void DisplayTextElement::draw() {
 void DisplayTextElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   DisplayOutputElement::pushState(callback);
-  callback(PROP_VALUE, _value.c_str());
 }  // pushState()
 
 // End

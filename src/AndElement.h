@@ -34,12 +34,6 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Construct a new AndElement.
-   */
-  AndElement();
-
-
 protected:
   /**
    * @brief Do the calculation on all input values.

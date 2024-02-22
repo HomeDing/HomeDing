@@ -53,7 +53,7 @@ extern "C" {
 #define ELEMTRACE(...)  // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...) Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define NETTRACE(...)  // Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -94,10 +94,6 @@ FS *HomeDingFS::sdFS = nullptr;
 
 /** Reset Counter to detect multiple hardware resets in a row. */
 bool _isWakeupStart = false;
-
-// https://community.platformio.org/t/esp32-firebeetle-fast-boot-after-deep-sleep/13206
-// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-bootloader-skip-validate-in-deep-sleep
-// CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
 
 /**
  * @brief Initialize a blank board.
@@ -195,16 +191,20 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
 void Board::add(const char *id, Element *e) {
   ELEMTRACE("add(%s)", id);
-  _addedElements++;
+  bool hasLoop = (e->category & Element::CATEGORY::Looping);
+  Element *l = hasLoop ? _elementList : _elementListNoLoop;
 
+  _addedElements++;
   strcpy(e->id, id);
   Element::_strlower(e->id);
-  Element *l = _elementList;
 
   // append to end of list.
-  if (!l) {
-    // first Element.
-    _elementList = e;
+  if ((!l) && hasLoop) {
+    _elementList = e;  // first looping element
+
+  } else if ((!l) && (!hasLoop)) {
+    _elementListNoLoop = e;  // first non-looping element
+
   } else {
     // search last Element.
     while (l->next)
@@ -314,19 +314,16 @@ void Board::_addAllElements() {
 void Board::start(Element_StartupMode startupMode) {
   // BOARDTRACE("start(%d)", startupMode);
 
-  // make elements active that match
-  Element *l = _elementList;
-  while (l) {
-    if ((!l->active) && (l->startupMode <= startupMode)) {
+  // make elements active that match the startupMode
+  forEach(Element::CATEGORY::All, [startupMode](Element *e) {
+    if ((!e->active) && (e->startupMode <= startupMode)) {
       // start element when not already active
       ELEMTRACE("starting %s...", l->id);
-      l->setup();  // one-time initialization
-      l->start();  // start...
+      e->setup();  // one-time initialization
+      e->start();  // start...
       hd_yield();
-    }  // if
-
-    l = l->next;
-  }  // while
+    }
+  });
 
   active = true;
   _nextElement = nullptr;
@@ -394,24 +391,23 @@ void Board::loop() {
     // dispatch next action from _actions if any
     if (!_actions.empty()) {
       _DeepSleepCount = 0;
-      String a = _actions.pop();
-      BOARDTRACE("popped %s", a.c_str());
-      dispatchAction(a);
+      dispatchAction(_actions.pop());
       return;
     }  // if
 
-    // give some time to next active element
+    // no actions left
+    // trigger flush to a display
+    if ((display) && display->startFlush(false)) {
+      return;
+    }  // if
+
+    // give some time to next active element from the Looping List
     if (!_nextElement) {
       _nextElement = _elementList;
-      if ((display) && (display->outOfSync())) {
-        // sync / flush display buffer
-        display->flush();
-        return;
-      }  // if
-    }    // if
+    }  // if
 
     if (_nextElement) {
-      if (_nextElement->active) {
+      if ((_nextElement->active) && (_nextElement->category & Element::CATEGORY::Looping)) {
         // BOARDTRACE("loop %s", _nextElement->id);
 #if defined(HD_PROFILE)
         PROFILE_START(_nextElement);
@@ -515,13 +511,11 @@ void Board::loop() {
       DeviceState::loadElementState(this);
 
       // search any time requesting elements
-      Element *l = _elementList;
-      while (l != nullptr) {
-        if (l->startupMode == Element_StartupMode::Time) {
+      forEach(Element::CATEGORY::All, [this](Element *e) {
+        if (e->startupMode == Element_StartupMode::Time) {
           hasTimeElements = true;
-        }  // if
-        l = l->next;
-      }  // while
+        }
+      });
 
       // setup I2C system wide when configured.
       if ((I2cSda >= 0) && (I2cScl >= 0)) {
@@ -610,7 +604,7 @@ void Board::loop() {
     if (display) {
       delay(1600);
       display->clear();
-      display->flush();
+      display->startFlush(true);
     }  // if
 
     server->begin();
@@ -759,25 +753,6 @@ void Board::cancelSleep() {
 }  // cancelSleep()
 
 
-Element *Board::findById(String &id) {
-  return (findById(id.c_str()));
-}
-
-Element *Board::findById(const char *id) {
-  // BOARDTRACE("findById(%s)", id);
-
-  Element *l = _elementList;
-  while (l != NULL) {
-    if (strcmp(l->id, id) == 0) {
-      // BOARDTRACE(" found:%s", l->id);
-      break;  // while
-    }         // if
-    l = l->next;
-  }  // while
-  return (l);
-}  // findById
-
-
 // ===== queue / process / dispatch actions =====
 
 bool Board::queueIsEmpty() {
@@ -790,7 +765,7 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
   if (!action.isEmpty()) {
     String tmp = action;
     tmp.replace("$v", v);
-    LOGGER_INFO("(%s)=>(%s)", (_nextElement ? _nextElement->id : ""), tmp.c_str());
+    LOGGER_TRACE("queue (%s)=>(%s)", (_nextElement ? _nextElement->id : ""), tmp.c_str());
     if (split) {
       int len = ListUtils::length(tmp);
       for (int n = 0; n < len; n++) {
@@ -845,7 +820,7 @@ void Board::dispatchAction(String action) {
     if (!target) {
       LOGGER_ERR("dispatch: %s not found", remoteID.c_str());
     } else {
-      // also show action in log when target has trace loglevel
+      // send over the network to target device
       target->dispatchAction(targetId, name, value);
     }
 
@@ -913,19 +888,16 @@ void Board::deferSleepMode() {
 }  // deferSleepMode()
 
 
-void Board::getState(String &out, const String &path) {
-  // BOARDTRACE("getState(%s)", path.c_str());
+void Board::getState(String &out, const char *id) {
+  BOARDTRACE("getState(%s)", path.c_str());
   String ret = "{";
-  const char *cPath = path.c_str();
 
-  Element *l = _elementList;
-  while (l != NULL) {
-    // BOARDTRACE("  ->%s", l->id);
-    if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
+  forEach(Element::CATEGORY::All, [this, id, &ret](Element *e) {
+    if ((!id) || (strcmp(e->id, id) == 0)) {
       ret += '\"';
-      ret += l->id;
+      ret += e->id;
       ret += "\":{";
-      l->pushState([&ret](const char *name, const char *value) {
+      e->pushState([&ret](const char *name, const char *value) {
         // BOARDTRACE("->%s=%s", name, value);
         ret.concat('\"');
         ret.concat(name);
@@ -935,22 +907,15 @@ void Board::getState(String &out, const String &path) {
       });
       ret += "},";
     }  // if
+  });
 
-    l = l->next;
-  }  // while
-
-
-  // close root object
+  // close root object and remove last comma before close.
   ret += "}";
-
-  // remove last comma before close.
   ret.replace(",}", "}");
-
-  // prettify somehow
-  // ret.replace("},", "},\n");
-
   out = ret;
+  BOARDTRACE("getState=%s", out.c_str());
 }  // getState
+
 
 // ===== Time functionality =====
 
@@ -988,64 +953,66 @@ time_t Board::getTimeOfDay() {
  * @brief Get a Element by typename. Returns the first found element.
  */
 Element *Board::getElement(const char *elementType) {
-  // BOARDTRACE("getElement(%s)", elementType);
+  String tn;
+  Element *found = nullptr;
+  BOARDTRACE("getElement(%s)", elementType);
 
-  String tn = elementType;
-  tn.concat(ELEM_ID_SEPARATOR);
-  int tnLength = tn.length();
+  tn = elementType;
+  tn.concat('/');
 
-  Element *l = _elementList;
-  while (l != NULL) {
-    if (String(l->id).substring(0, tnLength).equalsIgnoreCase(tn)) {
-      break;  // while
-    }         // if
-    l = l->next;
-  }  // while
-  // BOARDTRACE("found: %d", l);
-  return (l);
+  forEach(Element::CATEGORY::All, [this, &tn, &found](Element *e) {
+    if (String(e->id).startsWith(tn)) {
+      found = e;
+    }
+  });
+  return (found);
 }  // getElement()
-
-
-/**
- * @brief Get a Element by typename/id.
- */
-Element *Board::getElementById(const char *elementId) {
-  BOARDTRACE("getElementById(%s)", elementId);
-
-  Element *l = _elementList;
-  while (l != NULL) {
-    if (Element::_stricmp(l->id, elementId) == 0) { break; }
-    l = l->next;
-  }  // while
-  // BOARDTRACE("found: 0x%08x", l);
-  return (l);
-}  // getElementById()
 
 
 Element *Board::getElement(const char *elementType, const char *elementName) {
-  String tn = elementType;
+  String tn;
+  Element *found = nullptr;
+
+  tn = elementType;
   tn.concat('/');
   tn.concat(elementName);
 
-  Element *l = _elementList;
-  while (l != NULL) {
-    if (String(l->id).equalsIgnoreCase(tn)) {
-      break;
-    }  // if
-    l = l->next;
-  }  // while
-  return (l);
+  forEach(Element::CATEGORY::All, [this, &tn, &found](Element *e) {
+    if (String(e->id).equalsIgnoreCase(tn)) {
+      found = e;
+    }
+  });
 
+  return (found);
 }  // getElement()
 
 
-/**
- * @brief Iterate though all Elements.
- */
-void Board::forEach(const char *prefix, ElementCallbackFn fCallback) {
-  Element *l = _elementList;
+Element *Board::findById(const char *id) {
+  BOARDTRACE("findById(%s)", id);
+  Element *found = nullptr;
+
+  forEach(Element::CATEGORY::All, [this, id, &found](Element *e) {
+    if (strcmp(e->id, id) == 0) { found = e; }
+  });
+  return (found);
+}  // findById
+
+
+/// @brief Iterate all Elements from both lists with a given category.
+void Board::forEach(Element::CATEGORY cat, ElementCallbackFn fCallback) {
+  Element *l;
+
+  l = _elementList;
   while (l != NULL) {
-    if (Element::_stristartswith(l->id, prefix)) {
+    if (l->category & cat) {
+      (fCallback)(l);
+    }
+    l = l->next;
+  }  // while
+
+  l = _elementListNoLoop;
+  while (l != NULL) {
+    if (l->category & cat) {
       (fCallback)(l);
     }
     l = l->next;
@@ -1078,7 +1045,7 @@ void Board::displayInfo(const char *text1, const char *text2) {
     if (text2) {
       display->drawText(0, display->getLineHeight(), 0, text2);
     }
-    display->flush();
+    display->startFlush(true);
   }  // if
 }
 

@@ -28,11 +28,6 @@ public:
   static Element *create();
 
   /**
-   * @brief Construct a new OrElement
-   */
-  OrElement();
-
-  /**
    * @brief static variable to ensure registering in static init phase.
    */
   static bool registered;

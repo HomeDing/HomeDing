@@ -17,7 +17,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#define NETWORKTRACE(...) LOGGER_JUSTINFO("Net:" __VA_ARGS__)
+#define NETWORKTRACE(...) // LOGGER_JUSTINFO("Net:" __VA_ARGS__)
 
 class Network {
 public:

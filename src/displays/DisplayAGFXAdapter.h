@@ -194,19 +194,6 @@ public:
 
 
   /**
-   * @brief fill rectangle with current background color.
-   * @param x x-position or offset of the text.
-   * @param y y-position of the area.
-   * @param w width of the area.
-   * @param h height of the area, assumed always 1.
-   */
-  void clear(int16_t x, int16_t y, int16_t w, int16_t h) override {
-    // PANELTRACE("clear: %d %d %d %d\n", x, y, w, h);
-    gfx->fillRect(x, y, w, h, backColor565);
-    DisplayAdapter::clear(x, y, w, h);
-  };  // clear()
-
-  /**
    * @brief Draw a text at this position using the specific height.-
    * @param x x-position or offset of the text.
    * @param y y-position of the text.
@@ -231,7 +218,7 @@ public:
       gfx->setTextColor(drawColor565, drawColor565);  // transparent background
       gfx->setCursor(x, y + baseLine);
       gfx->print(text);
-      _needSync = true;
+      _needFlush = true;
       return ((bx - x) + bw);
 
     } else {
@@ -283,59 +270,78 @@ public:
       gfx->setTextColor(fCol);
       gfx->setCursor(x + dx, y + dy + baseLine);
       gfx->print(text);
-      _needSync = true;
+      _needFlush = true;
     }
 
   }  // drawButton()
 
-
-  /// @brief Draw a boolean indicator on/off
-  /// @param x X Position
-  /// @param y Y Position
-  /// @param h Height of the indicator
-  /// @param fill
-  /// @return
-  int drawDot(int16_t x, int16_t y, int16_t h, bool fill) override {
-    // LOGGER_JUSTINFO("drawDot: (%d,%d)=%d", x, y, fill);
-    int r = h / 2;
-
-    if (fill) {
-      gfx->fillCircle(x + r, y + r, r, drawColor565);
-    } else {
-      gfx->drawCircle(x + r, y + r, r, drawColor565);
-    }
-    return (1);
-    _needSync = true;
-  };  // drawDot()
-
-
   virtual void drawPixel(UNUSED int16_t x, UNUSED int16_t y, UNUSED uint32_t color) override {
-    _needSync = true;
-    gfx->drawPixel(x, y, col565(color));
+    if (RGB_IS_COLOR(color)) {
+      gfx->drawPixel(x, y, col565(color));
+      _needFlush = true;
+    }
   };
 
-  virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
-    PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, drawColor565);
+  virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color) override {
+    PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, color);
 
-    if (displayBox.overlaps(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1))) {
-      gfx->drawLine(x0, y0, x1, y1, drawColor565);
-      _needSync = true;
+    if ((color != RGB_UNDEFINED) && (color != RGB_TRANSPARENT) && (x1 >= x0) && (y1 >= y0)) {
+      if (displayBox.overlaps(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1))) {
+        gfx->drawLine(x0, y0, x1, y1, col565(color));
+        _needFlush = true;
+      }
     }
   }  // drawLine()
 
 
-  void drawCircle(int16_t cx, int16_t cy, int16_t radius) override {
-    LOGGER_TRACE("drawCircle(%d/%d %d #%08x / #%08x)\n", cx, cy, radius, borderColor, backColor);
+  /// @brief Draw a rectangle with the given dimensions of the box and an optional inner border.
+  virtual void drawRectangle(BoundingBox &box, uint32_t borderColor, uint32_t fillColor = RGB_UNDEFINED) override {
+    PANELTRACE("drawRectangle(%d/%d - %d/%d #%08x #%08x)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);
 
-    if (backColor != RGB_UNDEFINED) {
-      gfx->fillCircle(cx, cy, radius, backColor565);
+    if ((!box.isEmpty()) && (displayBox.overlaps(box))) {
+      int16_t w = box.x_max - box.x_min + 1;
+      int16_t h = box.y_max - box.y_min + 1;
+      bool bFill = RGB_IS_COLOR(fillColor);
+      uint16_t fill = col565(fillColor);
+
+      if (RGB_NO_COLOR(borderColor)) {
+        // draw without border
+        if (bFill) {
+          gfx->fillRect(box.x_min, box.y_min, w, h, fill);
+          _needFlush = true;
+        }
+
+      } else {
+        if (bFill) {
+          gfx->fillRect(box.x_min + 1, box.y_min + 1, box.x_max - box.x_min - 1, box.y_max - box.y_min - 1, fill);
+        }
+        gfx->drawRect(box.x_min, box.y_min, w, h, col565(borderColor));
+        _needFlush = true;
+      }
     }
-    if (borderColor != RGB_UNDEFINED) {
-      gfx->drawCircle(cx, cy, radius, borderColor565);
+  }  // drawRectangle()
+
+
+  /// @brief Draw a circle with the given dimensions of the box and an optional inner border.
+  void drawCircle(UNUSED BoundingBox &box, UNUSED uint32_t borderColor, UNUSED uint32_t fillColor = RGB_UNDEFINED) override {
+    LOGGER_JUSTINFO("drawCircle(%d/%d - %d/%d #%08x #%08x)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);
+
+    int16_t radius = (box.x_max - box.x_min - 1) / 2;
+    int16_t cx = box.x_min + radius;
+    int16_t cy = box.y_min + radius;
+
+    if (RGB_IS_COLOR(fillColor)) {
+      gfx->fillCircle(cx, cy, radius, col565(fillColor));
     }
-    _needSync = true;
+    if (RGB_IS_COLOR(borderColor)) {
+      gfx->drawCircle(cx, cy, radius, col565(borderColor));
+    }
+
+    _needFlush = true;
   };
 
+
+protected:
   /// @brief send all buffered pixels to display.
   void flush() override {
     gfx->flush();
@@ -343,7 +349,6 @@ public:
   };  // flush()
 
 
-protected:
   /// @brief convert a 32-bit color value 0x00RRGGBB into the 565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
   /// @param color 24-bit color value
   /// @return 16-bit color in 565 format.

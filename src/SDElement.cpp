@@ -34,7 +34,9 @@
  * @return SDElement* created element
  */
 Element *SDElement::create() {
-  return (new SDElement());
+  SDElement *e =new SDElement();
+  e->category = CATEGORY::Standard; // no polling
+  return (e);
 }  // create()
 
 

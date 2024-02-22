@@ -49,6 +49,16 @@ bool Element::set(const char *name, const char *value) {
   } else if (_stricmp(name, "useState") == 0) {
     _useState = _atob(value);
 
+  } else if (_stricmp(name, "startup") == 0) {
+    if (_stricmp(value, "sys") == 0) {
+      startupMode = Element_StartupMode::System;
+    } else if (_stricmp(value, "net") == 0) {
+      startupMode = Element_StartupMode::Network;
+    } else if (_stricmp(value, "time") == 0) {
+      startupMode = Element_StartupMode::Time;
+    }
+
+
     // do not report an error for the following properties,
     // as they are used by the web ui and stored in the config files only.
   } else if (_stricmp(name, "description") == 0) {
@@ -82,9 +92,7 @@ void Element::start() {
 void Element::loop() {}  // loop()
 
 
-/**
- * @brief push the current value of all properties to the callback.
- */
+/// @brief push the current value of all properties to the callback.
 void Element::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   callback("active", active ? "true" : "false");
@@ -127,7 +135,7 @@ int Element::_atoi(const char *value) {
 }  // _atoi()
 
 
-/* Return a boolean value from a string. */
+// Return true for `1`, `true`, `high` or `on`. Return false otherwise.
 bool Element::_atob(const char *value) {
   bool ret = false;
 
@@ -135,14 +143,13 @@ bool Element::_atob(const char *value) {
     // ret = false;
   } else if (_stricmp(value, "1") == 0) {
     ret = true;
-  } else {
-    char v[8];
-    strcpy(v, value);
-    if (_stricmp(value, "true") == 0) {
-      ret = true;
-    } else if (_stricmp(value, "high") == 0) {
-      ret = true;
-    }
+
+  } else if (_stricmp(value, "true") == 0) {
+    ret = true;
+  } else if (_stricmp(value, "high") == 0) {
+    ret = true;
+  } else if (_stricmp(value, "on") == 0) {
+    ret = true;
   }  // if
   return (ret);
 }  // _atob()

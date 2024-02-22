@@ -19,12 +19,18 @@
 
 #include "DisplayElement.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+
+DisplayElement::DisplayElement() {
+  startupMode = Element_StartupMode::System;
+  // no loop() call required for display elements as they are used for configuration only.
+  category = CATEGORY::Display;
+}
 
 // ===== private functions =====
 
 void DisplayElement::_newPage(int page) {
-  LOGGER_ETRACE("newPage %d", page);
+  TRACE("newPage %d", page);
   DisplayAdapter *da = _board->display;
   if (da) {
     int oldPage = da->page;
@@ -32,9 +38,9 @@ void DisplayElement::_newPage(int page) {
     da->page = constrain(page, 0, da->maxpage);
 
     da->clear();
-    // redraw all display elements
-    _board->forEach("display", [this](Element *e) {
-      LOGGER_ETRACE("do %s", e->id);
+    // redraw all DisplayOutput elements
+    _board->forEach(CATEGORY::Widget, [this](Element *e) {
+      TRACE("do %s", e->id);
       e->set("redraw", "1");
     });
     if (da->page != oldPage) {
@@ -45,13 +51,6 @@ void DisplayElement::_newPage(int page) {
 
 
 // ===== Element functions =====
-
-/**
- * @brief Constructor of a new DisplayElement.
- */
-DisplayElement::DisplayElement() {
-  startupMode = Element_StartupMode::System;
-}
 
 
 void DisplayElement::init(Board *board) {

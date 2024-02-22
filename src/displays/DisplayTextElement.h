@@ -68,20 +68,11 @@ protected:
   virtual void draw() override;
 
 private:
-  /**
-   * @brief When using the TEXT type this text is shown before the value text.
-   */
+  /// @brief When using the TEXT type this text is shown before the value text.
   String _prefix; // static text before the value
 
-  /**
-   * @brief When using the TEXT type this text is shown after the value text.
-   */
+  /// @brief When using the TEXT type this text is shown after the value text.
   String _postfix; //  after the value
-
-  /**
-   * @brief displayed value
-   */
-  String _value;
 };
 
 #ifdef HOMEDING_REGISTER

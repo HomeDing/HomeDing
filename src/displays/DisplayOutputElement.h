@@ -12,6 +12,7 @@
  * Changelog:
  * * 26.04.2021 created by Matthias Hertel
  * * 26.01.2024 force redraw on attribute changes
+ * * 20.02.2024 added common value handling
  */
 
 
@@ -27,6 +28,10 @@
  */
 class DisplayOutputElement : public Element {
 public:
+
+  // Constructor
+  DisplayOutputElement();
+
   /// @brief Set a parameter or property to a new value or start an action.
   /// @param name Name of the property.
   /// @param value Value of the property.
@@ -46,13 +51,21 @@ public:
   /// @brief draw the element on the display adapter.
   virtual void draw();
 
+  /// @brief push the current value of all properties to the callback.
+  /// @param callback callback function that is used for every property.
+  virtual void pushState(
+    std::function<void(const char *pName, const char *eValue)> callback);
+
   /// @brief Bounding Box
   BoundingBox box;
 
-protected:
-  /// @brief Page of the display where the element is placed. Default on page 1.
-  int _page = 1;
+  /// @brief Redraw needed flag;
+  bool needsDraw = false;
 
+  /// @brief Page of the display where the element is placed. Default on page 1.
+  int page = 1;
+
+protected:
   /// @brief X-position ot the output element
   int16_t _x;
 
@@ -74,9 +87,9 @@ protected:
   /// @brief Border color of the element
   uint32_t _borderColor = RGB_UNDEFINED;
 
+  /// @brief Value the element
+  String _value;
+
   /// @brief Reference to DisplayAdapter
   DisplayAdapter *_display = nullptr;
-
-  /// @brief Redraw needed flag;
-  bool _needredraw = false;
 };

@@ -174,7 +174,7 @@ void ColorElement::start() {
 
   for (int n = 0; n < leSize; n++) {
     // connected elements
-    Element *e = _board->getElementById(_lightElementIDs[n].c_str());
+    Element *e = _board->findById(_lightElementIDs[n].c_str());
     if (e) {
       TRACE("  add(%s)", e->id);
       _lightElements[_lightElementsCount++] = static_cast<LightElement *>(e);

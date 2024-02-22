@@ -20,7 +20,7 @@
 #include <Wire.h>
 
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Private functions ===== */
 
@@ -151,8 +151,8 @@ void DisplayTouchElement::loop() {
 
       if (!_bFound) {
         // find displaybutton at x/y
-        _board->forEach("displaybutton", [this](Element *e) {
-          if (!_bFound) {
+        _board->forEach(CATEGORY::Widget, [this](Element *e) {
+          if ((!_bFound) && (Element::_stristartswith(e->id, "displaybutton/"))) {
             DisplayButtonElement *be = (DisplayButtonElement *)e;
             if (be->touchStart(lastX, lastY)) {
               _bFound = be;

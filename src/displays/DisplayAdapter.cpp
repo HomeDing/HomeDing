@@ -17,6 +17,7 @@
 #include <HomeDing.h>
 
 #include "DisplayAdapter.h"
+#include "displays/DisplayOutputElement.h"
 
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
@@ -81,4 +82,50 @@ void DisplayAdapter::setBrightness(uint8_t bright) {
     ledcWrite(_lightChannel, duty);
 #endif
   }
+};
+
+
+/// @brief draw all DisplayOutputElements, then
+/// flush all buffered pixels to the display.
+bool DisplayAdapter::startFlush(bool force) {
+  bool ret = false;
+  BoundingBox box;
+  if (force || _needFlush) {
+
+    // if (deferDrawing()) {
+
+    // find extended bounding box of all un-drawn elements
+    board->forEach(Element::CATEGORY::Widget, [this, &box](Element *e) {
+      DisplayOutputElement *de = (DisplayOutputElement *)e;
+
+      // LOGGER_JUSTINFO("check: %d %d %d %s", de->active, de->needsDraw, de->page, de->id);
+
+      if (de->active && de->page == page && de->needsDraw) {
+        // LOGGER_JUSTINFO("box: %s: %d/%d-%d/%d", de->id, de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
+        box.extend(de->box);
+      }
+    });
+    // LOGGER_JUSTINFO("box = %d/%d-%d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
+
+    // draw box with background color
+    drawRectangle(box, RGB_TRANSPARENT, conf->backgroundColor);
+
+    // draw all inside box
+    board->forEach(Element::CATEGORY::Widget, [this, &box](Element *e) {
+      DisplayOutputElement *de = (DisplayOutputElement *)e;
+
+      if (de->active && de->page == page) {
+        if (box.overlaps(de->box)) {
+          // LOGGER_JUSTINFO("draw: %s", de->id);
+          de->draw();
+          de->needsDraw = false;
+        }
+      }
+    });
+
+    this->flush();
+    ret = true;
+  }
+  _needFlush = false;
+  return (ret);
 };

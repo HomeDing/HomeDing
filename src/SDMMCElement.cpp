@@ -32,7 +32,9 @@
  * @return SDMMCElement* created element
  */
 Element *SDMMCElement::create() {
-  return (new SDMMCElement());
+  SDMMCElement *e =new SDMMCElement();
+  e->category = CATEGORY::Standard; // no polling
+  return (e);
 }  // create()
 
 

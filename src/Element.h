@@ -13,6 +13,7 @@
 // 27.04.2018 parameter pushing & loading added.
 // 29.04.2018 action passing added.
 // 15.05.2018 set = properties and action interface.
+// 15.02.2024 CATEGORY added.
 // -----
 
 #pragma once
@@ -51,7 +52,7 @@ class Element;
  * @brief Startup Mode specifies when is the right moment to try
  * starting/activating the element.
  */
-enum Element_StartupMode {
+enum Element_StartupMode : uint16_t {
   System = 1,   // right after loading the configurations.
   Network = 2,  // after a network connectivity in AP Mode was established.
   Time = 3,     // after a valid local time was set.
@@ -77,29 +78,39 @@ enum Element_StartupMode {
  */
 class Element {
 public:
-  // Datatype definitions for elements processing different types
-  enum DATATYPE : int {
+  /// @brief Datatype definitions for elements processing different types based on the configuration.
+  enum DATATYPE : uint16_t {
     STRING = 0,  // unspecified, all data can be presented as strings
     BOOLEAN,     // a boolean (stored as integer 0/1)
     INTEGER,     // a number without any decimals
     FLOAT        // a number with decimals
   };
 
-  /**
-   * @brief The id of the Element. Visible to anyone.
-   */
+  /// @brief CATEGORY definitions for elements. Features supported by the Element or Element base class.
+  enum CATEGORY : uint16_t {
+    Looping = 0x01,  // using the loop() function.
+    Standard = 0x10,   // is a normal Element
+    Display = 0x20,  // is a DisplayElement
+    Widget = 0x40,   // is a DisplayOutputElement
+    All = 0xff       // all elements
+  };
+
+  /// @brief The id of the Element.
   char id[MAX_ID_LENGTH];  // TODO: convert to String
 
-  int loglevel = LOGGER_LEVEL_ERR;
+  /// @brief The detail of logging for this Element.
+  uint16_t loglevel = LOGGER_LEVEL_ERR;
+
+  /// @brief The default features for this Element.
+  CATEGORY category = (CATEGORY)(CATEGORY::Standard | CATEGORY::Looping);
 
 #if defined(HD_PROFILE)
   PROFILE_DATA;
 #endif
 
-  /**
-   * @brief The Element will be marked active after passing valid parameters and
-   * calling start().
-   */
+  /// @brief The Element will be marked active after passing valid parameters and
+  /// calling start(). Then loop() function will be called periodically.
+  ///
   bool active = false;
 
 
@@ -148,10 +159,8 @@ public:
   virtual void term();
 
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
+  /// @brief push the current value of all properties to the callback.
+  /// @param callback callback function that is used for every property.
   virtual void pushState(
     std::function<void(const char *pName, const char *eValue)> callback);
 
@@ -179,8 +188,7 @@ public:
   /**
    * @brief Return a boolean value from a string.
    * @param value Given value as string.
-   * @return true Return for "true", "on", "1", "high".
-   * @return false Return false as the default case.
+   * @return Return true for `1`, `true`, `high` or `on`. Return false otherwise.
    */
   static bool _atob(const char *value);
 

@@ -71,7 +71,7 @@ public:
    * @param w width of the area.
    * @param h height of the area, assumed always 1.
    */
-  void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h) override {
+  void xclear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h)  {
     display->setCursor(x, y);
     if (y < conf->height) {
       while ((x < conf->width) && (w > 0)) {
@@ -80,7 +80,7 @@ public:
         x++;
       }  // while
     }    // if
-  };     // clear()
+  };     // xclear()
 
 
   /**
@@ -105,10 +105,10 @@ public:
   }  // drawText
 
 
-  int drawDot(int16_t x, int16_t y, UNUSED int16_t h, bool fill) override {
-    drawText(x, y, 1, fill ? "\02" : "\01");
-    return (1);
-  };  // drawDot()
+  void drawCircle(BoundingBox &box, UNUSED uint32_t borderColor, uint32_t fillColor) override {
+    drawText(box.x_min, box.y_min, 1, RGB_IS_COLOR(fillColor) ? "\02" : "\01");
+    _needFlush = true;
+  };
 
 private:
   /**

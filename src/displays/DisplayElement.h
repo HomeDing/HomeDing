@@ -38,6 +38,9 @@ class DisplayAdapter;
 #define RGB_UNDEFINED 0xEE000000  // key color
 #define RGB_TRANSPARENT 0xEF000000  // key color
 
+#define RGB_IS_COLOR(col) ((col != RGB_UNDEFINED) && (col != RGB_TRANSPARENT))
+#define RGB_NO_COLOR(col) ((col == RGB_UNDEFINED) || (col == RGB_TRANSPARENT))
+
 
 #define BUSMODE_ANY   0x00
 #define BUSMODE_I2C   0x01

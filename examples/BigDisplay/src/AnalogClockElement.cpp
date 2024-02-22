@@ -128,7 +128,7 @@ void AnalogClockElement::draw() {
   _last_a_sec = aSec;
   _last_a_min = aMin;
   _last_a_hour = aHour;
-  _display->flush();
+  _display->setFlush();
   _shown_time = now;
 }
 
@@ -139,7 +139,7 @@ void AnalogClockElement::loop() {
   unsigned long int now = _board->getTime();
 
   if (_shown_time != now) {
-    _needredraw = true;
+    needsDraw = true;
   }
   DisplayOutputElement::loop();
 }  // loop()
@@ -164,11 +164,10 @@ void AnalogClockElement::_drawClock() {
   // LOGGER_ETRACE("drawClock()");
   float rad1 = (M_TWOPI / 60);
   int16_t x0, y0, x1, y1;
+  BoundingBox box(_cx - _radius, _cy - _radius, _cx + _radius, _cy + _radius);
   uint32_t color;
 
-  _display->setBackgroundColor(_backgroundColor);
-  _display->setBorderColor(_borderColor);
-  _display->drawCircle(_cx, _cy, _radius);
+  _display->drawCircle(box, _borderColor, _backgroundColor);
 
   for (uint8_t i = 0; i < 60; i++) {
     float deg = (rad1 * i);
@@ -192,8 +191,7 @@ void AnalogClockElement::_drawClock() {
       color = RGB_GRAY;
     }
 
-    _display->setColor(color);
-    _display->drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1);
+    _display->drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, color);
   }  // for
 }
 

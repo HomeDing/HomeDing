@@ -21,7 +21,7 @@
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 DisplayOutputElement::DisplayOutputElement() {
-  category = CATEGORY::Widget;
+  category = CATEGORY::Widget; // no loop
 }
 
 // ===== Element functions =====
@@ -120,24 +120,6 @@ void DisplayOutputElement::start() {
     if (_display) _display->setFlush();
   }  // if
 }  // start()
-
-
-/**
- * @brief check the state of the DHT values and eventually create actions.
- */
-void DisplayOutputElement::loop() {
-  if (needsDraw && active) {
-    if (_display && (!_display->deferDrawing()) && (_display->page == page)) {
-      // need erase background
-      auto bCol = _display->getBackgroundColor();
-      _display->drawRectangle(box, RGB_TRANSPARENT, _display->getBackgroundColor());
-
-      // draw immediately (no overlapping elements)
-      draw();
-      needsDraw = false;
-    }
-  }  // if
-}  // loop()
 
 
 /**

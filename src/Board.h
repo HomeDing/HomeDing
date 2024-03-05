@@ -352,17 +352,6 @@ public:
   /// @param fCallback Callback function passing each element
   void forEach(Element::CATEGORY cat, ElementCallbackFn fCallback);
 
-
-  /**
-   * Get a Element by typename. Returns the first found element.
-   * This method can be used to access the singleton Elements like device,
-   * display, ota, ...
-   * @param elementTypeName type name of element.
-   * @return Element* first element in list with this type.
-   */
-  Element *getElement(const char *elementTypeName);
-
-
   /**
    * Get an Element by type and name. Returns found element.
    * @param elementType type of element.
@@ -376,13 +365,10 @@ public:
   /// @return found element
   Element *findById(const char *id);
 
-
   /// @brief Find an Element by full qualified ID `type/name`.
   /// @param id type and name of element.
   /// @return found element
-  Element *findById(String &id) {
-    return (findById(id.c_str()));
-  };
+  Element *findById(String &id) { return (findById(id.c_str())); };
 
 
   /**

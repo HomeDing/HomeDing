@@ -24,7 +24,7 @@
   },
 
   "element": {
-    "properties": ["loglevel", "title", "description"],
+    "properties": ["loglevel", "title", "description", "startup"],
     "actions": ["start", "stop"]
   },
 

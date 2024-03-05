@@ -949,41 +949,10 @@ time_t Board::getTimeOfDay() {
 }  // getTimeOfDay()
 
 
-/**
- * @brief Get a Element by typename. Returns the first found element.
- */
-Element *Board::getElement(const char *elementType) {
-  String tn;
-  Element *found = nullptr;
-  BOARDTRACE("getElement(%s)", elementType);
-
-  tn = elementType;
-  tn.concat('/');
-
-  forEach(Element::CATEGORY::All, [this, &tn, &found](Element *e) {
-    if (String(e->id).startsWith(tn)) {
-      found = e;
-    }
-  });
-  return (found);
-}  // getElement()
-
-
 Element *Board::getElement(const char *elementType, const char *elementName) {
-  String tn;
-  Element *found = nullptr;
-
-  tn = elementType;
-  tn.concat('/');
-  tn.concat(elementName);
-
-  forEach(Element::CATEGORY::All, [this, &tn, &found](Element *e) {
-    if (String(e->id).equalsIgnoreCase(tn)) {
-      found = e;
-    }
-  });
-
-  return (found);
+  char id[32];
+  sprintf(id, "%s/%s", elementType, elementName);
+  return (findById(id));
 }  // getElement()
 
 
@@ -991,7 +960,7 @@ Element *Board::findById(const char *id) {
   BOARDTRACE("findById(%s)", id);
   Element *found = nullptr;
 
-  forEach(Element::CATEGORY::All, [this, id, &found](Element *e) {
+  forEach(Element::CATEGORY::All, [id, &found](Element *e) {
     if (strcmp(e->id, id) == 0) { found = e; }
   });
   return (found);

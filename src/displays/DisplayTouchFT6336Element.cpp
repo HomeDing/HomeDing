@@ -49,7 +49,6 @@ bool DisplayTouchFT6336Element::pullSensorData() {
     if (count > 0) {
       lastX = ((registers[3] & 0x0F) << 8) + registers[4];
       lastY = ((registers[5] & 0x0F) << 8) + registers[6];
-      Serial.printf("%4d %4d\n", lastX, lastY);
       return (true);
     }
   }

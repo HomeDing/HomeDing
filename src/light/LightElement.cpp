@@ -21,14 +21,6 @@
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
-/**
- * @brief Construct a new LightElement.
- */
-LightElement::LightElement() {
-  startupMode = Element_StartupMode::System;
-}
-
-
 void LightElement::setColors(uint32_t *color, int brightness) {
   // just take the first in the array as default.
   setColor(*color, brightness);
@@ -66,7 +58,9 @@ void LightElement::setColor(uint32_t color, int brightness) {
  * @return LightElement* created element
  */
 Element *LightElement::create() {
-  return (new LightElement());
+  LightElement *e = new LightElement();
+  e->startupMode = Element_StartupMode::System;
+  return (e);
 }  // create()
 
 

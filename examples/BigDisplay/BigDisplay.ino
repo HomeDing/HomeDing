@@ -62,16 +62,17 @@
 // enable these lines to get more displays supported
 #define HOMEDING_INCLUDE_DISPLAYGC9A01
 #define HOMEDING_INCLUDE_DISPLAYST7796
-// #define HOMEDING_INCLUDE_DISPLAYESP32PANEL
 #define HOMEDING_INCLUDE_DISPLAYST7789
+#define HOMEDING_INCLUDE_DISPLAYST7735
+#define HOMEDING_INCLUDE_DISPLAYESP32PANEL
+#define HOMEDING_INCLUDE_DISPLAYST7701
 
-// #define HOMEDING_INCLUDE_DISPLAYST7735
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
-// #define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
+
+// enable these lines to get touch displays supported
+#define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
 #define HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
 #define HOMEDING_INCLUDE_DISPLAYTOUCHCST816
-// Enable simple display Elements
-// #define HOMEDING_INCLUDE_TM1637
 
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR
@@ -112,6 +113,7 @@ WebServer server(80);
 void setup(void) {
   fs::FS *fs = nullptr;
   Serial.begin(115200);
+  Serial.setTxTimeoutMs(0);
 
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
@@ -121,7 +123,6 @@ void setup(void) {
 #endif
 
   Serial.setDebugOutput(false);
-
 
 #if defined(ESP8266)
   fs = &LittleFS;

@@ -43,11 +43,6 @@ public:
   /// @return false when activation failed.
   virtual void start() override;
 
-  /**
-   * @brief Give some processing time to do drawing if required.
-   */
-  virtual void loop() override;
-
   /// @brief draw the element on the display adapter.
   virtual void draw();
 

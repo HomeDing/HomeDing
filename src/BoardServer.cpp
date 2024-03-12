@@ -106,7 +106,7 @@ void BoardHandler::handleConnect(WebServer &server) {
 
       File f = HomeDingFS::open(NET_FILENAME, "w");
       if (f) {
-        f.printf("%s,%s", netName, netPass);
+        f.printf("%s,%s", netName.c_str(), netPass.c_str());
         f.close();
       }
       break;

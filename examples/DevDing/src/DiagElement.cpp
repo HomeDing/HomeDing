@@ -212,7 +212,7 @@ String DiagElement::_handleProfile() {
 String DiagElement::_handleChipInfo() {
   String sOut;
   char buffer[128];
-  char *s = nullptr;
+  const char *s = nullptr;
 
   sOut = "Chip Infos:\n";
 

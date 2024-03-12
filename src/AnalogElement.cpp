@@ -18,7 +18,7 @@
 
 #include <AnalogElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new AnalogElement.
@@ -35,11 +35,12 @@ int AnalogElement::map(int value) {
   if (divisor != 0) {
     out = ((value - _inMin) * (_outMax - _outMin) / divisor) + _outMin;
   }
-  if (_constrain)
+  if (_constrain) {
     if (_outMin < _outMax)
       out = constrain(out, _outMin, _outMax);
     else
       out = constrain(out, _outMax, _outMin);
+  }
   TRACE("map(%d) %d", value, out);
   return (out);
 }
@@ -142,7 +143,7 @@ bool AnalogElement::getProbe(UNUSED String &values) {
   if ((value >= _lastValue + _hysteresis) || (value <= _lastValue - _hysteresis)) {
     _lastValue = value;
     values = String(value) + ',' + (value < _reference ? "0" : "1");
-  }               // if
+  }  // if
 
   return (true);  // always simulate data is fine
 }  // getProbe()
@@ -159,7 +160,7 @@ void AnalogElement::sendData(UNUSED String &values) {
       _board->dispatch(_lowAction);
     }  // if
     _lastReference = r;
-  }    // if
+  }  // if
 
 }  // sendData()
 

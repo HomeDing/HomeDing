@@ -173,9 +173,8 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-bootloader-skip-validate-in-deep-sleep
   // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
 
-  esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
   BOARDTRACE("ws=%d", _isWakeupStart);
-  BOARDTRACE("ESP32: deep sleep cause: %d", cause);
+  BOARDTRACE("ESP32: deep sleep cause: %d", esp_sleep_get_wakeup_cause());
 
   _startup = (_isWakeupStart) ? BOARDSTARTUP::DEEPSLEEP : BOARDSTARTUP::NORMAL;
   _isWakeupStart = false;

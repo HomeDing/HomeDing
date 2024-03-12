@@ -17,7 +17,13 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#define NETWORKTRACE(...) // LOGGER_JUSTINFO("Net:" __VA_ARGS__)
+#define NETWORKTRACE_ON
+
+#if defined(NETWORKTRACE_ON)
+#define NETWORKTRACE(...) LOGGER_JUSTINFO("Net:" __VA_ARGS__)
+#else
+#define NETWORKTRACE(...)
+#endif
 
 class Network {
 public:
@@ -83,6 +89,7 @@ public:
         state = NETSTATE::FAILED;
       }
 
+#if defined(NETWORKTRACE_ON)
       const char *sText = "";
       switch (state) {
         case NETSTATE::NONET: sText = "No Net"; break;
@@ -95,6 +102,7 @@ public:
       }
 
       NETWORKTRACE("state: (%d) %s", thisState, sText);
+#endif
 
       _wifi_status = thisState;
     }

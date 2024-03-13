@@ -118,11 +118,7 @@ void SDMMCElement::start() {
     // mount the sd filesystem
     HomeDingFS::sdFS = &SD_MMC;
 
-    uint8_t cardType = SD_MMC.cardType();
-    TRACE("Card Type: %d", cardType);
-
-    uint32_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
-
+    TRACE("Card Type: %d", SD_MMC.cardType());
     TRACE("SD_MMC Card Size: %d MByte", SD_MMC.cardSize() / (1024 * 1024));
     TRACE(" Total: %d MByte", SD_MMC.totalBytes() / (1024 * 1024));
     TRACE(" Used : %d MByte", SD_MMC.usedBytes() / (1024 * 1024));

@@ -126,12 +126,12 @@ public:
     return (drawText(x, y, h, text.c_str()));
   };
 
-  virtual int drawText(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t h, const char *text) {
+  virtual int drawText(int16_t /* x */, int16_t /* y */, int16_t /* h */, const char *text) {
     _needFlush = true;
     return (charWidth * strnlen(text, MAX_DISPLAY_STRING_LEN));
   };
 
-  virtual void drawPixel(UNUSED int16_t x, UNUSED int16_t y, UNUSED uint32_t color) {
+  virtual void drawPixel(int16_t /* x */, int16_t /* y */, uint32_t /* color */) {
     _needFlush = true;
   };
 
@@ -139,19 +139,19 @@ public:
     drawLine(x0, y0, x1, y1, color);
   };
 
-  virtual void drawLine(UNUSED int16_t x0, UNUSED int16_t y0, UNUSED int16_t x1, UNUSED int16_t y1, UNUSED uint32_t color) {
+  virtual void drawLine(int16_t /* x0 */, int16_t /* y0 */, int16_t /* x1 */, int16_t /* y1 */, uint32_t /* color */) {
     _needFlush = true;
   };
 
-  virtual void drawButton(UNUSED int16_t x, UNUSED int16_t y, UNUSED int16_t w, UNUSED int16_t h, UNUSED const char *text, UNUSED bool pressed = false) {
+  virtual void drawButton(int16_t /* x */, int16_t /* y */, int16_t /* w */, int16_t /* h */, const char * /* text */, bool /* pressed = false */) {
     _needFlush = true;
   };
 
-  virtual void drawRectangle(UNUSED BoundingBox &box, UNUSED uint32_t borderColor, UNUSED uint32_t fillColor = RGB_UNDEFINED) {
+  virtual void drawRectangle(BoundingBox & /* box */, uint32_t /* borderColor */, uint32_t /* fillColor = RGB_UNDEFINED */) {
     _needFlush = true;
   };
 
-  virtual void drawCircle(UNUSED BoundingBox &box, UNUSED uint32_t borderColor, UNUSED uint32_t fillColor = RGB_UNDEFINED) {
+  virtual void drawCircle(BoundingBox & /* box */, uint32_t /* borderColor */, uint32_t /* fillColor = RGB_UNDEFINED */) {
     _needFlush = true;
   };
 

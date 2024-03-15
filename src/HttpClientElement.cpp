@@ -80,7 +80,7 @@ void HttpClientElement::processHeader(String &key, String &value) {
   }
 };
 
-void HttpClientElement::processBody(UNUSED char *value){};
+void HttpClientElement::processBody(char */* value */){};
 
 /**
  * @brief check the state of the input.

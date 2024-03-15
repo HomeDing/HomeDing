@@ -204,9 +204,9 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
  * @return false
  */
 #if defined(ESP8266)
-bool BoardHandler::handle(WebServer &server, UNUSED HTTPMethod requestMethod, const String &requestUri2)
+bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, String &requestUri2)
 #elif defined(ESP32)
-bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String requestUri2)
+bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, String requestUri2)
 #endif
 {
   TRACE("handle(%s)", requestUri2.c_str());

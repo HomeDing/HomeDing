@@ -275,7 +275,7 @@ public:
 
   }  // drawButton()
 
-  virtual void drawPixel(UNUSED int16_t x, UNUSED int16_t y, UNUSED uint32_t color) override {
+  virtual void drawPixel(int16_t x, int16_t y, uint32_t color) override {
     if (RGB_IS_COLOR(color)) {
       gfx->drawPixel(x, y, col565(color));
       _needFlush = true;
@@ -323,7 +323,7 @@ public:
 
 
   /// @brief Draw a circle with the given dimensions of the box and an optional inner border.
-  void drawCircle(UNUSED BoundingBox &box, UNUSED uint32_t borderColor, UNUSED uint32_t fillColor = RGB_UNDEFINED) override {
+  void drawCircle(BoundingBox &box, uint32_t borderColor, uint32_t fillColor = RGB_UNDEFINED) override {
     LOGGER_JUSTINFO("drawCircle(%d/%d - %d/%d #%08x #%08x)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);
 
     int16_t radius = (box.x_max - box.x_min - 1) / 2;

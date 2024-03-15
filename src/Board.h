@@ -62,7 +62,7 @@
 
 #include <time.h>
 
-#define UNUSED __attribute__((unused))
+#define UNUSED
 
 // forward class declarations
 class Board;

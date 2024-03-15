@@ -166,12 +166,12 @@ void SensorElement::setWait(unsigned long waitMilliseconds) {
   _waitDuration = waitMilliseconds;
 }
 
-bool SensorElement::getProbe(UNUSED String &values) {
+bool SensorElement::getProbe(String & /*values */) {
   return (true);  // always simulate data is fine
 }  // getProbe()
 
 
-void SensorElement::sendData(UNUSED String &values) {
+void SensorElement::sendData(String &values) {
   TRACE("sendData()");
   for (int n = 0; n < _valuesCount; n++) {
     _board->dispatchItem(_actions[n], values, n);

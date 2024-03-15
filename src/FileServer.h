@@ -47,13 +47,13 @@ public:
   /**
     @brief check wether the request can be handled by this implementation.
     @param requestMethod method of the http request line.
-    @param requestUri request ressource from the http request line.
+    @param uri request ressource from the http request line.
     @return true when method can be handled.
   */
 #if defined(ESP8266)
-  bool canHandle(HTTPMethod requestMethod, UNUSED const String &uri) override
+  bool canHandle(HTTPMethod requestMethod, const String &/* uri */) override
 #elif defined(ESP32)
-  bool canHandle(HTTPMethod requestMethod, UNUSED String uri) override
+  bool canHandle(HTTPMethod requestMethod, String /* uri */) override
 #endif
   {
     return ((!_board->isSafeMode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
@@ -103,9 +103,9 @@ public:
 // handle uploading of payload of a file.
 // ensure the file has no '#' and no '$' character.
 #if defined(ESP8266)
-  void upload(UNUSED WebServer &server, UNUSED const String &requestUri, HTTPUpload &upload) override
+  void upload(WebServer &/* server */, const String &/* requestUri */, HTTPUpload &upload) override
 #elif defined(ESP32)
-  void upload(UNUSED WebServer &server, UNUSED String requestUri, HTTPUpload &upload) override
+  void upload(WebServer &/* server */, String /* requestUri */, HTTPUpload &upload) override
 #endif
   {
     // ensure that filename starts with '/' and is lowercase

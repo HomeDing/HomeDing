@@ -128,7 +128,7 @@ void AnalogElement::start() {
 }  // start()
 
 
-bool AnalogElement::getProbe(UNUSED String &values) {
+bool AnalogElement::getProbe(String &values) {
   int rawValue = analogRead(_pin);
   int value;
 
@@ -149,7 +149,7 @@ bool AnalogElement::getProbe(UNUSED String &values) {
 }  // getProbe()
 
 
-void AnalogElement::sendData(UNUSED String &values) {
+void AnalogElement::sendData(String &values) {
   SensorElement::sendData(values);
 
   int r = (values.endsWith(",1") ? 1 : 0);

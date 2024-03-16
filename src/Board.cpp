@@ -834,8 +834,9 @@ void Board::dispatchAction(String action) {
       Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action(%s)", action.c_str());
       bool ret = target->set(name.c_str(), value.c_str());
 
-      if (!ret)
+      if (!ret) {
         LOGGER_ERR("Action '%s' was not accepted.", action.c_str());
+      }
     }
   }
 }  // dispatchAction()

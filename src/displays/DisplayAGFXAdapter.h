@@ -13,7 +13,7 @@
 
 #pragma once
 
-#define UNUSED(x)
+#define UNUSED(expr) do { (void)(expr); } while (0)
 
 #include <Arduino_GFX_Library.h>
 

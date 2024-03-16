@@ -13,6 +13,8 @@
 
 #pragma once
 
+#define UNUSED(x)
+
 #include <Arduino_GFX_Library.h>
 
 #include <displays/DisplayAdapter.h>

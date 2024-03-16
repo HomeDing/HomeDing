@@ -261,17 +261,9 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, Str
 
 #if defined(ESP8266)
     jc.addProperty("core", "ESP8266");
+
 #elif defined(ESP32)
-    esp_chip_info_t chip_info;
-    esp_chip_info(&chip_info);
-    esp_chip_model_t model = chip_info.model;
-    const char *s = "unknown";
-    if (model == CHIP_ESP32) { s = "ESP32"; };
-    // if (model == CHIP_ESP32S2) { s = "ESP32-S2"; };
-    if (model == CHIP_ESP32S3) { s = "ESP32-S3"; };
-    if (model == CHIP_ESP32C3) { s = "ESP32-C3"; };
-    // if (model == CHIP_ESP32H2) { s = "ESP32-H2"; };
-    jc.addProperty("core", s);
+    jc.addProperty("core", ESP.getChipModel());
 #endif
 
     jc.addProperty("build", __DATE__);

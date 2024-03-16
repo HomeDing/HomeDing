@@ -62,8 +62,6 @@
 
 #include <time.h>
 
-#define UNUSED
-
 // forward class declarations
 class Board;
 

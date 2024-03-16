@@ -80,7 +80,7 @@ public:
    * @return false
    */
 #if defined(ESP8266)
-  bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override;
+  bool handle(WebServer &server, HTTPMethod /* requestMethod */, const String &requestUri) override;
 #elif defined(ESP32)
   bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override;
 #endif

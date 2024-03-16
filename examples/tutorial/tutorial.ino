@@ -122,7 +122,7 @@ void setup(void) {
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-#if defined(NET_DEBUG) && defined (ESP8266)
+#if defined(NET_DEBUG) && defined(ESP8266)
   Serial.setDebugOutput(true);
   // eSTAConnected = WiFi.onStationModeConnected(onSTAConnected);
   static WiFiEventHandler eSTAConnected =
@@ -147,11 +147,11 @@ void setup(void) {
     Serial.println("WiFi Station DHCPTimeout.");
   });
 
-  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](UNUSED const WiFiEventSoftAPModeStationConnected& event) {
+  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](const WiFiEventSoftAPModeStationConnected&) {
     Serial.println("WiFi AP Station connected.");
   });
 
-  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](UNUSED const WiFiEventSoftAPModeProbeRequestReceived& event) {
+  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](const WiFiEventSoftAPModeProbeRequestReceived&) {
     Serial.println("WiFi AP Station probe.");
   });
 

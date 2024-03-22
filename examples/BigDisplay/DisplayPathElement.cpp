@@ -62,7 +62,7 @@ void DisplayPathElement::draw() {
   dObj->setPath(_path);
   // dObj->setFillGradient(gfxDraw::RED, 4, 6, gfxDraw::YELLOW, 10, 9);
 
-  dObj->draw(_x, _y, [&](int16_t x, int16_t y, gfxDraw::RGBA color) {
+  dObj->draw(box.x_min, box.y_min, [&](int16_t x, int16_t y, gfxDraw::RGBA color) {
     // printf("draw %02x %02x %02x %08lx\n", color.Red, color.Green, color.Blue, color.toColor24());
     _display->drawPixel(x, y, color.toColor24());
   });

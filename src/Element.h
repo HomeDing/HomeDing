@@ -86,11 +86,11 @@ public:
 
   /// @brief CATEGORY definitions for elements. Features supported by the Element or Element base class.
   enum CATEGORY : uint16_t {
-    Looping = 0x01,  // using the loop() function.
-    Standard = 0x10,   // is a normal Element
-    Display = 0x20,  // is a DisplayElement
-    Widget = 0x40,   // is a DisplayOutputElement
-    All = 0xff       // all elements
+    Looping = 0x01,   // using the loop() function.
+    Standard = 0x10,  // is a normal Element
+    Display = 0x20,   // is a DisplayElement
+    Widget = 0x40,    // is a DisplayOutputElement
+    All = 0xff        // all elements
   };
 
   /// @brief The id of the Element.
@@ -268,6 +268,10 @@ public:
   static int _stricmp(const char *str1, const char *str2);
 
 
+  /// @brief String start with prefix, case sensitive.
+  static bool _strStartsWith(const char *s, const char *prefix);
+
+
   /**
    * @brief String start with prefix, case insensitive.
    */
@@ -278,6 +282,7 @@ public:
    * @brief to lowercase a c string.
    */
   static void _strlower(char *str);
+
 
   /* ===== String as List functions =====*/
   // These are useful function to use a String
@@ -291,9 +296,7 @@ public:
 
 
 protected:
-  /**
-   * @brief A reference to the board the Element is on.
-   */
+  /// @brief A reference to the board the Element is on.
   Board *_board;
 
   /**

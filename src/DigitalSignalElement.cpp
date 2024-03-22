@@ -36,26 +36,29 @@ Element *DigitalSignalElement::create() {
 bool DigitalSignalElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_PIN) == 0) {
+  if (Element::set(name, value)) {
+    // done.
+
+  } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "pullup") == 0) {
     _pullup = _atob(value);
 
-  } else if (_stricmp(name, "onHigh") == 0) {
+  } else if (name == HomeDing::Action::OnHigh) {
     _highAction = value;
 
-  } else if (_stricmp(name, "onLow") == 0) {
+  } else if (name == HomeDing::Action::OnLow) {
     _lowAction = value;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else if (_stricmp(name, "duration") == 0) {
     _valueAction = value;
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
   return (ret);
 }  // set()
@@ -132,7 +135,7 @@ void DigitalSignalElement::loop() {
 void DigitalSignalElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _printBoolean(_pulseValue));
+  callback(HomeDing::Action::Value, _printBoolean(_pulseValue));
 }  // pushState()
 
 // ----- static interrupt stuff here -----

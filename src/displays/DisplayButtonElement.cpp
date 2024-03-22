@@ -61,7 +61,6 @@ void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
 /// @param board Reference to the board.
 void DisplayButtonElement::init(Board *board) {
   DisplayOutputElement::init(board);
-  _h = 24;  // default height for buttons
 }  // init()
 
 
@@ -75,7 +74,7 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
   if (DisplayOutputElement::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, "text") == 0) {
+  } else if (name == HomeDing::Action::Text) {
     _text = value;
     needsDraw = true;
 
@@ -93,10 +92,10 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
 /// @brief Draw the button on display.
 void DisplayButtonElement::draw() {
 
-  TRACE("draw %d.%d.%d.%d", box.x_min, box.y_min, _w, _h);
+  TRACE("draw %d.%d.%d.%d", box.x_min, box.y_min, box.x_max, box.y_min);
 
   DisplayOutputElement::draw();  // prepare colors
-  _display->drawButton(box.x_min, box.y_min, _w, _h, _text.c_str(), _pressed);
+  _display->drawButton(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1, _text.c_str(), _pressed);
 }
 
 // End

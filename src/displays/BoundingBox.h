@@ -48,15 +48,19 @@ public:
   /// @return true when point is inside.
   bool contains(int16_t x, int16_t y) {
     return ((x >= x_min) && (x <= x_max) && (y >= y_min) && (y <= y_max));
-  };
+  }  // contains()
 
 
-  /// @brief check if the box overlaps the given box.
+  /// @brief check if a box overlaps the this box.
   /// @param b
   /// @return
   bool overlaps(BoundingBox &b) {
-    return ((x_max >= b.x_min) && (x_min <= b.x_max) && (y_max >= b.y_min) && (y_min <= b.y_max));
-  }
+    bool isOut =
+      (b.x_min > this->x_max) || (b.x_max < this->x_min)
+      || (b.y_min > this->y_max) || (b.y_max < this->y_min);
+    return (!isOut);
+  }  // overlaps()
+
 
   /// @brief check if the box overlaps the given box.
   bool overlaps(int16_t x, int16_t y, int16_t w, int16_t h) {

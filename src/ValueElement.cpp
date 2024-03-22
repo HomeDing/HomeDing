@@ -82,35 +82,35 @@ bool ValueElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, PROP_VALUE) == 0) {
+  } else if (name == HomeDing::Action::Value) {
     if (_isStringType)
       _setValue(value);
     else
       _setValue(_atoi(value));
 
-  } else if (_stricmp(name, "up") == 0) {
+  } else if (name == HomeDing::Action::Up) {
     _setValue(_value + _atoi(value) * _step);
 
-  } else if (_stricmp(name, "down") == 0) {
+  } else if (name == HomeDing::Action::Down) {
     _setValue(_value - _atoi(value) * _step);
 
-  } else if (_stricmp(name, "min") == 0) {
+  } else if (name == HomeDing::Action::Min) {
     _minRange = _atoi(value);
 
-  } else if (_stricmp(name, "max") == 0) {
+  } else if (name == HomeDing::Action::Max) {
     _maxRange = _atoi(value);
 
-  } else if (_stricmp(name, "step") == 0) {
+  } else if (name == HomeDing::Action::Step) {
     _step = _atoi(value);
 
-  } else if (_stricmp(name, "label") == 0) {
+  } else if (name == HomeDing::Action::Label) {
     _label = value;
 
-  } else if (_stricmp(name, "type") == 0) {
+  } else if (name == HomeDing::Action::Type) {
     if (_stricmp(value, "string") == 0)
       _isStringType = true;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else {
@@ -147,7 +147,7 @@ void ValueElement::start() {
 void ValueElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, (_isStringType ? _valueString : String(_value)).c_str());
+  callback(HomeDing::Action::Value, (_isStringType ? _valueString : String(_value)).c_str());
 }  // pushState()
 
 /** return actual value */

@@ -93,7 +93,7 @@ bool TimerElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onend") == 0) {
     _endAction = value;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else {
@@ -196,7 +196,7 @@ void TimerElement::pushState(
   } else {
     callback("time", String((now - _startTime) / 1000).c_str());
   }
-  callback(PROP_VALUE, _value ? "1" : "0");
+  callback(HomeDing::Action::Value, _value ? "1" : "0");
 }  // pushState()
 
 

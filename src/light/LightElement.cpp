@@ -73,7 +73,7 @@ bool LightElement::set(const char *name, const char *pValue) {
   bool ret = true;
   TRACE("L-set %s=%s", name, pValue);
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     if (_stricmp(value.c_str(), pValue)) {
       value = pValue;
       _outColor = _atoColor(pValue);
@@ -102,7 +102,7 @@ bool LightElement::set(const char *name, const char *pValue) {
       needUpdate = true;
     }
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _count = 0;
     while (_count < LightElement::MAXPINS) {
       String p = getItemValue(pValue, _count);

@@ -99,7 +99,7 @@ bool SelectElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onkey") == 0) {
     _keyAction = value;
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else {

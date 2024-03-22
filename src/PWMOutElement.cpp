@@ -29,10 +29,10 @@ Element *PWMOutElement::create() {
 bool PWMOutElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     _setValue(_atoi(value));
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "invert") == 0) {

@@ -254,9 +254,13 @@ void Board::_addAllElements() {
   Element *_lastElem = NULL;  // last created Element
 
   MicroJson *mj = new MicroJson(
-    [this, &_lastElem](int level, char *path, char *value) {
+    [this, &_lastElem](int level, char *_path, char *value) {
       // BOARDTRACE("callback %d %s =%s", level, path, value ? value : "-");
       hd_yield();
+
+      char path[128];
+      strncpy(path, _path, sizeof(path));
+      strlwr(path);
 
       if (level == 1) {
 
@@ -273,7 +277,7 @@ void Board::_addAllElements() {
         *t = '\0';
 
         // typeName starts with "web" ?
-        if (Element::_stristartswith(typeName, "web")) {
+        if (Element::_strStartsWith(typeName, "web")) {
           // don't try to create web elements
           _lastElem = nullptr;
         } else {
@@ -290,9 +294,7 @@ void Board::_addAllElements() {
         // Search 2. slash as starting point for name to include 3. level
         char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
         name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
-        ELEMTRACE(" (%s) %s=%s", path, name, value ? value : "-");
-        // add a parameter to the last Element
-        _lastElem->set(name, value);
+        dispatchAction(_lastElem, name, value ? value : "-");
       }  // if
     });
 
@@ -778,6 +780,30 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
 
 
 // send a event out to the defined target.
+void Board::dispatchAction(Element *target, const char *action_name, const char *action_value) {
+
+#if defined(LOGGER_ENABLED)
+  // show action in log when target has trace loglevel
+  Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "send %s?%s=%s", target->id, action_name, action_value);
+#endif
+
+  const char *action = HomeDing::Action::find(action_name);
+  if (!action) action = action_name;
+
+#if defined(LOGGER_ENABLED)
+  bool ret = target->set(action, action_value);
+  if (!ret) {
+    LOGGER_ERR("Action '%s' was not accepted by %s.", action, target->id);
+  }
+
+#else
+  target->set(action, action_value);
+
+#endif
+}  // dispatchAction()
+
+
+// send a event out to the defined target.
 void Board::dispatchAction(String action) {
   BOARDTRACE("dispatch %s", action.c_str());
 
@@ -809,6 +835,7 @@ void Board::dispatchAction(String action) {
     name = action.substring(pParam + 1);
     value = "";
   }
+  name.toLowerCase();
 
   if (!host.isEmpty()) {
     // host:type/id?param=val
@@ -830,13 +857,7 @@ void Board::dispatchAction(String action) {
       LOGGER_ERR("dispatch: %s not found", targetId.c_str());
 
     } else {
-      // also show action in log when target has trace loglevel
-      Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action(%s)", action.c_str());
-      bool ret = target->set(name.c_str(), value.c_str());
-
-      if (!ret) {
-        LOGGER_ERR("Action '%s' was not accepted.", action.c_str());
-      }
+      dispatchAction(target, name.c_str(), value.c_str());
     }
   }
 }  // dispatchAction()

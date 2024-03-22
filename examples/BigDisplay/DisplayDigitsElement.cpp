@@ -44,7 +44,7 @@ bool DisplayDigitsElement::set(const char *name, const char *value) {
   if (DisplayOutputElement::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, "value") == 0) {
+  } else if (name == HomeDing::Action::Value) {
     _value = value;
     needsDraw = true;
 
@@ -91,7 +91,7 @@ void DisplayDigitsElement::_drawDigits7(char ch, int16_t x, int16_t y) {
     drawSegments = 0b00001000;
 
   } else if (ch == ':') {
-    drawSegments = 0b10000000; // ':' segments
+    drawSegments = 0b10000000;  // ':' segments
   }
 
   if (drawSegments) {
@@ -110,20 +110,20 @@ void DisplayDigitsElement::_drawDigits7(char ch, int16_t x, int16_t y) {
 /// @brief Draw this output element.
 void DisplayDigitsElement::draw() {
   // TRACE("draw('%s' color=%08lx border=%08lx back=%08lx)", _value.c_str(), _color, _borderColor, _backgroundColor);
-  int16_t x = _x;
+  int16_t x = box.x_min;
 
-  DisplayOutputElement::draw(); // set output colors
+  DisplayOutputElement::draw();  // set output colors
 
-  _scale = (_h * 100) / DIGITS_HEIGHT;
+  _scale = ((box.y_max - box.y_min + 1) * 100) / DIGITS_HEIGHT;
 
   for (int n = 0; n < _value.length(); n++) {
-    if (_value[n] != _lastValue[n]) { _drawDigits7(_value[n], x, _y); }
+    if (_value[n] != _lastValue[n]) { _drawDigits7(_value[n], x, box.y_min); }
     x += GFXSCALE100(DIGITS_WIDTH + DIGITS_GAP, _scale);
   }
   _lastValue = _value;
 
   box.x_max = x - GFXSCALE100(DIGITS_GAP, _scale);
-} // draw()
+}  // draw()
 
 
 /**
@@ -132,7 +132,7 @@ void DisplayDigitsElement::draw() {
 void DisplayDigitsElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _value.c_str());
+  callback(HomeDing::Action::Value, _value.c_str());
 }  // pushState()
 
 // End

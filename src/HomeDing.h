@@ -10,6 +10,7 @@
 #include <Board.h>            // Platform
 #include <Element.h>          // Abstract Elements
 #include <ElementRegistry.h>  // Element Registry
+#include <Action.h>           // static Action Registry
 
 #include <core/Logger.h>
 
@@ -18,11 +19,6 @@
 
 // some common property names
 
-extern const char *PROP_VALUE;
-extern const char *PROP_PIN;
-extern const char *PROP_ADDRESS;
-
-extern const char *ACTION_ONVALUE;
 extern const char *ACTION_ONTEMPERATURE;
 extern const char *ACTION_ONHUMIDITY;
 extern const char *ACTION_ONPRESSURE;

@@ -36,7 +36,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
 
     // these properties can be changed and redraw will happen
 
-  } else if (_stricmp(name, "value") == 0) {
+  } else if (name == HomeDing::Action::Value) {
     _value = value;
     needsDraw = true;
 
@@ -48,23 +48,23 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     needsDraw = true;
 
   } else if (_stricmp(name, "x") == 0) {
-    _x = box.x_min = _atoi(value);
-    box.x_max = _x + _w - 1;
+    box.x_max -= box.x_min;
+    box.x_min = _atoi(value);
+    box.x_max += box.x_min;
     needsDraw = true;
 
   } else if (_stricmp(name, "y") == 0) {
-    _y = box.y_min = _atoi(value);
-    box.y_max = _y + _h - 1;
+    box.y_max -= box.y_min;
+    box.y_min = _atoi(value);
+    box.y_max += box.y_min;
     needsDraw = true;
 
-  } else if ((_stricmp(name, "w") == 0) || (_stricmp(name, "width") == 0)) {
-    _w = _atoi(value);
-    box.x_max = _x + _w - 1;
+  } else if ((name == HomeDing::Action::Width) || (_stricmp(name, "w") == 0)) {
+    box.x_max = box.x_min + _atoi(value); - 1;
     needsDraw = true;
 
-  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "height") == 0) || (_stricmp(name, "fontsize") == 0)) {
-    _h = _atoi(value);
-    box.y_max = _y + _h - 1;
+  } else if ((name == HomeDing::Action::Height) || (_stricmp(name, "h") == 0) || (_stricmp(name, "fontsize") == 0)) {
+    box.y_max = box.y_min + _atoi(value) - 1;
     needsDraw = true;
 
   } else if (_stricmp(name, "color") == 0) {
@@ -75,7 +75,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     _backgroundColor = _atoColor(value);
     needsDraw = true;
 
-  } else if (_stricmp(name, "border") == 0) {
+  } else if (name == HomeDing::Action::Border) {
     _borderColor = _atoColor(value);
     needsDraw = true;
 

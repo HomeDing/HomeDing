@@ -43,14 +43,17 @@
 bool HttpClientElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "host") == 0) {
+  if (Element::set(name, value)) {
+    // done.
+
+  } else if (_stricmp(name, "host") == 0) {
     _host = value;
 
   } else if (_stricmp(name, "url") == 0) {
     _url = value;
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }
   return (ret);
 }  // set()

@@ -51,6 +51,13 @@ bool DisplayTextElement::set(const char *name, const char *value) {
     ret = false;
   }  // if
 
+  // set width at least to 1 unit per character...
+  if (needsDraw) {
+    int16_t right = box.x_min + _prefix.length() + _value.length() + _postfix.length();
+    if (right > box.x_max)
+      box.x_max = right;
+  }
+
   return (ret);
 }  // set()
 
@@ -65,9 +72,10 @@ void DisplayTextElement::draw() {
     msg.concat(_value);
     msg.concat(_postfix);
 
-    _w = _display->drawText(box.x_min, box.y_min, _h, msg);  // remember width of drawn text
-    box.x_max = box.x_min + _w - 1;
-    _h = _display->getLineHeight();            // adjust height
+    // adjust height and width to the drawn text
+    int w = _display->drawText(box.x_min, box.y_min, box.y_max - box.y_min + 1, msg);  // remember width of drawn text
+    box.x_max = box.x_min + w - 1;
+    box.y_max = box.y_min + _display->getLineHeight() - 1;
   }
 }  // draw
 

@@ -107,7 +107,7 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "background") == 0) {
     config.backgroundColor = _atoColor(value);
 
-  } else if (_stricmp(name, "border") == 0) {
+  } else if (name == HomeDing::Action::Border) {
     config.borderColor = _atoColor(value);
 
   } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
@@ -151,7 +151,7 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // ===== i2c bus parameter
 
-  } else if (_stricmp(name, "address") == 0) {
+  } else if (name == HomeDing::Action::Address) {
     config.i2cAddress = _atoi(value);
 
     // ===== spi bus parameter
@@ -186,10 +186,10 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // ===== Display settings
 
-  } else if (_stricmp(name, "width") == 0) {
+  } else if (name == HomeDing::Action::Width) {
     config.width = _atoi(value);
 
-  } else if (_stricmp(name, "height") == 0) {
+  } else if (name == HomeDing::Action::Height) {
     config.height = _atoi(value);
 
   } else if (_stricmp(name, "rotation") == 0) {

@@ -85,6 +85,11 @@ bool AnalogClockElement::set(const char *name, const char *value) {
     ret = false;
   }  // if
 
+  box.x_min = _cx - _radius;
+  box.x_max = _cx + _radius;
+  box.y_min = _cy - _radius;
+  box.y_max = _cy + _radius;
+
   return (ret);
 }  // set()
 

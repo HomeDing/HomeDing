@@ -257,39 +257,43 @@ public:
   bool queueIsEmpty();
 
   /**
-   * send all the actions to the right elements.
+   * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
   void dispatch(const String &action, const char *value = nullptr);
 
   /**
-   * send all the actions to the right elements.
+   * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
   void dispatch(const String &action, int value);
 
   /**
-   * send all the actions to the right elements.
+   * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
   void dispatch(const String &action, const String &value, boolean split = true);
 
   /**
-   * @brief Dispatch an action without queueing it.
-   * @param action The action string.
-   */
-  void dispatchAction(String action);
-
-  /**
-   * send all the actions to the right elements.
+   * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    * @param item use the n-th item of the value.
    */
   void dispatchItem(const String &action, const String &values, int n);
+
+
+  /// @brief Send an action to an element.
+  /// @param action The action string.
+  void dispatchAction(String action);
+
+  /// @brief Send an action to an element.
+  /// @param action_name The name of the action.
+  /// @param action_value The value of the action.
+  void dispatchAction(Element *target, const char *action_name, const char *action_value);
 
 
   // ===== state of elements =====

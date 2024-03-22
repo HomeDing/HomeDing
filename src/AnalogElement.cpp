@@ -55,7 +55,7 @@ bool AnalogElement::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // done.
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "hysteresis") == 0) {
@@ -82,16 +82,16 @@ bool AnalogElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "reference") == 0) {
     _reference = _atoi(value);
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _actions[0] = value;
 
   } else if (_stricmp(name, "onreference") == 0) {
     _actions[1] = value;
 
-  } else if (_stricmp(name, "onhigh") == 0) {
+  } else if (name == HomeDing::Action::OnHigh) {
     _highAction = value;
 
-  } else if (_stricmp(name, "onlow") == 0) {
+  } else if (name == HomeDing::Action::OnLow) {
     _lowAction = value;
 
   } else {

@@ -367,6 +367,25 @@ bool Element::_stristartswith(const char *s, const char *prefix) {
 }  // _stristartswith()
 
 
+// String start with prefix, case sensitive.
+bool Element::_strStartsWith(const char *s, const char *prefix) {
+  if (s && prefix) {
+    while (*s && *prefix) {
+      if (*s != *prefix)
+        return (false);
+      s++;
+      prefix++;
+    }  // while
+
+    if (*prefix)
+      return (false);
+  } else {
+    return (false);
+  }
+  return (true);
+}  // _strStartsWith()
+
+
 void Element::_strlower(char *str) {
   if (str) {
     while (*str) {
@@ -426,6 +445,5 @@ String Element::popItemValue(String &data) {
   }  // if
   return (item);
 }  // popItemValue
-
 
 // End

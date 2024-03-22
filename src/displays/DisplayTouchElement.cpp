@@ -53,13 +53,13 @@ bool DisplayTouchElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done.
 
-  } else if (_stricmp(name, "address") == 0) {
+  } else if (name == HomeDing::Action::Address) {
     _address = _atoi(value);
 
-  } else if (_stricmp(name, "width") == 0) {
+  } else if (name == HomeDing::Action::Width) {
     _width = _atoi(value);
 
-  } else if (_stricmp(name, "height") == 0) {
+  } else if (name == HomeDing::Action::Height) {
     _height = _atoi(value);
 
   } else if (_stricmp(name, "rotation") == 0) {

@@ -102,7 +102,7 @@ bool ColorElement::set(const char *name, const char *value) {
   bool ret = true;
   unsigned long now = millis();
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     // set next value of color
     uint32_t colorValue = _atoColor(value);
 
@@ -144,7 +144,7 @@ bool ColorElement::set(const char *name, const char *value) {
     _lightElementIDs.push(value);
     TRACE("  con(%s, %d)", value, _lightElementIDs.size());
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     // save the actions
     _valueAction = value;
 

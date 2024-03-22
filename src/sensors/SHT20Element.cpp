@@ -40,7 +40,7 @@ bool SHT20Element::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // ok.
 
-  } else if (_stricmp(name, PROP_ADDRESS) == 0) {
+  } else if (name == HomeDing::Action::Address) {
     _address = _atoi(value);
     ret = true;
 

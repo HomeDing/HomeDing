@@ -21,6 +21,8 @@
 
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
+#define TRACEDRAW(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+
 DisplayAdapter::DisplayAdapter() {
   color = 0x00FFFFFF;      // white
   backColor = 0x00000000;  // black
@@ -88,24 +90,46 @@ void DisplayAdapter::setBrightness(uint8_t bright) {
 /// @brief draw all DisplayOutputElements, then
 /// flush all buffered pixels to the display.
 bool DisplayAdapter::startFlush(bool force) {
-  bool ret = false;
-  BoundingBox box;
-  if (force || _needFlush) {
+  // TRACE("startFlush(%d, %d)", force, _needFlush);
 
-    // if (deferDrawing()) {
+  bool ret = false;
+  if (force || _needFlush) {
+    TRACE("startFlush...");
+
+#if 1
+    // direct drawing (no overlapping widgets)
+
+    board->forEach(Element::CATEGORY::Widget, [this](Element *e) {
+      DisplayOutputElement *de = (DisplayOutputElement *)e;
+
+      TRACEDRAW("check: %d %d %d %s", de->active, de->needsDraw, de->page, de->id);
+
+      if (de->active && de->page == page && de->needsDraw) {
+        TRACEDRAW(" draw: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
+        // draw box with background color
+        drawRectangle(de->box, RGB_TRANSPARENT, conf->backgroundColor);
+        de->draw();
+        de->needsDraw = false;
+      }
+    });
+
+#else
+    // find all to be redrawn elements.
+    BoundingBox box;
 
     // find extended bounding box of all un-drawn elements
     board->forEach(Element::CATEGORY::Widget, [this, &box](Element *e) {
       DisplayOutputElement *de = (DisplayOutputElement *)e;
 
-      // LOGGER_JUSTINFO("check: %d %d %d %s", de->active, de->needsDraw, de->page, de->id);
+      TRACEDRAW("check: %d %d %d %s", de->active, de->needsDraw, de->page, de->id);
 
       if (de->active && de->page == page && de->needsDraw) {
-        // LOGGER_JUSTINFO("box: %s: %d/%d-%d/%d", de->id, de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
+        TRACEDRAW("  box: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
         box.extend(de->box);
       }
     });
-    // LOGGER_JUSTINFO("box = %d/%d-%d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
+
+    TRACEDRAW("box = %d/%d-%d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
 
     // draw box with background color
     drawRectangle(box, RGB_TRANSPARENT, conf->backgroundColor);
@@ -114,15 +138,18 @@ bool DisplayAdapter::startFlush(bool force) {
     board->forEach(Element::CATEGORY::Widget, [this, &box](Element *e) {
       DisplayOutputElement *de = (DisplayOutputElement *)e;
 
+      TRACEDRAW("draw: %s %d", de->id, de->page);
       if (de->active && de->page == page) {
         if (box.overlaps(de->box)) {
-          // LOGGER_JUSTINFO("draw: %s", de->id);
+          TRACEDRAW("draw...");
           de->draw();
           de->needsDraw = false;
         }
       }
     });
+#endif
 
+    // send to the device
     this->flush();
     ret = true;
   }

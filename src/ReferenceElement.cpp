@@ -42,7 +42,7 @@ bool ReferenceElement::set(const char *name, const char *value) {
 
   TRACE("set %s=%s", name, value);
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     gotNewValue = true;
     _incomingValue = atof(value);
     TRACE("new value =%f", _incomingValue);
@@ -58,10 +58,10 @@ bool ReferenceElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onreference") == 0) {
     _referenceAction = value;
 
-  } else if (_stricmp(name, "onhigh") == 0) {
+  } else if (name == HomeDing::Action::OnHigh) {
     _highAction = value;
 
-  } else if (_stricmp(name, "onlow") == 0) {
+  } else if (name == HomeDing::Action::OnLow) {
     _lowAction = value;
 
   } else {

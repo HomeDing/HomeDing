@@ -61,18 +61,6 @@ public:
   int page = 1;
 
 protected:
-  /// @brief X-position ot the output element
-  int16_t _x;
-
-  /// @brief Y-position ot the output element
-  int16_t _y;
-
-  /// @brief Width ot the output element
-  int16_t _w = 100;
-
-  /// @brief height and fontsize
-  int16_t _h = 10;
-
   /// @brief Draw color of the element
   uint32_t _color = RGB_UNDEFINED;
 

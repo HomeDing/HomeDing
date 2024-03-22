@@ -69,12 +69,4 @@ void DisplayPathElement::draw() {
 
 }
 
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DisplayPathElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-}  // pushState()
-
 // End

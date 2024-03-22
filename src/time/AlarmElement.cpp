@@ -94,15 +94,4 @@ void AlarmElement::loop()
 } // loop()
 
 
-/**
- * @brief push the current value of all properties to the callback.
- */
-void AlarmElement::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  Element::pushState(callback);
-  // callback("time", String(_value).c_str());
-} // pushState()
-
-
 // End

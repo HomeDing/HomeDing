@@ -137,12 +137,6 @@ void ButtonElement::loop() {
 }  // loop()
 
 
-void ButtonElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-}  // pushState()
-
-
 void ButtonElement::_send(ACTIONS action) {
   TRACE("send %d", action);
   String a;

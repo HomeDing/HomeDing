@@ -15,7 +15,7 @@
 
 #include "AnalogClockElement.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -37,8 +37,7 @@ Element *AnalogClockElement::create() {
 /* ===== Element functions ===== */
 
 AnalogClockElement::AnalogClockElement() {
-  // adjust startupMode when Network (default) is not applicable.
-  // startupMode = Element_StartupMode::System;
+  category = (CATEGORY)(CATEGORY::Widget | CATEGORY::Looping); // needs loop
 }
 
 
@@ -105,6 +104,7 @@ void AnalogClockElement::start() {
 
 
 void AnalogClockElement::draw() {
+  TRACE("draw()");
   DisplayOutputElement::draw();
 
   unsigned long int now = _board->getTime();
@@ -141,22 +141,13 @@ void AnalogClockElement::draw() {
  * @brief Give some processing time to the Element to check for next actions.
  */
 void AnalogClockElement::loop() {
-  unsigned long int now = _board->getTime();
-
-  if (_shown_time != now) {
+  if ((! needsDraw) && (_shown_time != _board->getTime())) {
+    TRACE("need");
     needsDraw = true;
+    _display->setFlush();
   }
   DisplayOutputElement::loop();
 }  // loop()
-
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void AnalogClockElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-}  // pushState()
 
 
 void AnalogClockElement::term() {

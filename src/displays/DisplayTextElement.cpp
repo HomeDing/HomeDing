@@ -80,12 +80,4 @@ void DisplayTextElement::draw() {
 }  // draw
 
 
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DisplayTextElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  DisplayOutputElement::pushState(callback);
-}  // pushState()
-
 // End

@@ -126,13 +126,4 @@ void DisplayDigitsElement::draw() {
 }  // draw()
 
 
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DisplayDigitsElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-  callback(HomeDing::Action::Value, _value.c_str());
-}  // pushState()
-
 // End

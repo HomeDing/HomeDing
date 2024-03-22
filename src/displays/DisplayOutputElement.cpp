@@ -136,7 +136,7 @@ void DisplayOutputElement::draw() {
 void DisplayOutputElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _value.c_str());
+  callback(HomeDing::Action::Value, _value.c_str());
 }  // pushState()
 
 // End

@@ -137,13 +137,4 @@ void P9813Element::start()
 } // start()
 
 
-/**
- * @brief push the current value of all properties to the callback.
- */
-void P9813Element::pushState(
-    std::function<void(const char *pName, const char *eValue)> callback)
-{
-  LightElement::pushState(callback);
-} // pushState()
-
 // End

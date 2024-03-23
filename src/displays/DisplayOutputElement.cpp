@@ -60,7 +60,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     needsDraw = true;
 
   } else if ((name == HomeDing::Action::Width) || (_stricmp(name, "w") == 0)) {
-    box.x_max = box.x_min + _atoi(value); - 1;
+    box.x_max = box.x_min + _atoi(value) - 1;
     needsDraw = true;
 
   } else if ((name == HomeDing::Action::Height) || (_stricmp(name, "h") == 0) || (_stricmp(name, "fontsize") == 0)) {

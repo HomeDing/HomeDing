@@ -24,12 +24,12 @@
   },
 
   "element": {
-    "properties": ["loglevel", "title", "description", "startup"],
+    "properties": ["title", "description", "room", "loglevel", "startup"],
     "actions": ["start", "stop"]
   },
 
   "sensor": {
-    "properties": ["warmuptime", "readtime", "resendtime", "restart"]
+    "properties": ["readtime", "resendtime", "warmuptime", "restart"]
   },
 
   "analog": { "extends": "sensor",
@@ -92,22 +92,24 @@
     "events": ["onvalue", "onhigh", "onlow"]
   },
 
-  "displaydot": {
+  "displayoutput": {
     "sys": "false",
-    "properties": ["page", "x", "y", "color"],
+    "properties": ["x", "y", "w", "h", "page", "color", "background", "border"],
     "actions": ["value", "clear", "redraw"]
   },
 
-  "displaytext": {
+  "displaydot": { "extends": "displayoutput" },
+
+  "displayrect": { "extends": "displayoutput" },
+
+  "displaytext": { "extends": "displayoutput",
     "sys": "false",
-    "properties": ["page", "x", "y", "color", "fontsize", "prefix", "postfix"],
-    "actions": ["value", "clear", "redraw"]
+    "properties": ["fontsize", "prefix", "postfix"]
   },
 
-  "displayline": {
+  "displayline": { "extends": "displayoutput",
     "sys": "false",
-    "properties": ["page", "x", "y", "x1", "y1", "color"],
-    "actions": ["redraw"]
+    "properties": ["x1", "y1"]
   },
 
   "displaybutton": {
@@ -237,7 +239,7 @@
   },  
 
   "dht": { "extends": "sensor", "ui": "air",
-    "properties": ["pin"],
+    "properties": ["pin", "type", "powerpin", "powerinvert"],
     "events": ["ontemperature", "onhumidity"]
   },
 

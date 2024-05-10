@@ -662,6 +662,7 @@ void Board::loop() {
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
       MDNS.addServiceTxt(serv, "title", title.c_str());
       MDNS.addServiceTxt(serv, "room", room.c_str());
+      MDNS.announce();
 
 #elif defined(ESP32)
       MDNS.begin(deviceName.c_str());

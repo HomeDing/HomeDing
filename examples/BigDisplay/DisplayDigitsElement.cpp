@@ -56,15 +56,16 @@ bool DisplayDigitsElement::set(const char *name, const char *value) {
 
 
 void DisplayDigitsElement::_drawDigit(const char *path, int16_t x, int16_t y) {
-  gfxDrawObject *o = new gfxDrawObject();
+  gfxDraw::gfxDrawObject *o = new gfxDraw::gfxDrawObject();
 
   o->setStrokeColor((_borderColor == RGB_TRANSPARENT ? gfxDraw::TRANSPARENT : gfxDraw::RGBA(_borderColor)));
   o->setFillColor((_color == RGB_TRANSPARENT ? gfxDraw::TRANSPARENT : gfxDraw::RGBA(_color)));
 
   o->setPath(path);
   o->scale(_scale);
+  o->move(x, y);
 
-  o->draw(x, y, [&](int16_t x, int16_t y, gfxDraw::RGBA color) {
+  o->draw([&](int16_t x, int16_t y, gfxDraw::RGBA color) {
     _display->drawPixel(x, y, color.toColor24());
   });
 }

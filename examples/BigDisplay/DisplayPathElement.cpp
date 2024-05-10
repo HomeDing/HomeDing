@@ -19,6 +19,7 @@
 
 #include "DisplayPathElement.h"
 #include "gfxDraw.h"
+#include "gfxDrawObject.h"
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
@@ -57,12 +58,13 @@ void DisplayPathElement::draw() {
   DisplayOutputElement::draw();  // set colors
   TRACE("draw border=%08lx back=%08lx", _borderColor, _backgroundColor);
 
-  gfxDrawObject *dObj = new gfxDrawObject(gfxDraw::RGBA(_borderColor), gfxDraw::RGBA(_backgroundColor) );
+  gfxDraw::gfxDrawObject *dObj = new gfxDraw::gfxDrawObject(gfxDraw::RGBA(_borderColor), gfxDraw::RGBA(_backgroundColor) );
 
-  dObj->setPath(_path);
+  dObj->setPath(_path.c_str());
   // dObj->setFillGradient(gfxDraw::RED, 4, 6, gfxDraw::YELLOW, 10, 9);
+  dObj->move(box.x_min, box.y_min);
 
-  dObj->draw(box.x_min, box.y_min, [&](int16_t x, int16_t y, gfxDraw::RGBA color) {
+  dObj->draw([&](int16_t x, int16_t y, gfxDraw::RGBA color) {
     // printf("draw %02x %02x %02x %08lx\n", color.Red, color.Green, color.Blue, color.toColor24());
     _display->drawPixel(x, y, color.toColor24());
   });

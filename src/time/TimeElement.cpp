@@ -44,7 +44,7 @@ Element *TimeElement::create() {
 /* ===== Element functions ===== */
 
 TimeElement::TimeElement() {
-  startupMode = Element_StartupMode::Time;
+  startupMode = Element_StartupMode::WithTime;
 }
 
 

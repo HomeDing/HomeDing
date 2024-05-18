@@ -42,7 +42,7 @@ Element *ScheduleElement::create()
 
 ScheduleElement::ScheduleElement()
 {
-  startupMode = Element_StartupMode::Time;
+  startupMode = Element_StartupMode::WithTime;
 }
 
 /**

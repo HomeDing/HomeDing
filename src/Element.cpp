@@ -53,9 +53,9 @@ bool Element::set(const char *name, const char *value) {
     if (_stricmp(value, "sys") == 0) {
       startupMode = Element_StartupMode::System;
     } else if (_stricmp(value, "net") == 0) {
-      startupMode = Element_StartupMode::Network;
+      startupMode = Element_StartupMode::WithNetwork;
     } else if (_stricmp(value, "time") == 0) {
-      startupMode = Element_StartupMode::Time;
+      startupMode = Element_StartupMode::WithTime;
     }
 
 

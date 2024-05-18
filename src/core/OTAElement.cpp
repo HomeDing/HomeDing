@@ -33,7 +33,7 @@ Element *OTAElement::create() {
 /* ===== Element functions ===== */
 
 OTAElement::OTAElement() {
-  startupMode = Element_StartupMode::Network;
+  startupMode = Element_StartupMode::WithNetwork;
 }
 
 /**

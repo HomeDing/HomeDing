@@ -369,7 +369,7 @@ void Board::loop() {
         // starting time depending elements
         // check if time is valid now -> start all elements with
         if (time(nullptr)) {
-          start(Element_StartupMode::Time);
+          start(Element_StartupMode::WithTime);
           startComplete = true;
         }  // if
       }    // if
@@ -513,7 +513,7 @@ void Board::loop() {
 
       // search any time requesting elements
       forEach(Element::CATEGORY::All, [this](Element *e) {
-        if (e->startupMode == Element_StartupMode::Time) {
+        if (e->startupMode == Element_StartupMode::WithTime) {
           hasTimeElements = true;
         }
       });
@@ -637,7 +637,7 @@ void Board::loop() {
       cacheHeader = "";  // do not pass this cache header
     }
 
-    start(Element_StartupMode::Network);
+    start(Element_StartupMode::WithNetwork);
     dispatch(sysStartAction);  // dispatched when network is available
 
     // ===== finish network setup

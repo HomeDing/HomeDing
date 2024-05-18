@@ -52,8 +52,8 @@ class Element;
  */
 enum Element_StartupMode : uint16_t {
   System = 1,   // right after loading the configurations.
-  Network = 2,  // after a network connectivity in AP Mode was established.
-  Time = 3,     // after a valid local time was set.
+  WithNetwork = 2,  // after a network connectivity in AP Mode was established.
+  WithTime = 3,     // after a valid local time was set.
   Manual = 9    // manually started.
 };
 
@@ -115,7 +115,7 @@ public:
   /**
    * @brief when the element should be started.
    */
-  Element_StartupMode startupMode = Element_StartupMode::Network;
+  Element_StartupMode startupMode = Element_StartupMode::WithNetwork;
 
 
   /**

@@ -37,7 +37,7 @@ Element *LogElement::create() {
 /* ===== Element functions ===== */
 
 LogElement::LogElement() {
-  startupMode = Element_StartupMode::Time;
+  startupMode = Element_StartupMode::WithTime;
 }
 
 

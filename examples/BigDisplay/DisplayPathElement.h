@@ -60,6 +60,13 @@ private:
 
   /// @brief The path to be displayed 
   String _path;
+
+  // rotation angle and center.
+  int16_t _scale = 100;
+  int16_t _rotation = 0;
+
+  int16_t _centerX = 0;
+  int16_t _centerY = 0;
 };
 
 // #ifdef HOMEDING_REGISTER

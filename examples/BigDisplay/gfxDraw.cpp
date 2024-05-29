@@ -1,13 +1,24 @@
-// gfxDraw.cpp
+// - - - - -
+// GFXDraw - A Arduino library for drawing shapes on a GFX display using paths describing the borders.
+// gfxdraw.cpp: Library implementation file
+//
+// Copyright (c) 2024-2024 by Matthias Hertel, http://www.mathertel.de
+// This work is licensed under a BSD style license. See http://www.mathertel.de/License.aspx
+//
+// Changelog: See gfxdraw.h and documentation files in this library.
+//
+// - - - - -
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+// #include <iostream>
 
 #include "gfxDraw.h"
-#include "gfxDrawColors.h"
 
+#include "gfxDrawBezier.h"
+#include "gfxDrawCircle.h"
 
-#define TRACE(...) printf(__VA_ARGS__)
+#define TRACE(...)  // printf(__VA_ARGS__)
 
 #define SLOPE_UNKNOWN 0
 #define SLOPE_FALLING 1
@@ -19,32 +30,7 @@ namespace gfxDraw {
 
 // ===== internal class definitions =====
 
-/// @brief The Point holds a pixel position and provides some useful static methods.
-class Point {
-public:
-  Point(int16_t _x, int16_t _y)
-    : x(_x), y(_y){};
 
-  /// @brief X coordinate of the Point
-  int16_t x;
-
-  /// @brief Y coordinate of the Point
-  int16_t y;
-
-  /// @brief compare function for std::sort to sort points by (y) and ascending (x)
-  /// @param p1 first point
-  /// @param p2 second point
-  /// @return when p1 is lower than p2
-  static bool compare(const Point &p1, const Point &p2) {
-    if (p1.y != p2.y)
-      return (p1.y < p2.y);
-    return (p1.x < p2.x);
-  };
-
-  constexpr bool operator==(const Point &p2) {
-    return ((x == p2.x) && (y == p2.y));
-  };
-};
 
 
 /// @brief The _Edge class holds a horizontal pixel sequence for path boundaries and provides some useful static methods.
@@ -67,6 +53,9 @@ public:
     return (p1.len < p2.len);
   };
 
+  /// @brief add another point or Edge to the Edge
+  /// @param p2
+  /// @return true when this Edge could be expanded.
   bool expand(_Edge p2) {
     if (y == p2.y) {
       if (x > p2.x + p2.len) {
@@ -90,9 +79,6 @@ public:
 };
 
 
-#define POINT_BREAK_Y INT16_MAX
-
-
 // ===== Segments implementation =====
 
 Segment::Segment(Type _type, int16_t p1, int16_t p2) {
@@ -100,6 +86,45 @@ Segment::Segment(Type _type, int16_t p1, int16_t p2) {
   p[0] = p1;
   p[1] = p2;
 };
+
+
+// ===== fixed decimal precision sin & cos functions =====
+
+const int32_t tab_sin256[] = {
+  0, 4, 9, 13, 18, 22, 27, 31, 35, 40, 44,
+  49, 53, 57, 62, 66, 70, 75, 79, 83, 87,
+  91, 96, 100, 104, 108, 112, 116, 120, 124, 128,
+  131, 135, 139, 143, 146, 150, 153, 157, 160, 164,
+  167, 171, 174, 177, 180, 183, 186, 190, 192, 195,
+  198, 201, 204, 206, 209, 211, 214, 216, 219, 221,
+  223, 225, 227, 229, 231, 233, 235, 236, 238, 240,
+  241, 243, 244, 245, 246, 247, 248, 249, 250, 251,
+  252, 253, 253, 254, 254, 254, 255, 255, 255, 255
+};
+
+int32_t sin256(int32_t degree) {
+  degree = ((degree % 360) + 360) % 360;  // Math. Modulo Operator
+  if (degree <= 90) {
+    return (tab_sin256[degree]);
+  } else if (degree <= 180) {
+    return (tab_sin256[90 - (degree - 90)]);
+  } else if (degree <= 270) {
+    return (-tab_sin256[degree - 180]);
+  } else {
+    return (-tab_sin256[90 - (degree - 270)]);
+  }
+}
+
+int32_t cos256(int32_t degree) {
+  return (sin256(degree + 90));
+}
+
+#define SCALE256(v) ((v + 127) >> 8)
+
+
+
+
+// ===== Debug helping functions... =====
 
 void dumpPoints(std::vector<Point> &points) {
   TRACE("\nPoints:\n");
@@ -131,12 +156,12 @@ void dumpEdges(std::vector<_Edge> &edges) {
 // ===== gfxDraw helper functions =====
 
 void dumpColor(char *name, RGBA col) {
-  printf(" %-12s: %02x.%02x.%02x.%02x %08lx\n", name, col.Alpha, col.Red, col.Green, col.Blue, col.toColor24());
+  TRACE(" %-12s: %02x.%02x.%02x.%02x %08lx\n", name, col.Alpha, col.Red, col.Green, col.Blue, col.toColor24());
   int_fast16_t t1 = INT16_MIN;
 }
 
 void dumpColorTable() {
-  printf("        Color: A  R  G  B  #col24\n");
+  TRACE("        Color: A  R  G  B  #col24\n");
   dumpColor("Red", gfxDraw::RED);
   dumpColor("Green", gfxDraw::GREEN);
   dumpColor("Blue", gfxDraw::BLUE);
@@ -155,7 +180,7 @@ void dumpColorTable() {
 /// @param y1 Ending Point Y coordinate.
 /// @param cbDraw Callback with coordinates of line pixels.
 void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, fSetPixel cbDraw) {
-  // TRACE("Draw Line %d/%d %d/%d\n", x0, y0, x1, y1);
+  TRACE("Draw Line %d/%d %d/%d\n", x0, y0, x1, y1);
 
   int16_t dx = abs(x1 - x0);
   int16_t dy = abs(y1 - y0);
@@ -267,7 +292,7 @@ void drawSolidRect(int16_t x0, int16_t y0, int16_t w, int16_t h, fSetPixel cbDra
 
 /// @brief Calculate the center parameterization for an arc from endpoints
 /// The radius values may be scaled up when there is no arc possible.
-void arcCenter(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t &rx, int16_t &ry, int16_t phi, int16_t flags, int16_t &cx, int16_t &cy) {
+void arcCenter(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t &rx, int16_t &ry, int16_t phi, int16_t flags, int32_t &cx256, int32_t &cy256) {
   // Conversion from endpoint to center parameterization
   // see also http://www.w3.org/TR/SVG11/implnote.html#ArcImplementationNotes
 
@@ -287,17 +312,17 @@ void arcCenter(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t &rx, int1
   if (rx == 0 || ry == 0) {
     double dist = sqrt(((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)));
     rx = ry = dist / 2;
-    printf("rx=ry= %d\n", rx);
+    TRACE("rx=ry= %d\n", rx);
 
   } else {
     double dist2 = (xTemp * xTemp) / (rx * rx) + (yTemp * yTemp) / (ry * ry);
 
     if (dist2 > 1) {
       double dist = sqrt(dist2);
-      rx = rx * dist;
-      ry = ry * dist;
+      rx = (rx * dist) + 0.5;
+      ry = (ry * dist) + 0.5;
     }
-    printf("rx=%d ry=%d \n", rx, ry);
+    TRACE("rx=%d ry=%d \n", rx, ry);
   }
 
   // center calculation
@@ -307,7 +332,7 @@ void arcCenter(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t &rx, int1
     centerDist = sqrt(distNumerator / ((rx * rx) * (yTemp * yTemp) + (ry * ry) * (xTemp * xTemp)));
   }
 
-  if ((flags == 0x01) || (flags == 0x02)) {
+  if ((flags == 0x00) || (flags == 0x03)) {
     centerDist = -centerDist;
   }
 
@@ -317,61 +342,72 @@ void arcCenter(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t &rx, int1
   double centerX = (cosphi * cX) - (sinphi * cY) + (x1 + x2) / 2;
   double centerY = (sinphi * cX) + (cosphi * cY) + (y1 + y2) / 2;
 
-  cx = round(centerX);
-  cy = round(centerY);
+  cx256 = (256 * centerX);
+  cy256 = (256 * centerY);
 }  // arcCenter()
 
 
+/// Calculate the angle of a vector in degrees.
 int16_t vectorAngle(int16_t dx, int16_t dy) {
-  // printf("vectorAngle(%d, %d)\n", dx, dy);
-
-  double rad = acos(dx / sqrt((dx * dx) + (dy * dy)));
-  int16_t angle = floor((rad * 180 / M_PI) + 0.5);
-
-  if (dy < 0) { angle = 360 - angle; }
-  // printf(" = %d\n", angle);
-
+  // TRACE("vectorAngle(%d, %d)\n", dx, dy);
+  double rad = atan2(dy, dx);
+  int16_t angle = ((rad * 180 / M_PI) + 0.5);
+  if (angle < 0) angle = 360 + angle;
   return (angle % 360);
 }  // vectorAngle()
 
 
 /// @brief Draw an arc according to svg path arc parameters.
-/// @param x0 Starting Point X coordinate.
-/// @param y0 Starting Point Y coordinate.
+/// @param x1 Starting Point X coordinate.
+/// @param y1 Starting Point Y coordinate.
+/// @param x2 Ending Point X coordinate.
+/// @param y2 Ending Point Y coordinate.
 /// @param rx
 /// @param ry
 /// @param phi  rotation of the ellipsis
 /// @param flags
-/// @param x1 Ending Point X coordinate.
-/// @param y1 Ending Point Y coordinate.
 /// @param cbDraw Callback with coordinates of line pixels.
 void drawArc(int16_t x1, int16_t y1, int16_t x2, int16_t y2,
              int16_t rx, int16_t ry,
              int16_t phi, int16_t flags,
              fSetPixel cbDraw) {
+  TRACE("drawArc(%d/%d)-(%d/%d)\n", x1, y1, x2, y2);
 
-  int16_t cx, cy;
+  int32_t cx256, cy256;
 
-  arcCenter(x1, y1, x2, y2, rx, ry, phi, flags, cx, cy);
-  cbDraw(cx, cy);
+  arcCenter(x1, y1, x2, y2, rx, ry, phi, flags, cx256, cy256);
 
-  printf("flags=: 0x%02x\n", flags);
-  printf("center=: %d/%d\n", cx, cy);
+  TRACE("  flags   = 0x%02x\n", flags);
+  TRACE("  center = %d/%d\n", SCALE256(cx256), SCALE256(cy256));
+  TRACE("  radius = %d/%d\n", rx, ry);
 
-  cbDraw(x1, y1);
-  cbDraw(x2, y2);
+  proposePixel(x1, y1, cbDraw);
+  if (rx == ry) {
+    // draw a circle segment faster. ellipsis rotation can be ignored.
+    gfxDraw::drawCircle(gfxDraw::Point(SCALE256(cx256), SCALE256(cy256)), rx,
+                        gfxDraw::Point(x1, y1),
+                        gfxDraw::Point(x2, y2),
+                        (gfxDraw::ArcFlags)(flags & gfxDraw::ArcFlags::Clockwise),
+                        [&](int16_t x, int16_t y) {
+                          proposePixel(x, y, cbDraw);
+                        });
+  } else {
+    int startAngle = vectorAngle(256 * x1 - cx256, 256 * y1 - cy256);
+    int endAngle = vectorAngle(256 * x2 - cx256, 256 * y2 - cy256);
+    int stepAngle = (flags & 0x02) ? 1 : 359;
 
-  int startAngle = vectorAngle(x1 - cx, y1 - cy);
-  int endAngle = vectorAngle(x2 - cx, y2 - cy);
-  int dAngle = (flags & 0x02) ? -1 : 1;
-
-  // Iterate through the ellipse
-  for (uint16_t angle = startAngle; angle != endAngle; angle = (angle + dAngle) % 360) {
-    int x = cx + (int)(rx * cos((angle * M_PI) / 180) + 0.5);
-    int y = cy + (int)(ry * sin((angle * M_PI) / 180) + 0.5);
-    cbDraw(x, y);
+    // Iterate through the ellipse
+    for (int16_t angle = startAngle; angle != endAngle; angle = (angle + stepAngle) % 360) {
+      int16_t x = SCALE256(cx256 + (rx * cos256(angle)));
+      int16_t y = SCALE256(cy256 + (ry * sin256(angle)));
+      proposePixel(x, y, cbDraw);
+    }
   }
-}
+  proposePixel(x2, y2, cbDraw);
+
+  proposePixel(0, POINT_BREAK_Y, cbDraw);
+
+}  // drawArc()
 
 
 // ===== Segment transformation functions =====
@@ -426,7 +462,13 @@ void rotateSegments(std::vector<Segment> &segments, int16_t angle) {
 /// @param dx X-Offset
 /// @param dy Y-Offset
 void transformSegments(std::vector<Segment> &segments, fTransform cbTransform) {
+  int16_t p0_x, p0_y, p1_x, p1_y;
+  int16_t angle;
+  int16_t scale1000;
+  bool scaleKnown = false;
+
   for (Segment &pSeg : segments) {
+
     switch (pSeg.type) {
       case Segment::Type::Move:
       case Segment::Type::Line:
@@ -439,11 +481,58 @@ void transformSegments(std::vector<Segment> &segments, fTransform cbTransform) {
         cbTransform(pSeg.p[4], pSeg.p[5]);
         break;
 
+      case Segment::Type::Arc:
+        if (!scaleKnown) {
+          // extract scale and rotation from transforming (0,0)-(1000,0) once for the whole sement vector.
+          p0_x = p0_y = p1_y = 0;
+          p1_x = 1000;  // length = 1000
+
+          cbTransform(p0_x, p0_y);
+          cbTransform(p1_x, p1_y);
+
+          // ignore any translation
+          p1_x -= p0_x;
+          p1_y -= p0_y;
+
+          if (p1_y == 0) {
+            // simplify for non rotated or 180° rotated transformations
+            if (p1_x > 0) {
+              scale1000 = p1_x;
+              angle = 0;
+            } else {
+              scale1000 = -p1_x;
+              angle = 180;
+            }
+
+          } else {
+            double p1_length = sqrt((p1_x * p1_x) + (p1_y * p1_y));
+            scale1000 = round(p1_length);
+            angle = vectorAngle(p1_x, p1_y);
+          }
+          scaleKnown = true;
+        }
+
+        // scale x & y radius
+        pSeg.p[0] = (pSeg.p[0] * scale1000 + 500) / 1000;
+        pSeg.p[1] = (pSeg.p[1] * scale1000 + 500) / 1000;
+
+        // rotate ellipsis rotation
+        pSeg.p[2] += angle;
+
+        // transform endpoint
+        cbTransform(pSeg.p[4], pSeg.p[5]);  // endpoint
+        break;
+
+      case Segment::Type::Circle:
+        // TODO:
+        TRACE("Transform circle is missing.\n");
+        break;
+
       case Segment::Type::Close:
         break;
 
       default:
-        printf("unknown segment-%04x\n", pSeg.type);
+        TRACE("unknown segment-%04x\n", pSeg.type);
         break;
     }
   }  // for
@@ -500,7 +589,17 @@ void drawSegments(std::vector<Segment> &segments, int16_t dx, int16_t dy, fSetPi
                            pSeg.p[2],                   // phi, ellipsis rotation
                            pSeg.p[3],                   // flags
                            cbDraw);
+          break;
 
+        case Segment::Type::Circle:
+          if (1) {
+            Point pCenter(pSeg.p[0] + dx, pSeg.p[1] + dy);
+            Point pStart(pSeg.p[0] + dx + pSeg.p[2], pSeg.p[1] + dy);
+
+            // drawCircle(gfxDraw::Point(30, 190), 20, gfxDraw::Point(30 + 20, 190), gfxDraw::Point(30 + 20, 190), true, bmpSet(gfxDraw::RED));
+            // The simplified drawCircle cannot be used as for filling the circle the pixels must be in order.
+            gfxDraw::drawCircle(pCenter, pSeg.p[2], pStart, pStart, ArcFlags::Clockwise | ArcFlags::LongPath, cbDraw);
+          }
           break;
 
         case Segment::Type::Close:
@@ -513,7 +612,7 @@ void drawSegments(std::vector<Segment> &segments, int16_t dx, int16_t dy, fSetPi
           break;
 
         default:
-          printf("unknown segment-%04x\n", pSeg.type);
+          TRACE("unknown segment-%04x\n", pSeg.type);
           break;
       }
 
@@ -722,18 +821,9 @@ void pathByText(const char *pathText, int16_t x, int16_t y, int16_t scale100, fS
   } else {
     drawSegments(vSeg, x, y, cbBorder);
   }
+  int a;
 }
 
-
-/// @brief draw a path using a border and optional fill drawing function.
-/// @param path The path definition using SVG path syntax.
-/// @param x Starting Point X coordinate.
-/// @param y Starting Point Y coordinate.
-/// @param cbBorder Draw function for border pixels. cbFill is used when cbBorder is null.
-/// @param cbFill Draw function for filling pixels.
-void pathByText100(const char *pathText, int16_t x, int16_t y, fSetPixel cbBorder, fSetPixel cbFill) {
-  pathByText(pathText, x, y, 100, cbBorder, cbFill);
-}
 
 /// @brief draw the a path.
 /// @param path The path definition using SVG path syntax.
@@ -744,216 +834,7 @@ void drawPath(const char *pathText, fSetPixel cbDraw) {
 }
 
 
-// This implementation of cubic bezier curve with a start and an end point given and by using 2 control points.
-// C x1 y1, x2 y2, x y
-// good article for reading: <https://pomax.github.io/bezierinfo/>
-// Here the Casteljau's algorithm approach is used.
-
-void drawCubicBezier(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, fSetPixel cbDraw) {
-  // TRACE("cubicBezier: %d/%d %d/%d %d/%d %d/%d\n", x0, y0, x1, y1, x2, y2, x3, y3);
-  std::vector<Point> borderPoints;
-  // Line 1 is x0/y0 to x1/y1, dx1/dy1 is the relative vector from x0/y0 to x1/y1
-  int16_t dx1 = (x1 - x0);
-  int16_t dy1 = (y1 - y0);
-  int16_t dx2 = (x2 - x1);
-  int16_t dy2 = (y2 - y1);
-  int16_t dx3 = (x3 - x2);
-  int16_t dy3 = (y3 - y2);
-
-  // line(x0, y0, x1, y1, cbDraw);
-  // line(x1, y1, x2, y2, cbDraw);
-  // line(x2, y2, x3, y3, cbDraw);
-
-  // heuristic: calc the steps we need
-  uint16_t steps = abs(dx1) + abs(dy1) + abs(dx2) + abs(dy2) + abs(dx3) + abs(dy3);  // p0 - 1 - 2 - 3 - 4 - p3
-  // TRACE("steps:%d\n", steps);
-
-  uint16_t skipped = 0;
-
-  int16_t lastX = x0;
-  int16_t lastY = y0;
-
-  for (uint16_t n = 1; n <= steps; n++) {
-    int16_t f = (1000 * n) / steps;
-    // 3 points and 3 deltas in 1000 units
-    int32_t x4 = x0 * 1000 + (f * dx1);
-    int32_t y4 = y0 * 1000 + (f * dy1);
-    int32_t x5 = x1 * 1000 + (f * dx2);
-    int32_t y5 = y1 * 1000 + (f * dy2);
-    int32_t x6 = x2 * 1000 + (f * dx3);
-    int32_t y6 = y2 * 1000 + (f * dy3);
-    int32_t dx5 = (x5 - x4);
-    int32_t dy5 = (y5 - y4);
-    int32_t dx6 = (x6 - x5);
-    int32_t dy6 = (y6 - y5);
-
-    // 2 points
-    int32_t x7 = x4 + (f * dx5) / 1000;
-    int32_t y7 = y4 + (f * dy5) / 1000;
-    int32_t x8 = x5 + (f * dx6) / 1000;
-    int32_t y8 = y5 + (f * dy6) / 1000;
-    int32_t dx8 = (x8 - x7);
-    int32_t dy8 = (y8 - y7);
-
-    // 1 points
-    int32_t x9 = x7 + (f * dx8) / 1000;
-    int32_t y9 = y7 + (f * dy8) / 1000;
-
-    // line(lastX, lastY, x9, y9, cbDraw);
-    int16_t nextX = (x9 + 500) / 1000;
-    int16_t nextY = (y9 + 500) / 1000;
-
-    // don't collect duplicates
-    if ((nextX != lastX) || (nextY != lastY)) {
-      lastX = nextX;
-      lastY = nextY;
-      borderPoints.push_back(gfxDraw::Point(lastX, lastY));
-      // cbDraw(lastX, lastY);
-    } else {
-      skipped++;
-    }
-  }
-  // TRACE("skipped:%d\n", skipped);
-
-
-
-  // simplify borderPoints.
-  // remove duplicates
-  // remove middle point in corner steps.
-
-  size_t pSize = borderPoints.size();
-  // TRACE("  pSize=%d\n", pSize);
-  skipped = 0;
-
-  for (int n = 0; n < borderPoints.size() - 2; n++) {
-    bool delFlag = false;
-
-    if ((borderPoints[n].x == borderPoints[n + 1].x) && (borderPoints[n].y == borderPoints[n + 1].y)) {
-      delFlag = true;
-
-    } else if ((borderPoints[n].y == borderPoints[n + 1].y) && (abs(borderPoints[n].x - borderPoints[n + 1].x) == 1)) {
-      delFlag = (borderPoints[n + 1].x == borderPoints[n + 2].x);
-
-    } else if ((borderPoints[n].x == borderPoints[n + 1].x) && (abs(borderPoints[n].y - borderPoints[n + 1].y) == 1)) {
-      delFlag = (borderPoints[n + 1].y == borderPoints[n + 2].y);
-    }
-
-    if (delFlag) {
-      borderPoints.erase(borderPoints.begin() + n + 1);
-      skipped++;
-    };
-  }
-  // TRACE("removed:%d\n", skipped);
-
-  for (Point &p : borderPoints) { cbDraw(p.x, p.y); }
-};
-
-
-void cubicBezier2(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, fSetPixel cbDraw) {
-  printf("cubicBezier2: %d/%d %d/%d %d/%d %d/%d\n", x0, y0, x1, y1, x2, y2, x3, y3);
-
-  int32_t f, fx, fy, leg = 1;
-  int32_t sx = x0 < x3 ? 1 : -1, sy = y0 < y3 ? 1 : -1; /* step direction */
-  int32_t xc = -abs(x0 + x1 - x2 - x3), xa = xc - 4 * sx * (x1 - x2), xb = sx * (x0 - x1 - x2 + x3);
-  int32_t yc = -abs(y0 + y1 - y2 - y3), ya = yc - 4 * sy * (y1 - y2), yb = sy * (y0 - y1 - y2 + y3);
-  int32_t ab, ac, bc, cb, xx, xy, yy, dx, dy, ex, pxy, EP = 0.01;
-
-  /* check for curve restrains */
-  /* slope P0-P1 == P2-P3    and  (P0-P3 == P1-P2      or  no slope change)  */
-  if ((x1 - x0) * (x2 - x3) < EP && ((x3 - x0) * (x1 - x2) < EP || xb * xb < xa * xc + EP)) {}
-  if ((y1 - y0) * (y2 - y3) < EP && ((y3 - y0) * (y1 - y2) < EP || yb * yb < ya * yc + EP)) {}
-
-  int32_t len1 = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0) + 1; /* line lengths */
-  int32_t len2 = (x2 - x3) * (x2 - x3) + (y2 - y3) * (y2 - y3) + 1;
-
-  do { /* loop over both ends */
-    ab = xa * yb - xb * ya;
-    ac = xa * yc - xc * ya;
-    bc = xb * yc - xc * yb;
-    ex = ab * (ab + ac - 3 * bc) + ac * ac;        /* P0 part of self-intersection loop? */
-    f = ex > 0 ? 1 : floor(sqrt(1 + 1024 / len1)); /* calc resolution */
-    ab *= f;
-    ac *= f;
-    bc *= f;
-    ex *= f * f; /* increase resolution */
-    xy = 9 * (ab + ac + bc) / 8;
-    cb = 8 * (xa - ya); /* init differences of 1st degree */
-    dx = 27 * (8 * ab * (yb * yb - ya * yc) + ex * (ya + 2 * yb + yc)) / 64 - ya * ya * (xy - ya);
-    dy = 27 * (8 * ab * (xb * xb - xa * xc) - ex * (xa + 2 * xb + xc)) / 64 - xa * xa * (xy + xa);
-    /* init differences of 2nd degree */
-    xx = 3 * (3 * ab * (3 * yb * yb - ya * ya - 2 * ya * yc) - ya * (3 * ac * (ya + yb) + ya * cb)) / 4;
-    yy = 3 * (3 * ab * (3 * xb * xb - xa * xa - 2 * xa * xc) - xa * (3 * ac * (xa + xb) + xa * cb)) / 4;
-    xy = xa * ya * (6 * ab + 6 * ac - 3 * bc + cb);
-    ac = ya * ya;
-    cb = xa * xa;
-    xy = 3 * (xy + 9 * f * (cb * yb * yc - xb * xc * ac) - 18 * xb * yb * ab) / 8;
-
-    if (ex < 0) { /* negate values if inside self-intersection loop */
-      dx = -dx;
-      dy = -dy;
-      xx = -xx;
-      yy = -yy;
-      xy = -xy;
-      ac = -ac;
-      cb = -cb;
-    } /* init differences of 3rd degree */
-    ab = 6 * ya * ac;
-    ac = -6 * xa * ac;
-    bc = 6 * ya * cb;
-    cb = -6 * xa * cb;
-    dx += xy;
-    ex = dx + dy;
-    dy += xy; /* error of 1st step */
-              // exit:
-    for (pxy = 0, fx = fy = f; x0 != x3 && y0 != y3;) {
-      cbDraw(x0, y0);                                  /* plot curve */
-      do {                                             /* move sub-steps of one pixel */
-        if ((pxy == 0) && (dx > xy || dy < xy)) break; /* confusing */
-        if ((pxy == 1) && (dx > 0 || dy < 0)) break;   /* values */
-        y1 = 2 * ex - dy;                              /* save value for test of y step */
-        if (2 * ex >= dx) {                            /* x sub-step */
-          fx--;
-          ex += dx += xx;
-          dy += xy += ac;
-          yy += bc;
-          xx += ab;
-        } else if (y1 > 0)
-          break;
-        if (y1 <= 0) { /* y sub-step */
-          fy--;
-          ex += dy += yy;
-          dx += xy += bc;
-          xx += ac;
-          yy += cb;
-        }
-      } while (fx > 0 && fy > 0); /* pixel complete? */
-      if (2 * fx <= f) {
-        x0 += sx;
-        fx += f;
-      } /* x step */
-      if (2 * fy <= f) {
-        y0 += sy;
-        fy += f;
-      } /* y step */
-      if (pxy == 0 && dx < 0 && dy > 0) pxy = 1; /* pixel ahead valid */
-    }
-    xx = x0;
-    x0 = x3;
-    x3 = xx;
-    sx = -sx;
-    xb = -xb; /* swap legs */
-    yy = y0;
-    y0 = y3;
-    y3 = yy;
-    sy = -sy;
-    yb = -yb;
-    len1 = len2;
-  } while (leg--); /* try other end */
-
-  //  ??? plotLine(x0,y0, x3,y3);       /* remaining part in case of cusp or crunode */
-}
-
-/// @brief Scan a path text with the svg/path/d syntax to create a vector(array) of Segments.
+/// @brief Scan and parset a path text with the svg/path/d syntax to create a vector(array) of Segments.
 /// @param pathText path definition as String
 /// @return Vector with Segments.
 /// @example pathText="M4 8l12-6l10 10h-8v4h-6z"
@@ -964,132 +845,157 @@ std::vector<Segment> parsePath(const char *pathText) {
   char *path = (char *)pathText;
   int16_t lastX = 0, lastY = 0;
 
-  /// A lambda function to parse a parameter from the inputText.
-  auto getParam = [&]() {
-    while (isblank(*path) || (*path == ',')) { path++; }
+  /// A lambda function to parse a numeric parameter from the inputText.
+  auto getNumParam = [&]() {
+    while (isspace(*path) || (*path == ',')) { path++; }
     int16_t p = strtol(path, &path, 10);
     return (p);
+  };
+
+  /// A lambda function to parse a flag parameter from the inputText.
+  auto getBoolParam = [&]() {
+    while (isspace(*path) || (*path == ',')) { path++; }
+    bool flag = (*path++ == '1');
+    return (flag);
   };
 
   Segment Seg;
   std::vector<Segment> vSeg;
 
   while (path && *path) {
-    memset(&Seg, 0, sizeof(Seg));
-    int parameters = -1;
 
-    while (isblank(*path)) path++;
+    if (isspace(*path)) {
+      path++;
 
-    if (strchr("MmLlCcZHhVvAaz", *path))
-      command = *path++;
+    } else {
+      if (strchr("MmLlCcZHhVvAazO", *path))
+        command = *path++;
 
-    switch (command) {
-      case 'M':
-        Seg.type = Segment::Move;
-        lastX = Seg.p[0] = getParam();
-        lastY = Seg.p[1] = getParam();
-        break;
+      memset(&Seg, 0, sizeof(Seg));
+      int parameters = -1;
+      bool f1, f2;  // flags
 
-      case 'm':
-        // convert to absolute coordinates
-        Seg.type = Segment::Move;
-        lastX = Seg.p[0] = lastX + getParam();
-        lastY = Seg.p[1] = lastY + getParam();
-        break;
+      switch (command) {
+        case 'M':
+          Seg.type = Segment::Type::Move;
+          lastX = Seg.p[0] = getNumParam();
+          lastY = Seg.p[1] = getNumParam();
+          break;
 
-      case 'L':
-        Seg.type = Segment::Line;
-        lastX = Seg.p[0] = getParam();
-        lastY = Seg.p[1] = getParam();
-        break;
+        case 'm':
+          // convert to absolute coordinates
+          Seg.type = Segment::Type::Move;
+          lastX = Seg.p[0] = lastX + getNumParam();
+          lastY = Seg.p[1] = lastY + getNumParam();
+          break;
 
-      case 'l':
-        // convert to absolute coordinates
-        Seg.type = Segment::Line;
-        lastX = Seg.p[0] = lastX + getParam();
-        lastY = Seg.p[1] = lastY + getParam();
-        break;
+        case 'L':
+          Seg.type = Segment::Type::Line;
+          lastX = Seg.p[0] = getNumParam();
+          lastY = Seg.p[1] = getNumParam();
+          break;
 
-      case 'C':
-        // curve defined with absolute points - no convertion required
-        Seg.type = Segment::Curve;
-        Seg.p[0] = getParam();
-        Seg.p[1] = getParam();
-        Seg.p[2] = getParam();
-        Seg.p[3] = getParam();
-        lastX = Seg.p[4] = getParam();
-        lastY = Seg.p[5] = getParam();
-        break;
+        case 'l':
+          // convert to absolute coordinates
+          Seg.type = Segment::Type::Line;
+          lastX = Seg.p[0] = lastX + getNumParam();
+          lastY = Seg.p[1] = lastY + getNumParam();
+          break;
 
-      case 'c':
-        // curve defined with relative points - convert to absolute coordinates
-        Seg.type = Segment::Curve;
-        Seg.p[0] = lastX + getParam();
-        Seg.p[1] = lastY + getParam();
-        Seg.p[2] = lastX + getParam();
-        Seg.p[3] = lastY + getParam();
-        lastX = Seg.p[4] = lastX + getParam();
-        lastY = Seg.p[5] = lastY + getParam();
-        break;
+        case 'C':
+          // curve defined with absolute points - no convertion required
+          Seg.type = Segment::Type::Curve;
+          Seg.p[0] = getNumParam();
+          Seg.p[1] = getNumParam();
+          Seg.p[2] = getNumParam();
+          Seg.p[3] = getNumParam();
+          lastX = Seg.p[4] = getNumParam();
+          lastY = Seg.p[5] = getNumParam();
+          break;
 
-      case 'H':
-        // Horizontal line with absolute horizontal end point coordinate - convert to absolute line
-        Seg.type = Segment::Line;
-        lastX = Seg.p[0] = getParam();
-        Seg.p[1] = lastY;  // stay;
-        break;
+        case 'c':
+          // curve defined with relative points - convert to absolute coordinates
+          Seg.type = Segment::Type::Curve;
+          Seg.p[0] = lastX + getNumParam();
+          Seg.p[1] = lastY + getNumParam();
+          Seg.p[2] = lastX + getNumParam();
+          Seg.p[3] = lastY + getNumParam();
+          lastX = Seg.p[4] = lastX + getNumParam();
+          lastY = Seg.p[5] = lastY + getNumParam();
+          break;
 
-      case 'h':
-        // Horizontal line with relative horizontal end-point coordinate - convert to absolute line
-        Seg.type = Segment::Line;
-        lastX = Seg.p[0] = lastX + getParam();
-        Seg.p[1] = lastY;  // stay;
-        break;
+        case 'H':
+          // Horizontal line with absolute horizontal end point coordinate - convert to absolute line
+          Seg.type = Segment::Type::Line;
+          lastX = Seg.p[0] = getNumParam();
+          Seg.p[1] = lastY;  // stay;
+          break;
 
-      case 'V':
-        // Vertical line with absolute vertical end point coordinate - convert to absolute line
-        Seg.type = Segment::Line;
-        Seg.p[0] = lastX;  // stay;
-        lastY = Seg.p[1] = getParam();
-        break;
+        case 'h':
+          // Horizontal line with relative horizontal end-point coordinate - convert to absolute line
+          Seg.type = Segment::Type::Line;
+          lastX = Seg.p[0] = lastX + getNumParam();
+          Seg.p[1] = lastY;  // stay;
+          break;
 
-      case 'v':
-        // Vertical line with relative horizontal end-point coordinate - convert to absolute line
-        Seg.type = Segment::Line;
-        Seg.p[0] = lastX;  // stay;
-        lastY = Seg.p[1] = lastY + getParam();
-        break;
+        case 'V':
+          // Vertical line with absolute vertical end point coordinate - convert to absolute line
+          Seg.type = Segment::Type::Line;
+          Seg.p[0] = lastX;  // stay;
+          lastY = Seg.p[1] = getNumParam();
+          break;
 
-      case 'A':
-        // Ellipsis arc with absolute end-point coordinate. - calculate center and
-        Seg.type = Segment::Arc;
-        Seg.p[0] = getParam();       // rx
-        Seg.p[1] = getParam();       // ry
-        Seg.p[2] = getParam();       // rotation
-        Seg.p[3] = getParam();       // flag1
-        Seg.p[3] += getParam() * 2;  // flag2
-        lastX = Seg.p[4] = getParam();
-        lastY = Seg.p[5] = getParam();
-        break;
+        case 'v':
+          // Vertical line with relative horizontal end-point coordinate - convert to absolute line
+          Seg.type = Segment::Type::Line;
+          Seg.p[0] = lastX;  // stay;
+          lastY = Seg.p[1] = lastY + getNumParam();
+          break;
 
-      case 'a':
-        // Ellipsis arc with absolute end-point coordinate. - calculate center and
-        printf("arc not implemented yet.\n");
-        Seg.type = Segment::Arc;
-        break;
+        case 'A':
+          // Ellipsis arc with absolute end-point coordinates.
+          Seg.type = Segment::Type::Arc;
+          Seg.p[0] = getNumParam();  // rx
+          Seg.p[1] = getNumParam();  // ry
+          Seg.p[2] = getNumParam();  // rotation
+          f1 = getBoolParam();
+          f2 = getBoolParam();
+          Seg.p[3] = (f1 ? 0x01 : 0x00) + (f2 ? 0x02 : 0x00);  // flags
+          lastX = Seg.p[4] = getNumParam();
+          lastY = Seg.p[5] = getNumParam();
+          break;
 
-      case 'z':
-      case 'Z':
-        Seg.type = Segment::Close;
-        break;
+        case 'a':
+          // Ellipsis arc with relative end-point coordinates.
+          Seg.type = Segment::Type::Arc;
+          Seg.p[0] = getNumParam();  // rx
+          Seg.p[1] = getNumParam();  // ry
+          Seg.p[2] = getNumParam();  // rotation
+          f1 = getBoolParam();
+          f2 = getBoolParam();
+          Seg.p[3] = (f1 ? 0x01 : 0x00) + (f2 ? 0x02 : 0x00);  // flags
+          lastX = Seg.p[4] = lastX + getNumParam();
+          lastY = Seg.p[5] = lastY + getNumParam();
+          break;
 
-      default:
-        printf("unknown path type: %c\n", *path);
-        return (vSeg);
-        break;
+        case 'z':
+        case 'Z':
+          Seg.type = Segment::Type::Close;
+          break;
+
+          // non svg path types:
+        case 'O':
+          // Draw a whole circle by center and radius
+          Seg.type = Segment::Type::Circle;
+          Seg.p[0] = getNumParam();  // Center.x
+          Seg.p[1] = getNumParam();  // Center.y
+          Seg.p[2] = getNumParam();  // radius
+          lastX = lastY = 0;
+          break;
+      }
+      vSeg.push_back(Seg);
+      // } else { TRACE("unknown segment '%c'\n", *path);
     }
-
-    vSeg.push_back(Seg);
   }
 
   // TRACE("  scanned: %d segments\n", vSeg.size());
@@ -1099,8 +1005,6 @@ std::vector<Segment> parsePath(const char *pathText) {
 
   return (vSeg);
 }
-
-
 
 }  // gfxDraw:: namespace
 

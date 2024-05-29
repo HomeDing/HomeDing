@@ -1,36 +1,30 @@
-// draw algorithms
-
-// This library implements drawing polygons (and paths) on a display.
-
-// These pixel oriented drawing functions are implemented to use callback functions for the
-// effective drawing to make them independent from an specific canvas implementation and can be
-// used for drawing and un-drawing.
-
+// - - - - -
+// GFXDraw - A Arduino library for drawing shapes on a GFX display using paths describing the borders.
+// gfxdraw.h: Library header file
+// 
+// Copyright (c) 2024-2024 by Matthias Hertel, http://www.mathertel.de
+// This work is licensed under a BSD style license. See http://www.mathertel.de/License.aspx
+// 
+// These pixel oriented drawing functions are implemented to use callback functions for the effective drawing
+// to make them independent from an specific canvas or GFX implementation and can be used for drawing and un-drawing.
+// 
 // The functions have minimized use of float and arc arithmetics.
-// Path drawing is supporting one closed path and unfolded paths only.
-// The functions have minimized use of float and arc arithmetics.
-
-
-// Some basic drawing algorithms are based on the efficient drawing approach of bresenham, see
-// <http://members.chello.at/easyfilter/bresenham.html>.
-
-// The basic drawing algorithms are implemented as static function in the `gfxDraw` namespace where you can also find useful color constants.
-// The display coordinates are signed 16-bit integers.
-
-// https://svg-path-visualizer.netlify.app/#M2%2C2%20Q8%2C2%208%2C8
+// Path drawing is supporting on any given path.
+// Filled paths are supported on closed paths only.
+//
+// CHANGELOG:
+// 15.05.2024  creation of the GFXDraw library.
+//
+// - - - - -
 
 #pragma once
 
-#ifdef ARDUINO
-#include <Arduino.h>
-#endif
-
-#include <functional>
 #include <vector>
 #include <algorithm>
 
 #include <cctype>
 
+#include "gfxDrawCommon.h"
 #include "gfxDrawColors.h"
 
 // scaling: factors are in unit 100 (percent)
@@ -52,6 +46,7 @@ typedef std::function<void(int16_t x, int16_t y, RGBA color)> fDrawPixel;
 /// @brief Callback function to transform all points in the segments
 typedef std::function<void(int16_t &x, int16_t &y)> fTransform;
 
+
 /// @brief The Segment struct holds all information about a segment of a path.
 class Segment {
 public:
@@ -59,7 +54,8 @@ public:
     Move = 0x0100 + 2,
     Line = 0x0200 + 2,
     Curve = 0x0300 + 6,
-    Arc = 0x0400 + 7,
+    Arc   = 0x0400 + 7,
+    Circle = 0x0800 + 3,
     Close = 0xFF00 + 0,
   };
 
@@ -84,18 +80,6 @@ public:
       int16_t xEnd;
       int16_t yEnd;
     };
-
-    // struct {  // for Arcs
-    //   int16_t rx;
-    //   int16_t ry;
-    //   int16_t rotation; // of ellisis
-    //   int16_t delta angle; // positive -> clockwise
-    //   int16_t cx;
-    //   int16_t cy;
-    //   int16_t xEnd;
-    //   int16_t yEnd;
-    // };
-
   };
 };
 
@@ -139,7 +123,7 @@ void copySegments(std::vector<Segment> &segments);
 
 
 /// @brief Draw an arc using the most efficient algorithm
-void drawArc(int16_t x1, int16_t y1, int16_t rx, int16_t ry, int16_t phi, int16_t flags, int16_t x2, int16_t y2, fSetPixel cbDraw);
+void drawArc(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t rx, int16_t ry, int16_t phi, int16_t flags, fSetPixel cbDraw);
 
 
 /// @brief scale all points by the factor f100 / 100.
@@ -186,22 +170,15 @@ void fillSegments(std::vector<Segment> &segments, fSetPixel cbBorder, fSetPixel 
 /// @param cbFill Draw function for filling pixels.
 void pathByText(const char *pathText, int16_t x, int16_t y, int16_t scale100, fSetPixel cbBorder, fSetPixel cbFill);
 
-/// @brief draw a path using a border and optional fill drawing function.
-/// @param path The path definition using SVG path syntax.
-/// @param x Starting Point X coordinate.
-/// @param y Starting Point Y coordinate.
-/// @param cbBorder Draw function for border pixels. cbFill is used when cbBorder is null.
-/// @param cbFill Draw function for filling pixels.
-void pathByText100(const char *pathText, int16_t x, int16_t y, fSetPixel cbBorder, fSetPixel cbFill);
-
 
 /// ====== internally used functions - maybe helpful for generating paths
 
 /// @brief Calculate the angle of a vector in degrees
 /// @param dx x value of the vector
 /// @param dy y value of the vector
-/// @return the angle n range 0 - 359
+/// @return the angle n range 0...359
 int16_t vectorAngle(int16_t dx, int16_t dy);
+
 
 }  // gfxDraw:: namespace
 

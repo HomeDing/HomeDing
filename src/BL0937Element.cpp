@@ -42,9 +42,9 @@ unsigned long energyCountLastDay = 0;  // from yesterday
 // ===== meassuring current/voltage (CF1 pin) =====
 
 // static interrupt variables
-volatile unsigned long cf1SigStart;
-volatile unsigned long cf1SigLast;
-volatile unsigned int cf1SigCnt = 0;
+unsigned long cf1SigStart;
+unsigned long cf1SigLast;
+unsigned int cf1SigCnt = 0;
 
 // interrupt routine for power measurement. increment power counter and set exact cycle time.
 IRAM_ATTR void onPowerSignal() {

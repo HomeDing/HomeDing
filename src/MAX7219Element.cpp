@@ -58,7 +58,7 @@ void MAX7219Element::_clear() {
     _write(REG_DECODEMODE, _decodeMode);
   }
   for (int i = 1; i <= 8; i++) {
-    _write(i, B00000000);
+    _write(i, 0b00000000);
   }
 }  // _clear()
 

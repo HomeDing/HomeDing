@@ -326,7 +326,7 @@ public:
 
   /// @brief Draw a circle with the given dimensions of the box and an optional inner border.
   void drawCircle(BoundingBox &box, uint32_t borderColor, uint32_t fillColor = RGB_UNDEFINED) override {
-    LOGGER_JUSTINFO("drawCircle(%d/%d - %d/%d #%08x #%08x)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);
+    LOGGER_JUSTINFO("drawCircle(%d/%d - %d/%d #%08lx #%08lx)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);
 
     int16_t radius = (box.x_max - box.x_min - 1) / 2;
     int16_t cx = box.x_min + radius;

@@ -21,7 +21,7 @@
  */
 Element *PWMOutElement::create() {
   PWMOutElement *e = new PWMOutElement();
-  e->category = CATEGORY::Standard; // no polling
+  e->category = CATEGORY::Standard;  // no polling
   return (e);
 }  // create()
 
@@ -64,9 +64,17 @@ void PWMOutElement::start() {
     analogWriteRange(_range);
 
 #elif (defined(ESP32))
+
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+    pinMode(_pin, OUTPUT);
+    analogWriteFrequency(_pin, 8000);
+    analogWriteResolution(_pin, 8);
+#else
     _channel = _board->nextLedChannel++;
     ledcSetup(_channel, 8000, 8);
     ledcAttachPin(_pin, _channel);
+#endif
+
 #endif
 
     _setValue(_value);
@@ -95,7 +103,7 @@ void PWMOutElement::_setValue(int newValue) {
 #if defined(ESP8266)
     analogWrite(_pin, v);
 #elif (defined(ESP32))
-    ledcWrite(_channel, v);
+    analogWrite(_pin, v);
 #endif
 
   }  // if

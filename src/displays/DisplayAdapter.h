@@ -155,6 +155,10 @@ public:
     _needFlush = true;
   };
 
+  virtual uint32_t getPixel(int16_t /* x */, int16_t /* y */) {
+    return(RGB_BLACK);
+  };
+
   // @brief remember that flush is required after sequence.
   virtual void setFlush() {
     // LOGGER_TRACE("setFlush()");

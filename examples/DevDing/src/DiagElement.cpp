@@ -24,6 +24,7 @@
 
 #if defined(ESP32)
 #include <rom/rtc.h>
+#include <esp_chip_info.h>
 #endif
 
 // use DIAG TRACE for sending detailed output for the Diag Element.
@@ -220,6 +221,8 @@ String DiagElement::_handleChipInfo() {
   // about ESP8266 chip variants...
   sprintf(buffer, "  chip-id: 0x%08X", ESP.getChipId());
   sOut += buffer;
+  sprintf(buffer, "  Flash-ID: 0x%08x\n", ESP.getFlashChipId());
+  sOut += buffer;
 
 #elif defined(ESP32)
   // about ESP32 chip variants...
@@ -250,10 +253,6 @@ String DiagElement::_handleChipInfo() {
   sOut += "\n";
 
   sOut += "Flash:";
-#if defined(ESP8266)
-  sprintf(buffer, "  ID: 0x%08x\n", ESP.getFlashChipId());
-  sOut += buffer;
-#endif
   sprintf(buffer, "  Size: %d kByte\n", ESP.getFlashChipSize() / 1024);
   sOut += buffer;
 

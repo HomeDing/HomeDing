@@ -19,9 +19,12 @@
 #include "DisplayAdapter.h"
 #include "displays/DisplayOutputElement.h"
 
+// tracing information (left from development for future problem analysis) can be disabled
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
-#define TRACEDRAW(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+// tracing information on drawing (left from development for future problem analysis) can be disabled
+#define TRACEDRAW(...)  // LOGGER_PRINT(__VA_ARGS__)
+
 
 DisplayAdapter::DisplayAdapter() {
   color = 0x00FFFFFF;      // white
@@ -54,16 +57,7 @@ bool DisplayAdapter::setup(Board *b, struct DisplayConfig *c) {
 /// @return true when the display is ready for operation. Otherwise false.
 bool DisplayAdapter::start() {
   if (conf->lightPin) {
-#if defined(ESP8266)
     pinMode(conf->lightPin, OUTPUT);
-    analogWriteRange(100);
-
-#elif (defined(ESP32))
-    _lightChannel = board->nextLedChannel++;
-    TRACE("display chan %d %d", _lightChannel, conf->lightPin);
-    ledcSetup(_lightChannel, 8000, 10);
-    ledcAttachPin(conf->lightPin, _lightChannel);
-#endif
     setBrightness(conf->brightness);
   }
 
@@ -76,13 +70,9 @@ bool DisplayAdapter::start() {
 void DisplayAdapter::setBrightness(uint8_t bright) {
   TRACE("setBrightness %d %d", conf->lightPin, bright);
   if (conf->lightPin) {
-#if defined(ESP8266)
-    analogWrite(conf->lightPin, bright);
-#elif (defined(ESP32))
-    uint32_t duty = (bright * 1024) / 100;
-    TRACE("display duty %d %d", _lightChannel, duty);
-    ledcWrite(_lightChannel, duty);
-#endif
+    bright = constrain(bright, 0, 100);
+    uint32_t duty = (bright * (uint32_t)255) / 100;
+    analogWrite(conf->lightPin, duty);
   }
 };
 

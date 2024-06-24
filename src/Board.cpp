@@ -149,16 +149,24 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   uint8_t mac[6];
   char sMac[64];
 
-  WiFi.macAddress(mac);
+#if defined(ESP32)
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+  // ESP32 Version 3++
+  Network.macAddress(mac);
+  snprintf(sMac, sizeof(sMac), "esp32-%02x%02x%02x", mac[3], mac[4], mac[5]);
 
-#if defined(ESP8266)
-  snprintf(sMac, sizeof(sMac), "ESP-%02X%02X%02X", mac[3], mac[4], mac[5]);
-#elif defined(ESP32)
+#else
+  // ESP32 Version 2.x
+  WiFi.macAddress(mac);
   snprintf(sMac, sizeof(sMac), "esp32-%02x%02x%02x", mac[3], mac[4], mac[5]);
 #endif
 
-  deviceName = sMac;
+#elif defined(ESP8266)
+  WiFi.macAddress(mac);
+  snprintf(sMac, sizeof(sMac), "esp-%02x%02x%02x", mac[3], mac[4], mac[5]);
+#endif
 
+  deviceName = sMac;
 
   // check for deep sleep wakeup
 
@@ -372,7 +380,7 @@ void Board::loop() {
           start(Element_StartupMode::WithTime);
           startComplete = true;
         }  // if
-      }    // if
+      }  // if
 
       if (startComplete) {
         dispatch(startAction);  // dispatched when all elements are active.
@@ -633,6 +641,29 @@ void Board::loop() {
         }
         return (eTag);
       });
+
+#elif defined(ESP32)
+
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+      // enable eTags in results for static files
+      // by setting "cache": "etag" inc env.json on the device element
+
+      // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
+      server->enableETag(true, [this](FS &fs, const String &path) -> String {
+        String eTag;
+        if (!path.endsWith(".txt")) {
+          // txt files contain logs that must not be cached.
+          // eTag = esp8266webserver::calcETag(fs, path);
+          File f = fs.open(path, "r");
+          eTag = String(f.getLastWrite(), 16);  // use file modification timestamp to create ETag
+          f.close();
+          // use current counter
+          // eTag = String(filesVersion, 16);  // f.getLastWrite()
+        }
+        return (eTag);
+      });
+#endif
+
 #endif
       cacheHeader = "";  // do not pass this cache header
     }
@@ -694,7 +725,23 @@ void Board::loop() {
 
     DeviceState::setResetCounter(0);
 
+#if defined(ESP32)
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+    // ESP32 Version 3++
+    Network.macAddress(mac);
+#else
+    // ESP32 Version 2.x
     WiFi.macAddress(mac);
+#endif
+
+#elif defined(ESP8266)
+    WiFi.macAddress(mac);
+#endif
+
+
+
+
+
     snprintf(ssid, sizeof(ssid), "%s%02X%02X%02X", HOMEDING_GREETING, mac[3], mac[4], mac[5]);
 
     displayInfo("Captive Mode:", ssid);
@@ -767,7 +814,7 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
   if (!action.isEmpty()) {
     String tmp = action;
     tmp.replace("$v", v);
-    LOGGER_TRACE("queue (%s)=>(%s)", (_nextElement ? _nextElement->id : ""), tmp.c_str());
+    LOGGER_TRACE("queue (%s)=>(%s)", (_activeElement ? _activeElement->id : ""), tmp.c_str());
     if (split) {
       int len = ListUtils::length(tmp);
       for (int n = 0; n < len; n++) {
@@ -785,7 +832,7 @@ void Board::dispatchAction(Element *target, const char *action_name, const char 
 
 #if defined(LOGGER_ENABLED)
   // show action in log when target has trace loglevel
-  Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "send %s?%s=%s", target->id, action_name, action_value);
+  Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "set %s=%s", action_name, action_value);
 #endif
 
   const char *action = HomeDing::Action::find(action_name);

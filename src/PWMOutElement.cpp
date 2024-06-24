@@ -59,21 +59,23 @@ void PWMOutElement::start() {
     // enable output and stay off
     Element::start();
 
-#if defined(ESP8266)
-    pinMode(_pin, OUTPUT);
-    analogWriteRange(_range);
-
-#elif (defined(ESP32))
-
-#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+#if (defined(ESP32))
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+  // ESP32 Version 3++
     pinMode(_pin, OUTPUT);
     analogWriteFrequency(_pin, 8000);
     analogWriteResolution(_pin, 8);
+
 #else
+  // ESP32 Version 2.x
     _channel = _board->nextLedChannel++;
     ledcSetup(_channel, 8000, 8);
     ledcAttachPin(_pin, _channel);
 #endif
+
+#elif defined(ESP8266)
+    pinMode(_pin, OUTPUT);
+    analogWriteRange(_range);
 
 #endif
 

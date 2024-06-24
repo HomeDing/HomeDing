@@ -98,7 +98,7 @@ public:
 #endif
 
 
-#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3)
+#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
     } else if (busmode == BUSMODE_LCD8) {
       PANELTRACE("Use LCD8\n");
       bus = new Arduino_ESP32LCD8(

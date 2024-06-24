@@ -39,7 +39,7 @@ void LightElement::setColor(uint32_t color, int brightness) {
   }
 
   if (color != _outColor) {
-    snprintf(colBuffer, sizeof(colBuffer), "#%08x", color);
+    snprintf(colBuffer, sizeof(colBuffer), "#%08lx", color);
     value = colBuffer;
     _outColor = color;
     needUpdate = true;

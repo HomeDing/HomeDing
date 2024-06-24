@@ -182,7 +182,7 @@ bool BME680Element::getProbe(String &values) {
     } else {
       snprintf(buffer, sizeof(buffer),
                //  "%.2f,%.2f,%.0f,%.0f,%d",
-               "%d.%02d,%d.%03d,%d.%02d,%d",
+               "%d.%02d,%ld.%03ld,%ld.%02ld,%ld",
                data.temperature / 100, data.temperature % 100,
                data.humidity / 1000, data.humidity % 1000,
                data.pressure / 100, data.pressure % 100,

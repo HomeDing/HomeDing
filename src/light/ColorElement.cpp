@@ -294,7 +294,7 @@ void ColorElement::loop() {
 
     if (_needValueUpdate && (!_valueAction.isEmpty())) {
       char sColor[38];
-      sprintf(sColor, "x%08x", nextValue);
+      sprintf(sColor, "x%08lx", nextValue);
       _board->dispatch(_valueAction, sColor);
     }
     _needValueUpdate = false;
@@ -314,7 +314,7 @@ void ColorElement::pushState(
   callback("mode", _printInteger((int)_mode));
 
   if (_mode != Mode::wheel) {
-    sprintf(sColor, "x%08x", _toValue);  // do not report fading and interim colors
+    sprintf(sColor, "x%08lx", _toValue);  // do not report fading and interim colors
     callback("value", sColor);
   }
 

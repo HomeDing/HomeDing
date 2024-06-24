@@ -24,13 +24,13 @@
 // ===== meassuring power consumption (CF pin) =====
 
 // static interrupt variables
-volatile unsigned long powSigStart;
-volatile unsigned long powSigLast;
-volatile unsigned int powSigCnt = 0;
+unsigned long powSigStart;
+unsigned long powSigLast;
+unsigned int powSigCnt = 0;
 
 // ===== meassuring power consumption in Wh (CF pin) =====
 
-volatile unsigned long energyCount = 0;  // counting PowerSignal pulses
+unsigned long energyCount = 0;  // counting PowerSignal pulses
 
 time_t energyDate = 0;                 // start of reporting day.
 unsigned long energyCountLastDay = 0;  // from yesterday

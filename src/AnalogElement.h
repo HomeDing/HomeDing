@@ -58,10 +58,10 @@ public:
   // Sensor Element functions
 
   /// retrieve values from a sensor
-  bool getProbe(UNUSED String &values) override;
+  bool getProbe(String &values) override;
 
   /// send data out by crating actions
-  void sendData(UNUSED String &values) override;
+  void sendData(String &values) override;
 
 private:
 #if defined ESP8266

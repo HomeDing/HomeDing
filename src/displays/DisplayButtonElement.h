@@ -70,10 +70,10 @@ public:
   /// @param x X position of touch start event.
   /// @param y Y position of touch start event.
   /// @return true when button wants to participate in further actions.
-  bool touchStart(uint16_t xPos, uint16_t yPos);
+  bool touchStart(int16_t xPos, int16_t yPos);
 
   /// @brief A touchEnd event is given
-  void touchEnd(uint16_t xPos, uint16_t yPos);
+  void touchEnd(int16_t xPos, int16_t yPos);
 
 private:
   /// @brief button is pressed.

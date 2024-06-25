@@ -62,9 +62,9 @@ bool BuiltinHandler::canHandle(HTTPMethod requestMethod, String requestUri)
  * @return false
  */
 #if defined(ESP8266)
-bool BuiltinHandler::handle(WebServer &server, UNUSED HTTPMethod requestMethod, const String &uri)
+bool BuiltinHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, const String &uri)
 #elif defined(ESP32)
-bool BuiltinHandler::handle(WebServer &server, HTTPMethod requestMethod, String uri)
+bool BuiltinHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, String uri)
 #endif
 {
   TRACE("handle(%s)", uri.c_str());

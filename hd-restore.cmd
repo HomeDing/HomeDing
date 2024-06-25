@@ -29,11 +29,11 @@ if [%~1]==[-l]     ( set _list=1 && shift /1 && goto :restart )
 REM == HELP screen ==
 
 if DEFINED _help (
-  echo This is a utility to restore a configuration backup to a device.
+  echo This is the HomeDing utility to restore a configuration backup to a device.
   echo.
   echo Usage: hd-restore ^<devicename^> ^<target-ip-address^|target-hostname^>
   echo.  -h, --help     Get a brief help on using this tool
-  echo.  -l, --list     list existing backups only
+   @REM echo.  -l, --list     list existing backups only
   echo.
 )
 

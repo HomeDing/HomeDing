@@ -26,15 +26,13 @@
  * @return AndElement* created element
  */
 Element *AndElement::create() {
-  return (new AndElement());
+  AndElement *el = new AndElement();
+  el->_type = DATATYPE::BOOLEAN;
+  return (el);
 } // create()
 
 
 /* ===== Element functions ===== */
-
-AndElement::AndElement() {
-  _type = DATATYPE::BOOLEAN;
-}
 
 /**
  * @brief Give some processing time to the Element to check for next actions.

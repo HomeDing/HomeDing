@@ -62,8 +62,6 @@
 
 #include <time.h>
 
-#define UNUSED __attribute__((unused))
-
 // forward class declarations
 class Board;
 
@@ -259,34 +257,28 @@ public:
   bool queueIsEmpty();
 
   /**
-   * send all the actions to the right elements.
+   * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
   void dispatch(const String &action, const char *value = nullptr);
 
   /**
-   * send all the actions to the right elements.
+   * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
   void dispatch(const String &action, int value);
 
   /**
-   * send all the actions to the right elements.
+   * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    */
   void dispatch(const String &action, const String &value, boolean split = true);
 
   /**
-   * @brief Dispatch an action without queueing it.
-   * @param action The action string.
-   */
-  void dispatchAction(String action);
-
-  /**
-   * send all the actions to the right elements.
+   * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
    * @param item use the n-th item of the value.
@@ -294,14 +286,24 @@ public:
   void dispatchItem(const String &action, const String &values, int n);
 
 
+  /// @brief Send an action to an element.
+  /// @param action The action string.
+  void dispatchAction(String action);
+
+  /// @brief Send an action to an element.
+  /// @param action_name The name of the action.
+  /// @param action_value The value of the action.
+  void dispatchAction(Element *target, const char *action_name, const char *action_value);
+
+
   // ===== state of elements =====
 
   /**
    * Get the state (current values) of a single or all objects
    * @param out Output String for the result.
-   * @param path Path of an Element or null to get state of all elements.
+   * @param id Full qualified id of an Element or nullptr to get state of all elements.
    */
-  void getState(String &out, const String &path);
+  void getState(String &out, const char *id = nullptr);
 
 
   /**
@@ -346,20 +348,11 @@ public:
   // a counter used as eTag that gets incremented when any file is changed.
   unsigned int filesVersion;
 
-  /**
-   * Iterator through all Elements.
-   */
-  void forEach(const char *prefix, ElementCallbackFn fCallback);
 
-  /**
-   * Get a Element by typename. Returns the first found element.
-   * This method can be used to access the singleton Elements like device,
-   * display, ota, ...
-   * @param elementTypeName type name of element.
-   * @return Element* first element in list with this type.
-   */
-  Element *getElement(const char *elementTypeName);
-
+  /// @brief Iterate all Elements from both lists with a given category.
+  /// @param cat The categories that must match at least one.
+  /// @param fCallback Callback function passing each element
+  void forEach(Element::CATEGORY cat, ElementCallbackFn fCallback);
 
   /**
    * Get an Element by type and name. Returns found element.
@@ -369,12 +362,16 @@ public:
    */
   Element *getElement(const char *elementType, const char *elementName);
 
-  /**
-   * Get an Element by type/name. Returns found element.
-   * @param elementId type and name of element.
-   * @return Element* element in list with this type/name.
-   */
-  Element *getElementById(const char *elementId);
+  /// @brief Find an Element by full qualified ID `type/name`.
+  /// @param id type and name of element.
+  /// @return found element
+  Element *findById(const char *id);
+
+  /// @brief Find an Element by full qualified ID `type/name`.
+  /// @param id type and name of element.
+  /// @return found element
+  Element *findById(String &id) { return (findById(id.c_str())); };
+
 
   /**
    * @brief Reset/restart the board.
@@ -447,25 +444,10 @@ private:
    */
   void _addAllElements();
 
-  /**
-   * Find an Element by the path.
-   * @param path
-   * @return Element*
-   */
-  Element *findById(const char *id);
-
-  /**
-   * Find an Element by the path.
-   * @param path
-   * @return Element*
-   */
-  Element *findById(String &id);
-
-  /**
-   * Queue an action for later dispatching.
-   * @param action action or property.
-   * @param value the value
-   */
+  /// @brief Queue an action for later dispatching.
+  /// @param action action or property.
+  /// @param v the value
+  /// @param split
   void _queueAction(const String &action, const String &v, boolean split = true);
 
   int _addedElements = 0;
@@ -474,7 +456,7 @@ private:
 
   unsigned long connectPhaseEnd;  // for waiting on net connection
 
-  unsigned long _captiveEnd;      // terminate/reset captive portal mode after 5 minutes.
+  unsigned long _captiveEnd;  // terminate/reset captive portal mode after 5 minutes.
 
   void _newBoardState(enum BOARDSTATE newState);
 
@@ -493,13 +475,16 @@ private:
   /** net connection mode */
   int netMode;
 
-  /** list of active elements */
-  Element *_elementList;
+  /// @brief The list of elements using the loop () function.
+  Element *_elementList = nullptr;
 
-  /** next element that will be used in loop() */
+  /// @brief The list of elements not using the loop ().
+  Element *_elementListNoLoop = nullptr;
+
+  /// @brief The next element that will be used in loop().
   Element *_nextElement;
 
-  /** element is executing a loop() */
+  /// @brief The element is executing in a loop()
   Element *_activeElement;
 
   ArrayString _actions;

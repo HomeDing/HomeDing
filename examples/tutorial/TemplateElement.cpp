@@ -59,10 +59,10 @@ bool TemplateElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done.
 
-  } else if (_stricmp(name, "value") == 0) {
+  } else if (name == HomeDing::Action::Value) {
     _value = _atoi(value);
 
-    // } else if (_stricmp(name, "onvalue") == 0) {
+    // } else if (name == HomeDing::Action::OnValue) {
     // save the actions
     // _xAction = value;
 
@@ -106,7 +106,7 @@ void TemplateElement::loop() {
 void TemplateElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _printInteger(_value));
+  callback(HomeDing::Action::Value, _printInteger(_value));
 }  // pushState()
 
 

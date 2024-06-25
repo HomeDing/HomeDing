@@ -20,9 +20,14 @@
 
 #include <functional>
 
+#include <displays/BoundingBox.h>
+
+class DisplayAdapter;
+
 #define RGB_WHITE 0x00FFFFFF
 #define RGB_BLACK 0x00000000
 #define RGB_GRAY 0x00808080
+#define RGB_SILVER 0x00C0C0C0
 #define RGB_RED 0x00FF0000
 #define RGB_GREEN 0x0000FF00
 #define RGB_BLUE 0x000000FF
@@ -31,25 +36,30 @@
 #define RGB_PURPLE 0x00800080
 
 #define RGB_UNDEFINED 0xEE000000  // key color
+#define RGB_TRANSPARENT 0xEF000000  // key color
+
+#define RGB_IS_COLOR(col) ((col != RGB_UNDEFINED) && (col != RGB_TRANSPARENT))
+#define RGB_NO_COLOR(col) ((col == RGB_UNDEFINED) || (col == RGB_TRANSPARENT))
 
 
-#define BUSMODE_ANY 0x00
-#define BUSMODE_I2C 0x01
-#define BUSMODE_SPI 0x02   // standard SPI interface
-#define BUSMODE_HSPI 0x03  // high speed SPI interface on ESP32
-#define BUSMODE_PAR8 0x04
-#define BUSMODE_LCD8 0x21
+#define BUSMODE_ANY   0x00
+#define BUSMODE_I2C   0x01
+#define BUSMODE_SPI   0x02  // standard SPI interface
+#define BUSMODE_HSPI  0x03  // high speed SPI interface on ESP32
+#define BUSMODE_PAR8  0x04
+#define BUSMODE_LCD8  0x21
+#define BUSMODE_PANEL 0x40
 
 
 struct DisplayConfig {
   /** Width of display */
-  int width = 128;
+  uint16_t width = 128;
 
   /** Height of display */
-  int height = 64;
+  uint16_t height = 64;
 
   /// @brief Brightness of display 0...100 (percent)
-  int brightness = 50;
+  uint16_t brightness = 50;
 
   /** Default Draw & Background Color */
   uint32_t drawColor = RGB_WHITE;
@@ -96,6 +106,10 @@ struct DisplayConfig {
   int i2cSDA = 0;      ///< i2c data pin
   int i2cSCL = 0;      ///< i2c clock pin
 
+  // prefix bytes for I2c bus
+  uint8_t i2cCommandPrefix;
+  uint8_t i2cDataPrefix;
+
   /* ===== SPI interface ===== */
   int spiMOSI = -1;  ///< SPI interface MOSI pin
   int spiMISO = -1;  ///< SPI interface MISO pin
@@ -127,10 +141,11 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Activate the Element.
-   */
+  /// @brief Activate the Element.
   virtual void start() override;
+
+  /// @brief Activate the Element using the given adapter.
+  virtual void start(DisplayAdapter *displayAdapter);
 
   /**
    * @brief push the current value of all properties to the callback.

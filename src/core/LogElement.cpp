@@ -37,7 +37,7 @@ Element *LogElement::create() {
 /* ===== Element functions ===== */
 
 LogElement::LogElement() {
-  startupMode = Element_StartupMode::Time;
+  startupMode = Element_StartupMode::WithTime;
 }
 
 
@@ -78,7 +78,7 @@ bool LogElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, PROP_VALUE) == 0) {
+  } else if (name == HomeDing::Action::Value) {
     if (active) {
       loop(); // be sure the current average time-span is saved.
 
@@ -161,7 +161,7 @@ void LogElement::loop() {
 void LogElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_value).c_str());
+  callback(HomeDing::Action::Value, String(_value).c_str());
 } // pushState()
 
 

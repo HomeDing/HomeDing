@@ -39,23 +39,24 @@ bool DisplayTextElement::set(const char *name, const char *value) {
   if (DisplayOutputElement::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, "value") == 0) {
-    _value = value;
-    _needredraw = true;
-
-  } else if (_stricmp(name, "clear") == 0) {
-    _value.clear();
-    _needredraw = true;
-
   } else if (_stricmp(name, "prefix") == 0) {
     _prefix = value;
+    needsDraw = true;
 
   } else if (_stricmp(name, "postfix") == 0) {
     _postfix = value;
+    needsDraw = true;
 
   } else {
     ret = false;
   }  // if
+
+  // set width at least to 1 unit per character...
+  if (needsDraw) {
+    int16_t right = box.x_min + _prefix.length() + _value.length() + _postfix.length();
+    if (right > box.x_max)
+      box.x_max = right;
+  }
 
   return (ret);
 }  // set()
@@ -71,22 +72,12 @@ void DisplayTextElement::draw() {
     msg.concat(_value);
     msg.concat(_postfix);
 
-    if (_w && _h) {
-      _display->clear(_x, _y, _w, _h);
-    }
-    _w = _display->drawText(_x, _y, _h, msg);  // remember width of drawn text
-    _h = _display->getLineHeight();            // adjust height
+    // adjust height and width to the drawn text
+    int w = _display->drawText(box.x_min, box.y_min, box.y_max - box.y_min + 1, msg);  // remember width of drawn text
+    box.x_max = box.x_min + w - 1;
+    box.y_max = box.y_min + _display->getLineHeight() - 1;
   }
 }  // draw
 
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DisplayTextElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  DisplayOutputElement::pushState(callback);
-  callback(PROP_VALUE, _value.c_str());
-}  // pushState()
 
 // End

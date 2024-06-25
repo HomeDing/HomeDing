@@ -49,8 +49,9 @@ jobs:
             - name: Radio
             - name: RFCodes
             - name: LiquidCrystal_PCF8574
-            # - name: GFX Library for Arduino
-            - source-url: "https://github.com/moononournation/Arduino_GFX.git"
+            - name: GFX Library for Arduino
+            # - source-url: "https://github.com/moononournation/Arduino_GFX.git"
+            # - source-url: "https://github.com/mathertel/Arduino_GFX.git"
             - name: Adafruit GFX Library
             - name: Adafruit NeoPixel
             - name: Adafruit SSD1306

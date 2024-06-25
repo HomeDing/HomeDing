@@ -42,7 +42,7 @@ Element *ScheduleElement::create()
 
 ScheduleElement::ScheduleElement()
 {
-  startupMode = Element_StartupMode::Time;
+  startupMode = Element_StartupMode::WithTime;
 }
 
 /**
@@ -85,7 +85,7 @@ bool ScheduleElement::set(const char *name, const char *value)
       _mode = Mode::TIMER;
     }
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else {
@@ -164,7 +164,7 @@ void ScheduleElement::pushState(
   callback("mode", _mode == Mode::TIMER ? "timer"
                    : _mode == Mode::ON  ? "on"
                                         : "off");
-  callback(PROP_VALUE, _value ? "1" : "0");
+  callback(HomeDing::Action::Value, _value ? "1" : "0");
 } // pushState()
 
 // End

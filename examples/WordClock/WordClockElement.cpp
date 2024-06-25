@@ -75,11 +75,11 @@ public:
    * could be executed.
    */
   virtual bool set(const char *name, const char *value) override {
-    if (_stricmp(name, PROP_VALUE) == 0) {
+    if (name == HomeDing::Action::Value) {
       LOGGER_EINFO("new Time: %s", value);
       _newTime = value;
 
-    } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+    } else if (name == HomeDing::Action::OnValue) {
       LOGGER_EINFO("new Action: %s", value);
       _valueAction = value;
     }

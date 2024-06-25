@@ -144,6 +144,9 @@ private:
    */
   unsigned long _pulseTime = 0; // duration of the pulsetime
 
+  /// @brief when set to true the actions are sent even when no change has happened.
+  bool _forceSendActions;
+  
   /**
    * @brief The _onAction holds the actions that is submitted when the pulse
    * period starts.

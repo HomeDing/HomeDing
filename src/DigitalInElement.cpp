@@ -37,7 +37,7 @@ bool DigitalInElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "invert") == 0) {
@@ -46,13 +46,13 @@ bool DigitalInElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "pullup") == 0) {
     _pullup = _atob(value);
 
-  } else if (_stricmp(name, "onhigh") == 0) {
+  } else if (name == HomeDing::Action::OnHigh) {
     _highAction = value;
 
-  } else if (_stricmp(name, "onlow") == 0) {
+  } else if (name == HomeDing::Action::OnLow) {
     _lowAction = value;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else {

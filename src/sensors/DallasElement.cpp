@@ -72,7 +72,7 @@ bool DallasElement::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // done.
 
-  } else if (_stricmp(name, PROP_PIN) == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _impl->pin = _atopin(value);
 
   } else if (_stricmp(name, "resolution") == 0) {
@@ -157,7 +157,6 @@ void DallasElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   SensorElement::pushState(callback);
   callback("temperature", _lastValues.c_str());
-  // callback("value", _lastValues.c_str());
 }  // pushState()
 
 

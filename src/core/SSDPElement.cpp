@@ -43,9 +43,7 @@ Element *SSDPElement::create() {
 void SSDPElement::init(Board *board) {
   Element::init(board);
 
-  Element *deviceElement = board->getElement("device");
-
-  if ((deviceElement) && (board->server)) {
+  if (board->server) {
     // part of the notification response
     SSDP.setHTTPPort(80);
     SSDP.setModelName(board->deviceName);

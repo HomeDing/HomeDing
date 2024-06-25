@@ -55,31 +55,39 @@
 
 // ===== Logger Macros for non-element classes
 
+/// unconditional print this, no logging
+#define LOGGER_PRINT(fmt, ...) printf(fmt "\n" __VA_OPT__(,) __VA_ARGS__)
+
+/// unconditional print and log this
 #define LOGGER_ALWAYS(...) Logger::LoggerPrint(NULL, -1, __VA_ARGS__)
 
-/** Create simple log entry to serial only. */
-#define LOGGER_JUSTINFO(...) Logger::printf(__VA_ARGS__)
-
-/** Send error to Logfile and serial output. */
+/// Send error to print and logging when logger_level >= 0 (INFO).
 #define LOGGER_ERR(...) Logger::LoggerPrint("sys", LOGGER_LEVEL_ERR, __VA_ARGS__)
 
-/** Send information to logfile and serial output. */
+/// Send error to print and logging when logger_level >= 1 (INFO).
 #define LOGGER_INFO(...) Logger::LoggerPrint("sys", LOGGER_LEVEL_INFO, __VA_ARGS__)
 
-/** Send trace information to serial output. */
+/// Send error to print and logging when logger_level >= 2 (TRACE).
 #define LOGGER_TRACE(...) Logger::LoggerPrint(NULL, LOGGER_LEVEL_TRACE, __VA_ARGS__)
+
+/** deprecated: use LOGGER_PRINT */
+#define LOGGER_JUSTINFO(...) LOGGER_PRINT(__VA_ARGS__)
 
 // ===== Logger Macros for Elements
 
+/// Send error to print and logging when logger_level of element or device >= 0 (INFO).
 #define LOGGER_EERR(...) Logger::LoggerEPrint(this, LOGGER_LEVEL_ERR, __VA_ARGS__)
 
+/// Send error to print and logging when logger_level of element or device >= 1 (INFO).
 #define LOGGER_EINFO(...) Logger::LoggerEPrint(this, LOGGER_LEVEL_INFO, __VA_ARGS__)
 
+/// Send error to print and logging when logger_level of element or device >= 2 (TRACE).
 #define LOGGER_ETRACE(...) Logger::LoggerEPrint(this, LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 #else
 
 // no logger...
+#define LOGGER_PRINT(fmt, ...) 
 #define LOGGER_ALWAYS(...)
 #define LOGGER_JUSTINFO(...)
 #define LOGGER_ERR(...)

@@ -32,12 +32,6 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Activate the Element.
-   */
-  virtual void start();
-
-
 protected:
   /**
    * @brief Do the calculation on all input values.

@@ -161,7 +161,7 @@ bool TM1637Element::set(const char *name, const char *value) {
 
   if (Element::set(name, value)) {
     // done.
-  } else if (_stricmp(name, "value") == 0) {
+  } else if (name == HomeDing::Action::Value) {
     _value = value;
     _needUpdate = true;
 
@@ -171,7 +171,7 @@ bool TM1637Element::set(const char *name, const char *value) {
     _brightness = b;
     _needUpdate = true;
 
-  } else if (_stricmp(name, "type") == 0) {
+  } else if (name == HomeDing::Action::Type) {
     if (_stricmp(value, "tm1637") == 0) {
       _type = TYPE_TM1637;
       _ioDelay = TM1637_DELAY;
@@ -246,7 +246,7 @@ void TM1637Element::loop() {
 void TM1637Element::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _value.c_str());
+  callback(HomeDing::Action::Value, _value.c_str());
 }  // pushState()
 
 

@@ -10,6 +10,7 @@
 #include <Board.h>            // Platform
 #include <Element.h>          // Abstract Elements
 #include <ElementRegistry.h>  // Element Registry
+#include <Action.h>           // static Action Registry
 
 #include <core/Logger.h>
 
@@ -18,11 +19,6 @@
 
 // some common property names
 
-extern const char *PROP_VALUE;
-extern const char *PROP_PIN;
-extern const char *PROP_ADDRESS;
-
-extern const char *ACTION_ONVALUE;
 extern const char *ACTION_ONTEMPERATURE;
 extern const char *ACTION_ONHUMIDITY;
 extern const char *ACTION_ONPRESSURE;
@@ -112,6 +108,7 @@ extern Board homeding;
 #define HOMEDING_INCLUDE_DisplayText
 #define HOMEDING_INCLUDE_DisplayDot
 #define HOMEDING_INCLUDE_DisplayLine
+#define HOMEDING_INCLUDE_DisplayRect
 #define HOMEDING_INCLUDE_DisplayButton
 #endif
 
@@ -260,8 +257,12 @@ extern Board homeding;
 #include <displays/DisplayST7789Element.h>
 #endif
 
-#ifdef HOMEDING_INCLUDE_DISPLAYESP32PANEL
+#if defined(HOMEDING_INCLUDE_DISPLAYESP32PANEL) && defined(CONFIG_IDF_TARGET_ESP32S3)
 #include <displays/DisplayESP32PanelElement.h>
+#endif
+
+#if defined(HOMEDING_INCLUDE_DISPLAYST7701) && defined(CONFIG_IDF_TARGET_ESP32S3)
+#include <displays/DisplayST7701Element.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DISPLAYST7796
@@ -278,6 +279,10 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_DisplayLine
 #include <displays/DisplayLineElement.h>
+#endif
+
+#ifdef HOMEDING_INCLUDE_DisplayRect
+#include <displays/DisplayRectElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayButton

@@ -55,6 +55,7 @@ Element *NTPTimeElement::create() {
 
 NTPTimeElement::NTPTimeElement() {
   // set some defaults
+  category = CATEGORY::Standard; // no polling
   _ntpServer = "pool.ntp.org";
   _timezone = TZ_Europe_London; // e.g. "CET-1CEST,M3.5.0,M10.5.0/3"
 } // NTPTimeElement()

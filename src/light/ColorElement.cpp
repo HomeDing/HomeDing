@@ -102,7 +102,7 @@ bool ColorElement::set(const char *name, const char *value) {
   bool ret = true;
   unsigned long now = millis();
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     // set next value of color
     uint32_t colorValue = _atoColor(value);
 
@@ -144,7 +144,7 @@ bool ColorElement::set(const char *name, const char *value) {
     _lightElementIDs.push(value);
     TRACE("  con(%s, %d)", value, _lightElementIDs.size());
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     // save the actions
     _valueAction = value;
 
@@ -174,7 +174,7 @@ void ColorElement::start() {
 
   for (int n = 0; n < leSize; n++) {
     // connected elements
-    Element *e = _board->getElementById(_lightElementIDs[n].c_str());
+    Element *e = _board->findById(_lightElementIDs[n].c_str());
     if (e) {
       TRACE("  add(%s)", e->id);
       _lightElements[_lightElementsCount++] = static_cast<LightElement *>(e);
@@ -294,7 +294,7 @@ void ColorElement::loop() {
 
     if (_needValueUpdate && (!_valueAction.isEmpty())) {
       char sColor[38];
-      sprintf(sColor, "x%08x", nextValue);
+      sprintf(sColor, "x%08lx", nextValue);
       _board->dispatch(_valueAction, sColor);
     }
     _needValueUpdate = false;
@@ -314,7 +314,7 @@ void ColorElement::pushState(
   callback("mode", _printInteger((int)_mode));
 
   if (_mode != Mode::wheel) {
-    sprintf(sColor, "x%08x", _toValue);  // do not report fading and interim colors
+    sprintf(sColor, "x%08lx", _toValue);  // do not report fading and interim colors
     callback("value", sColor);
   }
 

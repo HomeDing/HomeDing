@@ -43,7 +43,7 @@ bool ButtonElement::set(const char *name, const char *value) {
   bool ret = true;
   TRACE("set %s=%s", name, value);
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     _inputLevel = _atob(value);
 
   } else if (_stricmp(name, "action") == 0) {
@@ -135,12 +135,6 @@ void ButtonElement::loop() {
   }    // if
 
 }  // loop()
-
-
-void ButtonElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-}  // pushState()
 
 
 void ButtonElement::_send(ACTIONS action) {

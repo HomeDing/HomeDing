@@ -39,9 +39,9 @@ Element *MenuElement::create() {
 bool MenuElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (name == HomeDing::Action::Value) {
     if (_count > 0) {
-      valueList[_active]->set("up", value);
+      valueList[_active]->set(HomeDing::Action::Up, value);
       _updateV = true;
     }
 
@@ -98,7 +98,7 @@ bool MenuElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onDisplay") == 0) {
     _displayAction = value;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else if (_stricmp(name, "onMenu") == 0) {

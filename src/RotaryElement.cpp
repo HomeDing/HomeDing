@@ -56,13 +56,13 @@ Element *RotaryElement::create() {
 bool RotaryElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     _value = _atoi(value);
     if (__encoder) {
       __encoder->setPosition(_value);
     }
 
-  } else if (_stricmp(name, "step") == 0) {
+  } else if (name == HomeDing::Action::Step) {
     _step = _atoi(value);
 
   } else if (_stricmp(name, "pin1") == 0) {
@@ -71,7 +71,7 @@ bool RotaryElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "pin2") == 0) {
     _pin2 = _atopin(value);
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else {
@@ -129,7 +129,7 @@ void RotaryElement::loop() {
 void RotaryElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, String(_value).c_str());
+  callback(HomeDing::Action::Value, String(_value).c_str());
 }  // pushState()
 
 // End

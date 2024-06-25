@@ -30,13 +30,13 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
-          verbose: true
+          verbose: false
           platforms: |
             # Install ESP32 platform via Boards Manager
             - name: "esp32:esp32"
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
               # version: 2.0.4 doesn't work with CLI caused by issue https://github.com/espressif/arduino-esp32/pull/7060
-              version: 2.0.2
+              # version: 2.0.2
           fqbn: esp32:esp32:esp32:PartitionScheme=huge_app
           libraries: |
             - source-path: ./

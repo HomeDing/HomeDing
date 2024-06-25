@@ -27,17 +27,13 @@
  * @return AddElement* created element
  */
 Element *AddElement::create() {
-  return (new AddElement());
+  AddElement *el = new AddElement();
+  el->_type = DATATYPE::INTEGER;
+  return (el);
 } // create()
 
 
 /* ===== Element functions ===== */
-
-void AddElement::start() {
-  CalcElement::start();
-  _type = DATATYPE::INTEGER;
-}
-
 
 /**
  * @brief Give some processing time to the Element to check for next actions.

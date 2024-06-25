@@ -25,12 +25,14 @@ public:
     PANELTRACE("DisplaySH1106Adapter.start()\n");
 
     conf->busmode = BUSMODE_I2C;
+    conf->i2cCommandPrefix = 0x00;
+    conf->i2cDataPrefix = 0x40;
     bus = getBus(conf);
 
     if (bus) {
       // Initialize the display using the physical parameters
       // and use the Mono color Canvas for drawing
-      Arduino_G *op = new Arduino_SH1106(bus, conf->resetPin, conf->width, conf->height);
+      op = new Arduino_SH1106(bus, conf->resetPin, conf->width, conf->height);
       gfx = new Arduino_Canvas_Mono(conf->width, conf->height, op, 0, 0, true);
 
       // set rotatation for drawing.
@@ -41,4 +43,13 @@ public:
     DisplayAGFXAdapter::start();
     return (gfx != nullptr);
   };  // start()
+
+  /// @brief set brightness for panel lightning.
+  /// @param bright new brightness in range 0...100
+  virtual void setBrightness(uint8_t bright) override {
+    if (op) { op->setBrightness((((uint16_t)bright) * 255) / 100); }
+  }
+
+private:
+  Arduino_SH1106 *op = nullptr;
 };

@@ -171,7 +171,7 @@ bool ToneElement::set(const char *name, const char *value) {
     _nextTone = 0;
     _nextToneTime = 1;  // asap
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
   } else {

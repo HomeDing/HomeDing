@@ -96,6 +96,8 @@ bool DeviceElement::set(const char *name, const char *value) {
   if ((!ret) && (!active)) {
     // These actions are only allowed during setup / before activation.
 
+    ret = true;
+
     if (_stricmp(name, "name") == 0) {
       _board->deviceName = value;
 
@@ -148,8 +150,11 @@ bool DeviceElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "spi-mosi") == 0) {
       _board->spiMOSI = _atopin(value);
 
+    } else {
+      ret = false;
+
     }  // if
-  }    // if (! active)
+  }  // if (! active)
 
   return (ret);
 }  // set()

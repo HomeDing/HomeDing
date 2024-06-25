@@ -34,7 +34,9 @@
  * @return SDElement* created element
  */
 Element *SDElement::create() {
-  return (new SDElement());
+  SDElement *e =new SDElement();
+  e->category = CATEGORY::Standard; // no polling
+  return (e);
 }  // create()
 
 
@@ -104,7 +106,12 @@ void SDElement::start() {
 
 
 #elif defined(ESP32)
-  if (!SD.begin(_csPin)) {
+
+  // restart SPI
+  SPI.end();  // maybe corrupted by previous SPI usages (display configuration)
+  SPI.begin(_board->spiCLK, _board->spiMISO, _board->spiMOSI);
+
+  if (!SD.begin(_csPin, SPI)) {
     TRACE("Card Mount Failed");
 
   } else {

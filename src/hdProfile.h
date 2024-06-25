@@ -30,10 +30,6 @@ struct hd_profiledata_t {
     e->profile.totalCount++; \
     if (delta > e->profile.maxDuration) e->profile.maxDuration = delta; \
   }
-
-#define PROFILE_TIMEPRINTBUF(buffer, e, topic) \
-  { sprintf(buffer, "%-19s | %7ld | %7ld | %6ld\n", topic, (e->profile.totalDuration / e->profile.totalCount), e->profile.maxDuration, e->profile.totalCount); }
-
 #else
 
 #define PROFILE_DATA

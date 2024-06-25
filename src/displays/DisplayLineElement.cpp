@@ -56,7 +56,7 @@ bool DisplayLineElement::set(const char *name, const char *value) {
  */
 void DisplayLineElement::draw() {
   DisplayOutputElement::draw();
-  _display->drawLine(_x, _y, _x1, _y1);
+  _display->drawLine(box.x_min, box.y_min, _x1, _y1);
 }
 
 

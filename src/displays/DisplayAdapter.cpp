@@ -17,8 +17,14 @@
 #include <HomeDing.h>
 
 #include "DisplayAdapter.h"
+#include "displays/DisplayOutputElement.h"
 
+// tracing information (left from development for future problem analysis) can be disabled
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+
+// tracing information on drawing (left from development for future problem analysis) can be disabled
+#define TRACEDRAW(...)  // LOGGER_PRINT(__VA_ARGS__)
+
 
 DisplayAdapter::DisplayAdapter() {
   color = 0x00FFFFFF;      // white
@@ -33,6 +39,16 @@ DisplayAdapter::DisplayAdapter() {
 bool DisplayAdapter::setup(Board *b, struct DisplayConfig *c) {
   board = b;
   conf = c;
+
+  displayBox.x_min = 0;
+  displayBox.y_min = 0;
+  if ((conf->rotation / 90) % 4 == 0) {
+    displayBox.x_max = c->width;
+    displayBox.y_max = c->height;
+  } else {
+    displayBox.x_max = c->height;
+    displayBox.y_max = c->width;
+  }
   return (true);
 }  // setup()
 
@@ -41,16 +57,7 @@ bool DisplayAdapter::setup(Board *b, struct DisplayConfig *c) {
 /// @return true when the display is ready for operation. Otherwise false.
 bool DisplayAdapter::start() {
   if (conf->lightPin) {
-#if defined(ESP8266)
     pinMode(conf->lightPin, OUTPUT);
-    analogWriteRange(100);
-
-#elif (defined(ESP32))
-    _lightChannel = board->nextLedChannel++;
-    TRACE("display chan %d %d", _lightChannel, conf->lightPin);
-    ledcSetup(_lightChannel, 8000, 10);
-    ledcAttachPin(conf->lightPin, _lightChannel);
-#endif
     setBrightness(conf->brightness);
   }
 
@@ -63,12 +70,79 @@ bool DisplayAdapter::start() {
 void DisplayAdapter::setBrightness(uint8_t bright) {
   TRACE("setBrightness %d %d", conf->lightPin, bright);
   if (conf->lightPin) {
-#if defined(ESP8266)
-    analogWrite(conf->lightPin, bright);
-#elif (defined(ESP32))
-    uint32_t duty = (bright * 1024) / 100;
-    TRACE("display duty %d %d", _lightChannel, duty);
-    ledcWrite(_lightChannel, duty);
-#endif
+    bright = constrain(bright, 0, 100);
+    uint32_t duty = (bright * (uint32_t)255) / 100;
+    analogWrite(conf->lightPin, duty);
   }
+};
+
+
+/// @brief draw all DisplayOutputElements, then
+/// flush all buffered pixels to the display.
+bool DisplayAdapter::startFlush(bool force) {
+  // TRACE("startFlush(%d, %d)", force, _needFlush);
+
+  bool ret = false;
+  if (force || _needFlush) {
+    TRACE("startFlush...");
+
+#if 1
+    // direct drawing (no overlapping widgets)
+
+    board->forEach(Element::CATEGORY::Widget, [this](Element *e) {
+      DisplayOutputElement *de = (DisplayOutputElement *)e;
+
+      TRACEDRAW("check: %d %d %d %s", de->active, de->needsDraw, de->page, de->id);
+
+      if (de->active && de->page == page && de->needsDraw) {
+        TRACEDRAW(" draw: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
+        // draw box with background color
+        drawRectangle(de->box, RGB_TRANSPARENT, conf->backgroundColor);
+        de->draw();
+        de->needsDraw = false;
+      }
+    });
+
+#else
+    // find all to be redrawn elements.
+    BoundingBox box;
+
+    // find extended bounding box of all un-drawn elements
+    board->forEach(Element::CATEGORY::Widget, [this, &box](Element *e) {
+      DisplayOutputElement *de = (DisplayOutputElement *)e;
+
+      TRACEDRAW("check: %d %d %d %s", de->active, de->needsDraw, de->page, de->id);
+
+      if (de->active && de->page == page && de->needsDraw) {
+        TRACEDRAW("  box: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
+        box.extend(de->box);
+      }
+    });
+
+    TRACEDRAW("box = %d/%d-%d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
+
+    // draw box with background color
+    drawRectangle(box, RGB_TRANSPARENT, conf->backgroundColor);
+
+    // draw all inside box
+    board->forEach(Element::CATEGORY::Widget, [this, &box](Element *e) {
+      DisplayOutputElement *de = (DisplayOutputElement *)e;
+
+      TRACEDRAW("draw: %s %d", de->id, de->page);
+      if (de->active && de->page == page) {
+        if (box.overlaps(de->box)) {
+          TRACEDRAW("draw...");
+          de->draw();
+          de->needsDraw = false;
+        }
+      }
+    });
+#endif
+
+    // send to the device
+    this->flush();
+    ret = true;
+  }
+  _needFlush = false;
+  return (ret);
 };

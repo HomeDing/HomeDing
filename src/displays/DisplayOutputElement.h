@@ -11,6 +11,8 @@
  *
  * Changelog:
  * * 26.04.2021 created by Matthias Hertel
+ * * 26.01.2024 force redraw on attribute changes
+ * * 20.02.2024 added common value handling
  */
 
 
@@ -26,6 +28,10 @@
  */
 class DisplayOutputElement : public Element {
 public:
+
+  // Constructor
+  DisplayOutputElement();
+
   /// @brief Set a parameter or property to a new value or start an action.
   /// @param name Name of the property.
   /// @param value Value of the property.
@@ -37,34 +43,24 @@ public:
   /// @return false when activation failed.
   virtual void start() override;
 
-  /**
-   * @brief Give some processing time to do drawing if required.
-   */
-  virtual void loop() override;
-
   /// @brief draw the element on the display adapter.
   virtual void draw();
 
+  /// @brief push the current value of all properties to the callback.
+  /// @param callback callback function that is used for every property.
+  virtual void pushState(
+    std::function<void(const char *pName, const char *eValue)> callback);
 
-protected:
-  /// @brief return true when object is at the specified position or is overlapping with rectangle
-  bool overlap(int16_t rx, int16_t ry, uint16_t rw = 0, uint16_t rh = 0);
+  /// @brief Bounding Box
+  BoundingBox box;
+
+  /// @brief Redraw needed flag;
+  bool needsDraw = false;
 
   /// @brief Page of the display where the element is placed. Default on page 1.
-  int _page = 1;
+  int page = 1;
 
-  /// @brief X-position ot the output element
-  uint16_t _x;
-
-  /// @brief Y-position ot the output element
-  uint16_t _y;
-
-  /// @brief Width ot the output element
-  uint16_t _w = 100;
-
-  /// @brief height and fontsize
-  uint16_t _h = 10;
-
+protected:
   /// @brief Draw color of the element
   uint32_t _color = RGB_UNDEFINED;
 
@@ -74,9 +70,9 @@ protected:
   /// @brief Border color of the element
   uint32_t _borderColor = RGB_UNDEFINED;
 
+  /// @brief Value the element
+  String _value;
+
   /// @brief Reference to DisplayAdapter
   DisplayAdapter *_display = nullptr;
-
-  /// @brief Redraw needed flag;
-  bool _needredraw = false;
 };

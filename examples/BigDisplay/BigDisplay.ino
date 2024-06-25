@@ -2,43 +2,10 @@
  * @file The BigDisplay.ino
  * @brief The BigDisplay Sketch that uses the HomeDing Library to implement Things attached the
  * Internet.
- * This example includes a driver for a 800*600 px RGB panel that works with the planel DMA interface of a ESP32-S3 module.
+ * This example includes a driver for some RGB panel that works with the DMA interface of a ESP32-S3 module.
  * All default from the standard sketch are included by default.
  *
- * Compile with
- * * Board: ESP32S3 Dev Module
- * * JTAG Adapter: Disabled
- * * PSRAM : "OPI PSRAM"
- * * Flash Mode: "QIO 80 MHz"
- * * Flash Size: 16MB (128Mb)
- * * USB Mode: Hardware CDC and JTAG 
- * * USB CDC On Boot : "Disabled"
- * * USB Firmware MSC on Boot: "Disabled"
- * * USB DFU on Boot: "Disabled"
- * * Upload Mode: UART0 / Hardware CDC
- * * Partition Scheme: 8M with spiffs (3MB APP/1.5MB SPIFFS)
- * * CPU Frequency 240 MHz (WiFi) 
- * * Core Debug Level: "None"
-
- * 
-  "board": "esp32:esp32:esp32s3",
-  "configuration": "JTAGAdapter=default,PSRAM=opi,FlashMode=qio,FlashSize=16M,LoopCore=1,EventsCore=1,USBMode=hwcdc,CDCOnBoot=cdc,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,PartitionScheme=huge_app,CPUFreq=240,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
-  "port": "COM6",
-  "output": ".\\build",
-  "sketch": "examples\\BigDisplay\\BigDisplay.ino"
- 
-   with CH340 USB-Serial adapter
- 
- {
-    "board": "esp32:esp32:esp32s3",
-    "configuration": "JTAGAdapter=default,PSRAM=opi,FlashMode=qio,FlashSize=16M,LoopCore=1,EventsCore=1,USBMode=hwcdc,CDCOnBoot=default,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,PartitionScheme=default_8MB,CPUFreq=240,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
-    "port": "COM12",
-    "output": ".\\build",
-    "sketch": "examples\\BigDisplay\\BigDisplay.ino"
-}
-
- *
- * There is full featured WebUI from the standard example can be used.
+ * See README.md for more details.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -52,7 +19,8 @@
  *
  * Changelog:
  * * 01.01.2021 created from standard sketch.
-*/ 
+ */
+
 #define DBG_TRACE  // trace level for all elements
 
 // ===== HomeDing Configuration : Enable Elements for the firmware
@@ -60,9 +28,8 @@
 #define HOMEDING_REGISTER 1
 
 // Enable the following element groups of the HomeDing Library
-#define HOMEDING_INCLUDE_SYSTEM
 #define HOMEDING_INCLUDE_CORE
-#define HOMEDING_INCLUDE_FULL_SYSTEM
+// #define HOMEDING_INCLUDE_SSDP
 
 // Enable some Sensor Elements
 #define HOMEDING_INCLUDE_DHT
@@ -70,10 +37,10 @@
 #define HOMEDING_INCLUDE_SHT20
 #define HOMEDING_INCLUDE_AHT20
 #define HOMEDING_INCLUDE_DALLAS
-#define HOMEDING_INCLUDE_BMP280
-#define HOMEDING_INCLUDE_BME680
-#define HOMEDING_INCLUDE_BH1750
-#define HOMEDING_INCLUDE_SCD4X
+// #define HOMEDING_INCLUDE_BMP280
+// #define HOMEDING_INCLUDE_BME680
+// #define HOMEDING_INCLUDE_BH1750
+// #define HOMEDING_INCLUDE_SCD4X
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -87,7 +54,7 @@
 #define HOMEDING_INCLUDE_DSTIME
 
 // Enable Elements for Displays
-#define HOMEDING_INCLUDE_DISPLAY // all elements that can be displayed
+#define HOMEDING_INCLUDE_DISPLAY  // all elements that can be displayed
 // #define HOMEDING_INCLUDE_DISPLAYLCD
 // #define HOMEDING_INCLUDE_DISPLAYSSD1306
 // #define HOMEDING_INCLUDE_DISPLAYSH1106
@@ -95,16 +62,17 @@
 // enable these lines to get more displays supported
 #define HOMEDING_INCLUDE_DISPLAYGC9A01
 #define HOMEDING_INCLUDE_DISPLAYST7796
-#define HOMEDING_INCLUDE_DISPLAYESP32PANEL
 #define HOMEDING_INCLUDE_DISPLAYST7789
+#define HOMEDING_INCLUDE_DISPLAYST7735
+#define HOMEDING_INCLUDE_DISPLAYESP32PANEL
+#define HOMEDING_INCLUDE_DISPLAYST7701
 
-// #define HOMEDING_INCLUDE_DISPLAYST7735
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
+
+// enable these lines to get touch displays supported
 #define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
 #define HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
 #define HOMEDING_INCLUDE_DISPLAYTOUCHCST816
-// Enable simple display Elements
-// #define HOMEDING_INCLUDE_TM1637
 
 // Enable Elements for LIGHT control
 #define HOMEDING_INCLUDE_COLOR
@@ -122,15 +90,17 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#include "esp_partition.h"
+
 #include <FS.h>
-#include <FFat.h>  // File System for Web Server Files
+#include <FFat.h>      // File System for Web Server Files
 #include <LittleFS.h>  // File System for Web Server Files
 
 #include <BuiltinHandler.h>  // Serve Built-in files
 #include <BoardServer.h>     // Web Server Middleware for Elements
 #include <FileServer.h>      // Web Server Middleware for UI
 
-// ===== WLAN credentials =====
+#include "src/AnalogClockElement.h"  // local element for Analog Clock
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);
@@ -141,7 +111,9 @@ WebServer server(80);
  * Setup all components and Serial debugging helpers
  */
 void setup(void) {
+  fs::FS *fs = nullptr;
   Serial.begin(115200);
+  Serial.setTxTimeoutMs(0);
 
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
@@ -150,13 +122,26 @@ void setup(void) {
   Logger::logger_level = LOGGER_LEVEL_TRACE;
 #endif
 
-
   Serial.setDebugOutput(false);
 
-  // ----- setup the platform with webserver and file system -----
+#if defined(ESP8266)
+  fs = &LittleFS;
 
-  // homeding.init(&server, &LittleFS, "BigDisplay");
-  homeding.init(&server, &FFat, "BigDisplay");
+#elif defined(ESP32)
+  // ----- check partitions for finding the fileystem type -----
+  esp_partition_iterator_t i;
+
+  if (i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, nullptr)) {
+    fs = &FFat;
+  } else if (i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr)) {
+    fs = &LittleFS;
+  }
+  esp_partition_iterator_release(i);
+#endif
+
+
+  // ----- setup the platform with webserver and file system -----
+  homeding.init(&server, fs, "Display");
 
   // ----- adding web server handlers -----
 
@@ -168,10 +153,6 @@ void setup(void) {
 
   // UPLOAD and DELETE of static files in the file system.
   server.addHandler(new FileServerHandler(&homeding));
-
-  // Serial.println("Setup Backlight:");
-  // pinMode(27, OUTPUT);
-  // digitalWrite(27, HIGH);
 
   LOGGER_INFO("setup done");
 }  // setup

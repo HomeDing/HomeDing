@@ -24,6 +24,7 @@
 
 #if defined(ESP32)
 #include <rom/rtc.h>
+#include <esp_chip_info.h>
 #endif
 
 // use DIAG TRACE for sending detailed output for the Diag Element.
@@ -36,17 +37,14 @@
  * @return DiagElement* created element
  */
 Element *DiagElement::create() {
-  return (new DiagElement());
+  DiagElement *e = new DiagElement();
+  e->startupMode = Element_StartupMode::System;
+  e->loglevel = LOGGER_LEVEL_TRACE;
+  return (e);
 }  // create()
 
 
 /* ===== Element functions ===== */
-
-DiagElement::DiagElement() {
-  startupMode = Element_StartupMode::System;
-  loglevel = LOGGER_LEVEL_TRACE;
-}
-
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
@@ -87,6 +85,15 @@ bool DiagElement::set(const char *name, const char *value) {
   return (ret);
 }  // set()
 
+// ===== web responses =====
+
+// minimized from upload.htm
+static const char diag_header[] PROGMEM =
+R"==(<!doctype html><html lang="en"><head><title>DIAG</title></head><body><pre>)==";
+
+// minimized from upload.htm
+static const char diag_footer[] PROGMEM =
+R"==(</pre></body></html>)==";
 
 String DiagElement::_handleDiag() {
   String out;
@@ -145,6 +152,8 @@ String DiagElement::_handleDiag() {
           desc = "AHT20,FT6336";
         } else if (adr == 0x3C) {
           desc = "SH1106,SSD1306,SSD1309";
+        } else if (adr == 0x3D) {
+          desc = "SH1106,SSD1306";
         } else if (adr == 0x40) {
           desc = "INA219,INA226";
         } else if (adr == (0x51)) {
@@ -185,29 +194,34 @@ String DiagElement::_handleDiag() {
 
 String DiagElement::_handleProfile() {
   String sOut;
-  sOut += "Profile Loop-Times (usecs):\n";
-  sOut += "Element             | Average | Maximum | Count\n";
+  sOut += "Element Profile       | A | Category | Average | Maximum | Count\n";
+
+  _board->forEach(CATEGORY::All, [this, &sOut](Element *e) {
+    char buffer[128];
+    sprintf(buffer, "%-21s | %d |   0x%04x |", e->id, e->active, e->category);
+    sOut.concat(buffer);
 
 #if defined(HD_PROFILE)
-  _board->forEach("", [this, &sOut](Element *e) {
-    char buffer[128];
-    PROFILE_TIMEPRINTBUF(buffer, e, e->id);
+    sprintf(buffer, " %7ld | %7ld | %6ld\n", (e->profile.totalDuration / e->profile.totalCount), e->profile.maxDuration, e->profile.totalCount);
     sOut.concat(buffer);
-  });
 #endif
+    sOut.concat("\n");
+  });
   return (sOut);
 }
 
 String DiagElement::_handleChipInfo() {
   String sOut;
   char buffer[128];
-  char *s = nullptr;
+  const char *s = nullptr;
 
   sOut = "Chip Infos:\n";
 
 #if defined(ESP8266)
   // about ESP8266 chip variants...
   sprintf(buffer, "  chip-id: 0x%08X", ESP.getChipId());
+  sOut += buffer;
+  sprintf(buffer, "  Flash-ID: 0x%08x\n", ESP.getFlashChipId());
   sOut += buffer;
 
 #elif defined(ESP32)
@@ -239,10 +253,6 @@ String DiagElement::_handleChipInfo() {
   sOut += "\n";
 
   sOut += "Flash:";
-#if defined(ESP8266)
-  sprintf(buffer, "  ID: 0x%08x\n", ESP.getFlashChipId());
-  sOut += buffer;
-#endif
   sprintf(buffer, "  Size: %d kByte\n", ESP.getFlashChipSize() / 1024);
   sOut += buffer;
 
@@ -263,7 +273,6 @@ String DiagElement::_handleChipInfo() {
   sOut += "PSRAM:";
   sprintf(buffer, "  Size: %d kByte\n", ESP.getPsramSize() / 1024);
   sOut += buffer;
-
 #endif
 
   return (sOut);
@@ -278,7 +287,11 @@ void DiagElement::start() {
 
   // enable I2C scan output using http://nodeding/diag
   _board->server->on("/diag", HTTP_GET, [this]() {
-    _board->server->send(200, "text/plain", _handleDiag());
+    String c;
+    c = FPSTR(diag_header);
+    c.concat(_handleDiag());
+    c.concat(FPSTR(diag_footer));
+    _board->server->send(200, "text/html", c);
   });
 
   _board->server->on("/profile", HTTP_GET, [this]() {

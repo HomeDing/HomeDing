@@ -59,7 +59,7 @@ bool PMSElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "pintx") == 0) {
     _pintx = _atopin(value);
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value; // save the actions
 
   } else {
@@ -179,7 +179,7 @@ void PMSElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback)
 {
   Element::pushState(callback);
-  callback(PROP_VALUE, Element::getItemValue(_lastValues, 1).c_str());
+  callback(HomeDing::Action::Value, Element::getItemValue(_lastValues, 1).c_str());
 } // pushState()
 
 #endif

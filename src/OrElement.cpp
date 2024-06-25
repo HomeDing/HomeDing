@@ -26,15 +26,13 @@
  * @return OrElement* created element
  */
 Element *OrElement::create() {
-  return (new OrElement());
+  OrElement *el = new OrElement();
+  el->_type = DATATYPE::BOOLEAN;
+  return (el);
 } // create()
 
 
 /* ===== Element functions ===== */
-
-OrElement::OrElement() {
-  _type = DATATYPE::BOOLEAN;
-}
 
 /**
  * @brief Give some processing time to the Element to check for next actions.

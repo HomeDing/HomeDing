@@ -21,8 +21,6 @@
 
 #include <displays/DisplaySSD1306Adapter.h>
 
-#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
-
 /* ===== Static factory function ===== */
 
 /**
@@ -38,23 +36,21 @@ Element *DisplaySSD1306Element::create() {
 
 // All required parameters are handled by DisplayElement::set()
 
-/**
- * @brief Activate the DisplaySSD1306Element and register a Display Adapter to LCD
- * in the board.
- */
+/// @brief Activate the DisplaySSD1306Element and register
+/// the Display Adapter to the board.
 void DisplaySSD1306Element::start() {
-  TRACE("start()");
-
+  LOGGER_ETRACE("start()");
   DisplayAdapter *d = new DisplaySSD1306Adapter();
+
   if (d->setup(_board, &config)) {
-    bool success = d->start();
-    if (success) {
+    if (d->start()) {
       _board->display = d;
       DisplayElement::start();
 
     } else {
       LOGGER_EERR("no display found");
       delete d;
+      active = false;
     }  // if
   }    // if
 }  // start()

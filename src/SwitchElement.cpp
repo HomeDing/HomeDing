@@ -60,16 +60,16 @@ bool SwitchElement::set(const char *name, const char *value)
 {
   bool ret = true;
 
-  if (_stricmp(name, PROP_VALUE) == 0) {
+  if (name == HomeDing::Action::Value) {
     _setValue(_atob(value), false);
 
-  } else if (_stricmp(name, "toggle") == 0) {
+  } else if (name == HomeDing::Action::Toggle) {
     _setValue(!_getValueInt(), false);
 
-  } else if (_stricmp(name, "onhigh") == 0) {
+  } else if (name == HomeDing::Action::OnHigh) {
     _highAction = value;
 
-  } else if (_stricmp(name, "onlow") == 0) {
+  } else if (name == HomeDing::Action::OnLow) {
     _lowAction = value;
 
   } else {

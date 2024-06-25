@@ -18,7 +18,7 @@
 
 #include <AnalogElement.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new AnalogElement.
@@ -35,11 +35,12 @@ int AnalogElement::map(int value) {
   if (divisor != 0) {
     out = ((value - _inMin) * (_outMax - _outMin) / divisor) + _outMin;
   }
-  if (_constrain)
+  if (_constrain) {
     if (_outMin < _outMax)
       out = constrain(out, _outMin, _outMax);
     else
       out = constrain(out, _outMax, _outMin);
+  }
   TRACE("map(%d) %d", value, out);
   return (out);
 }
@@ -54,7 +55,7 @@ bool AnalogElement::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // done.
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "hysteresis") == 0) {
@@ -81,16 +82,16 @@ bool AnalogElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "reference") == 0) {
     _reference = _atoi(value);
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _actions[0] = value;
 
   } else if (_stricmp(name, "onreference") == 0) {
     _actions[1] = value;
 
-  } else if (_stricmp(name, "onhigh") == 0) {
+  } else if (name == HomeDing::Action::OnHigh) {
     _highAction = value;
 
-  } else if (_stricmp(name, "onlow") == 0) {
+  } else if (name == HomeDing::Action::OnLow) {
     _lowAction = value;
 
   } else {
@@ -127,7 +128,7 @@ void AnalogElement::start() {
 }  // start()
 
 
-bool AnalogElement::getProbe(UNUSED String &values) {
+bool AnalogElement::getProbe(String &values) {
   int rawValue = analogRead(_pin);
   int value;
 
@@ -142,13 +143,13 @@ bool AnalogElement::getProbe(UNUSED String &values) {
   if ((value >= _lastValue + _hysteresis) || (value <= _lastValue - _hysteresis)) {
     _lastValue = value;
     values = String(value) + ',' + (value < _reference ? "0" : "1");
-  }               // if
+  }  // if
 
   return (true);  // always simulate data is fine
 }  // getProbe()
 
 
-void AnalogElement::sendData(UNUSED String &values) {
+void AnalogElement::sendData(String &values) {
   SensorElement::sendData(values);
 
   int r = (values.endsWith(",1") ? 1 : 0);
@@ -159,7 +160,7 @@ void AnalogElement::sendData(UNUSED String &values) {
       _board->dispatch(_lowAction);
     }  // if
     _lastReference = r;
-  }    // if
+  }  // if
 
 }  // sendData()
 

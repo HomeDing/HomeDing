@@ -89,105 +89,45 @@ bool DiagElement::set(const char *name, const char *value) {
 
 // minimized from upload.htm
 static const char diag_header[] PROGMEM =
-R"==(<!doctype html><html lang="en"><head><title>DIAG</title></head><body><pre>)==";
+  R"==(<!doctype html><html lang="en"><head><title>DIAG</title></head><body>)==";
 
 // minimized from upload.htm
 static const char diag_footer[] PROGMEM =
-R"==(</pre></body></html>)==";
+  R"==(</body></html>)==";
 
 String DiagElement::_handleDiag() {
   String out;
-  char buffer[128];
-  const char *desc = nullptr;
-  unsigned long tStart = millis();
-  int num = 0;
-  int adr = 0;
 
-  out += "**Info**\n";
+  out += FPSTR(diag_header);
+  out += "<h1>Diagnostics</h1>";
+
+  out += "<pre>";
   out += "DeviceName: ";
   out += _board->deviceName;
   out += '\n';
   out += "Build Date & Time: " __DATE__ "T" __TIME__ "\n";
   out += "State: [" + DeviceState::getStateString() + "]\n";
+
+#if defined(ESP32)
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+  // ESP32 Version 3++
+  out += "Mac-address: " + Network.macAddress() + "\n";
+#else
+  // ESP32 Version 2.x
   out += "Mac-address: " + WiFi.macAddress() + "\n";
-  out += "\n";
+#endif
+#elif defined(ESP8266)
+  out += "Mac-address: " + WiFi.macAddress() + "\n";
+#endif
 
-  if ((_board->I2cSda < 0) || (_board->I2cScl < 0)) {
-    out += "no i2c bus.\n";
+  out += "</pre>\n";
 
-  } else {
-    sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
-    out += buffer;
+  out += "<p><a href='/profile'>Profiler</a></p>\n";
+  out += "<p><a href='/chipinfo'>Chipinfo</a></p>\n";
+  out += "<p><a href='/wirescan'>I2C bus scan</a></p>\n";
+  out += "<p><a href='/networks'>Networks</a></p>\n";
 
-    while ((millis() < tStart + 3000) && (adr < 127)) {
-      adr++;
-
-      // The i2c scanner uses the return value of Write.endTransmission
-      // to find a device that acknowledged to the address.
-      Wire.beginTransmission(adr);
-      int error = Wire.endTransmission();
-
-      if (error) {
-        // try again for some devices that need wakeup
-        Wire.beginTransmission(adr);
-        error = Wire.endTransmission();
-      }
-
-      if (error == 0) {
-        desc = nullptr;
-
-        if (adr == 0x11) {
-          desc = "SI4721";
-        } else if (adr == (0x15)) {
-          desc = "CST816D";
-        } else if (adr == (0x0e)) {
-          desc = "MAG3110";
-        } else if (adr == (0x14)) {
-          desc = "GT911";
-        } else if (adr == 0x23) {
-          desc = "BH1750";
-        } else if (adr == 0x27) {
-          desc = "LCD,PCF8574";
-        } else if (adr == 0x38) {
-          desc = "AHT20,FT6336";
-        } else if (adr == 0x3C) {
-          desc = "SH1106,SSD1306,SSD1309";
-        } else if (adr == 0x3D) {
-          desc = "SH1106,SSD1306";
-        } else if (adr == 0x40) {
-          desc = "INA219,INA226";
-        } else if (adr == (0x51)) {
-          desc = "RTC,PCF8563";
-        } else if (adr == (0x5c)) {
-          desc = "AM2320";
-        } else if (adr == (0x5d)) {
-          desc = "GT911";
-        } else if (adr == (0x5f)) {
-          desc = "HTS221";
-        } else if (adr == 0x62) {
-          desc = "SCD-4x";
-        } else if (adr == 0x63) {
-          desc = "Radio,SI4730";
-        } else if (adr == (0x68)) {
-          desc = "RTC,DS1307,MPU-6050";
-        } else if (adr == 0x6D) {
-          desc = "FBM320";
-        } else if (adr == 0x77) {
-          desc = "BMP280";
-        }
-
-        sprintf(buffer, "* 0x%02x: (%s)\n", adr, desc ? desc : "");
-        out += buffer;
-        yield();
-        num++;
-      }
-    }  // while
-
-    sprintf(buffer, "%3d addresses scanned.\n", adr);
-    out += buffer;
-    sprintf(buffer, "%3d devices found.\n", num);
-    out += buffer;
-  }
+  out += FPSTR(diag_footer);
   return (out);
 }  // _handleDiag
 
@@ -278,6 +218,122 @@ String DiagElement::_handleChipInfo() {
   return (sOut);
 }
 
+String DiagElement::_handleWireScan() {
+  String sOut;
+  char buffer[128];
+  unsigned long tStart = millis();
+  const char *desc = nullptr;
+  int num = 0;
+  int adr = 0;
+
+  if ((_board->I2cSda < 0) || (_board->I2cScl < 0)) {
+    sOut += "no i2c bus.\n";
+
+  } else {
+    sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
+    sOut += buffer;
+
+    while ((millis() < tStart + 3000) && (adr < 127)) {
+      adr++;
+
+      // The i2c scanner uses the return value of Write.endTransmission
+      // to find a device that acknowledged to the address.
+      Wire.beginTransmission(adr);
+      int error = Wire.endTransmission();
+
+      if (error) {
+        // try again for some devices that need wakeup
+        Wire.beginTransmission(adr);
+        error = Wire.endTransmission();
+      }
+
+      if (error == 0) {
+        desc = nullptr;
+
+        if (adr == 0x11) {
+          desc = "SI4721";
+        } else if (adr == (0x15)) {
+          desc = "CST816D";
+        } else if (adr == (0x0e)) {
+          desc = "MAG3110";
+        } else if (adr == (0x14)) {
+          desc = "GT911";
+        } else if (adr == 0x23) {
+          desc = "BH1750";
+        } else if (adr == 0x27) {
+          desc = "LCD,PCF8574";
+        } else if (adr == 0x38) {
+          desc = "AHT20,FT6336";
+        } else if (adr == 0x3C) {
+          desc = "SH1106,SSD1306,SSD1309";
+        } else if (adr == 0x3D) {
+          desc = "SH1106,SSD1306";
+        } else if (adr == 0x40) {
+          desc = "INA219,INA226";
+        } else if (adr == (0x51)) {
+          desc = "RTC,PCF8563";
+        } else if (adr == (0x5c)) {
+          desc = "AM2320";
+        } else if (adr == (0x5d)) {
+          desc = "GT911";
+        } else if (adr == (0x5f)) {
+          desc = "HTS221";
+        } else if (adr == 0x62) {
+          desc = "SCD-4x";
+        } else if (adr == 0x63) {
+          desc = "Radio,SI4730";
+        } else if (adr == (0x68)) {
+          desc = "RTC,DS1307,MPU-6050";
+        } else if (adr == 0x6D) {
+          desc = "FBM320";
+        } else if (adr == 0x77) {
+          desc = "BMP280";
+        }
+
+        sprintf(buffer, "* 0x%02x: (%s)\n", adr, desc ? desc : "");
+        sOut += buffer;
+        yield();
+        num++;
+      }
+    }  // while
+
+    sprintf(buffer, "%3d addresses scanned.\n", adr);
+    sOut += buffer;
+    sprintf(buffer, "%3d devices found.\n", num);
+    sOut += buffer;
+    sOut += "</pre>";
+  }
+  return (sOut);
+}
+
+String DiagElement::_handleNetworks() {
+  String sOut;
+
+  sOut = "Local Networks:\n";
+
+  int n = WiFi.scanNetworks();
+  if (n == 0) {
+    sOut += "no networks found.\n";
+  } else {
+    for (int i = 0; i < n; ++i) {
+      // Print SSID and RSSI for each network found
+      sOut += String(i + 1);
+      sOut += ": ";
+      sOut += WiFi.SSID(i);
+      sOut += " (";
+      sOut += WiFi.RSSI(i);
+      sOut += ")";
+      sOut += WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? " " : "*";
+      delay(10);
+      sOut += "\n";
+    }
+  }
+
+  return (sOut);
+}  // _handleNetworks()
+
+
+
 /**
  * @brief Activate the DiagElement.
  */
@@ -287,11 +343,7 @@ void DiagElement::start() {
 
   // enable I2C scan output using http://nodeding/diag
   _board->server->on("/diag", HTTP_GET, [this]() {
-    String c;
-    c = FPSTR(diag_header);
-    c.concat(_handleDiag());
-    c.concat(FPSTR(diag_footer));
-    _board->server->send(200, "text/html", c);
+    _board->server->send(200, "text/html", _handleDiag());
   });
 
   _board->server->on("/profile", HTTP_GET, [this]() {
@@ -300,6 +352,14 @@ void DiagElement::start() {
 
   _board->server->on("/chipinfo", HTTP_GET, [this]() {
     _board->server->send(200, "text/plain", _handleChipInfo());
+  });
+
+  _board->server->on("/wirescan", HTTP_GET, [this]() {
+    _board->server->send(200, "text/plain", _handleWireScan());
+  });
+
+  _board->server->on("/networks", HTTP_GET, [this]() {
+    _board->server->send(200, "text/plain", _handleNetworks());
   });
 
   DIAGTRACE("I2C pins sda=%d scl=%d", _board->I2cSda, _board->I2cScl);

@@ -51,6 +51,8 @@
 
 #if defined(DEBUG_ESP_PORT) || defined(ESP32)
 
+/// LOGGER_ENABLED is defined when any Logging support is enabled at compile time.
+/// It can be used to avoid computations before logging. 
 #define LOGGER_ENABLED
 
 // ===== Logger Macros for non-element classes
@@ -134,6 +136,8 @@ public:
   /// @param fmt format string using printf syntax
   /// @param parameters according printf
   static void printf(const char *fmt, ...);
+
+  static void flush();
 
   /// @brief Create Log entry with module prefix
   /// @param module module prefix as string

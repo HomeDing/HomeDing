@@ -159,7 +159,6 @@ bool ToneElement::set(const char *name, const char *value) {
     // done.
 
   } else if (_stricmp(name, "tones") == 0) {
-    // Serial.printf("Tone: <%s>\n", value);
     String tones = value;
     tones.replace(' ', ',');  // allow ',' and ' '(space) for separation
     _loadTones(tones);

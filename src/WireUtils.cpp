@@ -20,6 +20,8 @@
 #include <Arduino.h>
 #include <WireUtils.h>
 
+#define CTRACE(...)  // Serial.printf(__VA_ARGS__)
+
 // activate to get some debug output.
 // #define WIREDUMP
 
@@ -28,10 +30,10 @@ void WireUtils::dumpBuffer(uint8_t *data, uint8_t len) {
 #ifdef WIREDUMP
   if (data) {
     while (len > 0) {
-      Serial.printf(" %02x", *data++);
+      CTRACE(" %02x", *data++);
       len--;
     }  // while
-    Serial.println();
+    CTRACE("\n");
   }    // if
 #endif
 }  // dumpBuffer()
@@ -57,7 +59,7 @@ uint8_t WireUtils::readBuffer(uint8_t address, uint8_t *data, uint8_t len) {
   }
 
 #ifdef WIREDUMP
-  Serial.printf("i2c <read: ");
+  CTRACE("i2c <read: ");
   dumpBuffer(data, len);
 #endif
 
@@ -68,7 +70,7 @@ uint8_t WireUtils::readBuffer(uint8_t address, uint8_t *data, uint8_t len) {
 // write a sequence of bytes from buffer
 uint8_t WireUtils::writeBuffer(uint8_t address, uint8_t *data, uint8_t len) {
 #ifdef WIREDUMP
-  Serial.printf("i2c >writ: ");
+  CTRACE("i2c >writ: ");
   dumpBuffer(data, len);
 #endif
 
@@ -106,7 +108,7 @@ uint8_t WireUtils::write(uint8_t address, uint8_t data1, uint8_t data2, uint8_t 
 
 uint8_t WireUtils::txrx(uint8_t address, uint8_t *txBuffer, uint8_t txLen, uint8_t *rxBuffer, uint8_t rxLen) {
 #ifdef WIREDUMP
-  Serial.printf("i2x txrx: 0x%02x %d %d\n", address, txLen, rxLen);
+  CTRACE("i2x txrx: 0x%02x %d %d\n", address, txLen, rxLen);
 #endif
 
   uint8_t done = 0;

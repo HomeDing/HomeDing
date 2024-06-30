@@ -156,7 +156,7 @@ public:
   };
 
   virtual uint32_t getPixel(int16_t /* x */, int16_t /* y */) {
-    return(backColor);
+    return(conf->backgroundColor);
   };
 
   // @brief remember that flush is required after sequence.

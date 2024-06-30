@@ -92,7 +92,7 @@ void TouchElement::start() {
 void TouchElement::loop() {
   int val = touchRead(_pin);
 
-  // Serial.println(val);
+  TRACE("touchRead (%d)", val);
   val = (val < 65);
 
   if (val != _value) {

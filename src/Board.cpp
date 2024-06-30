@@ -438,7 +438,7 @@ void Board::loop() {
       if ((nowMillis > _deepSleepStart) && (_DeepSleepCount > _addedElements + 4)) {
         // all elements now had the chance to create and dispatch an event.
         LOGGER_INFO("sleep %ld msecs.", _deepSleepTime);
-        Serial.flush();
+        Logger::flush();
 #if defined(ESP32)
         // remember there was deep sleep mode before reset.
         _isWakeupStart = true;
@@ -559,7 +559,6 @@ void Board::loop() {
 
     // get effective Hostname
     deviceName = WiFi.getHostname();
-    NETTRACE("deviceName=%s", deviceName.c_str());
 
 #if defined(ESP8266)
     WiFi.setOutputPower(outputPower);
@@ -814,7 +813,7 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
   if (!action.isEmpty()) {
     String tmp = action;
     tmp.replace("$v", v);
-    LOGGER_TRACE("queue (%s)=>(%s)", (_activeElement ? _activeElement->id : ""), tmp.c_str());
+    LOGGER_INFO("action (%s)=>(%s)", (_activeElement ? _activeElement->id : ""), tmp.c_str());
     if (split) {
       int len = ListUtils::length(tmp);
       for (int n = 0; n < len; n++) {
@@ -832,7 +831,7 @@ void Board::dispatchAction(Element *target, const char *action_name, const char 
 
 #if defined(LOGGER_ENABLED)
   // show action in log when target has trace loglevel
-  Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "set %s=%s", action_name, action_value);
+  Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "#set %s=%s", action_name, action_value);
 #endif
 
   const char *action = HomeDing::Action::find(action_name);
@@ -843,7 +842,6 @@ void Board::dispatchAction(Element *target, const char *action_name, const char 
   if (!ret) {
     LOGGER_ERR("Action '%s' was not accepted by %s.", action, target->id);
   }
-
 #else
   target->set(action, action_value);
 

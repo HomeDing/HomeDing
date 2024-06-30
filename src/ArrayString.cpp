@@ -18,7 +18,7 @@
 #include <Arduino.h>
 #include <ArrayString.h>
 
-#define CTRACE(...) // Serial.printf(__VA_ARGS__)
+#define CTRACE(...)  // Serial.printf(__VA_ARGS__)
 
 void ArrayString::_createCapacity(uint16_t num) {
   CTRACE("_createCapacity(%d)\n", num);

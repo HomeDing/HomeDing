@@ -36,20 +36,21 @@ bool Element::set(const char *name, const char *value) {
   // TRACE("set %s=%s", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "start") == 0) {
+  if (name == HomeDing::Action::Start) {
     start();
     ret = active;
 
-  } else if (_stricmp(name, "stop") == 0) {
+  } else if (name == HomeDing::Action::Stop) {
     term();
 
-  } else if (_stricmp(name, "logLevel") == 0) {
+  } else if (name == HomeDing::Action::LogLevel) {
     loglevel = _atoi(value);
 
-  } else if (_stricmp(name, "useState") == 0) {
+  } else if (name == HomeDing::Action::UseState) {
     _useState = _atob(value);
 
-  } else if (_stricmp(name, "startup") == 0) {
+  } else if (name == HomeDing::Action::Startup) {
+
     if (_stricmp(value, "sys") == 0) {
       startupMode = Element_StartupMode::System;
     } else if (_stricmp(value, "net") == 0) {
@@ -61,12 +62,12 @@ bool Element::set(const char *name, const char *value) {
 
     // do not report an error for the following properties,
     // as they are used by the web ui and stored in the config files only.
-  } else if (_stricmp(name, "description") == 0) {
-  } else if (_stricmp(name, "title") == 0) {
+  } else if (name == HomeDing::Action::Description) {
+  } else if (name == HomeDing::Action::Title) {
 
   } else {
-    // LOGGER_EERR("cannot set property %s:", name, value); // not an error when used for testing common properties
     ret = false;
+
   }  // if
   return (ret);
 }  // set()

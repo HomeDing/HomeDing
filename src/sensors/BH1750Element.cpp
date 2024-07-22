@@ -142,7 +142,7 @@ void BH1750Element::sendData(String &values) {
 void BH1750Element::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   SensorElement::pushState(callback);
-  callback("value", _lastValues.c_str());
+  callback(HomeDing::Action::Value, _lastValues.c_str());
 }  // pushState()
 
 // End

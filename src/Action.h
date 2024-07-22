@@ -1,11 +1,24 @@
-// Actions.h
-
-// maintain a list of knows actions from the current active elements.
-
-// A name in this collection can be comapred by the address of the string in the set() function of the element.
-// The board class converts any given name by (char *) or String into the (const char *) of the lowercase equivalent of this set of action names.
-
-
+/**
+ * @file Actions.h
+ *
+ * @brief The Actions helps speeding up dispatching of Actions to Elements in the HomeDing Library.
+ * Many action names are knows to be used frequently (like 'value') are looked up in the static name set.
+ * This found pointer is also saved in the variables in the namespace HomeDing::Action.
+ * This allows comparing pointers instead of the high resource consuming string comparisation
+ * in the set() functions of the Elements.
+ *
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license,
+ * https://www.mathertel.de/License.aspx.
+ *
+ * More information on https://www.mathertel.de/Arduino.
+ *
+ * Changelog:
+ * * 22.03.2024 created by Matthias Hertel
+ */
 
 namespace HomeDing {
 

@@ -258,12 +258,12 @@ void Board::_checkNetState() {
  * @brief Add and config the Elements defined in the config files.
  */
 void Board::_addAllElements() {
-  BOARDTRACE("addAllElements()");
+  ELEMTRACE("addAllElements()");
   Element *_lastElem = NULL;  // last created Element
 
   MicroJson *mj = new MicroJson(
     [this, &_lastElem](int level, char *_path, char *value) {
-      // BOARDTRACE("callback %d %s =%s", level, path, value ? value : "-");
+      ELEMTRACE("callback %d %s =%s", level, _path, value ? value : "-");
       hd_yield();
 
       char path[128];
@@ -813,7 +813,13 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
   if (!action.isEmpty()) {
     String tmp = action;
     tmp.replace("$v", v);
-    LOGGER_INFO("action (%s)=>(%s)", (_activeElement ? _activeElement->id : ""), tmp.c_str());
+
+#if defined(LOGGER_ENABLED)
+    if (Logger::logger_level >= LOGGER_LEVEL_TRACE) {
+      Logger::printf("#action (%s)=>%s", (_activeElement ? _activeElement->id : ""), tmp.c_str());
+    }
+#endif
+
     if (split) {
       int len = ListUtils::length(tmp);
       for (int n = 0; n < len; n++) {
@@ -829,23 +835,26 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
 // send a event out to the defined target.
 void Board::dispatchAction(Element *target, const char *action_name, const char *action_value) {
 
-#if defined(LOGGER_ENABLED)
-  // show action in log when target has trace loglevel
-  Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "#set %s=%s", action_name, action_value);
-#endif
-
-  const char *action = HomeDing::Action::find(action_name);
-  if (!action) action = action_name;
+  if (target) {
+    const char *action = HomeDing::Action::find(action_name);
+    if (!action) action = action_name;
 
 #if defined(LOGGER_ENABLED)
-  bool ret = target->set(action, action_value);
-  if (!ret) {
-    LOGGER_ERR("Action '%s' was not accepted by %s.", action, target->id);
-  }
+    // show action in log when target has trace loglevel
+    // Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "#set %s=%s", action_name, action_value);
+    if (Logger::logger_level >= LOGGER_LEVEL_TRACE)
+      Logger::printf("#set    %s?%s=%s", target->id, action, action_value);
+
+    bool ret = target->set(action, action_value);
+    if (!ret) {
+      LOGGER_ERR("Action '%s' was not accepted by %s.", action, target->id);
+    }
+
 #else
-  target->set(action, action_value);
-
+    target->set(action, action_value);
 #endif
+
+  }
 }  // dispatchAction()
 
 

@@ -42,7 +42,7 @@ bool ValueElement::_setValue(int newValue, bool forceAction) {
   
   if (_value != newValue) {
     _value = newValue;
-    saveState("value", String(_value));
+    saveState(HomeDing::Action::Value, String(_value));
   }
 
   return (ret);
@@ -61,7 +61,7 @@ bool ValueElement::_setValue(const char *newValue, bool forceAction) {
 
   if (_valueString != newValue) {
     _valueString = newValue;
-    saveState("value", _valueString);
+    saveState(HomeDing::Action::Value, _valueString);
   }
 
   return (ret);

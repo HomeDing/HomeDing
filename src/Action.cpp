@@ -1,3 +1,25 @@
+/**
+ * @file Actions.h
+ *
+ * @brief The Actions helps speeding up dispatching of Actions to Elements in the HomeDing Library.
+ * Many action names are knows to be used frequently (like 'value') are looked up in the static name set.
+ * This found pointer is also saved in the variables in the namespace HomeDing::Action.
+ * This allows comparing pointers instead of the high resource consuming string comparisation
+ * in the set() functions of the Elements.
+ *
+ * @author Matthias Hertel, https://www.mathertel.de
+ *
+ * @Copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
+ *
+ * This work is licensed under a BSD style license,
+ * https://www.mathertel.de/License.aspx.
+ *
+ * More information on https://www.mathertel.de/Arduino.
+ *
+ * Changelog:
+ * see <Action.h>
+ */
+
 // Actions.cpp
 
 #include <Arduino.h>

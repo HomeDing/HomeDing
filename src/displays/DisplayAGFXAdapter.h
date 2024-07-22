@@ -157,7 +157,7 @@ public:
       setColor(conf->drawColor);
       setBackgroundColor(conf->backgroundColor);
       setBorderColor(conf->borderColor);
-      _setTextHeight(conf->height > 64 ? 16 : 8);
+      _setTextHeight(conf->height > 128 ? 16 : 8);
       clear();
       flush();
     }  // if

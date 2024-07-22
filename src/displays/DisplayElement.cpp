@@ -86,6 +86,7 @@ bool DisplayElement::set(const char *name, const char *value) {
     // these actions only work with existing display adapter
 
     if (_stricmp(name, "page") == 0) {
+      // switch the page
       _newPage(*value ? _atoi(value) : da->page);
 
     } else if (_stricmp(name, "addpage") == 0) {
@@ -94,6 +95,9 @@ bool DisplayElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "clear") == 0) {
       da->start();
     }
+
+  } else if (_stricmp(name, "page") == 0) {
+    // da is not (yet) existing
 
   } else if (_stricmp(name, "onpage") == 0) {
     // action with current visible page

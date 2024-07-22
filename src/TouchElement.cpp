@@ -107,7 +107,7 @@ void TouchElement::loop() {
 void TouchElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _printBoolean(_value));
+  callback(HomeDing::Action::Value, _printBoolean(_value));
 }  // pushState()
 
 #endif

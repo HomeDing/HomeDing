@@ -60,6 +60,11 @@ public:
   /// @brief Page of the display where the element is placed. Default on page 1.
   int page = 1;
 
+  /// @brief isOpaque is true when the DisplayOutputElement always draws within the same boundary and has no transparent area.
+  /// This allows drawing without drawing its background first.
+  /// The DisplayOutputElement will draw it's local background usually. 
+  bool isOpaque = false;
+
 protected:
   /// @brief Draw color of the element
   uint32_t _color = RGB_UNDEFINED;

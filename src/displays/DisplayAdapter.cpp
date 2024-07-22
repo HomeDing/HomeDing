@@ -97,7 +97,9 @@ bool DisplayAdapter::startFlush(bool force) {
       if (de->active && de->page == page && de->needsDraw) {
         TRACEDRAW(" draw: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
         // draw box with background color
-        drawRectangle(de->box, RGB_TRANSPARENT, conf->backgroundColor);
+        if (!(de->isOpaque)) {
+          drawRectangle(de->box, RGB_TRANSPARENT, conf->backgroundColor);
+        }
         de->draw();
         de->needsDraw = false;
       }

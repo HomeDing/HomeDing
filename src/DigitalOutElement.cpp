@@ -84,7 +84,7 @@ void DigitalOutElement::start() {
 void DigitalOutElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _printBoolean(_lastValue));
+  callback(HomeDing::Action::Value, _printBoolean(_lastValue));
 }  // pushState()
 
 

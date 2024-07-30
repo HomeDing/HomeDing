@@ -17,6 +17,8 @@
 
 #pragma once
 
+#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
+
 #include <displays/DisplayElement.h>
 
 /// @brief DisplayESP32PanelElement implements creating an Display Adapter for a ST7796 based LCD.
@@ -43,4 +45,6 @@ public:
 // Register the DisplayESP32PanelElement onto the ElementRegistry.
 bool DisplayESP32PanelElement::registered =
   ElementRegistry::registerElement("displayesp32panel", DisplayESP32PanelElement::create);
+#endif
+
 #endif

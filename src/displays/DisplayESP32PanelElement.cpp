@@ -19,10 +19,11 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
+
 #include "displays/DisplayESP32PanelElement.h"
 
 #include "displays/DisplayESP32PanelAdapter.h"
-#include "DisplayESP32PanelElement.h"
 
 #define TRACE(...)  // LOGGER_EINFO(__VA_ARGS__)
 
@@ -55,5 +56,7 @@ void DisplayESP32PanelElement::start() {
     }  // if
   }    // if
 }  // start()
+
+#endif
 
 // End

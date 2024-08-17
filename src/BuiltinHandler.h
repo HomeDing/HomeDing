@@ -39,15 +39,21 @@ public:
   BuiltinHandler(Board *board);
 
   /**
-   * @brief Verify if the method and requestUri can be handles by this module.
+   * @brief Verify if the method and uri can be handles by this module.
    * @param requestMethod current http request method.
-   * @param requestUri current url of the request.
-   * @return true When the method and requestUri match a state request.
+   * @param uri current url of the request.
+   * @return true When the method and uri match a state request.
    */
 #if defined(ESP8266)
-  bool canHandle(HTTPMethod requestMethod, const String &requestUri) override;
+  bool canHandle(HTTPMethod requestMethod, const String &uri) override;
 #elif defined(ESP32)
-  bool canHandle(HTTPMethod requestMethod, String requestUri) override;
+
+#if (ESP_ARDUINO_VERSION_MAJOR < 3)
+  bool canHandle(HTTPMethod requestMethod, String uri) override;
+#else
+  bool canHandle(WebServer &server, HTTPMethod requestMethod, String uri) override;
+#endif
+
 #endif
 
   /**

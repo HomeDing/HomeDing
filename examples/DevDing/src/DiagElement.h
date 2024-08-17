@@ -78,4 +78,5 @@ private:
   String _handleChipInfo();
   String _handleWireScan();
   String _handleNetworks();
+  String _handleHeap();
 };

@@ -115,20 +115,7 @@ bool DisplayElement::set(const char *name, const char *value) {
     config.borderColor = _atoColor(value);
 
   } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
-    if (_stricmp(value, "spi") == 0) {
-      config.busmode = BUSMODE_SPI;
-    } else if (_stricmp(value, "hspi") == 0) {
-      config.busmode = BUSMODE_HSPI;
-    } else if (_stricmp(value, "i2c") == 0) {
-      config.busmode = BUSMODE_I2C;
-    } else if (_stricmp(value, "par8") == 0) {
-      config.busmode = BUSMODE_PAR8;  // 8 bit parallel data
-    } else if (_stricmp(value, "lcd8") == 0) {
-      config.busmode = BUSMODE_LCD8;
-
-    } else if (_stricmp(value, "panel") == 0) {
-      config.busmode = BUSMODE_PANEL;
-    }
+    config.busmode = ListUtils::indexOf(BUSMODE_LIST, value);
 
   } else if (_stricmp(name, "busspeed") == 0) {
     config.busSpeed = _atoi(value);

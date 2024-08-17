@@ -50,19 +50,16 @@ extern "C" {
 #define BOARDTRACE(...)  // Logger::LoggerPrint("Board", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use ELEM-TRACE for compiling with detailed TRACE output for Element creation.
-#define ELEMTRACE(...)  // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define ELEMTRACE(...) // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...)  // Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define NETTRACE(...) Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
-// The captive Mode will stay for 5 min. and then restart.
-#define CAPTIVE_TIME (5 * 60 * 1000)
-
-#define NetMode_PSK 2   // second try
-#define NetMode_PASS 1  // last try
+// The captive Mode will stay for 10 min. and then restart.
+#define CAPTIVE_TIME (10 * 60 * 1000)
 
 DNSServer *dnsServer;
 IPAddress apIP(192, 168, 4, 1);
@@ -137,7 +134,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
   // board parameters configured / overwritten by device element
   homepage = "/index.htm";
-  cacheHeader = "no-cache";
+  cacheHeader = "etag";  //  "no-cache";
 
   _newBoardState(BOARDSTATE::NONE);
   _deepSleepStart = 0;         // no deep sleep to be started
@@ -327,7 +324,7 @@ void Board::start(Element_StartupMode startupMode) {
   forEach(Element::CATEGORY::All, [startupMode](Element *e) {
     if ((!e->active) && (e->startupMode <= startupMode)) {
       // start element when not already active
-      ELEMTRACE("starting %s...", l->id);
+      ELEMTRACE("starting %s...", e->id);
       e->setup();  // one-time initialization
       e->start();  // start...
       hd_yield();
@@ -618,8 +615,7 @@ void Board::loop() {
     server->begin();
     server->enableCORS(true);
 
-    randomSeed(millis());         // millis varies on every start, good enough
-    filesVersion = random(8000);  // will incremented on every file upload by file server
+    randomSeed(millis());  // millis varies on every start, good enough
 
     if (cacheHeader == "etag") {
 #if defined(ESP8266)
@@ -635,8 +631,6 @@ void Board::loop() {
           File f = fs.open(path, "r");
           eTag = String(f.getLastWrite(), 16);  // use file modification timestamp to create ETag
           f.close();
-          // use current counter
-          // eTag = String(filesVersion, 16);  // f.getLastWrite()
         }
         return (eTag);
       });
@@ -646,18 +640,15 @@ void Board::loop() {
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
       // enable eTags in results for static files
       // by setting "cache": "etag" inc env.json on the device element
+      // don't cache *.txt files
 
       // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
       server->enableETag(true, [this](FS &fs, const String &path) -> String {
         String eTag;
         if (!path.endsWith(".txt")) {
-          // txt files contain logs that must not be cached.
-          // eTag = esp8266webserver::calcETag(fs, path);
           File f = fs.open(path, "r");
           eTag = String(f.getLastWrite(), 16);  // use file modification timestamp to create ETag
           f.close();
-          // use current counter
-          // eTag = String(filesVersion, 16);  // f.getLastWrite()
         }
         return (eTag);
       });
@@ -845,7 +836,14 @@ void Board::dispatchAction(Element *target, const char *action_name, const char 
     if (Logger::logger_level >= LOGGER_LEVEL_TRACE)
       Logger::printf("#set    %s?%s=%s", target->id, action, action_value);
 
+#if defined(HD_PROFILE)
+    PROFILE_START(target);
+#endif
     bool ret = target->set(action, action_value);
+#if defined(HD_PROFILE)
+    PROFILE_END(target);
+#endif
+
     if (!ret) {
       LOGGER_ERR("Action '%s' was not accepted by %s.", action, target->id);
     }
@@ -853,7 +851,6 @@ void Board::dispatchAction(Element *target, const char *action_name, const char 
 #else
     target->set(action, action_value);
 #endif
-
   }
 }  // dispatchAction()
 
@@ -965,16 +962,17 @@ void Board::deferSleepMode() {
 
 
 void Board::getState(String &out, const char *id) {
-  BOARDTRACE("getState(%s)", path.c_str());
+  BOARDTRACE("getState(%s)", id ? id : "-");
   String ret = "{";
 
   forEach(Element::CATEGORY::All, [this, id, &ret](Element *e) {
+    BOARDTRACE("  %s", e->id);
     if ((!id) || (strcmp(e->id, id) == 0)) {
       ret += '\"';
       ret += e->id;
       ret += "\":{";
       e->pushState([&ret](const char *name, const char *value) {
-        // BOARDTRACE("->%s=%s", name, value);
+        BOARDTRACE("->%s=%s", name, value);
         ret.concat('\"');
         ret.concat(name);
         ret.concat("\":\"");
@@ -1033,12 +1031,14 @@ Element *Board::getElement(const char *elementType, const char *elementName) {
 
 
 Element *Board::findById(const char *id) {
-  BOARDTRACE("findById(%s)", id);
+  BOARDTRACE("findById(%s)", id ? id : "-");
   Element *found = nullptr;
 
-  forEach(Element::CATEGORY::All, [id, &found](Element *e) {
-    if (strcmp(e->id, id) == 0) { found = e; }
-  });
+  if (id) {
+    forEach(Element::CATEGORY::All, [id, &found](Element *e) {
+      if (strcmp(e->id, id) == 0) { found = e; }
+    });
+  }
   return (found);
 }  // findById
 

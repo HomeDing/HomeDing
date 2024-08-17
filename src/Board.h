@@ -345,10 +345,6 @@ public:
   /** WebServer instance */
   WebServer *server;
 
-  // a counter used as eTag that gets incremented when any file is changed.
-  unsigned int filesVersion;
-
-
   /// @brief Iterate all Elements from both lists with a given category.
   /// @param cat The categories that must match at least one.
   /// @param fCallback Callback function passing each element

@@ -22,7 +22,7 @@
 #include "upload.h"
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...)  LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Construct a new BuiltinHandler object
@@ -42,15 +42,22 @@ BuiltinHandler::BuiltinHandler(Board *board) {
  * @return true When the method and requestUri match a state request.
  */
 #if defined(ESP8266)
-bool BuiltinHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
+bool BuiltinHandler::canHandle(HTTPMethod requestMethod, const String &uri)
+
 #elif defined(ESP32)
-bool BuiltinHandler::canHandle(HTTPMethod requestMethod, String requestUri)
+#if (ESP_ARDUINO_VERSION_MAJOR < 3)
+bool BuiltinHandler::canHandle(HTTPMethod requestMethod, String uri)
+#else
+bool BuiltinHandler::canHandle(WebServer &server, HTTPMethod requestMethod, String uri)
+#endif
 #endif
 {
-  bool can = ((!_board->isSafeMode) && (requestMethod == HTTP_GET) // only GET requests in the API
-              && (requestUri.startsWith("/$setup") || requestUri.startsWith("/$update") || requestUri.startsWith("/$upload")));
+  TRACE("canhandle(%s)", uri.c_str());
+
+  bool can = ((!_board->isSafeMode) && (requestMethod == HTTP_GET)  // only GET requests in the API
+              && (uri.startsWith("/$setup") || uri.startsWith("/$update") || uri.startsWith("/$upload")));
   return (can);
-} // canHandle
+}  // canHandle
 
 
 /**
@@ -71,7 +78,7 @@ bool BuiltinHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, S
   String output;
 
   if (_board->isSafeMode) {
-    return(false);
+    return (false);
 
   } else if (uri.startsWith("/$setup")) {
     // Network Config Page
@@ -81,20 +88,20 @@ bool BuiltinHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, S
     // Bootstrap Page
     output = FPSTR(updateContent);
 
-#if ! defined(HD_MINIMAL)
+#if !defined(HD_MINIMAL)
   } else if (uri.startsWith("/$upload")) {
     // Bulk File Upload Page
     output = FPSTR(uploadContent);
 #endif
 
   } else {
-    return(false);
+    return (false);
   }
 
   server.sendHeader("X-Content-Type-Options", "no-sniff");
   server.send(200, "text/html", output);
 
   return (true);
-} // handle()
+}  // handle()
 
 // End.

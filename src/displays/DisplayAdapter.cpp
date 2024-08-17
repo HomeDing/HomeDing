@@ -70,7 +70,7 @@ bool DisplayAdapter::start() {
 void DisplayAdapter::setBrightness(uint8_t bright) {
   TRACE("setBrightness %d %d", conf->lightPin, bright);
   if (conf->lightPin) {
-    bright = constrain(bright, 0, 100);
+    bright = (bright > 100) ? 100 : bright;
     uint32_t duty = (bright * (uint32_t)255) / 100;
     analogWrite(conf->lightPin, duty);
   }

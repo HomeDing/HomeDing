@@ -42,6 +42,7 @@ class DisplayAdapter;
 #define RGB_NO_COLOR(col) ((col == RGB_UNDEFINED) || (col == RGB_TRANSPARENT))
 
 
+#define BUSMODE_LIST  "x,i2c,spi,hspi,par8lcd8,panel"
 #define BUSMODE_ANY   0x00
 #define BUSMODE_I2C   0x01
 #define BUSMODE_SPI   0x02  // standard SPI interface
@@ -102,18 +103,18 @@ struct DisplayConfig {
 
   /* ===== I2C interface ===== */
 
-  int i2cAddress = 0;  ///< i2c address
-  int i2cSDA = 0;      ///< i2c data pin
-  int i2cSCL = 0;      ///< i2c clock pin
+  int i2cAddress ;  ///< i2c address
+  int i2cSDA;      ///< i2c data pin
+  int i2cSCL;      ///< i2c clock pin
 
   // prefix bytes for I2c bus
   uint8_t i2cCommandPrefix;
   uint8_t i2cDataPrefix;
 
   /* ===== SPI interface ===== */
-  int spiMOSI = -1;  ///< SPI interface MOSI pin
-  int spiMISO = -1;  ///< SPI interface MISO pin
-  int spiCLK = -1;   ///< SPI interface clock CLK pin
+  int spiMOSI;  ///< SPI interface MOSI pin
+  int spiMISO;  ///< SPI interface MISO pin
+  int spiCLK;   ///< SPI interface clock CLK pin
 };
 
 

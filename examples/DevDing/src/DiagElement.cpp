@@ -19,12 +19,15 @@
 // open http://corec3/chipinfo
 #include <Arduino.h>
 #include <HomeDing.h>
+#include <hdfs.h>
 
 #include "DiagElement.h"
 
 #if defined(ESP32)
 #include <rom/rtc.h>
 #include <esp_chip_info.h>
+
+#include <esp_heap_caps.h>
 #endif
 
 // use DIAG TRACE for sending detailed output for the Diag Element.
@@ -134,7 +137,7 @@ String DiagElement::_handleDiag() {
 
 String DiagElement::_handleProfile() {
   String sOut;
-  sOut += "Element Profile       | A | Category | Average | Maximum | Count\n";
+  sOut += "Element Profile       | A | Category | Average | Maximum |   Heap |  Count\n";
 
   _board->forEach(CATEGORY::All, [this, &sOut](Element *e) {
     char buffer[128];
@@ -142,7 +145,7 @@ String DiagElement::_handleProfile() {
     sOut.concat(buffer);
 
 #if defined(HD_PROFILE)
-    sprintf(buffer, " %7ld | %7ld | %6ld\n", (e->profile.totalDuration / e->profile.totalCount), e->profile.maxDuration, e->profile.totalCount);
+    sprintf(buffer, " %7ld | %7ld | %6ld | %6ld", (e->profile.totalDuration / e->profile.totalCount), e->profile.maxDuration, e->profile.totalMem, e->profile.totalCount);
     sOut.concat(buffer);
 #endif
     sOut.concat("\n");
@@ -155,7 +158,12 @@ String DiagElement::_handleChipInfo() {
   char buffer[128];
   const char *s = nullptr;
 
-  sOut = "Chip Infos:\n";
+  String out;
+
+  sOut += FPSTR(diag_header);
+  sOut += "<h1>Chip Infos</h1>";
+
+  sOut += "<h2>SoC</h2><pre>";
 
 #if defined(ESP8266)
   // about ESP8266 chip variants...
@@ -164,38 +172,64 @@ String DiagElement::_handleChipInfo() {
   sprintf(buffer, "  Flash-ID: 0x%08x\n", ESP.getFlashChipId());
   sOut += buffer;
 
+ 
 #elif defined(ESP32)
   // about ESP32 chip variants...
   esp_chip_info_t chip_info;
   esp_chip_info(&chip_info);
 
-  esp_chip_model_t model = chip_info.model;
-  sprintf(buffer, "  model: %s(%d)\n", CONFIG_IDF_TARGET, model);
+  sprintf(buffer, "model: %s(%d)\n", CONFIG_IDF_TARGET, chip_info.model);
+  sOut += buffer;
+  sprintf(buffer, "cores: %d\n", chip_info.cores);
+  sOut += buffer;
+  sprintf(buffer, "revision: %d\n", chip_info.revision);
   sOut += buffer;
 
   uint32_t features = chip_info.features;
-  sprintf(buffer, "  features: %08x\n", features);
+  sprintf(buffer, "features: 0x%08lx\n", features);
   sOut += buffer;
 
-  if (features & CHIP_FEATURE_EMB_FLASH) { sOut += "    embedded flash memory\n"; };
-  if (features & CHIP_FEATURE_WIFI_BGN) { sOut += "    2.4GHz WiFi\n"; };
-  if (features & CHIP_FEATURE_BLE) { sOut += "    Bluetooth LE\n"; };
-  if (features & CHIP_FEATURE_BT) { sOut += "    Bluetooth Classic\n"; };
-  if (features & CHIP_FEATURE_IEEE802154) { sOut += "    IEEE 802.15.4\n"; };
+  if (features & CHIP_FEATURE_EMB_FLASH) { sOut += "  embedded flash memory\n"; };
+  if (features & CHIP_FEATURE_WIFI_BGN) { sOut += "  2.4GHz WiFi\n"; };
+  if (features & CHIP_FEATURE_BLE) { sOut += "  Bluetooth LE\n"; };
+  if (features & CHIP_FEATURE_BT) { sOut += "  Bluetooth Classic\n"; };
+  if (features & CHIP_FEATURE_IEEE802154) { sOut += "  IEEE 802.15.4\n"; };
+
 #if defined(CHIP_FEATURE_EMB_PSRAM)
-  if (features & CHIP_FEATURE_EMB_PSRAM) { sOut += "    embedded psram\n"; };
+  if (features & CHIP_FEATURE_EMB_PSRAM) { sOut += "  embedded psram\n"; };
 #endif
 
-  sprintf(buffer, "  cores: %d\n", chip_info.cores);
-  sOut += buffer;
-  sprintf(buffer, "  revision: %d\n", chip_info.revision);
-  sOut += buffer;
-  sOut += "\n";
+#endif
 
-  sOut += "Flash:";
-  sprintf(buffer, "  Size: %d kByte\n", ESP.getFlashChipSize() / 1024);
+  sOut += "</pre>\n";
+
+
+#if defined(ESP32)
+  sOut += "<h2>Flash</h2><pre>";
+
+  sprintf(buffer, "size: %ld kByte\n", ESP.getFlashChipSize() / 1024);
   sOut += buffer;
 
+  if (HomeDingFS::rootFS == (fs::FS *)&FFat) {
+    sOut += "using FAT\n";
+    sprintf(buffer, "totalBytes: %ld\n", FFat.totalBytes());
+    sOut += buffer;
+    sprintf(buffer, "usedBytes: %ld\n", FFat.usedBytes());
+    sOut += buffer;
+
+  } else if (HomeDingFS::rootFS == (fs::FS *)&LittleFS) {
+    sOut += "using LittleFS\n";
+    sprintf(buffer, "totalBytes: %ld\n", LittleFS.totalBytes());
+    sOut += buffer;
+    sprintf(buffer, "usedBytes: %ld\n", LittleFS.usedBytes());
+    sOut += buffer;
+
+  } else {
+    sOut += "using unknown\n";
+  }
+
+
+#if (0)
   FlashMode_t flashMode = ESP.getFlashChipMode();
   s = "unknown";
   if (flashMode == FM_QIO) { s = "QIO"; };
@@ -204,15 +238,20 @@ String DiagElement::_handleChipInfo() {
   if (flashMode == FM_DOUT) { s = "DOUT"; };
   // if (flashMode == FM_FAST_READ) { s = "FAST_READ"; };
   // if (flashMode == FM_SLOW_READ) { s = "SLOW_READ"; };
-  sprintf(buffer, "  Mode: %s(%d)\n", s, flashMode);
+  sprintf(buffer, "mode: %s(%d)\n", s, flashMode);
   sOut += buffer;
-  sprintf(buffer, "  Speed: %d\n", ESP.getFlashChipSpeed());
+
+  sprintf(buffer, "speed: %ld\n", ESP.getFlashChipSpeed());
   sOut += buffer;
   sOut += "\n";
+#endif
+  sOut += "</pre>";
 
-  sOut += "PSRAM:";
-  sprintf(buffer, "  Size: %d kByte\n", ESP.getPsramSize() / 1024);
+  sOut += "<h2>PSRAM</h2><pre>";
+  sprintf(buffer, "size: %ld kByte\n", ESP.getPsramSize() / 1024);
   sOut += buffer;
+  sOut += "</pre>";
+
 #endif
 
   return (sOut);
@@ -306,6 +345,26 @@ String DiagElement::_handleWireScan() {
   return (sOut);
 }
 
+String DiagElement::_handleHeap() {
+  // static bool inTrace = false;
+  String sOut;
+  char buffer[128];
+
+  sprintf(buffer, "=free %ld\n", esp_get_free_heap_size());
+  sOut = buffer;
+
+  // heap_caps_print_heap_info(MALLOC_CAP_DEFAULT);
+
+  // if (!inTrace) {
+  //   heap_trace_start();
+  //   inTrace = true;
+  // } else {
+  //   inTrace = false;
+  // }
+
+  return (sOut);
+}
+
 String DiagElement::_handleNetworks() {
   String sOut;
 
@@ -323,7 +382,11 @@ String DiagElement::_handleNetworks() {
       sOut += " (";
       sOut += WiFi.RSSI(i);
       sOut += ")";
+#if defined(ESP8266)
+      sOut += WiFi.encryptionType(i) == ENC_TYPE_NONE ? " " : "*";
+#else
       sOut += WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? " " : "*";
+#endif
       delay(10);
       sOut += "\n";
     }
@@ -351,7 +414,7 @@ void DiagElement::start() {
   });
 
   _board->server->on("/chipinfo", HTTP_GET, [this]() {
-    _board->server->send(200, "text/plain", _handleChipInfo());
+    _board->server->send(200, "text/html", _handleChipInfo());
   });
 
   _board->server->on("/wirescan", HTTP_GET, [this]() {
@@ -360,6 +423,10 @@ void DiagElement::start() {
 
   _board->server->on("/networks", HTTP_GET, [this]() {
     _board->server->send(200, "text/plain", _handleNetworks());
+  });
+
+  _board->server->on("/heap", HTTP_GET, [this]() {
+    _board->server->send(200, "text/plain", _handleHeap());
   });
 
   DIAGTRACE("I2C pins sda=%d scl=%d", _board->I2cSda, _board->I2cScl);

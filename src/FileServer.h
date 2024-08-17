@@ -51,19 +51,49 @@ public:
     @return true when method can be handled.
   */
 #if defined(ESP8266)
-  bool canHandle(HTTPMethod requestMethod, const String &/* uri */) override
+  bool canHandle(HTTPMethod requestMethod, const String & /* uri */) override
 #elif defined(ESP32)
-  bool canHandle(HTTPMethod requestMethod, String /* uri */) override
+
+#if (ESP_ARDUINO_VERSION_MAJOR < 3)
+  bool canHandle(HTTPMethod requestMethod, String uri) override
+#else
+  bool canHandle(WebServer &server, HTTPMethod requestMethod, String uri) override
+#endif
+
 #endif
   {
-    return ((!_board->isSafeMode) && ((requestMethod == HTTP_POST) || (requestMethod == HTTP_DELETE)));
+    JINFO("FileServerHandler::canhandle(%s) %d, %d", uri.c_str(), _board->isSafeMode, requestMethod);
+
+    bool can = false;
+
+    if (_board->isSafeMode) {
+      JINFO(" not in safeMode");
+      can = false;
+
+    } else if ((requestMethod == HTTP_POST) && (uri == "/")) {
+      JINFO(" upload...");
+      can = true;
+
+    } else if (requestMethod == HTTP_DELETE) {
+      JINFO(" delete...");
+      can = true;
+    };
+
+    JINFO("  %d", can);
+    return (can);
   }  // canHandle()
 
 
 #if defined(ESP8266)
   bool canUpload(const String &uri) override
 #elif defined(ESP32)
+
+#if (ESP_ARDUINO_VERSION_MAJOR < 3)
   bool canUpload(String uri) override
+#else
+  bool canUpload(WebServer &server, String uri) override
+#endif
+
 #endif
   {
     // only allow upload with POST on root fs level.
@@ -77,11 +107,14 @@ public:
   bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override
 #endif
   {
+    JINFO("FileServerHandler::handle(%s)", requestUri.c_str());
+
     // ensure that filename starts with '/'
     String fName = requestUri;
     if (!fName.startsWith("/")) {
       fName = "/" + fName;
     }
+    JINFO("  %s", fName.c_str());
 
     // LOGGER_RAW("File:handle(%s)", fName.c_str());
     if (requestMethod == HTTP_POST) {
@@ -91,7 +124,6 @@ public:
       JINFO("Delete %s", fName.c_str());
       if (HomeDingFS::exists(fName)) {
         HomeDingFS::remove(fName);
-        _board->filesVersion++;
       }
     }  // if
 
@@ -103,11 +135,13 @@ public:
 // handle uploading of payload of a file.
 // ensure the file has no '#' and no '$' character.
 #if defined(ESP8266)
-  void upload(WebServer &/* server */, const String &/* requestUri */, HTTPUpload &upload) override
+  void upload(WebServer & /* server */, const String & /* requestUri */, HTTPUpload &upload) override
 #elif defined(ESP32)
-  void upload(WebServer &/* server */, String /* requestUri */, HTTPUpload &upload) override
+  void upload(WebServer & /* server */, String requestUri, HTTPUpload &upload) override
 #endif
   {
+    JINFO("FileServerHandler::upload(%s)", requestUri.c_str());
+
     // ensure that filename starts with '/' and is lowercase
     String fName = upload.filename;
     fName.toLowerCase();
@@ -137,7 +171,6 @@ public:
 #endif
 
       _fsUploadFile = HomeDingFS::open(fName, "w");
-      _board->filesVersion++;
 
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       if (_fsUploadFile)
@@ -147,14 +180,12 @@ public:
     } else if (upload.status == UPLOAD_FILE_END) {
       if (_fsUploadFile) {
         _fsUploadFile.close();
-        _board->filesVersion++;
       }
     }  // if
-  }    // upload()
+  }  // upload()
 
 
 protected:
   File _fsUploadFile;
   Board *_board;
 };
-

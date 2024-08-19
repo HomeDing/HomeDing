@@ -70,7 +70,7 @@ bool DisplayAdapter::start() {
 void DisplayAdapter::setBrightness(uint8_t bright) {
   TRACE("setBrightness %d %d", conf->lightPin, bright);
   if (conf->lightPin) {
-    bright = constrain(bright, 0, 100);
+    bright = (bright > 100) ? 100 : bright;
     uint32_t duty = (bright * (uint32_t)255) / 100;
     analogWrite(conf->lightPin, duty);
   }
@@ -97,7 +97,9 @@ bool DisplayAdapter::startFlush(bool force) {
       if (de->active && de->page == page && de->needsDraw) {
         TRACEDRAW(" draw: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
         // draw box with background color
-        drawRectangle(de->box, RGB_TRANSPARENT, conf->backgroundColor);
+        if (!(de->isOpaque)) {
+          drawRectangle(de->box, RGB_TRANSPARENT, conf->backgroundColor);
+        }
         de->draw();
         de->needsDraw = false;
       }

@@ -46,6 +46,20 @@ void Logger::setLogFile(bool enable) {
 }  // setLogFile()
 
 
+void Logger::flush() {
+#ifdef DEBUG_ESP_PORT
+  DEBUG_ESP_PORT.flush();
+
+#elif ARDUINO_USB_CDC_ON_BOOT  // Serial used for USB CDC
+  if (Serial.isConnected())
+    Serial.flush();
+
+#elif defined(ESP32)
+  Serial.flush();
+
+#endif
+}
+
 /**
  * @brief Print out logging information
  */
@@ -62,7 +76,7 @@ void Logger::_print(const char *module, int level, const char *fmt,
 
   if (module) {
     // add module and loglevel
-    p += sprintf(p, "%s:%c ", module, *(LOGGER_LEVELS + level));
+    p += sprintf(p, "%s:%c\t", module, *(LOGGER_LEVELS + level));
   } else {
     p += sprintf(p, ">");
   }
@@ -72,12 +86,13 @@ void Logger::_print(const char *module, int level, const char *fmt,
 
 #ifdef DEBUG_ESP_PORT
   DEBUG_ESP_PORT.println(buffer);
+#elif ARDUINO_USB_CDC_ON_BOOT  // Serial used for USB CDC
+  if (Serial.isConnected())
+    Serial.println(buffer);
+
 #elif defined(ESP32)
   Serial.println(buffer);
-  // log_printf(buffer);
-  // log_printf("\n");
 #endif
-
   hd_yield();
 
   if ((module) && (_logFileEnabled) && (level < LOGGER_LEVEL_TRACE)) {
@@ -108,15 +123,15 @@ void Logger::_printToFile(char *buffer) {
 };
 
 
-  /// @brief Create Raw Log entry without prefix
-  /// @param fmt format string using printf syntax
-  /// @param parameters according printf
+/// @brief Create Raw Log entry without prefix
+/// @param fmt format string using printf syntax
+/// @param parameters according printf
 void Logger::printf(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    Logger::_print(nullptr, LOGGER_LEVEL_INFO, fmt, args);
-    va_end(args);
-} // printf
+  va_list args;
+  va_start(args, fmt);
+  Logger::_print(nullptr, LOGGER_LEVEL_INFO, fmt, args);
+  va_end(args);
+}  // printf
 
 
 /**

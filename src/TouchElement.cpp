@@ -92,7 +92,7 @@ void TouchElement::start() {
 void TouchElement::loop() {
   int val = touchRead(_pin);
 
-  // Serial.println(val);
+  TRACE("touchRead (%d)", val);
   val = (val < 65);
 
   if (val != _value) {
@@ -107,7 +107,7 @@ void TouchElement::loop() {
 void TouchElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _printBoolean(_value));
+  callback(HomeDing::Action::Value, _printBoolean(_value));
 }  // pushState()
 
 #endif

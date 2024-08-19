@@ -26,6 +26,8 @@
 #include <ListUtils.h>
 #include <ArrayString.h>
 
+// #include <hdProfile.h>
+
 // forward class declarations
 class Board;
 class Element;
@@ -51,10 +53,10 @@ class Element;
  * starting/activating the element.
  */
 enum Element_StartupMode : uint16_t {
-  System = 1,   // right after loading the configurations.
+  System = 1,       // right after loading the configurations.
   WithNetwork = 2,  // after a network connectivity in AP Mode was established.
   WithTime = 3,     // after a valid local time was set.
-  Manual = 9    // manually started.
+  Manual = 9        // manually started.
 };
 
 #define ACTION_SEPARATOR ','

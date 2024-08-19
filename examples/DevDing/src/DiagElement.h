@@ -76,4 +76,7 @@ private:
   String _handleDiag();
   String _handleProfile();
   String _handleChipInfo();
+  String _handleWireScan();
+  String _handleNetworks();
+  String _handleHeap();
 };

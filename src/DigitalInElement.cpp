@@ -105,7 +105,7 @@ void DigitalInElement::loop() {
 void DigitalInElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _printBoolean(_lastInLevel));
+  callback(HomeDing::Action::Value, _printBoolean(_lastInLevel));
 }  // pushState()
 
 // End

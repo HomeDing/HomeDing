@@ -81,6 +81,11 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onclick") == 0) {
     _clickAction = value;
 
+  } else if (_stricmp(name, "action") == 0) {
+    if (_stricmp(value, "click") == 0) {
+      _board->dispatch(_clickAction);
+    }
+
   } else {
     ret = false;
   }  // if

@@ -235,7 +235,7 @@ void MAX7219Element::pushState(
   Element::pushState(callback);
   callback("mode", _mode == Mode::numeric ? "numeric" : "8x8");
   callback("brightness", _printInteger(_brightness));
-  callback("value", String(_value).c_str());
+  callback(HomeDing::Action::Value, String(_value).c_str());
 }  // pushState()
 
 

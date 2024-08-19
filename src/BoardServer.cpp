@@ -54,7 +54,7 @@
 
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Construct a new State Handler object
@@ -174,23 +174,31 @@ void BoardHandler::handleReboot(WebServer &server, bool wipe) {
 
 
 /**
- * @brief Verify if the method and requestUri can be handles by this module.
+ * @brief Verify if the method and uri can be handles by this module.
  * @param requestMethod current http request method.
- * @param requestUri current url of the request.
- * @return true When the method and requestUri match a state request.
+ * @param uri current url of the request.
+ * @return true When the method and uri match a state request.
  */
 #if defined(ESP8266)
-bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
+bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &uri)
 #elif defined(ESP32)
-bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
+
+#if (ESP_ARDUINO_VERSION_MAJOR < 3)
+bool BoardHandler::canHandle(HTTPMethod requestMethod, String uri)
+#else
+bool BoardHandler::canHandle(WebServer &server, HTTPMethod requestMethod, String uri)
+#endif
+
 #endif
 {
-  // LOGGER_JUSTINFO("HTTP: > %s", requestUri.c_str());
-  bool can = ((requestMethod == HTTP_GET)           // only GET requests in the API
-              && (requestUri.startsWith(API_ROUTE)  // new api entries
-                  || (requestUri == "/")            // handle redirect
-                  || (_board->isCaptiveMode())));   // capt
+  TRACE("BoardHandler::canhandle(%s)", uri.c_str());
+  // LOGGER_JUSTINFO("HTTP: > %s", uri.c_str());
+  bool can = ((requestMethod == HTTP_GET)          // only GET requests in the API
+              && (uri.startsWith(API_ROUTE)        // new api entries
+                  || (uri == "/")                  // handle redirect
+                  || (_board->isCaptiveMode())));  // capt
 
+  TRACE("  %d", can);
   return (can);
 }  // canHandle
 
@@ -209,7 +217,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, con
 bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, String requestUri2)
 #endif
 {
-  TRACE("handle(%s)", requestUri2.c_str());
+  TRACE("BoardHandler::handle(%s)", requestUri2.c_str());
   String output;
   const char *output_type = nullptr;  // when output_type is set then send output as response.
 
@@ -378,6 +386,8 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, Str
 
 
   } else if (_board->isCaptiveMode()) {
+    LOGGER_JUSTINFO(">> $setup...");
+
     // Handle Redirect in Captive Portal Mode
     // redirect requests like "/generate_204", "/gen_204", "/chat", /connecttest.txt
     // to WIFI setup dialog /$setup
@@ -436,7 +446,7 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
       }
       jc.closeObject();
     }  // if
-  }    // while
+  }  // while
 }  // handleListFiles()
 
 
@@ -463,7 +473,7 @@ void BoardHandler::handleCleanWeb(String path) {
       TRACE("isFile.");
       HomeDingFS::remove(longName);
     }  // if
-  }    // while
+  }  // while
 }  // handleCleanWeb()
 
 

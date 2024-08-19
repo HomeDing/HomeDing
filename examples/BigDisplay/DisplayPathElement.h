@@ -20,14 +20,17 @@
 
 #include <displays/DisplayOutputElement.h>
 
+namespace gfxDraw {
+  class gfxDrawWidget;
+}
+
 /**
  * @brief The DisplayPathElement is an Element that allows to display a path based region like a
  *   polygon on the display based on actions.
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayPathElement : public DisplayOutputElement
-{
+class DisplayPathElement : public DisplayOutputElement {
 public:
   /**
    * @brief Factory function to create a ButtonElement.
@@ -57,9 +60,10 @@ public:
   virtual void draw() override;
 
 private:
-
-  /// @brief The path to be displayed 
+  /// @brief The path to be displayed
   String _path;
+  bool _needLoad = false;
+  bool _undraw = false;
 
   // rotation angle and center.
   int16_t _scale = 100;
@@ -67,10 +71,12 @@ private:
 
   int16_t _centerX = 0;
   int16_t _centerY = 0;
+
+  gfxDraw::gfxDrawWidget *dWidget = nullptr;
 };
 
 // #ifdef HOMEDING_REGISTER
 // Register the DisplayPathElement onto the ElementRegistry.
 bool DisplayPathElement::registered =
-    ElementRegistry::registerElement("displaypath", DisplayPathElement::create);
+  ElementRegistry::registerElement("displaypath", DisplayPathElement::create);
 // #endif

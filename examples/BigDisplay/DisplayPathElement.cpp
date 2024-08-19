@@ -18,8 +18,9 @@
 #include <HomeDing.h>
 
 #include "DisplayPathElement.h"
-#include "gfxDraw.h"
-#include "gfxDrawObject.h"
+
+#include <gfxDraw.h>
+#include <gfxDrawWidget.h>
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
@@ -38,13 +39,16 @@ Element *DisplayPathElement::create() {
 bool DisplayPathElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
   bool ret = true;
+  _needLoad = false;
 
   if (DisplayOutputElement::set(name, value)) {
     // done
+    _needLoad = needsDraw;
 
   } else if (strcmp(name, "path") == 0) {
     _path = value;
     needsDraw = true;
+    _needLoad = true;
 
   } else if (strcmp(name, "scale") == 0) {
     _scale = _atoi(value);
@@ -59,6 +63,9 @@ bool DisplayPathElement::set(const char *name, const char *value) {
     _centerY = _atoi(ListUtils::at(value, 1).c_str());
     needsDraw = true;
 
+  } else if (strcmp(name, "undraw") == 0) {
+    _undraw = _atob(value);
+
   } else {
     ret = false;
   }  // if
@@ -72,22 +79,45 @@ bool DisplayPathElement::set(const char *name, const char *value) {
 /// @brief Draw this output element.
 void DisplayPathElement::draw() {
   DisplayOutputElement::draw();  // set colors
-  TRACE("draw border=%08lx back=%08lx", _borderColor, _backgroundColor);
+  // LOGGER_PRINT("draw color=%08lx border=%08lx back=%08lx", _color, _borderColor, _backgroundColor);
 
-  gfxDraw::gfxDrawObject *dObj = new gfxDraw::gfxDrawObject(gfxDraw::RGBA(_borderColor), gfxDraw::RGBA(_backgroundColor));
-
-  dObj->setPath(_path.c_str());
-  // dObj->setFillGradient(gfxDraw::RED, 4, 6, gfxDraw::YELLOW, 10, 9);
-  dObj->move(-_centerX, -_centerY);
-  dObj->scale(_scale);
-  dObj->rotate(_rotation);
-  dObj->move(_centerX, _centerY);
-  dObj->move(box.x_min + _centerX, box.y_min + _centerY);
-
-  dObj->draw([&](int16_t x, int16_t y, gfxDraw::RGBA color) {
-    // printf("draw %02x %02x %02x %08lx\n", color.Red, color.Green, color.Blue, color.toColor24());
+  auto fDraw = [&](int16_t x, int16_t y, gfxDraw::ARGB color) {
     _display->drawPixel(x, y, color.toColor24());
-  });
+  };
+
+  auto fGet = [&](int16_t x, int16_t y) -> gfxDraw::ARGB {
+    gfxDraw::ARGB col(_display->getPixel(x, y));
+    return (col);
+  };
+
+  if (!dWidget) {
+    dWidget = new gfxDraw::gfxDrawWidget();
+    _needLoad = true;
+
+  } else if (_undraw) {
+    // LOGGER_PRINT("undraw...");
+    // dWidget->undraw(fDraw);
+  }
+
+  if (_needLoad) {
+    dWidget->setPath(_path.c_str());
+    dWidget->setFillColor(gfxDraw::ARGB(_backgroundColor));
+    dWidget->setStrokeColor(gfxDraw::ARGB(_borderColor));
+  }
+  _needLoad = false;
+
+  dWidget->resetTransformation();
+
+  // dObj->setFillGradient(gfxDraw::RED, 4, 6, gfxDraw::YELLOW, 10, 9);
+  dWidget->move(-_centerX, -_centerY);
+  dWidget->scale(_scale);
+  dWidget->rotate(_rotation);
+  dWidget->move(_centerX, _centerY);
+  dWidget->move(box.x_min + _centerX, box.y_min + _centerY);
+
+  dWidget->draw(fDraw, _undraw ? fGet : (gfxDraw::fReadPixel)nullptr);
+  // the bounding box of dObj is now correct
+// dWidget->bbox;
 
   TRACE("--done.");
 }

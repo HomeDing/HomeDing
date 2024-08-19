@@ -171,7 +171,7 @@ void LightElement::loop() {
 void LightElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", value.c_str());
+  callback(HomeDing::Action::Value, value.c_str());
   callback("enable", enabled ? "1" : "0");
   callback("brightness", _printInteger(_brightness));
 }  // pushState()

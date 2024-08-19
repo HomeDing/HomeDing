@@ -113,7 +113,7 @@ public:
   /// @brief Create a string with all array items separatend by delim.
   String concat(char delim);
 
-  /// @brief send a textual dump of the object to Serial.
+  /// @brief Dump of the ArrayString object to output.
   void dump();
 
 private:

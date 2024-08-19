@@ -21,7 +21,7 @@
  */
 Element *DigitalOutElement::create() {
   DigitalOutElement *e = new DigitalOutElement();
-  e->category = CATEGORY::Standard; // no loop
+  e->category = CATEGORY::Standard;  // no loop
   return (e);
 }  // create()
 
@@ -61,8 +61,16 @@ void DigitalOutElement::start() {
   if (_pin < 0) {
     LOGGER_EERR("no pin");
 
+#if defined(ESP8266)
   } else if ((_pin >= 6) && (_pin <= 11)) {
-    LOGGER_EERR("no valid pin");
+    LOGGER_EERR("bad pin");
+
+#elif defined(ESP32)
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+  } else if ((_pin >= 11) && (_pin <= 17)) {
+    LOGGER_EERR("bad pin");
+#endif
+#endif
 
   } else {
     Element::start();
@@ -76,7 +84,7 @@ void DigitalOutElement::start() {
 void DigitalOutElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _printBoolean(_lastValue));
+  callback(HomeDing::Action::Value, _printBoolean(_lastValue));
 }  // pushState()
 
 
@@ -87,8 +95,10 @@ void DigitalOutElement::pushState(
 void DigitalOutElement::_setLevel(bool logicalHigh) {
   _lastValue = (logicalHigh ? HIGH : LOW);
   int physLevel = (_inverse ? (!_lastValue) : _lastValue);
-  if (active)
+  if (active) {
     digitalWrite(_pin, physLevel);
+  }
 }  // _setLevel
+
 
 // End

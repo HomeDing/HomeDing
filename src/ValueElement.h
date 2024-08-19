@@ -1,6 +1,7 @@
 /**
  * @file ValueElement.h
  * @brief The ValueElement combines receiving modifying actions for an value and sending actions on changing the value.
+ * The types supported are "string" and "boolean".
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *

@@ -68,7 +68,13 @@ public:
 #if defined(ESP8266)
   bool canHandle(HTTPMethod requestMethod, const String &requestUri) override;
 #elif defined(ESP32)
-  bool canHandle(HTTPMethod requestMethod, String requestUri) override;
+
+#if (ESP_ARDUINO_VERSION_MAJOR < 3)
+  bool canHandle(HTTPMethod requestMethod, String uri) override;
+#else
+  bool canHandle(WebServer &server, HTTPMethod requestMethod, String uri) override;
+#endif
+
 #endif
 
   /**

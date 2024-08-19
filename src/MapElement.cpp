@@ -133,7 +133,7 @@ bool MapElement::set(const char *name, const char *value) {
       _mMin.setAt(mapIndex, value);
       _mMax.setAt(mapIndex, value);
 
-    } else if (_stricmp(mapName, "value") == 0) {
+    } else if (_stricmp(mapName, HomeDing::Action::Value) == 0) {
       _mValue.setAt(mapIndex, value);
 
     } else if (_stricmp(mapName, "onValue") == 0) {

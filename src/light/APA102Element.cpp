@@ -39,8 +39,6 @@ void APA102Element::_sendByte(uint8_t b) {
   uint8_t dataPin = STRIPE_DATA_PIN;
   uint8_t clockPin = STRIPE_CLOCK_PIN;
 
-  // Serial.printf("%02x ", b);
-
   digitalWrite(dataPin, (b & 0b10000000) > 0);
   digitalWrite(clockPin, HIGH);
   digitalWrite(clockPin, LOW);
@@ -93,8 +91,6 @@ void APA102Element::show() {
   _sendByte(0xFF);
   _sendByte(0xFF);
   _sendByte(0xFF);
-
-  // Serial.println();
 }  // show()
 
 

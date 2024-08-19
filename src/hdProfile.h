@@ -14,14 +14,19 @@
 struct hd_profiledata_t {
   unsigned long totalDuration = 0;
   unsigned long totalCount = 0;
+  unsigned long totalMem = 0;
   unsigned long maxDuration = 0;
   unsigned long start;
+  unsigned long mem;
 };
 
 #define PROFILE_DATA struct hd_profiledata_t profile
 
 #define PROFILE_START(e) \
-  { e->profile.start = micros(); }
+  { \
+    e->profile.start = micros(); \
+    e->profile.mem = esp_get_free_heap_size(); \
+  }
 
 #define PROFILE_END(e) \
   { \
@@ -29,6 +34,9 @@ struct hd_profiledata_t {
     e->profile.totalDuration += delta; \
     e->profile.totalCount++; \
     if (delta > e->profile.maxDuration) e->profile.maxDuration = delta; \
+    \
+    delta = e->profile.mem - esp_get_free_heap_size(); \
+    e->profile.totalMem += delta; \
   }
 #else
 

@@ -315,7 +315,7 @@ void ColorElement::pushState(
 
   if (_mode != Mode::wheel) {
     sprintf(sColor, "x%08lx", _toValue);  // do not report fading and interim colors
-    callback("value", sColor);
+    callback(HomeDing::Action::Value, sColor);
   }
 
   callback("duration", _printInteger(_duration));

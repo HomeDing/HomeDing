@@ -88,7 +88,7 @@ void PWMOutElement::start() {
 void PWMOutElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _printInteger(_value));
+  callback(HomeDing::Action::Value, _printInteger(_value));
 }  // pushState()
 
 

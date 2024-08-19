@@ -57,7 +57,7 @@ bool MenuElement::set(const char *name, const char *value) {
     while (1) {
       String name = getItemValue(value, n++);
       if (name.length() > 0) {
-        ValueElement *v = static_cast<ValueElement *>(_board->getElement("value", name.c_str()));
+        ValueElement *v = static_cast<ValueElement *>(_board->getElement(HomeDing::Action::Value, name.c_str()));
         if (!v)
           v = static_cast<ValueElement *>(_board->getElement("switch", name.c_str()));
         if ((v) && _count < MAXMENUVALUES) {

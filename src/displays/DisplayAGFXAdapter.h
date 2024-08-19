@@ -29,10 +29,7 @@
 
 #endif
 
-
-#include <fonts/font10.h>
-#include <fonts/font16.h>
-#include <fonts/font24.h>
+#include <fonts/font.h>
 
 #define PANELTRACE(...)  // Serial.printf("Display::" __VA_ARGS__)
 
@@ -62,7 +59,7 @@ public:
 #if defined(ESP32)
     } else if (busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
-      bus = new Arduino_HWSPI(conf->dcPin, conf->csPin);
+      bus = new Arduino_HWSPI(conf->dcPin, conf->csPin, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
       // bus = new Arduino_ESP32SPI(conf->dcPin, conf->csPin);
 
     } else if (busmode == BUSMODE_HSPI) {
@@ -115,8 +112,7 @@ public:
     } else if (busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
       // ESP8266 has pre-defined SPI pins
-      bus = new Arduino_ESP8266SPI(
-        conf->dcPin, conf->csPin);
+      bus = new Arduino_ESP8266SPI(conf->dcPin, conf->csPin);
 #endif
     }  // if
     return (bus);
@@ -157,7 +153,7 @@ public:
       setColor(conf->drawColor);
       setBackgroundColor(conf->backgroundColor);
       setBorderColor(conf->borderColor);
-      _setTextHeight(conf->height > 64 ? 16 : 8);
+      _setTextHeight(conf->height > 128 ? 16 : 8);
       clear();
       flush();
     }  // if

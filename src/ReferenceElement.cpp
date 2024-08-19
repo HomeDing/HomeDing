@@ -103,7 +103,7 @@ void ReferenceElement::loop() {
 void ReferenceElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", (_value ? "1" : "0"));
+  callback(HomeDing::Action::Value, (_value ? "1" : "0"));
   callback("reference", String(_refValue).c_str());
 } // pushState()
 

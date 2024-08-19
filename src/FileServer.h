@@ -51,7 +51,7 @@ public:
     @return true when method can be handled.
   */
 #if defined(ESP8266)
-  bool canHandle(HTTPMethod requestMethod, UNUSED const String &uri) override
+  bool canHandle(HTTPMethod requestMethod, const String &uri) override
 #elif defined(ESP32)
   bool canHandle(HTTPMethod requestMethod, UNUSED String uri) override
 #endif

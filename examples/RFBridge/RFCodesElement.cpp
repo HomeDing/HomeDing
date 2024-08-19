@@ -157,7 +157,7 @@ void RFCodesElement::loop() {
 void RFCodesElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _lastReceivedCode.c_str());
+  callback(HomeDing::Action::Value, _lastReceivedCode.c_str());
   callback("received", String(_receivedTime).c_str());
 }  // pushState()
 

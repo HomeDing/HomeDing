@@ -19,12 +19,18 @@
 
 #include "DisplayElement.h"
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+
+DisplayElement::DisplayElement() {
+  startupMode = Element_StartupMode::System;
+  // no loop() call required for display elements as they are used for configuration only.
+  category = CATEGORY::Display;
+}
 
 // ===== private functions =====
 
 void DisplayElement::_newPage(int page) {
-  LOGGER_ETRACE("newPage %d", page);
+  TRACE("newPage %d", page);
   DisplayAdapter *da = _board->display;
   if (da) {
     int oldPage = da->page;
@@ -32,9 +38,9 @@ void DisplayElement::_newPage(int page) {
     da->page = constrain(page, 0, da->maxpage);
 
     da->clear();
-    // redraw all display elements
-    _board->forEach("display", [this](Element *e) {
-      LOGGER_ETRACE("do %s", e->id);
+    // redraw all DisplayOutput elements
+    _board->forEach(CATEGORY::Widget, [this](Element *e) {
+      TRACE("do %s", e->id);
       e->set("redraw", "1");
     });
     if (da->page != oldPage) {
@@ -46,18 +52,11 @@ void DisplayElement::_newPage(int page) {
 
 // ===== Element functions =====
 
-/**
- * @brief Constructor of a new DisplayElement.
- */
-DisplayElement::DisplayElement() {
-  startupMode = Element_StartupMode::System;
-}
-
 
 void DisplayElement::init(Board *board) {
   Element::init(board);
 
-  config.busmode = BUSMODE_SPI;
+  config.busmode = BUSMODE_ANY;
 
   // use system wide I2C by default
   config.i2cSDA = board->I2cSda;
@@ -70,9 +69,7 @@ void DisplayElement::init(Board *board) {
 }  // init()
 
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
+///  @brief Set a parameter or property to a new value or start an action.
 bool DisplayElement::set(const char *name, const char *value) {
   bool ret = true;
   TRACE("set %s=%s", name, value);
@@ -89,6 +86,7 @@ bool DisplayElement::set(const char *name, const char *value) {
     // these actions only work with existing display adapter
 
     if (_stricmp(name, "page") == 0) {
+      // switch the page
       _newPage(*value ? _atoi(value) : da->page);
 
     } else if (_stricmp(name, "addpage") == 0) {
@@ -97,6 +95,9 @@ bool DisplayElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "clear") == 0) {
       da->start();
     }
+
+  } else if (_stricmp(name, "page") == 0) {
+    // da is not (yet) existing
 
   } else if (_stricmp(name, "onpage") == 0) {
     // action with current visible page
@@ -110,21 +111,11 @@ bool DisplayElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "background") == 0) {
     config.backgroundColor = _atoColor(value);
 
-  } else if (_stricmp(name, "border") == 0) {
+  } else if (name == HomeDing::Action::Border) {
     config.borderColor = _atoColor(value);
 
   } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
-    if (_stricmp(value, "spi") == 0) {
-      config.busmode = BUSMODE_SPI;
-    } else if (_stricmp(value, "hspi") == 0) {
-      config.busmode = BUSMODE_HSPI;
-    } else if (_stricmp(value, "i2c") == 0) {
-      config.busmode = BUSMODE_I2C;
-    } else if (_stricmp(value, "par8") == 0) {
-      config.busmode = BUSMODE_PAR8;  // 8 bit parallel data
-    } else if (_stricmp(value, "lcd8") == 0) {
-      config.busmode = BUSMODE_LCD8;
-    }
+    config.busmode = ListUtils::indexOf(BUSMODE_LIST, value);
 
   } else if (_stricmp(name, "busspeed") == 0) {
     config.busSpeed = _atoi(value);
@@ -151,7 +142,7 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // ===== i2c bus parameter
 
-  } else if (_stricmp(name, "address") == 0) {
+  } else if (name == HomeDing::Action::Address) {
     config.i2cAddress = _atoi(value);
 
     // ===== spi bus parameter
@@ -186,10 +177,10 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // ===== Display settings
 
-  } else if (_stricmp(name, "width") == 0) {
+  } else if (name == HomeDing::Action::Width) {
     config.width = _atoi(value);
 
-  } else if (_stricmp(name, "height") == 0) {
+  } else if (name == HomeDing::Action::Height) {
     config.height = _atoi(value);
 
   } else if (_stricmp(name, "rotation") == 0) {
@@ -223,9 +214,27 @@ void DisplayElement::start() {
     da->setBackgroundColor(config.backgroundColor);
 
   } else {
-    LOGGER_EERR("no display found");
+    LOGGER_EERR("start failed.");
   }
 }  // start()
+
+
+/// @brief Activate the Element using the given adapter.
+void DisplayElement::start(DisplayAdapter *displayAdapter) {
+  TRACE("start()");
+  if (displayAdapter) {
+    if (displayAdapter->setup(_board, &config)) {
+      bool success = displayAdapter->start();
+      if (success) {
+        _board->display = displayAdapter;
+
+      } else {
+        delete displayAdapter;
+      }
+    }
+  }
+  DisplayElement::start();
+}  // start(da)
 
 
 /**

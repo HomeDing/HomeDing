@@ -66,11 +66,17 @@ void GT911::init(int address) {
   regBuffer[0] = highByte(GT911_CONFIG_START);
   regBuffer[1] = lowByte(GT911_CONFIG_START);
 
-  pinMode(pinRst, OUTPUT);
-  if ((pinInt < 0) || (!address)) {
+  if (pinRst >= 0) { pinMode(pinRst, OUTPUT); }
+  if (pinInt >= 0) { pinMode(pinInt, OUTPUT); }
+
+  if ((pinInt < 0) && (pinRst < 0)) {
+    // nothing
+
+  } else if ((pinInt < 0) || (!address)) {
     digitalWrite(pinRst, LOW);
     delay(120);
     digitalWrite(pinRst, HIGH);
+    delay(50);
 
     if (WireUtils::exists(GT911_I2CADDR_14)) {
       address = GT911_I2CADDR_14;
@@ -96,7 +102,6 @@ void GT911::init(int address) {
     pinMode(pinInt, INPUT);
     // attachInterrupt(pinInt, GT911::onInterrupt, RISING);
   }
-  delay(50);
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
   uint16_t configSize = GT911_CONFIG_ALL - GT911_CONFIG_START + 1;
@@ -111,11 +116,12 @@ void GT911::init(int address) {
 
   width = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 0] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 1] << 8);
   height = configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 2] + (configBuf[GT911_RESOLUTION - GT911_CONFIG_START + 3] << 8);
+
+  WireUtils::write(addr, highByte(GT911_COMMAND), lowByte(GT911_COMMAND), 0);
 }
 
 
 uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
-  // Serial.println("GT911::getTouchPoints");
   uint8_t regBuffer[2];
   uint8_t rawData[GT911_MAX_CONTACTS * GT911_CONTACT_SIZE];
   uint8_t contacts = 0;
@@ -129,7 +135,7 @@ uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
     regBuffer, sizeof(regBuffer),
     rawData, 1);
   pointInfo = rawData[0];
-  // Serial.printf(" pointInfo: 0x%02x\n", pointInfo);
+  // TRACE(" pointInfo: 0x%02x\n", pointInfo);
 
   if (pointInfo & 0x80) {
     contacts = pointInfo & 0xF;
@@ -160,7 +166,7 @@ uint8_t GT911::getTouchPoints(GDTpoint_t *points) {
       points[i].x = rawPoint[1] + (rawPoint[2] << 8);
       points[i].y = rawPoint[3] + (rawPoint[4] << 8);
       points[i].area = rawPoint[5] + (rawPoint[6] << 8);
-      // Serial.printf("read: %d: %d/%d\n", i, points[i].x, points[i].y);
+      // TRACE("read: %d: %d/%d\n", i, points[i].x, points[i].y);
     }
   }
   if (pointInfo != 0x00) {

@@ -1,9 +1,17 @@
 {
   "device": {
     "sys": "true",
-    "properties": ["room", "name", "led", "button", "i2c-sda", "i2c-scl", "safemode", "sd", "reboottime", "logfile", "onstart", "onsysstart", "cache"],
-    "events": ["log"],
-    "actions": ["onSysStart", "onStart"]
+    "properties": ["room", "name", "safemode", "sd", "reboottime", "logfile", "cache",
+    "i2c-scl", "i2c-sda",
+    "spi-scl", "spi-miso", "spi-mosi"], 
+    "actions": ["log"],
+    "events": ["onSysStart", "onStart"]
+  },
+
+  "state": {
+    "sys": "true",
+    "properties": ["savedelay"],
+    "events": ["clear"]
   },
 
   "sdmmc": {
@@ -16,98 +24,103 @@
   },
 
   "element": {
-    "properties": ["loglevel", "title", "description"],
-    "events": ["start", "stop"]
+    "properties": ["title", "description", "room", "loglevel", "startup"],
+    "actions": ["start", "stop"]
   },
 
-  "analog": {
-    "properties": ["readtimems", "hysteresis", "pin", "reference", "mapinmin", "mapinmax", "mapoutmin", "mapoutmax"],
-    "actions": ["onvalue", "onreference", "onhigh", "onlow"]
+  "sensor": {
+    "properties": ["readtime", "resendtime", "warmuptime", "restart"]
+  },
+
+  "analog": { "extends": "sensor",
+    "properties": ["pin", "hysteresis", "reference", "mapinmin", "mapinmax", "mapoutmin", "mapoutmax"],
+    "events": ["onvalue", "onreference", "onhigh", "onlow"]
   },
 
   "reference": {
     "properties": ["reference", "invert"],
-    "events": ["value"],
-    "actions": ["onreference", "onhigh", "onlow"]
+    "actions": ["value"],
+    "events": ["onreference", "onhigh", "onlow"]
   },
 
   "add": {
     "properties": ["invert"],
-    "events": ["value[n]"],
-    "actions": ["onvalue"]
+    "actions": ["value[n]"],
+    "events": ["onvalue"]
   },
 
   "and": {
     "ui": "logic",
     "properties": ["invert"],
-    "events": ["value[n]"],
-    "actions": ["onvalue"]
+    "actions": ["value[n]"],
+    "events": ["onvalue"]
   },
 
   "or": {
     "ui": "logic",
     "properties": ["invert"],
-    "events": ["value[n]"],
-    "actions": ["onvalue"]
+    "actions": ["value[n]"],
+    "events": ["onvalue"]
   },
 
   "button": {
     "properties": [],
-    "events": ["value"],
-    "actions": ["onclick", "ondoubleclick", "onpress"]
+    "actions": ["value"],
+    "events": ["onclick", "ondoubleclick", "onpress"]
   },
 
   "digitalin": {
     "ui": "digitalvalue",
     "properties": ["pin", "invert", "pullup"],
-    "actions": ["onvalue", "onhigh", "onlow"]
+    "events": ["onvalue", "onhigh", "onlow"]
   },  
   
   "digitalout": {
     "ui": "digitalvalue",
     "properties": ["pin", "invert"],
-    "events": ["on", "off", "value"]
+    "actions": ["on", "off", "value"]
   },
   
   "digitalsignal": {
     "properties": ["pin", "pullup"],
-    "actions": ["onvalue", "onhigh", "onlow", "duration"]
+    "events": ["onvalue", "onhigh", "onlow", "duration"]
   },
 
   "touch": {
     "ui": "digitalvalue",
     "properties": ["pin", "reference"],
-    "actions": ["onvalue", "onhigh", "onlow"]
+    "events": ["onvalue", "onhigh", "onlow"]
   },
 
-  "displaydot": {
+  "displayoutput": {
     "sys": "false",
-    "properties": ["page", "x", "y", "color"],
-    "events": ["value", "clear", "redraw"]
+    "properties": ["x", "y", "w", "h", "page", "color", "background", "border"],
+    "actions": ["value", "clear", "redraw"]
   },
 
-  "displaytext": {
+  "displaydot": { "extends": "displayoutput" },
+
+  "displayrect": { "extends": "displayoutput" },
+
+  "displaytext": { "extends": "displayoutput",
     "sys": "false",
-    "properties": ["page", "x", "y", "color", "fontsize", "prefix", "postfix"],
-    "events": ["value", "clear", "redraw"]
+    "properties": ["fontsize", "prefix", "postfix"]
   },
 
-  "displayline": {
+  "displayline": { "extends": "displayoutput",
     "sys": "false",
-    "properties": ["page", "x", "y", "x1", "y1", "color"],
-    "events": ["redraw"]
+    "properties": ["x1", "y1"]
   },
 
   "displaybutton": {
     "sys": "false",
     "properties": ["page", "x", "y", "color", "w", "h"],
-    "events": [],
-    "actions": ["onclick"]
+    "events": ["onclick"]
   },
 
   "pwmout": {
     "properties": ["range", "pin", "invert"],
-    "events": ["on", "off", "value"]
+    "actions": ["on", "off", "value"]
   },
 
   "remote": {
@@ -117,42 +130,42 @@
 
   "rfcodes": {
     "properties": ["pinrx", "pintx", "received"],
-    "events": ["value"],
-    "actions": ["onvalue"]
+    "actions": ["value"],
+    "events": ["onvalue"]
   },
 
   "rotary": {
     "properties": ["pin1", "pin2", "step", "value"],
-    "actions": ["onvalue"]
+    "events": ["onvalue"]
   },
 
   "switch": {
     "properties": [],
-    "events": ["value", "toggle"],
-    "actions": ["onvalue", "onhigh", "onlow"]
+    "actions": ["value", "toggle"],
+    "events": ["onvalue", "onhigh", "onlow"]
   },
 
   "value": {
     "properties": ["min", "max"],
-    "events": ["value", "up", "down"],
-    "actions": ["onvalue"]
+    "actions": ["value", "up", "down"],
+    "events": ["onvalue"]
   },
 
   "map": {
     "properties": ["type", "rules/min", "rules/max", "rules/value", "rules/onvalue"],
-    "events": ["value"],
-    "actions": ["onvalue"]
+    "actions": ["value"],
+    "events": ["onvalue"]
   },
 
   "scene": {
     "properties": ["steps", "delay"],
-    "events": ["start"]
+    "actions": ["start"]
   },
 
   "select": {
     "properties": ["cycle", "options"],
-    "events": ["key", "index", "next", "prev"],
-    "actions": ["onkey", "onvalue"]
+    "actions": ["key", "index", "next", "prev"],
+    "events": ["onkey", "onvalue"]
   },
 
   "ota": {
@@ -165,41 +178,44 @@
     "properties": ["manufacturer", "manufacturerurl", "modelurl", "modelnumber"]
   },
 
-  "rtcstate": {
-    "sys": "true"
-  },
-
   "displaylcd": {
     "properties": ["address", "height"],
-    "actions": ["onpage"]
+    "events": ["onpage"]
   },
 
   "display":{
     "ui": "display",
-    "properties": ["color", "background", "address", "spimosi", "spimiso", "spiclk", "spics", "spidc", "invert", "resetpin", "lightpin", "width", "height", "rotation"],
+    "properties": ["width", "height", "rotation", "busmode", "address", "spimosi", "spimiso", "spiclk", "cspin", "dcpin", "color", "background", "border", "invert", "resetpin", "lightpin"],
     "actions" : ["brightness", "page", "addpage", "clear"],
     "events": ["onpage"]
-
-
   },
 
-  "displaysh1106": {
-    "ui": "display",
-    "properties": ["address", "readtime", "resetpin", "height", "brightness"],
-    "events": ["page", "addpage", "clear"],
-    "actions": ["onpage"]
-  },
-
-  "displayssd1306":{ "ui": "display", "extends": "display"},
-
+  "displayssd1306":{ "extends": "display", "ui": "display" },
+  "displaysh1106": { "extends": "display", "ui": "display" },
   "displayst7735": { "extends": "display", "ui": "display" },
   "displayst7789": { "extends": "display", "ui": "display" },
   "displayst7796": { "extends": "display", "ui": "display" },
-  "displaypanel": { "extends": "display", "ui": "display" },
+  "displaygc9a01": { "extends": "display", "ui": "display" },
+
+  "displaytouchcst816": { "icon": "default", "sys": "true",
+    "properties": ["address", "width", "height", "rotation", "interruptpin", "resetpin"],
+    "events": ["ontouch"]
+  },
+
+  "displaytouchgt911": { "icon": "default",
+    "properties": ["address", "width", "height", "rotation", "interruptpin", "resetpin"],
+    "events": ["ontouch"]
+  },
+
+  "displaytouchft6336": { "icon": "default",
+    "properties": ["width", "height", "rotation", "interruptpin", "resetpin"]
+  },
+
+  "displayesp32panel": { "extends": "display", "ui": "display" },
 
   "tm1637": {
     "properties": ["datapin", "clockpin"],
-    "events": ["value", "enable", "brightness"]
+    "actions": ["value", "enable", "brightness"]
   },
 
   "max7219": {
@@ -209,94 +225,83 @@
   "bl0937": {
     "properties": ["address", "selpin", "cfpin", "cf1pin", "cycletime", 
        "mode", "powerfactor", "poweradjust", "currentfactor", "currentadjust", "voltagefactor", "voltageadjust"],
-    "actions": ["onvoltage", "oncurrent", "onpower"]
+    "events": ["onvoltage", "oncurrent", "onpower"]
   },  
 
-  "ina219": {
-    "ui": "ina2xx",
-    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart",
-    "gain", "mode", "samples", "range"],
-    "actions": ["onvoltage", "oncurrent", "onpower"]
+  "ina219": { "extends": "sensor", "ui": "ina2xx",
+    "properties": ["address", "gain", "mode", "samples", "range"],
+    "events": ["onvoltage", "oncurrent", "onpower"]
   },  
 
-  "ina226": {
-    "ui": "ina2xx",
-    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart",
-    "gain", "mode", "samples", "range"],
-    "actions": ["onvoltage", "oncurrent", "onpower"]
+  "ina226": { "extends": "sensor", "ui": "ina2xx",
+    "properties": ["address", "gain", "mode", "samples", "range"],
+    "events": ["onvoltage", "oncurrent", "onpower"]
   },  
 
-  "dht": {
-    "ui": "air",
-    "properties": ["pin", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["ontemperature", "onhumidity"]
+  "dht": { "extends": "sensor", "ui": "air",
+    "properties": ["pin", "type", "powerpin", "powerinvert"],
+    "events": ["ontemperature", "onhumidity"]
   },
 
-  "aht20": {
-    "icon": "dht", "ui": "air",
-    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["ontemperature", "onhumidity"]
+  "aht20": { "extends": "sensor", "icon": "dht", "ui": "air",
+    "properties": ["address"],
+    "events": ["ontemperature", "onhumidity"]
   },
 
-  "am2320": {
-    "icon": "dht", "ui": "air",
-    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["ontemperature", "onhumidity"]
+  "am2320": { "extends": "sensor", "icon": "dht", "ui": "air",
+    "properties": ["address"],
+    "events": ["ontemperature", "onhumidity"]
   },
 
-  "sht20": {
-    "icon": "dht", "ui": "air",
-    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["ontemperature", "onhumidity"]
+  "sht20": { "extends": "sensor", "icon": "dht", "ui": "air",
+    "properties": ["address"],
+    "events": ["ontemperature", "onhumidity"]
   },
 
-  "dallas": {
-    "properties": ["pin", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["ontemperature"]
+  "dallas": { "extends": "sensor", 
+    "properties": ["pin"],
+    "events": ["ontemperature"]
   },
 
-  "bme680": {
-    "icon": "dht", "ui": "air",
-    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["ontemperature", "onhumidity", "onpressure", "ongas"]
+  "bme680": { "extends": "sensor", "icon": "dht", "ui": "air",
+    "properties": ["address"],
+    "events": ["ontemperature", "onhumidity", "onpressure", "ongas"]
   },  
 
-  "bmp280": {
-    "icon": "dht", "ui": "air",
-    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["ontemperature", "onpressure"]
+  "bmp280": { "extends": "sensor", "icon": "dht", "ui": "air",
+    "properties": ["address"],
+    "events": ["ontemperature", "onpressure"]
   },  
 
-  "scd4x": {
-    "icon": "dht", "ui": "air",
-    "properties": ["address", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["ontemperature", "onhumidity", "onco2"]
+  "scd4x": { "extends": "sensor", "icon": "dht", "ui": "air",
+    "properties": ["address"],
+    "events": ["ontemperature", "onhumidity", "onco2"]
   },
   
-  "bh1750": {
-    "properties": ["address", "mode", "factor", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["onvalue"]
+  "bh1750": { "extends": "sensor", 
+    "properties": ["address", "mode", "factor"],
+    "events": ["onvalue"]
   },  
 
-  "pms": {
-    "properties": ["pinrx", "pintx", "readtime", "warmuptime", "resendtime", "restart"],
-    "actions": ["onvalue"]
+  "pms": { "extends": "sensor", 
+    "properties": ["pinrx", "pintx"],
+    "events": ["onvalue"]
   },
 
   "log": {
     "properties": ["filesize", "filename", "averagetime"],
-    "events": ["value"]
+    "actions": ["value", "clear???"]
   },
 
   "color": {
-    "properties": [],
-    "events": ["config", "value", "mode", "duration", "brightness"],
-    "actions": ["onvalue", "onbrightness"]
+    "properties": ["config", "mode"],
+    "actions": ["value", "duration", "brightness"],
+    "events": ["onvalue", "onbrightness"]
   },
 
   "light": {
     "properties": ["pin", "duration", "mode"],
-    "events": ["value", "enable", "brightness"]
+    "actions": ["value", "enable", "brightness"]
   },
 
   "my9291": {
@@ -311,7 +316,7 @@
 
   "stripe": {
     "properties": ["count"],
-    "events": ["value", "enable", "mode", "brightness", "duration", "effectlength"]
+    "actions": ["value", "enable", "mode", "brightness", "duration", "effectlength"]
   },
 
   "apa102": {
@@ -327,7 +332,7 @@
   "alarm": {
     "icon": "default",
     "properties": ["time"],
-    "actions": ["ontime"]
+    "events": ["ontime"]
   },
 
   "diag": {
@@ -346,36 +351,35 @@
 
   "schedule": {
     "properties": ["ontime", "offtime"],
-    "actions": ["onon", "onoff", "onvalue"]
+    "events": ["onon", "onoff", "onvalue"]
   },
 
   "time": {
     "sys": "true",
     "properties": [],
-    "actions": ["onminute", "ontimestamp", "ontime", "ondate"]
+    "events": ["onminute", "ontimestamp", "ontime", "ondate"]
   },
 
   "timer": {
-    "properties": ["type", "waittime", "pulsetime", "cycletime"],
-    "events": ["next"],
-    "actions": ["onon", "onoff", "onvalue"]
+    "properties": ["mode", "waittime", "pulsetime", "cycletime", "restart"],
+    "actions": ["start", "stop", "next"],
+    "events": ["onon", "onoff", "onvalue"]
   },
 
   "tone": {
     "sys": "true",
     "properties": ["pin"],
-    "events": ["tones", "play"]
+    "actions": ["tones", "play"]
   },
 
-  "serialcmd": {
+  "serialcmd???": {
     "properties": [],
     "actions": ["preset0", "preset1", "preset2", "preset3"]
   },
 
   "weatherfeed": {
     "properties": ["get", "key", "loc", "readtime", "path", "actions/path"],
-    "events": [],
-    "actions": ["actions/onvalue"]
+    "events": ["actions/onvalue"]
   },
 
   "webproxy": {

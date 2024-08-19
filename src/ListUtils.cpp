@@ -95,8 +95,6 @@ String ListUtils::at(const char *list, int index) {
   const char *pStart = p;
   const char *pEnd = p - 1;
 
-  // Serial.printf("at:<%s, %d> = ", list, index);
-
   while (n <= index) {
     if ((*p == LISTSEPARATOR) || (!*p)) {
       pStart = pEnd + 1;
@@ -114,11 +112,7 @@ String ListUtils::at(const char *list, int index) {
     char buf[len + 1];
     memcpy(buf, pStart, len);
     buf[len] = NUL;
-    // Serial.printf("<%s>\n", buf);
     ret = buf;
-
-    // } else {
-    // Serial.printf("<null>\n");
   }
 
   return (ret);

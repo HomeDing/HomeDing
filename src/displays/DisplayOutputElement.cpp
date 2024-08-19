@@ -18,16 +18,11 @@
 #include <displays/DisplayOutputElement.h>
 #include "DisplayOutputElement.h"
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
-
-// ===== protected functions =====
-
-/// @brief return true when object is at the specified position or is overlapping with rectangle
-bool DisplayOutputElement::overlap(int16_t rx, int16_t ry, uint16_t rw, uint16_t rh) {
-  return ((rx + rw >= _x) && (rx < (_x + _w)) && (ry + rh >= _y) && (ry < (_y + _h)));
+DisplayOutputElement::DisplayOutputElement() {
+  category = CATEGORY::Widget; // no loop
 }
-
 
 // ===== Element functions =====
 
@@ -39,38 +34,63 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-  } else if (_stricmp(name, "redraw") == 0) {
-    if (_display && (_display->page == _page)) {
-      draw();  // only draw, no flush here
-    }
+    // these properties can be changed and redraw will happen
 
-  } else if (_stricmp(name, "page") == 0) {
-    _page = _atoi(value);
+  } else if (name == HomeDing::Action::Value) {
+    _value = value;
+    needsDraw = true;
+
+  } else if (_stricmp(name, "clear") == 0) {
+    _value.clear();
+    needsDraw = true;
+
+  } else if (_stricmp(name, "redraw") == 0) {
+    needsDraw = true;
 
   } else if (_stricmp(name, "x") == 0) {
-    _x = _atoi(value);
+    box.x_max -= box.x_min;
+    box.x_min = _atoi(value);
+    box.x_max += box.x_min;
+    needsDraw = true;
 
   } else if (_stricmp(name, "y") == 0) {
-    _y = _atoi(value);
+    box.y_max -= box.y_min;
+    box.y_min = _atoi(value);
+    box.y_max += box.y_min;
+    needsDraw = true;
 
-  } else if ((_stricmp(name, "w") == 0) || (_stricmp(name, "width") == 0)) {
-    _w = _atoi(value);
+  } else if ((name == HomeDing::Action::Width) || (_stricmp(name, "w") == 0)) {
+    box.x_max = box.x_min + _atoi(value) - 1;
+    needsDraw = true;
 
-  } else if ((_stricmp(name, "h") == 0) || (_stricmp(name, "height") == 0) || (_stricmp(name, "fontsize") == 0)) {
-    _h = _atoi(value);
+  } else if ((name == HomeDing::Action::Height) || (_stricmp(name, "h") == 0) || (_stricmp(name, "fontsize") == 0)) {
+    box.y_max = box.y_min + _atoi(value) - 1;
+    needsDraw = true;
 
   } else if (_stricmp(name, "color") == 0) {
     _color = _atoColor(value);
+    needsDraw = true;
 
   } else if (_stricmp(name, "background") == 0) {
     _backgroundColor = _atoColor(value);
+    needsDraw = true;
 
-  } else if (_stricmp(name, "border") == 0) {
+  } else if (name == HomeDing::Action::Border) {
     _borderColor = _atoColor(value);
+    needsDraw = true;
+
+    // these properties can be used for configuration only.
+
+  } else if (_stricmp(name, "page") == 0) {
+    page = _atoi(value);
+    needsDraw = true;
 
   } else {
     ret = false;
   }  // if
+
+  if (needsDraw && _display) _display->setFlush();
+
   return (ret);
 }  // set()
 
@@ -79,55 +99,44 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
  * @brief Activate the DisplayOutputElement.
  */
 void DisplayOutputElement::start() {
-  DisplayAdapter *d = _board->display;
+  TRACE("start()");
+  _display = _board->display;
+  if (_display) {
 
-  if (d == NULL) {
-    LOGGER_EERR("no display found");
-
-  } else {
-    // get standard draw/text color from display when no color was set.
-    if (_color == RGB_UNDEFINED) {
-      _color = d->getColor();
-    }
-    if (_backgroundColor == RGB_UNDEFINED) {
-      _backgroundColor = d->getBackgroundColor();
-    }
-    if (_borderColor == RGB_UNDEFINED) {
-      _borderColor = d->getBorderColor();
-    }
+    if (_color == RGB_UNDEFINED)
+      _color = _display->getColor();
+    if (_backgroundColor == RGB_UNDEFINED)
+      _backgroundColor = _display->getBackgroundColor();
+    if (_borderColor == RGB_UNDEFINED)
+      _borderColor = _display->getBorderColor();
     TRACE("colors: #%08x / #%08x / #%08x", _color, _backgroundColor, _borderColor);
 
-    _display = d;
-    if (_page > d->maxpage) {
-      d->maxpage = _page;
+    if (page > _display->maxpage) {
+      _display->maxpage = page;
     }
+
     Element::start();
-    _needredraw = true;
+    needsDraw = true;
+    if (_display) _display->setFlush();
   }  // if
 }  // start()
-
-
-/**
- * @brief check the state of the DHT values and eventually create actions.
- */
-void DisplayOutputElement::loop() {
-  if (_needredraw) {
-    if (_display && (_display->page == _page)) {
-      draw();
-    }
-    _needredraw = false;
-  }  // if
-}  // loop()
 
 
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 void DisplayOutputElement::draw() {
-  LOGGER_ETRACE("draw(%s) page=%d", id, _page);
+  // LOGGER_ETRACE("draw(%s) page=%d", id, page);
   _display->setColor(_color);
   _display->setBackgroundColor(_backgroundColor);
   _display->setBorderColor(_borderColor);
 }
+
+/// @brief push the current value of all properties to the callback.
+void DisplayOutputElement::pushState(
+  std::function<void(const char *pName, const char *eValue)> callback) {
+  Element::pushState(callback);
+  callback(HomeDing::Action::Value, _value.c_str());
+}  // pushState()
 
 // End

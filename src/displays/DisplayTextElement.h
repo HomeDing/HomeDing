@@ -15,6 +15,7 @@
  * * 29.04.2018 created by Matthias Hertel
  * * 24.06.2018 no problems when no display is available.
  * * 23.09.2018 support DisplayAdapter->flush()
+ * * 26.01.2024 force redraw on attribute changes
  */
 
 
@@ -53,13 +54,6 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
-
 protected:
   /**
    * @brief send current text to the display.
@@ -67,20 +61,11 @@ protected:
   virtual void draw() override;
 
 private:
-  /**
-   * @brief When using the TEXT type this text is shown before the value text.
-   */
+  /// @brief When using the TEXT type this text is shown before the value text.
   String _prefix; // static text before the value
 
-  /**
-   * @brief When using the TEXT type this text is shown after the value text.
-   */
+  /// @brief When using the TEXT type this text is shown after the value text.
   String _postfix; //  after the value
-
-  /**
-   * @brief displayed value
-   */
-  String _value;
 };
 
 #ifdef HOMEDING_REGISTER

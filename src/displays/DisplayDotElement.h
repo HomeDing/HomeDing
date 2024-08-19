@@ -28,52 +28,22 @@
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayDotElement : public DisplayOutputElement
-{
+class DisplayDotElement : public DisplayOutputElement {
 public:
-  /**
-   * @brief Factory function to create a ButtonElement.
-   * @return Element*
-   */
+  /// @brief Factory function to create a ButtonElement.
+  /// @return Element*
   static Element *create();
 
-  /**
-   * @brief static variable to ensure registering in static init phase.
-   */
+  /// @brief static variable to ensure registering in static init phase.
   static bool registered;
 
 
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
-  virtual bool set(const char *name, const char *value) override;
-
-
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
-
-  /**
-   * @brief Draw this output element.
-   */
+  /// @brief Draw this output element.
   virtual void draw() override;
-
-private:
-  /**
-   * @brief value to be displayed 
-   */
-  bool _value;
 };
 
 #ifdef HOMEDING_REGISTER
 // Register the DisplayDotElement onto the ElementRegistry.
 bool DisplayDotElement::registered =
-    ElementRegistry::registerElement("displaydot", DisplayDotElement::create);
+  ElementRegistry::registerElement("displaydot", DisplayDotElement::create);
 #endif

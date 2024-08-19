@@ -114,7 +114,7 @@ void WeatherFeedElement::processBody(char *value) {
     // TRACE("body(%d)", strlen(value));
     if (!mj) {
       mj = new (std::nothrow) MicroJson(
-        [this](UNUSED int level, char *path, char *value) {
+        [this](int /* level */, char *path, char *value) {
           if (path && value) {
             // LOGGER_INFO("<%s>=%s", path, value);
             // test all defined paths

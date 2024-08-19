@@ -13,6 +13,8 @@
 
 #pragma once
 
+#define UNUSED(expr) do { (void)(expr); } while (0)
+
 #include <Arduino_GFX_Library.h>
 
 #include <displays/DisplayAdapter.h>
@@ -27,10 +29,7 @@
 
 #endif
 
-
-#include <fonts/font10.h>
-#include <fonts/font16.h>
-#include <fonts/font24.h>
+#include <fonts/font.h>
 
 #define PANELTRACE(...)  // Serial.printf("Display::" __VA_ARGS__)
 
@@ -38,34 +37,32 @@ class DisplayAGFXAdapter : public DisplayAdapter {
 public:
   ~DisplayAGFXAdapter() = default;
 
-  Arduino_DataBus *getBus(DisplayConfig *conf) {
-    PANELTRACE("getbus: %d\n", conf->busmode);
+  Arduino_DataBus *getBus(int busmode, DisplayConfig *conf) {
+    PANELTRACE("getbus: %d\n", busmode);
     PANELTRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d\n",
                conf->dcPin, conf->csPin, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
     PANELTRACE("   i2c: adr:%d, sda:%d, scl:%d\n", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
 
     Arduino_DataBus *bus = nullptr;
 
-    if (conf->busmode == BUSMODE_ANY) {
+    if (busmode == BUSMODE_ANY) {
       if (conf->csPin >= 0) {
-        conf->busmode = BUSMODE_SPI;
+        busmode = BUSMODE_SPI;
       } else if (conf->i2cAddress)
-        conf->busmode = BUSMODE_I2C;
+        busmode = BUSMODE_I2C;
     }
 
-
-    if (conf->busmode == BUSMODE_I2C) {
+    if (busmode == BUSMODE_I2C) {
       PANELTRACE("Use I2C\n");
-      bus = new Arduino_Wire(conf->i2cAddress);
+      bus = new Arduino_Wire(conf->i2cAddress, conf->i2cCommandPrefix, conf->i2cDataPrefix);
 
 #if defined(ESP32)
-    } else if (conf->busmode == BUSMODE_SPI) {
+    } else if (busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
+      bus = new Arduino_HWSPI(conf->dcPin, conf->csPin, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
+      // bus = new Arduino_ESP32SPI(conf->dcPin, conf->csPin);
 
-      Arduino_DataBus *bus = new Arduino_ESP32SPI(
-        conf->dcPin, conf->csPin);
-
-    } else if (conf->busmode == BUSMODE_HSPI) {
+    } else if (busmode == BUSMODE_HSPI) {
       PANELTRACE("Use HSPI\n");
       bus = new Arduino_ESP32SPI(
         conf->dcPin,
@@ -78,7 +75,7 @@ public:
 #endif
 
 #if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
-    } else if (conf->busmode == BUSMODE_PAR8) {
+    } else if (busmode == BUSMODE_PAR8) {
       PANELTRACE("Use PAR8\n");
 
       int pinCount = ListUtils::length(conf->busPins);
@@ -92,20 +89,14 @@ public:
         }
       }
 
-      Serial.printf("ST7789::pins %d %d %d %d %d %d %d %d\n",
-                    pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
-
-      Serial.printf("ST7789::pins %d %d %d %d\n",
-                    conf->dcPin, conf->csPin, conf->wrPin, conf->rdPin);
-
       bus = new Arduino_ESP32PAR8Q(
         conf->dcPin, conf->csPin, conf->wrPin, conf->rdPin,
         pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
 #endif
 
 
-#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3)
-    } else if (conf->busmode == BUSMODE_LCD8) {
+#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
+    } else if (busmode == BUSMODE_LCD8) {
       PANELTRACE("Use LCD8\n");
       bus = new Arduino_ESP32LCD8(
         0 /* DC */,
@@ -118,17 +109,19 @@ public:
 
 
 #if defined(ESP8266)
-    } else if (conf->busmode == BUSMODE_SPI) {
+    } else if (busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
       // ESP8266 has pre-defined SPI pins
-      bus = new Arduino_ESP8266SPI(
-        conf->dcPin, conf->csPin);
+      bus = new Arduino_ESP8266SPI(conf->dcPin, conf->csPin);
 #endif
     }  // if
-    PANELTRACE("bus:%08lx\n", bus);
     return (bus);
   };
 
+
+  Arduino_DataBus *getBus(DisplayConfig *conf) {
+    return (getBus(conf->busmode, conf));
+  };
 
   virtual bool start() override {
     PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
@@ -160,7 +153,7 @@ public:
       setColor(conf->drawColor);
       setBackgroundColor(conf->backgroundColor);
       setBorderColor(conf->borderColor);
-      _setTextHeight(conf->height > 64 ? 16 : 8);
+      _setTextHeight(conf->height > 128 ? 16 : 8);
       clear();
       flush();
     }  // if
@@ -199,19 +192,6 @@ public:
 
 
   /**
-   * @brief fill rectangle with current background color.
-   * @param x x-position or offset of the text.
-   * @param y y-position of the area.
-   * @param w width of the area.
-   * @param h height of the area, assumed always 1.
-   */
-  void clear(int16_t x, int16_t y, int16_t w, int16_t h) override {
-    // PANELTRACE("clear: %d %d %d %d\n", x, y, w, h);
-    gfx->fillRect(x, y, w, h, backColor565);
-    DisplayAdapter::clear(x, y, w, h);
-  };  // clear()
-
-  /**
    * @brief Draw a text at this position using the specific height.-
    * @param x x-position or offset of the text.
    * @param y y-position of the text.
@@ -220,22 +200,29 @@ public:
    */
   int drawText(int16_t x, int16_t y, int16_t h, const char *text) override {
     PANELTRACE("drawText: %d/%d h:%d t:<%s>\n", x, y, h, text);
-    PANELTRACE("  colors: %d on %d\n", drawColor565, backColor565);
+    PANELTRACE("  colors: %04x on %04x\n", drawColor565, backColor565);
 
-    // textbox dimensions
-    int16_t bx, by;
-    uint16_t bw, bh;
+    if (displayBox.contains(x, y)) {
+      // textbox dimensions
+      int16_t bx, by;
+      uint16_t bw, bh;
 
-    gfx->setTextBound(0, 0, 128, 64);
-    _setTextHeight(h);
-    gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
-    // PANELTRACE("     box: %d/%d w:%d h:%d", bx, by, bw, bh);
+      gfx->setTextBound(0, 0, gfx->width(), gfx->height());
 
-    gfx->setTextColor(drawColor565, backColor565);
-    gfx->setCursor(x, y + baseLine);
-    gfx->print(text);
+      _setTextHeight(h);
+      gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
+      PANELTRACE("     box: %d/%d w:%d h:%d\n", bx, by, bw, bh);
 
-    return ((bx - x) + bw);
+      gfx->setTextColor(drawColor565, drawColor565);  // transparent background
+      gfx->setCursor(x, y + baseLine);
+      gfx->print(text);
+      _needFlush = true;
+      return ((bx - x) + bw);
+
+    } else {
+      return (0);
+    }
+
   }  // drawText
 
 
@@ -246,66 +233,113 @@ public:
   /// @param h height of the button
   /// @param text caption on the button
   virtual void drawButton(int16_t x, int16_t y, int16_t w, int16_t h, const char *text, bool pressed = false) override {
-    // LOGGER_JUSTINFO("drawButton: (%d,%d,%d,%d) <%s> %d\n", x, y, w, h, text, pressed);
-    const uint16_t paddingVertical = 4;
+    // LOGGER_JUSTINFO("drawButton: (%d,%d,%d,%d) <%s> %d", x, y, w, h, text, pressed);
 
-    // textbox dimensions
-    int16_t bx, by;
-    uint16_t bw, bh;
+    if (displayBox.overlaps(x, y, w, h)) {
+      const uint16_t paddingVertical = 4;
 
-    _setTextHeight(h - (2 * paddingVertical));
-    gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
+      // textbox dimensions
+      int16_t bx, by;
+      uint16_t bw, bh;
 
-    // calculate textbox offset
-    int16_t dx = (w - bw) / 2;
-    int16_t dy = (h - lineHeight) / 2 - 1;
+      _setTextHeight(h - (2 * paddingVertical));
+      gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
 
-    uint16_t fCol = (pressed ? backColor565 : drawColor565);
-    uint16_t bCol = (pressed ? drawColor565 : backColor565);
-    uint16_t r = (h / 2);
+      // calculate textbox offset
+      int16_t dx = (w - bw) / 2;
+      int16_t dy = (h - lineHeight) / 2 - 1;
 
-    // draw the background
-    if (backColor != RGB_UNDEFINED) {
-      gfx->fillRoundRect(x, y, w, h, r, bCol);
+      uint16_t fCol = (pressed ? backColor565 : drawColor565);
+      uint16_t bCol = (pressed ? drawColor565 : backColor565);
+      uint16_t r = (h / 2);
+
+      // draw the background
+      if (backColor != RGB_UNDEFINED) {
+        gfx->fillRoundRect(x, y, w, h, r, bCol);
+      }
+
+      // draw the border
+      if (borderColor != RGB_UNDEFINED) {
+        gfx->drawRoundRect(x, y, w, h, r, borderColor565);
+      }
+
+      // draw the text
+      gfx->setTextBound(x, y, w, h);
+      gfx->setTextColor(fCol);
+      gfx->setCursor(x + dx, y + dy + baseLine);
+      gfx->print(text);
+      _needFlush = true;
     }
 
-    // draw the border
-    if (borderColor != RGB_UNDEFINED) {
-      gfx->drawRoundRect(x, y, w, h, r, borderColor565);
-    }
-
-    // draw the text
-    gfx->setTextColor(fCol);
-    gfx->setCursor(x + dx, y + dy + baseLine);
-    gfx->print(text);
   }  // drawButton()
 
-
-  /// @brief Draw a boolean indicator on/off
-  /// @param x X Position
-  /// @param y Y Position
-  /// @param h Height of the indicator
-  /// @param fill
-  /// @return
-  int drawDot(int16_t x, int16_t y, int16_t h, bool fill) override {
-    // LOGGER_JUSTINFO("drawDot: (%d,%d)=%d", x, y, fill);
-    int r = h / 2;
-
-    if (fill) {
-      gfx->fillCircle(x + r, y + r, r, drawColor565);
-    } else {
-      gfx->drawCircle(x + r, y + r, r, drawColor565);
+  virtual void drawPixel(int16_t x, int16_t y, uint32_t color) override {
+    if (RGB_IS_COLOR(color)) {
+      gfx->drawPixel(x, y, col565(color));
+      _needFlush = true;
     }
-    return (1);
-  };  // drawDot()
+  };
 
+  virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color) override {
+    PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, color);
 
-  void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
-    PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, drawColor565);
-    gfx->drawLine(x0, y0, x1, y1, drawColor565);
+    if ((color != RGB_UNDEFINED) && (color != RGB_TRANSPARENT) && (x1 >= x0) && (y1 >= y0)) {
+      if (displayBox.overlaps(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1))) {
+        gfx->drawLine(x0, y0, x1, y1, col565(color));
+        _needFlush = true;
+      }
+    }
   }  // drawLine()
 
 
+  /// @brief Draw a rectangle with the given dimensions of the box and an optional inner border.
+  virtual void drawRectangle(BoundingBox &box, uint32_t borderColor, uint32_t fillColor = RGB_UNDEFINED) override {
+    PANELTRACE("drawRectangle(%d/%d - %d/%d #%08x #%08x)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);
+
+    if ((!box.isEmpty()) && (displayBox.overlaps(box))) {
+      int16_t w = box.x_max - box.x_min + 1;
+      int16_t h = box.y_max - box.y_min + 1;
+      bool bFill = RGB_IS_COLOR(fillColor);
+      uint16_t fill = col565(fillColor);
+
+      if (RGB_NO_COLOR(borderColor)) {
+        // draw without border
+        if (bFill) {
+          gfx->fillRect(box.x_min, box.y_min, w, h, fill);
+          _needFlush = true;
+        }
+
+      } else {
+        if (bFill) {
+          gfx->fillRect(box.x_min + 1, box.y_min + 1, box.x_max - box.x_min - 1, box.y_max - box.y_min - 1, fill);
+        }
+        gfx->drawRect(box.x_min, box.y_min, w, h, col565(borderColor));
+        _needFlush = true;
+      }
+    }
+  }  // drawRectangle()
+
+
+  /// @brief Draw a circle with the given dimensions of the box and an optional inner border.
+  void drawCircle(BoundingBox &box, uint32_t borderColor, uint32_t fillColor = RGB_UNDEFINED) override {
+    LOGGER_JUSTINFO("drawCircle(%d/%d - %d/%d #%08lx #%08lx)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);
+
+    int16_t radius = (box.x_max - box.x_min - 1) / 2;
+    int16_t cx = box.x_min + radius;
+    int16_t cy = box.y_min + radius;
+
+    if (RGB_IS_COLOR(fillColor)) {
+      gfx->fillCircle(cx, cy, radius, col565(fillColor));
+    }
+    if (RGB_IS_COLOR(borderColor)) {
+      gfx->drawCircle(cx, cy, radius, col565(borderColor));
+    }
+
+    _needFlush = true;
+  };
+
+
+protected:
   /// @brief send all buffered pixels to display.
   void flush() override {
     gfx->flush();
@@ -313,7 +347,6 @@ public:
   };  // flush()
 
 
-protected:
   /// @brief convert a 32-bit color value 0x00RRGGBB into the 565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
   /// @param color 24-bit color value
   /// @return 16-bit color in 565 format.
@@ -361,7 +394,7 @@ protected:
 
   // load a builtin font
   void loadFont(int16_t height, int8_t factor = 1) {
-    // PANELTRACE("loadFont(%d, %d)\n", height, factor);
+    PANELTRACE("loadFont(%d, %d)\n", height, factor);
     const GFXfont *font = nullptr;
 
     if (height <= 8) {

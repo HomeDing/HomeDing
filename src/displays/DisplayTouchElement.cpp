@@ -20,7 +20,7 @@
 #include <Wire.h>
 
 
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Private functions ===== */
 
@@ -47,18 +47,19 @@ void DisplayTouchElement::init(Board *board) {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DisplayTouchElement::set(const char *name, const char *value) {
+  TRACE("set(%s, %s)", name, value);
   bool ret = true;
 
   if (Element::set(name, value)) {
     // done.
 
-  } else if (_stricmp(name, "address") == 0) {
+  } else if (name == HomeDing::Action::Address) {
     _address = _atoi(value);
 
-  } else if (_stricmp(name, "width") == 0) {
+  } else if (name == HomeDing::Action::Width) {
     _width = _atoi(value);
 
-  } else if (_stricmp(name, "height") == 0) {
+  } else if (name == HomeDing::Action::Height) {
     _height = _atoi(value);
 
   } else if (_stricmp(name, "rotation") == 0) {
@@ -70,12 +71,29 @@ bool DisplayTouchElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "resetpin") == 0) {
     _resetPin = _atopin(value);
 
+  } else if (_stricmp(name, "ontouch") == 0) {
+    _touchAction = value;
+
   } else {
     ret = false;
   }  // if
 
   return (ret);
 }  // set()
+
+
+/// @brief setup the element so it can be started and stopped.
+void DisplayTouchElement::setup() {
+  TRACE("setup()");
+
+  if (!_width) {
+    _width = _board->display->getConfWidth();
+  }
+  if (!_height) {
+    _height = _board->display->getConfHeight();
+  }
+  TRACE(" _width=%d _height=%d", _width, _height);
+}
 
 
 /**
@@ -87,6 +105,7 @@ void DisplayTouchElement::start() {
   Element::start();
   nextRead = millis() + 50;
   _bFound = nullptr;
+  _isTouched = false;
 }  // start()
 
 
@@ -106,7 +125,7 @@ void DisplayTouchElement::loop() {
 
       } else if (_rotation == 90) {
         // 90° to the right
-        uint16_t temp = lastX;
+        int16_t temp = lastX;
         lastX = lastY;
         lastY = _width - temp;
 
@@ -117,18 +136,23 @@ void DisplayTouchElement::loop() {
 
       } else if (_rotation == 270) {
         // 90° to the left
-        uint16_t temp = lastX;
+        int16_t temp = lastX;
         lastX = _height - lastY;
         lastY = temp;
       }
 
+      if (!_isTouched) {
+        _board->dispatch(_touchAction);
+      }
+      _isTouched = true;
+
       // as of now only interested in the first.
-      TRACE("%d/%d", lastX, lastY);
+      LOGGER_ETRACE(" touch %d/%d", lastX, lastY);
 
       if (!_bFound) {
         // find displaybutton at x/y
-        _board->forEach("displaybutton", [this](Element *e) {
-          if (!_bFound) {
+        _board->forEach(CATEGORY::Widget, [this](Element *e) {
+          if ((!_bFound) && (Element::_stristartswith(e->id, "displaybutton/"))) {
             DisplayButtonElement *be = (DisplayButtonElement *)e;
             if (be->touchStart(lastX, lastY)) {
               _bFound = be;
@@ -140,15 +164,18 @@ void DisplayTouchElement::loop() {
         bool over = _bFound->touchStart(lastX, lastY);
         if (!over) {
           _bFound = nullptr;
+          _isTouched = false;
         }
       }
 
-    } else if (_bFound) {
-      TRACE("-end");
-      // call touchEnd to found button
-      _bFound->touchEnd(lastX, lastY);
-      _bFound = nullptr;
-
+    } else {
+      if (_bFound) {
+        TRACE("-end");
+        // call touchEnd to found button
+        _bFound->touchEnd(lastX, lastY);
+        _bFound = nullptr;
+      }  // if
+      _isTouched = false;
     }  // if
 
     nextRead = millis() + 50;

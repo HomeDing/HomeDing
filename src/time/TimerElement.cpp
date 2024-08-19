@@ -93,13 +93,14 @@ bool TimerElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onend") == 0) {
     _endAction = value;
 
-  } else if (_stricmp(name, ACTION_ONVALUE) == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else {
     ret = Element::set(name, value);
   }  // if
 
+  _forceSendActions = true;
   return (ret);
 }  // set()
 
@@ -163,8 +164,9 @@ void TimerElement::loop() {
     }
   }  // if
 
-  if (newValue == _value) {
+  if (! _forceSendActions && (newValue == _value)) {
     // no need to send an action.
+
   } else if (newValue) {
     _board->dispatch(_onAction);
     _board->dispatch(_valueAction, "1");
@@ -173,6 +175,7 @@ void TimerElement::loop() {
     _board->dispatch(_offAction);
     _board->dispatch(_valueAction, "0");
   }  // if
+  _forceSendActions = false;
   _value = newValue;
 }  // loop()
 
@@ -193,7 +196,7 @@ void TimerElement::pushState(
   } else {
     callback("time", String((now - _startTime) / 1000).c_str());
   }
-  callback(PROP_VALUE, _value ? "1" : "0");
+  callback(HomeDing::Action::Value, _value ? "1" : "0");
 }  // pushState()
 
 

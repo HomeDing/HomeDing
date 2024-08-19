@@ -1,6 +1,8 @@
 /**
  * @file DisplayESP32PanelElement.cpp
- * @brief Display Element for ST7796 compatible TFT displays.
+ *
+ * @brief Display Element for TFT displays using the ESP32-S3 specific
+ * 16-bit Panel Data interface.
  *
  * @author Matthias Hertel, https://www.mathertel.de
  *
@@ -17,41 +19,24 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
+
 #include "displays/DisplayESP32PanelElement.h"
 
 #include "displays/DisplayESP32PanelAdapter.h"
-#include "DisplayESP32PanelElement.h"
 
 #define TRACE(...)  // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
-/**
- * @brief static factory function to create a new DisplayESP32PanelElement
- * @return DisplayESP32PanelElement* created element
- */
+/// @brief static factory function to create a new DisplayESP32PanelElement
+/// @return DisplayESP32PanelElement* created element
 Element *DisplayESP32PanelElement::create() {
   return (new DisplayESP32PanelElement());
 }  // create()
 
 
 /* ===== Element functions ===== */
-
-void DisplayESP32PanelElement::init(Board *board) {
-  TRACE("init()");
-  DisplayElement::init(board);
-
-  // some default values for ST7796 displays
-  config.width = 320;
-  config.height = 480;
-}
-
-
-/// @brief Set a parameter or property to a new value or start an action.
-bool DisplayESP32PanelElement::set(const char *name, const char *value) {
-  return (DisplayElement::set(name, value));
-}
-
 
 /// @brief Activate the DisplayESP32PanelElement and register a Display Adapter to LCD
 void DisplayESP32PanelElement::start() {
@@ -71,5 +56,7 @@ void DisplayESP32PanelElement::start() {
     }  // if
   }    // if
 }  // start()
+
+#endif
 
 // End

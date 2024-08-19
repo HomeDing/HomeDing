@@ -40,11 +40,6 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Construct a new LightElement.
-   */
-  LightElement();
-
 
   /**
    * @brief Set a parameter or property to a new value or start an action.

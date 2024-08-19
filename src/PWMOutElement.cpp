@@ -20,17 +20,19 @@
  * @return PWMOutElement* as Element* created element
  */
 Element *PWMOutElement::create() {
-  return (new PWMOutElement());
+  PWMOutElement *e = new PWMOutElement();
+  e->category = CATEGORY::Standard;  // no polling
+  return (e);
 }  // create()
 
 
 bool PWMOutElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     _setValue(_atoi(value));
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "invert") == 0) {
@@ -57,14 +59,24 @@ void PWMOutElement::start() {
     // enable output and stay off
     Element::start();
 
-#if defined(ESP8266)
+#if (defined(ESP32))
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+  // ESP32 Version 3++
     pinMode(_pin, OUTPUT);
-    analogWriteRange(_range);
+    analogWriteFrequency(_pin, 8000);
+    analogWriteResolution(_pin, 8);
 
-#elif (defined(ESP32))
+#else
+  // ESP32 Version 2.x
     _channel = _board->nextLedChannel++;
     ledcSetup(_channel, 8000, 8);
     ledcAttachPin(_pin, _channel);
+#endif
+
+#elif defined(ESP8266)
+    pinMode(_pin, OUTPUT);
+    analogWriteRange(_range);
+
 #endif
 
     _setValue(_value);
@@ -76,7 +88,7 @@ void PWMOutElement::start() {
 void PWMOutElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("value", _printInteger(_value));
+  callback(HomeDing::Action::Value, _printInteger(_value));
 }  // pushState()
 
 
@@ -93,7 +105,7 @@ void PWMOutElement::_setValue(int newValue) {
 #if defined(ESP8266)
     analogWrite(_pin, v);
 #elif (defined(ESP32))
-    ledcWrite(_channel, v);
+    analogWrite(_pin, v);
 #endif
 
   }  // if

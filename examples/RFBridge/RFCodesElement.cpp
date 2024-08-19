@@ -69,10 +69,10 @@ bool RFCodesElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // ok.
 
-  } else if (_stricmp(name, "value") == 0) {
+  } else if (name == HomeDing::Action::Value) {
     _sendValue = value;  // will be sent in loop()
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else if (_stricmp(name, "pinRx") == 0) {

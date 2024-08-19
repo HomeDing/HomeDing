@@ -111,7 +111,7 @@ public:
     int16_t bx, by;
     uint16_t bw, bh;
     // LOGGER_JUSTINFO("drawText: %d/%d h:%d t:<%s>", x, y, h, text);
-    // LOGGER_JUSTINFO("  colors: %d on %d", drawColor565, backColor565);
+    // LOGGER_JUSTINFO("  colors: %04x on %04x", drawColor565, backColor565);
 
     _setTextHeight(h);
     gfxDisplay->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
@@ -120,6 +120,7 @@ public:
     gfxDisplay->setTextColor(drawColor565, backColor565);
     gfxDisplay->setCursor(x, y + baseLine);
     gfxDisplay->print(text);
+    _needSync = true;
 
     return ((bx - x) + bw);
   }  // drawText
@@ -134,12 +135,14 @@ public:
     } else {
       gfxDisplay->drawCircle(x + r, y + r, r, drawColor565);
     }
+    _needSync = true;
     return (1);
   };  // drawDot()
 
 
   void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) override {
     gfxDisplay->drawLine(x0, y0, x1, y1, drawColor565);
+    _needSync = true;
   }  // drawLine()
 
 

@@ -102,30 +102,34 @@ Element *BME680Element::create() {
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool BME680Element::set(const char *name, const char *value) {
-  bool ret = SensorElement::set(name, value);
+  bool ret = true;
 
-  if (!ret) {
-    if (_stricmp(name, PROP_ADDRESS) == 0) {
-      _address = _atoi(value);
-      ret = true;
+  if (SensorElement::set(name, value)) {
+    // done.
 
-    } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
-      _temperatureAction = value;
-      ret = true;
+  } else if (name == HomeDing::Action::Address) {
+    _address = _atoi(value);
+    ret = true;
 
-    } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
-      _humidityAction = value;
-      ret = true;
+  } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
+    _temperatureAction = value;
+    ret = true;
 
-    } else if (_stricmp(name, ACTION_ONPRESSURE) == 0) {
-      _pressureAction = value;
-      ret = true;
+  } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
+    _humidityAction = value;
+    ret = true;
 
-    } else if (_stricmp(name, "ongas") == 0) {
-      _gasAction = value;
-      ret = true;
-    }  // if
-  }    // if
+  } else if (_stricmp(name, ACTION_ONPRESSURE) == 0) {
+    _pressureAction = value;
+    ret = true;
+
+  } else if (_stricmp(name, "ongas") == 0) {
+    _gasAction = value;
+    ret = true;
+
+  } else {
+    ret = false;
+  }  // if
 
   return (ret);
 }  // set()
@@ -178,7 +182,7 @@ bool BME680Element::getProbe(String &values) {
     } else {
       snprintf(buffer, sizeof(buffer),
                //  "%.2f,%.2f,%.0f,%.0f,%d",
-               "%d.%02d,%d.%03d,%d.%02d,%d",
+               "%d.%02d,%ld.%03ld,%ld.%02ld,%ld",
                data.temperature / 100, data.temperature % 100,
                data.humidity / 1000, data.humidity % 1000,
                data.pressure / 100, data.pressure % 100,

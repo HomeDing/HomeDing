@@ -4,6 +4,8 @@
 
 #define NUL '\0'
 
+#define CTRACE(...)  // Serial.printf(__VA_ARGS__)
+
 // parsing strings like
 
 /**
@@ -87,13 +89,13 @@ public:
       }
     }
 
-    // Serial.printf("--protocol=%s\n", protocol ? protocol : "-");
-    // Serial.printf("--user=%s\n", user ? user : "-");
-    // Serial.printf("--passwd=%s\n", passwd ? passwd : "-");
-    // Serial.printf("--server=%s\n", server ? server : "-");
-    // Serial.printf("--port=%d\n", port);
-    // Serial.printf("--path=%s\n", path ? path : "-");
-    // Serial.printf("--query=%s\n", query ? query : "-");
+    // CTRACE("--protocol=%s\n", protocol ? protocol : "-");
+    // CTRACE("--user=%s\n", user ? user : "-");
+    // CTRACE("--passwd=%s\n", passwd ? passwd : "-");
+    // CTRACE("--server=%s\n", server ? server : "-");
+    // CTRACE("--port=%d\n", port);
+    // CTRACE("--path=%s\n", path ? path : "-");
+    // CTRACE("--query=%s\n", query ? query : "-");
   }
 
   char *protocol = nullptr;

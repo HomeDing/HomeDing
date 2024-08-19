@@ -155,7 +155,7 @@ bool RadioElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onFrequency") == 0) {
     _frequencyAction = value;
 
-  } else if (_stricmp(name, "address") == 0) {
+  } else if (name == HomeDing::Action::Address) {
     _address = _atoi(value);
 
   } else if (_stricmp(name, "antenna") == 0) {

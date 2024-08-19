@@ -33,7 +33,7 @@ Element *OTAElement::create() {
 /* ===== Element functions ===== */
 
 OTAElement::OTAElement() {
-  startupMode = Element_StartupMode::Network;
+  startupMode = Element_StartupMode::WithNetwork;
 }
 
 /**
@@ -118,14 +118,6 @@ void OTAElement::loop() {
   }
 }  // loop()
 
-
-/**
- * @brief push the current value of all properties to the callback.
- */
-void OTAElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-}  // pushState()
 
 // Always Register the OTAElement in the ElementRegistry.
 bool OTAElement::registered =

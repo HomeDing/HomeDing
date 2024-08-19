@@ -26,49 +26,18 @@
  * @return DisplayDotElement* as Element* created element
  */
 Element *DisplayDotElement::create() {
-  return (new DisplayDotElement());
+  DisplayDotElement *e = new DisplayDotElement();
+  e->_value = "1";
+  return (e);
 }  // create()
-
-
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
-bool DisplayDotElement::set(const char *name, const char *value) {
-  TRACE("set %s=%s", name, value);
-  bool ret = true;
-
-  if (DisplayOutputElement::set(name, value)) {
-    // done
-
-  } else if (_stricmp(name, "value") == 0) {
-    _value = _atob(value);
-    _needredraw = true;
-
-  } else if (_stricmp(name, "clear") == 0) {
-    _value = false;
-    _needredraw = true;
-
-  } else {
-    ret = false;
-  }  // if
-  return (ret);
-}  // set()
 
 
 /// @brief Draw this output element.
 void DisplayDotElement::draw() {
-  DisplayOutputElement::draw();
-  _display->clear(_x, _y, _h, _h);
-  _display->drawDot(_x, _y, _h, _value);
-}
+  TRACE("draw()");
+  bool bValue = _atob(_value.c_str());
+  _display->drawCircle(box, _borderColor, bValue ? _backgroundColor : RGB_TRANSPARENT);
+}  // draw()
 
-/**
- * @brief push the current value of all properties to the callback.
- */
-void DisplayDotElement::pushState(
-  std::function<void(const char *pName, const char *eValue)> callback) {
-  Element::pushState(callback);
-  callback("value", _value ? "1" : "0");
-}  // pushState()
 
 // End

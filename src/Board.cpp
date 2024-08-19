@@ -50,19 +50,16 @@ extern "C" {
 #define BOARDTRACE(...)  // Logger::LoggerPrint("Board", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use ELEM-TRACE for compiling with detailed TRACE output for Element creation.
-#define ELEMTRACE(...)  // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define ELEMTRACE(...) // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...)  // Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define NETTRACE(...) Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
 
-// The captive Mode will stay for 5 min. and then restart.
-#define CAPTIVE_TIME (5 * 60 * 1000)
-
-#define NetMode_PSK 2   // second try
-#define NetMode_PASS 1  // last try
+// The captive Mode will stay for 10 min. and then restart.
+#define CAPTIVE_TIME (10 * 60 * 1000)
 
 DNSServer *dnsServer;
 IPAddress apIP(192, 168, 4, 1);
@@ -95,10 +92,6 @@ FS *HomeDingFS::sdFS = nullptr;
 /** Reset Counter to detect multiple hardware resets in a row. */
 bool _isWakeupStart = false;
 
-// https://community.platformio.org/t/esp32-firebeetle-fast-boot-after-deep-sleep/13206
-// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-bootloader-skip-validate-in-deep-sleep
-// CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
-
 /**
  * @brief Initialize a blank board.
  */
@@ -111,8 +104,6 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
   Logger::init(fs);
   Network::init();
-
-  WiFi.persistent(true);  // ??? too early ?
 
   Logger::printf("Device %s starting...", buildName);
 #if defined(ESP32)
@@ -143,7 +134,7 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
   // board parameters configured / overwritten by device element
   homepage = "/index.htm";
-  cacheHeader = "no-cache";
+  cacheHeader = "etag";  //  "no-cache";
 
   _newBoardState(BOARDSTATE::NONE);
   _deepSleepStart = 0;         // no deep sleep to be started
@@ -155,16 +146,24 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   uint8_t mac[6];
   char sMac[64];
 
-  WiFi.macAddress(mac);
+#if defined(ESP32)
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+  // ESP32 Version 3++
+  Network.macAddress(mac);
+  snprintf(sMac, sizeof(sMac), "esp32-%02x%02x%02x", mac[3], mac[4], mac[5]);
 
-#if defined(ESP8266)
-  snprintf(sMac, sizeof(sMac), "ESP-%02X%02X%02X", mac[3], mac[4], mac[5]);
-#elif defined(ESP32)
+#else
+  // ESP32 Version 2.x
+  WiFi.macAddress(mac);
   snprintf(sMac, sizeof(sMac), "esp32-%02x%02x%02x", mac[3], mac[4], mac[5]);
 #endif
 
-  deviceName = sMac;
+#elif defined(ESP8266)
+  WiFi.macAddress(mac);
+  snprintf(sMac, sizeof(sMac), "esp-%02x%02x%02x", mac[3], mac[4], mac[5]);
+#endif
 
+  deviceName = sMac;
 
   // check for deep sleep wakeup
 
@@ -179,9 +178,8 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
   // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-bootloader-skip-validate-in-deep-sleep
   // CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP
 
-  esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
   BOARDTRACE("ws=%d", _isWakeupStart);
-  BOARDTRACE("ESP32: deep sleep cause: %d", cause);
+  BOARDTRACE("ESP32: deep sleep cause: %d", esp_sleep_get_wakeup_cause());
 
   _startup = (_isWakeupStart) ? BOARDSTARTUP::DEEPSLEEP : BOARDSTARTUP::NORMAL;
   _isWakeupStart = false;
@@ -197,16 +195,20 @@ void Board::init(WebServer *serv, FILESYSTEM *fs, const char *buildName) {
 
 void Board::add(const char *id, Element *e) {
   ELEMTRACE("add(%s)", id);
-  _addedElements++;
+  bool hasLoop = (e->category & Element::CATEGORY::Looping);
+  Element *l = hasLoop ? _elementList : _elementListNoLoop;
 
+  _addedElements++;
   strcpy(e->id, id);
   Element::_strlower(e->id);
-  Element *l = _elementList;
 
   // append to end of list.
-  if (!l) {
-    // first Element.
-    _elementList = e;
+  if ((!l) && hasLoop) {
+    _elementList = e;  // first looping element
+
+  } else if ((!l) && (!hasLoop)) {
+    _elementListNoLoop = e;  // first non-looping element
+
   } else {
     // search last Element.
     while (l->next)
@@ -253,13 +255,17 @@ void Board::_checkNetState() {
  * @brief Add and config the Elements defined in the config files.
  */
 void Board::_addAllElements() {
-  BOARDTRACE("addAllElements()");
+  ELEMTRACE("addAllElements()");
   Element *_lastElem = NULL;  // last created Element
 
   MicroJson *mj = new MicroJson(
-    [this, &_lastElem](int level, char *path, char *value) {
-      // BOARDTRACE("callback %d %s =%s", level, path, value ? value : "-");
+    [this, &_lastElem](int level, char *_path, char *value) {
+      ELEMTRACE("callback %d %s =%s", level, _path, value ? value : "-");
       hd_yield();
+
+      char path[128];
+      strncpy(path, _path, sizeof(path));
+      strlwr(path);
 
       if (level == 1) {
 
@@ -276,13 +282,13 @@ void Board::_addAllElements() {
         *t = '\0';
 
         // typeName starts with "web" ?
-        if (Element::_stristartswith(typeName, "web")) {
+        if (Element::_strStartsWith(typeName, "web")) {
           // don't try to create web elements
           _lastElem = nullptr;
         } else {
           _lastElem = ElementRegistry::createElement(typeName);
           if (!_lastElem) {
-            LOGGER_ERR("Cannot create Element type %s", typeName);
+            LOGGER_ERR("No such Element: %s", typeName);
           } else {
             // add to the list of elements
             add(path, _lastElem);
@@ -293,9 +299,7 @@ void Board::_addAllElements() {
         // Search 2. slash as starting point for name to include 3. level
         char *name = strchr(path, MICROJSON_PATH_SEPARATOR) + 1;
         name = strchr(name, MICROJSON_PATH_SEPARATOR) + 1;
-        ELEMTRACE(" (%s) %s=%s", path, name, value ? value : "-");
-        // add a parameter to the last Element
-        _lastElem->set(name, value);
+        dispatchAction(_lastElem, name, value ? value : "-");
       }  // if
     });
 
@@ -316,19 +320,16 @@ void Board::_addAllElements() {
 void Board::start(Element_StartupMode startupMode) {
   // BOARDTRACE("start(%d)", startupMode);
 
-  // make elements active that match
-  Element *l = _elementList;
-  while (l) {
-    if ((!l->active) && (l->startupMode <= startupMode)) {
+  // make elements active that match the startupMode
+  forEach(Element::CATEGORY::All, [startupMode](Element *e) {
+    if ((!e->active) && (e->startupMode <= startupMode)) {
       // start element when not already active
-      ELEMTRACE("starting %s...", l->id);
-      l->setup();  // one-time initialization
-      l->start();  // start...
+      ELEMTRACE("starting %s...", e->id);
+      e->setup();  // one-time initialization
+      e->start();  // start...
       hd_yield();
-    }  // if
-
-    l = l->next;
-  }  // while
+    }
+  });
 
   active = true;
   _nextElement = nullptr;
@@ -373,10 +374,10 @@ void Board::loop() {
         // starting time depending elements
         // check if time is valid now -> start all elements with
         if (time(nullptr)) {
-          start(Element_StartupMode::Time);
+          start(Element_StartupMode::WithTime);
           startComplete = true;
         }  // if
-      }    // if
+      }  // if
 
       if (startComplete) {
         dispatch(startAction);  // dispatched when all elements are active.
@@ -396,24 +397,23 @@ void Board::loop() {
     // dispatch next action from _actions if any
     if (!_actions.empty()) {
       _DeepSleepCount = 0;
-      String a = _actions.pop();
-      BOARDTRACE("popped %s", a.c_str());
-      dispatchAction(a);
+      dispatchAction(_actions.pop());
       return;
     }  // if
 
-    // give some time to next active element
+    // no actions left
+    // trigger flush to a display
+    if ((display) && display->startFlush(false)) {
+      return;
+    }  // if
+
+    // give some time to next active element from the Looping List
     if (!_nextElement) {
       _nextElement = _elementList;
-      if ((display) && (display->outOfSync())) {
-        // sync / flush display buffer
-        display->flush();
-        return;
-      }  // if
-    }    // if
+    }  // if
 
     if (_nextElement) {
-      if (_nextElement->active) {
+      if ((_nextElement->active) && (_nextElement->category & Element::CATEGORY::Looping)) {
         // BOARDTRACE("loop %s", _nextElement->id);
 #if defined(HD_PROFILE)
         PROFILE_START(_nextElement);
@@ -435,7 +435,7 @@ void Board::loop() {
       if ((nowMillis > _deepSleepStart) && (_DeepSleepCount > _addedElements + 4)) {
         // all elements now had the chance to create and dispatch an event.
         LOGGER_INFO("sleep %ld msecs.", _deepSleepTime);
-        Serial.flush();
+        Logger::flush();
 #if defined(ESP32)
         // remember there was deep sleep mode before reset.
         _isWakeupStart = true;
@@ -450,21 +450,26 @@ void Board::loop() {
     _newBoardState(BOARDSTATE::LOAD);
 
   } else if (boardState == BOARDSTATE::LOAD) {
-    // load network connection details
-    File f = HomeDingFS::rootFS->open(NET_FILENAME, "r");
-    if (f) {
-      netpass = f.readString();
-      f.close();
-    }
-    NETTRACE("$net=%s", ListUtils::at(netpass, 0).c_str());
 
-    if (netpass.isEmpty() && (ssid) && (*ssid)) {
+    netpass = "";
+    if ((ssid) && (*ssid)) {
       // use hard coded ssid+passPhrase
+      LOGGER_TRACE("$net: use hard coded network.");
       netpass = ssid;
       netpass.concat(',');
       if (passPhrase) netpass.concat(passPhrase);
-      NETTRACE("$net: use:%s", ssid);
+
+    } else {
+      // load network connection details
+      File f = HomeDingFS::rootFS->open(NET_FILENAME, "r");
+      if (f) {
+        netpass = f.readString();
+        f.close();
+      }
     }
+
+    netpass.replace("\n", "");
+    NETTRACE("$net=<%s>", ListUtils::at(netpass, 0).c_str());
 
     // increment BootCount
     _resetCount = DeviceState::getResetCounter() + 1;
@@ -477,6 +482,7 @@ void Board::loop() {
       _newBoardState(BOARDSTATE::SETUP);
     else
       _newBoardState(BOARDSTATE::STARTCAPTIVE);
+
 
   } else if (boardState == BOARDSTATE::SETUP) {
 
@@ -511,13 +517,11 @@ void Board::loop() {
       DeviceState::loadElementState(this);
 
       // search any time requesting elements
-      Element *l = _elementList;
-      while (l != nullptr) {
-        if (l->startupMode == Element_StartupMode::Time) {
+      forEach(Element::CATEGORY::All, [this](Element *e) {
+        if (e->startupMode == Element_StartupMode::WithTime) {
           hasTimeElements = true;
-        }  // if
-        l = l->next;
-      }  // while
+        }
+      });
 
       // setup I2C system wide when configured.
       if ((I2cSda >= 0) && (I2cScl >= 0)) {
@@ -552,7 +556,6 @@ void Board::loop() {
 
     // get effective Hostname
     deviceName = WiFi.getHostname();
-    BOARDTRACE("deviceName=%s", deviceName.c_str());
 
 #if defined(ESP8266)
     WiFi.setOutputPower(outputPower);
@@ -572,12 +575,6 @@ void Board::loop() {
       NETTRACE("connected.");
       _newBoardState(BOARDSTATE::GREET);
 
-      // } else if (boardState == BOARDSTATE::WAITNET) {
-
-    } else if (Network::state == Network::NETSTATE::CONNECTSTA) {
-      // wait on...
-      delay(100);
-
     } else if (Network::state == Network::NETSTATE::FAILED) {
       NETTRACE("connecting failed.");
       needReset = true;
@@ -585,6 +582,11 @@ void Board::loop() {
     } else if (nowMillis > connectPhaseEnd) {
       NETTRACE("connecting timed out.");
       needReset = true;
+
+    } else if (Network::state == Network::NETSTATE::CONNECTSTA) {
+      // wait on...
+      delay(100);
+
     }  // if
 
     if (needReset) {
@@ -607,14 +609,13 @@ void Board::loop() {
     if (display) {
       delay(1600);
       display->clear();
-      display->flush();
+      display->startFlush(true);
     }  // if
 
     server->begin();
     server->enableCORS(true);
 
-    randomSeed(millis());         // millis varies on every start, good enough
-    filesVersion = random(8000);  // will incremented on every file upload by file server
+    randomSeed(millis());  // millis varies on every start, good enough
 
     if (cacheHeader == "etag") {
 #if defined(ESP8266)
@@ -630,16 +631,34 @@ void Board::loop() {
           File f = fs.open(path, "r");
           eTag = String(f.getLastWrite(), 16);  // use file modification timestamp to create ETag
           f.close();
-          // use current counter
-          // eTag = String(filesVersion, 16);  // f.getLastWrite()
+        }
+        return (eTag);
+      });
+
+#elif defined(ESP32)
+
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+      // enable eTags in results for static files
+      // by setting "cache": "etag" inc env.json on the device element
+      // don't cache *.txt files
+
+      // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
+      server->enableETag(true, [this](FS &fs, const String &path) -> String {
+        String eTag;
+        if (!path.endsWith(".txt")) {
+          File f = fs.open(path, "r");
+          eTag = String(f.getLastWrite(), 16);  // use file modification timestamp to create ETag
+          f.close();
         }
         return (eTag);
       });
 #endif
+
+#endif
       cacheHeader = "";  // do not pass this cache header
     }
 
-    start(Element_StartupMode::Network);
+    start(Element_StartupMode::WithNetwork);
     dispatch(sysStartAction);  // dispatched when network is available
 
     // ===== finish network setup
@@ -664,6 +683,7 @@ void Board::loop() {
       MDNS.addServiceTxt(serv, "path", homepage.c_str());
       MDNS.addServiceTxt(serv, "title", title.c_str());
       MDNS.addServiceTxt(serv, "room", room.c_str());
+      MDNS.announce();
 
 #elif defined(ESP32)
       MDNS.begin(deviceName.c_str());
@@ -695,7 +715,23 @@ void Board::loop() {
 
     DeviceState::setResetCounter(0);
 
+#if defined(ESP32)
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
+    // ESP32 Version 3++
+    Network.macAddress(mac);
+#else
+    // ESP32 Version 2.x
     WiFi.macAddress(mac);
+#endif
+
+#elif defined(ESP8266)
+    WiFi.macAddress(mac);
+#endif
+
+
+
+
+
     snprintf(ssid, sizeof(ssid), "%s%02X%02X%02X", HOMEDING_GREETING, mac[3], mac[4], mac[5]);
 
     displayInfo("Captive Mode:", ssid);
@@ -703,7 +739,7 @@ void Board::loop() {
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, netMsk);
     WiFi.softAP(ssid);
-    hd_yield();
+    delay(100);
     BOARDTRACE(" AP-IP: %s", WiFi.softAPIP().toString().c_str());
 
     // setup dns server using standard port
@@ -756,25 +792,6 @@ void Board::cancelSleep() {
 }  // cancelSleep()
 
 
-Element *Board::findById(String &id) {
-  return (findById(id.c_str()));
-}
-
-Element *Board::findById(const char *id) {
-  // BOARDTRACE("findById(%s)", id);
-
-  Element *l = _elementList;
-  while (l != NULL) {
-    if (strcmp(l->id, id) == 0) {
-      // BOARDTRACE(" found:%s", l->id);
-      break;  // while
-    }         // if
-    l = l->next;
-  }  // while
-  return (l);
-}  // findById
-
-
 // ===== queue / process / dispatch actions =====
 
 bool Board::queueIsEmpty() {
@@ -787,7 +804,13 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
   if (!action.isEmpty()) {
     String tmp = action;
     tmp.replace("$v", v);
-    LOGGER_INFO("(%s)=>(%s)", (_nextElement ? _nextElement->id : ""), tmp.c_str());
+
+#if defined(LOGGER_ENABLED)
+    if (Logger::logger_level >= LOGGER_LEVEL_TRACE) {
+      Logger::printf("#action (%s)=>%s", (_activeElement ? _activeElement->id : ""), tmp.c_str());
+    }
+#endif
+
     if (split) {
       int len = ListUtils::length(tmp);
       for (int n = 0; n < len; n++) {
@@ -798,6 +821,38 @@ void Board::_queueAction(const String &action, const String &v, boolean split) {
     }
   }
 }  // _queueAction
+
+
+// send a event out to the defined target.
+void Board::dispatchAction(Element *target, const char *action_name, const char *action_value) {
+
+  if (target) {
+    const char *action = HomeDing::Action::find(action_name);
+    if (!action) action = action_name;
+
+#if defined(LOGGER_ENABLED)
+    // show action in log when target has trace loglevel
+    // Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "#set %s=%s", action_name, action_value);
+    if (Logger::logger_level >= LOGGER_LEVEL_TRACE)
+      Logger::printf("#set    %s?%s=%s", target->id, action, action_value);
+
+#if defined(HD_PROFILE)
+    PROFILE_START(target);
+#endif
+    bool ret = target->set(action, action_value);
+#if defined(HD_PROFILE)
+    PROFILE_END(target);
+#endif
+
+    if (!ret) {
+      LOGGER_ERR("Action '%s' was not accepted by %s.", action, target->id);
+    }
+
+#else
+    target->set(action, action_value);
+#endif
+  }
+}  // dispatchAction()
 
 
 // send a event out to the defined target.
@@ -832,6 +887,7 @@ void Board::dispatchAction(String action) {
     name = action.substring(pParam + 1);
     value = "";
   }
+  name.toLowerCase();
 
   if (!host.isEmpty()) {
     // host:type/id?param=val
@@ -842,7 +898,7 @@ void Board::dispatchAction(String action) {
     if (!target) {
       LOGGER_ERR("dispatch: %s not found", remoteID.c_str());
     } else {
-      // also show action in log when target has trace loglevel
+      // send over the network to target device
       target->dispatchAction(targetId, name, value);
     }
 
@@ -853,12 +909,7 @@ void Board::dispatchAction(String action) {
       LOGGER_ERR("dispatch: %s not found", targetId.c_str());
 
     } else {
-      // also show action in log when target has trace loglevel
-      Logger::LoggerEPrint(target, LOGGER_LEVEL_TRACE, "action(%s)", action.c_str());
-      bool ret = target->set(name.c_str(), value.c_str());
-
-      if (!ret)
-        LOGGER_ERR("Action '%s' was not accepted.", action.c_str());
+      dispatchAction(target, name.c_str(), value.c_str());
     }
   }
 }  // dispatchAction()
@@ -910,20 +961,18 @@ void Board::deferSleepMode() {
 }  // deferSleepMode()
 
 
-void Board::getState(String &out, const String &path) {
-  // BOARDTRACE("getState(%s)", path.c_str());
+void Board::getState(String &out, const char *id) {
+  BOARDTRACE("getState(%s)", id ? id : "-");
   String ret = "{";
-  const char *cPath = path.c_str();
 
-  Element *l = _elementList;
-  while (l != NULL) {
-    // BOARDTRACE("  ->%s", l->id);
-    if ((cPath[0] == '\0') || (strcmp(l->id, cPath) == 0)) {
+  forEach(Element::CATEGORY::All, [this, id, &ret](Element *e) {
+    BOARDTRACE("  %s", e->id);
+    if ((!id) || (strcmp(e->id, id) == 0)) {
       ret += '\"';
-      ret += l->id;
+      ret += e->id;
       ret += "\":{";
-      l->pushState([&ret](const char *name, const char *value) {
-        // BOARDTRACE("->%s=%s", name, value);
+      e->pushState([&ret](const char *name, const char *value) {
+        BOARDTRACE("->%s=%s", name, value);
         ret.concat('\"');
         ret.concat(name);
         ret.concat("\":\"");
@@ -932,22 +981,15 @@ void Board::getState(String &out, const String &path) {
       });
       ret += "},";
     }  // if
+  });
 
-    l = l->next;
-  }  // while
-
-
-  // close root object
+  // close root object and remove last comma before close.
   ret += "}";
-
-  // remove last comma before close.
   ret.replace(",}", "}");
-
-  // prettify somehow
-  // ret.replace("},", "},\n");
-
   out = ret;
+  BOARDTRACE("getState=%s", out.c_str());
 }  // getState
+
 
 // ===== Time functionality =====
 
@@ -981,68 +1023,41 @@ time_t Board::getTimeOfDay() {
 }  // getTimeOfDay()
 
 
-/**
- * @brief Get a Element by typename. Returns the first found element.
- */
-Element *Board::getElement(const char *elementType) {
-  // BOARDTRACE("getElement(%s)", elementType);
-
-  String tn = elementType;
-  tn.concat(ELEM_ID_SEPARATOR);
-  int tnLength = tn.length();
-
-  Element *l = _elementList;
-  while (l != NULL) {
-    if (String(l->id).substring(0, tnLength).equalsIgnoreCase(tn)) {
-      break;  // while
-    }         // if
-    l = l->next;
-  }  // while
-  // BOARDTRACE("found: %d", l);
-  return (l);
-}  // getElement()
-
-
-/**
- * @brief Get a Element by typename/id.
- */
-Element *Board::getElementById(const char *elementId) {
-  BOARDTRACE("getElementById(%s)", elementId);
-
-  Element *l = _elementList;
-  while (l != NULL) {
-    if (Element::_stricmp(l->id, elementId) == 0) { break; }
-    l = l->next;
-  }  // while
-  // BOARDTRACE("found: 0x%08x", l);
-  return (l);
-}  // getElementById()
-
-
 Element *Board::getElement(const char *elementType, const char *elementName) {
-  String tn = elementType;
-  tn.concat('/');
-  tn.concat(elementName);
-
-  Element *l = _elementList;
-  while (l != NULL) {
-    if (String(l->id).equalsIgnoreCase(tn)) {
-      break;
-    }  // if
-    l = l->next;
-  }  // while
-  return (l);
-
+  char id[32];
+  sprintf(id, "%s/%s", elementType, elementName);
+  return (findById(id));
 }  // getElement()
 
 
-/**
- * @brief Iterate though all Elements.
- */
-void Board::forEach(const char *prefix, ElementCallbackFn fCallback) {
-  Element *l = _elementList;
+Element *Board::findById(const char *id) {
+  BOARDTRACE("findById(%s)", id ? id : "-");
+  Element *found = nullptr;
+
+  if (id) {
+    forEach(Element::CATEGORY::All, [id, &found](Element *e) {
+      if (strcmp(e->id, id) == 0) { found = e; }
+    });
+  }
+  return (found);
+}  // findById
+
+
+/// @brief Iterate all Elements from both lists with a given category.
+void Board::forEach(Element::CATEGORY cat, ElementCallbackFn fCallback) {
+  Element *l;
+
+  l = _elementList;
   while (l != NULL) {
-    if (Element::_stristartswith(l->id, prefix)) {
+    if (l->category & cat) {
+      (fCallback)(l);
+    }
+    l = l->next;
+  }  // while
+
+  l = _elementListNoLoop;
+  while (l != NULL) {
+    if (l->category & cat) {
       (fCallback)(l);
     }
     l = l->next;
@@ -1075,7 +1090,7 @@ void Board::displayInfo(const char *text1, const char *text2) {
     if (text2) {
       display->drawText(0, display->getLineHeight(), 0, text2);
     }
-    display->flush();
+    display->startFlush(true);
   }  // if
 }
 

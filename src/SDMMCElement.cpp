@@ -32,7 +32,9 @@
  * @return SDMMCElement* created element
  */
 Element *SDMMCElement::create() {
-  return (new SDMMCElement());
+  SDMMCElement *e =new SDMMCElement();
+  e->category = CATEGORY::Standard; // no polling
+  return (e);
 }  // create()
 
 
@@ -99,11 +101,11 @@ void SDMMCElement::start() {
 #else
   // other boards ignore the settings, GPIO pins have to be used as defined by espressif
   // https://github.com/lewisxhe/TTGO-Time-Music-Box/blob/master/main/src/main.c
-  gpio_set_pull_mode(GPIO_NUM_15, GPIO_PULLUP_ONLY);
-  gpio_set_pull_mode(GPIO_NUM_2, GPIO_PULLUP_ONLY);
-  gpio_set_pull_mode(GPIO_NUM_4, GPIO_PULLUP_ONLY);
-  gpio_set_pull_mode(GPIO_NUM_12, GPIO_PULLUP_ONLY);
-  gpio_set_pull_mode(GPIO_NUM_13, GPIO_PULLUP_ONLY);
+  // gpio_set_pull_mode(GPIO_NUM_15, GPIO_PULLUP_ONLY);
+  // gpio_set_pull_mode(GPIO_NUM_2, GPIO_PULLUP_ONLY);
+  // gpio_set_pull_mode(GPIO_NUM_4, GPIO_PULLUP_ONLY);
+  // gpio_set_pull_mode(GPIO_NUM_12, GPIO_PULLUP_ONLY);
+  // gpio_set_pull_mode(GPIO_NUM_13, GPIO_PULLUP_ONLY);
 #endif
 
   SD_MMC.end();
@@ -116,11 +118,7 @@ void SDMMCElement::start() {
     // mount the sd filesystem
     HomeDingFS::sdFS = &SD_MMC;
 
-    uint8_t cardType = SD_MMC.cardType();
-    TRACE("Card Type: %d", cardType);
-
-    uint32_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
-
+    TRACE("Card Type: %d", SD_MMC.cardType());
     TRACE("SD_MMC Card Size: %d MByte", SD_MMC.cardSize() / (1024 * 1024));
     TRACE(" Total: %d MByte", SD_MMC.totalBytes() / (1024 * 1024));
     TRACE(" Used : %d MByte", SD_MMC.usedBytes() / (1024 * 1024));

@@ -159,7 +159,6 @@ bool ToneElement::set(const char *name, const char *value) {
     // done.
 
   } else if (_stricmp(name, "tones") == 0) {
-    // Serial.printf("Tone: <%s>\n", value);
     String tones = value;
     tones.replace(' ', ',');  // allow ',' and ' '(space) for separation
     _loadTones(tones);
@@ -171,7 +170,7 @@ bool ToneElement::set(const char *name, const char *value) {
     _nextTone = 0;
     _nextToneTime = 1;  // asap
 
-  } else if (_stricmp(name, "pin") == 0) {
+  } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
   } else {

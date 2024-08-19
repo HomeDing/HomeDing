@@ -36,7 +36,7 @@ void MyElement03::setup() {
 bool MyElement03::set(const char *name, const char *value) {
   bool ret = Element::set(name, value);
 
-  if (_stricmp(name, "pin") == 0) {
+  if (name == HomeDing::Action::Pin) {
     ledPin = _atopin(value);
     ret = true;
   } else if (_stricmp(name, "interval") == 0) {

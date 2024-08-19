@@ -49,7 +49,7 @@ bool SCD4XElement::set(const char *name, const char *value) {
 
   if (SensorElement::set(name, value)) {
     // ok.
-  } else if (_stricmp(name, "address") == 0) {
+  } else if (name == HomeDing::Action::Address) {
     _address = _atoi(value);
 
   } else if (_stricmp(name, "mode") == 0) {

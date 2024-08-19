@@ -36,27 +36,38 @@ bool Element::set(const char *name, const char *value) {
   // TRACE("set %s=%s", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "start") == 0) {
+  if (name == HomeDing::Action::Start) {
     start();
     ret = active;
 
-  } else if (_stricmp(name, "stop") == 0) {
+  } else if (name == HomeDing::Action::Stop) {
     term();
 
-  } else if (_stricmp(name, "logLevel") == 0) {
+  } else if (name == HomeDing::Action::LogLevel) {
     loglevel = _atoi(value);
 
-  } else if (_stricmp(name, "useState") == 0) {
+  } else if (name == HomeDing::Action::UseState) {
     _useState = _atob(value);
+
+  } else if (name == HomeDing::Action::Startup) {
+
+    if (_stricmp(value, "sys") == 0) {
+      startupMode = Element_StartupMode::System;
+    } else if (_stricmp(value, "net") == 0) {
+      startupMode = Element_StartupMode::WithNetwork;
+    } else if (_stricmp(value, "time") == 0) {
+      startupMode = Element_StartupMode::WithTime;
+    }
+
 
     // do not report an error for the following properties,
     // as they are used by the web ui and stored in the config files only.
-  } else if (_stricmp(name, "description") == 0) {
-  } else if (_stricmp(name, "title") == 0) {
+  } else if (name == HomeDing::Action::Description) {
+  } else if (name == HomeDing::Action::Title) {
 
   } else {
-    // LOGGER_EERR("cannot set property %s:", name, value); // not an error when used for testing common properties
     ret = false;
+
   }  // if
   return (ret);
 }  // set()
@@ -82,9 +93,7 @@ void Element::start() {
 void Element::loop() {}  // loop()
 
 
-/**
- * @brief push the current value of all properties to the callback.
- */
+/// @brief push the current value of all properties to the callback.
 void Element::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   callback("active", active ? "true" : "false");
@@ -127,7 +136,7 @@ int Element::_atoi(const char *value) {
 }  // _atoi()
 
 
-/* Return a boolean value from a string. */
+// Return true for `1`, `true`, `high` or `on`. Return false otherwise.
 bool Element::_atob(const char *value) {
   bool ret = false;
 
@@ -135,14 +144,13 @@ bool Element::_atob(const char *value) {
     // ret = false;
   } else if (_stricmp(value, "1") == 0) {
     ret = true;
-  } else {
-    char v[8];
-    strcpy(v, value);
-    if (_stricmp(value, "true") == 0) {
-      ret = true;
-    } else if (_stricmp(value, "high") == 0) {
-      ret = true;
-    }
+
+  } else if (_stricmp(value, "true") == 0) {
+    ret = true;
+  } else if (_stricmp(value, "high") == 0) {
+    ret = true;
+  } else if (_stricmp(value, "on") == 0) {
+    ret = true;
   }  // if
   return (ret);
 }  // _atob()
@@ -282,6 +290,8 @@ uint32_t Element::_atoColor(const char *value) {
       ret = RGB_BLACK;
     } else if (_stricmp(value, "gray") == 0) {
       ret = RGB_GRAY;
+    } else if (_stricmp(value, "silver") == 0) {
+      ret = RGB_SILVER;
     } else if (_stricmp(value, "white") == 0) {
       ret = RGB_WHITE;
 
@@ -293,6 +303,9 @@ uint32_t Element::_atoColor(const char *value) {
       ret = RGB_GREEN;
     } else if (_stricmp(value, "blue") == 0) {
       ret = RGB_BLUE;
+
+    } else if ((_stricmp(value, "none") == 0) || (_stricmp(value, "transparent") == 0)) {
+      ret = RGB_TRANSPARENT;
     }
   }  // if
   return (ret);
@@ -355,6 +368,25 @@ bool Element::_stristartswith(const char *s, const char *prefix) {
 }  // _stristartswith()
 
 
+// String start with prefix, case sensitive.
+bool Element::_strStartsWith(const char *s, const char *prefix) {
+  if (s && prefix) {
+    while (*s && *prefix) {
+      if (*s != *prefix)
+        return (false);
+      s++;
+      prefix++;
+    }  // while
+
+    if (*prefix)
+      return (false);
+  } else {
+    return (false);
+  }
+  return (true);
+}  // _strStartsWith()
+
+
 void Element::_strlower(char *str) {
   if (str) {
     while (*str) {
@@ -414,6 +446,5 @@ String Element::popItemValue(String &data) {
   }  // if
   return (item);
 }  // popItemValue
-
 
 // End

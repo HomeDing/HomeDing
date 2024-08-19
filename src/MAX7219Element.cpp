@@ -58,7 +58,7 @@ void MAX7219Element::_clear() {
     _write(REG_DECODEMODE, _decodeMode);
   }
   for (int i = 1; i <= 8; i++) {
-    _write(i, B00000000);
+    _write(i, 0b00000000);
   }
 }  // _clear()
 
@@ -154,7 +154,7 @@ bool MAX7219Element::set(const char *name, const char *value) {
    if (Element::set(name, value)) {
      // ok.
 
-  } else if (_stricmp(name, PROP_VALUE) == 0) {
+  } else if (name == HomeDing::Action::Value) {
     _value = value;
 
   } else if (_stricmp(name, "clear") == 0) {
@@ -235,7 +235,7 @@ void MAX7219Element::pushState(
   Element::pushState(callback);
   callback("mode", _mode == Mode::numeric ? "numeric" : "8x8");
   callback("brightness", _printInteger(_brightness));
-  callback("value", String(_value).c_str());
+  callback(HomeDing::Action::Value, String(_value).c_str());
 }  // pushState()
 
 

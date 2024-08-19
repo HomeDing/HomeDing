@@ -106,7 +106,7 @@ bool MapElement::set(const char *name, const char *value) {
   TRACE("set '%s'='%s'", name, value);
   bool ret = true;
 
-  if (_stricmp(name, "value") == 0) {
+  if (name == HomeDing::Action::Value) {
     // find the right map entry (first that matches)
     _mapValue(value);
 
@@ -133,7 +133,7 @@ bool MapElement::set(const char *name, const char *value) {
       _mMin.setAt(mapIndex, value);
       _mMax.setAt(mapIndex, value);
 
-    } else if (_stricmp(mapName, "value") == 0) {
+    } else if (_stricmp(mapName, HomeDing::Action::Value) == 0) {
       _mValue.setAt(mapIndex, value);
 
     } else if (_stricmp(mapName, "onValue") == 0) {
@@ -141,11 +141,11 @@ bool MapElement::set(const char *name, const char *value) {
 
     }  // if
 
-  } else if (_stricmp(name, "type") == 0) {
+  } else if (name == HomeDing::Action::Type) {
     if (_stricmp(value, "string") == 0)
       _isStringType = true;
 
-  } else if (_stricmp(name, "onValue") == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else if (_stricmp(name, "resend") == 0) {
@@ -177,7 +177,7 @@ void MapElement::loop() {
 void MapElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(PROP_VALUE, _value.c_str());
+  callback(HomeDing::Action::Value, _value.c_str());
 }  // pushState()
 
 // End

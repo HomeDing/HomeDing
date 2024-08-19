@@ -37,8 +37,8 @@ public:
 
     // ignore the reported gesture in raw[0]
     if (raw[1]) {
-      // Serial.printf("CST816:: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
-      //               raw[0], raw[1], raw[2], raw[3], raw[4], raw[5]);
+      // TRACE("CST816:: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
+      //        raw[0], raw[1], raw[2], raw[3], raw[4], raw[5]);
       p->x = ((raw[2] & 0x0F) << 8) + raw[3];
       p->y = ((raw[4] & 0x0F) << 8) + raw[5];
       return (true);

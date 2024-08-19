@@ -65,32 +65,13 @@ public:
 
 
   /**
-   * @brief Clear information from the display in this area.
-   * @param x x-position or offset of the text.
-   * @param y y-position of the area.
-   * @param w width of the area.
-   * @param h height of the area, assumed always 1.
-   */
-  void clear(int16_t x, int16_t y, int16_t w, UNUSED int16_t h) override {
-    display->setCursor(x, y);
-    if (y < conf->height) {
-      while ((x < conf->width) && (w > 0)) {
-        display->write(' ');
-        w--;
-        x++;
-      }  // while
-    }    // if
-  };     // clear()
-
-
-  /**
    * @brief Draw a text at this position using the specific height.-
    * @param x x-position or offset of the text.
    * @param y y-position of the text.
    * @param h height of the characters, ignored for this display.
    * @param text the text.
    */
-  int drawText(int16_t x, int16_t y, UNUSED int16_t h, const char *text) override {
+  int drawText(int16_t x, int16_t y, int16_t /* h */, const char *text) override {
     int w = strnlen(text, MAX_DISPLAY_STRING_LEN);
     char buffer[MAX_DISPLAY_STRING_LEN + 4];  // 8 chars character buffer max.
     if ((x > 20) || (y > 4)) {
@@ -105,10 +86,10 @@ public:
   }  // drawText
 
 
-  int drawDot(int16_t x, int16_t y, UNUSED int16_t h, bool fill) override {
-    drawText(x, y, 1, fill ? "\02" : "\01");
-    return (1);
-  };  // drawDot()
+  void drawCircle(BoundingBox &box, uint32_t /* borderColor */, uint32_t fillColor) override {
+    drawText(box.x_min, box.y_min, 1, RGB_IS_COLOR(fillColor) ? "\02" : "\01");
+    _needFlush = true;
+  };
 
 private:
   /**

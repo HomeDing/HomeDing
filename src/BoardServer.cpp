@@ -54,7 +54,7 @@
 
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...) // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Construct a new State Handler object
@@ -74,6 +74,11 @@ void BoardHandler::handleConnect(WebServer &server) {
     millis() + (60 * 1000);  // TODO: make configurable
   String netName, netPass;
   server.send(200);
+
+  if (server.hasArg("f")) {
+    LOGGER_JUSTINFO("format...");
+    HomeDingFS::format();
+  }
 
   if (server.hasArg("n")) {
     // const char *netName = server.arg("n").c_str();
@@ -101,9 +106,7 @@ void BoardHandler::handleConnect(WebServer &server) {
 
       File f = HomeDingFS::open(NET_FILENAME, "w");
       if (f) {
-        f.print(netName);
-        f.print(',');
-        f.print(netPass);
+        f.printf("%s,%s", netName.c_str(), netPass.c_str());
         f.close();
       }
       break;
@@ -129,7 +132,7 @@ String BoardHandler::handleScan() {
   _board->keepCaptiveMode();
 
   int8_t scanState = WiFi.scanComplete();
-  TRACE("handleScan state=%d" m scanState);
+  TRACE("handleScan state=%d", scanState);
 
   if (scanState == WIFI_SCAN_FAILED) {
     // restart an async network scan
@@ -171,23 +174,31 @@ void BoardHandler::handleReboot(WebServer &server, bool wipe) {
 
 
 /**
- * @brief Verify if the method and requestUri can be handles by this module.
+ * @brief Verify if the method and uri can be handles by this module.
  * @param requestMethod current http request method.
- * @param requestUri current url of the request.
- * @return true When the method and requestUri match a state request.
+ * @param uri current url of the request.
+ * @return true When the method and uri match a state request.
  */
 #if defined(ESP8266)
-bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &requestUri)
+bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &uri)
 #elif defined(ESP32)
-bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
+
+#if (ESP_ARDUINO_VERSION_MAJOR < 3)
+bool BoardHandler::canHandle(HTTPMethod requestMethod, String uri)
+#else
+bool BoardHandler::canHandle(WebServer &server, HTTPMethod requestMethod, String uri)
+#endif
+
 #endif
 {
-  // LOGGER_JUSTINFO("HTTP: > %s", requestUri.c_str());
-  bool can = ((requestMethod == HTTP_GET)           // only GET requests in the API
-              && (requestUri.startsWith(API_ROUTE)  // new api entries
-                  || (requestUri == "/")            // handle redirect
-                  || (_board->isCaptiveMode())));   // capt
+  TRACE("BoardHandler::canhandle(%s)", uri.c_str());
+  // LOGGER_JUSTINFO("HTTP: > %s", uri.c_str());
+  bool can = ((requestMethod == HTTP_GET)          // only GET requests in the API
+              && (uri.startsWith(API_ROUTE)        // new api entries
+                  || (uri == "/")                  // handle redirect
+                  || (_board->isCaptiveMode())));  // capt
 
+  TRACE("  %d", can);
   return (can);
 }  // canHandle
 
@@ -201,12 +212,12 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, String requestUri)
  * @return false
  */
 #if defined(ESP8266)
-bool BoardHandler::handle(WebServer &server, UNUSED HTTPMethod requestMethod, const String &requestUri2)
+bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, const String &requestUri2)
 #elif defined(ESP32)
-bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String requestUri2)
+bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, String requestUri2)
 #endif
 {
-  TRACE("handle(%s)", requestUri2.c_str());
+  TRACE("BoardHandler::handle(%s)", requestUri2.c_str());
   String output;
   const char *output_type = nullptr;  // when output_type is set then send output as response.
 
@@ -224,7 +235,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   if (api == "state") {
     // most common request, return state of all elements
-    _board->getState(output, String());
+    _board->getState(output);
     output_type = TEXT_JSON;
 
   } else if (api.startsWith("state/")) {
@@ -235,8 +246,8 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     int argCount = server.args();
 
     if (argCount == 0) {
-      // get status of all or the specified element
-      _board->getState(output, id);
+      // get status of the specified element
+      _board->getState(output, id.c_str());
 
     } else {
       // send arguments as actions to the specified element per given argument
@@ -258,17 +269,9 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
 #if defined(ESP8266)
     jc.addProperty("core", "ESP8266");
+
 #elif defined(ESP32)
-    esp_chip_info_t chip_info;
-    esp_chip_info(&chip_info);
-    esp_chip_model_t model = chip_info.model;
-    const char *s = "unknown";
-    if (model == CHIP_ESP32) { s = "ESP32"; };
-    // if (model == CHIP_ESP32S2) { s = "ESP32-S2"; };
-    if (model == CHIP_ESP32S3) { s = "ESP32-S3"; };
-    if (model == CHIP_ESP32C3) { s = "ESP32-C3"; };
-    // if (model == CHIP_ESP32H2) { s = "ESP32-H2"; };
-    jc.addProperty("core", s);
+    jc.addProperty("core", ESP.getChipModel());
 #endif
 
     jc.addProperty("build", __DATE__);
@@ -320,7 +323,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 
   } else if (unSafeMode && (api == "resetall")) {
     // Reset file system, network parameters and reboot
-    LittleFS.format();
+    HomeDingFS::format();
     handleReboot(server, true);
     output_type = TEXT_PLAIN;
 
@@ -360,26 +363,31 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
     // handle a redirect to the defined homepage or system system / update
     LOGGER_JUSTINFO("Redirect...");
     String url = _board->homepage;
+    size_t used = 0;
 
 #if defined(ESP8266)
     FSInfo fsi;
     LittleFS.info(fsi);
-    if (fsi.usedBytes < 18000) {
-      // assuming UI files not installed
-      url = PAGE_UPDATE;
-    }
+    used = fsi.usedBytes;
 
 #elif defined(ESP32)
-    if (LittleFS.usedBytes() < 18000) {
-      // assuming UI files not installed
-      url = PAGE_UPDATE;
+    // ESP32 supports FFat and LittleFS
+    if (HomeDingFS::rootFS == (fs::FS *)&FFat) {
+      used = FFat.usedBytes();
+    } else {
+      used = LittleFS.usedBytes();
     }
 #endif
-
+    if (used < 18000) {
+      url = PAGE_UPDATE;  // assuming UI files not installed
+    }
     server.sendHeader("Location", url, true);
     server.send(302);
 
+
   } else if (_board->isCaptiveMode()) {
+    LOGGER_JUSTINFO(">> $setup...");
+
     // Handle Redirect in Captive Portal Mode
     // redirect requests like "/generate_204", "/gen_204", "/chat", /connecttest.txt
     // to WIFI setup dialog /$setup
@@ -407,8 +415,9 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod requestMethod, String re
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
   TRACE("handleListFiles(%s)", path.c_str());
 
-  // assert: last char of path = '/'
-  TRACE("  open(%s)", path.c_str());
+  if ((path.length() > 4) && (path.endsWith("/")))
+    path.remove(path.length() - 1, 1);  // last '/'
+
   File dir = HomeDingFS::open(path);
 
   if (HomeDingFS::sdFS && path.equals("/")) {
@@ -437,7 +446,7 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
       }
       jc.closeObject();
     }  // if
-  }    // while
+  }  // while
 }  // handleListFiles()
 
 
@@ -464,7 +473,7 @@ void BoardHandler::handleCleanWeb(String path) {
       TRACE("isFile.");
       HomeDingFS::remove(longName);
     }  // if
-  }    // while
+  }  // while
 }  // handleCleanWeb()
 
 

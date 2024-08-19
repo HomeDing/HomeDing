@@ -43,10 +43,10 @@ bool BH1750Element::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // ok.
 
-  } else if (_stricmp(name, "address") == 0) {
+  } else if (name == HomeDing::Action::Address) {
     _address = _atoi(value);
 
-  } else if (_stricmp(name, "onvalue") == 0) {
+  } else if (name == HomeDing::Action::OnValue) {
     _valueAction = value;
 
   } else if (_stricmp(name, "mode") == 0) {
@@ -142,7 +142,7 @@ void BH1750Element::sendData(String &values) {
 void BH1750Element::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   SensorElement::pushState(callback);
-  callback("value", _lastValues.c_str());
+  callback(HomeDing::Action::Value, _lastValues.c_str());
 }  // pushState()
 
 // End

@@ -49,11 +49,6 @@ public:
   static bool registered;
 
   /**
-   * @brief Construct a new DiagElement
-   */
-  DiagElement();
-
-  /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
    * @param value Value of property.
@@ -81,4 +76,7 @@ private:
   String _handleDiag();
   String _handleProfile();
   String _handleChipInfo();
+  String _handleWireScan();
+  String _handleNetworks();
+  String _handleHeap();
 };

@@ -58,13 +58,6 @@ public:
    */
   virtual void loop() override;
 
-  /**
-   * @brief push the current value of all properties to the callback.
-   * @param callback callback function that is used for every property.
-   */
-  virtual void pushState(
-      std::function<void(const char *pName, const char *eValue)> callback) override;
-
 private:
   /** Actions */
   typedef enum {

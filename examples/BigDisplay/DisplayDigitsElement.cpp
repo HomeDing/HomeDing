@@ -19,11 +19,14 @@
 
 #include "DisplayDigitsElement.h"
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 #define DIGITS_WIDTH 17
 #define DIGITS_GAP 2
 #define DIGITS_HEIGHT 33
+
+// scaling: factors are that are in a unit of 100 (percent)
+#define GFXSCALE100(p, f100) (((int32_t)(p) * f100 + 50) / 100)
 
 /**
  * @brief static factory function to create a new DisplayDigitsElement.
@@ -34,19 +37,18 @@ Element *DisplayDigitsElement::create() {
 }  // create()
 
 
+DisplayDigitsElement::DisplayDigitsElement() {
+  isOpaque = true;
+}
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
 bool DisplayDigitsElement::set(const char *name, const char *value) {
-  TRACE("set %s=%s", name, value);
   bool ret = true;
 
   if (DisplayOutputElement::set(name, value)) {
     // done
-
-  } else if (name == HomeDing::Action::Value) {
-    _value = value;
-    needsDraw = true;
 
   } else {
     ret = false;
@@ -56,21 +58,24 @@ bool DisplayDigitsElement::set(const char *name, const char *value) {
 
 
 void DisplayDigitsElement::_drawDigit(const char *path, int16_t x, int16_t y) {
-  gfxDraw::gfxDrawObject *o = new gfxDraw::gfxDrawObject();
 
-  o->setStrokeColor((_borderColor == RGB_TRANSPARENT ? gfxDraw::TRANSPARENT : gfxDraw::RGBA(_borderColor)));
-  o->setFillColor((_color == RGB_TRANSPARENT ? gfxDraw::TRANSPARENT : gfxDraw::RGBA(_color)));
+  gfxDraw::gfxDrawWidget o;
 
-  o->setPath(path);
-  o->scale(_scale);
-  o->move(x, y);
+  o.setStrokeColor((_borderColor == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_borderColor)));
+  o.setFillColor((_color == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_color)));
 
-  o->draw([&](int16_t x, int16_t y, gfxDraw::RGBA color) {
+  o.setPath(path);
+  o.scale(_scale);
+  o.move(x, y);
+
+  o.draw([&](int16_t x, int16_t y, gfxDraw::ARGB color) {
     _display->drawPixel(x, y, color.toColor24());
   });
-}
+}  // _drawDigit()
 
 void DisplayDigitsElement::_drawDigits7(char ch, int16_t x, int16_t y) {
+  // TRACE("  draw=%c at %d/%d", ch, x, y);
+
   uint16_t drawSegments = 0b00000000;  // space and all unknown chars
 
   if (isDigit(ch)) {
@@ -110,20 +115,27 @@ void DisplayDigitsElement::_drawDigits7(char ch, int16_t x, int16_t y) {
 
 /// @brief Draw this output element.
 void DisplayDigitsElement::draw() {
-  // TRACE("draw('%s' color=%08lx border=%08lx back=%08lx)", _value.c_str(), _color, _borderColor, _backgroundColor);
+  // TRACE("draw('%s' color=%08lx border=%08lx)", _value.c_str(), _color, _borderColor);
   int16_t x = box.x_min;
+  int16_t xWidth;
+  int16_t xGap;
 
   DisplayOutputElement::draw();  // set output colors
 
   _scale = ((box.y_max - box.y_min + 1) * 100) / DIGITS_HEIGHT;
+  xWidth = GFXSCALE100(DIGITS_WIDTH, _scale);
+  xGap = GFXSCALE100(DIGITS_GAP, _scale);
 
   for (int n = 0; n < _value.length(); n++) {
-    if (_value[n] != _lastValue[n]) { _drawDigits7(_value[n], x, box.y_min); }
-    x += GFXSCALE100(DIGITS_WIDTH + DIGITS_GAP, _scale);
+    if (_lastValue[n] != _value[n]) {
+      BoundingBox b(x, box.y_min, x + xWidth, box.y_max);
+      _display->drawRectangle(b, RGB_TRANSPARENT, _backgroundColor);
+      _drawDigits7(_value[n], x, box.y_min);
+    }
+    x += xWidth + xGap;
   }
-  _lastValue = _value;
 
-  box.x_max = x - GFXSCALE100(DIGITS_GAP, _scale);
+  box.x_max = x - xGap;
 }  // draw()
 
 

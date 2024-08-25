@@ -19,8 +19,8 @@
 #pragma once
 
 #include <displays/DisplayOutputElement.h>
-#include "gfxDraw.h"
-#include "gfxDrawObject.h"
+#include <gfxDraw.h>
+#include <gfxDrawWidget.h>
 
 /**
  * @brief The DisplayDigitsElement is an Element that allows to display a path based region like a
@@ -42,6 +42,8 @@ public:
   static bool registered;
 
 
+  DisplayDigitsElement();
+
   /**
    * @brief Set a parameter or property to a new value or start an action.
    * @param name Name of property.
@@ -58,10 +60,9 @@ public:
   virtual void draw() override;
 
 private:
-  /// @brief The path to be displayed
-  String _value;
   String _lastValue;
-  
+
+  /// scaling factor of the paths in percent
   int16_t _scale = 300;
 
   void _drawDigit(const char *path, int16_t x, int16_t y);

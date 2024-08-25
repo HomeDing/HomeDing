@@ -93,8 +93,10 @@
 #include "esp_partition.h"
 
 #include <FS.h>
-#include <FFat.h>      // File System for Web Server Files
 #include <LittleFS.h>  // File System for Web Server Files
+#if defined(ESP32)
+#include <FFat.h>      // File System for Web Server Files on ESP32
+#endif
 
 #include <BuiltinHandler.h>  // Serve Built-in files
 #include <BoardServer.h>     // Web Server Middleware for Elements
@@ -125,6 +127,7 @@ void setup(void) {
   Serial.setDebugOutput(false);
 
 #if defined(ESP8266)
+  // LittleFS is the default filesystem on ESP8266
   fs = &LittleFS;
 
 #elif defined(ESP32)

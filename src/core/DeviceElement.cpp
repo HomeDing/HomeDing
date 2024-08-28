@@ -203,8 +203,4 @@ void DeviceElement::pushState(
 }  // pushState()
 
 
-// Always register the DeviceElement onto the ElementRegistry.
-bool DeviceElement::registered =
-  ElementRegistry::registerElement("device", DeviceElement::create);
-
 // End

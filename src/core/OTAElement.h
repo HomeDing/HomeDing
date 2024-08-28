@@ -63,3 +63,9 @@ private:
   uint16_t _port = 8266;
   String _passwd;
 };
+
+#ifdef HOMEDING_REGISTER
+// Always Register the OTAElement in the ElementRegistry.
+bool OTAElement::registered =
+  ElementRegistry::registerElement("ota", OTAElement::create);
+#endif

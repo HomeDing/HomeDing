@@ -118,9 +118,4 @@ void OTAElement::loop() {
   }
 }  // loop()
 
-
-// Always Register the OTAElement in the ElementRegistry.
-bool OTAElement::registered =
-  ElementRegistry::registerElement("ota", OTAElement::create);
-
 // End

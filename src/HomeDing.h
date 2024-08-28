@@ -36,6 +36,10 @@ extern Board homeding;
 // The only strictly required elements are: DeviceElement and OTAElement. They are included any time.
 // The other system level elements SSDPElement, TimeElement
 
+#include <core/DeviceElement.h>
+#include <core/OTAElement.h>
+// #include <StateElement.h>
+
 #ifdef HOMEDING_INCLUDE_ALL
 
 #define HOMEDING_INCLUDE_SYSTEM  // all system elements

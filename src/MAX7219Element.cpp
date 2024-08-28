@@ -157,7 +157,7 @@ bool MAX7219Element::set(const char *name, const char *value) {
   } else if (name == HomeDing::Action::Value) {
     _value = value;
 
-  } else if (_stricmp(name, "clear") == 0) {
+  } else if (name == HomeDing::Action::Clear) {
     if (active)
       _clear();
 

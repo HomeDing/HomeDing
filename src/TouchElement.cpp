@@ -35,7 +35,7 @@ Element *TouchElement::create() {
 
 #if defined(ESP32)
 
-#if ! defined (ARDUINO_NANO_ESP32)
+#if !defined(ARDUINO_NANO_ESP32)
 // in case there is no touchRead() available on ESP32 boards (e.g. C3)
 int __attribute__((weak)) touchRead(int /* _pin */) {
   return (0);
@@ -51,20 +51,27 @@ bool TouchElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done.
 
-  } else if (name == HomeDing::Action::Pin) {
-    _pin = _atopin(value);
+  } else if (!active) {
+    // these properties can be used for configuration only.
 
-  } else if (_stricmp(name, "reference") == 0) {
-    _reference = _atoi(value);
+    if (name == HomeDing::Action::Pin) {
+      _pin = _atopin(value);
 
-  } else if (name == HomeDing::Action::OnHigh) {
-    _highAction = value;
+    } else if (name == HomeDing::Action::Reference) {
+      _reference = _atoi(value);
 
-  } else if (name == HomeDing::Action::OnLow) {
-    _lowAction = value;
+    } else if (name == HomeDing::Action::OnHigh) {
+      _highAction = value;
 
-  } else if (name == HomeDing::Action::OnValue) {
-    _valueAction = value;
+    } else if (name == HomeDing::Action::OnLow) {
+      _lowAction = value;
+
+    } else if (name == HomeDing::Action::OnValue) {
+      _valueAction = value;
+
+    } else {
+      ret = false;
+    }  // if
 
   } else {
     ret = false;

@@ -34,21 +34,26 @@ namespace Action {
 // this list must have all actions names.
 // after adding a new value it must be lowercase.
 const char *_actionNames[] = {
-  "value",
   "address",
   "border",
+  "clear",
   "description",
-  "pin",
   "down",
   "height",
+  "invert",
   "label",
   "loglevel",
   "max",
   "min",
+  "mode",
   "onhigh",
   "onlow",
   "onvalue",
+  "pin",
+  "redraw",
+  "reference",
   "start",
+  "startup",
   "step",
   "stop",
   "text",
@@ -57,8 +62,10 @@ const char *_actionNames[] = {
   "type",
   "up",
   "usestate",
-  "startup",
-  "width"
+  "value",
+  "width",
+  "x",
+  "y"
 };
 
 
@@ -84,17 +91,22 @@ const char *find(const char *name) {
 // clang-format off
 const char *Address      = find("address");
 const char *Border       = find("border");
+const char *Clear        = find("clear");
 const char *Description  = find("description");
 const char *Down         = find("down");
 const char *Height       = find("height");
+const char *Invert       = find("invert");
 const char *Label        = find("label");
 const char *LogLevel     = find("loglevel");
 const char *Max          = find("max");
 const char *Min          = find("min");
+const char *Mode         = find("mode");
 const char *OnHigh       = find("onhigh");
 const char *OnLow        = find("onlow");
 const char *OnValue      = find("onvalue");
 const char *Pin          = find("pin");
+const char *Redraw       = find("redraw");
+const char *Reference    = find("reference");
 const char *Start        = find("start");
 const char *Startup      = find("startup");
 const char *Step         = find("step");
@@ -107,6 +119,8 @@ const char *Up           = find("up");
 const char *UseState     = find("usestate");
 const char *Value        = find("value");
 const char *Width        = find("width");
+const char *X            = find("x");
+const char *Y            = find("y");
 // clang-format on
 
 };  // namespace Action

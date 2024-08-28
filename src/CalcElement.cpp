@@ -57,12 +57,18 @@ bool CalcElement::set(const char *name, const char *value) {
       _needRecalc = true;
     }
 
-  } else if (_stricmp(name, "invert") == 0) {
-    // the invert property is used for AND and OR element.
-    _invert = _atob(value);
+  } else if (!active) {
+    // these properties can be used for configuration only.
 
-  } else if (name == HomeDing::Action::OnValue) {
-    _valueAction = value;
+    if (name == HomeDing::Action::Invert) {
+      // the invert property is used for AND and OR element.
+      _invert = _atob(value);
+
+    } else if (name == HomeDing::Action::OnValue) {
+      _valueAction = value;
+    } else {
+      ret = false;
+    }  // if
 
   } else {
     ret = false;
@@ -101,7 +107,7 @@ void CalcElement::pushState(
 /**
  * @brief function for calculating from input to output values.
  */
-void CalcElement::_calc(){};
+void CalcElement::_calc() {};
 
 
 // End

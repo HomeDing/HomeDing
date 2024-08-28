@@ -29,21 +29,31 @@ Element *PWMOutElement::create() {
 bool PWMOutElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (name == HomeDing::Action::Value) {
+  if (Element::set(name, value)) {
+    // done
+
+  } else if (name == HomeDing::Action::Value) {
     _setValue(_atoi(value));
 
-  } else if (name == HomeDing::Action::Pin) {
-    _pin = _atopin(value);
+  } else if (!active) {
+    // these properties can be used for configuration only.
 
-  } else if (_stricmp(name, "invert") == 0) {
-    _inverse = _atob(value);
+    if (name == HomeDing::Action::Pin) {
+      _pin = _atopin(value);
 
-  } else if (_stricmp(name, "range") == 0) {
-    _range = _atoi(value);
+    } else if (name == HomeDing::Action::Invert) {
+      _inverse = _atob(value);
+
+    } else if (_stricmp(name, "range") == 0) {
+      _range = _atoi(value);
+    } else {
+      ret = false;
+    }  // if
 
   } else {
-    ret = Element::set(name, value);
+    ret = false;
   }  // if
+
   return (ret);
 }  // set()
 
@@ -61,13 +71,13 @@ void PWMOutElement::start() {
 
 #if (defined(ESP32))
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
-  // ESP32 Version 3++
+    // ESP32 Version 3++
     pinMode(_pin, OUTPUT);
     analogWriteFrequency(_pin, 8000);
     analogWriteResolution(_pin, 8);
 
 #else
-  // ESP32 Version 2.x
+    // ESP32 Version 2.x
     _channel = _board->nextLedChannel++;
     ledcSetup(_channel, 8000, 8);
     ledcAttachPin(_pin, _channel);

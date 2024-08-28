@@ -41,7 +41,7 @@ void DisplayElement::_newPage(int page) {
     // redraw all DisplayOutput elements
     _board->forEach(CATEGORY::Widget, [this](Element *e) {
       TRACE("do %s", e->id);
-      e->set("redraw", "1");
+      e->set(HomeDing::Action::Redraw, "1");
     });
     if (da->page != oldPage) {
       _board->dispatch(_onPage, da->page);
@@ -92,7 +92,7 @@ bool DisplayElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "addpage") == 0) {
       _newPage(da->page + _atoi(value));
 
-    } else if (_stricmp(name, "clear") == 0) {
+    } else if (name == HomeDing::Action::Clear) {
       da->start();
     }
 
@@ -163,7 +163,7 @@ bool DisplayElement::set(const char *name, const char *value) {
     config.dcPin = _atopin(value);  // please use dcPin, deprecated
 
 
-  } else if (_stricmp(name, "invert") == 0) {
+  } else if (name == HomeDing::Action::Invert) {
     config.invert = _atob(value);
 
   } else if (_stricmp(name, "ips") == 0) {

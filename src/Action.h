@@ -18,6 +18,7 @@
  *
  * Changelog:
  * * 22.03.2024 created by Matthias Hertel
+ * * 10.07.2024 using std:set for fast finding
  */
 
 namespace HomeDing {
@@ -28,22 +29,26 @@ bool _setup();
 
 // find the action name in the Action collection or return null.
 const char *find(const char *name);
-const char *find1(const char *name);
 
 // allow direct pointer compare for these actions:
 extern const char *Address;
 extern const char *Border;
+extern const char *Clear;
 extern const char *Description;
 extern const char *Down;
 extern const char *Height;
+extern const char *Invert;
 extern const char *Label;
 extern const char *LogLevel;
 extern const char *Max;
 extern const char *Min;
+extern const char *Mode;
 extern const char *OnHigh;
 extern const char *OnLow;
 extern const char *OnValue;
 extern const char *Pin;
+extern const char *Redraw;
+extern const char *Reference;
 extern const char *Start;
 extern const char *Startup;
 extern const char *Step;
@@ -56,6 +61,8 @@ extern const char *Up;
 extern const char *UseState;
 extern const char *Value;
 extern const char *Width;
+extern const char *X;
+extern const char *Y;
 
 }; // namespace Action
 

@@ -48,20 +48,15 @@ public:
    */
   static bool registered;
 
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
+
+  /// @brief Set a parameter or property to a new value or start an action.
+  /// @param name Name of the property.
+  /// @param value Value of the property.
+  /// @return true when property was set or the action was received.
   virtual bool set(const char *name, const char *value) override;
 
-  /**
-   * @brief Activate the Element.
-   * @return true when the Element could be activated.
-   * @return false when parameters are not usable.
-   */
+
+  /// @brief Activate the Element.
   virtual void start() override;
 
   virtual void loop() override;

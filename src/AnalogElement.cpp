@@ -55,45 +55,51 @@ bool AnalogElement::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // done.
 
-  } else if (name == HomeDing::Action::Pin) {
-    _pin = _atopin(value);
+  } else if (name == HomeDing::Action::Reference) {
+    _reference = _atoi(value);
 
   } else if (_stricmp(name, "hysteresis") == 0) {
     _hysteresis = _atoi(value);
 
-    // } else if (_stricmp(name, "resolution") == 0) {
-    // _resolution = _atoi(value); ???
+  } else if (!active) {
+    // these properties can be used for configuration only.
 
-  } else if (_stricmp(name, "mapInMin") == 0) {
-    _inMin = _atoi(value);
+    if (name == HomeDing::Action::Pin) {
+      _pin = _atopin(value);
 
-  } else if (_stricmp(name, "mapInMax") == 0) {
-    _inMax = _atoi(value);
+      // } else if (_stricmp(name, "resolution") == 0) {
+      // _resolution = _atoi(value); ???
 
-  } else if (_stricmp(name, "mapOutMin") == 0) {
-    _outMin = _atoi(value);
+    } else if (_stricmp(name, "mapInMin") == 0) {
+      _inMin = _atoi(value);
 
-  } else if (_stricmp(name, "mapOutMax") == 0) {
-    _outMax = _atoi(value);
+    } else if (_stricmp(name, "mapInMax") == 0) {
+      _inMax = _atoi(value);
 
-  } else if (_stricmp(name, "constrain") == 0) {
-    _constrain = _atob(value);
+    } else if (_stricmp(name, "mapOutMin") == 0) {
+      _outMin = _atoi(value);
 
-  } else if (_stricmp(name, "reference") == 0) {
-    _reference = _atoi(value);
+    } else if (_stricmp(name, "mapOutMax") == 0) {
+      _outMax = _atoi(value);
 
-  } else if (name == HomeDing::Action::OnValue) {
-    _actions[0] = value;
+    } else if (_stricmp(name, "constrain") == 0) {
+      _constrain = _atob(value);
 
-  } else if (_stricmp(name, "onreference") == 0) {
-    _actions[1] = value;
+    } else if (name == HomeDing::Action::OnValue) {
+      _actions[0] = value;
 
-  } else if (name == HomeDing::Action::OnHigh) {
-    _highAction = value;
+    } else if (_stricmp(name, "onreference") == 0) {
+      _actions[1] = value;
 
-  } else if (name == HomeDing::Action::OnLow) {
-    _lowAction = value;
+    } else if (name == HomeDing::Action::OnHigh) {
+      _highAction = value;
 
+    } else if (name == HomeDing::Action::OnLow) {
+      _lowAction = value;
+
+    } else {
+      ret = false;
+    }  // if
   } else {
     ret = false;
   }  // if

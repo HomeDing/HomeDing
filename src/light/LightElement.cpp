@@ -73,26 +73,15 @@ bool LightElement::set(const char *name, const char *pValue) {
   bool ret = true;
   TRACE("L-set %s=%s", name, pValue);
 
-  if (name == HomeDing::Action::Value) {
+  if (Element::set(name, pValue)) {
+    // done
+
+  } else if (name == HomeDing::Action::Value) {
     if (_stricmp(value.c_str(), pValue)) {
       value = pValue;
       _outColor = _atoColor(pValue);
       needUpdate = true;
     }
-
-  } else if (_stricmp(name, "enable") == 0) {
-    enabled = _atob(pValue);
-    needUpdate = true;
-
-  } else if (_stricmp(name, "mode") == 0) {
-    if (_stricmp(pValue, "pwm") == 0) {
-      pwmMode = true;
-      needUpdate = true;
-    }
-
-  } else if (_stricmp(name, "invert") == 0) {
-    invert = _atob(pValue);
-    needUpdate = true;
 
   } else if (_stricmp(name, "brightness") == 0) {
     int b = _atoi(pValue);
@@ -102,20 +91,39 @@ bool LightElement::set(const char *name, const char *pValue) {
       needUpdate = true;
     }
 
-  } else if (name == HomeDing::Action::Pin) {
-    _count = 0;
-    while (_count < LightElement::MAXPINS) {
-      String p = getItemValue(pValue, _count);
-      if (p.isEmpty()) {
-        break;
+  } else if (_stricmp(name, "enable") == 0) {
+    enabled = _atob(pValue);
+    needUpdate = true;
+
+  } else if (!active) {
+    // these properties can be used for configuration only.
+
+    if (name == HomeDing::Action::Pin) {
+      _count = 0;
+      while (_count < LightElement::MAXPINS) {
+        String p = getItemValue(pValue, _count);
+        if (p.isEmpty()) {
+          break;
+        }  // while
+        _pins[_count] = _atopin(p.c_str());
+        TRACE("pin[%d]=%d", _count, _pins[_count]);
+        _count++;
       }  // while
-      _pins[_count] = _atopin(p.c_str());
-      TRACE("pin[%d]=%d", _count, _pins[_count]);
-      _count++;
-    }  // while
+
+    } else if (_stricmp(name, "mode") == 0) {
+      if (_stricmp(pValue, "pwm") == 0) {
+        pwmMode = true;
+      }
+
+    } else if (name == HomeDing::Action::Invert) {
+      invert = _atob(pValue);
+
+    } else {
+      ret = false;
+    }  // if
 
   } else {
-    ret = Element::set(name, pValue);
+    ret = false;
   }  // if
 
   return (ret);
@@ -160,7 +168,7 @@ void LightElement::loop() {
       analogWrite(_pins[n], c * _brightness / 100);
       color = color >> 8;
     }  // for
-  }    // if
+  }  // if
   needUpdate = false;
 }  // loop()
 

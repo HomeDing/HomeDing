@@ -18,10 +18,10 @@
 #include <displays/DisplayOutputElement.h>
 #include "DisplayOutputElement.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 DisplayOutputElement::DisplayOutputElement() {
-  category = CATEGORY::Widget; // no loop
+  category = CATEGORY::Widget;  // no loop
 }
 
 // ===== Element functions =====
@@ -40,20 +40,20 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     _value = value;
     needsDraw = true;
 
-  } else if (_stricmp(name, "clear") == 0) {
+  } else if (name == HomeDing::Action::Clear) {
     _value.clear();
     needsDraw = true;
 
-  } else if (_stricmp(name, "redraw") == 0) {
+  } else if (name == HomeDing::Action::Redraw) {
     needsDraw = true;
 
-  } else if (_stricmp(name, "x") == 0) {
+  } else if (name == HomeDing::Action::X) {
     box.x_max -= box.x_min;
     box.x_min = _atoi(value);
     box.x_max += box.x_min;
     needsDraw = true;
 
-  } else if (_stricmp(name, "y") == 0) {
+  } else if (name == HomeDing::Action::Y) {
     box.y_max -= box.y_min;
     box.y_min = _atoi(value);
     box.y_max += box.y_min;
@@ -79,11 +79,16 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     _borderColor = _atoColor(value);
     needsDraw = true;
 
+  } else if (!active) {
     // these properties can be used for configuration only.
 
-  } else if (_stricmp(name, "page") == 0) {
-    page = _atoi(value);
-    needsDraw = true;
+    if (_stricmp(name, "page") == 0) {
+      page = _atoi(value);
+      needsDraw = true;
+
+    } else {
+      ret = false;
+    }  // if
 
   } else {
     ret = false;

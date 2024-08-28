@@ -40,7 +40,7 @@ bool DigitalInElement::set(const char *name, const char *value) {
   } else if (name == HomeDing::Action::Pin) {
     _pin = _atopin(value);
 
-  } else if (_stricmp(name, "invert") == 0) {
+  } else if (name == HomeDing::Action::Invert) {
     _inverse = _atob(value);
 
   } else if (_stricmp(name, "pullup") == 0) {

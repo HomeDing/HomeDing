@@ -22,7 +22,7 @@
 #include "upload.h"
 
 // use TRACE for compiling with detailed TRACE output.
-#define TRACE(...)  LOGGER_JUSTINFO(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_JUSTINFO(__VA_ARGS__)
 
 /**
  * @brief Construct a new BuiltinHandler object

@@ -110,7 +110,6 @@ public:
 
   /// @brief The Element will be marked active after passing valid parameters and
   /// calling start(). Then loop() function will be called periodically.
-  ///
   bool active = false;
 
 
@@ -143,7 +142,7 @@ public:
   /// @brief setup the element so it can be started and stopped.
   virtual void setup();
 
-  //// @brief Activate the Element.
+  /// @brief Activate the Element.
   virtual void start();
 
 

@@ -35,17 +35,24 @@ bool DigitalOutElement::set(const char *name, const char *value) {
   } else if (name == HomeDing::Action::Value) {
     _setLevel(_atob(value));
 
-  } else if (name == HomeDing::Action::Pin) {
-    _pin = _atopin(value);
-
-  } else if (_stricmp(name, "invert") == 0) {
-    _inverse = _atob(value);
-
   } else if (_stricmp(name, "on") == 0) {
     _setLevel(true);
 
   } else if (_stricmp(name, "off") == 0) {
     _setLevel(false);
+
+  } else if (!active) {
+    // these properties can be used for configuration only.
+
+    if (name == HomeDing::Action::Pin) {
+      _pin = _atopin(value);
+
+    } else if (name == HomeDing::Action::Invert) {
+      _inverse = _atob(value);
+
+    } else {
+      ret = false;
+    }  // if
 
   } else {
     ret = false;

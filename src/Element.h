@@ -72,6 +72,14 @@ enum Element_StartupMode : uint16_t {
 #define ELEM_VALUE '='
 
 
+// less function for std::map and std::set
+struct _pchar_less {
+  bool operator()(const char *a, const char *b) const {
+    return strcmp(a, b) < 0;
+  }
+};
+
+
 /**
  * @brief This is the base class for all Elements that can be managed by the
  * Board.

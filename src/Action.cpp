@@ -69,14 +69,7 @@ const char *_actionNames[] = {
 };
 
 
-
-struct _actionless {
-  bool operator()(const char *a, const char *b) const {
-    return strcmp(a, b) < 0;
-  }
-};
-
-std::set<const char *, _actionless> _actions(_actionNames, _actionNames + sizeof(_actionNames) / sizeof(const char *));
+std::set<const char *, _pchar_less> _actions(_actionNames, _actionNames + sizeof(_actionNames) / sizeof(const char *));
 
 const char *find(const char *name) {
   auto it = _actions.find(name);

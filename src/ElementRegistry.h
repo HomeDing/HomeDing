@@ -9,11 +9,10 @@
 // More information on https://www.mathertel.de/Arduino
 // -----
 // 31.05.2018 created by Matthias Hertel
+// 02.09.2024 using std::map
 // -----
 
 #pragma once
-
-#define REG_MAX_TYPES 64
 
 typedef Element *(*CreateElementFn)(void);
 
@@ -43,9 +42,4 @@ public:
    * @returns String with all registered element types.
    */
   static String list();
-
-private:
-  static int _count;
-  static const char *_names[REG_MAX_TYPES];
-  static CreateElementFn _func[REG_MAX_TYPES];
 };

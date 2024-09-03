@@ -19,7 +19,7 @@
 
 #include <sensors/BME680Element.h>
 
-#include <sensors/bme680.h>
+#include <lib/bme680.h>
 #include <WireUtils.h>
 
 /* ===== Define local constants and often used strings ===== */

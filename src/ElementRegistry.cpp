@@ -12,34 +12,49 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
-#include <map>
 
 #include <core/Logger.h>
 
+// allocate static variables
+int ElementRegistry::_count;
+const char *ElementRegistry::_names[REG_MAX_TYPES];
+CreateElementFn ElementRegistry::_func[REG_MAX_TYPES];
 
-static std::map<const char *, CreateElementFn, _pchar_less> hdRegistry;
 
 /**
  * @brief Register a Factoryunction to create a Element of the specific type.
  */
-bool ElementRegistry::registerElement(
-  const char *elementTypeName,
-  Element *(*CreateElementFn)(void)) {
-
-  // This function is called during static variable initialization. Serial
+bool ElementRegistry::registerElement(const char *elementTypeName,
+                                      Element *(*CreateElementFn)(void)) {
+  // This functio is called during static variable initialization. Serial
   // doesn't work so early: LOGGER_RAW("register(%s)", elementTypeName);
-  // hdRegistry.insert(std::make_pair(elementTypeName, CreateElementFn));
-  hdRegistry.insert({elementTypeName, CreateElementFn});
-
-  return (true);
-}  // registerElement()
+  if (_count < REG_MAX_TYPES - 1) {
+    _names[_count] = elementTypeName;
+    _func[_count] = CreateElementFn;
+    _count++;
+    return (true);
+  }
+  return (false);
+} // registerElement()
 
 
 Element *ElementRegistry::createElement(const char *elementTypeName) {
   // LOGGER_RAW("createElement(%s)", elementTypeName);
-  auto p = hdRegistry.find(elementTypeName);
-  return ((p != hdRegistry.end()) ? p->second() : nullptr);
-}  // createElement()
+  int n;
+  Element *e = NULL;
+
+  // search for the the typeName
+  n = 0;
+  while ((n < _count) &&
+         (!String(_names[n]).equalsIgnoreCase(elementTypeName))) {
+    n++;
+  } // while
+
+  if (n < _count) {
+    e = _func[n]();
+  } // if
+  return (e);
+} // createElement()
 
 
 /**
@@ -48,15 +63,14 @@ Element *ElementRegistry::createElement(const char *elementTypeName) {
  */
 String ElementRegistry::list() {
   String buffer = "[";
-
-  for (auto p = hdRegistry.begin(); p != hdRegistry.end(); ++p) {
+  for (int n = 0; n < _count; n++) {
+    if (n > 0) buffer.concat(',');
     buffer.concat('\"');
-    buffer.concat(p->first);
+    buffer.concat(_names[n]);
     buffer.concat('\"');
-    if (p != hdRegistry.end()) buffer.concat(',');
-  }
+  } // for
   buffer.concat(']');
-  return (buffer);
-}  // list()
+  return(buffer);
+} // list()
 
 // End

@@ -47,7 +47,6 @@ Element *AudioElement::create() {
 // These references are set in static variables to make it available in the background audio task.
 
 AudioElement *__element = nullptr;
-Board *__board = nullptr;
 Audio *__audio = nullptr;
 uint32_t __cmd = AUDIOCMD_NONE;
 
@@ -97,12 +96,12 @@ void audio_info(const char *info) {
 
 void audio_showstation(const char *value) {
   __element->_station = value;
-  __board->dispatch(__element->_onStation, value);
+  HomeDing::Actions::push(__element->_onStation, value);
 }
 
 void audio_showstreamtitle(const char *value) {
   __element->_title = value;
-  __board->dispatch(__element->_onTitle, value);
+  HomeDing::Actions::push(__element->_onTitle, value);
 }
 
 /* ===== Element functions ===== */
@@ -112,7 +111,6 @@ void AudioElement::init(Board *board) {
   Element::init(board);
   // do something here like initialization
 
-  __board = board;
   __element = this;
   _i2s_bclk = -1;
   _i2s_lrc = -1;

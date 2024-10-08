@@ -44,7 +44,7 @@ void DisplayElement::_newPage(int page) {
       e->set(HomeDing::Action::Redraw, "1");
     });
     if (da->page != oldPage) {
-      _board->dispatch(_onPage, da->page);
+      HomeDing::Actions::push(_onPage, String(da->page).c_str());
     }
   }
 }  // _newPage()

@@ -160,14 +160,9 @@ void AnalogElement::sendData(String &values) {
 
   int r = (values.endsWith(",1") ? 1 : 0);
   if (r != _lastReference) {
-    if (r) {
-      _board->dispatch(_highAction);
-    } else {
-      _board->dispatch(_lowAction);
-    }  // if
+    HomeDing::Actions::push(r ? _highAction : _lowAction, r);
     _lastReference = r;
   }  // if
-
 }  // sendData()
 
 // End

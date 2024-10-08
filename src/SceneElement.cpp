@@ -95,11 +95,11 @@ void SceneElement::loop() {
     unsigned long now = millis();  // current (relative) time in msecs.
     TRACE("loop( %d, %d)", now, _nextStepTime);
 
-    if ((now >= _nextStepTime) && (_board->queueIsEmpty())) {
+    if ((now >= _nextStepTime) && (HomeDing::Actions::queueIsEmpty())) {
       if ((_currentStep >= 0) && (_currentStep < _steps.size())) {
         String actions = _steps[_currentStep];
         TRACE("send(%d):<%s>", _currentStep, actions.c_str());
-        _board->dispatch(actions);
+        HomeDing::Actions::push(actions);
       }
       _nextStepTime = 0;
       if (_delay >= 0) {

@@ -11,6 +11,9 @@ Boards that were used during development:
 * [ESP32-3248S035] -- ESP32 with 480*320 LCD touch display
 * [LilyGO-T-Display-S3] -- Small ESP32-S3 boards with 170*320 LCD touch display
 
+* [round]
+
+
 ESP8266 boards are not supported by this sketch.
 
 On the HomeDing web site you find more detailled documentation on these boards including

@@ -19,11 +19,10 @@
  * Changelog:
  * * 22.03.2024 created by Matthias Hertel
  * * 10.07.2024 using std:set for fast finding
+ * * 07.10.2024 queue of actions and dispatch functions 
  */
 
-namespace HomeDing {
-
-namespace Action {
+namespace HomeDing::Actions {
 
 bool _setup();
 
@@ -64,8 +63,6 @@ extern const char *Width;
 extern const char *X;
 extern const char *Y;
 
-}; // namespace Action
-
-}; // namespace Homeding
+}; // namespace Homeding::Actions
 
 // End

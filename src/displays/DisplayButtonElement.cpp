@@ -48,7 +48,7 @@ bool DisplayButtonElement::touchStart(int16_t xPos, int16_t yPos) {
 void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
   // TRACE("touchEnd(%d/%d)", xPos, yPos);
   if (box.contains(xPos, yPos)) {
-    _board->dispatch(_clickAction);
+    HomeDing::Actions::push(_clickAction);
   }
   _pressed = false;
   needsDraw = true;
@@ -83,7 +83,7 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "action") == 0) {
     if (_stricmp(value, "click") == 0) {
-      _board->dispatch(_clickAction);
+      HomeDing::Actions::push(_clickAction);
     }
 
   } else {

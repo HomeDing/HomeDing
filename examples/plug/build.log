@@ -1,0 +1,32 @@
+HomeDing Build plug.ino  ... 
+ 
+
+Compiling plug.ino  ... 
+
+Benutzte Bibliothek     Version Pfad
+HomeDing                0.9.7   C:\Users\Matthias\Documents\Arduino\libraries\HomeDing
+ESP8266WebServer        1.0     C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\ESP8266WebServer
+ESP8266WiFi             1.0     C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\ESP8266WiFi
+Wire                    1.0     C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\Wire
+LittleFS                0.1.0   C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\LittleFS
+SPI                     1.0     C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\SPI
+ESP8266mDNS             1.2     C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\ESP8266mDNS
+DNSServer               1.1.1   C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\DNSServer
+PubSubClient            2.8     C:\Users\Matthias\Documents\Arduino\libraries\PubSubClient
+RotaryEncoder           1.5.3   C:\Users\Matthias\Documents\Arduino\libraries\RotaryEncoder
+SD                      2.0.0   C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\SD
+SDFS                    0.1.0   C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\SDFS
+ESP8266SdFat            2.1.1   C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\ESP8266SdFat
+ArduinoOTA              1.0     C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\ArduinoOTA
+ESP8266SSDP             1.0     C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\ESP8266SSDP
+GFX Library for Arduino 1.4.7   C:\Users\Matthias\Documents\Arduino\libraries\GFX_Library_for_Arduino
+LiquidCrystal_PCF8574   2.2.0   C:\Users\Matthias\Documents\Arduino\libraries\LiquidCrystal_PCF8574
+my92xx                  3.0.3   C:\Users\Matthias\Documents\Arduino\libraries\my92xx
+Adafruit NeoPixel       1.12.3  C:\Users\Matthias\Documents\Arduino\libraries\Adafruit_NeoPixel
+DHTNEW                  0.4.20  C:\Users\Matthias\Documents\Arduino\libraries\DHTNEW
+OneWire                 2.3.8   C:\Users\Matthias\Documents\Arduino\libraries\OneWire
+DallasTemperature       3.9.0   C:\Users\Matthias\Documents\Arduino\libraries\DallasTemperature
+EspSoftwareSerial       8.0.1   C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\SoftwareSerial
+
+Verwendete Plattform Version Pfad
+esp8266:esp8266      3.1.2   C:\Users\Matthias\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2

@@ -20,7 +20,7 @@ if DEFINED _help (
   echo Use: hd ^<command^> --help 
   echo to get more help on available commands.
   echo.
-  echo Commands are: api, backup, discover, restore, upload, webupload
+  echo Commands are: api, build, backup, discover, restore, upload, webupload
   echo.
   goto :end
 )

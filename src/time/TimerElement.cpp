@@ -61,7 +61,7 @@ bool TimerElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "stop") == 0) {
     if (_mode == Mode::TIMER) {
-      _board->dispatch(_endAction);
+      HomeDing::Actions::push(_endAction);
     }
     _mode = Mode::OFF;
 
@@ -168,12 +168,12 @@ void TimerElement::loop() {
     // no need to send an action.
 
   } else if (newValue) {
-    _board->dispatch(_onAction);
-    _board->dispatch(_valueAction, "1");
+    HomeDing::Actions::push(_onAction);
+    HomeDing::Actions::push(_valueAction, "1");
 
   } else {
-    _board->dispatch(_offAction);
-    _board->dispatch(_valueAction, "0");
+    HomeDing::Actions::push(_offAction);
+    HomeDing::Actions::push(_valueAction, "0");
   }  // if
   _forceSendActions = false;
   _value = newValue;
@@ -205,13 +205,13 @@ void TimerElement::pushState(
  */
 void TimerElement::term() {
   if (_mode == Mode::TIMER) {
-    _board->dispatch(_endAction);
+    HomeDing::Actions::push(_endAction, 0);
   }
   _mode = Mode::OFF;
 
   if (_value) {
-    _board->dispatch(_offAction);
-    _board->dispatch(_valueAction, "0");
+    HomeDing::Actions::push(_offAction, 0);
+    HomeDing::Actions::push(_valueAction, 0);
     _value = false;
   }
 

@@ -203,7 +203,7 @@ public:
       char val[20];  // value to be send to matrix display
       sprintf(val, "0x%02x%02x%02x%02x%02x%02x%02x%02x", _leds[0], _leds[1], _leds[2], _leds[3], _leds[4], _leds[5], _leds[6], _leds[7]);
       LOGGER_EINFO("Send: %s", val);
-      _board->dispatch(_valueAction, val);
+      HomeDing::Actions::push(_valueAction, val);
 
       _lastTime = _newTime;
     }

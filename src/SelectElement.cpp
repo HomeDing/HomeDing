@@ -24,8 +24,8 @@
 void SelectElement::_selectOption(int n) {
   TRACE("select(%d)", n);
   if (_selected != n) {
-    _board->dispatch(_keyAction, _keys[n]);
-    _board->dispatch(_valueAction, _values[n]);
+    HomeDing::Actions::push(_keyAction, _keys[n]);
+    HomeDing::Actions::push(_valueAction, _values[n]);
     _selected = n;
   }
 }

@@ -56,17 +56,17 @@
 #define HOMEDING_INCLUDE_FULL_SYSTEM
 
 // Enable some Sensor Elements
-#define HOMEDING_INCLUDE_DHT
-#define HOMEDING_INCLUDE_AM2320
-#define HOMEDING_INCLUDE_SHT20
-#define HOMEDING_INCLUDE_AHT20
-#define HOMEDING_INCLUDE_DALLAS
-#define HOMEDING_INCLUDE_BMP280
-#define HOMEDING_INCLUDE_BME680
-#define HOMEDING_INCLUDE_BH1750
-#define HOMEDING_INCLUDE_SCD4X
+// #define HOMEDING_INCLUDE_DHT
+// #define HOMEDING_INCLUDE_AM2320
+// #define HOMEDING_INCLUDE_SHT20
+// #define HOMEDING_INCLUDE_AHT20
+// #define HOMEDING_INCLUDE_DALLAS
+// #define HOMEDING_INCLUDE_BMP280
+// #define HOMEDING_INCLUDE_BME680
+// #define HOMEDING_INCLUDE_BH1750
+// #define HOMEDING_INCLUDE_SCD4X
 
-#define HOMEDING_INCLUDE_TONE
+// #define HOMEDING_INCLUDE_TONE
 
 // The PMS uses SoftwareSerial Library that requires more IRAM.
 // When using, please switch the MMU: Options to give more IRAM
@@ -80,10 +80,10 @@
 #define HOMEDING_INCLUDE_DSTIME
 
 // Enable Elements for Displays (+36k program space, 32400 free heap)
-#define HOMEDING_INCLUDE_DISPLAY
-#define HOMEDING_INCLUDE_DISPLAYLCD
-#define HOMEDING_INCLUDE_DISPLAYSSD1306
-#define HOMEDING_INCLUDE_DISPLAYSH1106
+// #define HOMEDING_INCLUDE_DISPLAY
+// #define HOMEDING_INCLUDE_DISPLAYLCD
+// #define HOMEDING_INCLUDE_DISPLAYSSD1306
+// #define HOMEDING_INCLUDE_DISPLAYSH1106
 // #define HOMEDING_INCLUDE_DISPLAYST7789
 // #define HOMEDING_INCLUDE_DISPLAYST7796
 // #define HOMEDING_INCLUDE_DISPLAYST7735
@@ -98,11 +98,11 @@
 #define HOMEDING_INCLUDE_LIGHT
 #define HOMEDING_INCLUDE_NEOPIXEL
 #define HOMEDING_INCLUDE_APA102
-#define HOMEDING_INCLUDE_MY9291
+// #define HOMEDING_INCLUDE_MY9291
 
 // Network Services
-#define HOMEDING_INCLUDE_MQTT
-#define HOMEDING_INCLUDE_WEATHERFEED
+// #define HOMEDING_INCLUDE_MQTT
+// #define HOMEDING_INCLUDE_WEATHERFEED
 // #define HOMEDING_INCLUDE_SDMMC
 // #define HOMEDING_INCLUDE_SD
 
@@ -111,6 +111,10 @@
 
 #include <FS.h>
 #include <LittleFS.h>  // File System for Web Server Files
+
+#if defined(ESP32)
+#include <FFat.h>  // File System for Web Server Files
+#endif
 
 #include <BuiltinHandler.h>  // Serve Built-in files
 #include <BoardServer.h>     // Web Server Middleware for Elements
@@ -130,7 +134,11 @@ WebServer server(80);
  * Setup all components and Serial debugging helpers
  */
 void setup(void) {
+  fs::FS* fsys = nullptr;
   Serial.begin(115200);
+#if 0
+  Serial.setTxTimeoutMs(0);
+#endif
 
 #if ARDUINO_USB_CDC_ON_BOOT
   Serial.setTxTimeoutMs(0);
@@ -177,11 +185,11 @@ void setup(void) {
     Serial.println("WiFi Station DHCPTimeout.");
   });
 
-  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](UNUSED const WiFiEventSoftAPModeStationConnected& event) {
+  static WiFiEventHandler h4 = WiFi.onSoftAPModeStationConnected([](const WiFiEventSoftAPModeStationConnected& event) {
     Serial.println("WiFi AP Station connected.");
   });
 
-  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](UNUSED const WiFiEventSoftAPModeProbeRequestReceived& event) {
+  static WiFiEventHandler h5 = WiFi.onSoftAPModeProbeRequestReceived([](const WiFiEventSoftAPModeProbeRequestReceived& event) {
     Serial.println("WiFi AP Station probe.");
   });
 
@@ -192,14 +200,58 @@ void setup(void) {
 
   // WiFi.onEvent()
 
+  WiFi.onEvent([](arduino_event_id_t event) {
+    Serial.println("ARDUINO_EVENT_WIFI_STA_CONNECTED.");
+  },
+               ARDUINO_EVENT_WIFI_STA_CONNECTED);
+
+  WiFi.onEvent([](arduino_event_id_t event) {
+    Serial.println("ARDUINO_EVENT_WIFI_AP_START.");
+  },
+               ARDUINO_EVENT_WIFI_AP_START);
+  WiFi.onEvent([](arduino_event_id_t event) {
+    Serial.println("ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED.");
+  },
+               ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED);
+  WiFi.onEvent([](arduino_event_id_t event) {
+    Serial.println("ARDUINO_EVENT_WIFI_AP_STACONNECTED.");
+  },
+               ARDUINO_EVENT_WIFI_AP_STACONNECTED);
+
+
+  // ARDUINO_EVENT_WIFI_AP_STOP,
+  // ARDUINO_EVENT_WIFI_AP_STADISCONNECTED,
+  // ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED,
+  // ARDUINO_EVENT_WIFI_AP_GOT_IP6,
+
 #else
   Serial.setDebugOutput(false);
 #endif
 
   // ----- setup the platform with webserver and file system -----
 
-  // LittleFS is the default filesystem
-  homeding.init(&server, &LittleFS, "DevDing");
+#if defined(ESP8266)
+  // LittleFS is the default filesystem on ESP8266
+  fsys = &LittleFS;
+
+#elif defined(ESP32)
+  // ----- check partitions for finding the fileystem type -----
+  esp_partition_iterator_t i;
+
+  i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, nullptr);
+  if (i) {
+    fsys = &FFat;
+
+  } else {
+    i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr);
+    if (i) {
+      fsys = &LittleFS;
+    }
+  }
+  esp_partition_iterator_release(i);
+#endif
+
+  homeding.init(&server, fsys, "DevDing");
 
   // ----- adding web server handlers -----
 
@@ -216,10 +268,24 @@ void setup(void) {
 }  // setup
 
 
+unsigned long lastPrint = 0;
+long memLoss = 0;
+
 // handle all give time to all Elements and active components.
 void loop(void) {
+  unsigned long now = millis();
+  unsigned long mem = ESP.getFreeHeap();
+
   server.handleClient();
   homeding.loop();
+
+  memLoss = memLoss + ESP.getFreeHeap();
+  memLoss = memLoss - mem;
+
+  if (now > lastPrint + 2000) {
+    Serial.printf("heap: %ld (%ld)\n", mem, memLoss);
+    lastPrint = now;
+  }
 }  // loop()
 
 

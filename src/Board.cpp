@@ -45,12 +45,13 @@ extern "C" {
 
 #include <DNSServer.h>
 
+using namespace HomeDing::Actions;
 
 // use BOARDTRACE for compiling with detailed TRACE output.
 #define BOARDTRACE(...)  // Logger::LoggerPrint("Board", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use ELEM-TRACE for compiling with detailed TRACE output for Element creation.
-#define ELEMTRACE(...) // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define ELEMTRACE(...)  // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
 #define NETTRACE(...) Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
@@ -380,7 +381,7 @@ void Board::loop() {
       }  // if
 
       if (startComplete) {
-        dispatch(startAction);  // dispatched when all elements are active.
+        HomeDing::Actions::push(startAction);  // dispatched when all elements are active.
         saveWorkingState = nowMillis + (10 * 1000);
       }
 
@@ -394,10 +395,10 @@ void Board::loop() {
     }  // if
 
 
-    // dispatch next action from _actions if any
-    if (!_actions.empty()) {
+    // dispatch next action from queue if any
+    if (! HomeDing::Actions::queueIsEmpty()) {
       _DeepSleepCount = 0;
-      dispatchAction(_actions.pop());
+      dispatchAction(HomeDing::Actions::actions.pop());
       return;
     }  // if
 
@@ -659,7 +660,7 @@ void Board::loop() {
     }
 
     start(Element_StartupMode::WithNetwork);
-    dispatch(sysStartAction);  // dispatched when network is available
+    HomeDing::Actions::push(sysStartAction);  // dispatched when network is available
 
     // ===== finish network setup
 
@@ -794,35 +795,6 @@ void Board::cancelSleep() {
 
 // ===== queue / process / dispatch actions =====
 
-bool Board::queueIsEmpty() {
-  return (_actions.empty());
-}
-
-
-/** Queue an action for later dispatching. */
-void Board::_queueAction(const String &action, const String &v, boolean split) {
-  if (!action.isEmpty()) {
-    String tmp = action;
-    tmp.replace("$v", v);
-
-#if defined(LOGGER_ENABLED)
-    if (Logger::logger_level >= LOGGER_LEVEL_TRACE) {
-      Logger::printf("#action (%s)=>%s", (_activeElement ? _activeElement->id : ""), tmp.c_str());
-    }
-#endif
-
-    if (split) {
-      int len = ListUtils::length(tmp);
-      for (int n = 0; n < len; n++) {
-        _actions.push(ListUtils::at(tmp, n).c_str());
-      }
-    } else {
-      _actions.push(tmp);
-    }
-  }
-}  // _queueAction
-
-
 // send a event out to the defined target.
 void Board::dispatchAction(Element *target, const char *action_name, const char *action_value) {
 
@@ -916,36 +888,14 @@ void Board::dispatchAction(String action) {
 
 
 /**
- * @brief Save an action to the _actionList.
- */
-void Board::dispatch(const String &action, int value) {
-  _queueAction(action, String(value));
-}  // dispatch
-
-
-/**
- * @brief Save an action to the _actionList.
- */
-void Board::dispatch(const String &action, const char *value) {
-  _queueAction(action, String(value));
-}  // dispatch
-
-
-/**
- * @brief Save an action to the _actionList.
- */
-void Board::dispatch(const String &action, const String &value, boolean split) {
-  _queueAction(action, value, split);
-}  // dispatch
-
-
-/**
  * @brief Save an action to the _actionList using a item part of a value.
  */
 void Board::dispatchItem(const String &action, const String &values, int n) {
   if (action && values) {
     String v = Element::getItemValue(values, n);
-    if (v) _queueAction(action, v);
+    if (v) {
+      HomeDing::Actions::push(action, v.c_str());
+    }
   }  // if
 }  // dispatchItem
 

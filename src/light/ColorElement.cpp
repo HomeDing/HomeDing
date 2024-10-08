@@ -287,7 +287,7 @@ void ColorElement::loop() {
 
     // dispatch as action
     if (_needBrightnessUpdate) {
-      _board->dispatch(_brightnessAction, nextBrightness);
+      HomeDing::Actions::push(_brightnessAction, nextBrightness);
       _brightness = nextBrightness;
       _needBrightnessUpdate = false;
     }
@@ -295,7 +295,7 @@ void ColorElement::loop() {
     if (_needValueUpdate && (!_valueAction.isEmpty())) {
       char sColor[38];
       sprintf(sColor, "x%08lx", nextValue);
-      _board->dispatch(_valueAction, sColor);
+      HomeDing::Actions::push(_valueAction, sColor);
     }
     _needValueUpdate = false;
     _value = nextValue;

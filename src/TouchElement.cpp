@@ -104,8 +104,8 @@ void TouchElement::loop() {
 
   if (val != _value) {
     // TRACE("output %d->%d)", _value, val);
-    _board->dispatch(val ? _highAction : _lowAction);
-    _board->dispatch(_valueAction, val ? "1" : "0");
+    HomeDing::Actions::push(val ? _highAction : _lowAction);
+    HomeDing::Actions::push(_valueAction, val ? "1" : "0");
     _value = val;
   }  // if
 }  // loop()

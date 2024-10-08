@@ -142,7 +142,7 @@ void DisplayTouchElement::loop() {
       }
 
       if (!_isTouched) {
-        _board->dispatch(_touchAction);
+        HomeDing::Actions::push(_touchAction);
       }
       _isTouched = true;
 

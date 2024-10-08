@@ -34,10 +34,10 @@ bool SwitchElement::_setValue(int val, bool forceAction)
 
   if (hasChanged) {
     if (val) {
-      _board->dispatch(_highAction, _value);
+      HomeDing::Actions::push(_highAction, _value);
 
     } else {
-      _board->dispatch(_lowAction, _value);
+      HomeDing::Actions::push(_lowAction, _value);
     } // if
   } // if
   return (hasChanged);

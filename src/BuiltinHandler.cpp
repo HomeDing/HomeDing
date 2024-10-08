@@ -48,7 +48,7 @@ bool BuiltinHandler::canHandle(HTTPMethod requestMethod, const String &uri)
 #if (ESP_ARDUINO_VERSION_MAJOR < 3)
 bool BuiltinHandler::canHandle(HTTPMethod requestMethod, String uri)
 #else
-bool BuiltinHandler::canHandle(WebServer &server, HTTPMethod requestMethod, String uri)
+bool BuiltinHandler::canHandle(WebServer &server, HTTPMethod requestMethod, const String &uri)
 #endif
 #endif
 {
@@ -71,7 +71,7 @@ bool BuiltinHandler::canHandle(WebServer &server, HTTPMethod requestMethod, Stri
 #if defined(ESP8266)
 bool BuiltinHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, const String &uri)
 #elif defined(ESP32)
-bool BuiltinHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, String uri)
+bool BuiltinHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, const String &uri)
 #endif
 {
   TRACE("handle(%s)", uri.c_str());

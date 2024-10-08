@@ -117,7 +117,7 @@ void RotaryElement::loop() {
   long newPos = __encoder->getPosition();
   if (newPos != _value) {
     // send an action with the delta
-    _board->dispatch(_valueAction, _step * (newPos - _value));
+    HomeDing::Actions::push(_valueAction, _step * (newPos - _value));
   }
   _value = newPos;
 }  // loop()

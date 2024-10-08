@@ -149,7 +149,7 @@ bool DallasElement::getProbe(String &values) {
 void DallasElement::sendData(String &values) {
   // dispatch value.
   TRACE("sending %s", values.c_str());
-  _board->dispatch(_impl->tempAction, values);
+  HomeDing::Actions::push(_impl->tempAction, values);
 }  // sendData()
 
 

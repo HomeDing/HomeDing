@@ -4,15 +4,19 @@
 
 #pragma once
 
+#define Action Actions
+
 // to enable profiling the loop() times enable this include.
 // #include <hdProfile.h>
+
 
 #include <Board.h>            // Platform
 #include <Element.h>          // Abstract Elements
 #include <ElementRegistry.h>  // Element Registry
-#include <Action.h>           // static Action Registry
 
 #include <core/Logger.h>
+#include <Action.h>           // static Action Registry
+#include <core/Actions.h>           // static Action Registry
 
 // enable all TRACE at once here
 // #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)

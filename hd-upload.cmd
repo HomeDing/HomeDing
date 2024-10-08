@@ -90,7 +90,8 @@ echo.  Firmware    = %_binfile%
 echo.  Password    = %_pass%
 echo.
 
-python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a %_pass% -f %_binfile% 
+python %ESPTOOLS%\espota.py 
+@REM python %ESPTOOLS%\espota.py -d -r -i %devicename% -P 38288 -p 8266 -a %_pass% -f %_binfile% 
 echo.
 
 echo [1mdone.[0m

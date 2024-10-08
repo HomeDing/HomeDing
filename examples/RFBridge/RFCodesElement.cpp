@@ -138,7 +138,7 @@ void RFCodesElement::loop() {
       _lastReceivedCode = _receivedCode;
       _receivedMillis = _board->nowMillis;
       _receivedTime = time(nullptr);
-      _board->dispatch(_valueAction, _receivedCode);
+      HomeDing::Actions::push(_valueAction, _receivedCode);
     }
     _receivedCode = "";
 

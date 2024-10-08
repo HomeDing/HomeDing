@@ -22,7 +22,7 @@
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 #define DIGITS_WIDTH 17
-#define DIGITS_GAP 2
+#define DIGITS_GAP 4
 #define DIGITS_HEIGHT 33
 
 // scaling: factors are that are in a unit of 100 (percent)

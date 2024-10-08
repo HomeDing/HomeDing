@@ -120,10 +120,10 @@ void WeatherFeedElement::processBody(char *value) {
             // test all defined paths
             for (int n = 0; n < _count; n++) {
               if (_paths[n].equalsIgnoreCase(path)) {
-                _board->dispatch(_actions[n], value);
+                HomeDing::Actions::push(_actions[n], value);
               }
             }  // for
-          }    // if
+          }  // if
         });
     }
     if (mj) {

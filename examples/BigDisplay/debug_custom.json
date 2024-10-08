@@ -1,17 +1,22 @@
 {
-	"name":"Arduino on ESP32-S3",
-	"toolchainPrefix":"xtensa-esp32s3-elf",
-	"svdFile":"esp32s3.svd",
+	"name":"Arduino on ESP32-C3",
+	"toolchainPrefix":"riscv32-esp-elf",
+	"svdFile":"debug.svd",
 	"request":"attach",
+	"serverArgs":[
+		"-d3"
+	],
 	"overrideAttachCommands":[
-		"set remote hardware-watchpoint-limit 2",
-		"monitor reset halt",
+		"set remote hardware-watchpoint-limit 8",
+		"monitor reset",
+		"monitor halt",
 		"monitor gdb_sync",
-		"thb setup",
-		"c"
+		"thb setup"
 	],
 	"overrideRestartCommands":[
-		"monitor reset halt",
-		"monitor gdb_sync"
+		"monitor reset",
+		"monitor halt",
+		"monitor gdb_sync",
+		"thb setup"
 	]
 }

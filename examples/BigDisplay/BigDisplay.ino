@@ -32,11 +32,11 @@
 // #define HOMEDING_INCLUDE_SSDP
 
 // Enable some Sensor Elements
-#define HOMEDING_INCLUDE_DHT
-#define HOMEDING_INCLUDE_AM2320
-#define HOMEDING_INCLUDE_SHT20
-#define HOMEDING_INCLUDE_AHT20
-#define HOMEDING_INCLUDE_DALLAS
+// #define HOMEDING_INCLUDE_DHT
+// #define HOMEDING_INCLUDE_AM2320
+// #define HOMEDING_INCLUDE_SHT20
+// #define HOMEDING_INCLUDE_AHT20
+// #define HOMEDING_INCLUDE_DALLAS
 // #define HOMEDING_INCLUDE_BMP280
 // #define HOMEDING_INCLUDE_BME680
 // #define HOMEDING_INCLUDE_BH1750
@@ -47,11 +47,11 @@
 // #define HOMEDING_INCLUDE_PMS
 
 // Enable some INPUT Elements
-#define HOMEDING_INCLUDE_ROTARY
-#define HOMEDING_INCLUDE_MENU
+// #define HOMEDING_INCLUDE_ROTARY
+// #define HOMEDING_INCLUDE_MENU
 
 // Enable some TIME Elements
-#define HOMEDING_INCLUDE_DSTIME
+// #define HOMEDING_INCLUDE_DSTIME
 
 // Enable Elements for Displays
 #define HOMEDING_INCLUDE_DISPLAY  // all elements that can be displayed
@@ -60,32 +60,32 @@
 // #define HOMEDING_INCLUDE_DISPLAYSH1106
 
 // enable these lines to get more displays supported
-#define HOMEDING_INCLUDE_DISPLAYGC9A01
-#define HOMEDING_INCLUDE_DISPLAYST7796
-#define HOMEDING_INCLUDE_DISPLAYST7789
+// #define HOMEDING_INCLUDE_DISPLAYGC9A01
+// #define HOMEDING_INCLUDE_DISPLAYST7796
+// #define HOMEDING_INCLUDE_DISPLAYST7789
 #define HOMEDING_INCLUDE_DISPLAYST7735
-#define HOMEDING_INCLUDE_DISPLAYESP32PANEL
-#define HOMEDING_INCLUDE_DISPLAYST7701
+// #define HOMEDING_INCLUDE_DISPLAYESP32PANEL
+// #define HOMEDING_INCLUDE_DISPLAYST7701
 
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
 
 // enable these lines to get touch displays supported
-#define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
-#define HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
-#define HOMEDING_INCLUDE_DISPLAYTOUCHCST816
+// #define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
+// #define HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
+// #define HOMEDING_INCLUDE_DISPLAYTOUCHCST816
 
 // Enable Elements for LIGHT control
-#define HOMEDING_INCLUDE_COLOR
-#define HOMEDING_INCLUDE_LIGHT
-#define HOMEDING_INCLUDE_NEOPIXEL
-#define HOMEDING_INCLUDE_APA102
-#define HOMEDING_INCLUDE_MY9291
+// #define HOMEDING_INCLUDE_COLOR
+// #define HOMEDING_INCLUDE_LIGHT
+// #define HOMEDING_INCLUDE_NEOPIXEL
+// #define HOMEDING_INCLUDE_APA102
+// #define HOMEDING_INCLUDE_MY9291
 
 // Network Services
-#define HOMEDING_INCLUDE_MQTT
-#define HOMEDING_INCLUDE_WEATHERFEED
-#define HOMEDING_INCLUDE_SDMMC
-#define HOMEDING_INCLUDE_SD
+// #define HOMEDING_INCLUDE_MQTT
+// #define HOMEDING_INCLUDE_WEATHERFEED
+// #define HOMEDING_INCLUDE_SDMMC
+// #define HOMEDING_INCLUDE_SD
 
 #include <Arduino.h>
 #include <HomeDing.h>
@@ -113,9 +113,16 @@ WebServer server(80);
  * Setup all components and Serial debugging helpers
  */
 void setup(void) {
-  fs::FS *fs = nullptr;
+  fs::FS *fsys = nullptr;
   Serial.begin(115200);
+
+#if ARDUINO_USB_CDC_ON_BOOT
   Serial.setTxTimeoutMs(0);
+
+#else
+  while (!Serial)
+    yield();
+#endif
 
 #ifdef DBG_TRACE
   // wait so the serial monitor can capture all output.
@@ -134,17 +141,22 @@ void setup(void) {
   // ----- check partitions for finding the fileystem type -----
   esp_partition_iterator_t i;
 
-  if (i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, nullptr)) {
-    fs = &FFat;
-  } else if (i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr)) {
-    fs = &LittleFS;
+  i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, nullptr);
+  if (i) {
+    fsys = &FFat;
+
+  } else {
+    i = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr);
+    if (i) {
+      fsys = &LittleFS;
+    }
   }
   esp_partition_iterator_release(i);
 #endif
 
 
   // ----- setup the platform with webserver and file system -----
-  homeding.init(&server, fs, "Display");
+  homeding.init(&server, fsys, "Display");
 
   // ----- adding web server handlers -----
 
@@ -166,6 +178,5 @@ void loop(void) {
   server.handleClient();
   homeding.loop();
 }  // loop()
-
 
 // end.

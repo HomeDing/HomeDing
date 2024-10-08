@@ -14,3 +14,9 @@ Another typical bare board for this is a [ESP8266-01 board](/boards/esp01) with 
 More details about this example can be found in the online documentation at
 
 <https://homeding.github.io/examples/minimal.htm>
+
+## Compile and upload using arduino-cli
+
+``` txt
+hd-build.bat --case plug -c plug.ino
+```

@@ -215,7 +215,7 @@ void BL0937Element::loop() {
     float energyFactor = _powerFactor / 3600 / 1000000;
     float wh = energyCount * energyFactor;
     TRACE("last day energy: %d,%energyFactor", energyDate, wh);
-    _board->dispatch(_energyAction, String(wh));
+    HomeDing::Actions::push(_energyAction, String(wh));
 
     // start powerCounting per day
     energyCount = 0;
@@ -235,7 +235,7 @@ void BL0937Element::loop() {
       newPowerValue = (_powerFactor * _powerCount) / _powerDuration;
     }
     if (_powerValue != newPowerValue) {
-      _board->dispatch(_powerAction, newPowerValue);
+      HomeDing::Actions::push(_powerAction, newPowerValue);
     }
     _powerValue = newPowerValue;
     powSigStart = 0;  // start new cycle.
@@ -249,12 +249,12 @@ void BL0937Element::loop() {
     }
 
     if (_voltageValue != newVAValue) {
-      _board->dispatch(_voltageAction, newVAValue);
+      HomeDing::Actions::push(_voltageAction, newVAValue);
       _voltageValue = newVAValue;
     }  // if
 
     if (_currentValue != newVAValue) {
-      _board->dispatch(_currentAction, newVAValue);
+      HomeDing::Actions::push(_currentAction, newVAValue);
       _currentValue = newVAValue;
     }  // if
 

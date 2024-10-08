@@ -57,7 +57,7 @@ public:
 #if (ESP_ARDUINO_VERSION_MAJOR < 3)
   bool canHandle(HTTPMethod requestMethod, String uri) override
 #else
-  bool canHandle(WebServer &server, HTTPMethod requestMethod, String uri) override
+  bool canHandle(WebServer &server, HTTPMethod requestMethod, const String &uri) override
 #endif
 
 #endif
@@ -91,7 +91,7 @@ public:
 #if (ESP_ARDUINO_VERSION_MAJOR < 3)
   bool canUpload(String uri) override
 #else
-  bool canUpload(WebServer &server, String uri) override
+  bool canUpload(WebServer &server, const String &uri) override
 #endif
 
 #endif
@@ -104,7 +104,7 @@ public:
 #if defined(ESP8266)
   bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override
 #elif defined(ESP32)
-  bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override
+  bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override
 #endif
   {
     JINFO("FileServerHandler::handle(%s)", requestUri.c_str());
@@ -137,7 +137,7 @@ public:
 #if defined(ESP8266)
   void upload(WebServer & /* server */, const String & /* requestUri */, HTTPUpload &upload) override
 #elif defined(ESP32)
-  void upload(WebServer & /* server */, String requestUri, HTTPUpload &upload) override
+  void upload(WebServer & /* server */, const String &requestUri, HTTPUpload &upload) override
 #endif
   {
     JINFO("FileServerHandler::upload(%s)", requestUri.c_str());

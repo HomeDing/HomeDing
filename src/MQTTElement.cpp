@@ -213,7 +213,7 @@ void MQTTElement::_received(String topic, String payload) {
   int n = topic.lastIndexOf('/');
   tmp.replace("$k", topic.substring(n + 1));
 
-  _board->dispatch(tmp, payload);
+  HomeDing::Actions::push(tmp, payload);
 }  // _received
 
 

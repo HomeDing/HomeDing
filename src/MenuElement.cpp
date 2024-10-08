@@ -117,18 +117,18 @@ bool MenuElement::set(const char *name, const char *value) {
  */
 void MenuElement::loop() {
   if (_updateM) {
-    _board->dispatch(_menuAction, valueList[_active]->getLabel());
+    HomeDing::Actions::push(_menuAction, valueList[_active]->getLabel());
   }
 
   if (_updateV) {
-    _board->dispatch(_valueAction, valueList[_active]->getValue());
+    HomeDing::Actions::push(_valueAction, valueList[_active]->getValue());
   }
 
   if (_updateM || _updateV) {
     String v = valueList[_active]->getLabel();
     v.concat(":");
     v.concat(valueList[_active]->getValue());
-    _board->dispatch(_displayAction, v);
+    HomeDing::Actions::push(_displayAction, v);
   }
 
   _updateM = _updateV = false;

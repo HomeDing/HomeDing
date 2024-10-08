@@ -72,7 +72,7 @@ public:
 #if (ESP_ARDUINO_VERSION_MAJOR < 3)
   bool canHandle(HTTPMethod requestMethod, String uri) override;
 #else
-  bool canHandle(WebServer &server, HTTPMethod requestMethod, String uri) override;
+  bool canHandle(WebServer &server, HTTPMethod requestMethod, const String &uri) override;
 #endif
 
 #endif
@@ -88,7 +88,7 @@ public:
 #if defined(ESP8266)
   bool handle(WebServer &server, HTTPMethod /* requestMethod */, const String &requestUri) override;
 #elif defined(ESP32)
-  bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri) override;
+  bool handle(WebServer &server, HTTPMethod requestMethod, const String &requestUri) override;
 #endif
 
 

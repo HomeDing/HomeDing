@@ -108,7 +108,7 @@ bool RadioElement::set(const char *name, const char *value) {
     int v = _atoi(value);
     if (active && v != _impl->radioFreq) {
       radio.setFrequency(v);
-      _board->dispatch(_frequencyAction, v);
+      HomeDing::Actions::push(_frequencyAction, v);
     }
     _impl->radioFreq = v;
 
@@ -206,7 +206,7 @@ void RadioElement::start() {
     radio.setMute(_mute || (_volume == 0));
 
     Element::start();
-    _board->dispatch(_frequencyAction, _impl->radioFreq);
+    HomeDing::Actions::push(_frequencyAction, _impl->radioFreq);
 
     TRACE("SETUP RDS...");
     // setup the information chain for RDS data.
@@ -244,7 +244,7 @@ void RadioElement::loop() {
       memcpy(&_ri, &newri, sizeof(RADIO_INFO));
 
       RADIO_FREQ f = radio.getFrequency();
-      if (f != _impl->radioFreq) { _board->dispatch(_frequencyAction, f); }
+      if (f != _impl->radioFreq) { HomeDing::Actions::push(_frequencyAction, f); }
       _impl->radioFreq = f;
       _nextInfoCheck = now + _checkInfo;
     }
@@ -255,12 +255,12 @@ void RadioElement::loop() {
     }
 
     if (_newSN) {
-      _board->dispatch(_stationAction, _stationName);
+      HomeDing::Actions::push(_stationAction, _stationName);
       _newSN = false;
     }
 
     if (_newR) {
-      _board->dispatch(_rdsTextAction, _rdsText);
+      HomeDing::Actions::push(_rdsTextAction, _rdsText);
       _newR = false;
     }
   }

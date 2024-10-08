@@ -95,12 +95,12 @@ void ReferenceElement::loop() {
     }
 
     TRACE("%f/%f => %d", _incomingValue, _refValue, _value);
-    _board->dispatch(_referenceAction, _value);
+    HomeDing::Actions::push(_referenceAction, _value);
 
     if (_value) {
-      _board->dispatch(_highAction);
+      HomeDing::Actions::push(_highAction);
     } else {
-      _board->dispatch(_lowAction);
+      HomeDing::Actions::push(_lowAction);
     }  // if
     gotNewValue = false;
   }

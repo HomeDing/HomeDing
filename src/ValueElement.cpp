@@ -36,10 +36,10 @@ bool ValueElement::_setValue(int newValue, bool forceAction) {
   newValue = constrain(newValue, _minRange, _maxRange);
 
   if (forceAction || ((active) && (_value != newValue))) {
-    _board->dispatch(_valueAction, newValue);
+    HomeDing::Actions::push(_valueAction, newValue);
     ret = true;
   }  // if
-  
+
   if (_value != newValue) {
     _value = newValue;
     saveState(HomeDing::Action::Value, String(_value));
@@ -55,7 +55,7 @@ bool ValueElement::_setValue(const char *newValue, bool forceAction) {
   _isValid = true;
 
   if (forceAction || ((active) && (_valueString != newValue))) {
-    _board->dispatch(_valueAction, newValue);
+    HomeDing::Actions::push(_valueAction, newValue);
     ret = true;
   }
 

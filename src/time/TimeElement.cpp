@@ -130,7 +130,7 @@ void TimeElement::_sendAction(String &action, const char *fmt, struct tm *tmp) {
   if (action.length()) {
     char b[32];
     strftime(b, sizeof(b), fmt, tmp);
-    _board->dispatch(action, b);
+    HomeDing::Actions::push(action, b);
   }  // if
 }  // _sendAction()
 

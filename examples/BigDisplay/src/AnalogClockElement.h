@@ -70,7 +70,7 @@ public:
 
 
 private:
-  unsigned long int _shown_time = 0;
+  time_t _shown_time = 0;
 
   // colors
   // uint32_t _color = RGB_GRAY; // provided by DisplayOutputElement

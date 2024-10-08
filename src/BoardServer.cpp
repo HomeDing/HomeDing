@@ -186,7 +186,7 @@ bool BoardHandler::canHandle(HTTPMethod requestMethod, const String &uri)
 #if (ESP_ARDUINO_VERSION_MAJOR < 3)
 bool BoardHandler::canHandle(HTTPMethod requestMethod, String uri)
 #else
-bool BoardHandler::canHandle(WebServer &server, HTTPMethod requestMethod, String uri)
+bool BoardHandler::canHandle(WebServer &server, HTTPMethod requestMethod, const String &uri)
 #endif
 
 #endif
@@ -214,7 +214,7 @@ bool BoardHandler::canHandle(WebServer &server, HTTPMethod requestMethod, String
 #if defined(ESP8266)
 bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, const String &requestUri2)
 #elif defined(ESP32)
-bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, String requestUri2)
+bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, const String &requestUri2)
 #endif
 {
   TRACE("BoardHandler::handle(%s)", requestUri2.c_str());
@@ -253,7 +253,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, Str
       // send arguments as actions to the specified element per given argument
       for (int a = 0; a < argCount; a++) {
         String tmp = id + "?" + server.argName(a) + "=$v";
-        _board->dispatch(tmp, server.arg(a), false);
+        HomeDing::Actions::push(tmp, server.arg(a), false);
       }
     }  // if
     output_type = TEXT_JSON;

@@ -164,8 +164,8 @@ bool MapElement::set(const char *name, const char *value) {
  */
 void MapElement::loop() {
   if (_needUpdate) {
-    _board->dispatch(_mActions[_currentMapIndex], _value);
-    _board->dispatch(_valueAction, _value);
+    HomeDing::Actions::push(_mActions[_currentMapIndex], _value);
+    HomeDing::Actions::push(_valueAction, _value);
     _needUpdate = false;
   }
 }  // loop()

@@ -13,6 +13,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#include <ctime>
+
 #include "AnalogClockElement.h"
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
@@ -107,10 +109,8 @@ void AnalogClockElement::draw() {
   TRACE("draw()");
   DisplayOutputElement::draw();
 
-  unsigned long int now = _board->getTime();
-
-  time_t time = _board->getTime();
-  struct tm *lt = localtime(&time);
+  time_t now = time(nullptr);
+  struct tm *lt = localtime(&now);
   time_t secs = lt->tm_sec + (lt->tm_min * 60) + (lt->tm_hour * 60 * 60);
 
   // calculate angles in 360°
@@ -141,7 +141,7 @@ void AnalogClockElement::draw() {
  * @brief Give some processing time to the Element to check for next actions.
  */
 void AnalogClockElement::loop() {
-  if ((! needsDraw) && (_shown_time != _board->getTime())) {
+  if ((! needsDraw) && (_shown_time != time(nullptr))) {
     TRACE("need");
     needsDraw = true;
     _display->setFlush();

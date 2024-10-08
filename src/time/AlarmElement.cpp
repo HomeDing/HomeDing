@@ -87,7 +87,7 @@ void AlarmElement::loop()
   if (ct > 0) {
     if ((_lastTime < _time) && (ct >= _time)) {
       // send alarm
-      _board->dispatch(_timeAction);
+      HomeDing::Actions::push(_timeAction);
     }
     _lastTime = ct;
   } // if

@@ -251,33 +251,6 @@ public:
   // ===== queue / process / dispatch actions =====
 
   /**
-   * check if the dispatch queue is empty
-   * @return true when no action is in queue.
-   */
-  bool queueIsEmpty();
-
-  /**
-   * queue all the actions to the right elements.
-   * @param action list of actions.
-   * @param value the value for $v placeholder.
-   */
-  void dispatch(const String &action, const char *value = nullptr);
-
-  /**
-   * queue all the actions to the right elements.
-   * @param action list of actions.
-   * @param value the value for $v placeholder.
-   */
-  void dispatch(const String &action, int value);
-
-  /**
-   * queue all the actions to the right elements.
-   * @param action list of actions.
-   * @param value the value for $v placeholder.
-   */
-  void dispatch(const String &action, const String &value, boolean split = true);
-
-  /**
    * queue all the actions to the right elements.
    * @param action list of actions.
    * @param value the value for $v placeholder.
@@ -440,12 +413,6 @@ private:
    */
   void _addAllElements();
 
-  /// @brief Queue an action for later dispatching.
-  /// @param action action or property.
-  /// @param v the value
-  /// @param split
-  void _queueAction(const String &action, const String &v, boolean split = true);
-
   int _addedElements = 0;
 
   // state and timing
@@ -482,8 +449,6 @@ private:
 
   /// @brief The element is executing in a loop()
   Element *_activeElement;
-
-  ArrayString _actions;
 
   static Element *_registered;
 };

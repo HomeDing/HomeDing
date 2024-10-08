@@ -94,9 +94,9 @@ void DigitalInElement::loop() {
     lev = !lev;
 
   if (lev != _lastInLevel) {
-    // TRACE("output %d->%d)", _lastInLevel, lev);
-    _board->dispatch(lev ? _highAction : _lowAction);
-    _board->dispatch(_valueAction, lev ? "1" : "0");
+    int v = lev ? 1 : 0;
+    HomeDing::Actions::push(lev ? _highAction : _lowAction, v);
+    HomeDing::Actions::push(_valueAction, v);
     _lastInLevel = lev;
   }  // if
 }  // loop()

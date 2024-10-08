@@ -86,7 +86,7 @@ void CalcElement::loop() {
 
     _calc();
     if (_value != oldValue) {
-      _board->dispatch(_valueAction, _value);
+      HomeDing::Actions::push(_valueAction, _value);
     }
     _needRecalc = false;
   }  // if

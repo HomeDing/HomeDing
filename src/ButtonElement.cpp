@@ -156,9 +156,9 @@ void ButtonElement::_send(ACTIONS action) {
   }
 
   if (a.length() > 0)
-    _board->dispatch(a);
+    HomeDing::Actions::push(a);
   if (actionName)
-    _board->dispatch(_actionAction, actionName);
+    HomeDing::Actions::push(_actionAction, actionName);
 }  // _send()
 
 // End

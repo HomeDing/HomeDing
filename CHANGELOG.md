@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.9.x] - unreleased
+## \[0.9.x\] - unreleased
 
 ### Display and Touch Driver updates
 
@@ -95,7 +95,7 @@ Some examples also have a \<sketch\>.ino.globals.h file to define a Marco "HD_MI
 This is causing smaller bin files by removing some rarely needed functionality.
 
 
-## [0.9.7] - 2023-05-01 unreleased
+## \[0.9.7\] - 2023-05-01 unreleased
 
 * updated Web UI files from Web project <https://github.com/HomeDing/WebFiles>.
 
@@ -161,9 +161,9 @@ This is causing smaller bin files by removing some rarely needed functionality.
   See [micro example readme](/examples/micro/README.md)
 
 
-## [0.9.0] - 2022-08-22
+## \[0.9.0\] - 2022-08-22
 
-### Changes / Enhancements
+### 0.9.0 Changes / Enhancements
 
 * There are many enhancements and bug fixing in this release.
 
@@ -188,13 +188,13 @@ values from AM2320 sensors and creates actions when new values are available.
 The AHT20Element allows retrieving temperature and humidity
 values from from the AHT20 sensors from aosong and creates actions when new values are available.
 
-* **[SDC4x Element]**
-A Element to create actions based on sensor values from a SCD4X Temperature and Humidity sensor.
+* **[SDC4x Element](https://homeding.github.io/elements/sdc4x.htm)**
+A Element to create actions based on sensor values from a SCD4X CO2, Temperature and Humidity sensor.
 
 * **[Touch Element](https://homeding.github.io/elements/touch.htm)** --
 The TouchElement enables creating Actions by using touch input on the ESP32.
 
-* **[DisplayMAX7219 Element] to use more than 4 modules (WIP).
+* **[DisplayMAX7219 Element](https://homeding.github.io/elements/display/max7219.htm) to use more than 4 modules (WIP).
 
 * **SensorElement** is enhanced to support reporting the state and emitting actions for the sensor values
   to simplify sensor implementations and save overall memory.
@@ -209,7 +209,7 @@ for some elements with multiple input an calculated output.
 
 * much more support for ESP32.  
 
-## [0.8.2] - 2022-03-28
+## \[0.8.2\] - 2022-03-28
 
 The released version 0.7.2 was stable enough to do many implementations so many changes
 where not published in a release.
@@ -232,7 +232,7 @@ resulting a a reformatted flash disk space when updating.
 
   This version still supports both implementations, see filesystem initializing in main sketch.
 
-### Changes / Enhancements
+### 0.8.2 Changes / Enhancements
 
 * The redirection handler is moved into board server resulting in reduced sketch files.
 * The BuiltinHandler class is handling all server request with static ressources.
@@ -284,14 +284,14 @@ A lot new elements and examples:
 
 * The startup sequence and WiFi Manager implementation was improved.
 
-## [0.7.0] - 2021-06-15
+## \[0.7.0\] - 2021-06-15
 
 The version 0.7.0 was created to support the version 3.x of ESP8266 community board support.
 
 The ESP32 boards are supported with some exceptions (e.g. MY9291Element)
 and is still more beta than ESP8266 board support.
 
-### Changes / Enhancements
+### 0.7.0 Changes / Enhancements
 
 * RFBridge example
 
@@ -309,7 +309,7 @@ and is still more beta than ESP8266 board support.
 
   The [State Elements](https://homeding.github.io/elements/state.htm) allow saving current element values that will be restored after a reset or deep sleep without power loss.
 
-* [Color Element]
+* [Color Element](https://homeding.github.io/elements/color.htm)
 
   The [Color Element](https://homeding.github.io/elements/color.htm) allows
   controlling a value for a light emitting element using the
@@ -338,7 +338,7 @@ and is still more beta than ESP8266 board support.
 
   **page** - This property can be set on display the text, line or other visuals on a specific page.
 
-## [0.6.0] - 2021-01-03
+## \[0.6.0\] - 2021-01-03
 
 ### Enhancements
 
@@ -376,7 +376,7 @@ and is still more beta than ESP8266 board support.
 * **[Reference Element](https://homeding.github.io/elements/reference.htm)**
     A new Element for calculating a boolean from comparing a value against a reference value.
 
-## [0.5.0] - 2020-09-13
+## \[0.5.0\] - 2020-09-13
 
 This release focuses on stability and better developer support. New Elements is present that added required some features and fixes in the JSON parser.
 
@@ -387,7 +387,7 @@ This release focuses on stability and better developer support. New Elements is 
 > * Support for IE11 was dropped in favor for smaller code size. Edge is supported.
 > * Build and test using the ESP8266 Community board version 2.7.4.
 
-### Added Examples
+### 0.5.0 Added Examples
 
 * **[Development example](https://homeding.github.io/examples/develop.htm)** - The example can be used for for experimental and incubator implementations.<br />
   In the folder you can find elements that should not be present in long-time running devices but can help wile developing.<br />
@@ -395,7 +395,7 @@ This release focuses on stability and better developer support. New Elements is 
 
 * **[Minimal example](https://homeding.github.io/examples/minimal.htm)** - The example can be compiled to get a small firmware that runs on 1MByte flash boards with reduced functionality.
 
-### Added Elements
+### 0.5.0 Added Elements
 
 These Elements are added to the [Development example](https://homeding.github.io/examples/develop.htm) and are in an early development state or for development purpose only. When finalized they will be moved into the core library.
 
@@ -405,7 +405,7 @@ These Elements are added to the [Development example](https://homeding.github.io
 * **INA219 Element** - An Element to control a INA219 power consumption chip.
 * **Template Element.h** - An Element that is used as a template for implementing new elements.
 
-### Enhancements
+### 0.5.0 Enhancements
 
 * **[Device Element](https://homeding.github.io/elements/device.htm)** - Serval improvements.
   * **safeMode** - The safeMode (see <https://homeding.github.io/safemode.htm>) advanced in this release but still WIP.<br/>
@@ -464,7 +464,7 @@ These Elements are added to the [Development example](https://homeding.github.io
 
 * The `FileServer` and `BoardServer` have minor improvements and now used the enhanced WebServer class features.
 
-## [0.4.1] - 2020-04-16
+## \[0.4.1\] - 2020-04-16
 
 * JSON Parser supporting arrays.
 * Avoid long processing time without yield()/delay(1) calls on startup to get faster network connectivity.
@@ -473,7 +473,7 @@ These Elements are added to the [Development example](https://homeding.github.io
 * ntp time fixed according ESP8266 board version 4.7.0
 * CHANGELOG.md file added.  
 
-## [0.4.0] - 2020-04-16
+## \[0.4.0\] - 2020-04-16
 
 BME680 optimizations.
 
@@ -484,16 +484,16 @@ BME680 optimizations.
 ### Fixed
 
 * I2C bus usage through WireUtils improved.
-* use bosch bme680 instead of Adafruit library.
+* use bosch bme680 implementation in folder `lib` instead of Adafruit library.
 * external library dependency for `Adafruit Unified Sensor` and `Adafruit BME680 Library` removed.
 
-## [0.3.1] - 2020-04-15
+## \[0.3.1\] - 2020-04-15
 
-### Fixed
+### 0.3.1 Fixes
 
 * external library dependencies.
 
-## [0.3.0] - 2020-04-14
+## \[0.3.0\] - 2020-04-14
 
 Initial release after beta phase.
 

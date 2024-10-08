@@ -142,12 +142,12 @@ void ScheduleElement::loop()
   if ((newValue == _value) && (_init)) {
     // no need to send an action.
   } else if (newValue) {
-    _board->dispatch(_onAction);
-    _board->dispatch(_valueAction, "1");
+    HomeDing::Actions::push(_onAction, 1);
+    HomeDing::Actions::push(_valueAction, 1);
 
   } else {
-    _board->dispatch(_offAction);
-    _board->dispatch(_valueAction, "0");
+    HomeDing::Actions::push(_offAction, 0);
+    HomeDing::Actions::push(_valueAction, 0);
   } // if
   _init = true;
   _value = newValue;

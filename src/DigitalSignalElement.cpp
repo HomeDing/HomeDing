@@ -107,14 +107,11 @@ void DigitalSignalElement::loop() {
 
   // generate _pulse value and actions
   if (cnt != _lastSignalCount) {
-    // TRACE("# %ld", cnt);
-
-    // _board->dispatch(_valueAction, cnt);
 
     if (_pulseStart + _pulseDuration < now) {
       // start impulse output
-      _board->dispatch(_valueAction, 1);
-      _board->dispatch(_highAction, 1);
+      HomeDing::Actions::push(_valueAction, 1);
+      HomeDing::Actions::push(_highAction, 1);
       _pulseValue = true;
     }
 
@@ -124,11 +121,11 @@ void DigitalSignalElement::loop() {
   } else if (_pulseValue) {
     if (_pulseStart + _pulseDuration < now) {
       // start impulse output
-      _board->dispatch(_valueAction, 0);
-      _board->dispatch(_lowAction, 0);
+      HomeDing::Actions::push(_valueAction, 0);
+      HomeDing::Actions::push(_lowAction, 0);
       _pulseValue = false;
     }  // if
-  }    // if
+  }  // if
 }  // loop()
 
 

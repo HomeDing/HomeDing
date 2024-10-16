@@ -135,7 +135,7 @@ bool BH1750Element::getProbe(String &values) {
 
 void BH1750Element::sendData(String &values) {
   // dispatch values.
-  _board->dispatchItem(_valueAction, values, 0);
+  HomeDing::Actions::pushItem(_valueAction, values, 0);
 }  // sendData()
 
 

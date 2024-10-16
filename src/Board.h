@@ -31,6 +31,7 @@
  * * 19.04.2023 send to remotes using the host:type/id?name=value syntax
  * * 20.08.2023 remove AUTO connection mode
  * * 30.08.2023 use static Network class as Network Manager for connection and state
+ * * 15.10.2024 using static Actions queue
  */
 
 // The Board.h file also works as the base import file that contains some
@@ -249,15 +250,6 @@ public:
 
 
   // ===== queue / process / dispatch actions =====
-
-  /**
-   * queue all the actions to the right elements.
-   * @param action list of actions.
-   * @param value the value for $v placeholder.
-   * @param item use the n-th item of the value.
-   */
-  void dispatchItem(const String &action, const String &values, int n);
-
 
   /// @brief Send an action to an element.
   /// @param action The action string.

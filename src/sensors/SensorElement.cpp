@@ -174,7 +174,7 @@ bool SensorElement::getProbe(String & /*values */) {
 void SensorElement::sendData(String &values) {
   TRACE("sendData()");
   for (int n = 0; n < _valuesCount; n++) {
-    _board->dispatchItem(_actions[n], values, n);
+    HomeDing::Actions::pushItem(_actions[n], values, n);
   }
 }  // sendData()
 

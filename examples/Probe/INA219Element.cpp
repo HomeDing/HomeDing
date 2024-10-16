@@ -188,9 +188,9 @@ bool INA219Element::getProbe(String &values) {
 void INA219Element::sendData(String &values) {
   TRACE("data:%s", values.c_str());
   // dispatch values.
-  _board->dispatchItem(_voltageAction, values, 0);
-  _board->dispatchItem(_currentAction, values, 1);
-  _board->dispatchItem(_powerAction, values, 2);
+  HomeDing::Actions::pushItem(_voltageAction, values, 0);
+  HomeDing::Actions::pushItem(_currentAction, values, 1);
+  HomeDing::Actions::pushItem(_powerAction, values, 2);
 } // sendData()
 
 

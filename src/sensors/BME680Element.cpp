@@ -201,10 +201,10 @@ bool BME680Element::getProbe(String &values) {
 
 
 void BME680Element::sendData(String &values) {
-  _board->dispatchItem(_temperatureAction, values, 0);
-  _board->dispatchItem(_humidityAction, values, 1);
-  _board->dispatchItem(_pressureAction, values, 2);
-  _board->dispatchItem(_gasAction, values, 3);
+  HomeDing::Actions::pushItem(_temperatureAction, values, 0);
+  HomeDing::Actions::pushItem(_humidityAction, values, 1);
+  HomeDing::Actions::pushItem(_pressureAction, values, 2);
+  HomeDing::Actions::pushItem(_gasAction, values, 3);
 }  // sendData()
 
 

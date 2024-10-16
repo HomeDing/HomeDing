@@ -168,7 +168,7 @@ bool PMSElement::getProbe(String &values)
 
 void PMSElement::sendData(String &values)
 {
-  _board->dispatchItem(_valueAction, values, 1);
+  HomeDing::Actions::pushItem(_valueAction, values, 1);
 } // sendData()
 
 

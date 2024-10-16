@@ -398,7 +398,7 @@ void Board::loop() {
     // dispatch next action from queue if any
     if (! HomeDing::Actions::queueIsEmpty()) {
       _DeepSleepCount = 0;
-      dispatchAction(HomeDing::Actions::actions.pop());
+      dispatchAction(HomeDing::Actions::pop());
       return;
     }  // if
 
@@ -793,7 +793,7 @@ void Board::cancelSleep() {
 }  // cancelSleep()
 
 
-// ===== queue / process / dispatch actions =====
+// ===== dispatch actions =====
 
 // send a event out to the defined target.
 void Board::dispatchAction(Element *target, const char *action_name, const char *action_value) {
@@ -886,18 +886,6 @@ void Board::dispatchAction(String action) {
   }
 }  // dispatchAction()
 
-
-/**
- * @brief Save an action to the _actionList using a item part of a value.
- */
-void Board::dispatchItem(const String &action, const String &values, int n) {
-  if (action && values) {
-    String v = Element::getItemValue(values, n);
-    if (v) {
-      HomeDing::Actions::push(action, v.c_str());
-    }
-  }  // if
-}  // dispatchItem
 
 
 // ===== low power / sleep mode =====

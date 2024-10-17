@@ -156,8 +156,6 @@ String DiagElement::_handleProfile() {
 String DiagElement::_handleChipInfo() {
   String sOut;
   char buffer[128];
-  const char *s = nullptr;
-
   String out;
 
   sOut += FPSTR(diag_header);
@@ -212,16 +210,16 @@ String DiagElement::_handleChipInfo() {
 
   if (HomeDingFS::rootFS == (fs::FS *)&FFat) {
     sOut += "using FAT\n";
-    sprintf(buffer, "totalBytes: %ld\n", FFat.totalBytes());
+    sprintf(buffer, "totalBytes: %zu\n", FFat.totalBytes());
     sOut += buffer;
-    sprintf(buffer, "usedBytes: %ld\n", FFat.usedBytes());
+    sprintf(buffer, "usedBytes: %zu\n", FFat.usedBytes());
     sOut += buffer;
 
   } else if (HomeDingFS::rootFS == (fs::FS *)&LittleFS) {
     sOut += "using LittleFS\n";
-    sprintf(buffer, "totalBytes: %ld\n", LittleFS.totalBytes());
+    sprintf(buffer, "totalBytes: %zu\n", LittleFS.totalBytes());
     sOut += buffer;
-    sprintf(buffer, "usedBytes: %ld\n", LittleFS.usedBytes());
+    sprintf(buffer, "usedBytes: %zu\n", LittleFS.usedBytes());
     sOut += buffer;
 
   } else {
@@ -352,15 +350,6 @@ String DiagElement::_handleHeap() {
 
   sprintf(buffer, "=free %ld\n", esp_get_free_heap_size());
   sOut = buffer;
-
-  // heap_caps_print_heap_info(MALLOC_CAP_DEFAULT);
-
-  // if (!inTrace) {
-  //   heap_trace_start();
-  //   inTrace = true;
-  // } else {
-  //   inTrace = false;
-  // }
 
   return (sOut);
 }

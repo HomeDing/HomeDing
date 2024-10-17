@@ -57,7 +57,7 @@ jobs:
             - name: Adafruit SSD1306
             - name: PubSubClient
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
-            - source-url: "https://github.com/schreibfaul1/ESP32-audioI2S.git"
+              version: "v2.x"
           sketch-paths: |
             - 'examples/standard'
             - 'examples/tutorial'

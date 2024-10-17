@@ -55,6 +55,7 @@ jobs:
             # - name: GFX Library for Arduino
             - source-url: "https://github.com/moononournation/Arduino_GFX.git"
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
+              version: "v2.x"
             - source-url: "https://github.com/schreibfaul1/ESP32-audioI2S.git"
           sketch-paths: |
             - 'examples/standard'

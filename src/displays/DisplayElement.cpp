@@ -25,6 +25,7 @@ DisplayElement::DisplayElement() {
   startupMode = Element_StartupMode::System;
   // no loop() call required for display elements as they are used for configuration only.
   category = CATEGORY::Display;
+  config = &(HomeDing::displayConfig);
 }
 
 // ===== private functions =====
@@ -56,16 +57,31 @@ void DisplayElement::_newPage(int page) {
 void DisplayElement::init(Board *board) {
   Element::init(board);
 
-  config.busmode = BUSMODE_ANY;
+  config->busmode = BUSMODE_ANY;
+  config->brightness = 50;
+
+  /** Default Draw & Background Color */
+  config->drawColor = RGB_WHITE;
+  config->backgroundColor = RGB_BLACK;
+  config->borderColor = RGB_WHITE;
+
+  config->resetPin = -1;
+  config->lightPin = -1;
+
+  config->busSpeed = -1;
+  config->csPin = -1;
+  config->dcPin = -1;
+  config->wrPin = -1;
+  config->rdPin = -1;
 
   // use system wide I2C by default
-  config.i2cSDA = board->I2cSda;
-  config.i2cSCL = board->I2cScl;
+  config->i2cSDA = board->I2cSda;
+  config->i2cSCL = board->I2cScl;
 
   // use system wide SPI by default
-  config.spiCLK = board->spiCLK;
-  config.spiMOSI = board->spiMOSI;
-  config.spiMISO = board->spiMISO;
+  config->spiCLK = board->spiCLK;
+  config->spiMOSI = board->spiMOSI;
+  config->spiMISO = board->spiMISO;
 }  // init()
 
 
@@ -77,9 +93,9 @@ bool DisplayElement::set(const char *name, const char *value) {
 
   if (_stricmp(name, "brightness") == 0) {
     int b = _atoi(value);
-    config.brightness = constrain(b, 0, 100);
+    config->brightness = constrain(b, 0, 100);
     if (active && da) {
-      da->setBrightness(config.brightness);
+      da->setBrightness(config->brightness);
     }
 
   } else if (da) {
@@ -106,94 +122,94 @@ bool DisplayElement::set(const char *name, const char *value) {
     // === These properties can only be used during configuration:
 
   } else if (_stricmp(name, "color") == 0) {
-    config.drawColor = _atoColor(value);
+    config->drawColor = _atoColor(value);
 
   } else if (_stricmp(name, "background") == 0) {
-    config.backgroundColor = _atoColor(value);
+    config->backgroundColor = _atoColor(value);
 
   } else if (name == HomeDing::Action::Border) {
-    config.borderColor = _atoColor(value);
+    config->borderColor = _atoColor(value);
 
   } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
-    config.busmode = ListUtils::indexOf(BUSMODE_LIST, value);
+    config->busmode = ListUtils::indexOf(BUSMODE_LIST, value);
 
   } else if (_stricmp(name, "busspeed") == 0) {
-    config.busSpeed = _atoi(value);
+    config->busSpeed = _atoi(value);
 
 
     // ===== parallel busses configuration
 
   } else if (_stricmp(name, "cspin") == 0) {
-    config.csPin = _atopin(value);
+    config->csPin = _atopin(value);
 
   } else if (_stricmp(name, "dcpin") == 0) {
-    config.dcPin = _atopin(value);
+    config->dcPin = _atopin(value);
 
   } else if (_stricmp(name, "wrpin") == 0) {
-    config.wrPin = _atopin(value);
+    config->wrPin = _atopin(value);
 
   } else if (_stricmp(name, "rdpin") == 0) {
-    config.rdPin = _atopin(value);
+    config->rdPin = _atopin(value);
 
   } else if (_stricmp(name, "buspins") == 0) {
-    config.busPins = value;
-    config.busPins.replace(" ", "");
+    config->busPins = value;
+    config->busPins.replace(" ", "");
 
 
     // ===== i2c bus parameter
 
   } else if (name == HomeDing::Action::Address) {
-    config.i2cAddress = _atoi(value);
+    config->i2cAddress = _atoi(value);
 
     // ===== spi bus parameter
 
   } else if (_stricmp(name, "spimosi") == 0) {
-    config.spiMOSI = _atopin(value);
+    config->spiMOSI = _atopin(value);
 
   } else if (_stricmp(name, "spimiso") == 0) {
-    config.spiMISO = _atopin(value);
+    config->spiMISO = _atopin(value);
 
   } else if (_stricmp(name, "spiclk") == 0) {
-    config.spiCLK = _atopin(value);
+    config->spiCLK = _atopin(value);
 
   } else if (_stricmp(name, "spics") == 0) {
-    config.csPin = _atopin(value);  // please use csPin, deprecated
+    config->csPin = _atopin(value);  // please use csPin, deprecated
 
   } else if (_stricmp(name, "spidc") == 0) {
-    config.dcPin = _atopin(value);  // please use dcPin, deprecated
+    config->dcPin = _atopin(value);  // please use dcPin, deprecated
 
 
   } else if (name == HomeDing::Action::Invert) {
-    config.invert = _atob(value);
+    config->invert = _atob(value);
 
   } else if (_stricmp(name, "ips") == 0) {
-    config.ips = _atob(value);
+    config->ips = _atob(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {
-    config.resetPin = _atopin(value);
+    config->resetPin = _atopin(value);
 
   } else if (_stricmp(name, "lightpin") == 0) {
-    config.lightPin = _atopin(value);
+    config->lightPin = _atopin(value);
 
     // ===== Display settings
 
   } else if (name == HomeDing::Action::Width) {
-    config.width = _atoi(value);
+    config->width = _atoi(value);
 
   } else if (name == HomeDing::Action::Height) {
-    config.height = _atoi(value);
+    config->height = _atoi(value);
 
   } else if (_stricmp(name, "rotation") == 0) {
     int r = _atoi(value);
     r = (r / 90);
     r = constrain(r, 0, 3);
-    config.rotation = r * 90;
+    config->rotation = r * 90;
 
   } else if (_stricmp(name, "rowOffset") == 0) {
-    config.rowOffset = _atoi(value);
+    config->rowOffset = _atoi(value);
 
   } else if (_stricmp(name, "colOffset") == 0) {
-    config.colOffset = _atoi(value);
+    config->colOffset = _atoi(value);
 
   } else {
     ret = Element::set(name, value);
@@ -210,8 +226,8 @@ void DisplayElement::start() {
   DisplayAdapter *da = _board->display;
   if (da) {
     Element::start();
-    da->setBrightness(config.brightness);
-    da->setBackgroundColor(config.backgroundColor);
+    da->setBrightness(config->brightness);
+    da->setBackgroundColor(config->backgroundColor);
 
   } else {
     LOGGER_EERR("start failed.");
@@ -223,7 +239,7 @@ void DisplayElement::start() {
 void DisplayElement::start(DisplayAdapter *displayAdapter) {
   TRACE("start()");
   if (displayAdapter) {
-    if (displayAdapter->setup(_board, &config)) {
+    if (displayAdapter->setup(_board)) {
       bool success = displayAdapter->start();
       if (success) {
         _board->display = displayAdapter;
@@ -245,7 +261,7 @@ void DisplayElement::pushState(
   Element::pushState(callback);
   DisplayAdapter *da = _board->display;
   if (da) {
-    callback("brightness", String(config.brightness).c_str());
+    callback("brightness", String(config->brightness).c_str());
     callback("page", String(_board->display->page).c_str());
   }
 }  // pushState()

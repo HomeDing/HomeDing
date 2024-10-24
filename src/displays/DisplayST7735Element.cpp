@@ -40,7 +40,7 @@ void DisplayST7735Element::start() {
   TRACE("start()");
 
   DisplayAdapter *d = new DisplayST7735Adapter();
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board)) {
     bool success = d->start();
     if (success) {
       _board->display = d;

@@ -20,15 +20,15 @@ class DisplayESP32PanelAdapter : public DisplayAGFXAdapter {
 
   bool start() override {
 
-#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
-    int pinCount = ListUtils::length(conf->busPins);
+#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3)
+    int pinCount = ListUtils::length(displayConfig.busPins);
     int8_t pins[16];
 
     if (pinCount != 16) {
       LOGGER_ERR("ESP32Panel requires 16 pin definitions");
     } else {
       for (int n = 0; n < 16; n++) {
-        pins[n] = Element::_atopin(ListUtils::at(conf->busPins, n).c_str());
+        pins[n] = Element::_atopin(ListUtils::at(displayConfig.busPins, n).c_str());
       }
     }
 

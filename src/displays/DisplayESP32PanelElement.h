@@ -17,7 +17,7 @@
 
 #pragma once
 
-#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
+#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3)
 
 #include <displays/DisplayElement.h>
 

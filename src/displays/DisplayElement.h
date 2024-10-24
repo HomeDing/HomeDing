@@ -13,13 +13,14 @@
  *
  * Changelog:
  * * 29.08.2020 created by Matthias Hertel
- * * 17.03.2022 unified DisplayConfig
+ * * 17.03.2022 unified HomeDing::DisplayConfig
  */
 
 #pragma once
 
 #include <functional>
 
+#include <displays/DisplayConfig.h>
 #include <displays/BoundingBox.h>
 
 class DisplayAdapter;
@@ -40,82 +41,6 @@ class DisplayAdapter;
 
 #define RGB_IS_COLOR(col) ((col != RGB_UNDEFINED) && (col != RGB_TRANSPARENT))
 #define RGB_NO_COLOR(col) ((col == RGB_UNDEFINED) || (col == RGB_TRANSPARENT))
-
-
-#define BUSMODE_LIST  "x,i2c,spi,hspi,par8lcd8,panel"
-#define BUSMODE_ANY   0x00
-#define BUSMODE_I2C   0x01
-#define BUSMODE_SPI   0x02  // standard SPI interface
-#define BUSMODE_HSPI  0x03  // high speed SPI interface on ESP32
-#define BUSMODE_PAR8  0x04
-#define BUSMODE_LCD8  0x21
-#define BUSMODE_PANEL 0x40
-
-
-struct DisplayConfig {
-  /** Width of display */
-  uint16_t width = 128;
-
-  /** Height of display */
-  uint16_t height = 64;
-
-  /// @brief Brightness of display 0...100 (percent)
-  uint16_t brightness = 50;
-
-  /** Default Draw & Background Color */
-  uint32_t drawColor = RGB_WHITE;
-  uint32_t backgroundColor = RGB_BLACK;
-  uint32_t borderColor = RGB_WHITE;
-
-  /** Rotation of the display */
-  int rotation = 0;
-
-  /// @brief Row-Offset in the display memory for the displayed part.
-  int rowOffset = 0;
-
-  /// @brief Column-Offset in the display memory for the displayed part.
-  int colOffset = 0;
-
-  /** Pin to reset the display chip */
-  int resetPin = -1;
-
-  /** Pin to enable backlight etc. */
-  int lightPin = -1;
-
-  /** Pin to invert the display colors */
-  bool invert = false;
-
-  /// @brief TFT IPS panel in use.
-  bool ips = false;
-
-  int busmode = BUSMODE_ANY;
-
-  // bus configurations for any bus
-
-  int32_t busSpeed = -1;  // speed
-  int csPin = -1;         // chip select pin (SPI, lcd8, bus16)
-  int dcPin = -1;         // Data-Command pin (SPI, lcd8, bus16)
-  int wrPin = -1;         // write strobe pin (lcd8)
-  int rdPin = -1;         // read strobe pin (lcd8)
-
-  // GPIO pins used for the 8-bit and 16-bit busses
-  String busPins;
-
-  /* ===== I2C interface ===== */
-
-  int i2cAddress ;  ///< i2c address
-  int i2cSDA;      ///< i2c data pin
-  int i2cSCL;      ///< i2c clock pin
-
-  // prefix bytes for I2c bus
-  uint8_t i2cCommandPrefix;
-  uint8_t i2cDataPrefix;
-
-  /* ===== SPI interface ===== */
-  int spiMOSI;  ///< SPI interface MOSI pin
-  int spiMISO;  ///< SPI interface MISO pin
-  int spiCLK;   ///< SPI interface clock CLK pin
-};
 
 
 class DisplayElement : public Element {
@@ -158,7 +83,7 @@ public:
   // === common properties for initializing display adapters
 
 protected:
-  struct DisplayConfig config;
+  HomeDing::DisplayConfig *config;
 
   /** event when page changes */
   String _onPage;

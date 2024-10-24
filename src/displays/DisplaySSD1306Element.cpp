@@ -42,7 +42,7 @@ void DisplaySSD1306Element::start() {
   LOGGER_ETRACE("start()");
   DisplayAdapter *d = new DisplaySSD1306Adapter();
 
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board)) {
     if (d->start()) {
       _board->display = d;
       DisplayElement::start();

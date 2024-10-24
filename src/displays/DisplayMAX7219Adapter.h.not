@@ -35,11 +35,11 @@ public:
   ~DisplayMAX7219Adapter() = default;
 
   bool start() override {
-    _csPin = conf->csPin;
+    _csPin = displayConfig.csPin;
 
     // adjust false height and width (must be *8)
-    _hPanels = (conf->height + 7) / 8;
-    _wPanels = (conf->width + 7) / 8;
+    _hPanels = (displayConfig.height + 7) / 8;
+    _wPanels = (displayConfig.width + 7) / 8;
 
     int bytes = _hPanels * 8 * _wPanels * 8;
 
@@ -67,7 +67,7 @@ public:
       _writeAll(REG_SCANLIMIT, 0x07);  // all digits
       _writeAll(REG_DECODEMODE, 0);    // no decode
       _writeAll(REG_SHUTDOWN, 1);      // enable
-      setBrightness(conf->brightness);
+      setBrightness(displayConfig.brightness);
       display->fillScreen(backColor565);
       flush();
     }  // if
@@ -135,9 +135,9 @@ public:
 
     // // print buffer on Serial log
     // uint8_t *p = buffer;
-    // for (int l = 0; l < conf->height; l++) {
+    // for (int l = 0; l < displayConfig.height; l++) {
     //   uint8_t b = 0;
-    //   for (int x = 0; x < conf->width; x++) {
+    //   for (int x = 0; x < displayConfig.width; x++) {
     //     if ((x % 8) == 0) {
     //       b = *p++;
     //     }

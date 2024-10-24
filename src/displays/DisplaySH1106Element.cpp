@@ -42,7 +42,7 @@ void DisplaySH1106Element::start() {
   LOGGER_ETRACE("start()");
   DisplayAdapter *d = new DisplaySH1106Adapter();
 
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board)) {
     if (d->start()) {
       _board->display = d;
       DisplayElement::start();

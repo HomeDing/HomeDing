@@ -41,8 +41,8 @@ Element *DisplayST7796Element::create() {
   DisplayElement::init(board);
 
   // some default values for ST7796 displays
-  config.width = 320;
-  config.height = 480;
+  config->width = 320;
+  config->height = 480;
  }
 
 // All required parameters are handled by DisplayElement::set()
@@ -56,7 +56,7 @@ void DisplayST7796Element::start() {
 
   DisplayAdapter *d = new DisplayST7796Adapter();
   
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board)) {
     bool success = d->start();
     if (success) {
       _board->display = d;

@@ -19,7 +19,7 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
+#if defined(ESP32) && defined(CONFIG_IDF_TARGET_ESP32S3)
 
 #include "displays/DisplayESP32PanelElement.h"
 
@@ -44,7 +44,7 @@ void DisplayESP32PanelElement::start() {
 
   DisplayAdapter *d = new DisplayESP32PanelAdapter();
 
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board)) {
     bool success = d->start();
     if (success) {
       _board->display = d;

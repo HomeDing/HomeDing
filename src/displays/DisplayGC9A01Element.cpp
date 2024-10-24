@@ -40,11 +40,13 @@ Element *DisplayGC9A01Element::create() {
 /// @brief initialize a new Element.
 /// @param board The board reference.
 void DisplayGC9A01Element::init(Board *board) {
+  TRACE("init()");
   DisplayElement::init(board);
+
   // set default values
-  config.ips = true;
-  config.width = 240;
-  config.height = 240;
+  config->ips = true;
+  config->width = 240;
+  config->height = 240;
 }
 
 
@@ -57,7 +59,7 @@ void DisplayGC9A01Element::start() {
   TRACE("start()");
 
   DisplayAdapter *d = new DisplayGC9A01Adapter();
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board)) {
     bool success = d->start();
     if (success) {
       _board->display = d;

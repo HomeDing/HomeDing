@@ -21,6 +21,8 @@
 
 #include <displays/DisplayLCDAdapter.h>
 
+#define TRACE(...)  // LOGGER_EINFO(__VA_ARGS__)
+
 /* ===== Static factory function ===== */
 
 /**
@@ -35,9 +37,12 @@ Element *DisplayLCDElement::create() {
 /* ===== Element functions ===== */
 
 DisplayLCDElement::DisplayLCDElement() {
-  config.i2cAddress = 0x27;
-  config.height = 2;
-  config.width = 16;
+  TRACE("init()");
+  DisplayElement::init(_board);
+
+  config->i2cAddress = 0x27;
+  config->height = 2;
+  config->width = 16;
 }
 
 // All required parameters are handled by DisplayElement::set()
@@ -50,7 +55,7 @@ void DisplayLCDElement::start() {
   // TRACE("start()");
   DisplayAdapter *d = new DisplayLCDAdapter();
 
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board)) {
     bool success = d->start();
     if (success) {
       _board->display = d;

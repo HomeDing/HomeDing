@@ -47,7 +47,7 @@ void DisplayMAX7219Element::start() {
   TRACE("start()");
 
   DisplayAdapter *d = new DisplayMAX7219Adapter();
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board, config)) {
     bool success = d->start();
     if (success) {
       _board->display = d;

@@ -52,7 +52,7 @@ void DisplayST7789Element::start() {
   TRACE("start()");
 
   DisplayAdapter *d = new DisplayST7789Adapter();
-  if (d->setup(_board, &config)) {
+  if (d->setup(_board)) {
     bool success = d->start();
     if (success) {
       _board->display = d;

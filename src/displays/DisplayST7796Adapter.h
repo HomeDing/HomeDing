@@ -18,16 +18,16 @@
 class DisplayST7796Adapter : public DisplayAGFXAdapter {
 
   bool start() override {
-    bus = getBus(conf);
+    bus = getBus();
 
     if (bus) {
       gfx = new Arduino_ST7796(
         bus,
-        conf->resetPin,
-        (conf->rotation / 90),
-        conf->ips,
-        conf->width,
-        conf->height);
+        displayConfig.resetPin,
+        (displayConfig.rotation / 90),
+        displayConfig.ips,
+        displayConfig.width,
+        displayConfig.height);
     }
 
     DisplayAGFXAdapter::start();

@@ -13,11 +13,14 @@
 
 #pragma once
 
-#define UNUSED(expr) do { (void)(expr); } while (0)
+#define UNUSED(expr) \
+  do { (void)(expr); } while (0)
 
 #include <Arduino_GFX_Library.h>
 
 #include <displays/DisplayAdapter.h>
+
+using namespace HomeDing;
 
 #if defined(ESP8266)
 #include <pgmspace.h>
@@ -37,66 +40,66 @@ class DisplayAGFXAdapter : public DisplayAdapter {
 public:
   ~DisplayAGFXAdapter() = default;
 
-  Arduino_DataBus *getBus(int busmode, DisplayConfig *conf) {
-    PANELTRACE("getbus: %d\n", busmode);
+  Arduino_DataBus *getBus() {
+    PANELTRACE("getbus: %d\n", displayConfig.busmode);
     PANELTRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d\n",
-               conf->dcPin, conf->csPin, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
-    PANELTRACE("   i2c: adr:%d, sda:%d, scl:%d\n", conf->i2cAddress, conf->i2cSDA, conf->i2cSCL);
+               displayConfig.dcPin, displayConfig.csPin, displayConfig.spiCLK, displayConfig.spiMOSI, displayConfig.spiMISO);
+    PANELTRACE("   i2c: adr:%d, sda:%d, scl:%d\n", displayConfig.i2cAddress, displayConfig.i2cSDA, displayConfig.i2cSCL);
 
     Arduino_DataBus *bus = nullptr;
 
-    if (busmode == BUSMODE_ANY) {
-      if (conf->csPin >= 0) {
-        busmode = BUSMODE_SPI;
-      } else if (conf->i2cAddress)
-        busmode = BUSMODE_I2C;
+    if (displayConfig.busmode == BUSMODE_ANY) {
+      if (displayConfig.csPin >= 0) {
+        displayConfig.busmode = BUSMODE_SPI;
+      } else if (displayConfig.i2cAddress)
+        displayConfig.busmode = BUSMODE_I2C;
     }
 
-    if (busmode == BUSMODE_I2C) {
+    if (displayConfig.busmode == BUSMODE_I2C) {
       PANELTRACE("Use I2C\n");
-      bus = new Arduino_Wire(conf->i2cAddress, conf->i2cCommandPrefix, conf->i2cDataPrefix);
+      bus = new Arduino_Wire(displayConfig.i2cAddress, displayConfig.i2cCommandPrefix, displayConfig.i2cDataPrefix);
 
 #if defined(ESP32)
-    } else if (busmode == BUSMODE_SPI) {
+    } else if (displayConfig.busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
-      bus = new Arduino_HWSPI(conf->dcPin, conf->csPin, conf->spiCLK, conf->spiMOSI, conf->spiMISO);
-      // bus = new Arduino_ESP32SPI(conf->dcPin, conf->csPin);
+      bus = new Arduino_HWSPI(displayConfig.dcPin, displayConfig.csPin, displayConfig.spiCLK, displayConfig.spiMOSI, displayConfig.spiMISO);
+      // bus = new Arduino_ESP32SPI(displayConfig.dcPin, displayConfig.csPin);
 
-    } else if (busmode == BUSMODE_HSPI) {
+    } else if (displayConfig.busmode == BUSMODE_HSPI) {
       PANELTRACE("Use HSPI\n");
       bus = new Arduino_ESP32SPI(
-        conf->dcPin,
-        conf->csPin,
-        conf->spiCLK,
-        conf->spiMOSI,
-        conf->spiMISO,
+        displayConfig.dcPin,
+        displayConfig.csPin,
+        displayConfig.spiCLK,
+        displayConfig.spiMOSI,
+        displayConfig.spiMISO,
         HSPI /* spi_num */
       );
 #endif
 
 #if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
-    } else if (busmode == BUSMODE_PAR8) {
+    } else if (displayConfig.busmode == BUSMODE_PAR8) {
       PANELTRACE("Use PAR8\n");
 
-      int pinCount = ListUtils::length(conf->busPins);
+      int pinCount = ListUtils::length(displayConfig.busPins);
       int8_t pins[8];
 
       if (pinCount != 8) {
         LOGGER_ERR("ST7789 LCD8 bus requires 8 pin definitions");
       } else {
         for (int n = 0; n < 8; n++) {
-          pins[n] = Element::_atopin(ListUtils::at(conf->busPins, n).c_str());
+          pins[n] = Element::_atopin(ListUtils::at(displayConfig.busPins, n).c_str());
         }
       }
 
       bus = new Arduino_ESP32PAR8Q(
-        conf->dcPin, conf->csPin, conf->wrPin, conf->rdPin,
+        displayConfig.dcPin, displayConfig.csPin, displayConfig.wrPin, displayConfig.rdPin,
         pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
 #endif
 
 
 #if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
-    } else if (busmode == BUSMODE_LCD8) {
+    } else if (displayConfig.busmode == BUSMODE_LCD8) {
       PANELTRACE("Use LCD8\n");
       bus = new Arduino_ESP32LCD8(
         0 /* DC */,
@@ -109,25 +112,21 @@ public:
 
 
 #if defined(ESP8266)
-    } else if (busmode == BUSMODE_SPI) {
+    } else if (displayConfig.busmode == BUSMODE_SPI) {
       PANELTRACE("Use SPI\n");
       // ESP8266 has pre-defined SPI pins
-      bus = new Arduino_ESP8266SPI(conf->dcPin, conf->csPin);
+      bus = new Arduino_ESP8266SPI(displayConfig.dcPin, displayConfig.csPin);
 #endif
     }  // if
     return (bus);
   };
 
 
-  Arduino_DataBus *getBus(DisplayConfig *conf) {
-    return (getBus(conf->busmode, conf));
-  };
-
   virtual bool start() override {
-    PANELTRACE("init: w:%d, h:%d, r:%d\n", conf->width, conf->height, conf->rotation);
-    PANELTRACE(" colors: #%08x / #%08x / #%08x\n", conf->drawColor, conf->backgroundColor, conf->borderColor);
-    PANELTRACE(" invert: %d ips: %d\n", conf->invert, conf->ips);
-    PANELTRACE("   pins: light:%d, reset:%d\n", conf->lightPin, conf->resetPin);
+    PANELTRACE("init: w:%d, h:%d, r:%d\n", displayConfig.width, displayConfig.height, displayConfig.rotation);
+    PANELTRACE(" colors: #%08x / #%08x / #%08x\n", displayConfig.drawColor, displayConfig.backgroundColor, displayConfig.borderColor);
+    PANELTRACE(" invert: %d ips: %d\n", displayConfig.invert, displayConfig.ips);
+    PANELTRACE("   pins: light:%d, reset:%d\n", displayConfig.lightPin, displayConfig.resetPin);
 
 
     // LOGGER_JUSTINFO("Font_10: %d %d %d=%d", sizeof(Font_10), sizeof(Font_10Bitmaps), sizeof(Font_10Glyphs),
@@ -144,16 +143,16 @@ public:
       return (false);
 
     } else {
-      gfx->begin(conf->busSpeed);
-      gfx->invertDisplay(conf->invert);
+      gfx->begin(displayConfig.busSpeed);
+      gfx->invertDisplay(displayConfig.invert);
 
       DisplayAdapter::start();
 
       gfx->setTextWrap(false);
-      setColor(conf->drawColor);
-      setBackgroundColor(conf->backgroundColor);
-      setBorderColor(conf->borderColor);
-      _setTextHeight(conf->height > 128 ? 16 : 8);
+      setColor(displayConfig.drawColor);
+      setBackgroundColor(displayConfig.backgroundColor);
+      setBorderColor(displayConfig.borderColor);
+      _setTextHeight(displayConfig.height > 128 ? 16 : 8);
       clear();
       flush();
     }  // if
@@ -185,8 +184,8 @@ public:
 
   /// @brief Clear all displayed information from the display.
   void clear() override {
-    // PANELTRACE("clear #%08x\n", conf->backgroundColor);
-    gfx->fillScreen(col565(conf->backgroundColor));
+    // PANELTRACE("clear #%08x\n", displayConfig.backgroundColor);
+    gfx->fillScreen(col565(displayConfig.backgroundColor));
     DisplayAdapter::clear();
   };  // clear()
 

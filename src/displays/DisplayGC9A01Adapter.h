@@ -19,16 +19,16 @@ class DisplayGC9A01Adapter : public DisplayAGFXAdapter {
 
 public:
   bool start() override {
-    bus = getBus(conf);
+    bus = getBus();
 
     if (bus) {
       gfx = new Arduino_GC9A01(
         bus,
-        conf->resetPin,
-        (conf->rotation / 90),
-        conf->ips,
-        conf->width,
-        conf->height);
+        displayConfig.resetPin,
+        (displayConfig.rotation / 90),
+        displayConfig.ips,
+        displayConfig.width,
+        displayConfig.height);
     }
     
     DisplayAGFXAdapter::start();

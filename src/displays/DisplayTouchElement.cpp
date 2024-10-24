@@ -87,10 +87,10 @@ void DisplayTouchElement::setup() {
   TRACE("setup()");
 
   if (!_width) {
-    _width = _board->display->getConfWidth();
+    _width = HomeDing::displayConfig.width;
   }
   if (!_height) {
-    _height = _board->display->getConfHeight();
+    _height = HomeDing::displayConfig.height;
   }
   TRACE(" _width=%d _height=%d", _width, _height);
 }

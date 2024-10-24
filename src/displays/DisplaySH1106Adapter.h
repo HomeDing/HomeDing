@@ -24,20 +24,20 @@ public:
   bool start() override {
     PANELTRACE("DisplaySH1106Adapter.start()\n");
 
-    conf->busmode = BUSMODE_I2C;
-    conf->i2cCommandPrefix = 0x00;
-    conf->i2cDataPrefix = 0x40;
-    bus = getBus(conf);
+    displayConfig.busmode = BUSMODE_I2C;
+    displayConfig.i2cCommandPrefix = 0x00;
+    displayConfig.i2cDataPrefix = 0x40;
+    bus = getBus();
 
     if (bus) {
       // Initialize the display using the physical parameters
       // and use the Mono color Canvas for drawing
-      op = new Arduino_SH1106(bus, conf->resetPin, conf->width, conf->height);
-      gfx = new Arduino_Canvas_Mono(conf->width, conf->height, op, 0, 0, true);
+      op = new Arduino_SH1106(bus, displayConfig.resetPin, displayConfig.width, displayConfig.height);
+      gfx = new Arduino_Canvas_Mono(displayConfig.width, displayConfig.height, op, 0, 0, true);
 
       // set rotatation for drawing.
-      gfx->setRotation(conf->rotation / 90);
-      // conf->rotation
+      gfx->setRotation(displayConfig.rotation / 90);
+      // displayConfig.rotation
     }
 
     DisplayAGFXAdapter::start();

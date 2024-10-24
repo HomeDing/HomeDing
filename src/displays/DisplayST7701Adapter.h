@@ -21,14 +21,14 @@ class DisplayST7701Adapter : public DisplayAGFXAdapter {
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
-    int pinCount = ListUtils::length(conf->busPins);
+    int pinCount = ListUtils::length(displayConfig.busPins);
     int8_t pins[16];
 
     if (pinCount != 16) {
       LOGGER_ERR("ESP32Panel requires 16 pin definitions");
     } else {
       for (int n = 0; n < 16; n++) {
-        pins[n] = Element::_atopin(ListUtils::at(conf->busPins, n).c_str());
+        pins[n] = Element::_atopin(ListUtils::at(displayConfig.busPins, n).c_str());
       }
     }
 
@@ -153,7 +153,7 @@ class DisplayST7701Adapter : public DisplayAGFXAdapter {
     };
 
     // 9-bit mode SPI
-    bus = getBus(BUSMODE_HSPI, conf);
+    bus = getBus();
 
     // panel connections (hardware specific)
     Arduino_ESP32RGBPanel *rgbpanel = new Arduino_ESP32RGBPanel(
@@ -166,9 +166,9 @@ class DisplayST7701Adapter : public DisplayAGFXAdapter {
 
     // panel parameters & setup
     gfx = new Arduino_RGB_Display(
-      conf->width, conf->height, rgbpanel, (conf->rotation / 90),
+      displayConfig.width, displayConfig.height, rgbpanel, (displayConfig.rotation / 90),
       true /* auto_flush */,
-      bus, conf->resetPin,
+      bus, displayConfig.resetPin,
       st7701_4848S040_init, sizeof(st7701_4848S040_init));
 
 #endif

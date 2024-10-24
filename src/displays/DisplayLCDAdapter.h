@@ -21,12 +21,12 @@ class DisplayLCDAdapter : public DisplayAdapter {
 public:
   bool start() override {
     // test if a device is attached
-    if (!WireUtils::exists(conf->i2cAddress)) {
+    if (!WireUtils::exists(HomeDing::displayConfig.i2cAddress)) {
       LOGGER_ERR("not found");
       return (false);
 
     } else {
-      display = new (std::nothrow) LiquidCrystal_PCF8574(conf->i2cAddress);
+      display = new (std::nothrow) LiquidCrystal_PCF8574(HomeDing::displayConfig.i2cAddress);
 
       if (!display) {
         LOGGER_ERR("not found");
@@ -35,7 +35,7 @@ public:
       } else {
         DisplayAdapter::start();
 
-        display->begin(conf->width, conf->height);
+        display->begin(HomeDing::displayConfig.width, HomeDing::displayConfig.height);
         lineHeight = 1;
         charWidth = 1;
 
@@ -78,7 +78,7 @@ public:
       // TRACE("outside");
     } else {
       strlcpy(buffer, text, MAX_DISPLAY_STRING_LEN);
-      buffer[conf->width - x] = '\0';
+      buffer[HomeDing::displayConfig.width - x] = '\0';
       display->setCursor(x, y);
       display->print(buffer);
     }

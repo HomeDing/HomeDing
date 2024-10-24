@@ -21,19 +21,19 @@ public:
   ~DisplayST7735Adapter() = default;
 
   bool start() override {
-    bus = getBus(conf);
+    bus = getBus();
 
     gfx = new Arduino_ST7735(
       bus,                    // bus
-      conf->resetPin,         // reset
-      (conf->rotation / 90),  // rotation
-      conf->ips,              // ips
-      conf->width,            // width
-      conf->height,           // height
-      conf->colOffset,        // display offset in memory
-      conf->rowOffset,
-      conf->colOffset,
-      conf->rowOffset,
+      displayConfig.resetPin,         // reset
+      (displayConfig.rotation / 90),  // rotation
+      displayConfig.ips,              // ips
+      displayConfig.width,            // width
+      displayConfig.height,           // height
+      displayConfig.colOffset,        // display offset in memory
+      displayConfig.rowOffset,
+      displayConfig.colOffset,
+      displayConfig.rowOffset,
       true);  //  bgr mode
 
     DisplayAGFXAdapter::start();

@@ -25,6 +25,7 @@
 // tracing information on drawing (left from development for future problem analysis) can be disabled
 #define TRACEDRAW(...)  // LOGGER_PRINT(__VA_ARGS__)
 
+using namespace HomeDing;
 
 DisplayAdapter::DisplayAdapter() {
   color = 0x00FFFFFF;      // white
@@ -34,20 +35,20 @@ DisplayAdapter::DisplayAdapter() {
 
 /// @brief setup a fresh Display Adapter
 /// @param b Board Reference
-/// @param c DisplayConfig Data
+/// @param c HomeDing::DisplayConfig Configuration Data
 /// @return true
-bool DisplayAdapter::setup(Board *b, struct DisplayConfig *c) {
+bool DisplayAdapter::setup(Board *b) {
   board = b;
-  conf = c;
 
   displayBox.x_min = 0;
   displayBox.y_min = 0;
-  if ((conf->rotation / 90) % 4 == 0) {
-    displayBox.x_max = c->width;
-    displayBox.y_max = c->height;
+  
+  if ((displayConfig.rotation / 90) % 4 == 0) {
+    displayBox.x_max = displayConfig.width;
+    displayBox.y_max = displayConfig.height;
   } else {
-    displayBox.x_max = c->height;
-    displayBox.y_max = c->width;
+    displayBox.x_max = displayConfig.height;
+    displayBox.y_max = displayConfig.width;
   }
   return (true);
 }  // setup()
@@ -56,9 +57,9 @@ bool DisplayAdapter::setup(Board *b, struct DisplayConfig *c) {
 /// @brief Start the display.
 /// @return true when the display is ready for operation. Otherwise false.
 bool DisplayAdapter::start() {
-  if (conf->lightPin) {
-    pinMode(conf->lightPin, OUTPUT);
-    setBrightness(conf->brightness);
+  if (displayConfig.lightPin >= 0) {
+    pinMode(displayConfig.lightPin, OUTPUT);
+    setBrightness(displayConfig.brightness);
   }
 
   return (true);
@@ -68,11 +69,11 @@ bool DisplayAdapter::start() {
 /// @brief set brightness for panel lightning.
 /// @param bright new brightness in range 0...100
 void DisplayAdapter::setBrightness(uint8_t bright) {
-  TRACE("setBrightness %d %d", conf->lightPin, bright);
-  if (conf->lightPin) {
+  TRACE("setBrightness %d %d", displayConfig.lightPin, bright);
+  if (displayConfig.lightPin >= 0) {
     bright = (bright > 100) ? 100 : bright;
     uint32_t duty = (bright * (uint32_t)255) / 100;
-    analogWrite(conf->lightPin, duty);
+    analogWrite(displayConfig.lightPin, duty);
   }
 };
 
@@ -98,7 +99,7 @@ bool DisplayAdapter::startFlush(bool force) {
         TRACEDRAW(" draw: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
         // draw box with background color
         if (!(de->isOpaque)) {
-          drawRectangle(de->box, RGB_TRANSPARENT, conf->backgroundColor);
+          drawRectangle(de->box, RGB_TRANSPARENT, displayConfig.backgroundColor);
         }
         de->draw();
         de->needsDraw = false;
@@ -124,7 +125,7 @@ bool DisplayAdapter::startFlush(bool force) {
     TRACEDRAW("box = %d/%d-%d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
 
     // draw box with background color
-    drawRectangle(box, RGB_TRANSPARENT, conf->backgroundColor);
+    drawRectangle(box, RGB_TRANSPARENT, displayConfig.backgroundColor);
 
     // draw all inside box
     board->forEach(Element::CATEGORY::Widget, [this, &box](Element *e) {

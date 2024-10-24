@@ -36,9 +36,9 @@ public:
 
   /// @brief setup a fresh Display Adapter
   /// @param b Board Reference
-  /// @param c DisplayConfig Data
+  /// @param c HomeDing::DisplayConfig Configuration Data
   /// @return true
-  virtual bool setup(Board *b, struct DisplayConfig *c);
+  virtual bool setup(Board *b);
 
   /// @brief Start the display.
   /// @return true when the display is ready for operation. Otherwise false.
@@ -47,18 +47,6 @@ public:
   /// get height of the last drawn textline. Depends on font and text height.
   virtual int16_t getLineHeight() {
     return (lineHeight);
-  };
-
-
-  /// return the physical total width of the display.
-  int16_t getConfWidth() {
-    return (conf->width);
-  };
-
-
-  /// return the physical total height of the display.
-  int16_t getConfHeight() {
-    return (conf->height);
   };
 
 
@@ -97,25 +85,11 @@ public:
     backColor = col;
   };
 
-  /// @brief Get default background color
-  /// @return The 32-bit background color in 0x00rrggbb.
-  virtual uint32_t getBackgroundColor() {
-    return (conf->backgroundColor);
-  };
-
-
   /// @brief Set default border color
   /// @param col The 32-bit border color in 0x00rrggbb.
   virtual void setBorderColor(const uint32_t col) {
     borderColor = col;
   };
-
-  /// @brief Get default border color
-  /// @return The 32-bit border color in 0x00rrggbb.
-  virtual uint32_t getBorderColor() {
-    return (borderColor);
-  };
-
 
   /// @brief Clear the complete display
   virtual void clear() {
@@ -156,7 +130,7 @@ public:
   };
 
   virtual uint32_t getPixel(int16_t /* x */, int16_t /* y */) {
-    return(conf->backgroundColor);
+    return(HomeDing::displayConfig.backgroundColor);
   };
 
   // @brief remember that flush is required after sequence.
@@ -178,9 +152,6 @@ public:
   int maxpage = 1;
 
 protected:
-  /// @brief initialization settings
-  struct DisplayConfig *conf = nullptr;
-
   int16_t lineHeight;  ///< total height of a text line
   int16_t charWidth;   ///< width of a character
 

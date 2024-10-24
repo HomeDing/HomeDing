@@ -109,11 +109,12 @@ void DisplayOutputElement::start() {
   if (_display) {
 
     if (_color == RGB_UNDEFINED)
-      _color = _display->getColor();
+      _color = HomeDing::displayConfig.drawColor;
     if (_backgroundColor == RGB_UNDEFINED)
-      _backgroundColor = _display->getBackgroundColor();
+      _backgroundColor = HomeDing::displayConfig.backgroundColor;
     if (_borderColor == RGB_UNDEFINED)
-      _borderColor = _display->getBorderColor();
+      _borderColor = HomeDing::displayConfig.borderColor;
+      
     TRACE("colors: #%08x / #%08x / #%08x", _color, _backgroundColor, _borderColor);
 
     if (page > _display->maxpage) {

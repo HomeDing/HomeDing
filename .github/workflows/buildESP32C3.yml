@@ -36,8 +36,8 @@ jobs:
             - name: "esp32:esp32"
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
               # version: 2.0.4 doesn't work with CLI caused by issue https://github.com/espressif/arduino-esp32/pull/7060
-              version: 3.0.5
-          fqbn: esp32:esp32:esp32c3
+              version: 3.0.7
+          fqbn: esp32:esp32:esp32c3:PartitionScheme=default_8MB
           libraries: |
             - source-path: ./
             - name: OneWire

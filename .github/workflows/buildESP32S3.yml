@@ -1,0 +1,60 @@
+# GitHub Action Workflow
+
+name: Build Examples for ESP32-S3
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the develop branch
+  push:
+    branches: [master,develop]
+  pull_request:
+    branches: [master,develop]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Build Examples for ESP32S3
+  build-esp32s3:
+    name: build selected examples on ESP32S3
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Run Arduino Compiler
+      # see https://github.com/arduino/compile-sketches
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          verbose: false
+          platforms: |
+            # Install ESP32 platform via Boards Manager
+            - name: "esp32:esp32"
+              source-url: https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json
+              version: 3.0.7
+          fqbn: esp32:esp32:esp32:FlashSize=16M,PartitionScheme=fatflash
+          libraries: |
+            - source-path: ./
+            - source-url: "https://github.com/luc-github/ESP32SSDP.git"
+              version: "v2.x"
+            - name: OneWire
+            - name: DallasTemperature
+            - name: RotaryEncoder
+            - name: DHTNEW
+            - name: my92xx
+            - name: INA219_WE
+            - name: Radio
+            - name: RFCodes
+            - name: LiquidCrystal_PCF8574
+            - name: Adafruit NeoPixel
+            - name: PubSubClient
+            # - name: GFX Library for Arduino
+            - source-url: "https://github.com/moononournation/Arduino_GFX.git"
+            - source-url: "https://github.com/mathertel/gfxDraw.git"
+          sketch-paths: |
+            - 'examples/standard'
+            - 'examples/BigDisplay'

@@ -43,26 +43,14 @@ public:
   static bool registered;
 
 
-  /**
-   * @brief Set a parameter or property to a new value or start an action.
-   * @param name Name of property.
-   * @param value Value of property.
-   * @return true when property could be changed and the corresponding action
-   * could be executed.
-   */
-  virtual bool set(const char *name, const char *value) override;
+  // all parameters are handles by the DisplayOutputElement
+  // virtual bool set(const char *name, const char *value) override;
 
   /**
    * @brief Draw this output element.
    */
   virtual void draw() override;
 
-private:
-  /**
-   * @brief This variable corresponds to the x0 parameter.
-   */
-  uint16_t _x1 = 0;
-  uint16_t _y1 = 0;
 };
 
 #ifdef HOMEDING_REGISTER

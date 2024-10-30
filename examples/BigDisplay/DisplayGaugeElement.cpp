@@ -74,7 +74,7 @@ bool DisplayGaugeElement::set(const char *name, const char *value) {
     // x, y, w, h
 
 
-  } else if (name == HomeDing::Action::Value) {
+  } else if (name == HomeDing::Actions::Value) {
     _value = strtof(value, nullptr);
 
   } else if (!active) {

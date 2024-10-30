@@ -37,22 +37,22 @@ bool DigitalInElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-  } else if (name == HomeDing::Action::Pin) {
+  } else if (name == HomeDing::Actions::Pin) {
     _pin = _atopin(value);
 
-  } else if (name == HomeDing::Action::Invert) {
+  } else if (name == HomeDing::Actions::Invert) {
     _inverse = _atob(value);
 
   } else if (_stricmp(name, "pullup") == 0) {
     _pullup = _atob(value);
 
-  } else if (name == HomeDing::Action::OnHigh) {
+  } else if (name == HomeDing::Actions::OnHigh) {
     _highAction = value;
 
-  } else if (name == HomeDing::Action::OnLow) {
+  } else if (name == HomeDing::Actions::OnLow) {
     _lowAction = value;
 
-  } else if (name == HomeDing::Action::OnValue) {
+  } else if (name == HomeDing::Actions::OnValue) {
     _valueAction = value;
 
   } else {
@@ -105,7 +105,7 @@ void DigitalInElement::loop() {
 void DigitalInElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, _printBoolean(_lastInLevel));
+  callback(HomeDing::Actions::Value, _printBoolean(_lastInLevel));
 }  // pushState()
 
 // End

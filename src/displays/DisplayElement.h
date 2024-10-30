@@ -36,7 +36,7 @@ class DisplayAdapter;
 #define RGB_ORANGE 0x00FFA500
 #define RGB_PURPLE 0x00800080
 
-#define RGB_UNDEFINED 0xEE000000  // key color
+#define RGB_UNDEFINED 0xEE000000    // key color
 #define RGB_TRANSPARENT 0xEF000000  // key color
 
 #define RGB_IS_COLOR(col) ((col != RGB_UNDEFINED) && (col != RGB_TRANSPARENT))
@@ -73,6 +73,8 @@ public:
   /// @brief Activate the Element using the given adapter.
   virtual void start(DisplayAdapter *displayAdapter);
 
+  // no loop() call required for display elements as they are used for configuration only.
+
   /**
    * @brief push the current value of all properties to the callback.
    * @param callback callback function that is used for every property.
@@ -83,7 +85,7 @@ public:
   // === common properties for initializing display adapters
 
 protected:
-  HomeDing::DisplayConfig *config;
+  // HomeDing::DisplayConfig *config;
 
   /** event when page changes */
   String _onPage;

@@ -39,20 +39,7 @@ Element *DisplaySH1106Element::create() {
 /// @brief Activate the DisplaySH1106Element and register
 /// the Display Adapter to the board.
 void DisplaySH1106Element::start() {
-  LOGGER_ETRACE("start()");
-  DisplayAdapter *d = new DisplaySH1106Adapter();
-
-  if (d->setup(_board)) {
-    if (d->start()) {
-      _board->display = d;
-      DisplayElement::start();
-
-    } else {
-      LOGGER_EERR("no display found");
-      delete d;
-      active = false;
-    }  // if
-  }    // if
+  DisplayElement::start(new DisplaySH1106Adapter());
 }  // start()
 
 // End

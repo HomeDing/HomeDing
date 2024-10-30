@@ -25,6 +25,8 @@
  * on the display based on actions.
  *
  * The parameters specify how the information from the action will be displayed.
+ * The dimensions of the element can be specified by x,y,w,h or x,y,x1,y1.
+ * The BoundingBox (box) is calculated from this ensuring x1 >= x and y1 >= y. 
  */
 class DisplayOutputElement : public Element {
 public:
@@ -66,6 +68,14 @@ public:
   bool isOpaque = false;
 
 protected:
+  /**
+   * @brief This variable corresponds to the x0 parameter.
+   */
+  int16_t _x0 = 0;
+  int16_t _y0 = 0;
+  int16_t _x1 = 0;
+  int16_t _y1 = 0;
+
   /// @brief Draw color of the element
   uint32_t _color = RGB_UNDEFINED;
 

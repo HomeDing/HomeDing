@@ -21,7 +21,7 @@
 
 #include "displays/DisplayST7796Adapter.h"
 
-#define TRACE(...) // LOGGER_EINFO(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_EINFO(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -36,14 +36,14 @@ Element *DisplayST7796Element::create() {
 
 /* ===== Element functions ===== */
 
- void DisplayST7796Element::init(Board *board) {
+void DisplayST7796Element::init(Board *board) {
   TRACE("init()");
   DisplayElement::init(board);
 
   // some default values for ST7796 displays
-  config->width = 320;
-  config->height = 480;
- }
+  HomeDing::displayConfig.width = 320;
+  HomeDing::displayConfig.height = 480;
+}
 
 // All required parameters are handled by DisplayElement::set()
 
@@ -52,21 +52,7 @@ Element *DisplayST7796Element::create() {
  * in the board.
  */
 void DisplayST7796Element::start() {
-  TRACE("start()");
-
-  DisplayAdapter *d = new DisplayST7796Adapter();
-  
-  if (d->setup(_board)) {
-    bool success = d->start();
-    if (success) {
-      _board->display = d;
-      DisplayElement::start();
-
-    } else {
-      LOGGER_EERR("no display found");
-      delete d;
-    }  // if
-  }    // if
+  DisplayElement::start(new DisplayST7796Adapter());
 }  // start()
 
 // End

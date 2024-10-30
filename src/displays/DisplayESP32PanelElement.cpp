@@ -40,21 +40,7 @@ Element *DisplayESP32PanelElement::create() {
 
 /// @brief Activate the DisplayESP32PanelElement and register a Display Adapter to LCD
 void DisplayESP32PanelElement::start() {
-  TRACE("start()");
-
-  DisplayAdapter *d = new DisplayESP32PanelAdapter();
-
-  if (d->setup(_board)) {
-    bool success = d->start();
-    if (success) {
-      _board->display = d;
-      DisplayElement::start();
-
-    } else {
-      LOGGER_EERR("no display found");
-      delete d;
-    }  // if
-  }    // if
+  DisplayElement::start(new DisplayESP32PanelAdapter());
 }  // start()
 
 #endif

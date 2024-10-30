@@ -45,12 +45,12 @@ bool ReferenceElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-  } else if (name == HomeDing::Action::Value) {
+  } else if (name == HomeDing::Actions::Value) {
     gotNewValue = true;
     _incomingValue = atof(value);
     TRACE("new value =%f", _incomingValue);
 
-  } else if (name == HomeDing::Action::Reference) {
+  } else if (name == HomeDing::Actions::Reference) {
     gotNewValue = true;
     _refValue = atof(value);
     TRACE("new ref =%f", _refValue);
@@ -58,16 +58,16 @@ bool ReferenceElement::set(const char *name, const char *value) {
   } else if (!active) {
     // these properties can be used for configuration only.
 
-    if (name == HomeDing::Action::OnHigh) {
+    if (name == HomeDing::Actions::OnHigh) {
       _highAction = value;
 
-    } else if (name == HomeDing::Action::OnLow) {
+    } else if (name == HomeDing::Actions::OnLow) {
       _lowAction = value;
 
     } else if (_stricmp(name, "onreference") == 0) {
       _referenceAction = value;
 
-    } else if (name == HomeDing::Action::Invert) {
+    } else if (name == HomeDing::Actions::Invert) {
       _inverse = _atob(value);
 
     } else {
@@ -113,8 +113,8 @@ void ReferenceElement::loop() {
 void ReferenceElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, (_value ? "1" : "0"));
-  callback(HomeDing::Action::Reference, String(_refValue).c_str());
+  callback(HomeDing::Actions::Value, (_value ? "1" : "0"));
+  callback(HomeDing::Actions::Reference, String(_refValue).c_str());
 }  // pushState()
 
 

@@ -25,6 +25,13 @@
 // tracing information on drawing (left from development for future problem analysis) can be disabled
 #define TRACEDRAW(...)  // LOGGER_PRINT(__VA_ARGS__)
 
+namespace HomeDing {
+
+const DisplayAdapter *displayAdapter = nullptr;
+
+}
+
+
 using namespace HomeDing;
 
 DisplayAdapter::DisplayAdapter() {
@@ -42,7 +49,7 @@ bool DisplayAdapter::setup(Board *b) {
 
   displayBox.x_min = 0;
   displayBox.y_min = 0;
-  
+
   if ((displayConfig.rotation / 90) % 4 == 0) {
     displayBox.x_max = displayConfig.width;
     displayBox.y_max = displayConfig.height;
@@ -81,11 +88,11 @@ void DisplayAdapter::setBrightness(uint8_t bright) {
 /// @brief draw all DisplayOutputElements, then
 /// flush all buffered pixels to the display.
 bool DisplayAdapter::startFlush(bool force) {
-  // TRACE("startFlush(%d, %d)", force, _needFlush);
+  // TRACEDRAW("startFlush(%d, %d)", force, _needFlush);
 
   bool ret = false;
   if (force || _needFlush) {
-    TRACE("startFlush...");
+    TRACEDRAW(" startFlush...");
 
 #if 1
     // direct drawing (no overlapping widgets)
@@ -93,7 +100,7 @@ bool DisplayAdapter::startFlush(bool force) {
     board->forEach(Element::CATEGORY::Widget, [this](Element *e) {
       DisplayOutputElement *de = (DisplayOutputElement *)e;
 
-      TRACEDRAW("check: %d %d %d %s", de->active, de->needsDraw, de->page, de->id);
+      TRACEDRAW(" check: %d %d %d %s", de->active, de->needsDraw, de->page, de->id);
 
       if (de->active && de->page == page && de->needsDraw) {
         TRACEDRAW(" draw: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);

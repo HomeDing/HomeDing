@@ -75,11 +75,11 @@ public:
    * could be executed.
    */
   virtual bool set(const char *name, const char *value) override {
-    if (name == HomeDing::Action::Value) {
+    if (name == HomeDing::Actions::Value) {
       LOGGER_EINFO("new Time: %s", value);
       _newTime = value;
 
-    } else if (name == HomeDing::Action::OnValue) {
+    } else if (name == HomeDing::Actions::OnValue) {
       LOGGER_EINFO("new Action: %s", value);
       _valueAction = value;
     }

@@ -69,10 +69,10 @@ bool RFCodesElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // ok.
 
-  } else if (name == HomeDing::Action::Value) {
+  } else if (name == HomeDing::Actions::Value) {
     _sendValue = value;  // will be sent in loop()
 
-  } else if (name == HomeDing::Action::OnValue) {
+  } else if (name == HomeDing::Actions::OnValue) {
     _valueAction = value;
 
   } else if (_stricmp(name, "pinRx") == 0) {
@@ -157,7 +157,7 @@ void RFCodesElement::loop() {
 void RFCodesElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, _lastReceivedCode.c_str());
+  callback(HomeDing::Actions::Value, _lastReceivedCode.c_str());
   callback("received", String(_receivedTime).c_str());
 }  // pushState()
 

@@ -43,7 +43,7 @@ bool DHTElement::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // done.
 
-  } else if (name == HomeDing::Action::Pin) {
+  } else if (name == HomeDing::Actions::Pin) {
     _pin = _atopin(value);
 
   } else if (_stricmp(name, "powerpin") == 0) {

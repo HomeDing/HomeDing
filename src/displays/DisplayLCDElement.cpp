@@ -40,9 +40,9 @@ DisplayLCDElement::DisplayLCDElement() {
   TRACE("init()");
   DisplayElement::init(_board);
 
-  config->i2cAddress = 0x27;
-  config->height = 2;
-  config->width = 16;
+  HomeDing::displayConfig.i2cAddress = 0x27;
+  HomeDing::displayConfig.height = 2;
+  HomeDing::displayConfig.width = 16;
 }
 
 // All required parameters are handled by DisplayElement::set()
@@ -52,20 +52,7 @@ DisplayLCDElement::DisplayLCDElement() {
  * in the board.
  */
 void DisplayLCDElement::start() {
-  // TRACE("start()");
-  DisplayAdapter *d = new DisplayLCDAdapter();
-
-  if (d->setup(_board)) {
-    bool success = d->start();
-    if (success) {
-      _board->display = d;
-      DisplayElement::start();
-
-    } else {
-      LOGGER_EERR("no display found");
-      delete d;
-    }  // if
-  }    // if
+  DisplayElement::start(new DisplayLCDAdapter());
 }  // start()
 
 // End

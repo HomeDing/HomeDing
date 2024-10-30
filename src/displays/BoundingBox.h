@@ -26,11 +26,23 @@ public:
   };
 
   /// @brief explicit constructor.
-  BoundingBox(int16_t xMin, int16_t yMin, int16_t xMax, int16_t yMax) {
-    x_min = xMin;
-    y_min = yMin;
-    x_max = xMax;
-    y_max = yMax;
+  /// ensure that x_min <= x_max
+  BoundingBox(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+    if (x0 <= x1) {
+      x_min = x0;
+      x_max = x1;
+    } else {
+      x_min = x1;
+      x_max = x0;
+    }
+
+    if (y0 <= y1) {
+      y_min = y0;
+      y_max = y1;
+    } else {
+      y_min = y1;
+      y_max = y0;
+    }
   };
 
   /// @brief copy operator.

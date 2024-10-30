@@ -91,7 +91,7 @@ bool SelectElement::set(const char *name, const char *value) {
       TRACE("key[%d]=%s", i, value);
       _keys.setAt(i, value);
 
-    } else if (iName.equalsIgnoreCase(HomeDing::Action::Value)) {
+    } else if (iName.equalsIgnoreCase(HomeDing::Actions::Value)) {
       TRACE("value[%d]=%s", i, value);
       _values.setAt(i, value);
     }
@@ -99,7 +99,7 @@ bool SelectElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onkey") == 0) {
     _keyAction = value;
 
-  } else if (name == HomeDing::Action::OnValue) {
+  } else if (name == HomeDing::Actions::OnValue) {
     _valueAction = value;
 
   } else {
@@ -136,7 +136,7 @@ void SelectElement::pushState(
   Element::pushState(callback);
   callback("index", _printInteger(_selected));
   callback("key", _keys[_selected].c_str());
-  callback(HomeDing::Action::Value, _values[_selected].c_str());
+  callback(HomeDing::Actions::Value, _values[_selected].c_str());
 }  // pushState()
 
 

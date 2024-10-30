@@ -229,7 +229,7 @@ bool MQTTElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done.
 
-  } else if ((active && _impl->hasWildcard) || (name == HomeDing::Action::Value)) {
+  } else if ((active && _impl->hasWildcard) || (name == HomeDing::Actions::Value)) {
     // action is treated as data topics
     if (!_impl->_value.isEmpty()) { _impl->_value.concat(','); }
     _impl->_value.concat(name);
@@ -272,7 +272,7 @@ bool MQTTElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "qos") == 0) {
     _impl->qos = _atoi(value);
 
-  } else if (name == HomeDing::Action::OnValue) {
+  } else if (name == HomeDing::Actions::OnValue) {
     _impl->_valueAction = value;
 
   } else {
@@ -383,7 +383,7 @@ void MQTTElement::loop() {
 void MQTTElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, _impl->_value.c_str());
+  callback(HomeDing::Actions::Value, _impl->_value.c_str());
 }  // pushState()
 
 

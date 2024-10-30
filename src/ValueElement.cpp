@@ -42,7 +42,7 @@ bool ValueElement::_setValue(int newValue, bool forceAction) {
 
   if (_value != newValue) {
     _value = newValue;
-    saveState(HomeDing::Action::Value, String(_value));
+    saveState(HomeDing::Actions::Value, String(_value));
   }
 
   return (ret);
@@ -61,7 +61,7 @@ bool ValueElement::_setValue(const char *newValue, bool forceAction) {
 
   if (_valueString != newValue) {
     _valueString = newValue;
-    saveState(HomeDing::Action::Value, _valueString);
+    saveState(HomeDing::Actions::Value, _valueString);
   }
 
   return (ret);
@@ -82,35 +82,35 @@ bool ValueElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-  } else if (name == HomeDing::Action::Value) {
+  } else if (name == HomeDing::Actions::Value) {
     if (_isStringType)
       _setValue(value);
     else
       _setValue(_atoi(value));
 
-  } else if (name == HomeDing::Action::Up) {
+  } else if (name == HomeDing::Actions::Up) {
     _setValue(_value + _atoi(value) * _step);
 
-  } else if (name == HomeDing::Action::Down) {
+  } else if (name == HomeDing::Actions::Down) {
     _setValue(_value - _atoi(value) * _step);
 
-  } else if (name == HomeDing::Action::Min) {
+  } else if (name == HomeDing::Actions::Min) {
     _minRange = _atoi(value);
 
-  } else if (name == HomeDing::Action::Max) {
+  } else if (name == HomeDing::Actions::Max) {
     _maxRange = _atoi(value);
 
-  } else if (name == HomeDing::Action::Step) {
+  } else if (name == HomeDing::Actions::Step) {
     _step = _atoi(value);
 
-  } else if (name == HomeDing::Action::Label) {
+  } else if (name == HomeDing::Actions::Label) {
     _label = value;
 
-  } else if (name == HomeDing::Action::Type) {
+  } else if (name == HomeDing::Actions::Type) {
     if (_stricmp(value, "string") == 0)
       _isStringType = true;
 
-  } else if (name == HomeDing::Action::OnValue) {
+  } else if (name == HomeDing::Actions::OnValue) {
     _valueAction = value;
 
   } else {
@@ -147,7 +147,7 @@ void ValueElement::start() {
 void ValueElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, (_isStringType ? _valueString : String(_value)).c_str());
+  callback(HomeDing::Actions::Value, (_isStringType ? _valueString : String(_value)).c_str());
 }  // pushState()
 
 /** return actual value */

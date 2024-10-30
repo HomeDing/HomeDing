@@ -55,7 +55,7 @@ bool AnalogElement::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // done.
 
-  } else if (name == HomeDing::Action::Reference) {
+  } else if (name == HomeDing::Actions::Reference) {
     _reference = _atoi(value);
 
   } else if (_stricmp(name, "hysteresis") == 0) {
@@ -64,7 +64,7 @@ bool AnalogElement::set(const char *name, const char *value) {
   } else if (!active) {
     // these properties can be used for configuration only.
 
-    if (name == HomeDing::Action::Pin) {
+    if (name == HomeDing::Actions::Pin) {
       _pin = _atopin(value);
 
       // } else if (_stricmp(name, "resolution") == 0) {
@@ -85,16 +85,16 @@ bool AnalogElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "constrain") == 0) {
       _constrain = _atob(value);
 
-    } else if (name == HomeDing::Action::OnValue) {
+    } else if (name == HomeDing::Actions::OnValue) {
       _actions[0] = value;
 
     } else if (_stricmp(name, "onreference") == 0) {
       _actions[1] = value;
 
-    } else if (name == HomeDing::Action::OnHigh) {
+    } else if (name == HomeDing::Actions::OnHigh) {
       _highAction = value;
 
-    } else if (name == HomeDing::Action::OnLow) {
+    } else if (name == HomeDing::Actions::OnLow) {
       _lowAction = value;
 
     } else {

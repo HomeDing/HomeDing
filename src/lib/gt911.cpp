@@ -108,7 +108,7 @@ void GT911::init(int address) {
   Wire.setBufferSize(configSize + 4);
 #endif
 
-  // read current config.
+  // read current configuration
   WireUtils::txrx(
     addr,
     regBuffer, sizeof(regBuffer),

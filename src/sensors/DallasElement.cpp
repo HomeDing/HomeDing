@@ -72,14 +72,14 @@ bool DallasElement::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // done.
 
-  } else if (name == HomeDing::Action::Pin) {
+  } else if (name == HomeDing::Actions::Pin) {
     _impl->pin = _atopin(value);
 
   } else if (_stricmp(name, "resolution") == 0) {
     int r = atoi(value);
     _impl->resolution = constrain(r, 9, 12);
 
-  } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
+  } else if (_stricmp(name, HomeDing::Actions::OnTemperature) == 0) {
     _impl->tempAction = value;
   } else {
     ret = false;

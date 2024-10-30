@@ -39,9 +39,9 @@ Element *MenuElement::create() {
 bool MenuElement::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (name == HomeDing::Action::Value) {
+  if (name == HomeDing::Actions::Value) {
     if (_count > 0) {
-      valueList[_active]->set(HomeDing::Action::Up, value);
+      valueList[_active]->set(HomeDing::Actions::Up, value);
       _updateV = true;
     }
 
@@ -57,7 +57,7 @@ bool MenuElement::set(const char *name, const char *value) {
     while (1) {
       String name = getItemValue(value, n++);
       if (name.length() > 0) {
-        ValueElement *v = static_cast<ValueElement *>(_board->getElement(HomeDing::Action::Value, name.c_str()));
+        ValueElement *v = static_cast<ValueElement *>(_board->getElement(HomeDing::Actions::Value, name.c_str()));
         if (!v)
           v = static_cast<ValueElement *>(_board->getElement("switch", name.c_str()));
         if ((v) && _count < MAXMENUVALUES) {
@@ -98,7 +98,7 @@ bool MenuElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "onDisplay") == 0) {
     _displayAction = value;
 
-  } else if (name == HomeDing::Action::OnValue) {
+  } else if (name == HomeDing::Actions::OnValue) {
     _valueAction = value;
 
   } else if (_stricmp(name, "onMenu") == 0) {

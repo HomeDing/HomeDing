@@ -60,11 +60,11 @@ bool CalcElement::set(const char *name, const char *value) {
   } else if (!active) {
     // these properties can be used for configuration only.
 
-    if (name == HomeDing::Action::Invert) {
+    if (name == HomeDing::Actions::Invert) {
       // the invert property is used for AND and OR element.
       _invert = _atob(value);
 
-    } else if (name == HomeDing::Action::OnValue) {
+    } else if (name == HomeDing::Actions::OnValue) {
       _valueAction = value;
     } else {
       ret = false;
@@ -100,7 +100,7 @@ void CalcElement::loop() {
 void CalcElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, _value.c_str());
+  callback(HomeDing::Actions::Value, _value.c_str());
 }  // pushState()
 
 

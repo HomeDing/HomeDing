@@ -147,7 +147,7 @@ bool DSTimeElement::set(const char *name, const char *value) {
   if (_stricmp(name, "readtime") == 0) {
     _readTime = _atotime(value);
 
-  } else if (name == HomeDing::Action::Address) {
+  } else if (name == HomeDing::Actions::Address) {
     _address = _atoi(value);
 
   } else if (_stricmp(name, "time") == 0) {

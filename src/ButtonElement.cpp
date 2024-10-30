@@ -43,7 +43,7 @@ bool ButtonElement::set(const char *name, const char *value) {
   bool ret = true;
   TRACE("set %s=%s", name, value);
 
-  if (name == HomeDing::Action::Value) {
+  if (name == HomeDing::Actions::Value) {
     _inputLevel = _atob(value);
 
   } else if (_stricmp(name, "action") == 0) {

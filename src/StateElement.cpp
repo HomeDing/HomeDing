@@ -43,7 +43,7 @@ bool StateElement::set(const char *name, const char *value) {
     // save state after a specific time only
     _saveDelay = _scanDuration(value);
 
-  } else if (name == HomeDing::Action::Clear) {
+  } else if (name == HomeDing::Actions::Clear) {
     DeviceState::clear();
 
   } else {

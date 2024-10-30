@@ -19,7 +19,11 @@
 
 #include <displays/DisplayLineElement.h>
 
-/**
+#include <gfxDraw.h>
+
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+
+ /**
  * @brief static factory function to create a new DisplayLineElement.
  * @return DisplayLineElement* as Element* created element
  */
@@ -28,36 +32,23 @@ Element *DisplayLineElement::create() {
 }  // create()
 
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
-bool DisplayLineElement::set(const char *name, const char *value) {
-  bool ret = true;
-
-  if (DisplayOutputElement::set(name, value)) {
-    // done
-  } else if (_stricmp(name, "x1") == 0) {
-    _x1 = _atoi(value);
-
-  } else if (_stricmp(name, "y1") == 0) {
-    _y1 = _atoi(value);
-
-  } else {
-    ret = false;
-  }  // if
-
-  return (ret);
-}  // set()
-
-
-/**
- * @brief Draw this output element.
- *
- */
+/// @brief Draw the line by using gfxDraw functions.
 void DisplayLineElement::draw() {
-  DisplayOutputElement::draw();
-  _display->drawLine(box.x_min, box.y_min, _x1, _y1);
-}
+  TRACE("drawLine(%d/%d - %d/%d #%08x)\n", _x0, _y0, _x1, _y1, _color);
+  DisplayAdapter *d = _display;
+  uint32_t color = _color;
+
+  if ((_color != RGB_UNDEFINED) && (_color != RGB_TRANSPARENT)) {
+    _display->startWrite();
+    gfxDraw::drawLine(_x0, _y0, _x1, _y1, [d, color](int16_t x, int16_t y) {
+      if (d->displayBox.contains(x, y)) {
+        d->writePixel(x, y, color);
+      }
+    });
+    _display->endWrite();
+  }
+}  // draw()
+
 
 
 // End

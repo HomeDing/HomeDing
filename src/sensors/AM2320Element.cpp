@@ -41,7 +41,7 @@ bool AM2320Element::set(const char *name, const char *value) {
 
   if (SensorElement::set(name, value)) {
     // ok.
-  } else if (name == HomeDing::Action::Address) {
+  } else if (name == HomeDing::Actions::Address) {
     _address = _atoi(value);
 
   } else if (_stricmp(name, "onTemperature") == 0) {

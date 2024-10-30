@@ -72,7 +72,7 @@ bool StripeElement::set(const char *name, const char *pValue) {
   bool ret1 = LightElement::set(name, pValue);
   bool ret2 = true;
 
-  if (name == HomeDing::Action::Value) {
+  if (name == HomeDing::Actions::Value) {
     // saving to LightElement::value was handled in LightElement
     _mode = Mode::fix;
 

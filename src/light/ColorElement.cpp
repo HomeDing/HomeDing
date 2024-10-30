@@ -102,7 +102,7 @@ bool ColorElement::set(const char *name, const char *value) {
   bool ret = true;
   unsigned long now = millis();
 
-  if (name == HomeDing::Action::Value) {
+  if (name == HomeDing::Actions::Value) {
     // set next value of color
     uint32_t colorValue = _atoColor(value);
 
@@ -144,7 +144,7 @@ bool ColorElement::set(const char *name, const char *value) {
     _lightElementIDs.push(value);
     TRACE("  con(%s, %d)", value, _lightElementIDs.size());
 
-  } else if (name == HomeDing::Action::OnValue) {
+  } else if (name == HomeDing::Actions::OnValue) {
     // save the actions
     _valueAction = value;
 
@@ -315,7 +315,7 @@ void ColorElement::pushState(
 
   if (_mode != Mode::wheel) {
     sprintf(sColor, "x%08lx", _toValue);  // do not report fading and interim colors
-    callback(HomeDing::Action::Value, sColor);
+    callback(HomeDing::Actions::Value, sColor);
   }
 
   callback("duration", _printInteger(_duration));

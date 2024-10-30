@@ -49,18 +49,7 @@ void DisplayST7789Element::setup() {
 /// @brief Activate the Element and register a Display Adapter
 /// in the board.
 void DisplayST7789Element::start() {
-  TRACE("start()");
-
-  DisplayAdapter *d = new DisplayST7789Adapter();
-  if (d->setup(_board)) {
-    bool success = d->start();
-    if (success) {
-      _board->display = d;
-    } else {
-      delete d;
-    }  // if
-    DisplayElement::start();
-  }  // if
+  DisplayElement::start(new DisplayST7789Adapter());
 }  // start()
 
 // End

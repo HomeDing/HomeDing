@@ -3,7 +3,7 @@
  *
  * @brief The Actions helps speeding up dispatching of Actions to Elements in the HomeDing Library.
  * Many action names are knows to be used frequently (like 'value') are looked up in the static name set.
- * This found pointer is also saved in the variables in the namespace HomeDing::Action.
+ * This found pointer is also saved in the variables in the namespace HomeDing::Actions.
  * This allows comparing pointers instead of the high resource consuming string comparisation
  * in the set() functions of the Elements.
  *
@@ -49,7 +49,10 @@ extern const char *Max;
 extern const char *Min;
 extern const char *Mode;
 extern const char *OnHigh;
+extern const char *OnHumidity;
 extern const char *OnLow;
+extern const char *OnPressure;
+extern const char *OnTemperature;
 extern const char *OnValue;
 extern const char *Pin;
 extern const char *Redraw;

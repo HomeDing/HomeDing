@@ -3,7 +3,7 @@
  *
  * @brief The Actions helps speeding up dispatching of Actions to Elements in the HomeDing Library.
  * Many action names are knows to be used frequently (like 'value') are looked up in the static name set.
- * This found pointer is also saved in the variables in the namespace HomeDing::Action.
+ * This found pointer is also saved in the variables in the namespace HomeDing::Actions.
  * This allows comparing pointers instead of the high resource consuming string comparisation
  * in the set() functions of the Elements.
  *
@@ -46,7 +46,10 @@ const char *_actionNames[] = {
   "min",
   "mode",
   "onhigh",
+  "onhumidity",
   "onlow",
+  "onpressure",
+  "ontemperature",
   "onvalue",
   "pin",
   "redraw",

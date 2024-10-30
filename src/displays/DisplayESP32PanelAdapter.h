@@ -27,12 +27,21 @@ class DisplayESP32PanelAdapter : public DisplayAGFXAdapter {
     if (pinCount != 16) {
       LOGGER_ERR("ESP32Panel requires 16 pin definitions");
     } else {
+      // configure: "buspins": "45,48,47,21,14,5,6,7,15,16,4,8,3,46,9,1"
       for (int n = 0; n < 16; n++) {
         pins[n] = Element::_atopin(ListUtils::at(displayConfig.busPins, n).c_str());
       }
     }
 
-    // configure: "buspins": "45,48,47,21,14,5,6,7,15,16,4,8,3,46,9,1"
+    // if (displayConfig.resetPin >= 0) {
+    //   pinMode(displayConfig.resetPin, OUTPUT);
+    //   digitalWrite(displayConfig.resetPin, LOW);
+    //   delay(200);
+    //   digitalWrite(displayConfig.resetPin, HIGH);
+    //   delay(200);
+    // }
+
+
 
     // from: <https://github.com/moononournation/Arduino_GFX/wiki/Dev-Device-Declaration#esp32-8048s043>
     Arduino_ESP32RGBPanel *rgbpanel = new Arduino_ESP32RGBPanel(
@@ -45,7 +54,10 @@ class DisplayESP32PanelAdapter : public DisplayAGFXAdapter {
     );
 
     gfx = new Arduino_RGB_Display(
-      800 /* width */, 480 /* height */, rgbpanel, 0 /* rotation */, false /* auto_flush */);
+      displayConfig.width, 
+      displayConfig.height, 
+      rgbpanel, (displayConfig.rotation / 90), false /* auto_flush */, nullptr /* bus */,
+      displayConfig.resetPin);
 
     DisplayAGFXAdapter::start();
 #endif

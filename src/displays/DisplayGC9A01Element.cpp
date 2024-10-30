@@ -44,9 +44,9 @@ void DisplayGC9A01Element::init(Board *board) {
   DisplayElement::init(board);
 
   // set default values
-  config->ips = true;
-  config->width = 240;
-  config->height = 240;
+  HomeDing::displayConfig.ips = true;
+  HomeDing::displayConfig.width = 240;
+  HomeDing::displayConfig.height = 240;
 }
 
 
@@ -56,18 +56,7 @@ void DisplayGC9A01Element::init(Board *board) {
 /// @brief Activate the DisplayGC9A01Element and register a Display Adapter to LCD
 /// in the board.
 void DisplayGC9A01Element::start() {
-  TRACE("start()");
-
-  DisplayAdapter *d = new DisplayGC9A01Adapter();
-  if (d->setup(_board)) {
-    bool success = d->start();
-    if (success) {
-      _board->display = d;
-    } else {
-      delete d;
-    }  // if
-    DisplayElement::start();
-  }  // if
+  DisplayElement::start(new DisplayGC9A01Adapter());
 }  // start()
 
 

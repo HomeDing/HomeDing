@@ -4,8 +4,6 @@
 
 #pragma once
 
-#define Action Actions
-
 // to enable profiling the loop() times enable this include.
 // #include <hdProfile.h>
 
@@ -19,12 +17,6 @@
 
 // enable all TRACE at once here
 // #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
-
-// some common property names
-
-extern const char *ACTION_ONTEMPERATURE;
-extern const char *ACTION_ONHUMIDITY;
-extern const char *ACTION_ONPRESSURE;
 
 // global access to the board implementation
 extern Board homeding;

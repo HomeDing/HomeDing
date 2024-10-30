@@ -54,19 +54,19 @@ bool TouchElement::set(const char *name, const char *value) {
   } else if (!active) {
     // these properties can be used for configuration only.
 
-    if (name == HomeDing::Action::Pin) {
+    if (name == HomeDing::Actions::Pin) {
       _pin = _atopin(value);
 
-    } else if (name == HomeDing::Action::Reference) {
+    } else if (name == HomeDing::Actions::Reference) {
       _reference = _atoi(value);
 
-    } else if (name == HomeDing::Action::OnHigh) {
+    } else if (name == HomeDing::Actions::OnHigh) {
       _highAction = value;
 
-    } else if (name == HomeDing::Action::OnLow) {
+    } else if (name == HomeDing::Actions::OnLow) {
       _lowAction = value;
 
-    } else if (name == HomeDing::Action::OnValue) {
+    } else if (name == HomeDing::Actions::OnValue) {
       _valueAction = value;
 
     } else {
@@ -114,7 +114,7 @@ void TouchElement::loop() {
 void TouchElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, _printBoolean(_value));
+  callback(HomeDing::Actions::Value, _printBoolean(_value));
 }  // pushState()
 
 #endif

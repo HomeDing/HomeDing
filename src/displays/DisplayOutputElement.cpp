@@ -34,57 +34,50 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-    // these properties can be changed and redraw will happen
-
-  } else if (name == HomeDing::Action::Value) {
+  } else if (name == HomeDing::Actions::Value) {
     _value = value;
-    needsDraw = true;
 
-  } else if (name == HomeDing::Action::Clear) {
+  } else if (name == HomeDing::Actions::Clear) {
     _value.clear();
-    needsDraw = true;
 
-  } else if (name == HomeDing::Action::Redraw) {
-    needsDraw = true;
+  } else if (name == HomeDing::Actions::Redraw) {
 
-  } else if (name == HomeDing::Action::X) {
-    box.x_max -= box.x_min;
-    box.x_min = _atoi(value);
-    box.x_max += box.x_min;
-    needsDraw = true;
+  } else if (name == HomeDing::Actions::X) {
+    int16_t v = _atoi(value);
+    _x1 += v - _x0;
+    _x0 = v;
 
-  } else if (name == HomeDing::Action::Y) {
-    box.y_max -= box.y_min;
-    box.y_min = _atoi(value);
-    box.y_max += box.y_min;
-    needsDraw = true;
+  } else if (name == HomeDing::Actions::Y) {
+    int16_t v = _atoi(value);
+    _y1 += v - _y0;
+    _y0 = v;
 
-  } else if ((name == HomeDing::Action::Width) || (_stricmp(name, "w") == 0)) {
-    box.x_max = box.x_min + _atoi(value) - 1;
-    needsDraw = true;
+  } else if (_stricmp(name, "x1") == 0) {
+    _x1 = _atoi(value);
 
-  } else if ((name == HomeDing::Action::Height) || (_stricmp(name, "h") == 0) || (_stricmp(name, "fontsize") == 0)) {
-    box.y_max = box.y_min + _atoi(value) - 1;
-    needsDraw = true;
+  } else if (_stricmp(name, "y1") == 0) {
+    _y1 = _atoi(value);
+
+  } else if ((name == HomeDing::Actions::Width) || (_stricmp(name, "w") == 0)) {
+    _x1 = _x0 + _atoi(value) - 1;
+
+  } else if ((name == HomeDing::Actions::Height) || (_stricmp(name, "h") == 0) || (_stricmp(name, "fontsize") == 0)) {
+    _y1 = _y0 + _atoi(value) - 1;
 
   } else if (_stricmp(name, "color") == 0) {
     _color = _atoColor(value);
-    needsDraw = true;
 
   } else if (_stricmp(name, "background") == 0) {
     _backgroundColor = _atoColor(value);
-    needsDraw = true;
 
-  } else if (name == HomeDing::Action::Border) {
+  } else if (name == HomeDing::Actions::Border) {
     _borderColor = _atoColor(value);
-    needsDraw = true;
 
   } else if (!active) {
     // these properties can be used for configuration only.
 
     if (_stricmp(name, "page") == 0) {
       page = _atoi(value);
-      needsDraw = true;
 
     } else {
       ret = false;
@@ -93,6 +86,11 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else {
     ret = false;
   }  // if
+
+  if (ret) {
+    box = BoundingBox(_x0, _y0, _x1, _y1);
+    needsDraw = true;
+  }
 
   if (needsDraw && _display) _display->setFlush();
 
@@ -114,7 +112,7 @@ void DisplayOutputElement::start() {
       _backgroundColor = HomeDing::displayConfig.backgroundColor;
     if (_borderColor == RGB_UNDEFINED)
       _borderColor = HomeDing::displayConfig.borderColor;
-      
+
     TRACE("colors: #%08x / #%08x / #%08x", _color, _backgroundColor, _borderColor);
 
     if (page > _display->maxpage) {
@@ -142,7 +140,7 @@ void DisplayOutputElement::draw() {
 void DisplayOutputElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, _value.c_str());
+  callback(HomeDing::Actions::Value, _value.c_str());
 }  // pushState()
 
 // End

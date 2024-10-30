@@ -78,7 +78,7 @@ bool LogElement::set(const char *name, const char *value) {
   if (Element::set(name, value)) {
     // done
 
-  } else if (name == HomeDing::Action::Value) {
+  } else if (name == HomeDing::Actions::Value) {
     if (active) {
       loop(); // be sure the current average time-span is saved.
 
@@ -161,7 +161,7 @@ void LogElement::loop() {
 void LogElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, String(_value).c_str());
+  callback(HomeDing::Actions::Value, String(_value).c_str());
 } // pushState()
 
 

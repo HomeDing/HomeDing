@@ -799,7 +799,7 @@ void Board::cancelSleep() {
 void Board::dispatchAction(Element *target, const char *action_name, const char *action_value) {
 
   if (target) {
-    const char *action = HomeDing::Action::find(action_name);
+    const char *action = HomeDing::Actions::find(action_name);
     if (!action) action = action_name;
 
 #if defined(LOGGER_ENABLED)

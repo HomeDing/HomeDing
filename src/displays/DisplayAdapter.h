@@ -18,6 +18,29 @@
  * 19.02.2024 startFlush(bool) method added.
  */
 
+/*
+ The display adapters are acting as a connecting interface decoupling the HomeDing library implementation
+ from underlying GFX implementations (chip driver and bus).
+
+ After initialization the adapter can be used for drawing by using 2 possible procedures:
+
+ Drawing pixels on the display by using the lo-level functions
+
+ * `startWrite()` -- to start a pixel sequence
+ * `writePixel(...)` -- draw pixels with a color, be sure not to draw outside the display limits.
+ * `endWrite()` -- to stop a pixel sequence
+
+ Drawing simple functions
+
+ * `drawNNNN(...)` -- draw the whole primitive by using GFX functionality.
+
+Some drivers capture everything in an internal buffer and will transfer it at a whole after drawing.
+Therefore after completing any drawing the flush() method must be called to transfer the pixels to the board.
+
+* `flush()` -- finalize drawing by updating the display.
+
+*/
+
 #pragma once
 
 #include <Wire.h>
@@ -109,13 +132,7 @@ public:
     _needFlush = true;
   };
 
-  virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
-    drawLine(x0, y0, x1, y1, color);
-  };
-
-  virtual void drawLine(int16_t /* x0 */, int16_t /* y0 */, int16_t /* x1 */, int16_t /* y1 */, uint32_t /* color */) {
-    _needFlush = true;
-  };
+  // virtual void drawLine(int16_t /* x0 */, int16_t /* y0 */, int16_t /* x1 */, int16_t /* y1 */, uint32_t /* color */){};
 
   virtual void drawButton(int16_t /* x */, int16_t /* y */, int16_t /* w */, int16_t /* h */, const char * /* text */, bool /* pressed = false */) {
     _needFlush = true;
@@ -129,8 +146,23 @@ public:
     _needFlush = true;
   };
 
+
+  // low level pixel drawing
+
+  virtual void startWrite() {}
+
+  virtual void writePixel(int16_t x, int16_t y, uint32_t color) {
+  };
+
+  virtual void endWrite() {
+    _needFlush = true;
+  }
+
+
+  // low level pixel reading
+
   virtual uint32_t getPixel(int16_t /* x */, int16_t /* y */) {
-    return(HomeDing::displayConfig.backgroundColor);
+    return (HomeDing::displayConfig.backgroundColor);
   };
 
   // @brief remember that flush is required after sequence.
@@ -171,3 +203,11 @@ protected:
 
   Board *board;
 };
+
+
+// ===== static variables for the display in the HomeDing namespace
+
+namespace HomeDing {
+extern const DisplayAdapter *displayAdapter;
+
+}

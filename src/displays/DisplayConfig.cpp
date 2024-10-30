@@ -23,4 +23,24 @@ namespace HomeDing {
 
 HomeDing::DisplayConfig displayConfig;
 
+DisplayConfig::DisplayConfig() {
+  // initialization values.
+  busmode = BUSMODE_ANY;
+  brightness = 50;
+
+  /** Default Draw & Background Color */
+  drawColor = RGB_WHITE;
+  backgroundColor = RGB_BLACK;
+  borderColor = RGB_WHITE;
+
+  resetPin = -1;
+  lightPin = -1;
+
+  busSpeed = -1;
+  csPin = -1;
+  dcPin = -1;
+  wrPin = -1;
+  rdPin = -1;
 }
+
+} // namespace

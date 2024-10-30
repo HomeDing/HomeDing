@@ -44,20 +44,7 @@ Element *DisplayMAX7219Element::create() {
  * in the board.
  */
 void DisplayMAX7219Element::start() {
-  TRACE("start()");
-
-  DisplayAdapter *d = new DisplayMAX7219Adapter();
-  if (d->setup(_board, config)) {
-    bool success = d->start();
-    if (success) {
-      _board->display = d;
-      DisplayElement::start();
-
-    } else {
-      LOGGER_EERR("no display found");
-      delete d;
-    }  // if
-  }    // if
+  DisplayElement::start(new DisplayMAX7219Adapter());
 }  // start()
 
 // End

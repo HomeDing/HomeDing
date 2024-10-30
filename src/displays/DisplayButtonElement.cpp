@@ -40,7 +40,11 @@ Element *DisplayButtonElement::create() {
 bool DisplayButtonElement::touchStart(int16_t xPos, int16_t yPos) {
   // TRACE("touchStart(%d/%d)", xPos, yPos);
   bool over = box.contains(xPos, yPos);
-  if (over != _pressed) needsDraw = true;
+  if (over != _pressed) {
+    needsDraw = true;
+    if (_display) _display->setFlush();
+    TRACE("touch(%d)", over);
+  }
   _pressed = over;
   return (over);
 }
@@ -52,6 +56,7 @@ void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
   }
   _pressed = false;
   needsDraw = true;
+  if (_display) _display->setFlush();
 }
 
 
@@ -74,7 +79,7 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
   if (DisplayOutputElement::set(name, value)) {
     // done
 
-  } else if (name == HomeDing::Action::Text) {
+  } else if (name == HomeDing::Actions::Text) {
     _text = value;
     needsDraw = true;
 

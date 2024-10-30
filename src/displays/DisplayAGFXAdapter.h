@@ -17,6 +17,7 @@
   do { (void)(expr); } while (0)
 
 #include <Arduino_GFX_Library.h>
+#include <gfxDraw.h>
 
 #include <displays/DisplayAdapter.h>
 
@@ -36,92 +37,22 @@ using namespace HomeDing;
 
 #define PANELTRACE(...)  // Serial.printf("Display::" __VA_ARGS__)
 
+
+// ===== static variables (one display only)
+
+/// @brief Active Databus implementation;
+extern Arduino_DataBus *bus;
+
+/// @brief Active GFX implementation;
+extern Arduino_GFX *gfx;
+
+// static uint16_t DisplayAGFXAdapter_drawcolor;
+
 class DisplayAGFXAdapter : public DisplayAdapter {
 public:
   ~DisplayAGFXAdapter() = default;
 
-  Arduino_DataBus *getBus() {
-    PANELTRACE("getbus: %d\n", displayConfig.busmode);
-    PANELTRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d\n",
-               displayConfig.dcPin, displayConfig.csPin, displayConfig.spiCLK, displayConfig.spiMOSI, displayConfig.spiMISO);
-    PANELTRACE("   i2c: adr:%d, sda:%d, scl:%d\n", displayConfig.i2cAddress, displayConfig.i2cSDA, displayConfig.i2cSCL);
-
-    Arduino_DataBus *bus = nullptr;
-
-    if (displayConfig.busmode == BUSMODE_ANY) {
-      if (displayConfig.csPin >= 0) {
-        displayConfig.busmode = BUSMODE_SPI;
-      } else if (displayConfig.i2cAddress)
-        displayConfig.busmode = BUSMODE_I2C;
-    }
-
-    if (displayConfig.busmode == BUSMODE_I2C) {
-      PANELTRACE("Use I2C\n");
-      bus = new Arduino_Wire(displayConfig.i2cAddress, displayConfig.i2cCommandPrefix, displayConfig.i2cDataPrefix);
-
-#if defined(ESP32)
-    } else if (displayConfig.busmode == BUSMODE_SPI) {
-      PANELTRACE("Use SPI\n");
-      bus = new Arduino_HWSPI(displayConfig.dcPin, displayConfig.csPin, displayConfig.spiCLK, displayConfig.spiMOSI, displayConfig.spiMISO);
-      // bus = new Arduino_ESP32SPI(displayConfig.dcPin, displayConfig.csPin);
-
-    } else if (displayConfig.busmode == BUSMODE_HSPI) {
-      PANELTRACE("Use HSPI\n");
-      bus = new Arduino_ESP32SPI(
-        displayConfig.dcPin,
-        displayConfig.csPin,
-        displayConfig.spiCLK,
-        displayConfig.spiMOSI,
-        displayConfig.spiMISO,
-        HSPI /* spi_num */
-      );
-#endif
-
-#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
-    } else if (displayConfig.busmode == BUSMODE_PAR8) {
-      PANELTRACE("Use PAR8\n");
-
-      int pinCount = ListUtils::length(displayConfig.busPins);
-      int8_t pins[8];
-
-      if (pinCount != 8) {
-        LOGGER_ERR("ST7789 LCD8 bus requires 8 pin definitions");
-      } else {
-        for (int n = 0; n < 8; n++) {
-          pins[n] = Element::_atopin(ListUtils::at(displayConfig.busPins, n).c_str());
-        }
-      }
-
-      bus = new Arduino_ESP32PAR8Q(
-        displayConfig.dcPin, displayConfig.csPin, displayConfig.wrPin, displayConfig.rdPin,
-        pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
-#endif
-
-
-#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
-    } else if (displayConfig.busmode == BUSMODE_LCD8) {
-      PANELTRACE("Use LCD8\n");
-      bus = new Arduino_ESP32LCD8(
-        0 /* DC */,
-        GFX_NOT_DEFINED /* CS */,
-        47 /* WR */,
-        GFX_NOT_DEFINED /* RD */,
-        9, 46, 3, 8, 18, 17, 16, 15  //  D0 - D7
-      );
-#endif
-
-
-#if defined(ESP8266)
-    } else if (displayConfig.busmode == BUSMODE_SPI) {
-      PANELTRACE("Use SPI\n");
-      // ESP8266 has pre-defined SPI pins
-      bus = new Arduino_ESP8266SPI(displayConfig.dcPin, displayConfig.csPin);
-#endif
-    }  // if
-    return (bus);
-  };
-
-
+public:
   virtual bool start() override {
     PANELTRACE("init: w:%d, h:%d, r:%d\n", displayConfig.width, displayConfig.height, displayConfig.rotation);
     PANELTRACE(" colors: #%08x / #%08x / #%08x\n", displayConfig.drawColor, displayConfig.backgroundColor, displayConfig.borderColor);
@@ -189,6 +120,29 @@ public:
     DisplayAdapter::clear();
   };  // clear()
 
+
+  /// @brief draw a single pixel on the display.
+  /// @param x x coordinate of the pixel.
+  /// @param y y coordinate of the pixel.
+  /// @param color color of the pixel.
+  virtual void drawPixel(int16_t x, int16_t y, uint32_t color) override {
+    if (RGB_IS_COLOR(color)) {
+      gfx->drawPixel(x, y, col565(color));
+      gfx->startWrite();
+      gfx->writePixel(x, y, color);
+      gfx->endWrite();
+      _needFlush = true;
+    }
+  };
+
+
+  /// @brief draw a staight line on the display.
+  /// @param x0 x coordinate of the starting pixel.
+  /// @param y0 y coordinate of the starting pixel.
+  /// @param x1 x coordinate of the ending pixel.
+  /// @param y1 y coordinate of the ending pixel.
+  /// @param color color of the line.
+  // virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color) override;
 
   /**
    * @brief Draw a text at this position using the specific height.-
@@ -272,24 +226,6 @@ public:
 
   }  // drawButton()
 
-  virtual void drawPixel(int16_t x, int16_t y, uint32_t color) override {
-    if (RGB_IS_COLOR(color)) {
-      gfx->drawPixel(x, y, col565(color));
-      _needFlush = true;
-    }
-  };
-
-  virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color) override {
-    PANELTRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, color);
-
-    if ((color != RGB_UNDEFINED) && (color != RGB_TRANSPARENT) && (x1 >= x0) && (y1 >= y0)) {
-      if (displayBox.overlaps(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1))) {
-        gfx->drawLine(x0, y0, x1, y1, col565(color));
-        _needFlush = true;
-      }
-    }
-  }  // drawLine()
-
 
   /// @brief Draw a rectangle with the given dimensions of the box and an optional inner border.
   virtual void drawRectangle(BoundingBox &box, uint32_t borderColor, uint32_t fillColor = RGB_UNDEFINED) override {
@@ -338,7 +274,26 @@ public:
   };
 
 
+  // low level pixel drawing
+
+  void startWrite() override {
+    gfx->startWrite();
+  }
+
+  void writePixel(int16_t x, int16_t y, uint32_t color) override {
+    gfx->writePixelPreclipped(x, y, col565(color));
+  };
+
+  void endWrite() override {
+    DisplayAdapter::endWrite();
+    gfx->endWrite();
+  }
+
+
 protected:
+  /// @brief return the databus implementation as specified by config.
+  Arduino_DataBus *getBus();
+
   /// @brief send all buffered pixels to display.
   void flush() override {
     gfx->flush();
@@ -427,13 +382,6 @@ protected:
     baseLine *= factor;
     charWidth *= factor;
   }  // loadFont()
-
-  /**
-   * @brief Reference to the used library object
-   */
-  Arduino_DataBus *bus = nullptr;
-  Arduino_GFX *gfx = nullptr;
-
 
   int baseLine;  // baseline offset
   uint16_t backColor565;

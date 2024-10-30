@@ -154,10 +154,10 @@ bool MAX7219Element::set(const char *name, const char *value) {
    if (Element::set(name, value)) {
      // ok.
 
-  } else if (name == HomeDing::Action::Value) {
+  } else if (name == HomeDing::Actions::Value) {
     _value = value;
 
-  } else if (name == HomeDing::Action::Clear) {
+  } else if (name == HomeDing::Actions::Clear) {
     if (active)
       _clear();
 
@@ -235,7 +235,7 @@ void MAX7219Element::pushState(
   Element::pushState(callback);
   callback("mode", _mode == Mode::numeric ? "numeric" : "8x8");
   callback("brightness", _printInteger(_brightness));
-  callback(HomeDing::Action::Value, String(_value).c_str());
+  callback(HomeDing::Actions::Value, String(_value).c_str());
 }  // pushState()
 
 

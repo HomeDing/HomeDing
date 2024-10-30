@@ -107,19 +107,19 @@ bool BME680Element::set(const char *name, const char *value) {
   if (SensorElement::set(name, value)) {
     // done.
 
-  } else if (name == HomeDing::Action::Address) {
+  } else if (name == HomeDing::Actions::Address) {
     _address = _atoi(value);
     ret = true;
 
-  } else if (_stricmp(name, ACTION_ONTEMPERATURE) == 0) {
+  } else if (name == HomeDing::Actions::OnTemperature) {
     _temperatureAction = value;
     ret = true;
 
-  } else if (_stricmp(name, ACTION_ONHUMIDITY) == 0) {
+  } else if (name == HomeDing::Actions::OnHumidity) {
     _humidityAction = value;
     ret = true;
 
-  } else if (_stricmp(name, ACTION_ONPRESSURE) == 0) {
+  } else if (name == HomeDing::Actions::OnPressure) {
     _pressureAction = value;
     ret = true;
 

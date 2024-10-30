@@ -37,20 +37,7 @@ Element *DisplayST7735Element::create() {
 
 /// @brief Activate the Element and register a Display Adapter to LCD in the board.
 void DisplayST7735Element::start() {
-  TRACE("start()");
-
-  DisplayAdapter *d = new DisplayST7735Adapter();
-  if (d->setup(_board)) {
-    bool success = d->start();
-    if (success) {
-      _board->display = d;
-      DisplayElement::start();
-
-    } else {
-      LOGGER_EERR("no display found");
-      delete d;
-    }  // if
-  }    // if
+  DisplayElement::start(new DisplayST7735Adapter());
 }  // start()
 
 // End

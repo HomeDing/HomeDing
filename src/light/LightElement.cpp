@@ -76,7 +76,7 @@ bool LightElement::set(const char *name, const char *pValue) {
   if (Element::set(name, pValue)) {
     // done
 
-  } else if (name == HomeDing::Action::Value) {
+  } else if (name == HomeDing::Actions::Value) {
     if (_stricmp(value.c_str(), pValue)) {
       value = pValue;
       _outColor = _atoColor(pValue);
@@ -98,7 +98,7 @@ bool LightElement::set(const char *name, const char *pValue) {
   } else if (!active) {
     // these properties can be used for configuration only.
 
-    if (name == HomeDing::Action::Pin) {
+    if (name == HomeDing::Actions::Pin) {
       _count = 0;
       while (_count < LightElement::MAXPINS) {
         String p = getItemValue(pValue, _count);
@@ -115,7 +115,7 @@ bool LightElement::set(const char *name, const char *pValue) {
         pwmMode = true;
       }
 
-    } else if (name == HomeDing::Action::Invert) {
+    } else if (name == HomeDing::Actions::Invert) {
       invert = _atob(pValue);
 
     } else {
@@ -179,7 +179,7 @@ void LightElement::loop() {
 void LightElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Action::Value, value.c_str());
+  callback(HomeDing::Actions::Value, value.c_str());
   callback("enable", enabled ? "1" : "0");
   callback("brightness", _printInteger(_brightness));
 }  // pushState()

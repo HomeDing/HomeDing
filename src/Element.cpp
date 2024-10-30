@@ -36,20 +36,20 @@ bool Element::set(const char *name, const char *value) {
   // TRACE("set %s=%s", name, value);
   bool ret = true;
 
-  if (name == HomeDing::Action::Start) {
+  if (name == HomeDing::Actions::Start) {
     start();
     ret = active;
 
-  } else if (name == HomeDing::Action::Stop) {
+  } else if (name == HomeDing::Actions::Stop) {
     term();
 
-  } else if (name == HomeDing::Action::LogLevel) {
+  } else if (name == HomeDing::Actions::LogLevel) {
     loglevel = _atoi(value);
 
-  } else if (name == HomeDing::Action::UseState) {
+  } else if (name == HomeDing::Actions::UseState) {
     _useState = _atob(value);
 
-  } else if (name == HomeDing::Action::Startup) {
+  } else if (name == HomeDing::Actions::Startup) {
 
     if (_stricmp(value, "sys") == 0) {
       startupMode = Element_StartupMode::System;
@@ -62,8 +62,8 @@ bool Element::set(const char *name, const char *value) {
 
     // do not report an error for the following properties,
     // as they are used by the web ui and stored in the config files only.
-  } else if (name == HomeDing::Action::Description) {
-  } else if (name == HomeDing::Action::Title) {
+  } else if (name == HomeDing::Actions::Description) {
+  } else if (name == HomeDing::Actions::Title) {
 
   } else {
     ret = false;

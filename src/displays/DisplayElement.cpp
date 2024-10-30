@@ -21,11 +21,11 @@
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
+using namespace HomeDing;
+
 DisplayElement::DisplayElement() {
   startupMode = Element_StartupMode::System;
-  // no loop() call required for display elements as they are used for configuration only.
   category = CATEGORY::Display;
-  config = &(HomeDing::displayConfig);
 }
 
 // ===== private functions =====
@@ -42,7 +42,7 @@ void DisplayElement::_newPage(int page) {
     // redraw all DisplayOutput elements
     _board->forEach(CATEGORY::Widget, [this](Element *e) {
       TRACE("do %s", e->id);
-      e->set(HomeDing::Action::Redraw, "1");
+      e->set(HomeDing::Actions::Redraw, "1");
     });
     if (da->page != oldPage) {
       HomeDing::Actions::push(_onPage, String(da->page).c_str());
@@ -57,31 +57,14 @@ void DisplayElement::_newPage(int page) {
 void DisplayElement::init(Board *board) {
   Element::init(board);
 
-  config->busmode = BUSMODE_ANY;
-  config->brightness = 50;
-
-  /** Default Draw & Background Color */
-  config->drawColor = RGB_WHITE;
-  config->backgroundColor = RGB_BLACK;
-  config->borderColor = RGB_WHITE;
-
-  config->resetPin = -1;
-  config->lightPin = -1;
-
-  config->busSpeed = -1;
-  config->csPin = -1;
-  config->dcPin = -1;
-  config->wrPin = -1;
-  config->rdPin = -1;
-
   // use system wide I2C by default
-  config->i2cSDA = board->I2cSda;
-  config->i2cSCL = board->I2cScl;
+  displayConfig.i2cSDA = board->I2cSda;
+  displayConfig.i2cSCL = board->I2cScl;
 
   // use system wide SPI by default
-  config->spiCLK = board->spiCLK;
-  config->spiMOSI = board->spiMOSI;
-  config->spiMISO = board->spiMISO;
+  displayConfig.spiCLK = board->spiCLK;
+  displayConfig.spiMOSI = board->spiMOSI;
+  displayConfig.spiMISO = board->spiMISO;
 }  // init()
 
 
@@ -93,9 +76,9 @@ bool DisplayElement::set(const char *name, const char *value) {
 
   if (_stricmp(name, "brightness") == 0) {
     int b = _atoi(value);
-    config->brightness = constrain(b, 0, 100);
+    displayConfig.brightness = constrain(b, 0, 100);
     if (active && da) {
-      da->setBrightness(config->brightness);
+      da->setBrightness(displayConfig.brightness);
     }
 
   } else if (da) {
@@ -108,7 +91,7 @@ bool DisplayElement::set(const char *name, const char *value) {
     } else if (_stricmp(name, "addpage") == 0) {
       _newPage(da->page + _atoi(value));
 
-    } else if (name == HomeDing::Action::Clear) {
+    } else if (name == HomeDing::Actions::Clear) {
       da->start();
     }
 
@@ -122,94 +105,94 @@ bool DisplayElement::set(const char *name, const char *value) {
     // === These properties can only be used during configuration:
 
   } else if (_stricmp(name, "color") == 0) {
-    config->drawColor = _atoColor(value);
+    displayConfig.drawColor = _atoColor(value);
 
   } else if (_stricmp(name, "background") == 0) {
-    config->backgroundColor = _atoColor(value);
+    displayConfig.backgroundColor = _atoColor(value);
 
-  } else if (name == HomeDing::Action::Border) {
-    config->borderColor = _atoColor(value);
+  } else if (name == HomeDing::Actions::Border) {
+    displayConfig.borderColor = _atoColor(value);
 
   } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
-    config->busmode = ListUtils::indexOf(BUSMODE_LIST, value);
+    displayConfig.busmode = ListUtils::indexOf(BUSMODE_LIST, value);
 
   } else if (_stricmp(name, "busspeed") == 0) {
-    config->busSpeed = _atoi(value);
+    displayConfig.busSpeed = _atoi(value);
 
 
     // ===== parallel busses configuration
 
   } else if (_stricmp(name, "cspin") == 0) {
-    config->csPin = _atopin(value);
+    displayConfig.csPin = _atopin(value);
 
   } else if (_stricmp(name, "dcpin") == 0) {
-    config->dcPin = _atopin(value);
+    displayConfig.dcPin = _atopin(value);
 
   } else if (_stricmp(name, "wrpin") == 0) {
-    config->wrPin = _atopin(value);
+    displayConfig.wrPin = _atopin(value);
 
   } else if (_stricmp(name, "rdpin") == 0) {
-    config->rdPin = _atopin(value);
+    displayConfig.rdPin = _atopin(value);
 
   } else if (_stricmp(name, "buspins") == 0) {
-    config->busPins = value;
-    config->busPins.replace(" ", "");
+    displayConfig.busPins = value;
+    displayConfig.busPins.replace(" ", "");
 
 
     // ===== i2c bus parameter
 
-  } else if (name == HomeDing::Action::Address) {
-    config->i2cAddress = _atoi(value);
+  } else if (name == HomeDing::Actions::Address) {
+    displayConfig.i2cAddress = _atoi(value);
 
     // ===== spi bus parameter
 
   } else if (_stricmp(name, "spimosi") == 0) {
-    config->spiMOSI = _atopin(value);
+    displayConfig.spiMOSI = _atopin(value);
 
   } else if (_stricmp(name, "spimiso") == 0) {
-    config->spiMISO = _atopin(value);
+    displayConfig.spiMISO = _atopin(value);
 
   } else if (_stricmp(name, "spiclk") == 0) {
-    config->spiCLK = _atopin(value);
+    displayConfig.spiCLK = _atopin(value);
 
   } else if (_stricmp(name, "spics") == 0) {
-    config->csPin = _atopin(value);  // please use csPin, deprecated
+    displayConfig.csPin = _atopin(value);  // please use csPin, deprecated
 
   } else if (_stricmp(name, "spidc") == 0) {
-    config->dcPin = _atopin(value);  // please use dcPin, deprecated
+    displayConfig.dcPin = _atopin(value);  // please use dcPin, deprecated
 
 
-  } else if (name == HomeDing::Action::Invert) {
-    config->invert = _atob(value);
+  } else if (name == HomeDing::Actions::Invert) {
+    displayConfig.invert = _atob(value);
 
   } else if (_stricmp(name, "ips") == 0) {
-    config->ips = _atob(value);
+    displayConfig.ips = _atob(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {
-    config->resetPin = _atopin(value);
+    displayConfig.resetPin = _atopin(value);
 
   } else if (_stricmp(name, "lightpin") == 0) {
-    config->lightPin = _atopin(value);
+    displayConfig.lightPin = _atopin(value);
 
     // ===== Display settings
 
-  } else if (name == HomeDing::Action::Width) {
-    config->width = _atoi(value);
+  } else if (name == HomeDing::Actions::Width) {
+    displayConfig.width = _atoi(value);
 
-  } else if (name == HomeDing::Action::Height) {
-    config->height = _atoi(value);
+  } else if (name == HomeDing::Actions::Height) {
+    displayConfig.height = _atoi(value);
 
   } else if (_stricmp(name, "rotation") == 0) {
     int r = _atoi(value);
     r = (r / 90);
     r = constrain(r, 0, 3);
-    config->rotation = r * 90;
+    displayConfig.rotation = r * 90;
 
   } else if (_stricmp(name, "rowOffset") == 0) {
-    config->rowOffset = _atoi(value);
+    displayConfig.rowOffset = _atoi(value);
 
   } else if (_stricmp(name, "colOffset") == 0) {
-    config->colOffset = _atoi(value);
+    displayConfig.colOffset = _atoi(value);
 
   } else {
     ret = Element::set(name, value);
@@ -223,15 +206,17 @@ bool DisplayElement::set(const char *name, const char *value) {
  * @brief Activate the Element.
  */
 void DisplayElement::start() {
-  DisplayAdapter *da = _board->display;
-  if (da) {
-    Element::start();
-    da->setBrightness(config->brightness);
-    da->setBackgroundColor(config->backgroundColor);
+  LOGGER_EERR("start() called without display Adapter parameter");
 
-  } else {
-    LOGGER_EERR("start failed.");
-  }
+  // DisplayAdapter *da = _board->display;
+  // if (da) {
+  //   Element::start();
+  //   da->setBrightness(displayConfig.brightness);
+  //   da->setBackgroundColor(displayConfig.backgroundColor);
+
+  // } else {
+  //   LOGGER_EERR("start failed.");
+  // }
 }  // start()
 
 
@@ -239,17 +224,27 @@ void DisplayElement::start() {
 void DisplayElement::start(DisplayAdapter *displayAdapter) {
   TRACE("start()");
   if (displayAdapter) {
+    resetPin;
     if (displayAdapter->setup(_board)) {
       bool success = displayAdapter->start();
       if (success) {
+
         _board->display = displayAdapter;
+        HomeDing::displayAdapter = displayAdapter;
+
+        displayAdapter->setBrightness(displayConfig.brightness);
+
+        // should be removed in the future:
+        displayAdapter->setColor(displayConfig.drawColor);
+        displayAdapter->setBackgroundColor(displayConfig.backgroundColor);
 
       } else {
         delete displayAdapter;
+        LOGGER_EERR("start failed.");
       }
     }
   }
-  DisplayElement::start();
+  Element::start();
 }  // start(da)
 
 
@@ -261,7 +256,7 @@ void DisplayElement::pushState(
   Element::pushState(callback);
   DisplayAdapter *da = _board->display;
   if (da) {
-    callback("brightness", String(config->brightness).c_str());
+    callback("brightness", String(displayConfig.brightness).c_str());
     callback("page", String(_board->display->page).c_str());
   }
 }  // pushState()

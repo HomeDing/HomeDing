@@ -23,12 +23,32 @@
 
 #define DBG_TRACE  // trace level for all elements
 
-// ===== HomeDing Configuration : Enable Elements for the firmware
+
+// Common Elements for display devices
 
 #define HOMEDING_REGISTER 1
 
-// Enable the following element groups of the HomeDing Library
+#define HOMEDING_INCLUDE_DISPLAY  // all elements that can be displayed
 #define HOMEDING_INCLUDE_CORE
+
+// ===== HomeDing Pre-defined Display Devices
+
+#define HOMEDING_DEVICE_ESP328048S043
+// #define HOMEDING_DEVICE_PANEL
+// #define HOMEDING_DEVICE_PANEL22
+
+#if defined(HOMEDING_DEVICE_ESP328048S043)
+
+#define HOMEDING_INCLUDE_DISPLAYESP32PANEL
+#define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
+#define HOMEDING_INCLUDE_SD
+
+
+#else
+
+// ===== HomeDing Configuration : Enable Elements for the firmware
+
+// Enable the following element groups of the HomeDing Library
 // #define HOMEDING_INCLUDE_SSDP
 
 // Enable some Sensor Elements
@@ -54,7 +74,6 @@
 // #define HOMEDING_INCLUDE_DSTIME
 
 // Enable Elements for Displays
-#define HOMEDING_INCLUDE_DISPLAY  // all elements that can be displayed
 // #define HOMEDING_INCLUDE_DISPLAYLCD
 // #define HOMEDING_INCLUDE_DISPLAYSSD1306
 // #define HOMEDING_INCLUDE_DISPLAYSH1106
@@ -64,13 +83,13 @@
 // #define HOMEDING_INCLUDE_DISPLAYST7796
 // #define HOMEDING_INCLUDE_DISPLAYST7789
 #define HOMEDING_INCLUDE_DISPLAYST7735
-// #define HOMEDING_INCLUDE_DISPLAYESP32PANEL
+#define HOMEDING_INCLUDE_DISPLAYESP32PANEL
 // #define HOMEDING_INCLUDE_DISPLAYST7701
 
 // #define HOMEDING_INCLUDE_DISPLAYMAX7219
 
 // enable these lines to get touch displays supported
-// #define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
+#define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
 // #define HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
 // #define HOMEDING_INCLUDE_DISPLAYTOUCHCST816
 
@@ -85,7 +104,9 @@
 // #define HOMEDING_INCLUDE_MQTT
 // #define HOMEDING_INCLUDE_WEATHERFEED
 // #define HOMEDING_INCLUDE_SDMMC
-// #define HOMEDING_INCLUDE_SD
+
+#endif
+
 
 #include <Arduino.h>
 #include <HomeDing.h>
@@ -115,6 +136,7 @@ WebServer server(80);
 void setup(void) {
   fs::FS *fsys = nullptr;
   Serial.begin(115200);
+  Serial.println();
 
 #if ARDUINO_USB_CDC_ON_BOOT
   Serial.setTxTimeoutMs(0);

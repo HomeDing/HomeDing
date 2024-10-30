@@ -39,20 +39,7 @@ Element *DisplaySSD1306Element::create() {
 /// @brief Activate the DisplaySSD1306Element and register
 /// the Display Adapter to the board.
 void DisplaySSD1306Element::start() {
-  LOGGER_ETRACE("start()");
-  DisplayAdapter *d = new DisplaySSD1306Adapter();
-
-  if (d->setup(_board)) {
-    if (d->start()) {
-      _board->display = d;
-      DisplayElement::start();
-
-    } else {
-      LOGGER_EERR("no display found");
-      delete d;
-      active = false;
-    }  // if
-  }    // if
+  DisplayElement::start(new DisplaySSD1306Adapter());
 }  // start()
 
 // End

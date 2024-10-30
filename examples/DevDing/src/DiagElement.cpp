@@ -17,6 +17,7 @@
 // open http://corec3/diag
 // open http://corec3/profile
 // open http://corec3/chipinfo
+
 #include <Arduino.h>
 #include <HomeDing.h>
 #include <hdfs.h>

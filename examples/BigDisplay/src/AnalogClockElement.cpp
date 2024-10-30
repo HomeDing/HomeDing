@@ -17,7 +17,9 @@
 
 #include "AnalogClockElement.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#include "gfxDraw.h"
+
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
 
@@ -39,7 +41,7 @@ Element *AnalogClockElement::create() {
 /* ===== Element functions ===== */
 
 AnalogClockElement::AnalogClockElement() {
-  category = (CATEGORY)(CATEGORY::Widget | CATEGORY::Looping); // needs loop
+  category = (CATEGORY)(CATEGORY::Widget | CATEGORY::Looping);  // needs loop
 }
 
 
@@ -141,7 +143,7 @@ void AnalogClockElement::draw() {
  * @brief Give some processing time to the Element to check for next actions.
  */
 void AnalogClockElement::loop() {
-  if ((! needsDraw) && (_shown_time != time(nullptr))) {
+  if ((!needsDraw) && (_shown_time != time(nullptr))) {
     TRACE("need");
     needsDraw = true;
     _display->setFlush();
@@ -161,6 +163,7 @@ void AnalogClockElement::_drawClock() {
   float rad1 = (M_TWOPI / 60);
   int16_t x0, y0, x1, y1;
   BoundingBox box(_cx - _radius, _cy - _radius, _cx + _radius, _cy + _radius);
+  DisplayAdapter *d = _display;
   uint32_t color;
 
   _display->drawCircle(box, _borderColor, _backgroundColor);
@@ -187,7 +190,12 @@ void AnalogClockElement::_drawClock() {
       color = RGB_GRAY;
     }
 
-    _display->drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, color);
+    gfxDraw::drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, [d, color](int16_t x, int16_t y) {
+      d->writePixel(x, y, color);
+    });
+
+    // gfxDraw::drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, gfxDraw::cbUseColor(color, _display->writePixel));
+
   }  // for
 }
 
@@ -216,39 +224,43 @@ void AnalogClockElement::_drawClock() {
 //    }
 // }
 
-void _drawLineWidth(DisplayAdapter *d, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t wd) {
+void _drawLineWidth(DisplayAdapter *d, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color, uint16_t wd) {
 
+  d->startWrite();
   if (wd < 2) {
-    d->drawLine(x0, y0, x1, y1);
+    gfxDraw::drawLine(x0, y0, x1, y1, [d, color](int16_t x, int16_t y) {
+      d->writePixel(x, y, color);
+    });
 
   } else if (wd < 4) {
-    // clang-format off
     //   X
     //  XOX
     //   X
-    d->drawLine(x0 + 1, y0,     x1 + 1, y1);
-    d->drawLine(x0,     y0 + 1, x1,     y1 + 1);
-    d->drawLine(x0 - 1, y0,     x1 - 1, y1);
-    d->drawLine(x0,     y0 - 1, x1,     y1 - 1);
-    // clang-format on
+    gfxDraw::drawLine(x0, y0, x1, y1, [d, color](int16_t x, int16_t y) {
+      d->writePixel(x + 1, y, color);
+      d->writePixel(x, y + 1, color);
+      d->writePixel(x - 1, y, color);
+      d->writePixel(x, y - 1, color);
+    });
 
   } else if (wd < 6) {
-    // clang-format off
-    //   X       3  
-    //  X X     4 2 
+    //   X       3
+    //  X X     4 2
     // X O X   5 O 1
-    //  X X     6 X 
-    //   X       X  
-    d->drawLine(x0 + 2, y0,     x1 + 2, y1    );
-    d->drawLine(x0 + 1, y0 - 1, x1 + 1, y1 - 1);
-    d->drawLine(x0    , y0 - 2, x1    , y1 - 2);
-    d->drawLine(x0 - 1, y0 - 1, x1 - 1, y1 - 1);
-    d->drawLine(x0 - 2, y0    , x1 - 2, y1    );
-    d->drawLine(x0 - 1, y0 + 1, x1 - 1, y1 + 1);
-    d->drawLine(x0    , y0 + 2, x1    , y1 + 2);
-    d->drawLine(x0 + 1, y0 + 1, x1 + 1, y1 + 1);
-    // clang-format on
+    //  X X     6 X
+    //   X       X
+    gfxDraw::drawLine(x0, y0, x1, y1, [d, color](int16_t x, int16_t y) {
+      d->writePixel(x + 2, y, color);
+      d->writePixel(x + 1, y - 1, color);
+      d->writePixel(x, y - 2, color);
+      d->writePixel(x - 1, y - 1, color);
+      d->writePixel(x - 2, y, color);
+      d->writePixel(x - 1, y + 1, color);
+      d->writePixel(x, y + 2, color);
+      d->writePixel(x + 1, y + 1, color);
+    });
   }
+  d->endWrite();
 }
 
 
@@ -260,8 +272,7 @@ void AnalogClockElement::_drawHand(uint16_t deg, uint16_t len, uint16_t width, u
   int16_t x1 = _cx + (fx * len * _radius / 12.0);
   int16_t y1 = _cy + (fy * len * _radius / 12.0);
 
-  _display->setColor(color);
-  _drawLineWidth(_display, _cx, _cy, x1, y1, width);
+  _drawLineWidth(_display, _cx, _cy, x1, y1, color, width);
 }
 
 /* ===== Register the Element ===== */

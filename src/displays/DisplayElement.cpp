@@ -224,7 +224,6 @@ void DisplayElement::start() {
 void DisplayElement::start(DisplayAdapter *displayAdapter) {
   TRACE("start()");
   if (displayAdapter) {
-    resetPin;
     if (displayAdapter->setup(_board)) {
       bool success = displayAdapter->start();
       if (success) {

@@ -151,8 +151,8 @@ void MAX7219Element::_writeM8X8(String value) {
 bool MAX7219Element::set(const char *name, const char *value) {
   bool ret = true;
 
-   if (Element::set(name, value)) {
-     // ok.
+  if (Element::set(name, value)) {
+    // ok.
 
   } else if (name == HomeDing::Actions::Value) {
     _value = value;
@@ -161,20 +161,15 @@ bool MAX7219Element::set(const char *name, const char *value) {
     if (active)
       _clear();
 
-  } else if (_stricmp(name, "brightness") == 0) {
-    int b = _atoi(value);
-    _brightness = constrain(b, 0, 16);
+  } else if (name == HomeDing::Actions::Brightness) {
+    _brightness = _atoi(value, 0, 16);
     _setBrightness();
 
   } else if (_stricmp(name, "cspin") == 0) {
     _csPin = _atopin(value);
 
-  } else if (_stricmp(name, "mode") == 0) {
-    if (_stricmp(value, "numeric") == 0) {
-      _mode = Mode::numeric;
-    } else if (_stricmp(value, "8x8") == 0) {
-      _mode = Mode::m8x8;
-    }
+  } else if (name == HomeDing::Actions::Mode) {
+    _mode = (Mode)_scanEnum("none,numeric,8x8", value);
 
   } else {
     ret = false;
@@ -199,10 +194,10 @@ void MAX7219Element::start() {
     SPI.begin();
     pinMode(_csPin, OUTPUT);
     digitalWrite(_csPin, HIGH);
-    _write(REG_DISPLAYTEST, 0);           // no test mode
-    _write(REG_SCANLIMIT, 0x07);          // all digits
+    _write(REG_DISPLAYTEST, 0);   // no test mode
+    _write(REG_SCANLIMIT, 0x07);  // all digits
 
-     _clear();
+    _clear();
     _setBrightness();
     _lastValue = "";
   }  // if
@@ -233,9 +228,9 @@ void MAX7219Element::loop() {
 void MAX7219Element::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback("mode", _mode == Mode::numeric ? "numeric" : "8x8");
+  // callback("mode", _mode == Mode::numeric ? "numeric" : "8x8");
   callback("brightness", _printInteger(_brightness));
-  callback(HomeDing::Actions::Value, String(_value).c_str());
+  callback(HomeDing::Actions::Value, _value.c_str());
 }  // pushState()
 
 

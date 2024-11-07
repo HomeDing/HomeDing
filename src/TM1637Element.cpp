@@ -165,7 +165,7 @@ bool TM1637Element::set(const char *name, const char *value) {
     _value = value;
     _needUpdate = true;
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (name == HomeDing::Actions::Brightness) {
     int b = _atoi(value);
     b = constrain(b, 0, 8);
     _brightness = b;

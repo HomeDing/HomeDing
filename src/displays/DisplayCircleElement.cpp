@@ -1,5 +1,5 @@
 /**
- * @file DisplayRectElement.cpp
+ * @file DisplayCircleElement.cpp
  * @brief Output Element for controlling a binary output on a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -11,29 +11,31 @@
  *
  * More information on https://www.mathertel.de/Arduino.
  *
- * Changelog, see DisplayRectElement.h.
+ * Changelog, see DisplayCircleElement.h.
  */
 
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <displays/DisplayRectElement.h>
+#include <displays/DisplayCircleElement.h>
 
 #include <gfxDraw.h>
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
-/// @brief static factory function to create a new DisplayRectElement.
-/// @return DisplayRectElement* as Element* created element.
-Element *DisplayRectElement::create() {
-  DisplayRectElement *e = new DisplayRectElement();
+/**
+ * @brief static factory function to create a new DisplayCircleElement.
+ * @return DisplayCircleElement* as Element* created element
+ */
+Element *DisplayCircleElement::create() {
+  DisplayCircleElement *e = new DisplayCircleElement();
   e->_value = "1";
   return (e);
 }  // create()
 
 
-/// @brief Draw the rectangle.
-void DisplayRectElement::draw() {
+/// @brief Draw this output element.
+void DisplayCircleElement::draw() {
   bool bValue = _atob(_value.c_str());
   TRACE("draw(%d)", bValue);
 
@@ -42,10 +44,12 @@ void DisplayRectElement::draw() {
 
   HomeDing::displayAdapter->startWrite();
 
-  gfxDraw::drawRect(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1,
-                    HomeDing::stroke, bValue ? HomeDing::fill : nullptr);
+  gfxDraw::drawCircle(
+    gfxDraw::Point((_x0 + _x1) / 2, (_y0 + _y1) / 2),(_x1 - _x0) / 2,
+    HomeDing::stroke, bValue ? HomeDing::fill : nullptr);
 
   HomeDing::displayAdapter->endWrite();
+
 }  // draw()
 
 

@@ -92,7 +92,7 @@ Element *BL0937Element::create() {
 bool BL0937Element::set(const char *name, const char *value) {
   bool ret = true;
 
-  if (_stricmp(name, "mode") == 0) {
+  if (name == HomeDing::Actions::Mode) {
     _voltageMode = (_stricmp(value, "current") != 0);
 
     if (active) {

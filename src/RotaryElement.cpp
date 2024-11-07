@@ -129,7 +129,7 @@ void RotaryElement::loop() {
 void RotaryElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Actions::Value, String(_value).c_str());
+  callback(HomeDing::Actions::Value, _printInteger((int)_value));
 }  // pushState()
 
 // End

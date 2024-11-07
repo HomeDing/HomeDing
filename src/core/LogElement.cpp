@@ -37,7 +37,7 @@ Element *LogElement::create() {
 /* ===== Element functions ===== */
 
 LogElement::LogElement() {
-  startupMode = Element_StartupMode::WithTime;
+  startupMode = Element::STARTUPMODE::Time;
 }
 
 
@@ -161,7 +161,7 @@ void LogElement::loop() {
 void LogElement::pushState(
     std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Actions::Value, String(_value).c_str());
+  callback(HomeDing::Actions::Value, _value.c_str());
 } // pushState()
 
 

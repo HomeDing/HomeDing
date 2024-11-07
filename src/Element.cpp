@@ -15,6 +15,9 @@
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
+// textual versions of the enum Element::STARTUPMODE
+#define STARTUPMODE_TEXT "manual,sys,net,time"
+
 /* ===== Element functions ===== */
 
 /**
@@ -50,15 +53,7 @@ bool Element::set(const char *name, const char *value) {
     _useState = _atob(value);
 
   } else if (name == HomeDing::Actions::Startup) {
-
-    if (_stricmp(value, "sys") == 0) {
-      startupMode = Element_StartupMode::System;
-    } else if (_stricmp(value, "net") == 0) {
-      startupMode = Element_StartupMode::WithNetwork;
-    } else if (_stricmp(value, "time") == 0) {
-      startupMode = Element_StartupMode::WithTime;
-    }
-
+    startupMode = (STARTUPMODE)(_scanEnum(STARTUPMODE_TEXT, value));
 
     // do not report an error for the following properties,
     // as they are used by the web ui and stored in the config files only.
@@ -133,6 +128,14 @@ void Element::term() {
 /* Return am integer value from a string. */
 int Element::_atoi(const char *value) {
   return (strtol(value, nullptr, 0));
+}  // _atoi()
+
+
+// Return am integer value from a string in the specified range.
+int Element::_atoi(const char *value, int min, int max) {
+  int v = strtol(value, nullptr, 0);
+  v = constrain(v, min, max);
+  return (v);
 }  // _atoi()
 
 
@@ -312,6 +315,15 @@ uint32_t Element::_atoColor(const char *value) {
 }  // _atoColor()
 
 
+// Scan a configuration or action value for one enum value as an index of string.
+
+int Element::_scanEnum(const char *enumTexts, const char *value) {
+  String v = value;
+  v.toLowerCase();
+  int m = ListUtils::indexOf(enumTexts, v.c_str());
+  return (m >= 0 ? m : 0);
+}  // _scanEnum()
+
 // ===== static value to string helper function ===== //
 
 char Element::_convertBuffer[32];
@@ -394,7 +406,7 @@ void Element::_strlower(char *str) {
         *str += 'a' - 'A';
       str++;
     }  // while
-  }    // if
+  }  // if
 }  // _strlower
 
 

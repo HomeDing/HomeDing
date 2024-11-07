@@ -19,6 +19,8 @@
 
 #include <displays/DisplayDotElement.h>
 
+#include <gfxDraw.h>
+
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
@@ -34,9 +36,28 @@ Element *DisplayDotElement::create() {
 
 /// @brief Draw this output element.
 void DisplayDotElement::draw() {
-  TRACE("draw()");
+  TRACE("draw(%d/%d - %d/%d #%08x)\n", _x0, _y0, _x1, _y1);
+
   bool bValue = _atob(_value.c_str());
+
+#if 0
   _display->drawCircle(box, _borderColor, bValue ? _backgroundColor : RGB_TRANSPARENT);
+
+#else
+  HomeDing::strokeColor = _borderColor;
+  HomeDing::fillColor = _backgroundColor;
+
+  HomeDing::displayAdapter->startWrite();
+
+  gfxDraw::drawCircle(
+    gfxDraw::Point((_x0 + _x1) / 2, (_y0 + _y1) / 2),
+    (_x1 - _x0) / 2,
+    HomeDing::stroke,
+    HomeDing::fill);
+
+  HomeDing::displayAdapter->endWrite();
+#endif
+
 }  // draw()
 
 

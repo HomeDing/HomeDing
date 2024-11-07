@@ -32,7 +32,7 @@
 #endif
 
 // use DIAG TRACE for sending detailed output for the Diag Element.
-#define DIAGTRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define DIAGTRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -42,7 +42,7 @@
  */
 Element *DiagElement::create() {
   DiagElement *e = new DiagElement();
-  e->startupMode = Element_StartupMode::System;
+  e->startupMode = Element::STARTUPMODE::System;
   e->loglevel = LOGGER_LEVEL_TRACE;
   return (e);
 }  // create()
@@ -115,7 +115,7 @@ String DiagElement::_handleDiag() {
 #if defined(ESP32)
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0))
   // ESP32 Version 3++
-  out += "Mac-address: " + Network.macAddress() + "\n";
+  out += "Mac-address: " +  ::Network.macAddress() + "\n";
 #else
   // ESP32 Version 2.x
   out += "Mac-address: " + WiFi.macAddress() + "\n";

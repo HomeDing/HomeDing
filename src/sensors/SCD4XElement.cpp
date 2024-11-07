@@ -25,6 +25,9 @@
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
+// textual versions of the enum SCD4XElement::SCANMODE
+#define SCANMODE_TEXT "continuous,lowpower,single"
+
 /**
  * @brief static factory function to create a new SCD4XElement
  * @return SCD4XElement* created element
@@ -40,6 +43,7 @@ SCD4XElement::SCD4XElement() {
   _stateKeys = "co2,temperature,humidity";
 }
 
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -52,10 +56,8 @@ bool SCD4XElement::set(const char *name, const char *value) {
   } else if (name == HomeDing::Actions::Address) {
     _address = _atoi(value);
 
-  } else if (_stricmp(name, "mode") == 0) {
-    SCANMODE m = (SCANMODE)ListUtils::indexOf("continuous,lowpower,single", value);
-    if ((m >= SCANMODE::_min) && (m <= SCANMODE::_max))
-      _mode = m;
+  } else if (name == HomeDing::Actions::Mode) {
+    _mode = (SCANMODE)(_scanEnum(SCANMODE_TEXT, value));
 
   } else if (_stricmp(name, "onCO2") == 0) {
     _actions[0] = value;
@@ -127,7 +129,7 @@ void SCD4XElement::start() {
       _state = 0;
 
     }  // if
-  }    // if
+  }  // if
 }  // start()
 
 

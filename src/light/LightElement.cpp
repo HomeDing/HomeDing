@@ -59,7 +59,7 @@ void LightElement::setColor(uint32_t color, int brightness) {
  */
 Element *LightElement::create() {
   LightElement *e = new LightElement();
-  e->startupMode = Element_StartupMode::System;
+  e->startupMode = Element::STARTUPMODE::System;
   return (e);
 }  // create()
 
@@ -83,7 +83,7 @@ bool LightElement::set(const char *name, const char *pValue) {
       needUpdate = true;
     }
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (name == HomeDing::Actions::Brightness) {
     int b = _atoi(pValue);
     b = constrain(b, 0, 100);
     if (_brightness != b) {
@@ -110,7 +110,7 @@ bool LightElement::set(const char *name, const char *pValue) {
         _count++;
       }  // while
 
-    } else if (_stricmp(name, "mode") == 0) {
+    } else if (name == HomeDing::Actions::Mode) {
       if (_stricmp(pValue, "pwm") == 0) {
         pwmMode = true;
       }

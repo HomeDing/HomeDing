@@ -83,9 +83,6 @@ public:
   int wrPin = -1;         // write strobe pin (lcd8)
   int rdPin = -1;         // read strobe pin (lcd8)
 
-  // GPIO pins used for the 8-bit and 16-bit busses
-  String busPins;
-
   /* ===== I2C interface ===== */
 
   int i2cAddress;  ///< i2c address
@@ -100,6 +97,27 @@ public:
   int spiMOSI;  ///< SPI interface MOSI pin
   int spiMISO;  ///< SPI interface MISO pin
   int spiCLK;   ///< SPI interface clock CLK pin
+
+  /* ===== RGB Parallel / Panel ===== */
+
+  int dePin;
+
+  int hsync_pin;
+  uint16_t hsync_polarity;
+  uint16_t hsync_pulse_width;
+  uint16_t hsync_front_porch;
+  uint16_t hsync_back_porch;
+
+  int vsync_pin;
+  uint16_t vsync_polarity;
+  uint16_t vsync_pulse_width;
+  uint16_t vsync_front_porch;
+  uint16_t vsync_back_porch;
+
+  int pclk_pin;
+
+  // GPIO pins used for the 8-bit and 16-bit busses
+  String busPins;
 };
 
 // global, singleton display configuration

@@ -34,7 +34,7 @@ bool TimerElement::set(const char *name, const char *value) {
   bool ret = true;
   // TRACE("set %s=%s", name, value);
 
-  if (_stricmp(name, "mode") == 0) {
+  if (name == HomeDing::Actions::Mode) {
     if (_stricmp(value, "off") == 0) {
       _mode = Mode::OFF;
     } else if (_stricmp(value, "on") == 0) {
@@ -194,7 +194,7 @@ void TimerElement::pushState(
   if (_mode != Mode::TIMER) {
     callback("time", "0");
   } else {
-    callback("time", String((now - _startTime) / 1000).c_str());
+    callback("time", _printInteger((now - _startTime) / 1000));
   }
   callback(HomeDing::Actions::Value, _value ? "1" : "0");
 }  // pushState()

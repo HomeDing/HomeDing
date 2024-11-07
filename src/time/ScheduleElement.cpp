@@ -42,7 +42,7 @@ Element *ScheduleElement::create()
 
 ScheduleElement::ScheduleElement()
 {
-  startupMode = Element_StartupMode::WithTime;
+  startupMode = Element::STARTUPMODE::Time;
 }
 
 /**
@@ -76,7 +76,7 @@ bool ScheduleElement::set(const char *name, const char *value)
   } else if (_stricmp(name, "onoff") == 0) {
     _offAction = value;
 
-  } else if (_stricmp(name, "mode") == 0) {
+  } else if (name == HomeDing::Actions::Mode) {
     if (_stricmp(value, "off") == 0) {
       _mode = Mode::OFF;
     } else if (_stricmp(value, "on") == 0) {

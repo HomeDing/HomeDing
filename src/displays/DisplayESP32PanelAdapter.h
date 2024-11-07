@@ -10,6 +10,8 @@
  * -----
  * * 25.07.2018 created by Matthias Hertel
  * * 02.04.2023 using Arduino GFX library.
+ * https://hackaday.com/2024/01/25/displays-we-love-hacking-parallel-rgb/
+ * https://riverdi.com/blog/the-parallel-rgb-interface-explained
  */
 
 #pragma once
@@ -32,16 +34,6 @@ class DisplayESP32PanelAdapter : public DisplayAGFXAdapter {
         pins[n] = Element::_atopin(ListUtils::at(displayConfig.busPins, n).c_str());
       }
     }
-
-    // if (displayConfig.resetPin >= 0) {
-    //   pinMode(displayConfig.resetPin, OUTPUT);
-    //   digitalWrite(displayConfig.resetPin, LOW);
-    //   delay(200);
-    //   digitalWrite(displayConfig.resetPin, HIGH);
-    //   delay(200);
-    // }
-
-
 
     // from: <https://github.com/moononournation/Arduino_GFX/wiki/Dev-Device-Declaration#esp32-8048s043>
     Arduino_ESP32RGBPanel *rgbpanel = new Arduino_ESP32RGBPanel(

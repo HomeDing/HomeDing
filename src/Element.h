@@ -48,17 +48,6 @@ class Element;
 // ===== Helping classes =====
 #include <core/Logger.h>
 
-/**
- * @brief Startup Mode specifies when is the right moment to try
- * starting/activating the element.
- */
-enum Element_StartupMode : uint16_t {
-  System = 1,       // right after loading the configurations.
-  WithNetwork = 2,  // after a network connectivity in AP Mode was established.
-  WithTime = 3,     // after a valid local time was set.
-  Manual = 9        // manually started.
-};
-
 #define ACTION_SEPARATOR ','
 
 #define VALUE_SEPARATOR ','
@@ -86,6 +75,18 @@ struct _pchar_less {
  */
 class Element {
 public:
+/**
+ * @brief Startup Mode specifies when is the right moment to try
+ * starting/activating the element.
+ */
+  enum STARTUPMODE : uint16_t {
+    Manual = 0,       // manually started.
+    System = 1,       // right after loading the configurations.
+    Network = 2,  // after a network connectivity in AP Mode was established.
+    Time = 3,     // after a valid local time was set.
+  };
+
+
   /// @brief Datatype definitions for elements processing different types based on the configuration.
   enum DATATYPE : uint16_t {
     STRING = 0,  // unspecified, all data can be presented as strings
@@ -124,7 +125,7 @@ public:
   /**
    * @brief when the element should be started.
    */
-  Element_StartupMode startupMode = Element_StartupMode::WithNetwork;
+  Element::STARTUPMODE startupMode = Element::STARTUPMODE::Network;
 
 
   /**
@@ -192,6 +193,13 @@ public:
    */
   static int _atoi(const char *value);
 
+  /// @brief Return am integer value from a string in the specified range.
+  /// @param value Given value as string.
+  /// @param min minimal result
+  /// @param max maximal result
+  /// @return value from string contrained to the range.
+  static int _atoi(const char *value, int min, int max);
+
   /**
    * @brief Return a boolean value from a string.
    * @param value Given value as string.
@@ -251,6 +259,11 @@ public:
   /// @return color value
   uint32_t _atoColor(const char *value);
 
+  /// @brief scan a configuration or action value for one enum value as an index of string.
+  /// @param enumTexts list f enum constants/texts.
+  /// @param value given value to be used as eNum.
+  /// @return 0 if not found, 0...n when found.
+  int _scanEnum(const char *enumTexts, const char *value);
 
   /**
    * @brief extract index and property name from a configuration string

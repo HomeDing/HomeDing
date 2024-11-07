@@ -119,23 +119,5 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
 
 
 
-// /// @brief draw a staight line on the display.
-// /// @param x0 x coordinate of the starting pixel.
-// /// @param y0 y coordinate of the starting pixel.
-// /// @param x1 x coordinate of the ending pixel.
-// /// @param y1 y coordinate of the ending pixel.
-// /// @param color color of the line.
-// void DisplayAGFXAdapter::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color) {
-//   TRACE("drawLine(%d/%d - %d/%d #%08x)\n", x0, y0, x1, y1, color);
-
-//   if ((color != RGB_UNDEFINED) && (color != RGB_TRANSPARENT) && (x1 >= x0) && (y1 >= y0)) {
-//     if (displayBox.overlaps(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1))) {
-//       AGFX_drawColor = col565(color);
-
-//       gfxDraw::drawLine(x0, y0, x1, y1, AGFX_drawByColor);
-//       _needFlush = true;
-//     }
-//   }
-// }  // drawLine()
-
+// drawAda
 // End.

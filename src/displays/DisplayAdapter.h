@@ -138,9 +138,6 @@ public:
     _needFlush = true;
   };
 
-  virtual void drawRectangle(BoundingBox & /* box */, uint32_t /* borderColor */, uint32_t /* fillColor = RGB_UNDEFINED */) {
-    _needFlush = true;
-  };
 
   virtual void drawCircle(BoundingBox & /* box */, uint32_t /* borderColor */, uint32_t /* fillColor = RGB_UNDEFINED */) {
     _needFlush = true;
@@ -208,6 +205,13 @@ protected:
 // ===== static variables for the display in the HomeDing namespace
 
 namespace HomeDing {
-extern const DisplayAdapter *displayAdapter;
+extern DisplayAdapter *displayAdapter;
+
+extern uint32_t strokeColor;
+extern uint32_t fillColor;
+
+extern void stroke(int16_t x, int16_t y);
+extern void fill(int16_t x, int16_t y);
+
 
 }

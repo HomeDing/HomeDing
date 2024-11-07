@@ -35,6 +35,7 @@ namespace HomeDing::Actions {
 const char *_actionNames[] = {
   "address",
   "border",
+  "brightness",
   "clear",
   "description",
   "down",
@@ -86,6 +87,7 @@ const char *find(const char *name) {
 // clang-format off
 const char *Address      = find("address");
 const char *Border       = find("border");
+const char *Brightness   = find("brightness");
 const char *Clear        = find("clear");
 const char *Description  = find("description");
 const char *Down         = find("down");

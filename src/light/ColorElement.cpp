@@ -116,7 +116,7 @@ bool ColorElement::set(const char *name, const char *value) {
     _toBrightness = _brightness;
     _needValueUpdate = true;
 
-  } else if (_stricmp(name, "brightness") == 0) {
+  } else if (name == HomeDing::Actions::Brightness) {
     // set brightness: pass through to light elements
     int b = _atoi(value);
     _fromBrightness = _brightness;
@@ -125,7 +125,7 @@ bool ColorElement::set(const char *name, const char *value) {
     _needBrightnessUpdate = true;
 
 
-  } else if (_stricmp(name, "mode") == 0) {
+  } else if (name == HomeDing::Actions::Mode) {
     Mode m = (Mode)ListUtils::indexOf("fix,fade,wheel,pulse", value);
     if ((m >= Mode::_min) && (m <= Mode::_max)) {
       _mode = m;

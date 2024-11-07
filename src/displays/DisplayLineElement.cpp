@@ -34,18 +34,13 @@ Element *DisplayLineElement::create() {
 
 /// @brief Draw the line by using gfxDraw functions.
 void DisplayLineElement::draw() {
-  TRACE("drawLine(%d/%d - %d/%d #%08x)\n", _x0, _y0, _x1, _y1, _color);
-  DisplayAdapter *d = _display;
-  uint32_t color = _color;
+  TRACE("draw(%d/%d - %d/%d)\n", _x0, _y0, _x1, _y1);
 
   if ((_color != RGB_UNDEFINED) && (_color != RGB_TRANSPARENT)) {
-    _display->startWrite();
-    gfxDraw::drawLine(_x0, _y0, _x1, _y1, [d, color](int16_t x, int16_t y) {
-      if (d->displayBox.contains(x, y)) {
-        d->writePixel(x, y, color);
-      }
-    });
-    _display->endWrite();
+    HomeDing::strokeColor = _color;
+    HomeDing::displayAdapter->startWrite();
+    gfxDraw::drawLine(_x0, _y0, _x1, _y1, HomeDing::stroke);
+    HomeDing::displayAdapter->endWrite();
   }
 }  // draw()
 

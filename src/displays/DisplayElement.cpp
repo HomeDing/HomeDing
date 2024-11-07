@@ -24,7 +24,7 @@
 using namespace HomeDing;
 
 DisplayElement::DisplayElement() {
-  startupMode = Element_StartupMode::System;
+  startupMode = Element::STARTUPMODE::System;
   category = CATEGORY::Display;
 }
 
@@ -73,9 +73,11 @@ bool DisplayElement::set(const char *name, const char *value) {
   bool ret = true;
   TRACE("set %s=%s", name, value);
   DisplayAdapter *da = _board->display;
+  int value_int = _atoi(value);
+  int value_pin = _atopin(value);
 
-  if (_stricmp(name, "brightness") == 0) {
-    int b = _atoi(value);
+  if (name == HomeDing::Actions::Brightness) {
+    int b = value_int;
     displayConfig.brightness = constrain(b, 0, 100);
     if (active && da) {
       da->setBrightness(displayConfig.brightness);
@@ -86,10 +88,10 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     if (_stricmp(name, "page") == 0) {
       // switch the page
-      _newPage(*value ? _atoi(value) : da->page);
+      _newPage(*value ? value_int : da->page);
 
     } else if (_stricmp(name, "addpage") == 0) {
-      _newPage(da->page + _atoi(value));
+      _newPage(da->page + value_int);
 
     } else if (name == HomeDing::Actions::Clear) {
       da->start();
@@ -117,49 +119,89 @@ bool DisplayElement::set(const char *name, const char *value) {
     displayConfig.busmode = ListUtils::indexOf(BUSMODE_LIST, value);
 
   } else if (_stricmp(name, "busspeed") == 0) {
-    displayConfig.busSpeed = _atoi(value);
+    displayConfig.busSpeed = value_int;
+
+
+    // ===== bus configurations for any bus
+
+  } else if (_stricmp(name, "cspin") == 0) {
+    displayConfig.csPin = value_pin;
+
+  } else if (_stricmp(name, "dcpin") == 0) {
+    displayConfig.dcPin = value_pin;
+
+  } else if (_stricmp(name, "wrpin") == 0) {
+    displayConfig.wrPin = value_pin;
+
+  } else if (_stricmp(name, "rdpin") == 0) {
+    displayConfig.rdPin = value_pin;
 
 
     // ===== parallel busses configuration
-
-  } else if (_stricmp(name, "cspin") == 0) {
-    displayConfig.csPin = _atopin(value);
-
-  } else if (_stricmp(name, "dcpin") == 0) {
-    displayConfig.dcPin = _atopin(value);
-
-  } else if (_stricmp(name, "wrpin") == 0) {
-    displayConfig.wrPin = _atopin(value);
-
-  } else if (_stricmp(name, "rdpin") == 0) {
-    displayConfig.rdPin = _atopin(value);
 
   } else if (_stricmp(name, "buspins") == 0) {
     displayConfig.busPins = value;
     displayConfig.busPins.replace(" ", "");
 
+  } else if (_stricmp(name, "depin") == 0) {
+    displayConfig.dePin = value_pin;
+
+
+  } else if (_stricmp(name, "hsyncpin") == 0) {
+    displayConfig.hsync_pin = value_pin;
+
+  } else if (_stricmp(name, "hsyncpolarity") == 0) {
+    displayConfig.hsync_polarity = value_int;
+
+  } else if (_stricmp(name, "hsyncpulsewidth") == 0) {
+    displayConfig.hsync_pulse_width = value_int;
+
+  } else if (_stricmp(name, "hsyncfrontporch") == 0) {
+    displayConfig.hsync_front_porch = value_int;
+
+  } else if (_stricmp(name, "hsyncbackporch") == 0) {
+    displayConfig.hsync_back_porch = value_int;
+
+
+  } else if (_stricmp(name, "vsyncpin") == 0) {
+    displayConfig.vsync_pin = value_pin;
+
+  } else if (_stricmp(name, "vsyncpolarity") == 0) {
+    displayConfig.vsync_polarity = value_int;
+
+  } else if (_stricmp(name, "vsyncpulsewidth") == 0) {
+    displayConfig.vsync_pulse_width = value_int;
+
+  } else if (_stricmp(name, "vsyncfrontporch") == 0) {
+    displayConfig.vsync_front_porch = value_int;
+
+  } else if (_stricmp(name, "vsyncbackporch") == 0) {
+    displayConfig.vsync_back_porch = value_int;
+
+  } else if (_stricmp(name, "pclkpin") == 0) {
+    displayConfig.pclk_pin = value_pin;
 
     // ===== i2c bus parameter
 
   } else if (name == HomeDing::Actions::Address) {
-    displayConfig.i2cAddress = _atoi(value);
+    displayConfig.i2cAddress = value_int;
 
     // ===== spi bus parameter
 
   } else if (_stricmp(name, "spimosi") == 0) {
-    displayConfig.spiMOSI = _atopin(value);
+    displayConfig.spiMOSI = value_pin;
 
   } else if (_stricmp(name, "spimiso") == 0) {
-    displayConfig.spiMISO = _atopin(value);
+    displayConfig.spiMISO = value_pin;
 
   } else if (_stricmp(name, "spiclk") == 0) {
-    displayConfig.spiCLK = _atopin(value);
+    displayConfig.spiCLK = value_pin;
 
   } else if (_stricmp(name, "spics") == 0) {
-    displayConfig.csPin = _atopin(value);  // please use csPin, deprecated
+    displayConfig.csPin = value_pin;  // please use csPin, deprecated
 
   } else if (_stricmp(name, "spidc") == 0) {
-    displayConfig.dcPin = _atopin(value);  // please use dcPin, deprecated
+    displayConfig.dcPin = value_pin;  // please use dcPin, deprecated
 
 
   } else if (name == HomeDing::Actions::Invert) {
@@ -169,30 +211,30 @@ bool DisplayElement::set(const char *name, const char *value) {
     displayConfig.ips = _atob(value);
 
   } else if (_stricmp(name, "resetpin") == 0) {
-    displayConfig.resetPin = _atopin(value);
+    displayConfig.resetPin = value_pin;
 
   } else if (_stricmp(name, "lightpin") == 0) {
-    displayConfig.lightPin = _atopin(value);
+    displayConfig.lightPin = value_pin;
 
     // ===== Display settings
 
   } else if (name == HomeDing::Actions::Width) {
-    displayConfig.width = _atoi(value);
+    displayConfig.width = value_int;
 
   } else if (name == HomeDing::Actions::Height) {
-    displayConfig.height = _atoi(value);
+    displayConfig.height = value_int;
 
   } else if (_stricmp(name, "rotation") == 0) {
-    int r = _atoi(value);
+    int r = value_int;
     r = (r / 90);
     r = constrain(r, 0, 3);
     displayConfig.rotation = r * 90;
 
   } else if (_stricmp(name, "rowOffset") == 0) {
-    displayConfig.rowOffset = _atoi(value);
+    displayConfig.rowOffset = value_int;
 
   } else if (_stricmp(name, "colOffset") == 0) {
-    displayConfig.colOffset = _atoi(value);
+    displayConfig.colOffset = value_int;
 
   } else {
     ret = Element::set(name, value);
@@ -255,8 +297,8 @@ void DisplayElement::pushState(
   Element::pushState(callback);
   DisplayAdapter *da = _board->display;
   if (da) {
-    callback("brightness", String(displayConfig.brightness).c_str());
-    callback("page", String(_board->display->page).c_str());
+    callback("brightness", _printInteger(displayConfig.brightness));
+    callback("page", _printInteger(_board->display->page));
   }
 }  // pushState()
 

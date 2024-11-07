@@ -185,7 +185,7 @@ void DSTimeElement::loop() {
   struct tm t;
 
   if ((_state != 1) && (_nextRead < now)) {
-    int status = WireUtils::readRegister(DS3231_ADDRESS, DS3231_REGSTATUS);
+    int status = WireUtils::readRegister(_address, DS3231_REGSTATUS);
 
     // The OSF flag shows if the time is valid / no power lost since last
     // adjustment.
@@ -211,7 +211,6 @@ void DSTimeElement::pushState(
   Element::pushState(callback);
   strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&now));
   callback("now", tmp);
-  callback("wire-address", String(_address).c_str());
 }  // pushState()
 
 // End.

@@ -19,7 +19,9 @@
 
 #include <displays/DisplayTextElement.h>
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#include "gfxDraw.h"
+
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new DisplayTextElement.
@@ -55,7 +57,7 @@ bool DisplayTextElement::set(const char *name, const char *value) {
   if (needsDraw) {
     int16_t right = box.x_min + _prefix.length() + _value.length() + _postfix.length();
     if (right > box.x_max)
-      box.x_max = right;
+      _x1 = box.x_max = right;
   }
 
   return (ret);
@@ -67,16 +69,24 @@ bool DisplayTextElement::set(const char *name, const char *value) {
  */
 void DisplayTextElement::draw() {
   DisplayOutputElement::draw();
-  if (_display) {
-    String msg(_prefix);
-    msg.concat(_value);
-    msg.concat(_postfix);
 
-    // adjust height and width to the drawn text
-    int w = _display->drawText(box.x_min, box.y_min, box.y_max - box.y_min + 1, msg);  // remember width of drawn text
-    box.x_max = box.x_min + w - 1;
-    box.y_max = box.y_min + _display->getLineHeight() - 1;
-  }
+  TRACE("txt %d,%d/%d,%d", box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1);
+
+  String msg(_prefix);
+  msg.concat(_value);
+  msg.concat(_postfix);
+
+  HomeDing::fillColor = _backgroundColor;
+  HomeDing::displayAdapter->startWrite();
+  gfxDraw::drawRect(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1,
+                    nullptr, HomeDing::fill);
+  HomeDing::displayAdapter->endWrite();
+
+  // adjust height and width to the drawn text
+  int w = HomeDing::displayAdapter->drawText(box.x_min, box.y_min, box.y_max - box.y_min + 1, msg);  // remember width of drawn text
+  TRACE("txt w=%d", w);
+  _x1 = box.x_max = box.x_min + w - 1;
+  _y1 = box.y_max = box.y_min + HomeDing::displayAdapter->getLineHeight() - 1;
 }  // draw
 
 

@@ -62,7 +62,7 @@ bool INA219Element::set(const char *name, const char *value) {
     } else if (_stricmp(name, "onPower") == 0) {
       _powerAction = value;
 
-    } else if (_stricmp(name, "mode") == 0) {
+    } else if (name == HomeDing::Actions::Mode) {
       if (_stricmp(value, "once") == 0)
         _mode = INA219_MEASURE_MODE::TRIGGERED;
       else if (_stricmp(value, "continuous") == 0)

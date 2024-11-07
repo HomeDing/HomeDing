@@ -219,7 +219,7 @@ public:
   /**
    * activate all the Elements by using start().
    */
-  void start(Element_StartupMode startupMode);
+  void start(Element::STARTUPMODE startupMode);
 
   /**
    * Give some processing time to all the active elements on the board.

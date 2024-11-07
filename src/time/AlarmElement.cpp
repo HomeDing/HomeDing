@@ -36,7 +36,7 @@ Element *AlarmElement::create()
 /* ===== Element functions ===== */
 
 AlarmElement::AlarmElement() {
-  startupMode = Element_StartupMode::WithTime;
+  startupMode = Element::STARTUPMODE::Time;
 }
 
 

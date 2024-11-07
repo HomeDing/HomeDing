@@ -18,7 +18,7 @@
 #include <displays/DisplayOutputElement.h>
 #include "DisplayOutputElement.h"
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 DisplayOutputElement::DisplayOutputElement() {
   category = CATEGORY::Widget;  // no loop
@@ -64,6 +64,12 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else if ((name == HomeDing::Actions::Height) || (_stricmp(name, "h") == 0) || (_stricmp(name, "fontsize") == 0)) {
     _y1 = _y0 + _atoi(value) - 1;
 
+  } else if (_stricmp(name, "stroke") == 0) {
+    _color = _atoColor(value);
+
+  } else if (_stricmp(name, "fill") == 0) {
+    _backgroundColor = _atoColor(value);
+
   } else if (_stricmp(name, "color") == 0) {
     _color = _atoColor(value);
 
@@ -90,6 +96,8 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   if (ret) {
     box = BoundingBox(_x0, _y0, _x1, _y1);
     needsDraw = true;
+    TRACE("box= %d,%d/%d,%d", box.x_min, box.y_min, box.x_max, box.y_max);
+
   }
 
   if (needsDraw && _display) _display->setFlush();

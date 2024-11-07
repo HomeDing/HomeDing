@@ -28,15 +28,10 @@
  */
 class SCD4XElement : public SensorElement {
 public:
-  enum SCANMODE : int {
-    _min = 0,         // minimal value
-    _default = 0,     // default value
-
+  enum SCANMODE : int16_t {
     CONTINUOUS = 0,  // startup operation states
     LOWPOWER = 1,    // load configurations and create elements. Start SYS
     SINGLE = 2,      // unspecified
-
-    _max = 2,         // maximal value
   };
 
   /**
@@ -81,7 +76,7 @@ protected:
 private:
   uint8_t _address = 0x62;  // default i2c address
   uint8_t _state = 0;
-  SCANMODE _mode = SCANMODE::_default;
+  SCANMODE _mode = SCANMODE::CONTINUOUS;
 
   static uint8_t _crc8(uint8_t *data, int len);
 };

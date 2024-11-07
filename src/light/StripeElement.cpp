@@ -76,7 +76,7 @@ bool StripeElement::set(const char *name, const char *pValue) {
     // saving to LightElement::value was handled in LightElement
     _mode = Mode::fix;
 
-  } else if (_stricmp(name, "mode") == 0) {
+  } else if (name == HomeDing::Actions::Mode) {
     Mode m = (Mode)ListUtils::indexOf(StripeElement_ModeList, pValue);
     if ((m >= Mode::_min) && (m <= Mode::_max)) {
       _mode = m;

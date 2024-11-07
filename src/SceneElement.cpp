@@ -33,7 +33,7 @@ Element *SceneElement::create() {
 
 SceneElement::SceneElement() {
   // adjust startupMode when Network (default) is not applicable.
-  // startupMode = Element_StartupMode::System;
+  // startupMode = Element::STARTUPMODE::System;
   _delay = 100;       // fast stepping to the next action.
   _currentStep = -1;  // no current step
 }

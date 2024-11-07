@@ -42,7 +42,7 @@ Element *SDMMCElement::create() {
 
 SDMMCElement::SDMMCElement() {
   // adjust startupMode when Network (default) is not applicable.
-  startupMode = Element_StartupMode::System;
+  startupMode = Element::STARTUPMODE::System;
 }
 
 

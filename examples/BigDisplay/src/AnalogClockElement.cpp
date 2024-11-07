@@ -166,7 +166,17 @@ void AnalogClockElement::_drawClock() {
   DisplayAdapter *d = _display;
   uint32_t color;
 
-  _display->drawCircle(box, _borderColor, _backgroundColor);
+
+  HomeDing::displayAdapter->startWrite();
+
+  HomeDing::strokeColor = _borderColor;
+  HomeDing::fillColor = _backgroundColor;
+
+  gfxDraw::drawCircle(
+    gfxDraw::Point((_x0 + _x1) / 2, (_y0 + _y1) / 2),
+    (_x1 - _x0) / 2,
+    HomeDing::stroke,
+    HomeDing::fill);
 
   for (uint8_t i = 0; i < 60; i++) {
     float deg = (rad1 * i);
@@ -177,26 +187,23 @@ void AnalogClockElement::_drawClock() {
     if ((i % 15) == 0) {
       x1 = (x0 * 9.0) / 12.0;
       y1 = (y0 * 9.0) / 12.0;
-      color = RGB_BLUE;
+      HomeDing::strokeColor = RGB_BLUE;
 
     } else if ((i % 5) == 0) {
       x1 = (x0 * 10.0) / 12.0;
       y1 = (y0 * 10.0) / 12.0;
-      color = RGB_GREEN;
+      HomeDing::strokeColor = RGB_GREEN;
 
     } else {
       x1 = (x0 * 11.5) / 12.0;
       y1 = (y0 * 11.5) / 12.0;
-      color = RGB_GRAY;
+      HomeDing::strokeColor = RGB_GRAY;
     }
 
-    gfxDraw::drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, [d, color](int16_t x, int16_t y) {
-      d->writePixel(x, y, color);
-    });
-
-    // gfxDraw::drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, gfxDraw::cbUseColor(color, _display->writePixel));
+    gfxDraw::drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, HomeDing::stroke);
 
   }  // for
+  HomeDing::displayAdapter->endWrite();
 }
 
 // void _drawLineWidth(DisplayAdapter *d, int x0, int y0, int x1, int y1, float wd)
@@ -224,23 +231,24 @@ void AnalogClockElement::_drawClock() {
 //    }
 // }
 
-void _drawLineWidth(DisplayAdapter *d, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color, uint16_t wd) {
+void _drawLineWidth(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color, uint16_t wd) {
 
-  d->startWrite();
+  DisplayAdapter *da = HomeDing::displayAdapter;
+
+  da->startWrite();
   if (wd < 2) {
-    gfxDraw::drawLine(x0, y0, x1, y1, [d, color](int16_t x, int16_t y) {
-      d->writePixel(x, y, color);
-    });
+    HomeDing::strokeColor = color;
+    gfxDraw::drawLine(x0, y0, x1, y1, HomeDing::stroke);
 
   } else if (wd < 4) {
     //   X
     //  XOX
     //   X
-    gfxDraw::drawLine(x0, y0, x1, y1, [d, color](int16_t x, int16_t y) {
-      d->writePixel(x + 1, y, color);
-      d->writePixel(x, y + 1, color);
-      d->writePixel(x - 1, y, color);
-      d->writePixel(x, y - 1, color);
+    gfxDraw::drawLine(x0, y0, x1, y1, [da, color](int16_t x, int16_t y) {
+      da->writePixel(x + 1, y, color);
+      da->writePixel(x, y + 1, color);
+      da->writePixel(x - 1, y, color);
+      da->writePixel(x, y - 1, color);
     });
 
   } else if (wd < 6) {
@@ -249,18 +257,18 @@ void _drawLineWidth(DisplayAdapter *d, uint16_t x0, uint16_t y0, uint16_t x1, ui
     // X O X   5 O 1
     //  X X     6 X
     //   X       X
-    gfxDraw::drawLine(x0, y0, x1, y1, [d, color](int16_t x, int16_t y) {
-      d->writePixel(x + 2, y, color);
-      d->writePixel(x + 1, y - 1, color);
-      d->writePixel(x, y - 2, color);
-      d->writePixel(x - 1, y - 1, color);
-      d->writePixel(x - 2, y, color);
-      d->writePixel(x - 1, y + 1, color);
-      d->writePixel(x, y + 2, color);
-      d->writePixel(x + 1, y + 1, color);
+    gfxDraw::drawLine(x0, y0, x1, y1, [da, color](int16_t x, int16_t y) {
+      da->writePixel(x + 2, y, color);
+      da->writePixel(x + 1, y - 1, color);
+      da->writePixel(x, y - 2, color);
+      da->writePixel(x - 1, y - 1, color);
+      da->writePixel(x - 2, y, color);
+      da->writePixel(x - 1, y + 1, color);
+      da->writePixel(x, y + 2, color);
+      da->writePixel(x + 1, y + 1, color);
     });
   }
-  d->endWrite();
+  da->endWrite();
 }
 
 
@@ -272,7 +280,7 @@ void AnalogClockElement::_drawHand(uint16_t deg, uint16_t len, uint16_t width, u
   int16_t x1 = _cx + (fx * len * _radius / 12.0);
   int16_t y1 = _cy + (fy * len * _radius / 12.0);
 
-  _drawLineWidth(_display, _cx, _cy, x1, y1, color, width);
+  _drawLineWidth(_cx, _cy, x1, y1, color, width);
 }
 
 /* ===== Register the Element ===== */

@@ -39,7 +39,7 @@ Element *DeviceElement::create() {
 DeviceElement::DeviceElement()
   : _rebootTime(0), _nextBoot(0)  // default with no automatic reboot
 {
-  startupMode = Element_StartupMode::System;
+  startupMode = Element::STARTUPMODE::System;
 }
 
 

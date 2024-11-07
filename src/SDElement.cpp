@@ -44,7 +44,7 @@ Element *SDElement::create() {
 
 SDElement::SDElement() {
   // adjust startupMode when Network (default) is not applicable.
-  startupMode = Element_StartupMode::System;
+  startupMode = Element::STARTUPMODE::System;
 }
 
 

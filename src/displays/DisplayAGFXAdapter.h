@@ -227,34 +227,6 @@ public:
   }  // drawButton()
 
 
-  /// @brief Draw a rectangle with the given dimensions of the box and an optional inner border.
-  virtual void drawRectangle(BoundingBox &box, uint32_t borderColor, uint32_t fillColor = RGB_UNDEFINED) override {
-    PANELTRACE("drawRectangle(%d/%d - %d/%d #%08x #%08x)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);
-
-    if ((!box.isEmpty()) && (displayBox.overlaps(box))) {
-      int16_t w = box.x_max - box.x_min + 1;
-      int16_t h = box.y_max - box.y_min + 1;
-      bool bFill = RGB_IS_COLOR(fillColor);
-      uint16_t fill = col565(fillColor);
-
-      if (RGB_NO_COLOR(borderColor)) {
-        // draw without border
-        if (bFill) {
-          gfx->fillRect(box.x_min, box.y_min, w, h, fill);
-          _needFlush = true;
-        }
-
-      } else {
-        if (bFill) {
-          gfx->fillRect(box.x_min + 1, box.y_min + 1, box.x_max - box.x_min - 1, box.y_max - box.y_min - 1, fill);
-        }
-        gfx->drawRect(box.x_min, box.y_min, w, h, col565(borderColor));
-        _needFlush = true;
-      }
-    }
-  }  // drawRectangle()
-
-
   /// @brief Draw a circle with the given dimensions of the box and an optional inner border.
   void drawCircle(BoundingBox &box, uint32_t borderColor, uint32_t fillColor = RGB_UNDEFINED) override {
     LOGGER_JUSTINFO("drawCircle(%d/%d - %d/%d #%08lx #%08lx)\n", box.x_min, box.y_min, box.x_max, box.y_max, borderColor, fillColor);

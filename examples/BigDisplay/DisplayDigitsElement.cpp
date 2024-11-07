@@ -69,7 +69,7 @@ void DisplayDigitsElement::_drawDigit(const char *path, int16_t x, int16_t y) {
   o.move(x, y);
 
   o.draw([&](int16_t x, int16_t y, gfxDraw::ARGB color) {
-    _display->drawPixel(x, y, color.toColor24());
+    _display->writePixel(x, y, color.toColor24());
   });
 }  // _drawDigit()
 
@@ -126,14 +126,20 @@ void DisplayDigitsElement::draw() {
   xWidth = GFXSCALE100(DIGITS_WIDTH, _scale);
   xGap = GFXSCALE100(DIGITS_GAP, _scale);
 
+
+  HomeDing::displayAdapter->startWrite();
+
   for (int n = 0; n < _value.length(); n++) {
     if (_lastValue[n] != _value[n]) {
-      BoundingBox b(x, box.y_min, x + xWidth, box.y_max);
-      _display->drawRectangle(b, RGB_TRANSPARENT, _backgroundColor);
+      // BoundingBox b(x, box.y_min, x + xWidth, box.y_max);
+
+      HomeDing::fillColor = _backgroundColor;
+      gfxDraw::drawRect(x, box.y_min, x + xWidth, box.y_max, nullptr, HomeDing::fill);
       _drawDigits7(_value[n], x, box.y_min);
     }
     x += xWidth + xGap;
   }
+  HomeDing::displayAdapter->endWrite();
 
   box.x_max = x - xGap;
 }  // draw()

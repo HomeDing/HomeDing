@@ -38,6 +38,7 @@ const char *find(const char *name);
 // allow direct pointer compare for these actions:
 extern const char *Address;
 extern const char *Border;
+extern const char *Brightness;
 extern const char *Clear;
 extern const char *Description;
 extern const char *Down;

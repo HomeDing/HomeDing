@@ -54,7 +54,7 @@ using namespace HomeDing::Actions;
 #define ELEMTRACE(...)  // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...) Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define NETTRACE(...) // Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -318,7 +318,7 @@ void Board::_addAllElements() {
 }  // _addAllElements()
 
 
-void Board::start(Element_StartupMode startupMode) {
+void Board::start(Element::STARTUPMODE startupMode) {
   // BOARDTRACE("start(%d)", startupMode);
 
   // make elements active that match the startupMode
@@ -375,7 +375,7 @@ void Board::loop() {
         // starting time depending elements
         // check if time is valid now -> start all elements with
         if (time(nullptr)) {
-          start(Element_StartupMode::WithTime);
+          start(Element::STARTUPMODE::Time);
           startComplete = true;
         }  // if
       }  // if
@@ -519,7 +519,7 @@ void Board::loop() {
 
       // search any time requesting elements
       forEach(Element::CATEGORY::All, [this](Element *e) {
-        if (e->startupMode == Element_StartupMode::WithTime) {
+        if (e->startupMode == Element::STARTUPMODE::Time) {
           hasTimeElements = true;
         }
       });
@@ -542,7 +542,7 @@ void Board::loop() {
 #endif
     }
 
-    start(Element_StartupMode::System);  // including displays !
+    start(Element::STARTUPMODE::System);  // including displays !
     displayInfo(HOMEDING_GREETING);
 
     _newBoardState(BOARDSTATE::CONNECT);
@@ -659,7 +659,7 @@ void Board::loop() {
       cacheHeader = "";  // do not pass this cache header
     }
 
-    start(Element_StartupMode::WithNetwork);
+    start(Element::STARTUPMODE::Network);
     HomeDing::Actions::push(sysStartAction);  // dispatched when network is available
 
     // ===== finish network setup

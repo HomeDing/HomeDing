@@ -147,7 +147,7 @@ void ValueElement::start() {
 void ValueElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  callback(HomeDing::Actions::Value, (_isStringType ? _valueString : String(_value)).c_str());
+  callback(HomeDing::Actions::Value, (_isStringType ? _valueString.c_str() : _printInteger(_value)));
 }  // pushState()
 
 /** return actual value */

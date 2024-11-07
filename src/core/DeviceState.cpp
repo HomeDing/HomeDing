@@ -20,7 +20,7 @@
 #define PREF_FILENAME "/$pref.txt"
 
 // use BOARDTRACE for compiling with detailed TRACE output.
-#define STATETRACE(...) Logger::LoggerPrint("State", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define STATETRACE(...) // Logger::LoggerPrint("State", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 /// @brief state was loaded from perm. memory.
 bool DeviceState::_isLoaded = false;

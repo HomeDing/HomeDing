@@ -81,7 +81,7 @@ Element *RadioElement::create() {
  */
 RadioElement::RadioElement() {
   _impl = new RadioElementImpl();
-  // startupMode = Element_StartupMode::System;
+  // startupMode = Element::STARTUPMODE::System;
 }
 
 

@@ -49,7 +49,8 @@ bool BH1750Element::set(const char *name, const char *value) {
   } else if (name == HomeDing::Actions::OnValue) {
     _valueAction = value;
 
-  } else if (_stricmp(name, "mode") == 0) {
+  } else if (name == HomeDing::Actions::Mode) {
+    // see documentation of the mode in the chip
     int m = _atoi(value);
     if ((m == 0) || (m == 1) || (m == 3))
       _mode = 0x20 + m;

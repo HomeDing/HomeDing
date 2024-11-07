@@ -19,6 +19,8 @@
 #include "DisplayAdapter.h"
 #include "displays/DisplayOutputElement.h"
 
+#include "gfxDraw.h"
+
 // tracing information (left from development for future problem analysis) can be disabled
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
@@ -27,8 +29,23 @@
 
 namespace HomeDing {
 
-const DisplayAdapter *displayAdapter = nullptr;
+DisplayAdapter *displayAdapter = nullptr;
 
+uint32_t strokeColor;
+uint32_t fillColor;
+
+//  [color](int16_t x, int16_t y) {
+//   if (HomeDing::displayAdapter->displayBox.contains(x, y)) {
+//     HomeDing::displayAdapter->writePixel(x, y, color);
+//   }
+// });
+
+void stroke(int16_t x, int16_t y) {
+  displayAdapter->writePixel(x, y, strokeColor);
+}
+void fill(int16_t x, int16_t y) {
+  displayAdapter->writePixel(x, y, fillColor);
+}
 }
 
 
@@ -87,6 +104,7 @@ void DisplayAdapter::setBrightness(uint8_t bright) {
 
 /// @brief draw all DisplayOutputElements, then
 /// flush all buffered pixels to the display.
+
 bool DisplayAdapter::startFlush(bool force) {
   // TRACEDRAW("startFlush(%d, %d)", force, _needFlush);
 
@@ -106,7 +124,11 @@ bool DisplayAdapter::startFlush(bool force) {
         TRACEDRAW(" draw: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
         // draw box with background color
         if (!(de->isOpaque)) {
-          drawRectangle(de->box, RGB_TRANSPARENT, displayConfig.backgroundColor);
+          HomeDing::fillColor = displayConfig.backgroundColor;
+          HomeDing::displayAdapter->startWrite();
+          gfxDraw::drawRect(de->box.x_min, de->box.y_min, de->box.x_max - de->box.x_min + 1, de->box.y_max - de->box.y_min + 1,
+                            nullptr, HomeDing::fill);
+          HomeDing::displayAdapter->endWrite();
         }
         de->draw();
         de->needsDraw = false;

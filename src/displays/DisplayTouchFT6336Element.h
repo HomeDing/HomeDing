@@ -16,6 +16,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayTouchElement.h>
 
 /**
@@ -50,4 +52,6 @@ private:
 // Register the DisplayTouchFT6336Element onto the ElementRegistry.
 bool DisplayTouchFT6336Element::registered =
   ElementRegistry::registerElement("displaytouchft6336", DisplayTouchFT6336Element::create);
+#endif
+
 #endif

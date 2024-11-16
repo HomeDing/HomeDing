@@ -13,6 +13,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include <displays/DisplayButtonElement.h>
 
 #include "DisplayTouchElement.h"
@@ -181,5 +183,7 @@ void DisplayTouchElement::loop() {
     nextRead = millis() + 50;
   }
 }  // loop()
+
+#endif
 
 // End

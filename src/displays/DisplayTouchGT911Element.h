@@ -17,6 +17,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayTouchElement.h>
 #include <lib/gt911.h>
 
@@ -55,4 +57,6 @@ public:
 // Register the DisplayTouchGT911Element onto the ElementRegistry.
 bool DisplayTouchGT911Element::registered =
   ElementRegistry::registerElement("displaytouchgt911", DisplayTouchGT911Element::create);
+#endif
+
 #endif

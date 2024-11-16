@@ -13,6 +13,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include <displays/DisplayButtonElement.h>
 #include <displays/DisplayTouchCST816Element.h>
 
@@ -64,5 +66,6 @@ void DisplayTouchCST816Element::start() {
   }
 }  // start()
 
+#endif
 
 // End

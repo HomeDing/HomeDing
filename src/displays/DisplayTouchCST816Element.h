@@ -17,6 +17,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayTouchElement.h>
 #include <lib/cst816.h>
 
@@ -52,4 +54,6 @@ private:
 // Register the DisplayTouchCST816Element onto the ElementRegistry.
 bool DisplayTouchCST816Element::registered =
   ElementRegistry::registerElement("displaytouchcst816", DisplayTouchCST816Element::create);
+#endif
+
 #endif

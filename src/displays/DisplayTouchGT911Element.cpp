@@ -13,7 +13,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
-#include <displays/DisplayButtonElement.h>
+#if defined(ESP32)
+
 #include <displays/DisplayTouchGT911Element.h>
 
 #include <Wire.h>
@@ -66,5 +67,5 @@ void DisplayTouchGT911Element::start() {
   }
 }  // start()
 
-
+#endif
 // End

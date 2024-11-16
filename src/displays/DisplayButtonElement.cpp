@@ -17,6 +17,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include <displays/DisplayButtonElement.h>
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
@@ -108,5 +110,7 @@ void DisplayButtonElement::draw() {
   DisplayOutputElement::draw();  // prepare colors
   _display->drawButton(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1, _text.c_str(), _pressed);
 }
+
+#endif
 
 // End

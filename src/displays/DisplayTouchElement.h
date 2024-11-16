@@ -17,6 +17,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayButtonElement.h>
 
 /**
@@ -91,3 +93,5 @@ protected:
 
   unsigned long nextRead;
 };
+
+#endif

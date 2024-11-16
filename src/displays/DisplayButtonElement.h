@@ -20,6 +20,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayOutputElement.h>
 
 /**
@@ -92,4 +94,6 @@ private:
 // Register the DisplayButtonElement onto the ElementRegistry.
 bool DisplayButtonElement::registered =
   ElementRegistry::registerElement("displaybutton", DisplayButtonElement::create);
+#endif
+
 #endif

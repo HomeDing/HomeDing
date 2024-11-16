@@ -12,13 +12,12 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
-#include <WireUtils.h>
 
-#include <displays/DisplayButtonElement.h>
+#if defined(ESP32)
+
 #include <displays/DisplayTouchFT6336Element.h>
 
-#include <Wire.h>
-
+#include <WireUtils.h>
 
 #define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
@@ -75,5 +74,6 @@ void DisplayTouchFT6336Element::start() {
   }
 }  // start()
 
+#endif
 
 // End

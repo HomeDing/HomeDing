@@ -38,9 +38,8 @@ Element *DisplayDotElement::create() {
 void DisplayDotElement::draw() {
   TRACE("draw(%d/%d - %d/%d #%08x)\n", _x0, _y0, _x1, _y1);
 
-  bool bValue = _atob(_value.c_str());
-
 #if 0
+  bool bValue = _atob(_value.c_str());
   _display->drawCircle(box, _borderColor, bValue ? _backgroundColor : RGB_TRANSPARENT);
 
 #else

@@ -121,62 +121,12 @@ public:
   };  // clear()
 
 
-  /// @brief draw a single pixel on the display.
-  /// @param x x coordinate of the pixel.
-  /// @param y y coordinate of the pixel.
-  /// @param color color of the pixel.
-  virtual void drawPixel(int16_t x, int16_t y, uint32_t color) override {
-    if (RGB_IS_COLOR(color)) {
-      gfx->drawPixel(x, y, col565(color));
-      gfx->startWrite();
-      gfx->writePixel(x, y, color);
-      gfx->endWrite();
-      _needFlush = true;
-    }
-  };
-
-
-  /// @brief draw a staight line on the display.
-  /// @param x0 x coordinate of the starting pixel.
-  /// @param y0 y coordinate of the starting pixel.
-  /// @param x1 x coordinate of the ending pixel.
-  /// @param y1 y coordinate of the ending pixel.
-  /// @param color color of the line.
-  // virtual void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color) override;
-
-  /**
-   * @brief Draw a text at this position using the specific height.-
-   * @param x x-position or offset of the text.
-   * @param y y-position of the text.
-   * @param size height of the characters box.
-   * @param text the text.
-   */
-  int drawText(int16_t x, int16_t y, int16_t h, const char *text) override {
-    PANELTRACE("drawText: %d/%d h:%d t:<%s>\n", x, y, h, text);
-    PANELTRACE("  colors: %04x on %04x\n", drawColor565, backColor565);
-
-    if (displayBox.contains(x, y)) {
-      // textbox dimensions
-      int16_t bx, by;
-      uint16_t bw, bh;
-
-      gfx->setTextBound(0, 0, gfx->width(), gfx->height());
-
-      _setTextHeight(h);
-      gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
-      PANELTRACE("     box: %d/%d w:%d h:%d\n", bx, by, bw, bh);
-
-      gfx->setTextColor(drawColor565, drawColor565);  // transparent background
-      gfx->setCursor(x, y + baseLine);
-      gfx->print(text);
-      _needFlush = true;
-      return ((bx - x) + bw);
-
-    } else {
-      return (0);
-    }
-
-  }  // drawText
+  /// @brief Draw a text at this position using the specific height.-
+  /// @param x x-position or offset of the text.
+  /// @param y y-position of the text.
+  /// @param h height of the characters box.
+  /// @param text the text.
+  BoundingBox drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t strokeColor) override;
 
 
   /// @brief Draw a button

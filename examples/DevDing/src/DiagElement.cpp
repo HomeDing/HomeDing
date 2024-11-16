@@ -31,8 +31,8 @@
 #include <esp_heap_caps.h>
 #endif
 
-// use DIAG TRACE for sending detailed output for the Diag Element.
-#define DIAGTRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+// enable TRACE for sending detailed output from this Element
+#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Static factory function ===== */
 
@@ -60,7 +60,7 @@ bool DiagElement::set(const char *name, const char *value) {
     // log some heap information. using http://nodeding/api/state/diag/0?rtcmem=1
 #if defined(ESP8266)
     // dump rtc Memory
-    DIAGTRACE("===== RTCMEM =====");
+    TRACE("===== RTCMEM =====");
     uint8_t rtcbuffer[16];
     for (unsigned int adr = 0; adr < (512); adr += sizeof(rtcbuffer)) {
       ESP.rtcUserMemoryRead(adr / 4, (uint32_t *)rtcbuffer, sizeof(rtcbuffer));
@@ -78,7 +78,7 @@ bool DiagElement::set(const char *name, const char *value) {
           chars.concat('.');
         }
       }
-      DIAGTRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
+      TRACE("  %04x: %s%s", adr, bytes.c_str(), chars.c_str());
     }  // for
 #endif
 
@@ -391,7 +391,7 @@ String DiagElement::_handleNetworks() {
  * @brief Activate the DiagElement.
  */
 void DiagElement::start() {
-  DIAGTRACE("start()");
+  TRACE("start()");
   Element::start();
 
   // enable I2C scan output using http://nodeding/diag
@@ -419,13 +419,11 @@ void DiagElement::start() {
     _board->server->send(200, "text/plain", _handleHeap());
   });
 
-  DIAGTRACE("I2C pins sda=%d scl=%d", _board->I2cSda, _board->I2cScl);
-
 #if defined(ESP8266)
-  DIAGTRACE("Reset Reason: %s", ESP.getResetReason().c_str());
+  TRACE("Reset Reason: %s", ESP.getResetReason().c_str());
 #elif defined(ESP32)
   // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
-  DIAGTRACE("Reset Reason: %d", rtc_get_reset_reason(0));
+  TRACE("Reset Reason: %d", rtc_get_reset_reason(0));
 #endif
 }  // start()
 

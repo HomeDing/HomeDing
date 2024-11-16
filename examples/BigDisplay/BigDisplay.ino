@@ -31,18 +31,26 @@
 #define HOMEDING_INCLUDE_DISPLAY  // all elements that can be displayed
 #define HOMEDING_INCLUDE_CORE
 
-// ===== HomeDing Pre-defined Display Devices
+// ===== HomeDing Pre-defined Boards with Displays
 
 #define HOMEDING_DEVICE_ESP328048S043
 // #define HOMEDING_DEVICE_PANEL
 // #define HOMEDING_DEVICE_PANEL22
 
-#if defined(HOMEDING_DEVICE_ESP328048S043)
 
+
+#if defined(HOMEDING_DEVICE_ESP328048S043)
+// See board description at <https://...>
 #define HOMEDING_INCLUDE_DISPLAYESP32PANEL
 #define HOMEDING_INCLUDE_DISPLAYTOUCHGT911
 #define HOMEDING_INCLUDE_SD
+#define HOMEDING_EXTEND_ANALOGCLOCK
 
+#elif defined(HOMEDING_DEVICE_PANEL)
+// See board description at <https://...>
+
+#elif defined(HOMEDING_DEVICE_PANEL22)
+// See board description at <https://...>
 
 #else
 
@@ -110,6 +118,7 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
+#include <src/DisplayExtensions.h>
 
 #include "esp_partition.h"
 
@@ -123,7 +132,7 @@
 #include <BoardServer.h>     // Web Server Middleware for Elements
 #include <FileServer.h>      // Web Server Middleware for UI
 
-#include "src/AnalogClockElement.h"  // local element for Analog Clock
+// #include "src/AnalogClockElement.h"  // local element for Analog Clock
 
 // WebServer on port 80 to reach Web UI and services
 WebServer server(80);

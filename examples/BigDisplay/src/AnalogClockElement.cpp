@@ -19,6 +19,7 @@
 
 #include "gfxDraw.h"
 
+// enable TRACE for sending detailed output from this Element
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /* ===== Define local constants and often used strings ===== */
@@ -163,9 +164,6 @@ void AnalogClockElement::_drawClock() {
   float rad1 = (M_TWOPI / 60);
   int16_t x0, y0, x1, y1;
   BoundingBox box(_cx - _radius, _cy - _radius, _cx + _radius, _cy + _radius);
-  DisplayAdapter *d = _display;
-  uint32_t color;
-
 
   HomeDing::displayAdapter->startWrite();
 
@@ -283,19 +281,5 @@ void AnalogClockElement::_drawHand(uint16_t deg, uint16_t len, uint16_t width, u
   _drawLineWidth(_cx, _cy, x1, y1, color, width);
 }
 
-/* ===== Register the Element ===== */
-
-// As long as the Element is project specific or is a element always used
-// the registration is placed here without using a register #define.
-
-// When transferred to the HomeDing library a #define like the
-// HOMEDING_INCLUDE_XXX should be used to allow the sketch to select the
-// available Elements. See <HomeDing.h> the move these lines to AnalogClockElement.h:
-
-// #ifdef HOMEDING_REGISTER
-// Register the AnalogClockElement onto the ElementRegistry.
-bool AnalogClockElement::registered =
-  ElementRegistry::registerElement("analogclock", AnalogClockElement::create);
-// #endif
 
 // End

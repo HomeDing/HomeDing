@@ -83,10 +83,11 @@ void DisplayTextElement::draw() {
   HomeDing::displayAdapter->endWrite();
 
   // adjust height and width to the drawn text
-  int w = HomeDing::displayAdapter->drawText(box.x_min, box.y_min, box.y_max - box.y_min + 1, msg);  // remember width of drawn text
+  BoundingBox b = HomeDing::displayAdapter->drawText(box.x_min, box.y_min, box.y_max - box.y_min + 1, msg.c_str(), _color);
+
   TRACE("txt w=%d", w);
-  _x1 = box.x_max = box.x_min + w - 1;
-  _y1 = box.y_max = box.y_min + HomeDing::displayAdapter->getLineHeight() - 1;
+  _x1 = box.x_max = b.x_max;
+  _y1 = box.y_max = b.y_max;
 }  // draw
 
 

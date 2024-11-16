@@ -96,3 +96,11 @@ private:
    */
   String _xAction;
 };
+
+/* ===== Register the Element ===== */
+
+#ifdef HOMEDING_REGISTER
+// Register the AnalogClockElement in the ElementRegistry.
+bool AnalogClockElement::registered =
+  ElementRegistry::registerElement("analogclock", AnalogClockElement::create);
+#endif

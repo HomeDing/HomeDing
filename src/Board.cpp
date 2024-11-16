@@ -54,7 +54,7 @@ using namespace HomeDing::Actions;
 #define ELEMTRACE(...)  // Logger::LoggerPrint("Elem", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // use NETTRACE for compiling with detailed output on startup & joining the network.
-#define NETTRACE(...) // Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
+#define NETTRACE(...)  // Logger::LoggerPrint("Net", LOGGER_LEVEL_TRACE, __VA_ARGS__)
 
 // time_t less than this value is assumed as not initialized.
 #define MIN_VALID_TIME (30 * 24 * 60 * 60)
@@ -396,7 +396,7 @@ void Board::loop() {
 
 
     // dispatch next action from queue if any
-    if (! HomeDing::Actions::queueIsEmpty()) {
+    if (!HomeDing::Actions::queueIsEmpty()) {
       _DeepSleepCount = 0;
       dispatchAction(HomeDing::Actions::pop());
       return;
@@ -1024,9 +1024,10 @@ void Board::displayInfo(const char *text1, const char *text2) {
   Logger::printf("%s %s", text1, text2 ? text2 : "");
   if (display) {
     display->clear();
-    display->drawText(0, 0, 0, text1);
+    BoundingBox b = display->drawText(0, 0, 0, text1, HomeDing::displayConfig.drawColor);
+
     if (text2) {
-      display->drawText(0, display->getLineHeight(), 0, text2);
+      display->drawText(0, b.x_max+1, 0, text2, HomeDing::displayConfig.drawColor);
     }
     display->startFlush(true);
   }  // if

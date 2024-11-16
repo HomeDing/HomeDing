@@ -10,8 +10,6 @@
  * -----
  */
 
-#pragma once
-
 #include <displays/DisplayAGFXAdapter.h>
 
 #define TRACE(...)  // Serial.printf("Display::" __VA_ARGS__)
@@ -29,10 +27,6 @@ Arduino_GFX *gfx = nullptr;
 // Helper functions for drawing callbacks in gfxDraw Library
 
 static uint16_t AGFX_drawColor;
-
-void AGFX_drawByColor(int16_t x, int16_t y) {
-  gfx->drawPixel(x, y, AGFX_drawColor);
-}
 
 // ===== protected functions
 
@@ -117,6 +111,38 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
   return (bus);
 }  // getBus()
 
+
+BoundingBox DisplayAGFXAdapter::drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t strokeColor) {
+  TRACE("drawText: %d/%d h:%d t:<%s> color:%08lx\n", x, y, h, text, strokeColor);
+
+  if (displayBox.contains(x, y)) {
+    // textbox dimensions
+    int16_t bx, by;
+    uint16_t bw, bh;
+    uint16_t col = col565(strokeColor);
+
+    gfx->setTextBound(0, 0, gfx->width(), gfx->height());
+
+    _setTextHeight(h);
+    gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
+    TRACE("     box: %d/%d w:%d h:%d\n", bx, by, bw, bh);
+
+    gfx->setTextColor(col, col);  // transparent background
+    gfx->setCursor(x, y + baseLine);
+    gfx->print(text);
+    _needFlush = true;
+
+    BoundingBox b(x, y, bx + bw - 1, by + bh - 1);
+    TRACE(" boundbox: %d -- %d / %d -- %d\n", b.x_min, b.x_max, b.y_min, b.y_max);
+    return (b);
+
+  } else {
+    BoundingBox b;
+    TRACE("    nobox: %d -- %d / %d -- %d\n", b.x_min, b.x_max, b.y_min, b.y_max);
+    return (b);
+  }
+
+}  // drawText
 
 
 // drawAda

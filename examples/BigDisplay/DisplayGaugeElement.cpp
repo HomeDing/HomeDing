@@ -22,6 +22,7 @@
 #include <gfxDraw.h>
 #include <gfxDrawWidget.h>
 
+// enable TRACE for sending detailed output from this Element
 #define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /**
@@ -144,9 +145,11 @@ void DisplayGaugeElement::_drawRangeSegment(int16_t a0, int16_t a1, uint32_t fil
   s.type = gfxDraw::Segment::Close;
   o.addSegment(s);
 
+  _display->startWrite();
   o.draw([&](int16_t x, int16_t y, gfxDraw::ARGB color) {
-    _display->drawPixel(x, y, color.toColor24());
+    _display->writePixel(x, y, color.toColor24());
   });
+  _display->endWrite();
 
 }  // _drawRangeSegment()
 

@@ -43,6 +43,7 @@ int countConnect = 0;
 #define STATE_DONE 99
 int state = STATE_INIT;
 
+// enable TRACE to create detailed output
 #define TRACE(...) Serial.printf(__VA_ARGS__)
 
 

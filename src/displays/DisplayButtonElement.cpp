@@ -47,7 +47,8 @@ bool DisplayButtonElement::touchStart(int16_t xPos, int16_t yPos) {
   }
   _pressed = over;
   return (over);
-}
+} // touchStart()
+
 
 void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
   // TRACE("touchEnd(%d/%d)", xPos, yPos);
@@ -57,7 +58,7 @@ void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
   _pressed = false;
   needsDraw = true;
   if (_display) _display->setFlush();
-}
+} // touchEnd()
 
 
 // ===== Element functions =====

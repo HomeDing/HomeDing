@@ -22,6 +22,7 @@
 #include <gfxDraw.h>
 #include <gfxDrawWidget.h>
 
+// enable TRACE for sending detailed output from this Element
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 /**
@@ -82,7 +83,7 @@ void DisplayPathElement::draw() {
   // LOGGER_PRINT("draw color=%08lx border=%08lx back=%08lx", _color, _borderColor, _backgroundColor);
 
   auto fDraw = [&](int16_t x, int16_t y, gfxDraw::ARGB color) {
-    _display->drawPixel(x, y, color.toColor24());
+    _display->writePixel(x, y, color.toColor24());
   };
 
   auto fGet = [&](int16_t x, int16_t y) -> gfxDraw::ARGB {
@@ -115,9 +116,12 @@ void DisplayPathElement::draw() {
   dWidget->move(_centerX, _centerY);
   dWidget->move(box.x_min + _centerX, box.y_min + _centerY);
 
-  dWidget->draw(fDraw, _undraw ? fGet : (gfxDraw::fReadPixel)nullptr);
+  _display->startWrite();
+  dWidget->draw(fDraw, _undraw ? fGet : (gfxDraw::fReadPixel) nullptr);
+  _display->endWrite();
+  
   // the bounding box of dObj is now correct
-// dWidget->bbox;
+  // dWidget->bbox;
 
   TRACE("--done.");
 }

@@ -85,41 +85,43 @@ const char *find(const char *name) {
 
 
 // clang-format off
-const char *Address      = find("address");
-const char *Border       = find("border");
-const char *Brightness   = find("brightness");
-const char *Clear        = find("clear");
-const char *Description  = find("description");
-const char *Down         = find("down");
-const char *Height       = find("height");
-const char *Invert       = find("invert");
-const char *Label        = find("label");
-const char *LogLevel     = find("loglevel");
-const char *Max          = find("max");
-const char *Min          = find("min");
-const char *Mode         = find("mode");
-const char *OnHigh       = find("onhigh");
-const char *OnLow        = find("onlow");
-const char *OnValue      = find("onvalue");
-const char *Pin          = find("pin");
-const char *Redraw       = find("redraw");
-const char *Reference    = find("reference");
-const char *Start        = find("start");
-const char *Startup      = find("startup");
-const char *Step         = find("step");
-const char *Stop         = find("stop");
-const char *Text         = find("text");
-const char *Title        = find("title");
-const char *Toggle       = find("toggle");
-const char *Type         = find("type");
-const char *Up           = find("up");
-const char *UseState     = find("usestate");
-const char *Value        = find("value");
-const char *Width        = find("width");
-const char *X            = find("x");
-const char *Y            = find("y");
+const char *Address       = find("address");
+const char *Border        = find("border");
+const char *Brightness    = find("brightness");
+const char *Clear         = find("clear");
+const char *Description   = find("description");
+const char *Down          = find("down");
+const char *Height        = find("height");
+const char *Invert        = find("invert");
+const char *Label         = find("label");
+const char *LogLevel      = find("loglevel");
+const char *Max           = find("max");
+const char *Min           = find("min");
+const char *Mode          = find("mode");
+const char *OnHigh        = find("onhigh");
+const char *OnHumidity    = find("onhumidity");
+const char *OnLow         = find("onlow");
+const char *OnPressure    = find("onpressure");
+const char *OnTemperature = find("ontemperature");;
+const char *OnValue       = find("onvalue");
+const char *Pin           = find("pin");
+const char *Redraw        = find("redraw");
+const char *Reference     = find("reference");
+const char *Start         = find("start");
+const char *Startup       = find("startup");
+const char *Step          = find("step");
+const char *Stop          = find("stop");
+const char *Text          = find("text");
+const char *Title         = find("title");
+const char *Toggle        = find("toggle");
+const char *Type          = find("type");
+const char *Up            = find("up");
+const char *UseState      = find("usestate");
+const char *Value         = find("value");
+const char *Width         = find("width");
+const char *X             = find("x");
+const char *Y             = find("y");
 // clang-format on
-
 
 // ===== Queue =====
 ArrayString actions;

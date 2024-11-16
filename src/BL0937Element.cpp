@@ -19,6 +19,7 @@
 
 #include <BL0937Element.h>
 
+// enable TRACE for sending detailed output from this Element
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 // ===== meassuring power consumption (CF pin) =====

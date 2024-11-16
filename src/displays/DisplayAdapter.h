@@ -63,26 +63,23 @@ public:
   /// @return true
   virtual bool setup(Board *b);
 
-  /// @brief Start the display.
+  /// @brief Start the display using the HomeDing::displayConfig settings.
   /// @return true when the display is ready for operation. Otherwise false.
   virtual bool start();
 
-  /// get height of the last drawn textline. Depends on font and text height.
-  virtual int16_t getLineHeight() {
-    return (lineHeight);
-  };
+  /// @brief Clear the complete display
+  virtual void clear();
 
+  /// @brief print a text at the specified position
+  /// @param x x position
+  /// @param y y position
+  /// @param h character height
+  /// @param text text to be printed.
+  /// @return Bounding Box of the drawn text.
+   virtual BoundingBox drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t color);
 
   // Bounding box of the drawable area.
   BoundingBox displayBox;
-
-
-  /// When the display supports overlapping elements the drawing must not be immediate.
-  /// The flush() command will start  drawing all elements ant the covered elements.
-  bool deferDrawing() {
-    return (true);
-  };
-
 
   /// @brief set brightness for panel lightning.
   /// @param bright new brightness in range 0...100
@@ -113,26 +110,6 @@ public:
   virtual void setBorderColor(const uint32_t col) {
     borderColor = col;
   };
-
-  /// @brief Clear the complete display
-  virtual void clear() {
-    _needFlush = true;
-  };
-
-  virtual int drawText(int16_t x, int16_t y, int16_t h, String &text) {
-    return (drawText(x, y, h, text.c_str()));
-  };
-
-  virtual int drawText(int16_t /* x */, int16_t /* y */, int16_t /* h */, const char *text) {
-    _needFlush = true;
-    return (charWidth * strnlen(text, MAX_DISPLAY_STRING_LEN));
-  };
-
-  virtual void drawPixel(int16_t /* x */, int16_t /* y */, uint32_t /* color */) {
-    _needFlush = true;
-  };
-
-  // virtual void drawLine(int16_t /* x0 */, int16_t /* y0 */, int16_t /* x1 */, int16_t /* y1 */, uint32_t /* color */){};
 
   virtual void drawButton(int16_t /* x */, int16_t /* y */, int16_t /* w */, int16_t /* h */, const char * /* text */, bool /* pressed = false */) {
     _needFlush = true;

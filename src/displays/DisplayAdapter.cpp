@@ -21,7 +21,7 @@
 
 #include "gfxDraw.h"
 
-// tracing information (left from development for future problem analysis) can be disabled
+// enable TRACE to create detailed output
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
 // tracing information on drawing (left from development for future problem analysis) can be disabled
@@ -87,6 +87,19 @@ bool DisplayAdapter::start() {
   }
 
   return (true);
+};
+
+
+/// @brief Clear the complete display
+void DisplayAdapter::clear() {
+  _needFlush = true;
+};
+
+
+BoundingBox DisplayAdapter::drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t color) {
+  BoundingBox b(x, y, x + strlen(text) - 1, y);
+  _needFlush = true;
+  return (b);
 };
 
 

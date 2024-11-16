@@ -20,6 +20,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayOutputElement.h>
 
 /**
@@ -46,4 +48,6 @@ public:
 // Register the DisplayCircleElement onto the ElementRegistry.
 bool DisplayCircleElement::registered =
   ElementRegistry::registerElement("displaycircle", DisplayCircleElement::create);
+#endif
+
 #endif

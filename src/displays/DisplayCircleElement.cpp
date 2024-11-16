@@ -17,6 +17,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include <displays/DisplayCircleElement.h>
 
 #include <gfxDraw.h>
@@ -52,5 +54,6 @@ void DisplayCircleElement::draw() {
 
 }  // draw()
 
+#endif
 
 // End

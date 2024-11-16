@@ -17,7 +17,7 @@
   do { (void)(expr); } while (0)
 
 #include <Arduino_GFX_Library.h>
-#include <gfxDraw.h>
+// #include <gfxDraw.h>
 
 #include <displays/DisplayAdapter.h>
 

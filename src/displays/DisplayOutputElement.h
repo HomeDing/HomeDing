@@ -26,10 +26,16 @@
  *
  * The parameters specify how the information from the action will be displayed.
  * The dimensions of the element can be specified by x,y,w,h or x,y,x1,y1.
- * The BoundingBox (box) is calculated from this ensuring x1 >= x and y1 >= y. 
+ * The BoundingBox (box) is calculated from this ensuring x1 >= x and y1 >= y.
  */
 class DisplayOutputElement : public Element {
 public:
+
+  enum TEXTALIGN : uint16_t {
+    LEFT = 0,
+    CENTER = 1,
+    RIGHT = 2
+  };
 
   // Constructor
   DisplayOutputElement();
@@ -64,7 +70,7 @@ public:
 
   /// @brief isOpaque is true when the DisplayOutputElement always draws within the same boundary and has no transparent area.
   /// This allows drawing without drawing its background first.
-  /// The DisplayOutputElement will draw it's local background usually. 
+  /// The DisplayOutputElement will draw it's local background usually.
   bool isOpaque = false;
 
 protected:
@@ -84,6 +90,12 @@ protected:
 
   /// @brief Border color of the element
   uint32_t _borderColor = RGB_UNDEFINED;
+
+  /// fontsize setting
+  int16_t _fontsize = -1;  // not set
+
+  /// fontsize setting
+  TEXTALIGN _align = TEXTALIGN::LEFT;
 
   /// @brief Value the element
   String _value;

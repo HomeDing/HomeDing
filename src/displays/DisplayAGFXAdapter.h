@@ -17,7 +17,6 @@
   do { (void)(expr); } while (0)
 
 #include <Arduino_GFX_Library.h>
-// #include <gfxDraw.h>
 
 #include <displays/DisplayAdapter.h>
 
@@ -53,44 +52,9 @@ public:
   ~DisplayAGFXAdapter() = default;
 
 public:
-  virtual bool start() override {
-    PANELTRACE("init: w:%d, h:%d, r:%d\n", displayConfig.width, displayConfig.height, displayConfig.rotation);
-    PANELTRACE(" colors: #%08x / #%08x / #%08x\n", displayConfig.drawColor, displayConfig.backgroundColor, displayConfig.borderColor);
-    PANELTRACE(" invert: %d ips: %d\n", displayConfig.invert, displayConfig.ips);
-    PANELTRACE("   pins: light:%d, reset:%d\n", displayConfig.lightPin, displayConfig.resetPin);
-
-
-    // LOGGER_JUSTINFO("Font_10: %d %d %d=%d", sizeof(Font_10), sizeof(Font_10Bitmaps), sizeof(Font_10Glyphs),
-    //                 sizeof(Font_10) + sizeof(Font_10Bitmaps) + sizeof(Font_10Glyphs));
-
-    // LOGGER_JUSTINFO("Font_16: %d %d %d=%d", sizeof(Font_16), sizeof(Font_16Bitmaps), sizeof(Font_16Glyphs),
-    //                 sizeof(Font_16) + sizeof(Font_16Bitmaps) + sizeof(Font_16Glyphs));
-
-    // LOGGER_JUSTINFO("Font_24: %d %d %d=%d", sizeof(Font_24), sizeof(Font_24Bitmaps), sizeof(Font_24Glyphs),
-    //                 sizeof(Font_24) + sizeof(Font_24Bitmaps) + sizeof(Font_24Glyphs));
-
-    if (!gfx) {
-      LOGGER_ERR("not found");
-      return (false);
-
-    } else {
-      gfx->begin(displayConfig.busSpeed);
-      gfx->invertDisplay(displayConfig.invert);
-
-      DisplayAdapter::start();
-
-      gfx->setTextWrap(false);
-      setColor(displayConfig.drawColor);
-      setBackgroundColor(displayConfig.backgroundColor);
-      setBorderColor(displayConfig.borderColor);
-      _setTextHeight(displayConfig.height > 128 ? 16 : 8);
-      clear();
-      flush();
-    }  // if
-
-    return (true);
-  };  // init()
-
+  /// @brief initialize and start the display
+  /// @return display is working
+  virtual bool start() override;
 
   virtual void setColor(const uint32_t col) override {
     PANELTRACE("setColor #%08x\n", col);
@@ -120,6 +84,14 @@ public:
     DisplayAdapter::clear();
   };  // clear()
 
+
+  void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color) override {
+    DisplayAdapter::fillRect(x, y, w, h, color);
+    gfx->fillRect(x, y, w, h, col565(color));
+  };
+
+
+  BoundingBox textBox(int16_t h, const char *text) override;
 
   /// @brief Draw a text at this position using the specific height.-
   /// @param x x-position or offset of the text.
@@ -239,7 +211,7 @@ protected:
   /// @brief Set height of text in a box.
   /// @param h max. resulting height
   void _setTextHeight(int16_t h) {
-    PANELTRACE("setTextHeight(%d)\n", h);
+    PANELTRACE("_setTextHeight(%d)\n", h);
     int16_t base, fit;
 
     // 8, 10, 16, 24

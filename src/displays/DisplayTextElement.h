@@ -54,10 +54,13 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
+  /// @brief Activate the DisplayTextElement.
+  /// @return true when activation was good.
+  /// @return false when activation failed.
+  virtual void start() override;
+
 protected:
-  /**
-   * @brief send current text to the display.
-   */
+  /// @brief send current text to the display.
   virtual void draw() override;
 
 private:

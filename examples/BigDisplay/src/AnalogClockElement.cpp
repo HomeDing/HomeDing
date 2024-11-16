@@ -17,7 +17,7 @@
 
 #include "AnalogClockElement.h"
 
-#include "gfxDraw.h"
+#include <gfxDraw.h>
 
 // enable TRACE for sending detailed output from this Element
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)

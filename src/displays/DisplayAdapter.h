@@ -70,13 +70,39 @@ public:
   /// @brief Clear the complete display
   virtual void clear();
 
+  /// @brief Fill a rectangle area with one color or clear text.
+  /// @param x Top left corner x coordinate.
+  /// @param y Top left corner y coordinate.
+  /// @param w Width in pixels or text characters.
+  /// @param h Height in pixels or text characters.
+  /// @param color color for filling for pixel displays.
+  /// For text only displays this function should clear the text of the given range.
+  virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color);
+
+
+  /// @brief Fill a rectangle area with one color or clear text.
+  /// @param box Bounding Box of the rectangle.
+  /// @param color color for filling for pixel displays.
+  void fillRect(BoundingBox &box, uint32_t color);
+
+
+  /// @brief calculate the Bounding box of a text drawn at 0/0
+  /// @param h Text heigth
+  /// @param text sample text
+  /// @return size of the resulting box when character size is 1
+  virtual BoundingBox textBox(int16_t h, const char *text) {
+    BoundingBox b(0, 0, strlen(text) - 1, 0);
+    return (b);
+  };
+
+
   /// @brief print a text at the specified position
   /// @param x x position
   /// @param y y position
   /// @param h character height
   /// @param text text to be printed.
   /// @return Bounding Box of the drawn text.
-   virtual BoundingBox drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t color);
+  virtual BoundingBox drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t color);
 
   // Bounding box of the drawable area.
   BoundingBox displayBox;

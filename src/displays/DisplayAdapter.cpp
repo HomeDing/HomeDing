@@ -19,8 +19,6 @@
 #include "DisplayAdapter.h"
 #include "displays/DisplayOutputElement.h"
 
-#include "gfxDraw.h"
-
 // enable TRACE to create detailed output
 #define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
@@ -85,14 +83,25 @@ bool DisplayAdapter::start() {
     pinMode(displayConfig.lightPin, OUTPUT);
     setBrightness(displayConfig.brightness);
   }
-
   return (true);
 };
 
 
 /// @brief Clear the complete display
 void DisplayAdapter::clear() {
+  fillRect(displayBox, displayConfig.backgroundColor);
+};
+
+
+/// @brief Clear a specific rectangle area
+void DisplayAdapter::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color) {
   _needFlush = true;
+};
+
+
+/// @brief Clear a specific rectangle area
+void DisplayAdapter::fillRect(BoundingBox &box, uint32_t color) {
+  fillRect(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1, color);
 };
 
 
@@ -127,6 +136,7 @@ bool DisplayAdapter::startFlush(bool force) {
 
 #if 1
     // direct drawing (no overlapping widgets)
+    // all opaque display output element need drawing the background
 
     board->forEach(Element::CATEGORY::Widget, [this](Element *e) {
       DisplayOutputElement *de = (DisplayOutputElement *)e;
@@ -135,16 +145,14 @@ bool DisplayAdapter::startFlush(bool force) {
 
       if (de->active && de->page == page && de->needsDraw) {
         TRACEDRAW(" draw: %d/%d-%d/%d", de->box.x_min, de->box.y_min, de->box.x_max, de->box.y_max);
-        // draw box with background color
+
         if (!(de->isOpaque)) {
-          HomeDing::fillColor = displayConfig.backgroundColor;
-          HomeDing::displayAdapter->startWrite();
-          gfxDraw::drawRect(de->box.x_min, de->box.y_min, de->box.x_max - de->box.x_min + 1, de->box.y_max - de->box.y_min + 1,
-                            nullptr, HomeDing::fill);
-          HomeDing::displayAdapter->endWrite();
+          // The DisplayOutputElement needs drawing the background
+          fillRect(de->box, displayConfig.backgroundColor);
+          // fillRect(de->box.x_min, de->box.y_min, de->box.x_max - de->box.x_min + 1, de->box.y_max - de->box.y_min + 1, displayConfig.backgroundColor);
         }
         de->draw();
-        de->needsDraw = false;
+        de->needsDraw = false;  // done.
       }
     });
 

@@ -12,8 +12,7 @@
 
 #include <displays/DisplayAGFXAdapter.h>
 
-#define TRACE(...)  // Serial.printf("Display::" __VA_ARGS__)
-
+#define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
 
 // ===== static variables (one display only)
 
@@ -28,13 +27,105 @@ Arduino_GFX *gfx = nullptr;
 
 static uint16_t AGFX_drawColor;
 
+bool DisplayAGFXAdapter::start() {
+  TRACE("init: w:%d, h:%d, r:%d", displayConfig.width, displayConfig.height, displayConfig.rotation);
+  TRACE(" colors: #%08x / #%08x / #%08x", displayConfig.drawColor, displayConfig.backgroundColor, displayConfig.borderColor);
+  TRACE(" invert: %d ips: %d", displayConfig.invert, displayConfig.ips);
+  TRACE("   pins: light:%d, reset:%d", displayConfig.lightPin, displayConfig.resetPin);
+
+
+  // LOGGER_JUSTINFO("Font_10: %d %d %d=%d", sizeof(Font_10), sizeof(Font_10Bitmaps), sizeof(Font_10Glyphs),
+  //                 sizeof(Font_10) + sizeof(Font_10Bitmaps) + sizeof(Font_10Glyphs));
+
+  // LOGGER_JUSTINFO("Font_16: %d %d %d=%d", sizeof(Font_16), sizeof(Font_16Bitmaps), sizeof(Font_16Glyphs),
+  //                 sizeof(Font_16) + sizeof(Font_16Bitmaps) + sizeof(Font_16Glyphs));
+
+  // LOGGER_JUSTINFO("Font_24: %d %d %d=%d", sizeof(Font_24), sizeof(Font_24Bitmaps), sizeof(Font_24Glyphs),
+  //                 sizeof(Font_24) + sizeof(Font_24Bitmaps) + sizeof(Font_24Glyphs));
+
+  if (!gfx) {
+    LOGGER_ERR("not found");
+    return (false);
+
+  } else {
+    gfx->begin(displayConfig.busSpeed);
+    gfx->invertDisplay(displayConfig.invert);
+
+    DisplayAdapter::start();
+
+    gfx->setTextWrap(false);
+    setColor(displayConfig.drawColor);
+    setBackgroundColor(displayConfig.backgroundColor);
+    setBorderColor(displayConfig.borderColor);
+    _setTextHeight(displayConfig.height > 128 ? 16 : 8);
+    clear();
+    flush();
+  }  // if
+
+  return (true);
+};  // start()
+
+
+/// return the Bounding box of a text drawn at 0/0
+
+
+BoundingBox DisplayAGFXAdapter::textBox(int16_t h, const char *text) {
+  TRACE("textBox: h:%d t:\"%s\"", h, text);
+
+  int16_t bx, by;
+  uint16_t bw, bh;
+
+  gfx->setTextBound(0, 0, gfx->width(), gfx->height());
+
+  _setTextHeight(h);  // also sets baseLine
+  gfx->getTextBounds(text, 0, 0 + baseLine, &bx, &by, &bw, &bh);
+  TRACE("  bounds: %d/%d w:%d h:%d", bx, by, bw, bh);
+  // bx and by might be > 0 because of the first character is starting with some space.
+  // therefore by, by is added to the width/height.
+  BoundingBox box(0, 0, bx + bw - 1, by + bh - 1);
+  TRACE("     box: %d -- %d / %d -- %d", box.x_min, box.y_min, box.x_max, box.y_max);
+  return (box);
+};
+
+
+BoundingBox DisplayAGFXAdapter::drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t strokeColor) {
+  TRACE("drawText: %d/%d h:%d t:\"%s\" color:%08lx", x, y, h, text, strokeColor);
+
+  if (displayBox.contains(x, y)) {
+    // textbox dimensions
+    uint16_t col = col565(strokeColor);
+
+    // done in textBox()...
+    // gfx->setTextBound(0, 0, gfx->width(), gfx->height());
+    // _setTextHeight(h);
+
+    BoundingBox b = textBox(h, text);
+    TRACE(" boundbox: %d/%d -- %d/%d", b.x_min, b.x_max, b.y_min, b.y_max);
+
+    gfx->setTextColor(col, col);  // transparent background
+    gfx->setCursor(x, y + baseLine);
+    gfx->print(text);
+    _needFlush = true;
+
+    b.shift(x, y);
+    return (b);
+
+  } else {
+    BoundingBox b;
+    TRACE("    nobox: %d -- %d / %d -- %d", b.x_min, b.x_max, b.y_min, b.y_max);
+    return (b);
+  }
+
+}  // drawText
+
+
 // ===== protected functions
 
 Arduino_DataBus *DisplayAGFXAdapter::getBus() {
-  TRACE("getbus: %d\n", displayConfig.busmode);
-  TRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d\n",
+  TRACE("getbus: %d", displayConfig.busmode);
+  TRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d",
         displayConfig.dcPin, displayConfig.csPin, displayConfig.spiCLK, displayConfig.spiMOSI, displayConfig.spiMISO);
-  TRACE("   i2c: adr:%d, sda:%d, scl:%d\n", displayConfig.i2cAddress, displayConfig.i2cSDA, displayConfig.i2cSCL);
+  TRACE("   i2c: adr:%d, sda:%d, scl:%d", displayConfig.i2cAddress, displayConfig.i2cSDA, displayConfig.i2cSCL);
 
   Arduino_DataBus *bus = nullptr;
 
@@ -46,17 +137,17 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
   }
 
   if (displayConfig.busmode == BUSMODE_I2C) {
-    TRACE("Use I2C\n");
+    TRACE("Use I2C");
     bus = new Arduino_Wire(displayConfig.i2cAddress, displayConfig.i2cCommandPrefix, displayConfig.i2cDataPrefix);
 
 #if defined(ESP32)
   } else if (displayConfig.busmode == BUSMODE_SPI) {
-    TRACE("Use SPI\n");
+    TRACE("Use SPI");
     bus = new Arduino_HWSPI(displayConfig.dcPin, displayConfig.csPin, displayConfig.spiCLK, displayConfig.spiMOSI, displayConfig.spiMISO);
     // bus = new Arduino_ESP32SPI(displayConfig.dcPin, displayConfig.csPin);
 
   } else if (displayConfig.busmode == BUSMODE_HSPI) {
-    TRACE("Use HSPI\n");
+    TRACE("Use HSPI");
     bus = new Arduino_ESP32SPI(
       displayConfig.dcPin,
       displayConfig.csPin,
@@ -69,7 +160,7 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
 
 #if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
   } else if (displayConfig.busmode == BUSMODE_PAR8) {
-    TRACE("Use PAR8\n");
+    TRACE("Use PAR8");
 
     int pinCount = ListUtils::length(displayConfig.busPins);
     int8_t pins[8];
@@ -90,7 +181,7 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
 
 #if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
   } else if (displayConfig.busmode == BUSMODE_LCD8) {
-    TRACE("Use LCD8\n");
+    TRACE("Use LCD8");
     bus = new Arduino_ESP32LCD8(
       0 /* DC */,
       GFX_NOT_DEFINED /* CS */,
@@ -103,46 +194,13 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
 
 #if defined(ESP8266)
   } else if (displayConfig.busmode == BUSMODE_SPI) {
-    TRACE("Use SPI\n");
+    TRACE("Use SPI");
     // ESP8266 has pre-defined SPI pins
     bus = new Arduino_ESP8266SPI(displayConfig.dcPin, displayConfig.csPin);
 #endif
   }  // if
   return (bus);
 }  // getBus()
-
-
-BoundingBox DisplayAGFXAdapter::drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t strokeColor) {
-  TRACE("drawText: %d/%d h:%d t:<%s> color:%08lx\n", x, y, h, text, strokeColor);
-
-  if (displayBox.contains(x, y)) {
-    // textbox dimensions
-    int16_t bx, by;
-    uint16_t bw, bh;
-    uint16_t col = col565(strokeColor);
-
-    gfx->setTextBound(0, 0, gfx->width(), gfx->height());
-
-    _setTextHeight(h);
-    gfx->getTextBounds(text, x, y + baseLine, &bx, &by, &bw, &bh);
-    TRACE("     box: %d/%d w:%d h:%d\n", bx, by, bw, bh);
-
-    gfx->setTextColor(col, col);  // transparent background
-    gfx->setCursor(x, y + baseLine);
-    gfx->print(text);
-    _needFlush = true;
-
-    BoundingBox b(x, y, bx + bw - 1, by + bh - 1);
-    TRACE(" boundbox: %d -- %d / %d -- %d\n", b.x_min, b.x_max, b.y_min, b.y_max);
-    return (b);
-
-  } else {
-    BoundingBox b;
-    TRACE("    nobox: %d -- %d / %d -- %d\n", b.x_min, b.x_max, b.y_min, b.y_max);
-    return (b);
-  }
-
-}  // drawText
 
 
 // drawAda

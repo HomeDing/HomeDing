@@ -54,6 +54,19 @@ public:
     return (*this);
   };
 
+
+  /// @brief shift the bounding box by a vector
+  /// @param dx x dimension of the vector
+  /// @param dx y dimension of the vector
+
+  void shift(int16_t dx, int16_t dy) {
+    x_min += dx;
+    x_max += dx;
+    y_min += dy;
+    y_max += dy;
+  }  // shift()
+
+
   /// @brief check if the box contains the given point
   /// @param x x-coordinate of the point
   /// @param y y-coordinate of the point
@@ -67,9 +80,7 @@ public:
   /// @param b
   /// @return
   bool overlaps(BoundingBox &b) {
-    bool isOut =
-      (b.x_min > this->x_max) || (b.x_max < this->x_min)
-      || (b.y_min > this->y_max) || (b.y_max < this->y_min);
+    bool isOut = (b.x_min > this->x_max) || (b.x_max < this->x_min) || (b.y_min > this->y_max) || (b.y_max < this->y_min);
     return (!isOut);
   }  // overlaps()
 

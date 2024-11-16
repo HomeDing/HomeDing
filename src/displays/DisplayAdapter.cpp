@@ -32,12 +32,6 @@ DisplayAdapter *displayAdapter = nullptr;
 uint32_t strokeColor;
 uint32_t fillColor;
 
-//  [color](int16_t x, int16_t y) {
-//   if (HomeDing::displayAdapter->displayBox.contains(x, y)) {
-//     HomeDing::displayAdapter->writePixel(x, y, color);
-//   }
-// });
-
 void stroke(int16_t x, int16_t y) {
   displayAdapter->writePixel(x, y, strokeColor);
 }

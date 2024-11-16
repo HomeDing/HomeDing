@@ -37,7 +37,6 @@ public:
 
         display->begin(HomeDing::displayConfig.width, HomeDing::displayConfig.height);
         lineHeight = 1;
-        charWidth = 1;
 
         byte dotOff[] = { 0b00000, 0b01110, 0b10001, 0b10001,
                           0b10001, 0b01110, 0b00000, 0b00000 };

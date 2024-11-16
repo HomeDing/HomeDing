@@ -1027,7 +1027,9 @@ void Board::displayInfo(const char *text1, const char *text2) {
     BoundingBox b = display->drawText(0, 0, 0, text1, HomeDing::displayConfig.drawColor);
 
     if (text2) {
-      display->drawText(0, b.y_max+1, 0, text2, HomeDing::displayConfig.drawColor);
+      int16_t y = b.y_max + 1;
+      if (b.y_max > 8) { y += 4; }
+      display->drawText(0, y, 0, text2, HomeDing::displayConfig.drawColor);
     }
     display->startFlush(true);
   }  // if

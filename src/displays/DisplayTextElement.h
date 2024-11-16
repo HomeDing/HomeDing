@@ -16,6 +16,7 @@
  * * 24.06.2018 no problems when no display is available.
  * * 23.09.2018 support DisplayAdapter->flush()
  * * 26.01.2024 force redraw on attribute changes
+ * * 16.11.2024 independant fontsize from textbox, horizontal alignment implemented
  */
 
 

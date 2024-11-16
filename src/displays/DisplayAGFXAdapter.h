@@ -249,32 +249,27 @@ protected:
       // builtin 8pt font
       lineHeight = 8;  // 8+0
       baseLine = 0;
-      charWidth = 6;
 
     } else if (height <= 10) {
       font = &Font_10;
       lineHeight = 10;  // 8 + 2
       baseLine = 7;
-      charWidth = 8;
 
     } else if (height <= 16) {
       font = &Font_16;
       lineHeight = 16;  // 13 + 3
       baseLine = 12;
-      charWidth = 11;
 
     } else if (height <= 24) {
       font = &Font_24;
       lineHeight = 24;  // 20+4
       baseLine = 19;
-      charWidth = 14;
     }  // if
 
     gfx->setFont(font);
     gfx->setTextSize(factor);
     lineHeight *= factor;
     baseLine *= factor;
-    charWidth *= factor;
   }  // loadFont()
 
   int baseLine;  // baseline offset

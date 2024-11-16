@@ -185,7 +185,6 @@ public:
 
 protected:
   int16_t lineHeight;  ///< total height of a text line
-  int16_t charWidth;   ///< width of a character
 
   uint32_t color;        ///< default draw color
   uint32_t backColor;    ///< default background color

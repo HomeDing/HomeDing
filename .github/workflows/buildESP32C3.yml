@@ -58,6 +58,7 @@ jobs:
             - name: PubSubClient
             - source-url: "https://github.com/luc-github/ESP32SSDP.git"
               version: "v2.x"
+            - source-url: "https://github.com/mathertel/gfxDraw.git"
           sketch-paths: |
             - 'examples/standard'
             - 'examples/tutorial'

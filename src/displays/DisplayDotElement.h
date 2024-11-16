@@ -20,6 +20,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayOutputElement.h>
 
 /**
@@ -46,4 +48,6 @@ public:
 // Register the DisplayDotElement onto the ElementRegistry.
 bool DisplayDotElement::registered =
   ElementRegistry::registerElement("displaydot", DisplayDotElement::create);
+#endif
+
 #endif

@@ -17,6 +17,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include <displays/DisplayDotElement.h>
 
 #include <gfxDraw.h>
@@ -38,11 +40,6 @@ Element *DisplayDotElement::create() {
 void DisplayDotElement::draw() {
   TRACE("draw(%d/%d - %d/%d #%08x)\n", _x0, _y0, _x1, _y1);
 
-#if 0
-  bool bValue = _atob(_value.c_str());
-  _display->drawCircle(box, _borderColor, bValue ? _backgroundColor : RGB_TRANSPARENT);
-
-#else
   HomeDing::strokeColor = _borderColor;
   HomeDing::fillColor = _backgroundColor;
 
@@ -55,9 +52,8 @@ void DisplayDotElement::draw() {
     HomeDing::fill);
 
   HomeDing::displayAdapter->endWrite();
-#endif
-
 }  // draw()
 
+#endif
 
 // End

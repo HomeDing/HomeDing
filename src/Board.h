@@ -272,12 +272,6 @@ public:
 
 
   /**
-   * Display Adapter when a display is configured.
-   */
-  DisplayAdapter *display = NULL;
-
-
-  /**
    * Safe Mode flag
    */
   bool isSafeMode;
@@ -331,7 +325,9 @@ public:
   /// @brief Find an Element by full qualified ID `type/name`.
   /// @param id type and name of element.
   /// @return found element
-  Element *findById(String &id) { return (findById(id.c_str())); };
+  Element *findById(String &id) {
+    return (findById(id.c_str()));
+  };
 
 
   /**
@@ -345,7 +341,7 @@ public:
    * @param text1
    * @param text2
    */
-  void displayInfo(const char *text1, const char *text2 = NULL);
+  void displayInfo(const char *text1 = nullptr, const char *text2 = nullptr);
 
 
   /**

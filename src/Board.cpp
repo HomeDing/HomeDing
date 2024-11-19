@@ -404,7 +404,7 @@ void Board::loop() {
 
     // no actions left
     // trigger flush to a display
-    if ((display) && display->startFlush(false)) {
+    if ((HomeDing::displayAdapter) && HomeDing::displayAdapter->startFlush(false)) {
       return;
     }  // if
 
@@ -602,15 +602,15 @@ void Board::loop() {
   } else if (boardState == BOARDSTATE::GREET) {
     const char *name = WiFi.getHostname();
 
-    displayInfo(name, WiFi.localIP().toString().c_str());
-    Logger::printf("connected to %s (%s mode)",
-                   WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
+    Logger::printf("connected to %s (%s mode)", WiFi.SSID().c_str(), (isSafeMode ? "safe" : "unsafe"));
     Logger::printf("start http://%s/\n", name);
 
-    if (display) {
+    displayInfo(name, WiFi.localIP().toString().c_str());
+
+    if (HomeDing::displayAdapter) {
+      // clear again.
       delay(1600);
-      display->clear();
-      display->startFlush(true);
+      displayInfo();
     }  // if
 
     server->begin();
@@ -1021,17 +1021,19 @@ void Board::reboot(bool wipe) {
 
 
 void Board::displayInfo(const char *text1, const char *text2) {
-  Logger::printf("%s %s", text1, text2 ? text2 : "");
-  if (display) {
-    display->clear();
-    BoundingBox b = display->drawText(0, 0, 0, text1, HomeDing::displayConfig.drawColor);
+  Logger::printf("%s %s", text1 ? text1 : "", text2 ? text2 : "");
+  if (HomeDing::displayAdapter) {
+    HomeDing::displayAdapter->clear();
+    if (text1) {
+      BoundingBox b = HomeDing::displayAdapter->drawText(0, 0, 0, text1, HomeDing::displayConfig.drawColor);
 
-    if (text2) {
-      int16_t y = b.y_max + 1;
-      if (b.y_max > 8) { y += 4; }
-      display->drawText(0, y, 0, text2, HomeDing::displayConfig.drawColor);
+      if (text2) {
+        int16_t y = b.y_max + 1;
+        if (b.y_max > 8) { y += 4; }
+        HomeDing::displayAdapter->drawText(0, y, 0, text2, HomeDing::displayConfig.drawColor);
+      }
     }
-    display->startFlush(true);
+    HomeDing::displayAdapter->startFlush(true);
   }  // if
 }
 

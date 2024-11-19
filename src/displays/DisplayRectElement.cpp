@@ -17,6 +17,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include <displays/DisplayRectElement.h>
 
 #include <gfxDraw.h>
@@ -48,5 +50,6 @@ void DisplayRectElement::draw() {
   HomeDing::displayAdapter->endWrite();
 }  // draw()
 
+#endif
 
 // End

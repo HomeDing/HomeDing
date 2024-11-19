@@ -149,8 +149,7 @@ void DisplayTouchElement::loop() {
       _isTouched = true;
 
       // as of now only interested in the first.
-      LOGGER_ETRACE(" touch %d/%d", lastX, lastY);
-
+      TRACE(" touch %d/%d", lastX, lastY);
       if (!_bFound) {
         // find displaybutton at x/y
         _board->forEach(CATEGORY::Widget, [this](Element *e) {

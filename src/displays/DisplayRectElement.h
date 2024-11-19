@@ -18,6 +18,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayOutputElement.h>
 
 /**
@@ -46,4 +48,6 @@ private:
 // Register the DisplayRectElement onto the ElementRegistry.
 bool DisplayRectElement::registered =
   ElementRegistry::registerElement("displayrect", DisplayRectElement::create);
+#endif
+
 #endif

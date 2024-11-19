@@ -169,7 +169,7 @@ public:
 
 protected:
 
-  uint32_t color;        ///< default draw color
+  uint32_t color;        /// ??? default draw color -> displayConfig::strokeColor
   uint32_t backColor;    ///< default background color
 
   /// @brief  the display buffer is not in sync with the display.

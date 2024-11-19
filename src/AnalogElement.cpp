@@ -69,7 +69,7 @@ bool AnalogElement::set(const char *name, const char *value) {
       _pin = _atopin(value);
 
       // } else if (_stricmp(name, "resolution") == 0) {
-      // _resolution = _atoi(value); ???
+      // _resolution = _atoi(value);
 
     } else if (_stricmp(name, "mapInMin") == 0) {
       _inMin = _atoi(value);

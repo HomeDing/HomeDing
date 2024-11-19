@@ -29,8 +29,6 @@ DisplayOutputElement::DisplayOutputElement() {
 }
 
 
-}
-
 // ===== Element functions =====
 
 /// @brief Set a parameter or property to a new value or start an action.
@@ -106,7 +104,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     TRACE("box= %d/%d - %d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
   }
 
-  if (needsDraw) { HomeDing::displayAdapter->setFlush(); }
+  if (needsDraw && HomeDing::displayAdapter) { HomeDing::displayAdapter->setFlush(); }
 
   return (ret);
 }  // set()

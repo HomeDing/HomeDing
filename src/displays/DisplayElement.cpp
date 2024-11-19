@@ -25,28 +25,26 @@ using namespace HomeDing;
 
 DisplayElement::DisplayElement() {
   startupMode = Element::STARTUPMODE::System;
-  category = CATEGORY::Display; // no looping
+  category = CATEGORY::Display;  // no looping
 }
 
 // ===== private functions =====
 
 void DisplayElement::_newPage(int page) {
   TRACE("newPage %d", page);
-  DisplayAdapter *da = _board->display;
-  if (da) {
-    int oldPage = da->page;
+  DisplayAdapter *da = HomeDing::displayAdapter;
 
-    da->page = constrain(page, 0, da->maxpage);
+  int oldPage = da->page;
+  da->page = constrain(page, 0, da->maxpage);
 
-    da->clear();
-    // redraw all DisplayOutput elements
-    _board->forEach(CATEGORY::Widget, [this](Element *e) {
-      TRACE("do %s", e->id);
-      e->set(HomeDing::Actions::Redraw, "1");
-    });
-    if (da->page != oldPage) {
-      HomeDing::Actions::push(_onPage, String(da->page).c_str());
-    }
+  da->clear();
+  // redraw all DisplayOutput elements
+  _board->forEach(CATEGORY::Widget, [this](Element *e) {
+    TRACE("do %s", e->id);
+    e->set(HomeDing::Actions::Redraw, "1");
+  });
+  if (da->page != oldPage) {
+    HomeDing::Actions::push(_onPage, String(da->page).c_str());
   }
 }  // _newPage()
 
@@ -72,7 +70,7 @@ void DisplayElement::init(Board *board) {
 bool DisplayElement::set(const char *name, const char *value) {
   bool ret = true;
   TRACE("set %s=%s", name, value);
-  DisplayAdapter *da = _board->display;
+  DisplayAdapter *da = HomeDing::displayAdapter;
   int value_int = _atoi(value);
   int value_pin = _atopin(value);
 
@@ -106,7 +104,10 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // === These properties can only be used during configuration:
 
-  } else if (_stricmp(name, "background") == 0) {
+  } else if ((_stricmp(name, "color") == 0) || (_stricmp(name, "stroke") == 0)) {
+    displayConfig.drawColor = _atoColor(value);
+
+  } else if ((_stricmp(name, "background") == 0) || (_stricmp(name, "fill") == 0)) {
     displayConfig.backgroundColor = _atoColor(value);
 
   } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
@@ -245,8 +246,6 @@ void DisplayElement::start(DisplayAdapter *displayAdapter) {
     if (displayAdapter->setup(_board)) {
       bool success = displayAdapter->start();
       if (success) {
-
-        _board->display = displayAdapter;
         HomeDing::displayAdapter = displayAdapter;
 
         displayAdapter->setBrightness(displayConfig.brightness);
@@ -265,17 +264,12 @@ void DisplayElement::start(DisplayAdapter *displayAdapter) {
 }  // start(da)
 
 
-/**
- * @brief push the current value of all properties to the callback.
- */
+/// * @brief push the current value of all properties to the callback.
 void DisplayElement::pushState(
   std::function<void(const char *pName, const char *eValue)> callback) {
   Element::pushState(callback);
-  DisplayAdapter *da = _board->display;
-  if (da) {
-    callback(HomeDing::Actions::Brightness, _printInteger(displayConfig.brightness));
-    callback("page", _printInteger(_board->display->page));
-  }
+  callback(HomeDing::Actions::Brightness, _printInteger(displayConfig.brightness));
+  callback("page", _printInteger(HomeDing::displayAdapter->page));
 }  // pushState()
 
 // End

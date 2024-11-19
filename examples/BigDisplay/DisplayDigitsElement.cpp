@@ -62,15 +62,15 @@ void DisplayDigitsElement::_drawDigit(const char *path, int16_t x, int16_t y) {
 
   gfxDraw::gfxDrawWidget o;
 
-  o.setStrokeColor((_borderColor == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_borderColor)));
-  o.setFillColor((_color == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_color)));
+  o.setStrokeColor((_strokeColor == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_strokeColor)));
+  o.setFillColor((_backgroundColor == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_backgroundColor)));
 
   o.setPath(path);
   o.scale(_scale);
   o.move(x, y);
 
   o.draw([&](int16_t x, int16_t y, gfxDraw::ARGB color) {
-    _display->writePixel(x, y, color.toColor24());
+    HomeDing::displayAdapter->writePixel(x, y, color.toColor24());
   });
 }  // _drawDigit()
 
@@ -116,7 +116,7 @@ void DisplayDigitsElement::_drawDigits7(char ch, int16_t x, int16_t y) {
 
 /// @brief Draw this output element.
 void DisplayDigitsElement::draw() {
-  // TRACE("draw('%s' color=%08lx border=%08lx)", _value.c_str(), _color, _borderColor);
+  // TRACE("draw('%s' stroke=%08lx fill=%08lx)", _value.c_str(), _strokeColor, _backgroundColor);
   int16_t x = box.x_min;
   int16_t xWidth;
   int16_t xGap;

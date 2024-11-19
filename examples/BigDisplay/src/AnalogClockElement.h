@@ -73,7 +73,6 @@ private:
   time_t _shown_time = 0;
 
   // colors
-  // uint32_t _color = RGB_GRAY; // provided by DisplayOutputElement
   uint32_t _hand_color_s = RGB_GRAY;
   uint32_t _hand_color_m = RGB_WHITE;
   uint32_t _hand_color_h = RGB_WHITE;

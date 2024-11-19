@@ -37,7 +37,7 @@ void DisplayRectElement::draw() {
   bool bValue = _atob(_value.c_str());
   TRACE("draw(%d)", bValue);
 
-  HomeDing::strokeColor = _color;
+  HomeDing::strokeColor = _strokeColor;
   HomeDing::fillColor = _backgroundColor;
 
   HomeDing::displayAdapter->startWrite();

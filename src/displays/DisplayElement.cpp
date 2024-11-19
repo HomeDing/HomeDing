@@ -25,7 +25,7 @@ using namespace HomeDing;
 
 DisplayElement::DisplayElement() {
   startupMode = Element::STARTUPMODE::System;
-  category = CATEGORY::Display;
+  category = CATEGORY::Display; // no looping
 }
 
 // ===== private functions =====
@@ -106,14 +106,8 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // === These properties can only be used during configuration:
 
-  } else if (_stricmp(name, "color") == 0) {
-    displayConfig.drawColor = _atoColor(value);
-
   } else if (_stricmp(name, "background") == 0) {
     displayConfig.backgroundColor = _atoColor(value);
-
-  } else if (name == HomeDing::Actions::Border) {
-    displayConfig.borderColor = _atoColor(value);
 
   } else if ((_stricmp(name, "busmode") == 0) || (_stricmp(name, "bus") == 0)) {
     displayConfig.busmode = ListUtils::indexOf(BUSMODE_LIST, value);
@@ -244,24 +238,6 @@ bool DisplayElement::set(const char *name, const char *value) {
 }  // set()
 
 
-/**
- * @brief Activate the Element.
- */
-void DisplayElement::start() {
-  LOGGER_EERR("start() called without display Adapter parameter");
-
-  // DisplayAdapter *da = _board->display;
-  // if (da) {
-  //   Element::start();
-  //   da->setBrightness(displayConfig.brightness);
-  //   da->setBackgroundColor(displayConfig.backgroundColor);
-
-  // } else {
-  //   LOGGER_EERR("start failed.");
-  // }
-}  // start()
-
-
 /// @brief Activate the Element using the given adapter.
 void DisplayElement::start(DisplayAdapter *displayAdapter) {
   TRACE("start()");
@@ -297,7 +273,7 @@ void DisplayElement::pushState(
   Element::pushState(callback);
   DisplayAdapter *da = _board->display;
   if (da) {
-    callback("brightness", _printInteger(displayConfig.brightness));
+    callback(HomeDing::Actions::Brightness, _printInteger(displayConfig.brightness));
     callback("page", _printInteger(_board->display->page));
   }
 }  // pushState()

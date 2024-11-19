@@ -33,11 +33,7 @@ public:
    */
   static bool registered;
 
-  virtual void init(Board *board) override;
-
-  /**
-   * @brief Activate the Element.
-   */
+  // Activate the Element and register a Display Adapter.
   virtual void start() override;
 };
 

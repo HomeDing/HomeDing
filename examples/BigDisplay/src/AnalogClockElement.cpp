@@ -136,7 +136,7 @@ void AnalogClockElement::draw() {
   _last_a_sec = aSec;
   _last_a_min = aMin;
   _last_a_hour = aHour;
-  _display->setFlush();
+  HomeDing::displayAdapter->setFlush();
   _shown_time = now;
 }
 
@@ -147,7 +147,7 @@ void AnalogClockElement::loop() {
   if ((!needsDraw) && (_shown_time != time(nullptr))) {
     TRACE("need");
     needsDraw = true;
-    _display->setFlush();
+    HomeDing::displayAdapter->setFlush();
   }
   DisplayOutputElement::loop();
 }  // loop()
@@ -167,7 +167,7 @@ void AnalogClockElement::_drawClock() {
 
   HomeDing::displayAdapter->startWrite();
 
-  HomeDing::strokeColor = _borderColor;
+  HomeDing::strokeColor = _strokeColor;
   HomeDing::fillColor = _backgroundColor;
 
   gfxDraw::drawCircle(

@@ -20,8 +20,9 @@
 #if defined(ESP32)
 
 #include <displays/DisplayButtonElement.h>
+#include <gfxDraw.h>
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 
 // ===== Element Registry =====
@@ -44,12 +45,12 @@ bool DisplayButtonElement::touchStart(int16_t xPos, int16_t yPos) {
   bool over = box.contains(xPos, yPos);
   if (over != _pressed) {
     needsDraw = true;
-    if (_display) _display->setFlush();
+    HomeDing::displayAdapter->setFlush();
     TRACE("touch(%d)", over);
   }
   _pressed = over;
   return (over);
-} // touchStart()
+}  // touchStart()
 
 
 void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
@@ -59,8 +60,8 @@ void DisplayButtonElement::touchEnd(int16_t xPos, int16_t yPos) {
   }
   _pressed = false;
   needsDraw = true;
-  if (_display) _display->setFlush();
-} // touchEnd()
+  HomeDing::displayAdapter->setFlush();
+}  // touchEnd()
 
 
 // ===== Element functions =====
@@ -104,12 +105,41 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
 
 /// @brief Draw the button on display.
 void DisplayButtonElement::draw() {
+  const uint16_t paddingVertical = 4;
+  int16_t h = box.y_max - box.y_min + 1;
+  int16_t fontSize = _fontsize;
+  int16_t padX = 0;
+  int16_t padY = 0;
 
-  TRACE("draw %d.%d.%d.%d", box.x_min, box.y_min, box.x_max, box.y_min);
+  TRACE("draw [%d/%d - %d/%d] <%s> %d", box.x_min, box.x_max, box.y_min, box.y_max, _text, _pressed);
 
   DisplayOutputElement::draw();  // prepare colors
-  _display->drawButton(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1, _text.c_str(), _pressed);
-}
+
+  // fontsize can be defined smaller but not extending height - padding.
+  if (fontSize < 0) { fontSize = h - (2 * paddingVertical); }
+  if (fontSize < 0) { fontSize = 0; }
+
+  BoundingBox txtBox = HomeDing::displayAdapter->textBox(fontSize, _text.c_str());
+
+  txtBox.shift(box.x_min, box.y_min);
+
+  // center horizontal
+  padX = (box.x_max - txtBox.x_max) / 2;
+  // center vertical
+  if (txtBox.y_max < box.y_max) { padY = (box.y_max - txtBox.y_max) / 2; }
+
+  HomeDing::strokeColor = (_pressed ? _backgroundColor : _strokeColor);
+  HomeDing::fillColor = (_pressed ? _strokeColor : _backgroundColor);
+
+  HomeDing::displayAdapter->startWrite();
+  gfxDraw::drawRoundedRect(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1, (h / 2),
+                           HomeDing::stroke, HomeDing::fill);
+
+  HomeDing::displayAdapter->endWrite();
+
+  HomeDing::displayAdapter->drawText(box.x_min + padX, box.y_min + padY, _fontsize, _text.c_str(), HomeDing::strokeColor);
+}  // draw()
+
 
 #endif
 

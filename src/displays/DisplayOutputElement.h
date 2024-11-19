@@ -13,6 +13,7 @@
  * * 26.04.2021 created by Matthias Hertel
  * * 26.01.2024 force redraw on attribute changes
  * * 20.02.2024 added common value handling
+ * * 19.11.2024 use global HomeDing::displayAdapter
  */
 
 
@@ -82,14 +83,11 @@ protected:
   int16_t _x1 = 0;
   int16_t _y1 = 0;
 
-  /// @brief Draw color of the element
-  uint32_t _color = RGB_UNDEFINED;
+  /// @brief Stroke color of the Element.
+  uint32_t _strokeColor;
 
   /// @brief Background color of the element
-  uint32_t _backgroundColor = RGB_UNDEFINED;
-
-  /// @brief Border color of the element
-  uint32_t _borderColor = RGB_UNDEFINED;
+  uint32_t _backgroundColor;
 
   /// fontsize setting
   int16_t _fontsize = -1;  // not set
@@ -99,7 +97,4 @@ protected:
 
   /// @brief Value the element
   String _value;
-
-  /// @brief Reference to DisplayAdapter
-  DisplayAdapter *_display = nullptr;
 };

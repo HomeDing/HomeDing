@@ -29,7 +29,7 @@ static uint16_t AGFX_drawColor;
 
 bool DisplayAGFXAdapter::start() {
   TRACE("init: w:%d, h:%d, r:%d", displayConfig.width, displayConfig.height, displayConfig.rotation);
-  TRACE(" colors: #%08x / #%08x / #%08x", displayConfig.drawColor, displayConfig.backgroundColor, displayConfig.borderColor);
+  TRACE(" colors: #%08x / #%08x", displayConfig.drawColor, displayConfig.backgroundColor);
   TRACE(" invert: %d ips: %d", displayConfig.invert, displayConfig.ips);
   TRACE("   pins: light:%d, reset:%d", displayConfig.lightPin, displayConfig.resetPin);
 
@@ -56,8 +56,13 @@ bool DisplayAGFXAdapter::start() {
     gfx->setTextWrap(false);
     setColor(displayConfig.drawColor);
     setBackgroundColor(displayConfig.backgroundColor);
-    setBorderColor(displayConfig.borderColor);
-    _setTextHeight(displayConfig.height > 128 ? 16 : 8);
+
+    int16_t fontsize = 8 + 1;  // Standard
+    if (displayConfig.height > 128) fontsize *= 2;
+    if (displayConfig.height > 256) fontsize *= 2;
+    // if (displayConfig.height > 320) fontsize = 48;
+    _setTextHeight(fontsize);
+
     clear();
     flush();
   }  // if
@@ -67,7 +72,6 @@ bool DisplayAGFXAdapter::start() {
 
 
 /// return the Bounding box of a text drawn at 0/0
-
 
 BoundingBox DisplayAGFXAdapter::textBox(int16_t h, const char *text) {
   TRACE("textBox: h:%d t:\"%s\"", h, text);
@@ -121,8 +125,15 @@ BoundingBox DisplayAGFXAdapter::drawText(int16_t x, int16_t y, int16_t h, const 
 
 // ===== protected functions
 
+/// @brief send all buffered pixels to display.
+void DisplayAGFXAdapter::flush() {
+  gfx->flush();
+  DisplayAdapter::flush();
+};  // flush()
+
+
 Arduino_DataBus *DisplayAGFXAdapter::getBus() {
-  TRACE("getbus: %d", displayConfig.busmode);
+  TRACE("getBus: %d", displayConfig.busmode);
   TRACE("   spi: dc:%d cs:%d clk:%d mosi:%d miso:%d",
         displayConfig.dcPin, displayConfig.csPin, displayConfig.spiCLK, displayConfig.spiMOSI, displayConfig.spiMISO);
   TRACE("   i2c: adr:%d, sda:%d, scl:%d", displayConfig.i2cAddress, displayConfig.i2cSDA, displayConfig.i2cSCL);
@@ -203,5 +214,79 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
 }  // getBus()
 
 
-// drawAda
+/// @brief convert a 32-bit color value 0x00RRGGBB into the 565 style packed RGB format 0bRRRRRGGGGGGBBBBB.
+/// @param color 24-bit color value
+/// @return 16-bit color in 565 format.
+uint16_t DisplayAGFXAdapter::col565(uint32_t color) {
+
+  uint16_t col =
+    ((color & 0x00F80000) >> 8)
+    | ((color & 0x0000FC00) >> 5)
+    | ((color & 0x000000F8) >> 3);
+  return (col);
+}  // col565()
+
+
+/// @brief Set height of text in a box.
+/// @param h max. resulting height
+void DisplayAGFXAdapter::_setTextHeight(int16_t h) {
+  PANELTRACE("_setTextHeight(%d)\n", h);
+  int16_t base, fit;
+
+  // 8, 10, 16, 24
+
+  if (h > 0) {
+    base = 8;
+    fit = h % base;
+
+    if ((h >= 10) && (h % 10 <= fit)) {
+      base = 10;
+      fit = h % base;
+    }
+
+    if ((h >= 16) && (h % 16 <= fit)) {
+      base = 16;
+      fit = h % base;
+    }
+
+    if ((h >= 24) && (h % 24 <= fit)) {
+      base = 24;
+      fit = h % base;
+    }
+
+    loadFont(base, h / base);
+    // LOGGER_JUSTINFO(" >(%d)", baseLine);
+  }
+}  // _setTextHeight()
+
+
+// load a builtin font
+void DisplayAGFXAdapter::loadFont(int16_t height, int8_t factor) {
+  PANELTRACE("loadFont(%d, %d)\n", height, factor);
+  const GFXfont *font = nullptr;
+
+  if (height <= 8) {
+    // builtin 8pt font
+    baseLine = 0;
+
+  } else if (height <= 10) {
+    font = &Font_10;
+    baseLine = 7;
+
+  } else if (height <= 16) {
+    font = &Font_16;
+    baseLine = 12;
+
+  } else if (height <= 24) {
+    font = &Font_24;
+    baseLine = 19;
+  }  // if
+
+  gfx->setFont(font);
+  gfx->setTextSize(factor);
+  baseLine *= factor;
+}  // loadFont()
+
+
+
 // End.

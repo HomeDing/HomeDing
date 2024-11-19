@@ -17,13 +17,16 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include <displays/DisplayLineElement.h>
 
 #include <gfxDraw.h>
+#include "DisplayLineElement.h"
 
-#define TRACE(...) // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
- /**
+/**
  * @brief static factory function to create a new DisplayLineElement.
  * @return DisplayLineElement* as Element* created element
  */
@@ -32,18 +35,23 @@ Element *DisplayLineElement::create() {
 }  // create()
 
 
+void DisplayLineElement::start() {
+  TRACE("start()");
+  DisplayOutputElement::start();
+  isOpaque = true; // don't draw a background color rectangle.
+}
+
+
 /// @brief Draw the line by using gfxDraw functions.
 void DisplayLineElement::draw() {
   TRACE("draw(%d/%d - %d/%d)\n", _x0, _y0, _x1, _y1);
 
-  if ((_color != RGB_UNDEFINED) && (_color != RGB_TRANSPARENT)) {
-    HomeDing::strokeColor = _color;
-    HomeDing::displayAdapter->startWrite();
-    gfxDraw::drawLine(_x0, _y0, _x1, _y1, HomeDing::stroke);
-    HomeDing::displayAdapter->endWrite();
-  }
+  HomeDing::strokeColor = _strokeColor;
+  HomeDing::displayAdapter->startWrite();
+  gfxDraw::drawLine(_x0, _y0, _x1, _y1, HomeDing::stroke);
+  HomeDing::displayAdapter->endWrite();
 }  // draw()
 
-
+#endif
 
 // End

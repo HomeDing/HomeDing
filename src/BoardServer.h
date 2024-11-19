@@ -31,7 +31,7 @@ The state of a special existing element can be retrieved by using a more
 specific url like: <http://homeding/api/state/timer/blink>.
 
 To send an action to a element a parameter can be added like:
-<http://homeding/api/state/displaydot/b?value=1> or
+<http://homeding/api/state/value/x?value=11>
 <http://homeding/api/state/displaytext/info?show=Hello>
 @endverbatim
  */

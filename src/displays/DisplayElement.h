@@ -40,7 +40,6 @@ class DisplayAdapter;
 #define RGB_TRANSPARENT 0xEF000000  // key color
 
 #define RGB_IS_COLOR(col) ((col != RGB_UNDEFINED) && (col != RGB_TRANSPARENT))
-#define RGB_NO_COLOR(col) ((col == RGB_UNDEFINED) || (col == RGB_TRANSPARENT))
 
 
 class DisplayElement : public Element {
@@ -67,13 +66,11 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /// @brief Activate the Element.
-  virtual void start() override;
+  /// @brief The start function without displayAdapter must not be called on DisplayElement.
+  virtual void start() override {};
 
-  /// @brief Activate the Element using the given adapter.
+  /// @brief Activate the Element using the given Display Adapter.
   virtual void start(DisplayAdapter *displayAdapter);
-
-  // no loop() call required for display elements as they are used for configuration only.
 
   /**
    * @brief push the current value of all properties to the callback.
@@ -82,11 +79,7 @@ public:
   virtual void pushState(
     std::function<void(const char *pName, const char *eValue)> callback) override;
 
-  // === common properties for initializing display adapters
-
 protected:
-  // HomeDing::DisplayConfig *config;
-
   /** event when page changes */
   String _onPage;
 

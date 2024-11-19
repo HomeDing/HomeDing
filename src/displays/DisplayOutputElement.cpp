@@ -22,6 +22,13 @@
 
 DisplayOutputElement::DisplayOutputElement() {
   category = CATEGORY::Widget;  // no loop
+  
+  // use default stroke and background color 
+  _strokeColor = HomeDing::displayConfig.drawColor;
+  _backgroundColor = HomeDing::displayConfig.backgroundColor;
+}
+
+
 }
 
 // ===== Element functions =====
@@ -64,16 +71,10 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else if ((name == HomeDing::Actions::Height) || (_stricmp(name, "h") == 0)) {
     _y1 = _y0 + _atoi(value) - 1;
 
-  } else if (_stricmp(name, "stroke") == 0) {
-    _color = _atoColor(value);
+  } else if ((_stricmp(name, "stroke") == 0) || (_stricmp(name, "color") == 0)) {
+    _strokeColor = _atoColor(value);
 
-  } else if (_stricmp(name, "fill") == 0) {
-    _backgroundColor = _atoColor(value);
-
-  } else if (_stricmp(name, "color") == 0) {
-    _color = _atoColor(value);
-
-  } else if (_stricmp(name, "background") == 0) {
+  } else if ((_stricmp(name, "fill") == 0) || (_stricmp(name, "background") == 0)) {
     _backgroundColor = _atoColor(value);
 
   } else if (_stricmp(name, "fontsize") == 0) {
@@ -82,8 +83,8 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else if (_stricmp(name, "align") == 0) {
     _align = (TEXTALIGN)_scanEnum("left,center,right", value);
 
-  } else if (name == HomeDing::Actions::Border) {
-    _borderColor = _atoColor(value);
+    // } else if (name == HomeDing::Actions::Border) {
+    //   _borderColor = _atoColor(value);
 
   } else if (!active) {
     // these properties can be used for configuration only.
@@ -105,7 +106,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     TRACE("box= %d/%d - %d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
   }
 
-  if (needsDraw && _display) _display->setFlush();
+  if (needsDraw) { HomeDing::displayAdapter->setFlush(); }
 
   return (ret);
 }  // set()
@@ -116,37 +117,22 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
  */
 void DisplayOutputElement::start() {
   TRACE("start()");
-  _display = _board->display;
-  if (_display) {
+  TRACE("colors: #%08x / #%08x", _strokeColor, _backgroundColor);
 
-    if (_color == RGB_UNDEFINED)
-      _color = HomeDing::displayConfig.drawColor;
-    if (_backgroundColor == RGB_UNDEFINED)
-      _backgroundColor = HomeDing::displayConfig.backgroundColor;
-    if (_borderColor == RGB_UNDEFINED)
-      _borderColor = HomeDing::displayConfig.borderColor;
+  // make sure that the page is in the range of valid virtual pages
+  if (page > HomeDing::displayAdapter->maxpage) {
+    HomeDing::displayAdapter->maxpage = page;
+  }
 
-    TRACE("colors: #%08x / #%08x / #%08x", _color, _backgroundColor, _borderColor);
-
-    if (page > _display->maxpage) {
-      _display->maxpage = page;
-    }
-
-    Element::start();
-    needsDraw = true;
-    if (_display) _display->setFlush();
-  }  // if
+  Element::start();
+  needsDraw = true;
+  HomeDing::displayAdapter->setFlush();
 }  // start()
 
 
-/**
- * @brief Set a parameter or property to a new value or start an action.
- */
+/// @brief Draw the OutputElement...
 void DisplayOutputElement::draw() {
   // LOGGER_ETRACE("draw(%s) page=%d", id, page);
-  _display->setColor(_color);
-  _display->setBackgroundColor(_backgroundColor);
-  _display->setBorderColor(_borderColor);
 }
 
 /// @brief push the current value of all properties to the callback.

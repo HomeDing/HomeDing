@@ -38,7 +38,6 @@ Element *DisplayESP32PanelElement::create() {
 
 /* ===== Element functions ===== */
 
-/// @brief Activate the DisplayESP32PanelElement and register a Display Adapter to LCD
 void DisplayESP32PanelElement::start() {
   DisplayElement::start(new DisplayESP32PanelAdapter());
 }  // start()

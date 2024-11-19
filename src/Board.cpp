@@ -201,7 +201,7 @@ void Board::add(const char *id, Element *e) {
 
   _addedElements++;
   strcpy(e->id, id);
-  Element::_strlower(e->id);
+  // Element::_strlower(e->id);
 
   // append to end of list.
   if ((!l) && hasLoop) {

@@ -131,22 +131,6 @@ public:
     backColor = col;
   };
 
-  /// @brief Set default border color
-  /// @param col The 32-bit border color in 0x00rrggbb.
-  virtual void setBorderColor(const uint32_t col) {
-    borderColor = col;
-  };
-
-  virtual void drawButton(int16_t /* x */, int16_t /* y */, int16_t /* w */, int16_t /* h */, const char * /* text */, bool /* pressed = false */) {
-    _needFlush = true;
-  };
-
-
-  virtual void drawCircle(BoundingBox & /* box */, uint32_t /* borderColor */, uint32_t /* fillColor = RGB_UNDEFINED */) {
-    _needFlush = true;
-  };
-
-
   // low level pixel drawing
 
   virtual void startWrite() {}
@@ -184,13 +168,9 @@ public:
   int maxpage = 1;
 
 protected:
-  int16_t lineHeight;  ///< total height of a text line
 
   uint32_t color;        ///< default draw color
   uint32_t backColor;    ///< default background color
-  uint32_t borderColor;  ///< default border color
-
-  uint8_t _lightChannel;
 
   /// @brief  the display buffer is not in sync with the display.
   bool _needFlush;

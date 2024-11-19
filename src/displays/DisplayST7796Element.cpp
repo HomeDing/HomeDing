@@ -36,21 +36,7 @@ Element *DisplayST7796Element::create() {
 
 /* ===== Element functions ===== */
 
-void DisplayST7796Element::init(Board *board) {
-  TRACE("init()");
-  DisplayElement::init(board);
-
-  // some default values for ST7796 displays
-  HomeDing::displayConfig.width = 320;
-  HomeDing::displayConfig.height = 480;
-}
-
-// All required parameters are handled by DisplayElement::set()
-
-/**
- * @brief Activate the DisplayST7796Element and register a Display Adapter to LCD
- * in the board.
- */
+// Activate the Element and register a Display Adapter.
 void DisplayST7796Element::start() {
   DisplayElement::start(new DisplayST7796Adapter());
 }  // start()

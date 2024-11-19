@@ -145,11 +145,11 @@ void DisplayGaugeElement::_drawRangeSegment(int16_t a0, int16_t a1, uint32_t fil
   s.type = gfxDraw::Segment::Close;
   o.addSegment(s);
 
-  _display->startWrite();
+  HomeDing::displayAdapter->startWrite();
   o.draw([&](int16_t x, int16_t y, gfxDraw::ARGB color) {
-    _display->writePixel(x, y, color.toColor24());
+    HomeDing::displayAdapter->writePixel(x, y, color.toColor24());
   });
-  _display->endWrite();
+  HomeDing::displayAdapter->endWrite();
 
 }  // _drawRangeSegment()
 

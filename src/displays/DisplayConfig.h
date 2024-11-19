@@ -42,14 +42,11 @@ public:
   /// @brief Brightness of display 0...100 (percent)
   uint16_t brightness;
 
-  /// @brief Default Draw Color
+  /// @brief Default Stroke Color
   uint32_t drawColor;
 
-  /// @brief Default Background Color
+  /// @brief Default Fill Color
   uint32_t backgroundColor;
-
-  /// @brief Default Border Color
-  uint32_t borderColor;
 
   /// @brief Rotation of the display.
   int rotation;

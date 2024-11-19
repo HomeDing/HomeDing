@@ -14,11 +14,12 @@
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
  * * 24.06.2018 no problems when no display is available.
- * * 23.09.2018 support DisplayAdapter->flush()
  */
 
 
 #pragma once
+
+#if defined(ESP32)
 
 #include <displays/DisplayOutputElement.h>
 
@@ -28,8 +29,7 @@
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayLineElement : public DisplayOutputElement
-{
+class DisplayLineElement : public DisplayOutputElement {
 public:
   /**
    * @brief Factory function to create a ButtonElement.
@@ -42,6 +42,10 @@ public:
    */
   static bool registered;
 
+  /// @brief Activate the Element.
+  /// @return true when activation was good.
+  /// @return false when activation failed.
+  virtual void start() override;
 
   // all parameters are handles by the DisplayOutputElement
   // virtual bool set(const char *name, const char *value) override;
@@ -50,11 +54,12 @@ public:
    * @brief Draw this output element.
    */
   virtual void draw() override;
-
 };
 
 #ifdef HOMEDING_REGISTER
 // Register the DisplayLineElement onto the ElementRegistry.
 bool DisplayLineElement::registered =
-    ElementRegistry::registerElement("displayline", DisplayLineElement::create);
+  ElementRegistry::registerElement("displayline", DisplayLineElement::create);
+#endif
+
 #endif

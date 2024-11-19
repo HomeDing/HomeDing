@@ -31,7 +31,6 @@ DisplayConfig::DisplayConfig() {
   /** Default Draw & Background Color */
   drawColor = RGB_WHITE;
   backgroundColor = RGB_BLACK;
-  borderColor = RGB_WHITE;
 
   resetPin = -1;
   lightPin = -1;

@@ -1,5 +1,5 @@
 /**
- * @file DisplayTextElement.h
+ * @file DisplayTextBoxElement.h
  * @brief Output Element for controlling a text output on a display.
  *
  * @author Matthias Hertel, https://www.mathertel.de
@@ -25,12 +25,12 @@
 #include <displays/DisplayOutputElement.h>
 
 /**
- * @brief The DisplayTextElement is an Element that allows to create information
+ * @brief The DisplayTextBoxElement is an Element that allows to create information
  * on the display based on actions.
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayTextElement : public DisplayOutputElement
+class DisplayTextBoxElement : public DisplayOutputElement
 {
 public:
   /**
@@ -54,7 +54,7 @@ public:
    */
   virtual bool set(const char *name, const char *value) override;
 
-  /// @brief Activate the DisplayTextElement.
+  /// @brief Activate the Element.
   /// @return true when activation was good.
   /// @return false when activation failed.
   virtual void start() override;
@@ -72,7 +72,7 @@ private:
 };
 
 #ifdef HOMEDING_REGISTER
-// Register the DisplayTextElement onto the ElementRegistry.
-bool DisplayTextElement::registered =
-    ElementRegistry::registerElement("displaytext", DisplayTextElement::create);
+// Register the DisplayTextBoxElement onto the ElementRegistry.
+bool DisplayTextBoxElement::registered =
+    ElementRegistry::registerElement("displaytextbox", DisplayTextBoxElement::create);
 #endif

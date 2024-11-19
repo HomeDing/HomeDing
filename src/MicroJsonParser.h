@@ -90,6 +90,8 @@ protected:
   int  _index[12]; // -1 for object
   char _name[64];
   char _value[200];
+
+  /// @brief character sequence for escaped characters like '\n', '\r', '\u0034'
   char _esc[8];
 
   MicroJsonCallbackFn _callbackFn;

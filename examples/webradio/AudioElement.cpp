@@ -85,6 +85,7 @@ void audioTask(void *parameter) {
     if (!__audio->isRunning()) {
       sleep(1);
     }
+    vTaskDelay(0);
   }  // while
 }
 
@@ -216,7 +217,8 @@ void AudioElement::start() {
       "audio",               /* Name of the task */
       16000,                 /* Stack size in words */
       NULL,                  /* Task input parameter */
-      2 | portPRIVILEGE_BIT, /* Priority of the task */
+      // 2 | portPRIVILEGE_BIT, /* Priority of the task */
+      1 | portPRIVILEGE_BIT, /* Priority of the task */
       NULL,                  /* Task handle. */
       1                      /* Core where the task should run */
     );

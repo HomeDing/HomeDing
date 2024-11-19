@@ -190,6 +190,5 @@ bool DisplayAdapter::startFlush(bool force) {
     this->flush();
     ret = true;
   }
-  _needFlush = false;
   return (ret);
 };

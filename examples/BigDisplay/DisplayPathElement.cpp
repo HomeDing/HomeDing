@@ -71,7 +71,7 @@ bool DisplayPathElement::set(const char *name, const char *value) {
     ret = false;
   }  // if
 
-  if (needsDraw && _display) _display->setFlush();
+  if (needsDraw) {HomeDing::displayAdapter->setFlush();}
 
   return (ret);
 }  // set()
@@ -80,14 +80,14 @@ bool DisplayPathElement::set(const char *name, const char *value) {
 /// @brief Draw this output element.
 void DisplayPathElement::draw() {
   DisplayOutputElement::draw();  // set colors
-  // LOGGER_PRINT("draw color=%08lx border=%08lx back=%08lx", _color, _borderColor, _backgroundColor);
+  // LOGGER_PRINT("draw stroke=%08lx back=%08lx", _strokeColor, _backgroundColor);
 
   auto fDraw = [&](int16_t x, int16_t y, gfxDraw::ARGB color) {
-    _display->writePixel(x, y, color.toColor24());
+    HomeDing::displayAdapter->writePixel(x, y, color.toColor24());
   };
 
   auto fGet = [&](int16_t x, int16_t y) -> gfxDraw::ARGB {
-    gfxDraw::ARGB col(_display->getPixel(x, y));
+    gfxDraw::ARGB col(HomeDing::displayAdapter->getPixel(x, y));
     return (col);
   };
 
@@ -103,7 +103,7 @@ void DisplayPathElement::draw() {
   if (_needLoad) {
     dWidget->setPath(_path.c_str());
     dWidget->setFillColor(gfxDraw::ARGB(_backgroundColor));
-    dWidget->setStrokeColor(gfxDraw::ARGB(_borderColor));
+    dWidget->setStrokeColor(gfxDraw::ARGB(_strokeColor));
   }
   _needLoad = false;
 
@@ -116,9 +116,9 @@ void DisplayPathElement::draw() {
   dWidget->move(_centerX, _centerY);
   dWidget->move(box.x_min + _centerX, box.y_min + _centerY);
 
-  _display->startWrite();
+  HomeDing::displayAdapter->startWrite();
   dWidget->draw(fDraw, _undraw ? fGet : (gfxDraw::fReadPixel) nullptr);
-  _display->endWrite();
+  HomeDing::displayAdapter->endWrite();
   
   // the bounding box of dObj is now correct
   // dWidget->bbox;

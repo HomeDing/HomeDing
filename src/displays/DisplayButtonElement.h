@@ -14,7 +14,6 @@
  * Changelog:
  * * 29.04.2018 created by Matthias Hertel
  * * 24.06.2018 no problems when no display is available.
- * * 23.09.2018 support DisplayAdapter->flush()
  */
 
 

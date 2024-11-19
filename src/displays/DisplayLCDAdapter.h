@@ -36,14 +36,15 @@ public:
         DisplayAdapter::start();
 
         display->begin(HomeDing::displayConfig.width, HomeDing::displayConfig.height);
-        lineHeight = 1;
 
-        byte dotOff[] = { 0b00000, 0b01110, 0b10001, 0b10001,
-                          0b10001, 0b01110, 0b00000, 0b00000 };
-        byte dotOn[] = { 0b00000, 0b01110, 0b11111, 0b11111,
-                         0b11111, 0b01110, 0b00000, 0b00000 };
+        // add some useful extra characters
 
+        // #01 circle with no filling
+        byte dotOff[] = { 0b00000, 0b01110, 0b10001, 0b10001, 0b10001, 0b01110, 0b00000, 0b00000 };
         display->createChar(1, dotOff);
+
+        // #02 circle with filling
+        byte dotOn[8] = { 0b00000, 0b01110, 0b11111, 0b11111, 0b11111, 0b01110, 0b00000, 0b00000 };
         display->createChar(2, dotOn);
 
         display->clear();
@@ -63,13 +64,11 @@ public:
   };  // clear()
 
 
-  /**
-   * @brief Draw a text at this position using the specific height.-
-   * @param x x-position or offset of the text.
-   * @param y y-position of the text.
-   * @param h height of the characters, ignored for this display.
-   * @param text the text.
-   */
+  /// @brief Draw a text at this position using the specific height.-
+  /// @param x x-position or offset of the text.
+  /// @param y y-position of the text.
+  /// @param h height of the characters, ignored for this display.
+  /// @param text the text.
   BoundingBox drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t strokeColor) override {
     int w = strnlen(text, MAX_DISPLAY_STRING_LEN);
     char buffer[MAX_DISPLAY_STRING_LEN + 4];  // 8 chars character buffer max.
@@ -84,12 +83,6 @@ public:
     BoundingBox b = DisplayAdapter::drawText(x, y, h, text, strokeColor);
     return (b);
   }  // drawText
-
-
-  void drawCircle(BoundingBox &box, uint32_t /* borderColor */, uint32_t fillColor) override {
-    drawText(box.x_min, box.y_min, 1, RGB_IS_COLOR(fillColor) ? "\02" : "\01", 1);
-    _needFlush = true;
-  };
 
 private:
   /**

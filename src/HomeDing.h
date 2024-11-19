@@ -105,7 +105,6 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_DISPLAY
 #define HOMEDING_INCLUDE_DisplayText
-#define HOMEDING_INCLUDE_DisplayDot
 #define HOMEDING_INCLUDE_DisplayLine
 #define HOMEDING_INCLUDE_DisplayRect
 #define HOMEDING_INCLUDE_DisplayCircle
@@ -271,10 +270,7 @@ extern Board homeding;
 
 #ifdef HOMEDING_INCLUDE_DisplayText
 #include <displays/DisplayTextElement.h>
-#endif
-
-#ifdef HOMEDING_INCLUDE_DisplayDot
-#include <displays/DisplayDotElement.h>
+#include <displays/DisplayTextBoxElement.h>
 #endif
 
 #ifdef HOMEDING_INCLUDE_DisplayLine

@@ -22,8 +22,8 @@
 
 DisplayOutputElement::DisplayOutputElement() {
   category = CATEGORY::Widget;  // no loop
-  
-  // use default stroke and background color 
+
+  // use default stroke and background color
   _strokeColor = HomeDing::displayConfig.drawColor;
   _backgroundColor = HomeDing::displayConfig.backgroundColor;
 }

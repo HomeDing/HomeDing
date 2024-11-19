@@ -21,6 +21,8 @@
 
 #pragma once
 
+#if defined(ESP32)
+
 #include <displays/DisplayAdapter.h>
 #include <displays/DisplayOutputElement.h>
 
@@ -75,4 +77,6 @@ private:
 // Register the DisplayTextBoxElement onto the ElementRegistry.
 bool DisplayTextBoxElement::registered =
     ElementRegistry::registerElement("displaytextbox", DisplayTextBoxElement::create);
+#endif
+
 #endif

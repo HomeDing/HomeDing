@@ -17,6 +17,8 @@
 #include <Arduino.h>
 #include <HomeDing.h>
 
+#if defined(ESP32)
+
 #include <displays/DisplayTextBoxElement.h>
 
 #include <gfxDraw.h>
@@ -132,5 +134,6 @@ void DisplayTextBoxElement::draw() {
 
 }  // draw
 
+#endif
 
 // End

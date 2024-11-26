@@ -55,8 +55,6 @@ class DisplayAdapter {
 public:
   virtual ~DisplayAdapter() = default;
 
-  DisplayAdapter();
-
   /// @brief setup a fresh Display Adapter
   /// @param b Board Reference
   /// @param c HomeDing::DisplayConfig Configuration Data
@@ -112,26 +110,7 @@ public:
   virtual void setBrightness(uint8_t bright);
 
 
-  /// @brief Set default draw color
-  /// @param col The 32-bit draw color in 0x00rrggbb.
-  virtual void setColor(const uint32_t col) {
-    color = col;
-  };
-
-
-  /// @brief Get default draw color.
-  /// @return The default draw color.
-  virtual uint32_t getColor() {
-    return (color);
-  };
-
-  /// @brief Set default background color
-  /// @param col The 32-bit background color in 0x00rrggbb.
-  virtual void setBackgroundColor(const uint32_t col) {
-    backColor = col;
-  };
-
-  // low level pixel drawing
+  // ===== low level pixel drawing and reading =====
 
   virtual void startWrite() {}
 
@@ -142,12 +121,12 @@ public:
     _needFlush = true;
   }
 
-
-  // low level pixel reading
-
   virtual uint32_t getPixel(int16_t /* x */, int16_t /* y */) {
     return (HomeDing::displayConfig.backgroundColor);
   };
+
+
+  // ===== supporting deferred drawing and flushing =====
 
   // @brief remember that flush is required after sequence.
   virtual void setFlush() {
@@ -168,10 +147,6 @@ public:
   int maxpage = 1;
 
 protected:
-
-  uint32_t color;        /// ??? default draw color -> displayConfig::strokeColor
-  uint32_t backColor;    ///< default background color
-
   /// @brief  the display buffer is not in sync with the display.
   bool _needFlush;
 
@@ -194,6 +169,4 @@ extern uint32_t fillColor;
 
 extern void stroke(int16_t x, int16_t y);
 extern void fill(int16_t x, int16_t y);
-
-
 }

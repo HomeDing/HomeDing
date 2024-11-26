@@ -34,6 +34,7 @@ DisplayOutputElement::DisplayOutputElement() {
 /// @brief Set a parameter or property to a new value or start an action.
 bool DisplayOutputElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
+  int16_t iValue = _atoi(value);
   bool ret = true;
 
   if (Element::set(name, value)) {
@@ -48,26 +49,26 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else if (name == HomeDing::Actions::Redraw) {
 
   } else if (name == HomeDing::Actions::X) {
-    int16_t v = _atoi(value);
+    int16_t v = iValue;
     _x1 += v - _x0;
     _x0 = v;
 
   } else if (name == HomeDing::Actions::Y) {
-    int16_t v = _atoi(value);
+    int16_t v = iValue;
     _y1 += v - _y0;
     _y0 = v;
 
   } else if (_stricmp(name, "x1") == 0) {
-    _x1 = _atoi(value);
+    _x1 = iValue;
 
   } else if (_stricmp(name, "y1") == 0) {
-    _y1 = _atoi(value);
+    _y1 = iValue;
 
   } else if ((name == HomeDing::Actions::Width) || (_stricmp(name, "w") == 0)) {
-    _x1 = _x0 + _atoi(value) - 1;
+    _x1 = _x0 + iValue - 1;
 
   } else if ((name == HomeDing::Actions::Height) || (_stricmp(name, "h") == 0)) {
-    _y1 = _y0 + _atoi(value) - 1;
+    _y1 = _y0 + iValue - 1;
 
   } else if ((_stricmp(name, "stroke") == 0) || (_stricmp(name, "color") == 0)) {
     _strokeColor = _atoColor(value);
@@ -76,7 +77,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     _backgroundColor = _atoColor(value);
 
   } else if (_stricmp(name, "fontsize") == 0) {
-    _fontsize = _atoi(value);
+    _fontsize = iValue;
 
   } else if (_stricmp(name, "align") == 0) {
     _align = (TEXTALIGN)_scanEnum("left,center,right", value);
@@ -88,7 +89,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
     // these properties can be used for configuration only.
 
     if (_stricmp(name, "page") == 0) {
-      page = _atoi(value);
+      page = iValue;
 
     } else {
       ret = false;

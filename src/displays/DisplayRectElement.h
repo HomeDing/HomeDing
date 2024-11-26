@@ -37,9 +37,11 @@ public:
   /// @brief static variable to ensure registering in static init phase.
   static bool registered;
 
-
-  /// @brief Draw a rectangle
+  /// @brief Draw the rectangle
   virtual void draw() override;
+
+  /// @brief Draw the rectangle
+  virtual void draw(bool useBackground);
 
 private:
 };

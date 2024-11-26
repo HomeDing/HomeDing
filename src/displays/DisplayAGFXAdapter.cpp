@@ -54,8 +54,6 @@ bool DisplayAGFXAdapter::start() {
     DisplayAdapter::start();
 
     gfx->setTextWrap(false);
-    setColor(displayConfig.drawColor);
-    setBackgroundColor(displayConfig.backgroundColor);
 
     int16_t fontsize = 8 + 1;  // Standard
     if (displayConfig.height > 128) fontsize *= 2;

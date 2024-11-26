@@ -45,6 +45,30 @@ public:
     }
   };
 
+  /// @brief calculate the width of the box.
+  /// @return the width of the box.
+  inline int16_t width() {
+    return (x_max - x_min + 1);
+  };
+
+  /// @brief calculate the height of the box.
+  /// @return the height of the box.
+  int16_t height() {
+    return (y_max - y_min + 1);
+  };
+
+  /// @brief calculate the max quadratic size of the box treating width and height with 0 as uninitialized.
+  /// @return the max. quadrat inside the box.
+  int16_t qsize() {
+    int16_t size =  (x_max - x_min + 1);
+    int16_t h =  (y_max - y_min + 1);
+    if ((h > 1) && (h < size)) {
+      size = h;
+    }
+    return (size);  
+  };
+
+
   /// @brief copy operator.
   BoundingBox &operator=(const BoundingBox &other) {
     x_min = other.x_min;

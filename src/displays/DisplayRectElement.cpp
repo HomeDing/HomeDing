@@ -22,6 +22,7 @@
 #include <displays/DisplayRectElement.h>
 
 #include <gfxDraw.h>
+#include "DisplayRectElement.h"
 
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
@@ -36,8 +37,12 @@ Element *DisplayRectElement::create() {
 
 /// @brief Draw the rectangle.
 void DisplayRectElement::draw() {
-  bool bValue = _atob(_value.c_str());
-  TRACE("draw(%d)", bValue);
+  draw(_atob(_value.c_str()));
+}  // draw()
+
+
+void DisplayRectElement::draw(bool useBackground) {
+  TRACE("draw(%d)", useBackground);
 
   HomeDing::strokeColor = _strokeColor;
   HomeDing::fillColor = _backgroundColor;
@@ -45,11 +50,10 @@ void DisplayRectElement::draw() {
   HomeDing::displayAdapter->startWrite();
 
   gfxDraw::drawRect(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1,
-                    HomeDing::stroke, bValue ? HomeDing::fill : nullptr);
+                    HomeDing::stroke, useBackground ? HomeDing::fill : nullptr);
 
   HomeDing::displayAdapter->endWrite();
-}  // draw()
-
+}
 #endif
 
-// End
+  // End

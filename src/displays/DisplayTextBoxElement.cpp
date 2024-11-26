@@ -94,7 +94,6 @@ void DisplayTextBoxElement::start() {
 
 /// @brief send current text to display
 void DisplayTextBoxElement::draw() {
-  DisplayOutputElement::draw();
   int16_t padX = 0;
   int16_t padY = 0;
 
@@ -127,8 +126,7 @@ void DisplayTextBoxElement::draw() {
   TRACE("  padX: %d", padX);
   TRACE("  padY: %d", padY);
 
-// ??? use gfxDraw rect with border.
-  HomeDing::displayAdapter->fillRect(box, _backgroundColor);
+  DisplayRectElement::draw(true);
 
   HomeDing::displayAdapter->drawText(box.x_min + padX, box.y_min + padY, _fontsize, msg.c_str(), _strokeColor);
 

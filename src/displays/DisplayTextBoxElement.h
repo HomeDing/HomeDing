@@ -24,7 +24,7 @@
 #if defined(ESP32)
 
 #include <displays/DisplayAdapter.h>
-#include <displays/DisplayOutputElement.h>
+#include <displays/DisplayRectElement.h>
 
 /**
  * @brief The DisplayTextBoxElement is an Element that allows to create information
@@ -32,7 +32,7 @@
  *
  * The parameters specify how the information from the action will be displayed.
  */
-class DisplayTextBoxElement : public DisplayOutputElement
+class DisplayTextBoxElement : public DisplayRectElement
 {
 public:
   /**

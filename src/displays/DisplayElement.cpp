@@ -247,12 +247,7 @@ void DisplayElement::start(DisplayAdapter *displayAdapter) {
       bool success = displayAdapter->start();
       if (success) {
         HomeDing::displayAdapter = displayAdapter;
-
         displayAdapter->setBrightness(displayConfig.brightness);
-
-        // should be removed in the future:
-        displayAdapter->setColor(displayConfig.drawColor);
-        displayAdapter->setBackgroundColor(displayConfig.backgroundColor);
 
       } else {
         delete displayAdapter;

@@ -20,6 +20,12 @@
 
 #include <displays/DisplayOutputElement.h>
 
+namespace gfxDraw {
+  class gfxDrawGaugeWidget;
+  class GFXDrawGaugeConfig;
+}
+
+
 /**
  * @brief The DisplayGaugeElement is an Element that allows to display a path based region like a
  *   polygon on the display based on actions.
@@ -62,27 +68,17 @@ public:
 
 
 private:
-  float _value, _lastValue;
 
   /// total gauge segments angle
-  int16_t _degree = 280;
-
-  /// outer radius of the gauge segments
-  int16_t _radiusOut;
-
-  /// inner radius of the gauge segments
-  int16_t _radiusIn;
+  int16_t _startDegree = 30;
+  int16_t _endDegree = 330;
 
   /// minimum and maximum of values
   int16_t _minValue = 0;
   int16_t _maxValue = 100;
 
-  /// @brief draw a gauge range segment
-  /// @param a0 starting angle
-  /// @param a1 ending angle
-  /// @param fillcolor color of range segment
-  void _drawRangeSegment(int16_t a0, int16_t a1, uint32_t fillcolor);
-
+  gfxDraw::gfxDrawGaugeWidget *_gWidget = nullptr;
+  gfxDraw::GFXDrawGaugeConfig *_gConfig = nullptr;
 };
 
 // #ifdef HOMEDING_REGISTER

@@ -43,12 +43,6 @@ void fill(int16_t x, int16_t y) {
 
 using namespace HomeDing;
 
-DisplayAdapter::DisplayAdapter() {
-  color = 0x00FFFFFF;      // white
-  backColor = 0x00000000;  // black
-}
-
-
 /// @brief setup a fresh Display Adapter
 /// @param b Board Reference
 /// @param c HomeDing::DisplayConfig Configuration Data

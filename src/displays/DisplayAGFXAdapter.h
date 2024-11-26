@@ -46,20 +46,6 @@ public:
   /// @return display is working
   virtual bool start() override;
 
-  virtual void setColor(const uint32_t col) override {
-    PANELTRACE("setColor #%08x\n", col);
-    DisplayAdapter::setColor(col);
-    drawColor565 = col565(col);
-  };
-
-
-  virtual void setBackgroundColor(const uint32_t col) override {
-    PANELTRACE("setBackgroundColor #%08x\n", col);
-    DisplayAdapter::setBackgroundColor(col);
-    backColor565 = col565(col);
-  };
-
-
   /// @brief Clear all displayed information from the display.
   void clear() override {
     // PANELTRACE("clear #%08x\n", displayConfig.backgroundColor);
@@ -128,6 +114,4 @@ protected:
   void loadFont(int16_t height, int8_t factor = 1);
 
   int baseLine;  // baseline offset
-  uint16_t backColor565;
-  uint16_t drawColor565;
 };

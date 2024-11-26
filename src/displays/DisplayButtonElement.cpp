@@ -106,7 +106,8 @@ bool DisplayButtonElement::set(const char *name, const char *value) {
 /// @brief Draw the button on display.
 void DisplayButtonElement::draw() {
   const uint16_t paddingVertical = 4;
-  int16_t h = box.y_max - box.y_min + 1;
+  int16_t w = box.width();
+  int16_t h = box.height();
   int16_t fontSize = _fontsize;
   int16_t padX = 0;
   int16_t padY = 0;
@@ -132,9 +133,7 @@ void DisplayButtonElement::draw() {
   HomeDing::fillColor = (_pressed ? _strokeColor : _backgroundColor);
 
   HomeDing::displayAdapter->startWrite();
-  gfxDraw::drawRoundedRect(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1, (h / 2),
-                           HomeDing::stroke, HomeDing::fill);
-
+  gfxDraw::drawRoundedRect(box.x_min, box.y_min, w, h, (h / 2), HomeDing::stroke, HomeDing::fill);
   HomeDing::displayAdapter->endWrite();
 
   HomeDing::displayAdapter->drawText(box.x_min + padX, box.y_min + padY, _fontsize, _text.c_str(), HomeDing::strokeColor);

@@ -49,7 +49,7 @@ void DisplayRectElement::draw(bool useBackground) {
 
   HomeDing::displayAdapter->startWrite();
 
-  gfxDraw::drawRect(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1,
+  gfxDraw::drawRect(box.x_min, box.y_min, box.width(), box.height(),
                     HomeDing::stroke, useBackground ? HomeDing::fill : nullptr);
 
   HomeDing::displayAdapter->endWrite();

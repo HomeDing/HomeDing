@@ -89,6 +89,7 @@ public:
   /// @param text sample text
   /// @return size of the resulting box when character size is 1
   virtual BoundingBox textBox(int16_t h, const char *text) {
+    (void)h;
     BoundingBox b(0, 0, strlen(text) - 1, 0);
     return (b);
   };
@@ -115,6 +116,9 @@ public:
   virtual void startWrite() {}
 
   virtual void writePixel(int16_t x, int16_t y, uint32_t color) {
+    (void)x;
+    (void)y;
+    (void)color;
   };
 
   virtual void endWrite() {

@@ -89,7 +89,7 @@ void DisplayAdapter::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint32
 
 /// @brief Clear a specific rectangle area
 void DisplayAdapter::fillRect(BoundingBox &box, uint32_t color) {
-  fillRect(box.x_min, box.y_min, box.x_max - box.x_min + 1, box.y_max - box.y_min + 1, color);
+  fillRect(box.x_min, box.y_min, box.width(), box.height(), color);
 };
 
 

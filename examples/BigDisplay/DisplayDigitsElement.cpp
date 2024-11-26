@@ -20,7 +20,7 @@
 #include "DisplayDigitsElement.h"
 
 // enable TRACE for sending detailed output from this Element
-#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
 
 #define DIGITS_WIDTH 17
 #define DIGITS_GAP 4
@@ -123,7 +123,7 @@ void DisplayDigitsElement::draw() {
 
   DisplayOutputElement::draw();  // set output colors
 
-  _scale = ((box.y_max - box.y_min + 1) * 100) / DIGITS_HEIGHT;
+  _scale = (box.height() * 100) / DIGITS_HEIGHT;
   xWidth = GFXSCALE100(DIGITS_WIDTH, _scale);
   xGap = GFXSCALE100(DIGITS_GAP, _scale);
 

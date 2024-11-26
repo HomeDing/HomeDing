@@ -71,7 +71,7 @@ bool DisplayPathElement::set(const char *name, const char *value) {
     ret = false;
   }  // if
 
-  if (needsDraw) {HomeDing::displayAdapter->setFlush();}
+  if (needsDraw && HomeDing::displayAdapter) { HomeDing::displayAdapter->setFlush(); }
 
   return (ret);
 }  // set()
@@ -119,7 +119,7 @@ void DisplayPathElement::draw() {
   HomeDing::displayAdapter->startWrite();
   dWidget->draw(fDraw, _undraw ? fGet : (gfxDraw::fReadPixel) nullptr);
   HomeDing::displayAdapter->endWrite();
-  
+
   // the bounding box of dObj is now correct
   // dWidget->bbox;
 

@@ -21,8 +21,8 @@
 #include <displays/DisplayOutputElement.h>
 
 namespace gfxDraw {
-  class gfxDrawGaugeWidget;
-  class GFXDrawGaugeConfig;
+class gfxDrawGaugeWidget;
+class GFXDrawGaugeConfig;
 }
 
 
@@ -68,17 +68,11 @@ public:
 
 
 private:
-
-  /// total gauge segments angle
-  int16_t _startDegree = 30;
-  int16_t _endDegree = 330;
-
-  /// minimum and maximum of values
-  int16_t _minValue = 0;
-  int16_t _maxValue = 100;
-
   gfxDraw::gfxDrawGaugeWidget *_gWidget = nullptr;
   gfxDraw::GFXDrawGaugeConfig *_gConfig = nullptr;
+
+  String _pointer;
+
 };
 
 // #ifdef HOMEDING_REGISTER

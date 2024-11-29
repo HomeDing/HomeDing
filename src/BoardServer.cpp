@@ -167,6 +167,7 @@ String BoardHandler::handleScan() {
 
 // reset or reboot the device
 void BoardHandler::handleReboot(WebServer &server, bool wipe) {
+  TRACE("handleReboot(%d)", wipe);
   server.send(200);
   server.client().stop();
   _board->reboot(wipe);
@@ -323,6 +324,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, con
 
   } else if (unSafeMode && (api == "resetall")) {
     // Reset file system, network parameters and reboot
+    TRACE("  formatting...");
     HomeDingFS::format();
     handleReboot(server, true);
     output_type = TEXT_PLAIN;

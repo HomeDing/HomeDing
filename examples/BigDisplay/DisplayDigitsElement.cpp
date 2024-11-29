@@ -60,10 +60,11 @@ bool DisplayDigitsElement::set(const char *name, const char *value) {
 
 void DisplayDigitsElement::_drawDigit(const char *path, int16_t x, int16_t y) {
 
-  gfxDraw::gfxDrawWidget o;
+  gfxDraw::gfxDrawPathConfig c;
+  gfxDraw::gfxDrawPathWidget o;
 
-  o.setStrokeColor((_strokeColor == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_strokeColor)));
-  o.setFillColor((_backgroundColor == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_backgroundColor)));
+  c.fillColor = (_backgroundColor == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_backgroundColor));
+  c.strokeColor = (_strokeColor == RGB_TRANSPARENT ? gfxDraw::ARGB_TRANSPARENT : gfxDraw::ARGB(_strokeColor));
 
   o.setPath(path);
   o.scale(_scale);

@@ -35,9 +35,15 @@ uint32_t fillColor;
 void stroke(int16_t x, int16_t y) {
   displayAdapter->writePixel(x, y, strokeColor);
 }
+
 void fill(int16_t x, int16_t y) {
   displayAdapter->writePixel(x, y, fillColor);
 }
+
+void draw(int16_t x, int16_t y, uint32_t color) {
+  displayAdapter->writePixel(x, y, color);
+}
+
 }
 
 

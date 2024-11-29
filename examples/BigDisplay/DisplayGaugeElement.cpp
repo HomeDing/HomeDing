@@ -23,7 +23,7 @@
 #include <gfxDrawGaugeWidget.h>
 
 // enable TRACE for sending detailed output from this Element
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)   LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new DisplayGaugeElement.
@@ -64,9 +64,6 @@ void DisplayGaugeElement::start() {
     _gConfig->y = box.y_min;
     _gConfig->w = size;
 
-    _gConfig->minValue = 0;
-    _gConfig->maxValue = 100;
-
     _gWidget->setConfig(_gConfig);
 
     isOpaque = false;
@@ -98,6 +95,15 @@ bool DisplayGaugeElement::set(const char *name, const char *value) {
     } else if (strcmp(name, "maxangle") == 0) {
       int v = _atoi(value);
       _gConfig->maxAngle = constrain(v, 0, 360);
+
+    } else if (strcmp(name, "pointer") == 0) {
+      // use value as path
+
+    } else if (strcmp(name, "segment-radius") == 0) {
+      // outer radius of the segments in percentages 1...100
+      
+    } else if (strcmp(name, "segment-width") == 0) {
+      // width of the segments in percentages 1...100
 
     } else {
       ret = false;
@@ -161,7 +167,7 @@ bool DisplayGaugeElement::set(const char *name, const char *value) {
 
 /// @brief Draw this output element.
 void DisplayGaugeElement::draw() {
-  TRACE("draw()");
+  TRACE("draw(%s, %f -- %f)", _value.c_str(), _gConfig->minValue, _gConfig->maxValue);
 
   _gWidget->setValue(strtof(_value.c_str(), nullptr));
 

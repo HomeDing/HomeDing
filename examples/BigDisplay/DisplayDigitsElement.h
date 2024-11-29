@@ -20,7 +20,7 @@
 
 #include <displays/DisplayOutputElement.h>
 #include <gfxDraw.h>
-#include <gfxDrawWidget.h>
+#include <gfxDrawPathWidget.h>
 
 /**
  * @brief The DisplayDigitsElement is an Element that allows to display a path based region like a

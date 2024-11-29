@@ -173,4 +173,5 @@ extern uint32_t fillColor;
 
 extern void stroke(int16_t x, int16_t y);
 extern void fill(int16_t x, int16_t y);
+extern void draw(int16_t x, int16_t y, uint32_t color);
 }

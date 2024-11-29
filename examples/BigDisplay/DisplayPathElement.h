@@ -21,7 +21,7 @@
 #include <displays/DisplayOutputElement.h>
 
 namespace gfxDraw {
-  class gfxDrawWidget;
+  class gfxDrawPathWidget;
 }
 
 /**
@@ -72,7 +72,7 @@ private:
   int16_t _centerX = 0;
   int16_t _centerY = 0;
 
-  gfxDraw::gfxDrawWidget *dWidget = nullptr;
+  gfxDraw::gfxDrawPathWidget *dWidget = nullptr;
 };
 
 // #ifdef HOMEDING_REGISTER

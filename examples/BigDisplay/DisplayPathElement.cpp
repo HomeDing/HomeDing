@@ -20,7 +20,7 @@
 #include "DisplayPathElement.h"
 
 #include <gfxDraw.h>
-#include <gfxDrawWidget.h>
+#include <gfxDrawPathWidget.h>
 
 // enable TRACE for sending detailed output from this Element
 #define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
@@ -82,17 +82,8 @@ void DisplayPathElement::draw() {
   DisplayOutputElement::draw();  // set colors
   // LOGGER_PRINT("draw stroke=%08lx back=%08lx", _strokeColor, _backgroundColor);
 
-  auto fDraw = [&](int16_t x, int16_t y, gfxDraw::ARGB color) {
-    HomeDing::displayAdapter->writePixel(x, y, color.toColor24());
-  };
-
-  auto fGet = [&](int16_t x, int16_t y) -> gfxDraw::ARGB {
-    gfxDraw::ARGB col(HomeDing::displayAdapter->getPixel(x, y));
-    return (col);
-  };
-
   if (!dWidget) {
-    dWidget = new gfxDraw::gfxDrawWidget();
+    dWidget = new gfxDraw::gfxDrawPathWidget();
     _needLoad = true;
 
   } else if (_undraw) {
@@ -101,23 +92,22 @@ void DisplayPathElement::draw() {
   }
 
   if (_needLoad) {
+    gfxDraw::gfxDrawPathConfig c;
+    c.fillColor = gfxDraw::ARGB(_backgroundColor);
+    c.strokeColor = gfxDraw::ARGB(_strokeColor);
+    dWidget->setConfig(&c);
     dWidget->setPath(_path.c_str());
-    dWidget->setFillColor(gfxDraw::ARGB(_backgroundColor));
     dWidget->setStrokeColor(gfxDraw::ARGB(_strokeColor));
   }
   _needLoad = false;
 
   dWidget->resetTransformation();
-
-  // dObj->setFillGradient(gfxDraw::RED, 4, 6, gfxDraw::YELLOW, 10, 9);
-  dWidget->move(-_centerX, -_centerY);
+  dWidget->rotate(_rotation, _centerX, _centerY);
   dWidget->scale(_scale);
-  dWidget->rotate(_rotation);
-  dWidget->move(_centerX, _centerY);
   dWidget->move(box.x_min + _centerX, box.y_min + _centerY);
 
   HomeDing::displayAdapter->startWrite();
-  dWidget->draw(fDraw, _undraw ? fGet : (gfxDraw::fReadPixel) nullptr);
+  dWidget->draw(HomeDing::draw);
   HomeDing::displayAdapter->endWrite();
 
   // the bounding box of dObj is now correct

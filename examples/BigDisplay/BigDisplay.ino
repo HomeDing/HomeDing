@@ -21,7 +21,7 @@
  * * 01.01.2021 created from standard sketch.
  */
 
-#define DBG_TRACE  // trace level for all elements
+// #define DBG_TRACE  // trace level for all elements
 
 
 // Common Elements for display devices

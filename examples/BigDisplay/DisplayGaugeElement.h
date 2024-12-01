@@ -50,16 +50,15 @@ public:
   DisplayGaugeElement();
 
 
-  /// @brief Activate the Element.
-  virtual void start() override;
-
-
   /// @brief Set a parameter or property to a new value or start an action.
   /// @param name Name of the property.
   /// @param value Value of the property.
   /// @return true when property was set or the action was received.
   virtual bool set(const char *name, const char *value) override;
 
+
+  /// @brief Activate the Element.
+  virtual void start() override;
 
   /**
    * @brief Draw this output element.
@@ -72,6 +71,14 @@ private:
   gfxDraw::GFXDrawGaugeConfig *_gConfig = nullptr;
 
   String _pointer;
+
+  // segment definitions
+  struct _SEGDEF {
+    float minValue;
+    float maxValue;
+    uint32_t color;
+  };
+  std::vector<_SEGDEF>_segdefinitions; 
 
 };
 

@@ -23,7 +23,7 @@
 #include <gfxDrawGaugeWidget.h>
 
 // enable TRACE for sending detailed output from this Element
-#define TRACE(...)   LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...) LOGGER_ETRACE(__VA_ARGS__)
 
 /**
  * @brief static factory function to create a new DisplayGaugeElement.
@@ -51,25 +51,6 @@ DisplayGaugeElement::DisplayGaugeElement() {
   }
   isOpaque = false;
 }  // constructor
-
-
-void DisplayGaugeElement::start() {
-  TRACE("start()");
-  int16_t size = box.qsize();
-
-  TRACE("qSize = %d", size);
-
-  if (size > 24) {
-    _gConfig->x = box.x_min;
-    _gConfig->y = box.y_min;
-    _gConfig->w = size;
-
-    _gWidget->setConfig(_gConfig);
-
-    isOpaque = false;
-    DisplayOutputElement::start();
-  }
-}  // start()
 
 
 /// @brief Set a parameter or property to a new value or start an action.
@@ -101,14 +82,37 @@ bool DisplayGaugeElement::set(const char *name, const char *value) {
 
     } else if (strcmp(name, "segment-radius") == 0) {
       // outer radius of the segments in percentages 1...100
-      
+      _gConfig->segmentRadius = _atoi(value);
+
     } else if (strcmp(name, "segment-width") == 0) {
       // width of the segments in percentages 1...100
+      _gConfig->segmentWidth = _atoi(value);
+
+    } else if (_stristartswith(name, "segments[")) {
+      size_t indx;
+      String iName;
+      _scanIndexParam(name, indx, iName);
+
+      if (indx >= _segdefinitions.size()) {
+        // add a new segment to vector
+        _SEGDEF sd;
+        _segdefinitions.push_back(sd);
+        if (indx > 0) { 
+          _segdefinitions[indx].minValue = _segdefinitions[indx-1].maxValue;
+        }
+      }
+
+      if (iName.equalsIgnoreCase("min")) {
+        _segdefinitions[indx].minValue = strtof(value, nullptr);
+      } else if (iName.equalsIgnoreCase("max")) {
+        _segdefinitions[indx].maxValue = strtof(value, nullptr);
+      } else if (iName.equalsIgnoreCase("color")) {
+        _segdefinitions[indx].color = _atoColor(value);
+      }
 
     } else {
       ret = false;
     }
-
   } else {
     ret = false;
   }  // if
@@ -116,77 +120,39 @@ bool DisplayGaugeElement::set(const char *name, const char *value) {
 }  // set()
 
 
-// void DisplayGaugeElement::_drawRangeSegment(const char *path, int16_t x, int16_t y) {
-//   // TRACE("_drawRangeSegment()");
+void DisplayGaugeElement::start() {
+  TRACE("start()");
+  int16_t size = box.qsize();
 
-// }  // _drawRangeSegment()
+  if (size > 24) {
+    _gConfig->x = box.x_min;
+    _gConfig->y = box.y_min;
+    _gConfig->w = size;
+    _gConfig->strokeColor = _strokeColor;
+    _gConfig->fillColor = _backgroundColor;
 
+    _gWidget->setConfig(_gConfig);
+    for (_SEGDEF &seg : _segdefinitions) {
+      _gWidget->addSegment(seg.minValue, seg.maxValue, seg.color);
+    }
 
-// void DisplayGaugeElement::_drawRangeSegment(int16_t a0, int16_t a1, uint32_t fillcolor) {
-//   TRACE("_drawRangeSegment()");
+    isOpaque = false;
+    DisplayOutputElement::start();
+  }
+}  // start()
 
-//   gfxDraw::gfxDrawGaugeWidget o;
-//   gfxDraw::Segment s;
-
-//   o.setStrokeColor(gfxDraw::ARGB_TRANSPARENT);
-//   o.setFillColor(gfxDraw::ARGB(fillcolor));
-//   o.move(box.x_min, box.y_min);
-
-//   // construct the gauge segment
-
-//   s.type = gfxDraw::Segment::Move;
-//   s.p[0] = 0;
-//   s.p[1] = 0;
-//   o.addSegment(s);
-
-//   s.type = gfxDraw::Segment::Arc;
-//   s.p[0] = 0;
-//   s.p[1] = 0;
-//   o.addSegment(s);
-
-//   s.type = gfxDraw::Segment::Line;
-//   s.p[0] = 0;
-//   s.p[1] = 0;
-//   o.addSegment(s);
-
-//   s.type = gfxDraw::Segment::Arc;
-//   s.p[0] = 0;
-//   s.p[1] = 0;
-//   o.addSegment(s);
-
-//   s.type = gfxDraw::Segment::Close;
-//   o.addSegment(s);
-
-//   HomeDing::displayAdapter->startWrite();
-//   o.draw([&](int16_t x, int16_t y, gfxDraw::ARGB color) {
-//     HomeDing::displayAdapter->writePixel(x, y, color.toColor24());
-//   });
-//   HomeDing::displayAdapter->endWrite();
-
-// }  // _drawRangeSegment()
 
 /// @brief Draw this output element.
 void DisplayGaugeElement::draw() {
-  TRACE("draw(%s, %f -- %f)", _value.c_str(), _gConfig->minValue, _gConfig->maxValue);
+  TRACE("draw()");
 
   _gWidget->setValue(strtof(_value.c_str(), nullptr));
 
-  DisplayOutputElement::draw();  // set output colors
+  DisplayOutputElement::draw();
 
-  // drawing using stroke and fill
-
-  HomeDing::strokeColor = _strokeColor;
-  HomeDing::fillColor = _backgroundColor;
-
-  TRACE("a");
   HomeDing::displayAdapter->startWrite();
-  TRACE("b");
-
-  _gWidget->draw(HomeDing::stroke, HomeDing::fill);
-
-  TRACE("c");
+  _gWidget->draw(HomeDing::draw);
   HomeDing::displayAdapter->endWrite();
-  TRACE("d");
 }  // draw()
 
 

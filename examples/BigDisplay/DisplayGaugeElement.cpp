@@ -37,18 +37,8 @@ Element *DisplayGaugeElement::create() {
 DisplayGaugeElement::DisplayGaugeElement() {
   TRACE("DisplayGaugeElement()");
 
-  if (!_gWidget) {
-    // prepare the widget with all properties.
-    _gWidget = new gfxDraw::gfxDrawGaugeWidget();
-  }
-  if (!_gConfig) {
-    _gConfig = new gfxDraw::GFXDrawGaugeConfig();
-    // default boundaries
-    _gConfig->minValue = 0,
-    _gConfig->maxValue = 100,
-    _gConfig->minAngle = 30,
-    _gConfig->maxAngle = 360 - 30;
-  }
+  _gConfig = new gfxDraw::gfxDrawGaugeConfig();
+
   isOpaque = false;
 }  // constructor
 
@@ -78,7 +68,7 @@ bool DisplayGaugeElement::set(const char *name, const char *value) {
       _gConfig->maxAngle = constrain(v, 0, 360);
 
     } else if (strcmp(name, "pointer") == 0) {
-      // use value as path
+      _pointer = value;
 
     } else if (strcmp(name, "segment-radius") == 0) {
       // outer radius of the segments in percentages 1...100
@@ -88,26 +78,32 @@ bool DisplayGaugeElement::set(const char *name, const char *value) {
       // width of the segments in percentages 1...100
       _gConfig->segmentWidth = _atoi(value);
 
+    } else if (strcmp(name, "scale-width") == 0) {
+      _gConfig->scaleWidth = _atoi(value);
+
+    } else if (strcmp(name, "scale-steps") == 0) {
+      _gConfig->scaleSteps = _atoi(value);
+
     } else if (_stristartswith(name, "segments[")) {
       size_t indx;
       String iName;
       _scanIndexParam(name, indx, iName);
 
-      if (indx >= _segdefinitions.size()) {
+      if (indx >= _segDefinitions.size()) {
         // add a new segment to vector
         _SEGDEF sd;
-        _segdefinitions.push_back(sd);
-        if (indx > 0) { 
-          _segdefinitions[indx].minValue = _segdefinitions[indx-1].maxValue;
+        _segDefinitions.push_back(sd);
+        if (indx > 0) {
+          _segDefinitions[indx].minValue = _segDefinitions[indx - 1].maxValue;
         }
       }
 
       if (iName.equalsIgnoreCase("min")) {
-        _segdefinitions[indx].minValue = strtof(value, nullptr);
+        _segDefinitions[indx].minValue = strtof(value, nullptr);
       } else if (iName.equalsIgnoreCase("max")) {
-        _segdefinitions[indx].maxValue = strtof(value, nullptr);
+        _segDefinitions[indx].maxValue = strtof(value, nullptr);
       } else if (iName.equalsIgnoreCase("color")) {
-        _segdefinitions[indx].color = _atoColor(value);
+        _segDefinitions[indx].color = _atoColor(value);
       }
 
     } else {
@@ -128,14 +124,17 @@ void DisplayGaugeElement::start() {
     _gConfig->x = box.x_min;
     _gConfig->y = box.y_min;
     _gConfig->w = size;
-    _gConfig->strokeColor = _strokeColor;
-    _gConfig->fillColor = _backgroundColor;
+    _gConfig->pointerColor = _strokeColor;
+    _gConfig->segmentColor = _backgroundColor;
 
-    _gWidget->setConfig(_gConfig);
-    for (_SEGDEF &seg : _segdefinitions) {
-      _gWidget->addSegment(seg.minValue, seg.maxValue, seg.color);
+    if (_pointer.length() > 0) {
+      _gConfig->pointerPath = _pointer.c_str();
     }
 
+    _gWidget = new gfxDraw::gfxDrawGaugeWidget(_gConfig);
+    for (_SEGDEF &seg : _segDefinitions) {
+      _gWidget->addSegment(seg.minValue, seg.maxValue, seg.color);
+    }
     isOpaque = false;
     DisplayOutputElement::start();
   }

@@ -22,7 +22,7 @@
 
 namespace gfxDraw {
 class gfxDrawGaugeWidget;
-class GFXDrawGaugeConfig;
+class gfxDrawGaugeConfig;
 }
 
 
@@ -68,7 +68,7 @@ public:
 
 private:
   gfxDraw::gfxDrawGaugeWidget *_gWidget = nullptr;
-  gfxDraw::GFXDrawGaugeConfig *_gConfig = nullptr;
+  gfxDraw::gfxDrawGaugeConfig *_gConfig = nullptr;
 
   String _pointer;
 
@@ -78,7 +78,7 @@ private:
     float maxValue;
     uint32_t color;
   };
-  std::vector<_SEGDEF>_segdefinitions; 
+  std::vector<_SEGDEF>_segDefinitions; 
 
 };
 

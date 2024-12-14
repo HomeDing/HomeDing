@@ -94,27 +94,38 @@
 
   "displayoutput": {
     "sys": "false",
-    "properties": ["x", "y", "w", "h", "page", "color", "background", "border"],
+    "properties": ["x", "y", "page"],
     "actions": ["value", "clear", "redraw"]
   },
 
-  "displaydot": { "extends": "displayoutput" },
-
-  "displayrect": { "extends": "displayoutput" },
-
   "displaytext": { "extends": "displayoutput",
     "sys": "false",
-    "properties": ["fontsize", "prefix", "postfix"]
+    "properties": ["w", "h", "stroke", "fontsize", "prefix", "postfix"]
+  },
+
+  "displaytextbox": { "extends": "displayoutput",
+    "sys": "false",
+    "properties": ["w", "h", "stroke", "fill", "border", "fontsize", "align", "prefix", "postfix"]
+  },
+
+  "displaycircle": { "extends": "displayoutput",
+    "sys": "false",
+    "properties": ["w", "stroke", "fill"]
+  },
+
+  "displayrect": { "extends": "displayoutput",
+    "sys": "false",
+    "properties": ["w", "h", "stroke", "fill"]
   },
 
   "displayline": { "extends": "displayoutput",
     "sys": "false",
-    "properties": ["x1", "y1"]
+    "properties": ["x1", "y1", "stroke"]
   },
 
-  "displaybutton": {
+  "displaybutton": { "extends": "displayoutput",
     "sys": "false",
-    "properties": ["page", "x", "y", "color", "w", "h"],
+    "properties": ["w", "h", "stroke", "fill", "border", "fontsize"],
     "events": ["onclick"]
   },
 
@@ -350,7 +361,7 @@
   },
 
   "schedule": {
-    "properties": ["ontime", "offtime"],
+    "properties": ["mode", "ontime", "offtime"],
     "events": ["onon", "onoff", "onvalue"]
   },
 

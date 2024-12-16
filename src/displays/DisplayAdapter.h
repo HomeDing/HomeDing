@@ -163,15 +163,13 @@ protected:
 };
 
 
-// ===== static variables for the display in the HomeDing namespace
+// ===== declare static variables for the display in the HomeDing namespace
 
 namespace HomeDing {
 extern DisplayAdapter *displayAdapter;
 
-extern uint32_t strokeColor;
-extern uint32_t fillColor;
+std::function<void(int16_t x, int16_t y)> writeColor(uint32_t color);
 
-extern void stroke(int16_t x, int16_t y);
-extern void fill(int16_t x, int16_t y);
-extern void draw(int16_t x, int16_t y, uint32_t color);
+void draw(int16_t x, int16_t y, uint32_t color);
+
 }

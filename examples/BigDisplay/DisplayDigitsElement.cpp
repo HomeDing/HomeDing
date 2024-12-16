@@ -135,12 +135,14 @@ void DisplayDigitsElement::draw() {
     if (_lastValue[n] != _value[n]) {
       // BoundingBox b(x, box.y_min, x + xWidth, box.y_max);
 
-      HomeDing::fillColor = _backgroundColor;
-      gfxDraw::drawRect(x, box.y_min, x + xWidth, box.y_max, nullptr, HomeDing::fill);
+      gfxDraw::drawRect(
+        x, box.y_min, x + xWidth, box.y_max, nullptr,
+        HomeDing::writeColor(_backgroundColor));
       _drawDigits7(_value[n], x, box.y_min);
     }
     x += xWidth + xGap;
   }
+
   HomeDing::displayAdapter->endWrite();
 
   box.x_max = x - xGap;

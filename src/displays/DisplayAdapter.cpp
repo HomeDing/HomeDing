@@ -44,6 +44,12 @@ void draw(int16_t x, int16_t y, uint32_t color) {
   displayAdapter->writePixel(x, y, color);
 }
 
+std::function<void(int16_t x, int16_t y)> writeColor(uint32_t color) {
+  return [color](int16_t x, int16_t y) {
+    displayAdapter->writePixel(x, y, color);
+  };
+}
+
 }
 
 

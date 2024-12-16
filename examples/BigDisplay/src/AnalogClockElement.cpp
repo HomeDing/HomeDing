@@ -167,16 +167,14 @@ void AnalogClockElement::_drawClock() {
 
   HomeDing::displayAdapter->startWrite();
 
-  HomeDing::strokeColor = _strokeColor;
-  HomeDing::fillColor = _backgroundColor;
-
   gfxDraw::drawCircle(
     gfxDraw::Point((_x0 + _x1) / 2, (_y0 + _y1) / 2),
     (_x1 - _x0) / 2,
-    HomeDing::stroke,
-    HomeDing::fill);
+    HomeDing::writeColor(_strokeColor),
+    HomeDing::writeColor(_backgroundColor));
 
   for (uint8_t i = 0; i < 60; i++) {
+    uint32_t scaleColor;
     float deg = (rad1 * i);
 
     x0 = sin(deg) * _radius;
@@ -185,20 +183,20 @@ void AnalogClockElement::_drawClock() {
     if ((i % 15) == 0) {
       x1 = (x0 * 9.0) / 12.0;
       y1 = (y0 * 9.0) / 12.0;
-      HomeDing::strokeColor = RGB_BLUE;
+      scaleColor = RGB_BLUE;
 
     } else if ((i % 5) == 0) {
       x1 = (x0 * 10.0) / 12.0;
       y1 = (y0 * 10.0) / 12.0;
-      HomeDing::strokeColor = RGB_GREEN;
+      scaleColor = RGB_GREEN;
 
     } else {
       x1 = (x0 * 11.5) / 12.0;
       y1 = (y0 * 11.5) / 12.0;
-      HomeDing::strokeColor = RGB_GRAY;
+      scaleColor = RGB_GRAY;
     }
 
-    gfxDraw::drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, HomeDing::stroke);
+    gfxDraw::drawLine(_cx + x0, _cy + y0, _cx + x1, _cy + y1, HomeDing::writeColor(scaleColor));
 
   }  // for
   HomeDing::displayAdapter->endWrite();
@@ -235,8 +233,7 @@ void _drawLineWidth(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t
 
   da->startWrite();
   if (wd < 2) {
-    HomeDing::strokeColor = color;
-    gfxDraw::drawLine(x0, y0, x1, y1, HomeDing::stroke);
+    gfxDraw::drawLine(x0, y0, x1, y1, HomeDing::writeColor(color));
 
   } else if (wd < 4) {
     //   X

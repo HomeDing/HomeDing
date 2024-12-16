@@ -78,6 +78,9 @@ bool DisplayGaugeElement::set(const char *name, const char *value) {
       // width of the segments in percentages 1...100
       _gConfig->segmentWidth = _atoi(value);
 
+    } else if (strcmp(name, "scale-radius") == 0) {
+      _gConfig->scaleRadius = _atoi(value);
+
     } else if (strcmp(name, "scale-width") == 0) {
       _gConfig->scaleWidth = _atoi(value);
 

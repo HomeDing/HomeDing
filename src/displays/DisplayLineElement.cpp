@@ -24,7 +24,9 @@
 #include <gfxDraw.h>
 #include "DisplayLineElement.h"
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+#ifndef GFX_TRACE
+#define GFX_TRACE(...)  // GFXDRAWTRACE(__VA_ARGS__)
+#endif
 
 /**
  * @brief static factory function to create a new DisplayLineElement.
@@ -36,7 +38,7 @@ Element *DisplayLineElement::create() {
 
 
 void DisplayLineElement::start() {
-  TRACE("start()");
+  GFX_TRACE("start()");
   DisplayOutputElement::start();
   isOpaque = true; // don't draw a background color rectangle.
 }
@@ -44,11 +46,10 @@ void DisplayLineElement::start() {
 
 /// @brief Draw the line by using gfxDraw functions.
 void DisplayLineElement::draw() {
-  TRACE("draw(%d/%d - %d/%d)\n", _x0, _y0, _x1, _y1);
+  GFX_TRACE("draw(%d/%d - %d/%d)\n", _x0, _y0, _x1, _y1);
 
-  HomeDing::strokeColor = _strokeColor;
   HomeDing::displayAdapter->startWrite();
-  gfxDraw::drawLine(_x0, _y0, _x1, _y1, HomeDing::stroke);
+  gfxDraw::drawLine(_x0, _y0, _x1, _y1, HomeDing::writeColor(_strokeColor));
   HomeDing::displayAdapter->endWrite();
 }  // draw()
 

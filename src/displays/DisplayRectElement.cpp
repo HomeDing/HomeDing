@@ -44,16 +44,13 @@ void DisplayRectElement::draw() {
 void DisplayRectElement::draw(bool useBackground) {
   TRACE("draw(%d)", useBackground);
 
-  HomeDing::strokeColor = _strokeColor;
-  HomeDing::fillColor = _backgroundColor;
-
   HomeDing::displayAdapter->startWrite();
-
-  gfxDraw::drawRect(box.x_min, box.y_min, box.width(), box.height(),
-                    HomeDing::stroke, useBackground ? HomeDing::fill : nullptr);
-
+  gfxDraw::drawRect(
+    box.x_min, box.y_min, box.width(), box.height(),
+    HomeDing::writeColor(_strokeColor),
+    useBackground ? HomeDing::writeColor(_backgroundColor) : nullptr);
   HomeDing::displayAdapter->endWrite();
 }
 #endif
 
-  // End
+// End

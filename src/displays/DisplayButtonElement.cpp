@@ -22,7 +22,7 @@
 #include <displays/DisplayButtonElement.h>
 #include <gfxDraw.h>
 
-#define TRACE(...) //  LOGGER_ETRACE(__VA_ARGS__)
+#define TRACE(...)  //  LOGGER_ETRACE(__VA_ARGS__)
 
 
 // ===== Element Registry =====
@@ -129,14 +129,17 @@ void DisplayButtonElement::draw() {
   // center vertical
   if (txtBox.y_max < box.y_max) { padY = (box.y_max - txtBox.y_max) / 2; }
 
-  HomeDing::strokeColor = (_pressed ? _backgroundColor : _strokeColor);
-  HomeDing::fillColor = (_pressed ? _strokeColor : _backgroundColor);
+  uint32_t realStrokeColor = (_pressed ? _backgroundColor : _strokeColor);
+  uint32_t realFillColor = (_pressed ? _strokeColor : _backgroundColor);
 
   HomeDing::displayAdapter->startWrite();
-  gfxDraw::drawRoundedRect(box.x_min, box.y_min, w, h, (h / 2), HomeDing::stroke, HomeDing::fill);
+  gfxDraw::drawRoundedRect(box.x_min, box.y_min, w, h, (h / 2),
+                           HomeDing::writeColor(realStrokeColor),
+                           HomeDing::writeColor(realFillColor));
   HomeDing::displayAdapter->endWrite();
 
-  HomeDing::displayAdapter->drawText(box.x_min + padX, box.y_min + padY, _fontsize, _text.c_str(), HomeDing::strokeColor);
+  HomeDing::displayAdapter->drawText(box.x_min + padX, box.y_min + padY,
+                                     _fontsize, _text.c_str(), realStrokeColor);
 }  // draw()
 
 

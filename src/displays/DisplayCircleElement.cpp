@@ -41,15 +41,11 @@ void DisplayCircleElement::draw() {
   bool bValue = _atob(_value.c_str());
   TRACE("draw(%d)", bValue);
 
-  HomeDing::strokeColor = _strokeColor;
-  HomeDing::fillColor = _backgroundColor;
-
   HomeDing::displayAdapter->startWrite();
-
   gfxDraw::drawCircle(
-    gfxDraw::Point((_x0 + _x1) / 2, (_y0 + _y1) / 2),(_x1 - _x0) / 2,
-    HomeDing::stroke, bValue ? HomeDing::fill : nullptr);
-
+    gfxDraw::Point((_x0 + _x1) / 2, (_y0 + _y1) / 2), (_x1 - _x0) / 2,
+    HomeDing::writeColor(_strokeColor),
+    bValue ? HomeDing::writeColor(_backgroundColor) : nullptr);
   HomeDing::displayAdapter->endWrite();
 
 }  // draw()

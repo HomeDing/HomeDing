@@ -42,6 +42,7 @@ extern const char *Brightness;
 extern const char *Clear;
 extern const char *Description;
 extern const char *Down;
+extern const char *FontSize;
 extern const char *Height;
 extern const char *Invert;
 extern const char *Label;

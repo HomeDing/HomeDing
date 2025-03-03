@@ -27,6 +27,7 @@ DisplayConfig::DisplayConfig() {
   // initialization values.
   busmode = BUSMODE_ANY;
   brightness = 50;
+  fontsize = -1; // not set
 
   /** Default Draw & Background Color */
   drawColor = RGB_WHITE;

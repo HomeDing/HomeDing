@@ -55,6 +55,7 @@ public:
 
 
   void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color) override {
+    // PANELTRACE("fillRect %d/%d %d/%d #%08x\n", x, y, w, h, color);
     DisplayAdapter::fillRect(x, y, w, h, color);
     gfx->fillRect(x, y, w, h, col565(color));
   };

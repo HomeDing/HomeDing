@@ -39,6 +39,7 @@ const char *_actionNames[] = {
   "clear",
   "description",
   "down",
+  "fontsize",  
   "height",
   "invert",
   "label",
@@ -91,6 +92,7 @@ const char *Brightness    = find("brightness");
 const char *Clear         = find("clear");
 const char *Description   = find("description");
 const char *Down          = find("down");
+const char *FontSize      = find("fontsize");
 const char *Height        = find("height");
 const char *Invert        = find("invert");
 const char *Label         = find("label");

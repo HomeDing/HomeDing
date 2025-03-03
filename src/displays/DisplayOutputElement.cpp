@@ -76,7 +76,7 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
   } else if ((_stricmp(name, "fill") == 0) || (_stricmp(name, "background") == 0)) {
     _backgroundColor = _atoColor(value);
 
-  } else if (_stricmp(name, "fontsize") == 0) {
+  } else if (name == HomeDing::Actions::FontSize) {
     _fontsize = iValue;
 
   } else if (_stricmp(name, "align") == 0) {

@@ -83,6 +83,14 @@ bool DisplayAdapter::start() {
     pinMode(displayConfig.lightPin, OUTPUT);
     setBrightness(displayConfig.brightness);
   }
+
+  if (displayConfig.fontsize < 0) {
+    displayConfig.fontsize = 8 + 1;
+    if (displayConfig.height > 128) displayConfig.fontsize *= 2;
+    if (displayConfig.height > 256) displayConfig.fontsize *= 2;
+  }
+  TRACE("fontsize: %d", displayConfig.fontsize);
+
   return (true);
 };
 

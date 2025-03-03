@@ -213,6 +213,9 @@ bool DisplayElement::set(const char *name, const char *value) {
 
     // ===== Display settings
 
+  } else if (name == HomeDing::Actions::FontSize) {
+    displayConfig.fontsize = value_int;
+
   } else if (name == HomeDing::Actions::Width) {
     displayConfig.width = value_int;
 

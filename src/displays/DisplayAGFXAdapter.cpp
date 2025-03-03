@@ -28,10 +28,10 @@ Arduino_GFX *gfx = nullptr;
 static uint16_t AGFX_drawColor;
 
 bool DisplayAGFXAdapter::start() {
-  TRACE("init: w:%d, h:%d, r:%d", displayConfig.width, displayConfig.height, displayConfig.rotation);
-  TRACE(" colors: #%08x / #%08x", displayConfig.drawColor, displayConfig.backgroundColor);
-  TRACE(" invert: %d ips: %d", displayConfig.invert, displayConfig.ips);
-  TRACE("   pins: light:%d, reset:%d", displayConfig.lightPin, displayConfig.resetPin);
+  PANELTRACE("init: w:%d, h:%d, r:%d\n", displayConfig.width, displayConfig.height, displayConfig.rotation);
+  PANELTRACE(" colors: #%08x / #%08x\n", displayConfig.drawColor, displayConfig.backgroundColor);
+  PANELTRACE(" invert: %d ips: %d\n", displayConfig.invert, displayConfig.ips);
+  PANELTRACE("   pins: light:%d, reset:%d\n", displayConfig.lightPin, displayConfig.resetPin);
 
 
   // LOGGER_JUSTINFO("Font_10: %d %d %d=%d", sizeof(Font_10), sizeof(Font_10Bitmaps), sizeof(Font_10Glyphs),
@@ -48,18 +48,14 @@ bool DisplayAGFXAdapter::start() {
     return (false);
 
   } else {
+    PANELTRACE("gfx found.\n");
     gfx->begin(displayConfig.busSpeed);
     gfx->invertDisplay(displayConfig.invert);
 
     DisplayAdapter::start();
 
     gfx->setTextWrap(false);
-
-    int16_t fontsize = 8 + 1;  // Standard
-    if (displayConfig.height > 128) fontsize *= 2;
-    if (displayConfig.height > 256) fontsize *= 2;
-    // if (displayConfig.height > 320) fontsize = 48;
-    _setTextHeight(fontsize);
+    _setTextHeight(displayConfig.fontsize);
 
     clear();
     flush();
@@ -125,6 +121,7 @@ BoundingBox DisplayAGFXAdapter::drawText(int16_t x, int16_t y, int16_t h, const 
 
 /// @brief send all buffered pixels to display.
 void DisplayAGFXAdapter::flush() {
+  PANELTRACE("flush()\n");
   gfx->flush();
   DisplayAdapter::flush();
 };  // flush()
@@ -253,7 +250,6 @@ void DisplayAGFXAdapter::_setTextHeight(int16_t h) {
     }
 
     loadFont(base, h / base);
-    // LOGGER_JUSTINFO(" >(%d)", baseLine);
   }
 }  // _setTextHeight()
 

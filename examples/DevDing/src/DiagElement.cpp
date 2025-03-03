@@ -257,6 +257,7 @@ String DiagElement::_handleChipInfo() {
 }
 
 String DiagElement::_handleWireScan() {
+  TRACE("handleWireScan()");
   String sOut;
   char buffer[128];
   unsigned long tStart = millis();
@@ -268,12 +269,14 @@ String DiagElement::_handleWireScan() {
     sOut += "no i2c bus.\n";
 
   } else {
+    // TRACE("Scan...");
     sprintf(buffer, "Scan i2c (sda=%d, scl=%d)...\n", _board->I2cSda, _board->I2cScl);
     sOut += buffer;
 
     while ((millis() < tStart + 3000) && (adr < 127)) {
       adr++;
 
+      // TRACE("Scan 0x%02x ", adr, strlen(sOut.c_str()));
       // The i2c scanner uses the return value of Write.endTransmission
       // to find a device that acknowledged to the address.
       Wire.beginTransmission(adr);
@@ -349,7 +352,8 @@ String DiagElement::_handleHeap() {
   String sOut;
   char buffer[128];
 
-  sprintf(buffer, "=free %ld\n", esp_get_free_heap_size());
+  sprintf(buffer, "Free Heap: %ld\n", ESP.getFreeHeap());
+  // sprintf(buffer, "=free %ld\n", esp_get_free_heap_size());
   sOut = buffer;
 
   return (sOut);

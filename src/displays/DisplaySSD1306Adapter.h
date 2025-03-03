@@ -35,12 +35,18 @@ public:
       // Initialize the display using the physical parameters and use the Mono color Canvas for drawing
       op = new Arduino_SSD1306(bus, displayConfig.resetPin, displayConfig.width, displayConfig.height);
       gfx = new Arduino_Canvas_Mono(displayConfig.width, displayConfig.height, op, displayConfig.colOffset, displayConfig.rowOffset, true);
-
-      // set rotatation for drawing.
-      gfx->setRotation(displayConfig.rotation / 90);
+    } else {
+      PANELTRACE("no bus\n");
     }
 
-    DisplayAGFXAdapter::start();
+    if (gfx) {
+      // set rotatation for drawing.
+      gfx->setRotation(displayConfig.rotation / 90);
+      DisplayAGFXAdapter::start();
+    } else {
+      PANELTRACE("no gfx\n");
+    }
+    
     return (gfx != nullptr);
   };  // start()
 

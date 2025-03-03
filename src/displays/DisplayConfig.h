@@ -72,6 +72,9 @@ public:
   /// @brief Bus mode.
   int busmode;
 
+  /// @brief Size of default font used at startup.
+  int fontsize;
+
   // bus configurations for any bus
 
   int32_t busSpeed = -1;  // speed

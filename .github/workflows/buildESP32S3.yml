@@ -35,7 +35,7 @@ jobs:
             # Install ESP32 platform via Boards Manager
             - name: "esp32:esp32"
               source-url: https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json
-              version: 3.0.7
+              version: 3.1.3
           fqbn: esp32:esp32:esp32:FlashSize=16M,PartitionScheme=fatflash
           libraries: |
             - source-path: ./

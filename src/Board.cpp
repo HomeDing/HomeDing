@@ -2,7 +2,10 @@
  * @file Board.cpp
  * @author Matthias Hertel (https://www.mathertel.de)
  *
- * @brief Implementation of the Board class for the HomeDing Library
+ * @brief Implementation of the Board class for the HomeDing Library.
+ * This file contains the implementation of the Board class, which manages the initialization,
+ * configuration, and operation of the HomeDing device, including network setup, element management,
+ * and deep sleep functionality.
  *
  * @copyright Copyright (c) by Matthias Hertel, https://www.mathertel.de.
  * This work is licensed under a BSD 3-Clause style license, see https://www.mathertel.de/License.aspx
@@ -18,6 +21,7 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
+#include <MicroJsonComposer.h>
 
 #include <Wire.h>
 #include <SPI.h>
@@ -82,7 +86,14 @@ int _resetCount = 0;
 // ---
 
 static const char respond404[] PROGMEM =
-  "<html><head><title>File not found</title></head><body>File not found</body></html>";
+  "<html>"
+  "<head>"
+  "<title>File not found</title>"
+  "</head>"
+  "<body>"
+  "File not found"
+  "</body>"
+  "</html>";
 
 // define static variables for HomeDingFS here:
 
@@ -222,9 +233,17 @@ void Board::add(const char *id, Element *e) {
 }  // add()
 
 
-/// @brief Check the mode the device in running.
-/// @return true when board is runing in captive mode.
-/// @return false when board is runing in normal mode.
+/**
+ * @brief Check if the board is running in captive mode.
+ *
+ * Captive mode is a state where the device creates its own Wi-Fi network
+ * and serves a web page to configure the device. This mode is typically
+ * used when the device cannot connect to a predefined Wi-Fi network or
+ * when it needs to be initially configured.
+ *
+ * @return true if the board is running in captive mode.
+ * @return false if the board is running in normal mode.
+ */
 bool Board::isCaptiveMode() {
   return ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE));
 }  // isCaptiveMode()
@@ -232,6 +251,11 @@ bool Board::isCaptiveMode() {
 
 /**
  * @brief Continue the Captive Mode when activity is detected.
+ *
+ * This method extends the duration of the Captive Mode by resetting the
+ * `_captiveEnd` time to the current time plus the defined `CAPTIVE_TIME`.
+ * It ensures that the device remains in Captive Mode as long as there is
+ * activity detected within the Captive Mode period.
  */
 void Board::keepCaptiveMode() {
   if ((boardState == BOARDSTATE::STARTCAPTIVE) || (boardState == BOARDSTATE::RUNCAPTIVE)) {
@@ -241,7 +265,12 @@ void Board::keepCaptiveMode() {
 
 
 /**
- * @brief
+ * @brief Check and update the network state.
+ *
+ * This method calls the Network::loop() function to handle network-related tasks,
+ * such as maintaining the connection, processing incoming data, and handling
+ * network events. It ensures that the network state is regularly updated and
+ * any necessary actions are taken based on the current network status.
  */
 void Board::_checkNetState() {
   Network::loop();
@@ -338,7 +367,15 @@ void Board::start(Element::STARTUPMODE startupMode) {
 }  // start()
 
 
-// switch to a new state
+/**
+ * @brief Switch to a new board state.
+ *
+ * This method updates the board's state to the specified new state.
+ * It performs necessary actions based on the new state, such as updating
+ * network status, handling deep sleep mode, and managing element states.
+ *
+ * @param newState The new state to switch to.
+ */
 void Board::_newBoardState(enum BOARDSTATE newState) {
   hd_yield();
   // NETTRACE("WiFi state: %d", WiFi.status());
@@ -902,10 +939,13 @@ void Board::deferSleepMode() {
 void Board::getState(String &out, const char *id) {
   BOARDTRACE("getState(%s)", id ? id : "-");
   String ret = "{";
+  ret.reserve(600);
 
   forEach(Element::CATEGORY::All, [this, id, &ret](Element *e) {
     BOARDTRACE("  %s", e->id);
     if ((!id) || (strcmp(e->id, id) == 0)) {
+      ret.reserve(ret.length() + 64);
+
       ret += '\"';
       ret += e->id;
       ret += "\":{";
@@ -981,7 +1021,15 @@ Element *Board::findById(const char *id) {
 }  // findById
 
 
-/// @brief Iterate all Elements from both lists with a given category.
+/**
+ * @brief Iterate over all Elements from both lists with a given category and apply a callback function.
+ *
+ * This method iterates through all elements in the board, both looping and non-looping,
+ * and applies the provided callback function to each element that matches the specified category.
+ *
+ * @param cat The category of elements to iterate over.
+ * @param fCallback The callback function to apply to each matching element.
+ */
 void Board::forEach(Element::CATEGORY cat, ElementCallbackFn fCallback) {
   Element *l;
 
@@ -1005,7 +1053,13 @@ void Board::forEach(Element::CATEGORY cat, ElementCallbackFn fCallback) {
 
 /**
  * @brief Reset/restart the board.
- * @param wipe is set to true to disconnect from WiFi and forget saved network credentials.
+ *
+ * This method performs a reset or restart of the board. If the `wipe` parameter is set to true,
+ * it will disconnect from the WiFi network and forget any saved network credentials. This is useful
+ * for resetting the device to a clean state, especially when troubleshooting network issues or 
+ * preparing the device for a new configuration.
+ *
+ * @param wipe If set to true, the device will disconnect from WiFi and forget saved network credentials.
  */
 void Board::reboot(bool wipe) {
   Logger::printf("reboot...");
@@ -1020,6 +1074,16 @@ void Board::reboot(bool wipe) {
 };
 
 
+/**
+ * @brief Display information on the connected display and log it.
+ *
+ * This method displays two lines of text on the connected display, if available,
+ * and logs the same information. The first line of text is mandatory, while the
+ * second line is optional.
+ *
+ * @param text1 The first line of text to display and log.
+ * @param text2 The second line of text to display and log (optional).
+ */
 void Board::displayInfo(const char *text1, const char *text2) {
   Logger::printf("%s %s", text1 ? text1 : "", text2 ? text2 : "");
   if (HomeDing::displayAdapter) {

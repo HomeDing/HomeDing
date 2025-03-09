@@ -12,6 +12,7 @@
 
 #include <Arduino.h>
 #include <HomeDing.h>
+#include <MicroJsonComposer.h>
 
 #include <core/Logger.h>
 
@@ -35,7 +36,7 @@ bool ElementRegistry::registerElement(const char *elementTypeName,
     return (true);
   }
   return (false);
-} // registerElement()
+}  // registerElement()
 
 
 Element *ElementRegistry::createElement(const char *elementTypeName) {
@@ -45,32 +46,28 @@ Element *ElementRegistry::createElement(const char *elementTypeName) {
 
   // search for the the typeName
   n = 0;
-  while ((n < _count) &&
-         (!String(_names[n]).equalsIgnoreCase(elementTypeName))) {
+  while ((n < _count) && (!String(_names[n]).equalsIgnoreCase(elementTypeName))) {
     n++;
-  } // while
+  }  // while
 
   if (n < _count) {
     e = _func[n]();
-  } // if
+  }  // if
   return (e);
-} // createElement()
+}  // createElement()
 
 
 /**
- * @brief List all registered elements in JSON array format:
- * @param buffer for the names.
+ * @brief List all registered elements in JSON array format and return as String.
  */
 String ElementRegistry::list() {
-  String buffer = "[";
+  MicroJsonComposer jc;
+  jc.openArray();
   for (int n = 0; n < _count; n++) {
-    if (n > 0) buffer.concat(',');
-    buffer.concat('\"');
-    buffer.concat(_names[n]);
-    buffer.concat('\"');
-  } // for
-  buffer.concat(']');
-  return(buffer);
-} // list()
+    jc.addConstant(_names[n]);
+  }  // for
+  jc.closeArray();
+  return (jc.stringify());
+}  // list()
 
 // End

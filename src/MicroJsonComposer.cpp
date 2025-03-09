@@ -15,7 +15,10 @@
  */
 
 #include <Arduino.h>
+#include <HomeDing.h>
 #include <MicroJsonComposer.h>
+
+#define TRACE(...) Serial.sprintf(__VA_ARGS__)
 
 MicroJsonComposer::MicroJsonComposer() {
   _out.reserve(512);
@@ -28,6 +31,18 @@ void MicroJsonComposer::openObject() {
   _fresh = true;
 }
 
+// Create a property with String value
+void MicroJsonComposer::addObject(const char *id) {
+  CTRACE("addObject(%s)\n", id);
+
+  _out.reserve(_out.length() + strlen(id) + 32);
+  if (!_fresh) _out.concat(',');
+  _out.concat('\"');
+  _out.concat(id);
+  _out.concat("\":{");
+  _fresh = true;
+};
+
 void MicroJsonComposer::closeObject() {
   _out += "}";
   _fresh = false;
@@ -39,6 +54,15 @@ void MicroJsonComposer::openArray() {
   _fresh = true;
 }
 
+void MicroJsonComposer::addConstant(const char *value) {
+  _out.reserve((_out.length() + strlen(value) + 64) & 0xFFFFC0);
+  if (!_fresh) _out.concat(',');
+  _out.concat('\"');
+  _out.concat(value);
+  _out.concat('\"');
+  _fresh = false;
+}
+
 void MicroJsonComposer::closeArray() {
   _out += "]";
   _fresh = false;
@@ -47,7 +71,9 @@ void MicroJsonComposer::closeArray() {
 
 // Create a property with String value
 void MicroJsonComposer::addProperty(const char *key, String value) {
-  _out.reserve(_out.length() + strlen(key) + value.length() + 64);
+  CTRACE("addProperty(%s)\n", key);
+
+  _out.reserve((_out.length() + strlen(key) + value.length() + 64) & 0xFFFFC0);
   if (!_fresh) _out.concat(',');
   value.replace("\"", "\\\"");
   _out.concat('\"');
@@ -61,7 +87,7 @@ void MicroJsonComposer::addProperty(const char *key, String value) {
 // Create a property with char* value
 void MicroJsonComposer::addProperty(const char *key, const char *value) {
   addProperty(key, String(value));
-}
+};
 
 
 // Create a property with int value
@@ -70,10 +96,8 @@ void MicroJsonComposer::addProperty(const char *key, long value) {
 };
 
 
-// Create a property with int value
+// Return the composed string
 const char *MicroJsonComposer::stringify() {
-  // _out.replace(",]", "]");
-  // _out.replace(",}", "}");
   return (_out.c_str());
 };
 

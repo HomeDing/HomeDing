@@ -70,7 +70,6 @@ public:
   /// @param h height of the characters, ignored for this display.
   /// @param text the text.
   BoundingBox drawText(int16_t x, int16_t y, int16_t h, const char *text, uint32_t strokeColor) override {
-    int w = strnlen(text, MAX_DISPLAY_STRING_LEN);
     char buffer[MAX_DISPLAY_STRING_LEN + 4];  // 8 chars character buffer max.
     if ((x > 20) || (y > 4)) {
       // TRACE("outside");

@@ -417,7 +417,7 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, con
 void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
   TRACE("handleListFiles(%s)", path.c_str());
 
-  if ((path.length() > 4) && (path.endsWith("/")))
+  if ((path.length() > 1) && (path.endsWith("/")))
     path.remove(path.length() - 1, 1);  // last '/'
 
   File dir = HomeDingFS::open(path);
@@ -429,6 +429,9 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
     jc.addProperty("name", SD_MOUNTNAME);
     jc.closeObject();
   }
+
+  if ((path.length() > 1) && (! path.endsWith("/")))
+    path.concat('/');  // last '/'
 
   while (File entry = dir.openNextFile()) {
     String longName = path + entry.name();

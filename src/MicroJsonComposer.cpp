@@ -18,7 +18,7 @@
 #include <HomeDing.h>
 #include <MicroJsonComposer.h>
 
-#define TRACE(...) Serial.sprintf(__VA_ARGS__)
+#define CTRACE(...) // Serial.sprintf(__VA_ARGS__); Serial.println()
 
 MicroJsonComposer::MicroJsonComposer() {
   _out.reserve(512);
@@ -33,7 +33,7 @@ void MicroJsonComposer::openObject() {
 
 // Create a property with String value
 void MicroJsonComposer::addObject(const char *id) {
-  CTRACE("addObject(%s)\n", id);
+  CTRACE("addObject(%s)", id);
 
   _out.reserve(_out.length() + strlen(id) + 32);
   if (!_fresh) _out.concat(',');
@@ -71,7 +71,7 @@ void MicroJsonComposer::closeArray() {
 
 // Create a property with String value
 void MicroJsonComposer::addProperty(const char *key, String value) {
-  CTRACE("addProperty(%s)\n", key);
+  CTRACE("addProperty(%s)", key);
 
   _out.reserve((_out.length() + strlen(key) + value.length() + 64) & 0xFFFFC0);
   if (!_fresh) _out.concat(',');

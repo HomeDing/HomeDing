@@ -115,17 +115,20 @@ bool DisplayOutputElement::set(const char *name, const char *value) {
  * @brief Activate the DisplayOutputElement.
  */
 void DisplayOutputElement::start() {
-  TRACE("start()");
-  TRACE("colors: #%08x / #%08x", _strokeColor, _backgroundColor);
+  TRACE("start(%p)", HomeDing::displayAdapter);
+  
+  if (HomeDing::displayAdapter) {
+    TRACE("colors: #%08x / #%08x", _strokeColor, _backgroundColor);
 
-  // make sure that the page is in the range of valid virtual pages
-  if (page > HomeDing::displayAdapter->maxpage) {
-    HomeDing::displayAdapter->maxpage = page;
+    // make sure that the page is in the range of valid virtual pages
+    if (page > HomeDing::displayAdapter->maxpage) {
+      HomeDing::displayAdapter->maxpage = page;
+    }
+
+    Element::start();
+    needsDraw = true;
+    HomeDing::displayAdapter->setFlush();
   }
-
-  Element::start();
-  needsDraw = true;
-  HomeDing::displayAdapter->setFlush();
 }  // start()
 
 

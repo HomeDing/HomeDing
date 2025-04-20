@@ -20,10 +20,10 @@
 #include "displays/DisplayOutputElement.h"
 
 // enable TRACE to create detailed output
-#define TRACE(...)  // LOGGER_TRACE(__VA_ARGS__)
+#define TRACE(...)  LOGGER_TRACE(__VA_ARGS__)
 
 // tracing information on drawing (left from development for future problem analysis) can be disabled
-#define TRACEDRAW(...)  // LOGGER_PRINT(__VA_ARGS__)
+#define TRACEDRAW(...)  LOGGER_PRINT(__VA_ARGS__)
 
 namespace HomeDing {
 

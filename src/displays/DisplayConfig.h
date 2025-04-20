@@ -18,15 +18,14 @@
 
 #pragma once
 
-#define BUSMODE_LIST "x,i2c,spi,hspi,par8lcd8,panel"
+#define BUSMODE_LIST "x,i2c,spi,hspi,par8,lcd8,panel"
 #define BUSMODE_ANY 0x00
 #define BUSMODE_I2C 0x01
 #define BUSMODE_SPI 0x02   // standard SPI interface
 #define BUSMODE_HSPI 0x03  // high speed SPI interface on ESP32
 #define BUSMODE_PAR8 0x04
-#define BUSMODE_LCD8 0x21
-#define BUSMODE_PANEL 0x40
-
+#define BUSMODE_LCD8 0x05
+#define BUSMODE_PANEL 0x06
 namespace HomeDing {
 
 class DisplayConfig {

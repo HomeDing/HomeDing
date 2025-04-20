@@ -59,26 +59,31 @@ bool DisplayTextElement::set(const char *name, const char *value) {
  * @brief Activate the DisplayTextElement.
  */
 void DisplayTextElement::start() {
-  TRACE("start()");
-  DisplayOutputElement::start();
+  TRACE("start(%p)", HomeDing::displayAdapter);
 
-  if (_fontsize > 0 && (_y1 - _y0 + 1 < _fontsize)) {
-    // textElement has a minimum fontsize height.
-    _y1 = _y0 + _fontsize - 1;
-    box = BoundingBox(_x0, _y0, _x1, _y1);
+  if (HomeDing::displayAdapter) {
+    DisplayOutputElement::start();
 
-  } else if (_fontsize < 0) {
-    _fontsize = _y1 - _y0 + 1;
+    if (_fontsize > 0 && (_y1 - _y0 + 1 < _fontsize)) {
+      // textElement has a minimum fontsize height.
+      _y1 = _y0 + _fontsize - 1;
+      box = BoundingBox(_x0, _y0, _x1, _y1);
+
+    } else if (_fontsize < 0) {
+      _fontsize = _y1 - _y0 + 1;
+    }
+
+    TRACE("  box: %d/%d - %d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
+    TRACE("  fontsize = %d", _fontsize);
   }
-
-  TRACE("  box: %d/%d - %d/%d", box.x_min, box.y_min, box.x_max, box.y_max);
-  TRACE("  fontsize = %d", _fontsize);
 }  // start()
 
 
 
 /// @brief send current text to display
 void DisplayTextElement::draw() {
+  TRACE("draw(%p)", HomeDing::displayAdapter);
+
   DisplayOutputElement::draw();
 
   String msg(_prefix);

@@ -172,7 +172,7 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
     int8_t pins[8];
 
     if (pinCount != 8) {
-      LOGGER_ERR("ST7789 LCD8 bus requires 8 pin definitions");
+      LOGGER_ERR("PAR8 bus requires 8 pin definitions");
     } else {
       for (int n = 0; n < 8; n++) {
         pins[n] = Element::_atopin(ListUtils::at(displayConfig.busPins, n).c_str());
@@ -185,16 +185,24 @@ Arduino_DataBus *DisplayAGFXAdapter::getBus() {
 #endif
 
 
-#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3) && (ESP_ARDUINO_VERSION_MAJOR < 3)
+#if defined(ESP32) && (CONFIG_IDF_TARGET_ESP32S3) // && (ESP_ARDUINO_VERSION_MAJOR < 3)
   } else if (displayConfig.busmode == BUSMODE_LCD8) {
     TRACE("Use LCD8");
+
+    int pinCount = ListUtils::length(displayConfig.busPins);
+    int8_t pins[8];
+
+    if (pinCount != 8) {
+      LOGGER_ERR("LCD8 bus requires 8 pin definitions");
+    } else {
+      for (int n = 0; n < 8; n++) {
+        pins[n] = Element::_atopin(ListUtils::at(displayConfig.busPins, n).c_str());
+      }
+    }
+
     bus = new Arduino_ESP32LCD8(
-      0 /* DC */,
-      GFX_NOT_DEFINED /* CS */,
-      47 /* WR */,
-      GFX_NOT_DEFINED /* RD */,
-      9, 46, 3, 8, 18, 17, 16, 15  //  D0 - D7
-    );
+      displayConfig.dcPin, displayConfig.csPin, displayConfig.wrPin, displayConfig.rdPin,
+      pins[0], pins[1], pins[2], pins[3], pins[4], pins[5], pins[6], pins[7]);
 #endif
 
 

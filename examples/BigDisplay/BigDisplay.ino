@@ -33,9 +33,10 @@
 
 // ===== HomeDing Pre-defined Boards with Displays
 
-#define HOMEDING_DEVICE_ESP328048S043
+// #define HOMEDING_DEVICE_ESP328048S043
 // #define HOMEDING_DEVICE_PANEL
 // #define HOMEDING_DEVICE_PANEL22
+#define HOMEDING_DEVICE_SC01PLUS
 
 
 
@@ -51,6 +52,11 @@
 
 #elif defined(HOMEDING_DEVICE_PANEL22)
 // See board description at <https://...>
+
+#elif defined(HOMEDING_DEVICE_SC01PLUS)
+#define HOMEDING_INCLUDE_DISPLAYST7796
+#define HOMEDING_INCLUDE_DISPLAYTOUCHFT6336
+#define HOMEDING_INCLUDE_SD
 
 #else
 

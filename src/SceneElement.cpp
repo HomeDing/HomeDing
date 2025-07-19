@@ -47,12 +47,12 @@ bool SceneElement::set(const char *name, const char *value) {
   bool ret = true;
   int size = _steps.size();
 
-  if (_stricmp(name, "start") == 0) {
+  if (name == HomeDing::Actions::Start) {
     // start the scene at step[0]
     _currentStep = 0;
     _nextStepTime = 1;  // asap.
 
-  } else if (_stricmp(name, "next") == 0) {
+  } else if (name == HomeDing::Actions::Next) {
     // start next step in in scene
     TRACE("_next cnt=%d, size=%d", _currentStep, size);
     if (_currentStep < size) {

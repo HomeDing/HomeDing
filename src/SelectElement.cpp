@@ -66,7 +66,7 @@ bool SelectElement::set(const char *name, const char *value) {
         _selectOption(i);
       }
 
-    } else if (_stricmp(name, "next") == 0) {
+    } else if (name == HomeDing::Actions::Next) {
       // start next option
       if (_cycle || (_selected + 1 < size)) {
         _selectOption((_selected + 1) % size);

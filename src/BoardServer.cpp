@@ -228,7 +228,6 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, con
   String api;
 
   uri.toLowerCase();
-  output.reserve(512);
 
   if (uri.startsWith(API_ROUTE)) {
     api = uri.substring(5);

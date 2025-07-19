@@ -50,6 +50,7 @@ extern const char *LogLevel;
 extern const char *Max;
 extern const char *Min;
 extern const char *Mode;
+extern const char *Next;
 extern const char *OnHigh;
 extern const char *OnHumidity;
 extern const char *OnLow;

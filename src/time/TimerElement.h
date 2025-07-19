@@ -17,37 +17,10 @@
  * * 24.01.2020 timer type once doesn't start automatically. 
  * * 24.04.2021 mode=ON|TIMER|OFF added.
  * * 24.01.2022 resolution increased. milliseconds as durations enabled.
+ * * 19.07.2025 onAbort added
  */
 
 #pragma once
-
-/**
- * @details
-@verbatim
-
-The Timer Element can automatically produce 2 actions after a specified timing.
-
-                +--> "on" action  +--> "off" action
-                |                 |
-________________/^^^^^^^^^^^^^^^^^\______________
-
-<-- waittime --> <-- pulsetime -->
-<------------- cycletime ----------------------->
-
-When timer restart is activated the timer automatically starts from the begining
-after finishing the cycletime. The cycletime is automatically adjusted to
-minimum of waittime+pulsetime.
-
-"onon": "device.main:log:start relais...",
-"onoff": "device.main:log:stop relais..."
-
-"onon": "display.active:dot:1",
-"onoff": "display.active:dot:0"
-
-
-@endverbatim
- */
-
 
 /**
  * @brief type for looping the timer after cycletime is over.
@@ -148,16 +121,16 @@ private:
   bool _forceSendActions;
   
   /**
-   * @brief The _onAction holds the actions that is submitted when the pulse
+   * @brief The _highAction holds the actions that is submitted when the pulse
    * period starts.
    */
-  String _onAction;
+  String _highAction;
 
   /**
-   * @brief The _offAction holds the actions that is submitted when the pulse
+   * @brief The _lowAction holds the actions that is submitted when the pulse
    * period ends.
    */
-  String _offAction;
+  String _lowAction;
 
   /**
    * @brief The _valueAction holds the actions that are submitted when a new pulse

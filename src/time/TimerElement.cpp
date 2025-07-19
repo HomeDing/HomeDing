@@ -26,6 +26,10 @@ Element *TimerElement::create() {
 }  // create()
 
 
+// The 3 actions "onValue", "onHigh" and "onLow".
+// are used to send the current value of the timer.
+
+
 /**
  * @brief Set a parameter or property to a new value or start an action.
  */
@@ -34,38 +38,17 @@ bool TimerElement::set(const char *name, const char *value) {
   bool ret = true;
   // TRACE("set %s=%s", name, value);
 
-  if (name == HomeDing::Actions::Mode) {
-    if (_stricmp(value, "off") == 0) {
-      _mode = Mode::OFF;
-    } else if (_stricmp(value, "on") == 0) {
-      _mode = Mode::ON;
-    } else if (_stricmp(value, "timer") == 0) {
-      _mode = Mode::TIMER;
-    }
-
-  } else if (_stricmp(name, "restart") == 0) {
-    _restart = _atob(value);
-
-  } else if (_stricmp(name, "cycletime") == 0) {
-    _cycleTime = _scanDuration(value);
-
-  } else if (_stricmp(name, "waittime") == 0) {
-    _waitTime = _scanDuration(value);
-
-  } else if (_stricmp(name, "pulsetime") == 0) {
-    _pulseTime = _scanDuration(value);
-
-  } else if (_stricmp(name, "start") == 0) {
+  if (name == HomeDing::Actions::Start) {
     _mode = Mode::TIMER;
     _startTime = now;
 
-  } else if (_stricmp(name, "stop") == 0) {
+  } else if (name == HomeDing::Actions::Stop) {
     if (_mode == Mode::TIMER) {
       HomeDing::Actions::push(_endAction);
     }
     _mode = Mode::OFF;
 
-  } else if (_stricmp(name, "next") == 0) {
+  } else if (name == HomeDing::Actions::Next) {
     if (_mode == Mode::TIMER) {
       // time from start in milliseconds
       unsigned long tfs = now - _startTime;
@@ -84,17 +67,43 @@ bool TimerElement::set(const char *name, const char *value) {
       }
     }  // if TIMER
 
-  } else if (_stricmp(name, "onon") == 0) {
-    _onAction = value;
+  } else if (name == HomeDing::Actions::Mode) {
+    _mode = (Mode)_scanEnum("off,on,timer", value);
 
-  } else if (_stricmp(name, "onoff") == 0) {
-    _offAction = value;
+    
+  } else if (_stricmp(name, "restart") == 0) {
+    _restart = _atob(value);
 
-  } else if (_stricmp(name, "onend") == 0) {
-    _endAction = value;
+  } else if (_stricmp(name, "cycletime") == 0) {
+    _cycleTime = _scanDuration(value);
+
+  } else if (_stricmp(name, "waittime") == 0) {
+    _waitTime = _scanDuration(value);
+
+  } else if (_stricmp(name, "pulsetime") == 0) {
+    _pulseTime = _scanDuration(value);
+
+    // consistent event namings
+  } else if (name == HomeDing::Actions::OnHigh) {
+    _highAction = value;
+
+  } else if (name == HomeDing::Actions::OnLow) {
+    _lowAction = value;
 
   } else if (name == HomeDing::Actions::OnValue) {
     _valueAction = value;
+
+    // old event names
+  } else if (_stricmp(name, "onon") == 0) {
+    _highAction = value;
+
+  } else if (_stricmp(name, "onoff") == 0) {
+    _lowAction = value;
+
+
+
+  } else if (_stricmp(name, "onend") == 0) {
+    _endAction = value;
 
   } else {
     ret = Element::set(name, value);
@@ -106,7 +115,8 @@ bool TimerElement::set(const char *name, const char *value) {
 
 
 /**
- * @brief Activate the TimerElement.
+ * @brief Start the Timer
+ * .
  */
 void TimerElement::start() {
   // TRACE("start()");
@@ -155,6 +165,7 @@ void TimerElement::loop() {
 
     } else {
       newValue = false;
+      HomeDing::Actions::push(_endAction, 0);
       if (_restart) {
         // and update in next loop()
         _startTime = now;
@@ -164,15 +175,15 @@ void TimerElement::loop() {
     }
   }  // if
 
-  if (! _forceSendActions && (newValue == _value)) {
+  if (!_forceSendActions && (newValue == _value)) {
     // no need to send an action.
 
   } else if (newValue) {
-    HomeDing::Actions::push(_onAction);
+    HomeDing::Actions::push(_highAction);
     HomeDing::Actions::push(_valueAction, "1");
 
   } else {
-    HomeDing::Actions::push(_offAction);
+    HomeDing::Actions::push(_lowAction);
     HomeDing::Actions::push(_valueAction, "0");
   }  // if
   _forceSendActions = false;
@@ -210,7 +221,7 @@ void TimerElement::term() {
   _mode = Mode::OFF;
 
   if (_value) {
-    HomeDing::Actions::push(_offAction, 0);
+    HomeDing::Actions::push(_lowAction);
     HomeDing::Actions::push(_valueAction, 0);
     _value = false;
   }

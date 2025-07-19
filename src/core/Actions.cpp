@@ -100,6 +100,7 @@ const char *LogLevel      = find("loglevel");
 const char *Max           = find("max");
 const char *Min           = find("min");
 const char *Mode          = find("mode");
+const char *Next          = find("next");
 const char *OnHigh        = find("onhigh");
 const char *OnHumidity    = find("onhumidity");
 const char *OnLow         = find("onlow");

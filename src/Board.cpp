@@ -938,33 +938,25 @@ void Board::deferSleepMode() {
 
 void Board::getState(String &out, const char *id) {
   BOARDTRACE("getState(%s)", id ? id : "-");
-  String ret = "{";
-  ret.reserve(600);
+  MicroJsonComposer jc;
+  jc.openObject();
 
-  forEach(Element::CATEGORY::All, [this, id, &ret](Element *e) {
+  forEach(Element::CATEGORY::All, [this, id, &jc](Element *e) {
     BOARDTRACE("  %s", e->id);
     if ((!id) || (strcmp(e->id, id) == 0)) {
-      ret.reserve(ret.length() + 64);
 
-      ret += '\"';
-      ret += e->id;
-      ret += "\":{";
-      e->pushState([&ret](const char *name, const char *value) {
+      jc.addObject(e->id);
+      e->pushState([&jc](const char *name, const char *value) {
         BOARDTRACE("->%s=%s", name, value);
-        ret.concat('\"');
-        ret.concat(name);
-        ret.concat("\":\"");
-        ret.concat(value);
-        ret.concat("\",");
+        jc.addProperty(name, value);
       });
-      ret += "},";
+      jc.closeObject();
     }  // if
   });
 
   // close root object and remove last comma before close.
-  ret += "}";
-  ret.replace(",}", "}");
-  out = ret;
+  jc.closeObject();
+  out=jc.stringify();
   BOARDTRACE("getState=%s", out.c_str());
 }  // getState
 

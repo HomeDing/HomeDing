@@ -140,7 +140,7 @@ public:
   void upload(WebServer & /* server */, const String &requestUri, HTTPUpload &upload) override
 #endif
   {
-    JINFO("FileServerHandler::upload(%s)", requestUri.c_str());
+    JINFO("FileServerHandler::upload(%s) %d", requestUri.c_str(), _fsUploadFile ? 1 : 0);
 
     // ensure that filename starts with '/' and is lowercase
     String fName = upload.filename;
@@ -162,12 +162,12 @@ public:
 
 #if defined(ESP32)
       // create folder when required, LittleFS on ESP32 doesn't create folders automatically.
-      // String folders = fName;
-      // int n = folders.indexOf('/', 1);
-      // while (n > 0) {
-      //   _fs.mkdir(folders.substring(0, n));  // no harm if folder exists.
-      //   n = folders.indexOf('/', n + 1);
-      // };
+      String folders = fName;
+      int n = folders.indexOf('/', 1);
+      while (n > 0) {
+        HomeDingFS::mkdir(folders.substring(0, n));  // no harm if folder exists.
+        n = folders.indexOf('/', n + 1);
+      };
 #endif
 
       _fsUploadFile = HomeDingFS::open(fName, "w");

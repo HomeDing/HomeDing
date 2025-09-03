@@ -683,11 +683,11 @@ void Board::loop() {
       // This is a fast custom eTag generator. It returns a current number that gets incremented when any file is updated.
       server->enableETag(true, [this](FS &fs, const String &path) -> String {
         String eTag;
-        if (!path.endsWith(".txt")) {
+        // if (!path.endsWith(".txt")) {
           File f = fs.open(path, "r");
           eTag = String(f.getLastWrite(), 16);  // use file modification timestamp to create ETag
           f.close();
-        }
+        // }
         return (eTag);
       });
 #endif

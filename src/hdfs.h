@@ -61,7 +61,13 @@ public:
     FS *efs = HomeDingFS::_prep(path);
     return (efs->open(path, mode, create));
   };
-#endif
+
+  static void mkdir(String path) {
+    FS *efs = HomeDingFS::_prep(path);
+    efs->mkdir(path);
+  };
+
+  #endif
 
   static bool exists(String path) {
     FS *efs = _prep(path);

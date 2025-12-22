@@ -46,9 +46,10 @@ Element *SelectElement::create() {
 
 bool SelectElement::set(const char *name, const char *value) {
   TRACE("set %s=%s", name, value);
+
   bool ret = true;
   uint16_t size = _keys.size();
-
+  
   if (Element::set(name, value)) {
     // done.
   } else if (active && size) {
@@ -59,20 +60,20 @@ bool SelectElement::set(const char *name, const char *value) {
           break;  // for
         }
       }
-
+      
     } else if (_stricmp(name, "index") == 0) {
       int i = _atoi(value);
       if ((i >= 0) && (i < size)) {
         _selectOption(i);
       }
-
+      
     } else if (name == HomeDing::Actions::Next) {
       // start next option
       if (_cycle || (_selected + 1 < size)) {
         _selectOption((_selected + 1) % size);
       }
 
-    } else if (_stricmp(name, "prev") == 0) {
+    } else if (name == HomeDing::Actions::Prev) {
       // start previous option
       if (_cycle || (_selected > 0)) {
         _selectOption((_selected - 1) % size);

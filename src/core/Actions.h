@@ -58,6 +58,7 @@ extern const char *OnPressure;
 extern const char *OnTemperature;
 extern const char *OnValue;
 extern const char *Pin;
+extern const char *Prev;
 extern const char *Redraw;
 extern const char *Reference;
 extern const char *Start;

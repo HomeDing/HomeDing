@@ -60,7 +60,7 @@ bool SceneElement::set(const char *name, const char *value) {
       _nextStepTime = 1;  // asap.
     }
 
-  } else if (_stricmp(name, "prev") == 0) {
+  } else if (name == HomeDing::Actions::Prev) {
     // start previous step in in scene
     TRACE("_next cnt=%d, size=%d", _currentStep, size);
     if (_currentStep > 0) {

@@ -53,6 +53,41 @@ uint32_t __cmd = AUDIOCMD_NONE;
 
 // ===== Background task for audio processing ======
 
+// use some weak functions from audio library
+
+// callbacks
+void __audio_info(Audio::msg_t m) {
+  Serial.printf("audio::%s(%d): %s\n", m.s, m.e, m.msg);
+
+  if (m.e == Audio::event_t::evt_info) {
+    // trace info
+    Logger::LoggerEPrint(__element, LOGGER_LEVEL_INFO, "audio::info %s=%s", m.s, m.msg);
+
+  } else if (m.e == Audio::event_t::evt_streamtitle) {
+    __element->_title = m.msg;
+    HomeDing::Actions::push(__element->_onTitle, m.msg);
+
+  } else if (m.e == Audio::event_t::evt_name) {
+    __element->_station = m.msg;
+    HomeDing::Actions::push(__element->_onStation, m.msg);
+
+  } else if (m.e == Audio::event_t::evt_bitrate) {
+    __element->_bitrate = m.s;
+
+    // } else if (m.e == Audio::event_t::evt_id3data) {
+
+    // } else if (m.e == Audio::event_t::evt_image) {
+    // // log_n("image: %s\n", file.name());
+
+    // } else if (m.e == Audio::event_t::evt_name) {
+    // } else if (m.e == Audio::event_t::evt_eof) {
+    // } else if (m.e == Audio::event_t::evt_log) {
+
+    // evt_icydescription, evt_icyurl, evt_icylogo, evt_lasthost, evt_lyrics
+  }
+}  // __audio_info()
+
+
 void audioTask(void *parameter) {
 
   __audio->setVolume(__element->_volume);
@@ -66,9 +101,13 @@ void audioTask(void *parameter) {
       __cmd = AUDIOCMD_NONE;
 
       if (cmd & AUDIOCMD_URL) {
+        // start a new URL.
         __audio->stopSong();
-        audio_showstation("");
-        audio_showstreamtitle("");
+
+        __element->_title.clear();
+        HomeDing::Actions::push(__element->_onTitle, "");
+        __element->_station.clear();
+        HomeDing::Actions::push(__element->_onStation, "");
 
         if (!__element->_url.isEmpty()) {
           log_n(".1 %s\n", __element->_url.c_str());
@@ -89,21 +128,7 @@ void audioTask(void *parameter) {
   }  // while
 }
 
-// use some weak functions from audio library
 
-void audio_info(const char *info) {
-  Logger::LoggerEPrint(__element, LOGGER_LEVEL_TRACE, info);
-}
-
-void audio_showstation(const char *value) {
-  __element->_station = value;
-  HomeDing::Actions::push(__element->_onStation, value);
-}
-
-void audio_showstreamtitle(const char *value) {
-  __element->_title = value;
-  HomeDing::Actions::push(__element->_onTitle, value);
-}
 
 /* ===== Element functions ===== */
 
@@ -206,17 +231,19 @@ void AudioElement::start() {
   } else {
     Element::start();
 
-    __audio = new Audio();
+    __audio = new Audio(I2S_NUM_0);
+    Audio::audio_info_callback = __audio_info;
+
     __audio->setPinout(_i2s_bclk, _i2s_lrc, _i2s_dout);
     __audio->setVolume(0);
 
     __cmd |= AUDIOCMD_VOLUME | AUDIOCMD_BALANCE | AUDIOCMD_TONE | AUDIOCMD_MONO | AUDIOCMD_URL;
 
     xTaskCreatePinnedToCore(
-      audioTask,             /* Function to implement the task */
-      "audio",               /* Name of the task */
-      16000,                 /* Stack size in words */
-      NULL,                  /* Task input parameter */
+      audioTask, /* Function to implement the task */
+      "audio",   /* Name of the task */
+      16000,     /* Stack size in words */
+      NULL,      /* Task input parameter */
       // 2 | portPRIVILEGE_BIT, /* Priority of the task */
       1 | portPRIVILEGE_BIT, /* Priority of the task */
       NULL,                  /* Task handle. */

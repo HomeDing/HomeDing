@@ -65,6 +65,7 @@ public:
 
   String _url;      ///< Stream URL
   String _station;  ///< station information in stream
+  String _bitrate;  ///< bitrate information in stream
   String _title;    ///< title information in stream
   int _volume;      ///< volume
   int _balance;

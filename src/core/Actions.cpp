@@ -47,6 +47,7 @@ const char *_actionNames[] = {
   "max",
   "min",
   "mode",
+  "next",
   "onhigh",
   "onhumidity",
   "onlow",
@@ -54,6 +55,7 @@ const char *_actionNames[] = {
   "ontemperature",
   "onvalue",
   "pin",
+  "prev",
   "redraw",
   "reference",
   "start",
@@ -108,6 +110,7 @@ const char *OnPressure    = find("onpressure");
 const char *OnTemperature = find("ontemperature");;
 const char *OnValue       = find("onvalue");
 const char *Pin           = find("pin");
+const char *Prev          = find("prev");
 const char *Redraw        = find("redraw");
 const char *Reference     = find("reference");
 const char *Start         = find("start");

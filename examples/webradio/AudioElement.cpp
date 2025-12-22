@@ -74,16 +74,18 @@ void __audio_info(Audio::msg_t m) {
   } else if (m.e == Audio::event_t::evt_bitrate) {
     __element->_bitrate = m.s;
 
+    // } else if (m.e == Audio::event_t::evt_icydescription{
+    //   __element->_description = m.msg;
+
     // } else if (m.e == Audio::event_t::evt_id3data) {
 
     // } else if (m.e == Audio::event_t::evt_image) {
     // // log_n("image: %s\n", file.name());
 
-    // } else if (m.e == Audio::event_t::evt_name) {
     // } else if (m.e == Audio::event_t::evt_eof) {
     // } else if (m.e == Audio::event_t::evt_log) {
 
-    // evt_icydescription, evt_icyurl, evt_icylogo, evt_lasthost, evt_lyrics
+    // evt_icyurl, evt_icylogo, evt_lasthost, evt_lyrics
   }
 }  // __audio_info()
 

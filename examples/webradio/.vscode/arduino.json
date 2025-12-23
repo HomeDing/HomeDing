@@ -1,7 +1,18 @@
 {
-    "board": "esp32:esp32:esp32wrover",
-    "port": "COM4",
-    "configuration": "PartitionScheme=huge_app,FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
-    "sketch": "./webradio.ino",
-    "output": "./build"
+  "board": "esp32:esp32:esp32wrover",
+  "port": "COM7",
+  "configuration": "UploadSpeed=921600,FlashFreq=80,FlashMode=qio,PartitionScheme=huge_app,DebugLevel=none,EraseFlash=none",
+  "sketch": "./webradio.ino",
+  "output": "./build",
+  "monitorPortSettings": {
+    "port": "COM7",
+    "baudRate": 115200,
+    "lineEnding": "\r\n",
+    "dataBits": 8,
+    "parity": "none",
+    "stopBits": "one"
+  },
+  "configurationRequired": true,
+  "programmer": "esptool",
+  "optimize_for_debug": false
 }

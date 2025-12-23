@@ -67,7 +67,7 @@ Full featured firmware containing all most-used stable elements like standard I/
 light drivers and displays. Runs well on a 4MB Flash with all supported processors.
 
 **plug** and **bulb** -- 
-These [Minimal Examples](https://github.com/HomeDing/HomeDing/tree/develop/examples/minimal)
+These [Minimal Examples](https://github.com/HomeDing/HomeDing/tree/master/examples/minimal)
 are implemented to support ESP8266 based devices with 1MB Flash like switches and lights.
 They contain a reduced set of elements for the specific use-case and a small footprint Web-UI.
 These work well with small self-made and off-the-shell devices.
@@ -75,8 +75,8 @@ These work well with small self-made and off-the-shell devices.
 **DevDing** --
 An extended standard setup that includes hints and tools for development of new elements.
 
-**webradio** --
-The [WebRadio example](https://github.com/HomeDing/HomeDing/tree/develop/examples/webradio) is
+**WebRadio** --
+The [WebRadio example](https://github.com/HomeDing/HomeDing/tree/master/examples/webradio) is
 implemented especially for the ESP32 Wroover with PSRAM to build a Web Radio by using an Audio
 library. This Web Radio can be controlled through the embedded web interface.
 
@@ -89,7 +89,7 @@ The [RFBridge Example](https://homeding.github.io/examples/rfbridge.htm)** shows
 implement a RF433 bridge device sending and receiving 433MHz signals.
 
 **radio** --
-The [Radio example](https://github.com/HomeDing/HomeDing/tree/develop/examples/radio) has a
+The [Radio example](https://github.com/HomeDing/HomeDing/tree/master/examples/radio) has a
 local Element to control the features of the Arduino [Radio
 Library](https://github.com/mathertel/Radio) that to ontrol many Radio FM receiver chips.
 The [Radio Element](https://homeding.github.io/elements/audio/radio.htm) is avaiable as part of

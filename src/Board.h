@@ -425,9 +425,6 @@ private:
   void _checkNetState();
   // wl_status_t _wifi_status;
 
-  // /** net connection mode */
-  // int _netMode;
-
   /// @brief The list of elements using the loop () function.
   Element *_elementList = nullptr;
 
@@ -439,6 +436,4 @@ private:
 
   /// @brief The element is executing in a loop()
   Element *_activeElement;
-
-  static Element *_registered;
 };

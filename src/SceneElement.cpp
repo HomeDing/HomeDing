@@ -93,7 +93,6 @@ void SceneElement::loop() {
   if (_nextStepTime > 0) {
     // some outgoing actions should be sent
     unsigned long now = millis();  // current (relative) time in msecs.
-    TRACE("loop( %d, %d)", now, _nextStepTime);
 
     if ((now >= _nextStepTime) && (HomeDing::Actions::queueIsEmpty())) {
       if ((_currentStep >= 0) && (_currentStep < _steps.size())) {

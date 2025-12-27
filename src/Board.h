@@ -395,6 +395,8 @@ private:
   /** counts loops without messages beeing passed to gracefully shut down */
   int _DeepSleepCount;
 
+  /** State size to avoid reallocating strings later */
+  unsigned int _stateSizeHint = 720;
 
   /**
    * Add and config all Elements defined in the config files.
@@ -414,17 +416,17 @@ private:
   bool active = false;
 
   /** set to true when any time requesting elements defined. */
-  bool hasTimeElements = false;
+  bool _hasTimeElements = false;
 
   /** set to true when all elements have been started. */
-  bool startComplete = false;
+  bool _startComplete = false;
 
   /** connection status */
   void _checkNetState();
   // wl_status_t _wifi_status;
 
-  /** net connection mode */
-  int netMode;
+  // /** net connection mode */
+  // int _netMode;
 
   /// @brief The list of elements using the loop () function.
   Element *_elementList = nullptr;

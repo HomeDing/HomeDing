@@ -404,20 +404,20 @@ void Board::loop() {
     }
 #endif
 
-    if (!startComplete) {
-      if (!hasTimeElements) {
-        startComplete = true;
+    if (!_startComplete) {
+      if (!_hasTimeElements) {
+        _startComplete = true;
 
       } else {
         // starting time depending elements
         // check if time is valid now -> start all elements with
         if (time(nullptr)) {
           start(Element::STARTUPMODE::Time);
-          startComplete = true;
+          _startComplete = true;
         }  // if
       }  // if
 
-      if (startComplete) {
+      if (_startComplete) {
         HomeDing::Actions::push(startAction);  // dispatched when all elements are active.
         saveWorkingState = nowMillis + (10 * 1000);
       }
@@ -425,7 +425,7 @@ void Board::loop() {
     } else if (saveWorkingState) {
       if (saveWorkingState < nowMillis) {
         BOARDTRACE("Device is up and running...");
-        // some time after startComplete has completed.
+        // some time after _startComplete has completed.
         DeviceState::setResetCounter(0);
         saveWorkingState = 0;
       }
@@ -557,7 +557,7 @@ void Board::loop() {
       // search any time requesting elements
       forEach(Element::CATEGORY::All, [this](Element *e) {
         if (e->startupMode == Element::STARTUPMODE::Time) {
-          hasTimeElements = true;
+          _hasTimeElements = true;
         }
       });
 
@@ -938,7 +938,7 @@ void Board::deferSleepMode() {
 
 void Board::getState(String &out, const char *id) {
   BOARDTRACE("getState(%s)", id ? id : "-");
-  MicroJsonComposer jc;
+  MicroJsonComposer jc(_stateSizeHint);
   jc.openObject();
 
   forEach(Element::CATEGORY::All, [this, id, &jc](Element *e) {
@@ -954,9 +954,12 @@ void Board::getState(String &out, const char *id) {
     }  // if
   });
 
-  // close root object and remove last comma before close.
+  // close root object and format as string into the out buffer
   jc.closeObject();
   out=jc.stringify();
+  if (out.length() > _stateSizeHint) {
+    _stateSizeHint = out.length();
+  }
   BOARDTRACE("getState=%s", out.c_str());
 }  // getState
 

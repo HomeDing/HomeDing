@@ -54,8 +54,13 @@ bool BuiltinHandler::canHandle(WebServer &server, HTTPMethod requestMethod, cons
 {
   TRACE("canhandle(%s)", uri.c_str());
 
+#if defined(HD_MINIMAL)
+  bool can = ((!_board->isSafeMode) && (requestMethod == HTTP_GET)  // only GET requests in the API
+              && (uri.startsWith("/$setup") || uri.startsWith("/$upload")));
+#else
   bool can = ((!_board->isSafeMode) && (requestMethod == HTTP_GET)  // only GET requests in the API
               && (uri.startsWith("/$setup") || uri.startsWith("/$update") || uri.startsWith("/$upload")));
+#endif
   return (can);
 }  // canHandle
 
@@ -84,15 +89,16 @@ bool BuiltinHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, c
     // Network Config Page
     output = FPSTR(setupContent);
 
+#if !defined(HD_MINIMAL)
+  // Github based update is not supported for Minimal devices. Use $upload only.
   } else if (uri.startsWith("/$update")) {
     // Bootstrap Page
     output = FPSTR(updateContent);
+#endif
 
-#if !defined(HD_MINIMAL)
   } else if (uri.startsWith("/$upload")) {
     // Bulk File Upload Page
     output = FPSTR(uploadContent);
-#endif
 
   } else {
     return (false);

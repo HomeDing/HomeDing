@@ -47,6 +47,7 @@
 
 // integrated htm files
 #define PAGE_UPDATE "/$update.htm"
+#define PAGE_UPLOAD "/$upload.htm"
 
 // Content types for http results
 #define TEXT_JSON "application/json; charset=utf-8"  // Content type for JSON.
@@ -379,8 +380,14 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, con
       used = LittleFS.usedBytes();
     }
 #endif
+
     if (used < 18000) {
+#if defined(HD_MINIMAL)
+      // Upload via drag & drop on minimal devices
+      url = PAGE_UPLOAD;
+#else
       url = PAGE_UPDATE;  // assuming UI files not installed
+#endif
     }
     server.sendHeader("Location", url, true);
     server.send(302);
@@ -429,7 +436,7 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
     jc.closeObject();
   }
 
-  if ((path.length() > 1) && (! path.endsWith("/")))
+  if ((path.length() > 1) && (!path.endsWith("/")))
     path.concat('/');  // last '/'
 
   while (File entry = dir.openNextFile()) {

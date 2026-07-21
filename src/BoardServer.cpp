@@ -276,10 +276,10 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, con
 #endif
 
     jc.addProperty("build", __DATE__);
-    jc.addProperty("freeHeap", ESP.getFreeHeap());
+    jc.addProperty("freeHeap", (long)(ESP.getFreeHeap()));
 
 #if !defined(HD_MINIMAL)
-    jc.addProperty("flashSize", ESP.getFlashChipSize());
+    jc.addProperty("flashSize", (long)(ESP.getFlashChipSize()));
     jc.addProperty("mac", WiFi.macAddress().c_str());
 #endif
 
@@ -287,22 +287,22 @@ bool BoardHandler::handle(WebServer &server, HTTPMethod /* requestMethod */, con
     // ESP32 supports LittleFS only
     FSInfo fs_info;
     LittleFS.info(fs_info);
-    jc.addProperty("fsTotalBytes", fs_info.totalBytes);
-    jc.addProperty("fsUsedBytes", fs_info.usedBytes);
+    jc.addProperty("fsTotalBytes", (long)(fs_info.totalBytes));
+    jc.addProperty("fsUsedBytes", (long)(fs_info.usedBytes));
 
 #elif defined(ESP32)
     // ESP32 supports FFat and LittleFS
     if (HomeDingFS::rootFS == (fs::FS *)&FFat) {
-      jc.addProperty("fsTotalBytes", FFat.totalBytes());
-      jc.addProperty("fsUsedBytes", FFat.usedBytes());
+      jc.addProperty("fsTotalBytes", (long)(FFat.totalBytes()));
+      jc.addProperty("fsUsedBytes", (long)(FFat.usedBytes()));
     } else {
-      jc.addProperty("fsTotalBytes", LittleFS.totalBytes());
-      jc.addProperty("fsUsedBytes", LittleFS.usedBytes());
+      jc.addProperty("fsTotalBytes", (long)(LittleFS.totalBytes()));
+      jc.addProperty("fsUsedBytes", (long)(LittleFS.usedBytes()));
     }
 
 #endif
     jc.addProperty("safemode", _board->isSafeMode ? "true" : "false");
-    jc.addProperty("upTime", now / 1000);
+    jc.addProperty("upTime", (long)(now / 1000));
 
 #if !defined(HD_MINIMAL)
     // WIFI info
@@ -453,7 +453,7 @@ void BoardHandler::handleListFiles(MicroJsonComposer &jc, String path) {
       if (entry.isDirectory()) {
         jc.addProperty("type", "dir");
       } else {
-        jc.addProperty("size", entry.size());
+        jc.addProperty("size", (long)(entry.size()));
       }
       jc.closeObject();
     }  // if

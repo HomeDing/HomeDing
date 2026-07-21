@@ -84,7 +84,7 @@ private:
   float _currentFactor = 11177185.0; // pulse density to current in mA
   float _voltageFactor = 129059.0; // pulse density to voltage in V
 
-  unsigned long _cycleTime = 2 * 1000; // define how long signals will be watched to calculate the sensor values
+  unsigned int _cycleTime = 2 * 1000; // define how long signals will be watched to calculate the sensor values
   unsigned long _cycleStart; // start of current cycle
   int _voltageMode = LOW; // voltage (HIGH) or current (LOW) mode
 

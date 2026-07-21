@@ -111,7 +111,7 @@ bool BL0937Element::set(const char *name, const char *value) {
     _pinCF1 = _atopin(value);
 
   } else if (_stricmp(name, "cycletime") == 0) {
-    _cycleTime = _atoi(value);
+    _cycleTime = _atoui(value);
 
   } else if (_stricmp(name, "powerfactor") == 0) {
     _powerFactor = strtof(value, nullptr);
@@ -225,9 +225,9 @@ void BL0937Element::loop() {
 
 
   // Cycle is over.
-  if (_board->nowMillis - _cycleStart > _cycleTime) {
+  if ((unsigned int)(_board->nowMillis - _cycleStart) > _cycleTime) {
     unsigned long newPowerValue = 0;
-    unsigned long newVAValue = 0;  // voltage or Ampere
+    unsigned long newVAValue = 0;  // volt or ampere
 
     // report new power value:
     if (powSigCnt > 2) {
@@ -236,7 +236,7 @@ void BL0937Element::loop() {
       newPowerValue = (_powerFactor * _powerCount) / _powerDuration;
     }
     if (_powerValue != newPowerValue) {
-      HomeDing::Actions::push(_powerAction, newPowerValue);
+      HomeDing::Actions::push(_powerAction, (int)newPowerValue);
     }
     _powerValue = newPowerValue;
     powSigStart = 0;  // start new cycle.
@@ -250,12 +250,12 @@ void BL0937Element::loop() {
     }
 
     if (_voltageValue != newVAValue) {
-      HomeDing::Actions::push(_voltageAction, newVAValue);
+      HomeDing::Actions::push(_voltageAction, (int)newVAValue);
       _voltageValue = newVAValue;
     }  // if
 
     if (_currentValue != newVAValue) {
-      HomeDing::Actions::push(_currentAction, newVAValue);
+      HomeDing::Actions::push(_currentAction, (int)newVAValue);
       _currentValue = newVAValue;
     }  // if
 
@@ -274,7 +274,7 @@ void BL0937Element::pushState(
   Element::pushState(callback);
 
   // report actual cycletime and mode
-  callback("cycletime", _printInteger(_cycleTime));
+  callback("cycletime", _printInteger((int)_cycleTime));
   callback("mode", _voltageMode ? "voltage" : "current");
 
   // report actual power and factor in use.

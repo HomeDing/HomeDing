@@ -22,7 +22,7 @@
 
 class MicroJsonComposer {
 public:
-  MicroJsonComposer(int size = 300);
+  MicroJsonComposer(unsigned int size = 300);
 
   // Add a new unnamed object in root or array
   void openObject();

@@ -585,9 +585,11 @@ void Board::loop() {
     _newBoardState(BOARDSTATE::CONNECT);
 
   } else if (boardState == BOARDSTATE::CONNECT) {
-    int off = netpass.indexOf(',');
-    String nName = netpass.substring(0, off);
-    String nPass = netpass.substring(off + 1);
+    ArrayString credentials;
+    credentials.split(netpass, ',');
+
+    String nName = credentials[0];
+    String nPass = credentials[1];
 
     // connect to a network...
     Network::connect(deviceName, nName, nPass);
@@ -871,29 +873,29 @@ void Board::dispatchAction(String action) {
   // [host:](type/id)?(param)[=val]
   String host, targetId, name, value;
 
-  int p = action.indexOf(':');
+  int pHost = action.indexOf(':');
   int pParam = action.indexOf('?');
 
-  if ((p > 0) && (p < pParam)) {
-    host = action.substring(0, p);
-    action.remove(0, p + 1);
-    pParam -= (p + 1);
+  if ((pHost > 0) && (pHost < pParam)) {
+    host = action.substring(0, (unsigned int)pHost);
+    action.remove(0, (unsigned int)(pHost + 1));
+    pParam -= (pHost + 1);
   }
 
   if (pParam > 0) {
-    targetId = action.substring(0, pParam);
+    targetId = action.substring(0, (unsigned int)pParam);
     targetId.toLowerCase();
   } else {
     LOGGER_ERR("no action");
     return;
   }
 
-  int pValue = action.indexOf(ELEM_VALUE, pParam + 1);
+  int pValue = action.indexOf(ELEM_VALUE, (unsigned int)(pParam + 1));
   if (pValue > 0) {
-    name = action.substring(pParam + 1, pValue);
-    value = action.substring(pValue + 1);
+    name = action.substring((unsigned int)(pParam + 1), (unsigned int)pValue);
+    value = action.substring((unsigned int)(pValue + 1));
   } else {
-    name = action.substring(pParam + 1);
+    name = action.substring((unsigned int)(pParam + 1));
     value = "";
   }
   name.toLowerCase();

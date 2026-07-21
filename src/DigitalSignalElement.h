@@ -69,7 +69,7 @@ private:
   // ----- static interrupt stuff -----
   // we have up to 8 interrupt routines at hand to watch up to 8 input GPIOs for signals,
 
-  static uint _usedSignals;
+  static unsigned int _signalsInUse;
   static unsigned long _signalCount[8];
 
   static void onSignal0();
@@ -101,7 +101,7 @@ private:
   /**
    * @brief the signal counter offset used.
    */
-  int _signalOff = -1;
+  unsigned int _signalIndex;
 
   // last analyzed signal time.
   unsigned long _lastSignalTime;

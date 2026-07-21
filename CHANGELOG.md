@@ -1,8 +1,13 @@
 # Changelog
 
+[text](https://keepachangelog.com/en/1.1.0/)
+
 All notable changes to this project will be documented in this file.
 
-## \[0.9.x\] - unreleased
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## \[Unreleased\]
 
 ### Display and Touch Driver updates
 
@@ -95,6 +100,9 @@ Some examples also have a \<sketch\>.ino.globals.h file to define a Marco "HD_MI
 This is causing smaller bin files by removing some rarely needed functionality.
 
 
+## \[0.9.8\] - 2023-05-01 unreleased
+
+
 ## \[0.9.7\] - 2023-05-01 unreleased
 
 * updated Web UI files from Web project <https://github.com/HomeDing/WebFiles>.
@@ -105,13 +113,6 @@ This is causing smaller bin files by removing some rarely needed functionality.
   using ESP32 specific sdmmc interface.
   .
 * [SD Element](https://homeding.github.io/elements/sd.htm) add files from sd card to web server using the SPI interface.
-
-* ESP32-S3 Processor Support
-  
-  **Important** -- The SSDP discovery libraray for ESP32 must be installed manually
-  as it is not listed in the Arduino Library Manager.
-  It can be found at <https://github.com/luc-github/ESP32SSDP>
-  (download zip file and extract into the libraries folder or `git clone https://github.com/luc-github/ESP32SSDP`)
 
 * The Examples on [How to create and extend a new Element](https://homeding.github.io/steps/newelement.htm)
   have been moved into the [tutorial example](https://homeding.github.io/examples/tutorial.htm) folder.

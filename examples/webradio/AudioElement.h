@@ -65,7 +65,7 @@ public:
 
   String _url;      ///< Stream URL
   String _station;  ///< station information in stream
-  String _bitrate;  ///< bitrate information in stream
+  String _bitrate;  ///< bitrate of the stream
   String _title;    ///< title information in stream
   int _volume;      ///< volume
   int _balance;
@@ -78,6 +78,7 @@ public:
 
   String _onStation;
   String _onTitle;
+  String _onBitRate;
 
 private:
   int _i2s_bclk;  // bit clock Pin

@@ -70,26 +70,28 @@ bool DigitalSignalElement::set(const char *name, const char *value) {
 void DigitalSignalElement::start() {
   // only start with valid pin as input.
   TRACE("start pin=%d", _pin);
-  if ((_pin >= 0) && (_usedSignals < 8)) {
-    _signalOff = DigitalSignalElement::_usedSignals++;
+  if ((_pin >= 0) && (_signalsInUse < 8)) {
+    // assign the signal index used for this instance and increase the counter for the next instance
+    _signalIndex = DigitalSignalElement::_signalsInUse++;
     pinMode(_pin, _pullup ? INPUT_PULLUP : INPUT);
-    // TRACE("offset (%d)", _signalOff);
+    // TRACE("offset (%d)", _signalIndex);
 
-    if (_signalOff == 0) {
+    // attach the interrupt for the pin to the next free interrupt routine
+    if (_signalIndex == 0) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal0, CHANGE);
-    } else if (_signalOff == 1) {
+    } else if (_signalIndex == 1) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal1, CHANGE);
-    } else if (_signalOff == 2) {
+    } else if (_signalIndex == 2) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal2, CHANGE);
-    } else if (_signalOff == 3) {
+    } else if (_signalIndex == 3) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal3, CHANGE);
-    } else if (_signalOff == 4) {
+    } else if (_signalIndex == 4) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal4, CHANGE);
-    } else if (_signalOff == 5) {
+    } else if (_signalIndex == 5) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal5, CHANGE);
-    } else if (_signalOff == 6) {
+    } else if (_signalIndex == 6) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal6, CHANGE);
-    } else if (_signalOff == 7) {
+    } else if (_signalIndex == 7) {
       attachInterrupt(_pin, DigitalSignalElement::onSignal7, CHANGE);
     }
 
@@ -103,7 +105,7 @@ void DigitalSignalElement::start() {
  */
 void DigitalSignalElement::loop() {
   unsigned long now = millis();
-  unsigned long cnt = DigitalSignalElement::_signalCount[_signalOff];
+  unsigned long cnt = DigitalSignalElement::_signalCount[_signalIndex];
 
   // generate _pulse value and actions
   if (cnt != _lastSignalCount) {
@@ -137,7 +139,7 @@ void DigitalSignalElement::pushState(
 
 // ----- static interrupt stuff here -----
 
-uint DigitalSignalElement::_usedSignals = 0;
+unsigned int DigitalSignalElement::_signalsInUse = 0;
 unsigned long DigitalSignalElement::_signalCount[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 // increment counter on interrupt

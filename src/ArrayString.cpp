@@ -20,10 +20,10 @@
 
 #define CTRACE(...)  // Serial.printf(__VA_ARGS__)
 
-void ArrayString::_createCapacity(uint16_t num) {
+void ArrayString::_createCapacity(unsigned int num) {
   CTRACE("_createCapacity(%d)\n", num);
 
-  uint16_t newReserved = (num + 7) & 0xFFF8;
+  unsigned int newReserved = (num + 7) & 0xFFF8;
   size_t newSize = newReserved * sizeof(char *);
 
   if (_capacity == 0) {
@@ -41,13 +41,13 @@ void ArrayString::_createCapacity(uint16_t num) {
 }  // _createCapacity()
 
 
-void ArrayString::reserve(uint16_t num) {
+void ArrayString::reserve(unsigned int num) {
   _createCapacity(num);
 };
 
 
 /// @brief return String by index
-String ArrayString::at(uint16_t index) {
+String ArrayString::at(unsigned int index) {
   String ret;
 
   if (index < _used) {
@@ -58,7 +58,7 @@ String ArrayString::at(uint16_t index) {
 
 
 /// @brief add a String at the given position
-void ArrayString::setAt(uint16_t index, const char *s) {
+void ArrayString::setAt(unsigned int index, const char *s) {
   CTRACE("setAt[%d]=<%s>\n", index, s);
   _createCapacity(index + 1);
   if (array[index]) {
@@ -79,7 +79,7 @@ void ArrayString::setAt(uint16_t index, const char *s) {
 void ArrayString::split(const char *s, char delim) {
   CTRACE("AS: split <%s>\n", s);
   clear();
-  uint16_t cnt = 0;
+  unsigned int cnt = 0;
 
   if (s && *s) {
     // calculate number of items
@@ -98,7 +98,7 @@ void ArrayString::split(const char *s, char delim) {
       if (array[_used]) free(array[_used]);
 
       // copy pStart .. pEnd-1
-      uint16_t rawlen = pEnd - pStart;  // len without trailing '\0'
+      unsigned int rawlen = (unsigned int)(pEnd - pStart);  // len without trailing '\0'
 
       char *mem = (char *)malloc(rawlen + 1);
       memcpy(mem, pStart, rawlen);
@@ -115,15 +115,15 @@ void ArrayString::split(const char *s, char delim) {
 
 /// @brief Create a string with all array items separatend by delim.
 String ArrayString::concat(char delim) {
-  int size = 0;
+  unsigned int size = 0;
   String res;
 
-  for (int n = 0; n < _used; n++) {
+  for (unsigned int n = 0; n < _used; n++) {
     size += strlen(array[n]) + 1;
   }
 
   res.reserve(size + 2);
-  for (int n = 0; n < _used; n++) {
+  for (unsigned int n = 0; n < _used; n++) {
     if (n > 0) {
       res.concat(delim);
     }
@@ -151,7 +151,7 @@ String ArrayString::pop() {
 
 
 // remove a String Entry and return old entry as String
-String ArrayString::remove(uint16_t n) {
+String ArrayString::remove(unsigned int n) {
   String ret;
 
   if (n < _used) {
@@ -183,7 +183,7 @@ void ArrayString::clear() {
 /// @brief Find an entry starting with the given string.
 /// @param s String to be found.
 /// @return index of first found entry or -1 for not found.
-int16_t ArrayString::findStartWith(const String &sFind) {
+int ArrayString::findStartWith(const String &sFind) {
   CTRACE("AS: findStartWith(%s)\n", sFind.c_str());
 
   const char *s = sFind.c_str();

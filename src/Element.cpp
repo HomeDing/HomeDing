@@ -125,18 +125,24 @@ void Element::term() {
 
 // ===== static string to value helper function ===== //
 
-/* Return am integer value from a string. */
+/* Return an integer value from a string. */
 int Element::_atoi(const char *value) {
   return (strtol(value, nullptr, 0));
 }  // _atoi()
 
 
-// Return am integer value from a string in the specified range.
+// Return an integer value from a string in the specified range.
 int Element::_atoi(const char *value, int min, int max) {
-  int v = strtol(value, nullptr, 0);
+  long v = strtol(value, nullptr, 0);
   v = constrain(v, min, max);
-  return (v);
+  return ((int)v);
 }  // _atoi()
+
+
+/* Return a unsigned integer value from a string. */
+unsigned int Element::_atoui(const char *value) {
+  return ((unsigned int)strtoul(value, nullptr, 0));
+}  // _atoui()
 
 
 // Return true for `1`, `true`, `high` or `on`. Return false otherwise.
@@ -166,14 +172,14 @@ unsigned long Element::_atotime(const char *value) {
 
   if (strchr(value, ':') != NULL) {
     // scan using format hh:mm[:ss]
-    ret += strtol(value, &pEnd, 10) * 60 * 60;
+    ret += (unsigned long)strtol(value, &pEnd, 10) * 60 * 60;
     if (*pEnd == ':')
-      ret += strtol(pEnd + 1, &pEnd, 10) * 60;
+      ret += (unsigned long)strtol(pEnd + 1, &pEnd, 10) * 60;
     if (*pEnd == ':')
-      ret += strtol(pEnd + 1, &pEnd, 10);
+      ret += (unsigned long)strtol(pEnd + 1, &pEnd, 10);
 
   } else {
-    ret = strtol(value, &pEnd, 10);
+    ret = (unsigned long)strtol(value, &pEnd, 10);
     if (*pEnd == 'd') {
       ret *= (24 * 60 * 60);
     }

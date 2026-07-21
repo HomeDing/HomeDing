@@ -23,7 +23,9 @@
 
 #include <Audio.h>
 
-#define TRACE(...)  // LOGGER_ETRACE(__VA_ARGS__)
+// enable TRACE to create detailed output for the AudioElement
+#define INFO(...) // Logger::LoggerEPrint(__element, LOGGER_LEVEL_INFO, __VA_ARGS__);
+#define TRACE(...) // Logger::LoggerEPrint(__element, LOGGER_LEVEL_TRACE, __VA_ARGS__);
 
 /* ===== Static factory function ===== */
 
@@ -51,17 +53,17 @@ Audio *__audio = nullptr;
 uint32_t __cmd = AUDIOCMD_NONE;
 
 
+#pragma region ==== Background task for audio processing
+
 // ===== Background task for audio processing ======
 
-// use some weak functions from audio library
-
-// callbacks
+// handle callbacks from Audio Library
 void __audio_info(Audio::msg_t m) {
-  Serial.printf("audio::%s(%d): %s\n", m.s, m.e, m.msg);
+  Logger::LoggerEPrint(__element, LOGGER_LEVEL_INFO, "%s(%d): %s", m.s, m.e, m.msg);
 
   if (m.e == Audio::event_t::evt_info) {
-    // trace info
-    Logger::LoggerEPrint(__element, LOGGER_LEVEL_INFO, "audio::info %s=%s", m.s, m.msg);
+    // info from the library
+    Logger::LoggerEPrint(__element, LOGGER_LEVEL_INFO, "%s=%s", m.s, m.msg);
 
   } else if (m.e == Audio::event_t::evt_streamtitle) {
     __element->_title = m.msg;
@@ -72,7 +74,9 @@ void __audio_info(Audio::msg_t m) {
     HomeDing::Actions::push(__element->_onStation, m.msg);
 
   } else if (m.e == Audio::event_t::evt_bitrate) {
-    __element->_bitrate = m.s;
+    Logger::LoggerEPrint(__element, LOGGER_LEVEL_INFO, "%s=%s", m.s, m.msg);
+    __element->_bitrate = m.msg;
+    HomeDing::Actions::push(__element->_onBitRate, m.msg);
 
     // } else if (m.e == Audio::event_t::evt_icydescription{
     //   __element->_description = m.msg;
@@ -89,6 +93,8 @@ void __audio_info(Audio::msg_t m) {
   }
 }  // __audio_info()
 
+
+// This function will be run on the second core as background task for low latency
 
 void audioTask(void *parameter) {
 
@@ -112,7 +118,7 @@ void audioTask(void *parameter) {
         HomeDing::Actions::push(__element->_onStation, "");
 
         if (!__element->_url.isEmpty()) {
-          log_n(".1 %s\n", __element->_url.c_str());
+          TRACE("connect %s", __element->_url.c_str());
           __audio->connecttohost(__element->_url.c_str());
         }
       }
@@ -130,6 +136,7 @@ void audioTask(void *parameter) {
   }  // while
 }
 
+#pragma endregion
 
 
 /* ===== Element functions ===== */
@@ -203,6 +210,9 @@ bool AudioElement::set(const char *name, const char *value) {
 
   } else if (_stricmp(name, "onstation") == 0) {
     _onStation = value;
+
+  } else if (_stricmp(name, "onbitrate") == 0) {
+    _onBitRate = value;
 
   } else if (_stricmp(name, "bclk") == 0) {
     _i2s_bclk = _atopin(value);

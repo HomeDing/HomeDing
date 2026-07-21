@@ -199,6 +199,13 @@ public:
   /// @param max maximal result
   /// @return value from string contrained to the range.
   static int _atoi(const char *value, int min, int max);
+  
+  /**
+   * @brief Return an unsigned integer value from a string in various formats.
+   * @param value Given value as string.
+   * @return value from string.
+   */
+  static unsigned int _atoui(const char *value);
 
   /**
    * @brief Return a boolean value from a string.

@@ -138,7 +138,7 @@ bool DeviceElement::set(const char *name, const char *value) {
       _board->I2cScl = _atopin(value);
 
     } else if (_stricmp(name, "i2c-frequency") == 0) {
-      _board->I2cFrequency = _atoi(value);
+      _board->I2cFrequency = (uint32_t)_atoui(value);
 
       // ===== SPI bus =====
     } else if (_stricmp(name, "spi-scl") == 0) {

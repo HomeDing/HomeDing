@@ -29,14 +29,14 @@ public:
    * @param list A comma separated lists of strings.
    * @return int Number of items in the list.
    */
-  static int length(const char *list);
+  static unsigned int length(const char *list);
 
   /**
    * @brief calculate length of the list by counting the separators.
    * @param list A comma separated lists of strings.
    * @return int Number of items in the list.
    */
-  static int length(String &list);
+  static unsigned int length(String &list);
 
   /**
    * @brief Return the item of the list at the index position.
@@ -44,7 +44,7 @@ public:
    * @param index The index (position) of the array element to be returned.
    * @return String The item as String extracted from the list.
    */
-  static String at(String list, int index);
+  static String at(const String &list, int index);
 
   /**
    * @brief return the item of the list at the index position

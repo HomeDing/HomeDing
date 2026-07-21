@@ -20,7 +20,7 @@
 
 #define CTRACE(...) // Serial.sprintf(__VA_ARGS__); Serial.println()
 
-MicroJsonComposer::MicroJsonComposer(int size) {
+MicroJsonComposer::MicroJsonComposer(unsigned int size) {
   _out.reserve(size);
   _fresh = true;
 }

@@ -48,12 +48,12 @@ int _stricmp(const char *str1, const char *str2) {
  * @param list A comma separated lists of strings.
  * @return int Number of items in the list.
  */
-int ListUtils::length(const char *list) {
-  int cnt = 0;
+unsigned int ListUtils::length(const char *list) {
+  unsigned int cnt = 0;
 
-  if (list) {
-    cnt++;
+  if ((list) && (*list)) {
     const char *p = list;
+    cnt++;
     while (*p) {
       if (*p++ == LISTSEPARATOR) { cnt++; }
     }
@@ -66,7 +66,7 @@ int ListUtils::length(const char *list) {
  * @param list A comma separated lists of strings.
  * @return int Number of items in the list.
  */
-int ListUtils::length(String &list) {
+unsigned int ListUtils::length(String &list) {
   return (length(list.c_str()));
 }
 
@@ -77,7 +77,7 @@ int ListUtils::length(String &list) {
  * @param index The index (position) of the array element to be returned.
  * @return String The item as String extracted from the list.
  */
-String ListUtils::at(String list, int index) {
+String ListUtils::at(const String &list, int index) {
   return (at(list.c_str(), index));
 }
 
@@ -90,30 +90,30 @@ String ListUtils::at(String list, int index) {
  */
 String ListUtils::at(const char *list, int index) {
   String ret;
-  int n = 0;
-  const char *p = list;
-  const char *pStart = p;
-  const char *pEnd = p - 1;
 
-  while (n <= index) {
-    if ((*p == LISTSEPARATOR) || (!*p)) {
-      pStart = pEnd + 1;
-      pEnd = p;
-      n++;
-    }
-    if (!*p) {
-      break;
-    }
-    p++;
-  }  // while
-
-  if (n > index) {
-    int len = pEnd - pStart;
-    char buf[len + 1];
-    memcpy(buf, pStart, len);
-    buf[len] = NUL;
-    ret = buf;
+  if (!list || (index < 0)) {
+    return ret;
   }
+
+  const char *start = list;
+  int currentIndex = 0;
+
+  for (const char *p = list;; p++) {
+    if ((*p == LISTSEPARATOR) || (*p == NUL)) {
+      if (currentIndex == index) {
+        unsigned int len = (unsigned int)(p - start);
+
+        ret.reserve(len);
+        ret.concat(start, len);
+        return (ret);
+      }
+      if (*p == NUL) {
+        break;
+      }
+      currentIndex++;
+      start = p + 1;
+    }
+  }  // for
 
   return (ret);
 }  // at()

@@ -31,7 +31,7 @@ public:
 
   /// @brief reserve at least [num] strings in the array
   /// @param num reserved entries minimum.
-  void reserve(uint16_t num = 8);
+  void reserve(unsigned int num = 8);
 
 
   /// @brief return true if Array is empty.
@@ -43,24 +43,24 @@ public:
 
   /// @brief return the number of used Strings in the Array.
   /// @return Number of used Strings.
-  uint16_t size() {
+  unsigned int size() {
     return (_used);
   };
 
   /// @brief return String by Index
-  String at(uint16_t index);
+  String at(unsigned int index);
 
   /// @brief return String by Index
-  String operator[](uint16_t index) {
+  String operator[](unsigned int index) {
     return (at(index));
   };
 
 
   // add a String at the given position
-  void setAt(uint16_t index, const char *s);
+  void setAt(unsigned int index, const char *s);
 
   // add a String at the given position
-  void setAt(uint16_t index, const String &s) {
+  void setAt(unsigned int index, const String &s) {
     setAt(index, s.c_str());
   };
 
@@ -68,7 +68,7 @@ public:
   /// @brief Add new String to the end of the array
   /// @param s new item
   /// @return size of the array.
-  int16_t push(const char *s) {
+  unsigned int push(const char *s) {
     setAt(_used, s);
     return (_used);
   };  // push()
@@ -77,7 +77,7 @@ public:
   /// @brief Add new String to the end of the array
   /// @param s new item
   /// @return size of the array.
-  int16_t push(const String &s) {
+  unsigned int push(const String &s) {
     return (push(s.c_str()));
   };
 
@@ -98,14 +98,14 @@ public:
   /// @brief Find an entry starting with the given string.
   /// @param sFind string to be found
   /// @return index of first found entry or -1 for not found.
-  int16_t findStartWith(const String &sFind);
+  int findStartWith(const String &sFind);
 
 
   /// @brief remove first string from array and return it
   String pop();
 
   /// @brief remove n-th entry from array and return it
-  String remove(uint16_t n);
+  String remove(unsigned int n);
 
   /// @brief deallocate all memory and empty array.
   void clear();
@@ -118,14 +118,14 @@ public:
 
 private:
   /// @brief allocated capacity for array intems (char* pointers).
-  uint16_t _capacity = 0;
+  uint _capacity = 0;
   /// @brief number of used items [0...(_used-1)].
-  uint16_t _used = 0;
+  unsigned int _used = 0;
 
   char **array = nullptr;  // array with pointers to C-type strings
 
   /// @brief make sure that enough array pointers are given.
-  void _createCapacity(uint16_t num);
+  void _createCapacity(unsigned int num);
 };
 
 // End

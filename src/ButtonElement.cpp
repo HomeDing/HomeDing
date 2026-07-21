@@ -57,10 +57,10 @@ bool ButtonElement::set(const char *name, const char *value) {
     }
 
   } else if (_stricmp(name, "clickticks") == 0) {
-    _clickTicks = _atoi(value);
+    _clickTicks = _atoui(value);
 
   } else if (_stricmp(name, "pressticks") == 0) {
-    _pressTicks = _atoi(value);
+    _pressTicks = _atoui(value);
 
   } else if (_stricmp(name, "onclick") == 0) {
     _clickAction = value;
@@ -99,7 +99,7 @@ void ButtonElement::loop() {
     if (!_inputLevel) {
       _state = STATE_LOW1;
 
-    } else if ((_inputLevel) && ((unsigned long)(now - _startTime) > _pressTicks)) {
+    } else if ((_inputLevel) && ((unsigned int)(now - _startTime) > _pressTicks)) {
       _send(ACTION_PRESS);
       _state = STATE_PRESSHIGH;
 
@@ -111,7 +111,7 @@ void ButtonElement::loop() {
     // waiting for menu pin being pressed the second time or timeout.
 
     // if (_doubleClickAction.length() == 0 || ...
-    if ((unsigned long)(now - _startTime) > _clickTicks) {
+    if ((unsigned int)(now - _startTime) > _clickTicks) {
       // this was only a single short click
       _send(ACTION_CLICK);
       _state = STATE_INIT;  // restart.

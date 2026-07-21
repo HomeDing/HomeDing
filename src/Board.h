@@ -277,7 +277,7 @@ public:
   bool isSafeMode;
 
   /// @brief Maximum time to wait for a network connection.
-  int maxNetConnectTime = 30 * 1000;
+  unsigned long maxNetConnectTime = 30 * 1000L;  // 30 seconds
 
 #if defined(ESP32)
   /**
@@ -291,7 +291,7 @@ public:
    */
   int I2cSda = -1;
   int I2cScl = -1;
-  int I2cFrequency = 0;
+  uint32_t I2cFrequency = 0;
 
   /// Common SPI settings
   int spiCLK = -1;   ///< SPI interface clock CLK pin

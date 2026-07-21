@@ -349,12 +349,13 @@ void MQTTElement::loop() {
       String item = Element::popItemValue(_impl->_value);
 
       int n = item.indexOf('=');
+      unsigned int un = n;
       String k;
-      String v = item.substring(n + 1);
+      String v = item.substring(un + 1);
 
       if (_impl->hasWildcard) {
         // build topic name
-        k = _impl->publishTopic + item.substring(0, n);
+        k = _impl->publishTopic + item.substring(0, un);
       } else {
         // publishTopic has full topic name
         k = _impl->publishTopic;
